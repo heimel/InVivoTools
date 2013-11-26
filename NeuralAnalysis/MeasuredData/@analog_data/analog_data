@@ -1,0 +1,9 @@
+function A = analog_data(intervals,desc_long,desc_brief)
+
+%  ANALOG_DATA  - Continuous data object w/ filtering, shifting options
+%
+%  A = ANALOG_DATA(PARAMETERS,INTERVALS,DESC_LONG,DESC_BRIEF)
+%
+%  PARAMETERS has the following subfields:
+%
+%     

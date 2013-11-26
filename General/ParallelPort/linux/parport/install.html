@@ -1,0 +1,65 @@
+<HTML><HEAD><TITLE>ParallelPort Installation Instructions (Linux)</TITLE>
+<BODY bgColor=#ffffff><br>
+<font face="verdana,helvetica,arial" size="2">
+<CENTER>
+<H3>ParallelPort Installation Instructions (Linux)</H3></center>
+<P>
+<ol>
+  <li><a href="http://www.geocities.com/Juanga69/parport/parport-linux.zip">Download</a>
+      <tt><big>parport-linux.zip</big></tt>
+      to your computer.<br><br>
+  </li>
+
+  <li>Unzip the file <tt><big>parport-linux.zip</big></tt>. This will produce a 
+      hierarchy with a top level directory <tt><big>parport</big></tt> containing the class
+      and source files (along with <tt><big>libparport.so</big></tt>, C source files, and example programs).
+      This directory (<tt><big>parport</big></tt>) should go in your &quot;Java classes&quot; directory.
+      In other words, it should go in a directory contained in your <tt><big>CLASSPATH</big></tt>.
+
+      <P>The examples in this document assume that you have unzipped the 
+      <tt><big>parport-linux.zip</big></tt> file in your <tt><big>/usr/local/java/classes</big></tt> directory
+      and that your JDK installation is in <tt><big>/usr/local/jdk1.4.1</big></tt>. If you have installed 
+      JDK in an other location or unzipped <tt><big>parport-linux.zip</big></tt> in an 
+      other location modify the example commands appropriately.
+      <br><br>
+      </P>
+  </li>
+
+  <li>Copy <tt><big>libparport.so</big></tt> to any directory in your <tt><big>LD_LIBRARY_PATH</big></tt>.
+      Or, you can leave it where it's at and modify your <tt><big>LD_LIBRARY_PATH</big></tt> environment variable:
+
+      <blockquote>
+         <tt><big>$ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/java/classes/parport</big></tt>
+      </blockquote>
+  </li>
+
+  <li>Add <tt><big>parport</big></tt> to your <tt><big>CLASSPATH</big></tt>:
+      <ul type="disc">
+        <li>If you don't have a CLASSPATH defined:
+            <blockquote>
+               <tt><big>$ export CLASSPATH=/usr/local/java/classes</big></tt>
+            </blockquote>
+        </li>
+        <li>If you already have a CLASSPATH defined, then your &quot;Java classes&quot; directory is most
+            probably already there, and the compiler will find <tt><big>parport</big></tt> easily.
+            In case it's not, you can do this:
+
+            <blockquote>
+               <tt><big>$ export CLASSPATH=%CLASSPATH%:/usr/local/java/classes</big></tt>
+            </blockquote>
+        </li>
+      </ul>
+  </li>
+  <li>You will need root privileges to access the port.</li>
+</ol>
+
+<HR width="100%">
+
+<u>API Documentation</u><br>
+To view the API documentation for ParallelPort, point your browser to <A href="ParallelPort.html">ParallelPort.html</A>.
+
+</font>
+
+</BODY>
+
+</HTML>

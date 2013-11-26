@@ -1,0 +1,27 @@
+Software to do - 
+
+1) Get rid of parameter objects; make each object have a verifyParameters private func. *
+2) Add a graphical creation mode for all objects
+	a) 'graphical' implementation
+	b) make error checking more robust *
+3) User interface manager
+4) User interface to extractor/analysis
+5) Tetrode extraction
+6) Speed autoextractor
+7) Manipulator control?
+7) Intracellular control?
+7) Move acquisition to PC?
+
+need 'search' function for stims, maybe in stimScript, maybe not
+
+Zoran:
+	Add phase shift to gratings stimulus
+	Beautify and improve grating analysis routine, add F0, F1
+
+Speed spike detection
+
+Sometime:
+
+Make data, routine backups
+Make 'Configs' for experiment control to remove lab-specific portions out of
+files

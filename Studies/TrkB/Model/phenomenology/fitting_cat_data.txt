@@ -1,0 +1,30 @@
+
+Carandini & Sengpiel 2004:
+cat: median n=1.64, median c50=32.7
+
+find cat VEP amplitudes versus SF
+
+Schmidt, Singer & Galuske 2004 show VEP amplitudes versus SF from 0.1 to about 4 cpd.
+  (check to find better referencs)
+Linear on a log sf scale. 
+
+width of units is usually 2 octaves (find references)
+
+but in cat there is an SF-map. if Heeger's assumption about local pooling is correct,
+than sf-normalization may be even more flat:
+
+Heeger 1992a: 'A working hypothesis is that each cell in the striate cortex is suppressed by every other cell that is within some physical distance in the brain (see Bonds, 1989, for a similar suggestion). This predicts suppression with different characteristics for each cell, depending on the layout of the orientation columns, the lay-out of ocular-dominance columns, the spatial inhomogeneity of the cortical map, and the layout of spatial-frequency tuning. As mentioned aove, theses differences are not significant, as long as suppression is broad compared to the excitatory tuning of the underlying linear operators”
+This gives to explanations why, in single unit data in cat (although see the example given in fig 4 in Heeger 1992a) the spatial frequency tuning is relatively contrast invariant. 1) for each cell individually input sf tuning is expected to be much narrower than global sf tuning. 2) in cats there is a sf-map which means cells will get suppression which is in tune with there our sf tuning.
+
+
+Carandini & Sengpiel, 2004: C50 of intrinsic signal above C50 of single-unit data  from Albrecht & Hamilton, 1982, and median n is below that. Thus intrinsic signal is more linear than single-units. They suggests it may come from spatial averaging over neurons, or an expansive non-linearity in transforming spiking activity into intrinsic signal
+-> our exact model explaning the population data may apply better to the population than to individual unit responses
+
+Skottun et al. 1986: cells with high preferred sf lower their preferred sf if contrast is lowered. cells with intermediate preferred sfs do not show this behavior. 
+
+Also: "contrast thresholds of cells tuned to medium spatial frequencies tend to be lower than those of cells tuned to either higher or lower frequencies (Parker and Hawken 1983; Skottun et al. 1984), a decrease in contrast will reduce the response of cells tuned to higher or lower frequencies more than the response of medium-frequency cells." 
+
+Sceniak et al. 2002 show that for lower contrasts especially high spatial frequency responses are reduced. (in macaque)
+
+M.J. Nolt, R. D. Kumbhani and L. A. Palmer 2004 show that already in LGN cutoff SF is higher for higher contrast than for low contrast.
+Yumiko Umino, Eduardo Solessio, and Robert B. Barlow 2008 show that contrast sensitivity is lower at high spatial frequencies.

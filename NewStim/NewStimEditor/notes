@@ -1,0 +1,11 @@
+To do:
+
+add edit option to scriptobjeditor
+add remote script editor
+add virtual machine
+
+change loadStimScript,setDisplayMethod,getDisplayMethod,unloadStimScript, to
+       lowercase, change setDisplayMethod to setdisplayorder
+
+Virtual Machine
+

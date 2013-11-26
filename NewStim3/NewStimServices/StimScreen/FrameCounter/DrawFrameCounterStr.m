@@ -1,0 +1,1 @@
+function [init,str] = DrawFrameCounterStr(varName)FrameCounterGlobalsinit = [ 'FrameCounterGlobals; FRECT = [0 0 FrameCounterRect(1,3) - FrameCounterRect(1,1) FrameCounterRect(1,4) - FrameCounterRect(1,2)];'];str = [ 'screen(''CopyWindow'', ' varName '(mod(frameNum,FrameCounterDivs)+1), StimWindow, FRECT, FrameCounterRect(1,:), ''srcCopyQuickly'');'];

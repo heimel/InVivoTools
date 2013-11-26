@@ -1,0 +1,23 @@
+% NewStimCalibrate.m
+%
+%  A user-specific configuration file which contains calibration code
+%  for a specific machine and monitor.  Read each line of code and its comments
+%  in order to set each parameter.
+%  Copy to a local directory, rename to NewStimCalibrate.m somewhere on the
+%  path to use.
+
+if haspsychtbox,
+	% set clock multiplier...see help GetSecsTest for info
+	%GetSecsTest
+	screen('Preference','SecondsMultiplier',1);
+	screen('Preference','Backgrounding',0);
+else,
+	StimWindowGlobals;
+	StimWindowRect = [ 0 0 1600 1200 ];
+end;
+
+ % pixels_per_cm of the monitor in use
+global pixels_per_cm; pixels_per_cm = 45.4545;
+% below is only necessary if one plans to use remote communication
+global Remote_Comm_dir; Remote_Comm_dir = '/home/dataman/stims';
+

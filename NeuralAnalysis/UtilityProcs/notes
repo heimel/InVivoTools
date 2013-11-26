@@ -1,0 +1,129 @@
+Note to Chris:  Have to change acquisition program to use filename as NAME_$$$ instead of
+ELECTRODE_$$$ since electrodes can change.  No, actually not relevant as long as name matches.
+
+
+Analysis:
+
+Method one:
+
+Strict two stage for all,
+	Stage one:  extraction
+	Stage two:  sorting and assignment
+
+Adv:  highly modular
+Dvd:  
+
+Method two:
+	Extracellular is one stage
+	Multi-unit is two stage
+
+Dvd:  Less modular
+
+Extraction:
+Requirements for spikes:  extract spikes, either from scratch, when spikes have been extracted
+earlier, or as data is coming in.  Be able to extract different "versions" when different
+parameters are used.
+Requirements for low frequency:  (optional) low-pass filter and downsample to save disk space.
+How to do extraction:
+Should each routine traverse directory structure?  Seems like no.
+How should directory structure be traversed?
+Suppose one routine:
+Where are the scratch files stored?  Who names them?
+Example scratch file:
+	SEC001REF001P0
+	TET001REF001P0
+No, cannot use because number of SECs can change without losing a cell.
+Try:    NAME_REF0001_P0
+This works.  But where store?  analysis/scratch/
+How do we handle initialization?
+	A)  Could give an init routine a piece of data
+	B)  The init routine could request the data somehow (via a new call)
+Should the traversing code load the files, or just give the extracting routine a filename?
+
+Method three:  An interface to the data tree.
+Would allow B), and could stil do a traverser that would be almost nothing but calls to the
+interface.  Would be easy to debug.  Would allow one to select which data files to extract
+and which not to extract.  Can make indexable by test or by name for easy looping.  Do it.
+
+Interface: 
+	intf = Setup(pathname)
+	struct = GetAllNameRefs() % returns name/ref pairs
+	struct = GetFileName(TestFolder,Name,Ref);
+	{} = GetAllTests()
+	struct = GetNames() 
+	struct = GetTests() tests with all names/ref pairs contained
+	fname = GetScratchDirectory
+	intf = update(intf)
+	intf = SelectNameRefs(intf, pairs)
+	intf = SelectTests(intf,tests)
+
+Problem:  Say the user is making scripts and analyzing the experiment in one matlab session,
+and using the other for extraction (seems the most reasonable since the person wants to be able
+to do both at the same time).  How do we automatically tell the one session that new data is
+available, so, for example, it could be used to create a new script?
+
+Problem:  How to handle files that are not completely downloaded?
+How to detect?  Could use file size, and we know what size to expect for each
+type exactly, so try this.
+
+Problem:  What happens if we want to save extracted spikes for a cell whose data has all been
+extracted, but there is data from other cells still coming in?  The program cannot both be
+waiting for spikes and doing other stuff, so this doesn't matter.  However, it would be fast if
+we could find stuff for the program to do when it was waiting.
+
+Again, now, how to loop through files?
+Level 0 operators, which operate on the data directly. (Low frequencies, photodiode, raw data,
+etc.).
+Level 1 operators, which operate on the data indirectly. (Spike sorters)
+Must have some way of setting each operators' parameters, selecting which operators operate
+on which data, making sure two operators only operate on the same data if they are complementary
+Must have initialization of each operator, and clean-up.
+How can use different parameters for same operator on different data?
+Make operators objects?  Seems like a good idea for solving all of these issues.
+
+
+Go through each directory, have each pass 1 extractor
+operate, and then at the end do the object creation?
+
+Thinking of a model where all of the namerefs are listed, and assigned a specific extractor.
+Maybe we should use the extractor name for the scratch files, or the name must be provided.
+Have auto-assign preferences.  How does this work with the indirect extractors?
+Maybe for extractors that output intermediate data, one may choose a secondary extractor as
+a parameter, or "none".  How does primary output get represented?  Modify cksdirstruct to find
+that data in the scratch directory.  
+
+
+What should final output be?
+Recording records with record of extraction parameters.
+Should there be one cell per file, or one file for all of the cells of a particular experiment?
+	Probably...one can make such a collection after the experiment if he wants.
+How should the files be named?
+Date-type-description
+For example:
+cell_SEC_NAME_001_IND_2001_05_09
+would be cell (spikedata) recorded with a single extracellular electrode, the first cell of the
+day, extracted with parameter set P0.  (All of this information would be stored in the record,
+but the file name itself needs to be descriptive.)  The variable name should have the same name.
+This is why underscores are used, so the variable name can be the same as the filename.
+Where should all of this be stored?
+Probably in the root directory of the data folder.  If someone wants to move all of the
+extracted data out, then they can.  Parameter sets should NOT be overwriteable.
+What if someone wants to move the data away but leave the analysis?  Then they have to move the
+files.
+What about storing all of the extractions in one file associated with the parameters used to
+extract, like EXPER_P0?  Then one would have to load all of the data at once, instead of just
+loading what one is interested in.
+But one can load in MATLAB using wildcards.  So let's put them all in one file.  This sounds
+right.  Needs to be exportable for people using other software.
+
+So now we can have a list of cells in a window...how handle analysis?  Select the cell or data,
+then have a list of tests it was recorded in.  Select one or more of the tests, and then there
+is a list of available analysis methods (or those which are unavailable will be grayed out).
+Think more about this later.
+
+
+
+windowdiscriminator scratchfile variables:
+r00N_events
+start - start time from stims file
+N - highest trace extracted

@@ -1,0 +1,100 @@
+# PARAMETERS TO AUTOCLASS-REPORTS -- AutoClass C
+# ---------------------------------------------------------------
+# as the first character makes the line a comment, or
+! as the first character makes the line a comment, or
+; as the first character makes the line a comment, or
+;;; '\n' as the first character (empty line) makes the line a comment.
+
+# to override the following default parameters,
+# enter below the line => #!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;
+# <parameter_name> = <parameter_value>, or
+# <parameter_name> <parameter_value>, or      # separator is a space
+# <parameter_name>\tab<parameter_value>.
+# note: blanks/spaces are ignored if '=', or '\tab' are separators;
+# note: no trailing ';'s.
+# ---------------------------------------------------------------
+#  DEFAULT PARAMETERS
+# ---------------------------------------------------------------
+# n_clsfs = 1
+!       number of clsfs in the .results file for which to generate reports,
+!       starting with the first or "best".
+
+# clsf_n_list = 
+!       if specified, this is a one-based index list of clsfs in the clsf
+!       sequence read from the .results file.  It overrides "n_clsfs".
+!       For example: clsf_n_list = 1, 2 
+!           will produce the same output as
+!                    n_clsfs = 2
+!           but
+!                    clsf_n_list = 2
+!           will only output the "second best" classification report.
+
+# report_type = "all"
+!       type of reports to generate: "all", "influence_values", "xref_case", or
+!       "xref_class".
+
+# report_mode = "text"
+!       mode of reports to generate. "text" is formatted text layout.  "data"
+!       is numerical -- suitable for further processing.
+
+# comment_data_headers_p = false
+!       the default value does not insert # in column 1 of most 
+!       report_mode = "data" header lines.  If specified as true, the comment 
+!       character will be inserted in most header lines.
+
+#  num_atts_to_list = 
+!       if specified, the number of attributes to list in influence values report.
+!       if not specified, *all* attributes will be listed. 
+!       (e.g. num_atts_to_list = 5)
+
+# xref_class_report_att_list = 
+!       if specified, a list of attribute numbers (zero-based), whose values will 
+!       be output in the "xref_class" report along with the case probabilities.  
+!       if not specified, no attributes values will be output. 
+!       (e.g. xref_class_report_att_list = 1, 2, 3)
+
+# order_attributes_by_influence_p = true
+!       The default value lists each class's attributes in descending order of
+!       attribute influence value, and uses ".influ-o-text-n" as the
+!       influence values report file type.  If specified as false, then each 
+!       class's attributes will be listed in ascending order by attribute number.  
+!       The extension of the file generated will be "influ-no-text-n".
+
+# break_on_warnings_p = true
+!       The default value asks the user whether to coninue or not when data
+!       definition warnings are found.  If specified as false, then AutoClass
+!       will continue, despite warnings -- the warning will continue to be
+!       output to the terminal.
+
+# free_storage_p = true
+!       The default value tells AutoClass to free the majority of its allocated
+!       storage.  This is not required, and in the case of DEC Alpha's causes
+!       core dump.  If specified as false, AutoClass will not attempt to free
+!       storage.
+
+# max_num_xref_class_probs = 5
+!       Determines how many lessor class probabilities will be printed for the 
+!       case and class cross-reference reports.  The default is to print the
+!       most probable class probability value and up to 4 lessor class prob-
+!       ibilities.  Note this is true for both the "text" and "data" class
+!       cross-reference reports, but only true for the "data" case cross-
+!       reference report.  The "text" case cross-reference report only has the
+!       most probable class probability.
+
+# sigma_contours_att_list = 
+!       If specified, a list of real valued attribute indices (from .hd2 file) 
+!       will be to compute sigma class contour values, when generating 
+!       influence values report with the data option (report_mode = "data"). 
+!       If not specified, there will be no sigma class contour output.
+!       (e.g. sigma_contours_att_list = 3, 4, 5, 8, 15)
+
+
+#!#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;
+# OVERRIDE PARAMETERS
+#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;
+
+;xref_class_report_att_list = 2, 5, 6
+
+report_mode = "data"
+comment_data_headers_p = true
+;; sigma_contours_att_list = 18, 19, 20, 21, 22, 23,

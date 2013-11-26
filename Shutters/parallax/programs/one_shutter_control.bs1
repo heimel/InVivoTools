@@ -1,0 +1,34 @@
+' {$STAMP BS1}
+' {$PBASIC 1.0}
+
+SYMBOL servo_pin = 0
+SYMBOL control_pin = 1
+SYMBOL times =W0
+SYMBOL control_state = W1
+
+INPUT control_pin
+control_state=255
+
+Main:
+  IF control_state <> PIN1 THEN Switched_state
+  PAUSE 100
+  GOTO Main
+
+Switched_state:
+  control_state=PIN1
+  IF control_state = 1 THEN Open_shutter
+  GOTO Close_shutter
+
+Open_shutter:
+  FOR times=60 TO 230 STEP 2
+    PULSOUT servo_pin, times
+    PAUSE 20
+  NEXT
+  GOTO Main
+
+Close_shutter:
+  FOR times=230 TO 60 STEP -2
+    PULSOUT servo_pin, times
+    PAUSE 20
+  NEXT
+  GOTO Main

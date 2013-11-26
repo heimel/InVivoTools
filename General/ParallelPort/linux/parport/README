@@ -1,0 +1,16 @@
+INSTALL (linux specific)
+------------------------
+
+It´s simple!
+Just set LD_LIBRARY_PATH to a directory that contains libparport.so.
+
+Example that sets path to current directory:
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD
+
+If you want to compile it, use:
+gcc -c -fPIC -I<path to your JDK directory>/include -I<path to your JDK directory>/include/linux ParallelPort.c
+gcc -shared -Wl,-soname,libparport.so -o libparport.so ParallelPort.o
+
+------------------------
+Jonas Blank (jobl0000@student.mh.se)
+2003-11-13

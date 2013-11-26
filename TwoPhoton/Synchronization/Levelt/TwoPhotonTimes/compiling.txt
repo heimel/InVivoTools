@@ -1,0 +1,6 @@
+Compilation:
+
+Install MinGW32 (add MinGW32\bin to path environment variable)
+
+Type:
+gcc main.c NIDAQmx.lib -o record_tptimes

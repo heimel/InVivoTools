@@ -1,0 +1,31 @@
+% The NewStim package offers a framework for 2 types of remote communication.
+%  
+%   One mode is 'sockets', which uses the unix sockets framework to transmit information and files.
+%     The sockets mode is fully developed but had not been extensively tested.
+%
+%      Configuration of sockets: Look at the file NewStimCalibrate for assistance
+%         
+%
+%   The mode that has been used in all implementations thus far is the 'filesystem' mode of remote
+%      communication; this is very well tested and works well.  In this mode, the 'master' computer
+%      and the 'slave' computer both mount the same drive, using their operating systems.  (For example
+%      the master computer might share one of it's drives, and the slave computer might mount that drive
+%      before launching Matlab; or both master and slave might mount a drive on a third computer.)
+%
+%      Configuration of filesystem: Look at the NewStimCalibrate for assistance
+% 
+%      How to use this mode as a programmer:
+%
+%        Use the functions SENDREMOTECOMMAND and SENDREMOTECOMMANDVAR to dispatch commands
+%           and files to the remote machine.
+%         
+%           
+%  
+
+
+For filesystem,
+
+master machine writes a script file 'runit.m' to the remote directory.  The remote computer checks for the
+exitence of this file and tries to run it.  The files 'toremote' is traditionally used to transmit information
+to the remote computer and any script that needs variable input from the master machine will try to load this
+file.  Scripts running remotely can write a file called 'gotit' to indicate to the host that they are finished.

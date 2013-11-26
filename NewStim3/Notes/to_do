@@ -1,0 +1,20 @@
+Features to be added to NewStim:
+
+High priority:
+
+Add serial line remote control
+
+Medium priority:
+
+Add display options:
+	Make serial port triggering optional
+	If network communication enabled,
+		transmit stimulus timing data during interstimulus intervals
+
+Add color table scaling option in display (alternative gamma control)
+
+Low priority:
+Change the way parameters are input.
+	1)  Allow the user to pass only non-default values in parameter struct.
+	2)  Make more universal parameter error checking so there is less
+		to be done in each verifyparameters file

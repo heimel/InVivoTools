@@ -1,0 +1,82 @@
+%% Batch processing command file:
+%%
+%% Keywords start with a double dash and are not case sensitive: --Keyword
+%%
+%% Comments start with a % character and are ignored till end of line
+%% Each line starts exactly with one keyword and a list of values (if any)
+%%
+
+
+%% Filenames and Directories
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+--BeginGlobals
+  --ProcessingDirectory        .      
+  --FeatureDataDir 	       FD
+  --FindFilesSearchString      TT*.dat			% batch process all files matching this search string
+            
+  --ClusterAlgorithm		KlustaKwik		% use BBClust or KlustaKwik
+  --LoadingEngine		Load_Nelson	% replace with your LoadingEngine
+
+  --UseFeatures			energy wavePC1 wavePC2 waveFFT 
+  --ExtraFeatures		Peak valley
+
+  %--RemoveFromBatchList    	TT9.dat TT1.dat    	% blank separated list of filename.ext to be excluded
+  --AddToBatchList   	    	t9	        	% blank separated list of filename.ext to be included
+--EndGlobals
+
+--BeginDefaults                            	% defaults for all N-trode files unless overridden 
+  --ChannelValidity           1 1 1 1      	% 4 values: 1 for valid, 0 for invalid channels
+  --SubSampleToNSpikes        2000000   	% approx number of spikes to which files will be subsampled 
+  --KKwik_MinClusters 	      20
+  --KKwik_MaxClusters         30
+--EndDefaults
+
+
+%--File  TT1.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT2.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT3.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT4.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT5.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT6.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT7.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT8.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT9.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT10.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT11.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15
+%--File  TT12.dat                         %  override defaults for individual files
+%    --ChannelValidity         0 1 1 1  
+%    --KKwik_MinClusters       10
+%    --KKwik_MaxClusters       15

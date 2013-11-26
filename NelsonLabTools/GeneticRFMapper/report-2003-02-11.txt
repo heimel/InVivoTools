@@ -1,0 +1,29 @@
+Some random notes on the experiment 2003-02-11
+
+- An ISI of 0.5 s seems too short as after about 20 stimulus movies there was
+  less response
+
+- An ISI of 1s seemed okay
+
+- For 2 repeats, there were often several stimuli that spiked once or twice in each repeat, making it difficult to tell the better stimuli.
+
+- 5 repeats did not really solve this problem.  fitness did not
+  increase during 8 generation, but fluctuated between 3 and 8. (this
+  is with 4 parents, and mutationrate=0.1 and max_n_genes=20) than in
+  generation 9, suddenly three stimuli responded more than 10, one at
+  16 , one at 17. (stimuli saved as 949)
+
+- if one would take too few parents, then noise in fitness becomes too influential. This could be balanced by keeping the best from the population, but also this strength to the noise. One solution is to keep the best, but no longer than one or a few generations.
+
+
+
+Perfectly-isolated cell at 1499, 
+  recorded in [stimuli203, fithis203] 
+  then acquisition computer bailed out
+  recorded new in [stimuli233, fithis233]
+and also something around 1510 in 
+  [stimuli25?, fithis25?]
+
+All of this is saved in GeneticRFMapper directory in pika:/home/vanhoosr
+
+

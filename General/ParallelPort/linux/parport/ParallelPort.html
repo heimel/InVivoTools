@@ -1,0 +1,296 @@
+<HTML>
+<HEAD>
+<TITLE>Class  ParallelPort</TITLE>
+</HEAD>
+<BODY BGCOLOR="white">
+
+<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<TD><FONT SIZE="+2">
+<center><B>parport.ParallelPort Documentation</B></FONT></center>
+</TD>
+</TR>
+</table>
+<HR>
+<!-- ======== START OF CLASS DATA ======== -->
+<H2><FONT SIZE="-1">
+parport</FONT><br>
+Class  ParallelPort</H2>
+<PRE>
+java.lang.Object
+  |
+  +--<B>ParallelPort</B>
+</PRE>
+<HR>
+<DL>
+<DT>public class <B>ParallelPort</B><DT>extends java.lang.Object</DL>
+
+ Read and write bytes through parallel printer ports. For example:<br>
+ <pre>
+  import parport.ParallelPort;
+
+  class SimpleIO {
+    public static void main ( String []args )
+    {
+      ParallelPort lpt1 = new ParallelPort(0x378); // 0x378 is normally the base address for the LPT1 port
+      int aByte;
+      aByte = lpt1.read(); // read a byte from the port's STATUS pins
+      System.out.println("Input from parallel port: " + aByte);
+      aByte = aByte >> 2; // a simple and irrelevant operation
+      lpt1.write(aByte); // write a byte to the port's DATA pins
+      System.out.println("Output to port: " + aByte);
+    }
+  }</pre>
+ This class defines two native methods that are implemented in Visual C++ 6.0 for Windows, therefore
+ this class works only on Windows systems (if you would be interested in a linux version send
+ me an <a href="mailto:jdelcid@galileo.edu">email</a>, and I'll get to work on it).
+ Read the <a href="install.html">installation instructions.</a>
+<p>
+<dl>
+    <dt> <b>See Also:</b>
+    <dd> <a href="http://java.sun.com/docs/books/tutorial/native1.1/TOC.html">Java Native Interface</a>,
+    <a href="http://www.beyondlogic.org/spp/parallel.htm">Interfacing the Parallel Port</a>
+</dl>
+<hr>
+<P>
+
+<!-- =========== FIELD SUMMARY =========== -->
+<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<TD COLSPAN=2><FONT SIZE="+2">
+<B>Field Summary</B></FONT></TD>
+</TR>
+<TR BGCOLOR="white" CLASS="TableRowColor">
+<TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
+<CODE>&nbsp;int</CODE></FONT></TD>
+<TD><CODE><A HREF="ParallelPort.html#portBase"><B>portBase</B></A></CODE>
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The parallel port's base address</TD>
+</TR>
+</TABLE>
+&nbsp;
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+
+<A NAME="constructor_summary"><!-- --></A>
+<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<TD COLSPAN=2><FONT SIZE="+2">
+<B>Constructor Summary</B></FONT></TD>
+</TR>
+<TR BGCOLOR="white" CLASS="TableRowColor">
+<TD><CODE><B><A HREF="ParallelPort.html#ParallelPort(int)">ParallelPort</A></B>(int&nbsp;portBase)</CODE>
+
+<BR>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Create an interface to a parallel
+port using its base address</TD>
+</TR>
+</TABLE>
+&nbsp;
+
+<!-- ========== METHOD SUMMARY =========== -->
+
+<A NAME="method_summary"><!-- --></A>
+<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<TD COLSPAN=2><FONT SIZE="+2">
+<B>Method Summary</B></FONT></TD>
+</TR>
+<TR BGCOLOR="white" CLASS="TableRowColor">
+<TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
+<CODE>&nbsp;int</CODE></FONT></TD>
+<TD><CODE><B><A HREF="ParallelPort.html#read()">read</A></B>()</CODE>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Read one byte from the
+STATUS pins of this parallel port object.
+</TD>
+</TR>
+<TR BGCOLOR="white" CLASS="TableRowColor">
+<TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
+<CODE>static&nbsp;int</CODE></FONT></TD>
+<TD><CODE><B><A HREF="ParallelPort.html#readOneByte(int)">readOneByte</A></B>(int address)</CODE>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reads one byte from the
+specified address.
+</TD>
+</TR>
+<TR BGCOLOR="white" CLASS="TableRowColor">
+<TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
+<CODE>&nbsp;void</CODE></FONT></TD>
+<TD><CODE><B><A HREF="ParallelPort.html#write(int)">write</A></B>(int oneByte)</CODE>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Write one byte to the DATA pins
+of this parallel port object.
+</TD>
+</TR>
+<TR BGCOLOR="white" CLASS="TableRowColor">
+<TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
+<CODE>static&nbsp;void</CODE></FONT></TD>
+<TD><CODE><B><A HREF="ParallelPort.html#writeOneByte(int, int)">writeOneByte</A></B>(int address, int oneByte)</CODE>
+
+<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Writes one byte to the
+specified address.
+</TD>
+</TR>
+</TABLE>
+<P>
+
+<!-- ============ FIELD DETAIL =========== -->
+<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<TD COLSPAN=1><FONT SIZE="+2">
+<B>Field Detail</B></FONT></TD>
+</TR>
+</TABLE>
+
+<A NAME="portBase"><!-- --></A><H3>
+portBase</H3>
+<PRE>
+private int <B>portBase</B></PRE>
+<DL>
+<DD>The parallel port's <a href="http://www.beyondlogic.org/spp/parallel.htm#4">base address</a>
+</DL>
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+
+<A NAME="constructor_detail"><!-- --></A>
+<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<TD COLSPAN=1><FONT SIZE="+2">
+<B>Constructor Detail</B></FONT></TD>
+</TR>
+</TABLE>
+
+<A NAME="ParallelPort(int)"><!-- --></A><H3>
+ParallelPort</H3>
+<PRE>
+public <B>ParallelPort</B>(int&nbsp;portBase)</PRE>
+<DL>
+<DD>Create an interface to a parallel port using its <a href="#portBase">base address</a>
+<p>
+  <dd><dl>
+    <dt> <b>Parameters:</b>
+    <dd> portBase - The parallel port's base address.
+  </dl></dd>
+</dl>
+
+<!-- ============ METHOD DETAIL ========== -->
+
+<A NAME="method_detail"><!-- --></A>
+<TABLE BORDER="1" CELLPADDING="3" CELLSPACING="0" WIDTH="100%">
+<TR BGCOLOR="#CCCCFF" CLASS="TableHeadingColor">
+<TD COLSPAN=1><FONT SIZE="+2">
+<B>Method Detail</B></FONT></TD>
+</TR>
+</TABLE>
+
+<A NAME="read()"><!-- --></A><H3>
+read</H3>
+<PRE>
+public int <B>read</B>()</PRE>
+<DL>
+  <dd> Read one byte from the <a href="http://www.beyondlogic.org/spp/parallel.htm#5">STATUS</a>
+       address of a parallel port.
+       The byte read contains 5 valid bits, corresponding to 5 pins of input
+       from the STATUS pins of the parallel port (the STATUS is located
+       at "portBase + 1", e.g. the STATUS address for LPT1 is 0x379).<br><br>
+       This diagram shows the content of the byte:
+<pre>
+        Bit | Pin # | Printer Status  | Inverted
+       -----+-------+-----------------+-----------
+         7  |  ~11  | Busy            |   Yes
+         6  |   10  | Acknowledge     |
+         5  |   12  | Out of paper    |
+         4  |   13  | Selected        |
+         3  |   15  | I/O error       |
+</pre>
+       Note that Pin 11 is inverted, this means that "Hi" input on pin<br>
+       means 0 on bit 7, "Low" input on pin means 1 on bit 7.<p>
+  </dd>
+  <dd>
+   <dl>
+    <dt> <b>Returns:</b>
+    <dd> The byte read from the STATUS pins of the port.
+   </dl>
+  </dd>
+</dl>
+<HR>
+
+<A NAME="write(int)"><!-- --></A><H3>
+write</H3>
+<PRE>
+public void <B>write</B>(int oneByte)</PRE>
+<DL>
+  <dd>  Write one byte to the <a href="http://www.beyondlogic.org/spp/parallel.htm#5">DATA</a>
+        address of a parallel port. The byte is written to the DATA pins of the port.
+        The DATA pins are
+        located at the base address of the port (e.g. DATA address for LPT1
+        is 0x378).<br><br>
+     
+        This diagram shows how the byte is written:
+<pre>
+         Bit | Pin # | Printer DATA
+        -----+-------+--------------
+          7  |   9   |   DATA 7
+          6  |   8   |   DATA 6
+          5  |   7   |   DATA 5
+          4  |   6   |   DATA 4
+          3  |   5   |   DATA 3
+          2  |   4   |   DATA 2
+          1  |   3   |   DATA 1
+          0  |   2   |   DATA 0
+</pre>
+  </dd>
+  <dd>
+   <dl>
+    <dt> <b>Parameters:</b>
+    <dd> oneByte - the byte to write to the DATA pins.
+   </dl>
+  </dd>
+</DL>
+<HR>
+
+<A NAME="readOneByte(int)"><!-- --></A><H3>
+readOneByte</H3>
+<PRE>
+public static int <B>readOneByte</B>(int address)</PRE>
+<dl>
+  <DD>Reads one byte from any address on your PC's I/O memory</DD>
+  <dd>
+   <dl>
+    <dt> <b>Parameters:</b>
+    <dd> address - the address to read from. Normally it is the STATUS address of a parallel port.
+    <dt> <b>Returns:</b>
+    <dd> The byte read from the specified address.
+   </dl>
+  </dd>
+</dl>
+<HR>
+
+<A NAME="writeOneByte(int, int)"><!-- --></A><H3>
+writeOneByte</H3>
+<PRE>
+public static void <B>writeOneByte</B>(int address,
+                                int oneByte)</PRE>
+<DL>
+  <dd>Writes one byte to any address on your PC's I/O memory</dd>
+  <dd><dl>
+    <dt> <b>Parameters:</b>
+    <dd> address - The address to write at. Normally it is the DATA address of a parallel port.
+    <dd> oneByte - The byte to write.
+  </dl></dd>
+</dl>
+&nbsp;
+<!-- ========= END OF CLASS DATA ========= -->
+<HR>
+<font size="-1"><a href="mailto:jdelcid@galileo.edu">Submit a bug or feature</a> - Version 1.4.1 of Java Platform API Specification<br>
+This software is distributed "as is". It is Freeware. Any use of this software is by the users 
+own risk.</font>
+</BODY>
+</HTML>

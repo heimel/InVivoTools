@@ -1,0 +1,119 @@
+function [outstim] = loadstim(PSstim)
+
+PSstim = unloadstim(PSstim);
+StimWindowGlobals;
+
+% Set random seed
+s = RandStream.create('mt19937ar','seed',PSstim.PSparams.seed);
+RandStream.setDefaultStream(s);
+
+% Initialize and find Images
+filedir = PSstim.PSparams.dir;
+prefix = PSstim.PSparams.prefix;
+buffer = PSstim.PSparams.buffer;
+imgno = PSstim.PSparams.imgnumber;
+currentdir = pwd;
+cd(filedir);
+filenames_temp = ls;
+cd(currentdir);
+
+for i=1:length(filenames_temp)
+    isimage = strfind(filenames_temp(i,:),prefix);
+    j = 1;
+    if isimage 
+        j
+        filenames(i,:) = filenames_temp(i,:);
+end;
+
+for i=1:length(tiffind)
+    filenames(i) = filenames_temp(tiffind(i));
+end;
+
+num_files = length(filenames);
+imgperfile = zeros(num_files,1);
+for i=1:num_files
+    filename = [filedir '\' filenames(i+2,:)];
+    info = imfinfo(filename);
+    imgperfile(i) = numel(info);
+    if i==1 imgcumind(i) = 1;
+    else imgcumind(i) = imgcumind(i-1) + imgperfile(i);
+    end;
+end;
+num_images = sum(imgperfile); % Total Number of Images in Folder 
+
+% Determine how many images to load into buffer now and how many remain
+if (imgno<=num_images) && (imgno<=buffer) && (imgno>0)
+    numberofframes=imgno;
+    remainingframes = 0;
+elseif (num_images<buffer) && (num_images>0)
+    numberofframes=num_images;
+    remainingframes = 0;
+else
+    numberofframes=buffer;
+    if (imgno<=num_images) remainingframes=imgno-buffer; end;
+    if (imgno>num_images) remainingframes=num_images-buffer; end;
+end;
+
+A=zeros(info(1).Height,info(1).Width,numberofframes);
+
+% % Contrast Values
+% if (PSstim.PSparams.constrast<0)
+%     low_in = 0;
+%     high_in = 1;
+%     low_out = 0.5 * abs(PSstim.PSparams.constrast);
+%     high_out = 1 - (0.5 * abs(PSstim.PSparams.constrast));
+% elseif (PSstim.PSparams.constrast>0)
+%     low_in = 0.5 * abs(PSstim.PSparams.constrast);
+%     high_in = 1 - (0.5 * abs(PSstim.PSparams.constrast));
+%     low_out = 0;
+%     high_out = 1;
+% end; 
+
+imgtex = zeros(1,numberofframes);
+randframes = randperm(num_images);
+randframes = [randframes randperm(num_images)];
+for k = 1:imgno
+    for j=1:num_files
+        if (randframes(k)>=imgcumind(j)) && (randframes(k)<imgcumind(j+1))
+            rfileind(k) = j;
+            rimgind(k) = randframes(k) - imgcumind(j) + 1;
+            break;
+        end;
+    end;
+end;
+for i = 1:numberofframes
+    A(:,:,k) = imread([filedir '\' filenames(rfileind(i),:)], rimgind(i));
+    % Image Processing i.e. Contrast/Brightness Adjustment
+%     if (PSstim.PSparams.contrast==0) A(:,:,k) = imadjust(A(:,:,k),[low_in high_in],[low_out high_out]); end;
+    imgtex(k)=Screen('MakeTexture', StimWindow, A(:,:,k));
+    randlog(k) = randframes(k);
+end;
+
+clear A;
+colors = pscolors(PSstim);
+
+% Stimulus Variables
+frames = 1:numberofframes;
+ds_userfield = struct('buffer', buffer, 'remainingframes', remainingframes, ...
+               'randlog', randlog, 'randframes', randframes, ...
+               'imgindex', imgcumind, rfilein);
+
+% make color tables
+
+offClut = ones(256,1)*colors.backdropRGB;
+clut_bg = offClut;
+clut_usage = ones(size(clut_bg)); % we'll claim we'll use all slots
+clut = StimWindowPreviousCLUT; % we no longer need anything special here
+clut(1,:) = colors.backdropRGB;
+
+dp_stim = {'fps',1000/PSstim.PSparams.pause,'rect',PSstim.PSparams.rect,'frames',frames,PSstim.PSparams.dispprefs{:}, 'BGposttime', PSstim.PSparams.blankpause/1000};
+DP_stim = displayprefs(dp_stim);
+dS_stim = { 'displayType', 'Movie', 'displayProc', 'customdraw',  ...
+         'offscreen', imgtex, 'frames', frames, 'clut_usage', clut_usage, 'depth', 8, ...
+		 'clut_bg', clut_bg, 'clut', clut, 'clipRect', [] , 'makeClip', 0,'userfield',ds_userfield};
+PSstim = setdisplayprefs(PSstim,DP_stim);
+outstim = PSstim;
+outstim.stimulus = setdisplaystruct(outstim.stimulus,displaystruct(dS_stim));
+outstim.stimulus = loadstim(outstim.stimulus);
+return;
+

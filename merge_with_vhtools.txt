@@ -1,0 +1,98 @@
+% MERGE_WITH_VHTOOLS
+%
+% Changes to discuss with Steve to merge Heimel code with VHtools
+%
+% 2012, Alexander Heimel
+%
+
+% revision 893, 2012-06-27 is a good version for reintegration
+% after this version started to introduce trigger (optogenetic) interleaving
+%
+
+
+
+Fixes
+========
+A: ISUNIX_SV is no longer correct (since matlab VERSION command changed).    
+A possible fix is:
+
+   if strncmp(computer,'PC',2)
+       b = 0; 
+   elseif strcmp(computer,'MAC2')
+      b = 0; 
+   else 
+      b = 1;
+   end
+
+but this will only work as long as there are no new non-unix operating systems. 
+Or we can do some parsing on VERSION, but that might be even more fragile.
+
+A: SERIAL. On MAC OS9 computers the function SERIAL was provided by PTB2. On newer versions
+of Matlab, there is a function SERIAL to control the serial port, with a different interface.
+To avoid confusion PTB has renamed their SERIAL function to PSYCHSERIAL. PSYCHSERIAL however does 
+not seem to be maintained. To make the STIMSERIAL interface work, I changed STIMSERIAL from
+an empty function into a wrapper around PSYCHSERIAL on MAC2 systems and a wrapper around Matlab's 
+SERIAL on other systems. All calls to SERIAL in the NewStim code I had to replace by calls 
+to STIMSERIAL. The arguments should work without change.
+
+General questions
+=================
+A: Do you think it makes a difference where to have the communication directory 
+   at the stimulus slave or the runexperiment host?
+
+A: INITSTIMS: Early in initstims, quickRFmap is called. This leaves a window open. Is that intended?
+
+A: Does all code need to stay compatible with Matlab 5.3?
+
+A: What is the difference between Remote_Comm_isremote and Stim_Computer? 
+   Are all combinations possible, or are they always identical?
+
+Suggestions
+=========== 
+A: NEWSTIMCONFIGURATION: I would prefer to have it under version control, so that 
+reinstalling the software on a computer will be easier, and no separate backups need to
+be maintained. Could be done by using hostname and selecting filename based on host name.
+
+A: Can I/you change 'screen' to 'Screen' when I encounter them. Matlab produces a warning about
+inexact cases. I turned the warning off, but in future, it may produce errors.
+
+A: Suggest moving ReceptiveFieldMapper to NewStim.
+   Reason: reduce labspecific folders to the minimum, and some functions
+    such as 'ReceptiveFieldGlobals' in ReceptiveFieldMapper are needed for 
+    NewStim to run.
+   Temporary solution: in startup.m added temporary addpath to 
+          ~/Software/vhtools-dev/heimel/VH_matlab_code/NelsonLabTools/ReceptiveFieldMapper
+
+A: INITSTIMS: In my version of initstims I do a kbcheck after the pause, so that CloseStimWindow
+ can be called and the script can be ended gracefully. Can I port this?
+
+A: INITSTIMS: I would find it convenient to have a debug mode which calls CloseStimScreen between scripts. This way
+I can use initstims to show scripts on one computer by using two instances of Matlab. The debug mode could be set 
+by a new StimWindowGlobal, e.g. the logical StimDebug. This makes ShowStimScreen open a 640x480 window. 
+In DisplayStimulus it prevents the CLUT to be set to gray only at the end of the display.
+
+A: NEWSTIMGLOBALS: You use pixels_per_cm as a global, but its name doesnot suggest that 
+   it is a global variable. Perhaps use NewStimPixelsPerCm?
+  
+A: NEWSTIMGLOBALS: I like to have a global NewStimViewingDistance, which is set by NewStimConfiguration and tells the remote computer
+at which distance his screen is compared to the subject. In all loadstim this parameter can be called instead of the stimulus 
+parameter DISTANCE. For analysis it is necessary that NewStimViewingDistance is saved along with the stimuls script by the remote
+client
+
+A: NEWSTIMEDITOR and NEWSCRIPTEDITOR: It would be nice to let the program automatically suggest 
+a name, e.g. ps20120416_1015
+
+A: NEWSTIMEDITOR and NEWSCRIPTEDITOR: When accepting a name, check that no function exists with the 
+same name, otherwise stimuluscomputer may produce an error
+
+
+=====
+
+A: STIMENDSOUND: I added the function StimEndSound, which is called by the script written by 'write_runscript_remote'. It should not affect any existing 
+software. The function plays the train sound at the end of the stimulus display. It should work for Mac OS9 (but is OS language dependent! check) and 
+
+
+A: I added a trigger parameter to the stimscript object, to make a conditional trigger for optogenetic control. 
+this made changes in 
+DisplayStimulus,DisplayStimScript, stimscript, stimscript/setDisplayMethod, ScriptObjEditor
+and introduced stimscript/getTrigger

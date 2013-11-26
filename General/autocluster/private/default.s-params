@@ -1,0 +1,201 @@
+# PARAMETERS TO AUTOCLASS-SEARCH -- AutoClass C
+# ---------------------------------------------------------------
+# as the first character makes the line a comment, or
+! as the first character makes the line a comment, or
+; as the first character makes the line a comment, or
+;;; '\n' as the first character (empty line) makes the line a comment.
+
+# to override the following default parameters,
+# enter below the line => #!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;
+# <parameter_name> = <parameter_value>, or
+# <parameter_name> <parameter_value>, or      # separator is a space
+# <parameter_name>\tab<parameter_value>.
+# note: blanks/spaces are ignored if '=', or '\tab' are separators;
+# note: no trailing ';'s.
+# ---------------------------------------------------------------
+#  DEFAULT PARAMETERS
+# ---------------------------------------------------------------
+# rel_error = 0.01
+!       passed to clsf-DS-%= when deciding if a new clsf is duplicate of old
+
+# start_j_list = 5, 7, 10, 15, 25
+!       initially try these numbers of classes, so not to narrow the search
+!       too quickly.  the state of this list is saved in the <..>.search file
+!       and used on restarts, unless an override specification of start_j_list
+!       is made in this file for the restart run.
+!       start_j_list = -999 specifies an empty list (allowed only on restarts)
+
+# n_classes_fn_type = "random_ln_normal"
+!       will call this function to decide how many classes to start next try 
+!       with, based on best clsfs found so far.
+!       only "random_ln_normal" so far 
+
+# fixed_j = 0
+!       if not 0, overrides start_j_list and n_classes_fn_type, and always uses 
+!       this value as j-in 
+
+# min_report_period = 30
+!       wait at least this time (in seconds) since last report until
+!       reporting verbosely again 
+
+# max_duration = 0
+!       the search will end this time (in seconds) from start if it hasn't already
+
+# max_n_tries = 0
+!       if > 0, search will end after this many clsf tries have been done 
+
+# n_save = 2
+!       save this many clsfs to disk in the .results[-bin] and .search files.
+!       if 0, don't save anything (no .search & .results[-bin] files) 
+
+# log_file_p = true
+!       if false, do not write a log file 
+
+# search_file_p = true
+!       if false, do not write a search file 
+
+# results_file_p = true
+!       if false, do not write a results file
+
+# min_save_period = 1800
+!       to protect against possible cpu crash, will save to disk this often 
+!       (in seconds => 30 minutes)
+
+# max_n_store = 10
+!       don't store any more than this many clsfs internally
+
+# n_final_summary = 10
+!       print out descriptions of this many of the trials at the end of the search
+
+# start_fn_type = "random"
+!       clsf start function: "random" or "block"
+!       "block" is used for testing -- it produces repeatable searches.
+
+# try_fn_type = "converge_search_3"
+!       clsf try function: "converge_search_3", "converge_search_4" or "converge"
+!       "converge_search_3" uses an absolute stopping criterion for maximum
+!       class variation between successive convergence cycles.
+!       "converge_search_4" uses an absolute stopping criterion for the slope of
+!       class variation over sigma_beta_n_values cycles.    
+!       "converge" uses a criterion which tests the variation all the classes 
+!       aggregated together.
+
+# initial_cycles_p = true
+!       if true, perform base_cycle in initialize_parameters
+!       false is used only for testing
+
+# save_compact_p = true
+!       true saves classifications as machine dependent binary (.results-bin & 
+!       .chkpt-bin); false saves as ascii text (.results & .chkpt)
+
+# read_compact_p = true
+!       true reads classifications as machine dependent binary (.results-bin & 
+!       .chkpt-bin); false reads as ascii text (.results & .chkpt)
+        
+# randomize_random_p = true
+!       false uses 1 as the seed for rand, the pseudo-random number function (this
+!       facilitates producing repeatable test cases); true uses universal time 
+!       clock as the seed 
+
+# n_data = 0
+!       if > 0, will only read this many datum from .db2, rather than the whole file
+
+# halt_range = 0.5
+!       passed to try_fn_type "converge"
+!       one of two candidate tests for log_marginal (clsf->log_a_x_h) delta between 
+!       successive convergence cycles. the largest of halt_range and (halt_factor * 
+!       current_log_marginal) is used.
+!       increasing this value loosens the convergence and reduces the number of
+!       cycles. decreasing this value tightens the convergence and increases the
+!       number of cycles
+
+# halt_factor = 0.0001
+!       passed to try_fn_type "converge"
+!       one of two candidate tests for log_marginal (clsf->log_a_x_h) delta between 
+!       successive convergence cycles. the largest of halt_range and (halt_factor * 
+!       current_log_marginal) is used.
+!       increasing this value loosens the convergence and reduces the number of
+!       cycles. decreasing this value tightens the convergence and increases the
+!       number of cycles
+
+# rel_delta_range = 0.0025
+!       passed to try function "converge_search_3"
+!       delta for each class of log aprox-marginal-likelihood of class statistics
+!       with-respect-to the class hypothesis (class->log_a_w_s_h_j) divided by the 
+!       class weight (class->w_j) between successive convergence cycles.
+!       increasing this value loosens the convergence and reduces the number of
+!       cycles. decreasing this value tightens the convergence and increases the
+!       number of cycles
+
+# cs4_delta_range = 0.0025
+!       passed to try function "converge_search_4"
+!       delta for each class of log aprox-marginal-likelihood of class statistics 
+!       with-respect-to the class hypothesis (class->log_a_w_s_h_j) divided by the 
+!       class weight (class->w_j) over sigma_beta_n_values convergence cycles.  
+!       increasing this value loosens the convergence and reduces the number of 
+!       cycles. decreasing this value tightens the convergence and increases the 
+!       number of cycles
+
+# n_average = 3
+!       passed to try functions "converge_search_3" and "converge"
+!       The number of cycles for which the convergence criterion must be satisfied
+!       for the trial to terminate.
+
+# sigma_beta_n_values = 6
+!       passed to try_fn_type "converge_search_4"
+!       number of past values to use in computing sigma^2 (noise) and beta^2
+!       (signal).
+
+# max_cycles = 200
+!       passed to all try functions.  They will end a trial if this many cycles
+!       have been done and the convergence criterion has not been satisfied.
+
+# converge_print_p = false
+!       if true, the selected try function will print to the screen values useful in
+!       specifying non-default values for halt_range, halt_factor, rel_delta_range,
+!       n_average, sigma_beta_n_values, and range_factor.
+
+# force_new_search_p = true
+!       If true, will ignore any previous search results, discarding the 
+!       existing .search & .results[-bin] files after confirmation by the 
+!       user; if false, will continue the search using the existing 
+!       .search & .results[-bin] files. 
+!       For repeatable results, also see min_report_period, start_fn_type 
+!       and randomize_random_p.
+
+# checkpoint_p = false
+!       if true, checkpoints of the current classification will be output every
+!       min_checkpoint_period seconds.  file extension is .chkpt[-bin] -- useful 
+!       for very large classifications
+
+# min_checkpoint_period = 10800
+!       if checkpoint_p = true, the checkpointed classification will be written
+!       this often - in seconds (= 3 hours)
+
+# reconverge_type = ""
+!       can be either "chkpt" or "results"
+!       if "chkpt", continue convergence of the classification contained in 
+!       <...>.chkpt[-bin] -- checkpoint_p must be true.
+!       if "results", continue convergence of the best classification
+!       contained in <...>.results[-bin] -- checkpoint_p must be false.
+
+# screen_output_p = true
+!       if false, no output is directed to the screen.  Assuming log_file_p = true,
+!       output will be directed to the log file only.
+
+# interactive_p = true
+!       if false, standard input is not queried each cycle for the character q.
+!       Thus either parameter max_n_tires or max_duration must be specified, or
+!       AutoClass will run forever.
+
+# break_on_warnings_p = true
+!       The default value asks the user whether to coninue or not when data
+!       definition warnings are found.  If specified as false, then AutoClass
+!       will continue, despite warnings -- the warning will continue to be
+!       output to the terminal and the log file.
+
+#!#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;
+# OVERRIDE PARAMETERS
+#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;#!;
+
+start_j_list = 5, 7, 10, 15, 25, 50

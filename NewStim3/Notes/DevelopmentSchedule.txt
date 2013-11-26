@@ -1,0 +1,29 @@
+Development issues:
+
+General improvements (low priority):
+	Edit framework of local2remote to make it so the end-user doesn't actually have to modify a function.
+
+Improvements suggested Before upgrading to be compatible with Psychtoolbox version 3:
+
+Documentation:
+	Contents for every directory
+	Tutorial for new users/programmers
+	Document display routines
+	Document stimulus types for users and programmers
+	Document script types for users and programmers
+
+NewStimServices
+	Make an abstract parallel board interface; the PCIDIO96 should be a special case of this
+
+Triggering options/NewStimDisplayProcs
+	Develop a more generic means of triggering/reporting that relies on NewStimServices
+	Intrinsic -> slave mode, adjust parallel port
+
+How to upgrade to Psychtoolbox version 3:
+
+All NewStimServices need to be upgraded to operate on multiple platforms
+Likely will need a second set of DisplayProcs, one for each platform
+All stimulus/loadstim.m files need to be updated, to use the appropriate stimulus drawing methods
+
+
+

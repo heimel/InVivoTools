@@ -1,0 +1,32 @@
+Features for receptive field finder
+
+controls for a spot:
+
+pause between presentations
+in orientation mode:
+	go at all orientations or at only 1 orientation
+blink mode:
+	fixed on duration
+contrast
+number of cycles to run
+move in 100 pixel, 10 pixel, and 1 pixel increments
+resize in 10 pixel, 1 pixel increments (both x, y)
+show/hide rectangular boundary
+rectangle or oval mode
+alternate between this spot and alternate spot
+mouse interface
+
+spot management:
+
+alternate spot (for comparison)
+
+load/save any of 1000 spot locations (referenced by number)
+load into remote computer (maybe control the whole thing from remote computer)
+
+Connecting with the whole thing:
+
+Recenter command for recentering scripts (be careful about screen edge)
+Set rect command for scripts
+
+Virtual screen with list of RF's?
+

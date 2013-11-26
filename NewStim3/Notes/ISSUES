@@ -1,0 +1,10 @@
+This file describes assumptions and other issues that may complicate future development or extension.
+
+
+SAVE
+
+In Matlab 7, the file format changed.  To save in a format that Matlab versions 6 and 5 can read, one must
+add the flag '-V6' to the save command.  NewStim assumes that the remote computer is running a version of
+Matlab 6 or 5 and that the '-V6' command is unnecessary on the remote machine.
+
+

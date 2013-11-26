@@ -1,0 +1,35 @@
+TODO list for GeneticRFMapper
+-------------------------------------
+
+- make complex cell model for simulation (some references in Sceniak,
+  Hawken and Shapley)
+
+- improve GA simulation program in general
+
+- change response to many bins and fitness to sum
+
+- check to see if plot_chromosome and shown stimuli match. (at least
+  it seems upside down)
+
+- last response in minimize_stimulus is always zero. repair
+
+- the continue option in waiting for the extraction causes the program
+  to crash. repair.
+
+- better way to store all populations and generations, to later see
+  what happened
+
+- implement Boltzmann selection
+
+- add global speed and orientation preferences and implement Sacha's
+  suggestion of more knowledge about receptive fields.
+
+- make it possible to not sample not only uniformly but also from
+  other distributions 
+
+- stimulus density should be related to size & windowsize 
+
+- use different procedure to see if extracting is finished (at least
+  ask for confirmation when there are zero spikes)
+
+- save parameters in log file and presentation time of one generation

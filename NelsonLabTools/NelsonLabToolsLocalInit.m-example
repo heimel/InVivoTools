@@ -1,0 +1,18 @@
+function NelsonLabToolsInitLocal;
+
+ % inits local pathname variables for NelsonLabTools
+
+global sharedirNLT initdatapathNLT initanalysispathNLT initremotedirpathNLT;
+global initextractpathNLT initacqreadyNLT;
+
+sharedirNLT = '/home/dataman/stims';
+
+initdatapathNLT = '/home/data/';
+initanalysispathNLT = '/home/data';
+initremotedirpathNLT = '/home/dataman/stims';
+
+initextractpathNLT = '/home/data/';
+initacqreadyNLT= '/home/dataman/data/acqReady';
+
+global lgn_databaseNLT;
+lgn_databaseNLT = '/home/vanhoosr/nelson/lgn_characterize/single_unit/lgn_db';
