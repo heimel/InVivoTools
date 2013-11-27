@@ -13,7 +13,7 @@ fname = fullfile( pathstr,[name '.tif']);
 if isfield(inf,'ImageDescription')
     description = inf.ImageDescription;
 else 
-    description = ''; % probably needs to be filled in still
+    description = 'empty'; % probably needs to be filled in still
 end
 
 
