@@ -30,6 +30,9 @@ switch record.electrode
     case 'CSO'
         CSO = analyse_CSO(record,stimsfile,50,verbose); % contact point distance for SC 50, for VC 100
         return
+            case 'coherence'
+        WCoh = analyse_wavecoh(record,stimsfile); % contact point distance for SC 50, for VC 100
+        return
 end
 
 switch record.stim_type
@@ -90,7 +93,7 @@ switch lower(record.setup)
         EVENT = importtdt(EVENT);
         numchannel = max([EVENT.strms.channels]);
         channels_to_read = 1:numchannel;
-       channels_to_read = [12]; % [3 4 5 6 7 8 11 12 13 14 15 16]
+        channels_to_read = [3 11]; % [3 4 5 6 7 8 11 12 13 14 15 16]
         disp(['ANALYSE_VEPS: FOR DEBUGGING ONLY CHANNELS # ',num2str(channels_to_read)]);
         %         numchannel = 2;
         EVENT.Myevent = 'LFPs';
@@ -234,7 +237,7 @@ for lfpch=1:numLFPchannels
             for j = 1:length(stims)
                 pars = getparameters(stims{j});
                 if ~isempty(analyse_second_parameter)
-                    if pars.(analyse_parameter) == val && pars.(analyse_second_parameter) == parameter_second_values{1}(2) % Mehran
+                    if pars.(analyse_parameter) == val && pars.(analyse_second_parameter) == parameter_second_values{1}(5) % Mehran
                         ind = [ind find(do==j)];
                     end
                 else
@@ -323,7 +326,7 @@ for lfpch=1:numLFPchannels
             if process_params.vep_remove_vep_mean
                 data = remove_vep_mean( data );
             end
-            Fs = 380;
+            Fs = 380; % temporarily Mehran
             [powerm.power(:,:,i),powerm.freqs,powerm.time] = ...
                 GetPowerWavelet(data,Fs,onsettime,verbose);
 
