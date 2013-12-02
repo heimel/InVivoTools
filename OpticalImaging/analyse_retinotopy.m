@@ -213,8 +213,15 @@ if 0 % dccorrection
   end
 end
 
+spatial_filter = true;
+if ~isempty(record)
+    switch record.stim_type
+        case {'tf','sf'}
+            spatial_filter = true;
+    end
+end
 
-if 1 % spatial filter
+if spatial_filter % spatial filter
   filter=[];
   fp = 3;
   disp(['ANALYSE_RETINOTOPY: Filter width set to ' num2str(fp)]);

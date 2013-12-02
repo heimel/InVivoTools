@@ -2,7 +2,7 @@ function [SPs,NumClust] = spike_sort_wpca(SPIKESdata,cll1)
 spikes1=zeros(30,size(SPIKESdata,1));
 for i=1:length(SPIKESdata)
     A=wavelet_decompose(SPIKESdata(i,:),3,'db4');
-    spikes1(:,i)=A(1:30,3);
+    spikes1(:,i)=A(1:30,1);
 end;
 Spikes1=spikes1';
 spikes1=Spikes1(:,1:20);
@@ -21,6 +21,7 @@ for i=1:NumClust
     sps.time=cll1.data(IDX==i);
     sps.data=SPIKESdata(IDX==i,:);
     SPs=[SPs;sps];
+    i
 end
 
 subp1=floor(sqrt(NumClust+1));

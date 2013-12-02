@@ -331,10 +331,41 @@ if isempty(record.rorfile)
     pause(0.01);
 end
 
+% make bandwith figures
+switch record.stim_type
+    case {'sf','tf'}
+        
+        avg_norm = avg-repmat(min(avg,[],3),[ 1 1 size(avg,3)]);
+        roi_edge = edge(roi);
+
+        % low 
+        avg_low = avg_norm(:,:,1)./max(avg_norm,[],3);
+        figure;
+        im = avg_low;
+        im(roi_edge'==1) = 0;
+        imagesc(im');
+        axis off image
+        title(subst_ctlchars(['R_1/R_max: mouse=' record.mouse ',date=' record.date ',test=' record.test]));
+
+        % high
+        avg_high = avg_norm(:,:,end-1)./max(avg_norm,[],3);
+        figure;
+        im = avg_high;
+        im(roi_edge'==1) = 0;
+        imagesc(im');
+        axis off image
+        title(subst_ctlchars(['R_(end-1)/R_max: mouse=' record.mouse ',date=' record.date ',test=' record.test]));
+
+end
+
+
 % Do analysis
 switch record.stim_type
     case {'od','od_bin','od_mon','sf','tf','contrast',...
             'rt_response','sf_contrast','contrast_sf','sf_low_tf','ledtest'},
+        
+        % make bandwith figure
+        
         % compute timecourse
         [record.response,record.response_sem,record.response_all,...
             record.timecourse_roi,record.timecourse_ror,...

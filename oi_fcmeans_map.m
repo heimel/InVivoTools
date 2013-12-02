@@ -7,7 +7,7 @@ function oi_fcmeans_map( record )
 params.pick_starting_clusters = false;
 params.average_over_trials = true;
 params.remove_trial_average = true;
-n_clusters = 6;
+n_clusters = 5;
 
 if nargin<1
     record = [];
@@ -17,12 +17,31 @@ if ~isempty(record)
     cd(oidatapath(record));
 end
 
-load('spontaneous_frames.mat')
+load('spontaneous_frames0.mat')
+ffrr0=ffrr;
+data0 = zeros(size(ffrr0{1},1),size(ffrr0{1},2),length(ffrr0)/3);
+for i=1:3:length(ffrr0)
+    data0(:,:,floor(i/3)+1) = (ffrr0{i}+ffrr0{i+1}+ffrr0{i+2})/3;
+end
+
+% load('spontaneous_frames2.mat')
+% data = zeros(size(ffrr{1},1),size(ffrr{1},2),length(ffrr));
+% for i=1:length(ffrr)
+%     data(:,:,i) = ffrr{i}-squeeze(data0(:,:,ceil((i/5))));
+% end
+
+load('spontaneous_frames2.mat')
 data = zeros(size(ffrr{1},1),size(ffrr{1},2),length(ffrr));
 for i=1:length(ffrr)
     data(:,:,i) = ffrr{i};
 end
-% 
+
+% for i=1:size(data,1)
+%     for j=1:size(data,2)
+%         data(i,j,:)=detrend(squeeze(data(i,j,:)));
+%     end
+% end
+
 maxS=20;
 MFRDnew=zeros(size(ffrr{1},1),size(ffrr{1},2),length(ffrr));
 MFRDnew_phase=zeros(size(ffrr{1},1),size(ffrr{1},2),length(ffrr));
@@ -32,10 +51,19 @@ for i=1:size(ffrr{1},1)
     SS=[S(1:maxS,:);zeros(size(ffrr{1},2)-maxS,length(ffrr))];
     TDnew=U*SS*V';
     MFRDnew(i,:,:)=TDnew;
-    MFRDnew_phase(i,:,:)= angle(hilbert(TDnew));
-%     MFRDnew_phase(i,:,:)= angle(hilbert(TD));
+%     MFRDnew_phase(i,:,:)= angle(hilbert(TDnew));
+    MFRDnew_phase(i,:,:)= angle(hilbert(TD));
+% MFRDnew_phase(i,:,:)= real(hilbert(TD));
 end;
-data=MFRDnew_phase;
+
+data=cos(MFRDnew_phase);
+
+% for i=1:size(data,1)
+%     for j=1:size(data,2)
+%         data(i,j,:)=detrend(squeeze(data(i,j,:)));
+%     end
+% end
+
 % data=MFRDnew;
 clear MFRDnew
 clear MFRDnew_phase
@@ -52,7 +80,7 @@ yl = [1 size(data,2)];
 
 %xl = [20 120];
 %yl = [50 140];
-step = 2;
+step = 3;
 
 data = data(xl(1):step:xl(2),yl(1):step:yl(2),:);
 subplot(1,3,2)
@@ -62,7 +90,7 @@ axis image
 
 [n_x n_y n_images] = size(data);
 
-n_trials = 5;
+n_trials = 14;
 n_conditions = 4;
 n_frames = n_images / n_trials /n_conditions;
 data = reshape(data,n_x,n_y,n_frames,n_conditions,n_trials);
@@ -126,10 +154,10 @@ if params.pick_starting_clusters
     ind = kmeans(data,[],'Start',startdata);
 else
 %     ind = kmeans(data,n_clusters,'Distance','cosine');
-        ind = kmeans(data,n_clusters);
+%         ind = kmeans(data,n_clusters);
 
-%     [center, U_ind, obj_fcn] = FCmeansClust(data,n_clusters);
-%     [iii,ind]=max(U_ind);ind=ind';
+    [center, U_ind, obj_fcn] = FCmeansClust(data,n_clusters);
+    [iii,ind]=max(U_ind);ind=ind';
 end
 
 figure;

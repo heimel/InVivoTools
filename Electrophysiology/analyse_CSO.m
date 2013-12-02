@@ -54,7 +54,7 @@ EVENT.Myblock = blocknames;
 EVENT = importtdt(EVENT);
 numchannel = max([EVENT.strms.channels]);
 %         channels_to_read = 1:numchannel;
-channels_to_read = [9:16]; % [3 4 5 6 7 8 11 12 13 14 15 16]
+channels_to_read = [1:8]; % [3 4 5 6 7 8 11 12 13 14 15 16]
 disp(['ANALYSE_VEPS: ONLY FOR CHANNELS  ',num2str(channels_to_read)]);
 %         numchannel = 2;
 EVENT.Myevent = 'LFPs';
@@ -109,6 +109,8 @@ n_conditions = length(parameter_values);
 
 disp(['ANALYSE_VEPS: Analyzing ' analyse_parameter  ' and averaging over other parameters.']);
 
+[a_high,b_high] = butter(5,.5/(.5*Fs),'high');
+
 % for t = 1:length(stimss) % run over triggers
 stims = stimss(1);
 for i=1:length(stims.MTI2)
@@ -127,7 +129,8 @@ for i=1:length(stims.MTI2)
     Sigs = signalsTDT(EVENT,stimulus_start+startindTDT);
     RW=[];
     for j=channels_to_read
-       RW = [RW,Sigs{j,1}];
+       Msig=filter(a_high,b_high,Sigs{j,1});
+       RW = [RW,Msig];
     end
     results.waves=RW';
     waves{i} = 2000*results.waves;
@@ -144,7 +147,7 @@ for i = 1:n_conditions
     for j = 1:length(stims)
         pars = getparameters(stims{j});
         if ~isempty(analyse_second_parameter)
-            if pars.(analyse_parameter) == val && pars.(analyse_second_parameter) == parameter_second_values{1}(2) % Mehran
+            if pars.(analyse_parameter) == val && pars.(analyse_second_parameter) == parameter_second_values{1}(1) % Mehran
                 ind = [ind find(do==j)];
             end
         else

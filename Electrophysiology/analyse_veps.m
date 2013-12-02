@@ -90,17 +90,17 @@ switch lower(record.setup)
         EVENT = importtdt(EVENT);
         numchannel = max([EVENT.strms.channels]);
         channels_to_read = 1:numchannel;
-       channels_to_read = [1:8]; % [3 4 5 6 7 8 11 12 13 14 15 16]
-        disp('ANALYSE_VEPS: FOR DEBUGGING ONLY CHANNEL 13' );
+       channels_to_read = [12]; % [3 4 5 6 7 8 11 12 13 14 15 16]
+        disp(['ANALYSE_VEPS: FOR DEBUGGING ONLY CHANNELS # ',num2str(channels_to_read)]);
         %         numchannel = 2;
         EVENT.Myevent = 'LFPs';
         EVENT.Start =  -max_pretime;
         EVENT.Triallngth =  post_ttl+pre_ttl;
         results.sample_interval=1/EVENT.strms(1,3).sampf;
         startindTDT=EVENT.strons.tril(1)-pre_ttl;
-        Sigs = signalsTDT(EVENT,stimulus_start+startindTDT);
+        SIG = signalsTDT(EVENT,stimulus_start+startindTDT);
         for j=1:length(channels_to_read)
-            results.waves{1,j}=Sigs{channels_to_read(j),1};
+            results.waves{1,j}=SIG{channels_to_read(j),1};
         end
     otherwise
         results = importspike2_lfp(smrfile,record.stim_type,pre_ttl,post_ttl,true,record.amplification,verbose);
@@ -139,6 +139,8 @@ if ~isempty(isletter(record.stim_type)) && ~strcmp(record.stim_type,'ps')  && ~s
 else
     analyse_second_parameter = '';
 end;
+
+% pars2 = getparameters(pars.ps_add);
 
 parameter_values = parameter_values{1};
 
@@ -190,9 +192,9 @@ for lfpch=1:numLFPchannels
 
                     EVENT.Start =  -max_pretime;
                     EVENT.Triallngth =  post_ttl+pre_ttl;
-                    Sigs = signalsTDT(EVENT,stimulus_start+startindTDT);
+                    SIG = signalsTDT(EVENT,stimulus_start+startindTDT);
                     for j=channels_to_read
-                        results.waves{1,j}=Sigs{j,1};
+                        results.waves{1,j}=SIG{j,1};
                     end
                     waves(i,:) = 2000*results.waves{1,channels_to_read(lfpch)};
                     waves_time(i,:) = -stimulus_start-pre_ttl+(0:length(waves(i,:))-1)*results.sample_interval;
@@ -225,14 +227,14 @@ for lfpch=1:numLFPchannels
             bw = w0/15;
             [bb,aa] = iirnotch(w0,bw);
         end
-        
+        IND={};
         for i = 1:n_conditions % temp only doing high contrasts
             val = parameter_values(i);
             ind = [];
             for j = 1:length(stims)
                 pars = getparameters(stims{j});
                 if ~isempty(analyse_second_parameter)
-                    if pars.(analyse_parameter) == val && pars.(analyse_second_parameter) == parameter_second_values{1}(1) % Mehran
+                    if pars.(analyse_parameter) == val && pars.(analyse_second_parameter) == parameter_second_values{1}(2) % Mehran
                         ind = [ind find(do==j)];
                     end
                 else
@@ -242,6 +244,11 @@ for lfpch=1:numLFPchannels
                 end
                 
             end
+%             waves_timeVC=waves_time(ind,:);waves_VC=waves(ind,:);wavefile = ['waves_3',num2str(i),'_',num2str(channels_to_read),'.mat'];
+%             Wavepath=fullfile(datapath,EVENT.Myblock,wavefile);
+%             save(Wavepath,'waves_VC','waves_timeVC');
+%         end
+            IND=[IND,ind];
 
             waves_mean(i,:) = mean(waves(ind,:),1);
             waves_std(i,:) = std(waves(ind,:),1);
@@ -296,8 +303,15 @@ for lfpch=1:numLFPchannels
                 figure;
                 amax = 8;
                 a = 1:2^amax;
-                coefs = cwt(waves(ind(1),:),a,'db4','scal');
+                coefs=0;
+                for j=1:length(ind)
+                    Coefs = cwt(waves(ind(j),:),a,'db4','scal');
+                    coefs=coefs+Coefs;
+                end
+                coefs=coefs/length(ind);
                 f = scal2frq(a,'db4',1/Fs);
+                ff=f';FF=repmat(ff,[1,size(coefs,2)]);
+                coefs=FF.*coefs;
                 figure; SCimg = wscalogram('image',coefs);
                 figure;surf((1:size(coefs,2)),f,abs(coefs),'EdgeColor','none');axis tight; axis square; view(0,90);ylim([0 100])
             end
@@ -309,6 +323,7 @@ for lfpch=1:numLFPchannels
             if process_params.vep_remove_vep_mean
                 data = remove_vep_mean( data );
             end
+            Fs = 380;
             [powerm.power(:,:,i),powerm.freqs,powerm.time] = ...
                 GetPowerWavelet(data,Fs,onsettime,verbose);
 
@@ -448,6 +463,7 @@ end
 
 switch params.vep_poweranalysis_type
     case 'wavelet'
+        Fs = 380;
         [pxx,freqs,time] = GetPowerWavelet(reshape(waves,numel(waves),1,1),Fs,verbose);
     case 'periodogram'
         [pxx,freqs]=periodogram(waves,[],[],Fs);

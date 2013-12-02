@@ -9,58 +9,63 @@
 % % load ffrr
 % % load MFRDnew
 % % % load MFRDnew_phase
-blk_num=1;
-sm=length(ffrr);
+% blk_num=1;
+% sm=length(ffrr);
 Tnum=sm/blk_num;
 StimNum=4;
 TS=Tnum/StimNum;
-m=[size(ffrr{1,1}(1:end,1:end),1),size(ffrr{1,1}(1:end,1:end),2)];
-MFRDnew=zeros(m(1),m(2),sm);
-% denspat = fspecial('gaussian',3,3);
-for i=1:sm
-    MFRDnew(:,:,i)=ffrr{1,i}(1:end,1:end);
-%     GausI=imfilter(MFRDnew(:,:,i),denspat,'conv');
-%     MFRDnew(:,:,i)=GausI;
-    i
-end;
-clear ffrr
-
-% for i=1:m(1)
-%     for j=1:m(2)
-%         MFRDnew(i,j,:)= angle(hilbert(MFRDnew(i,j,:)));
-%     end
-% end
-
-
-% MFRDnew2=[];
+% m=[size(ffrr{1,1}(1:end,1:end),1),size(ffrr{1,1}(1:end,1:end),2)];
+% MFRDnew=zeros(m(1),m(2),sm);
+% % denspat = fspecial('gaussian',3,3);
 % for i=1:sm
-%     MFRDnew2(:,:,i)=MFRDnew([80:110,70:120],[20:60,90:160],i);
+%     MFRDnew(:,:,i)=ffrr{1,i}(1:end,1:end);
+% %     GausI=imfilter(MFRDnew(:,:,i),denspat,'conv');
+% %     MFRDnew(:,:,i)=GausI;
 %     i
 % end;
-% MFRDnew=MFRDnew2;
+% clear ffrr
+% 
+% % for i=1:m(1)
+% %     for j=1:m(2)
+% %         MFRDnew(i,j,:)= angle(hilbert(MFRDnew(i,j,:)));
+% %     end
+% % end
+% 
+% 
+% % MFRDnew2=[];
+% % for i=1:sm
+% %     MFRDnew2(:,:,i)=MFRDnew([80:110,70:120],[20:60,90:160],i);
+% %     i
+% % end;
+% % MFRDnew=MFRDnew2;
+% % % % 
+% % % %%
 % % % 
-% % %%
 % % 
-% 
-% % MFRDmean=(MFRDmean-min(MFRDmean(:)))/max(MFRDmean(:));
-% 
+% % % MFRDmean=(MFRDmean-min(MFRDmean(:)))/max(MFRDmean(:));
+% % 
+
+MFRDnew=data;
 M_index=[];
-M_ind_pre=[];
-M_ind_new={};
+% M_ind_pre=[];
+% M_ind_new={};
 for f=0:StimNum-1
     M_ind=[];
     for k=0:blk_num-1
         M_ind=[M_ind,Tnum*k+TS*f+1:Tnum*k+TS*(f+1)];
-        M_ind_pre=[M_ind_pre,Tnum*k+TS*f+1:Tnum*k+TS*f+100];
-        M_ind_new{f+1,k+1}=squeeze(mean(shiftdim(MFRDnew(:,:,Tnum*k+TS*f+1:Tnum*k+TS*f+100),2)));
+%         M_ind_pre=[M_ind_pre,Tnum*k+TS*f+1:Tnum*k+TS*f+100];
+%         M_ind_new{f+1,k+1}=squeeze(mean(shiftdim(MFRDnew(:,:,Tnum*k+TS*f+1:Tnum*k+TS*f+100),2)));
     end
     M_index=[M_index;M_ind];
 end
-% % 
-% MFRDmean=squeeze(mean(shiftdim(MFRDnew(:,:,1:3:end),2)));
-MFRDmean=squeeze(mean(shiftdim(MFRDnew(:,:,M_ind_pre),2)));
+% % % 
+% % MFRDmean=squeeze(mean(shiftdim(MFRDnew(:,:,1:3:end),2)));
+% MFRDmean=squeeze(mean(shiftdim(MFRDnew(:,:,M_ind_pre),2)));
+% 
+% pretimeStim=sm/blk_num/StimNum;
+% data=reshape(data,222,186,140);
 
-pretimeStim=sm/blk_num/StimNum;
+
 
 F=[];
 
@@ -82,7 +87,9 @@ cmap1=colormap('prism');
 % subplot(2,2,5)
 % imshow(MFRDnew_phase(:,:,1),[-pi pi],'Colormap',cmap2)
 % colormap prism
-
+blk_num=7;
+StimNum=4;
+sm=140;
 %%%%%%%%%%%%%%%%%%%%%%%
 lev1=StimNum/sm;
 lev2=1/blk_num;
@@ -118,7 +125,8 @@ pH=uicontrol( ...
     'Callback',callbackStr);
 Fac1=ceil(sqrt(StimNum));Fac2=ceil(StimNum/Fac1);
 good=0;
-Mrange=[-.5*std(MFRDmean(:)) +.5*std(MFRDmean(:))];
+Mrange=[-pi pi];
+% Mrange=[-.5*std(MFRDmean(:)) +.5*std(MFRDmean(:))];
 while good ==0
     t0=get(tv,'Value');
     %     s0=get(sv,'Value');
@@ -126,11 +134,11 @@ while good ==0
     %     s0=floor(s0);
     for i=1:StimNum
         subplot(Fac1,Fac2,i)
-%         imshow(squeeze(MFRDnew(:,:,M_index(i,t0)))'-MFRDmean',Mrange,'Colormap',cmap1)
+%         imshow(squeeze(MFRDnew(:,:,floor(t0/5)))',Mrange,'Colormap',cmap1)
 %         imshow(im2bw(squeeze(MFRDnew(:,:,M_index(i,t0)))'-MFRDmean',0.99))
 
-%         imshow(squeeze(MFRDnew(:,:,M_index(i,t0)))',Mrange,'Colormap',cmap1)
-        imshow(squeeze(MFRDnew(:,:,M_index(i,t0)))'-M_ind_new{i,ceil(t0/pretimeStim)}',Mrange,'Colormap',cmap1)
+        imshow(squeeze(MFRDnew(:,:,M_index(i,t0)))',Mrange,'Colormap',cmap1)
+%         imshow(squeeze(MFRDnew(:,:,M_index(i,t0)))'-M_ind_new{i,ceil(t0/pretimeStim)}',Mrange,'Colormap',cmap1)
 %         aa1=num2str(mod(t0,pretimeStim));
 %         posi1 = [70 800 40 15];
 %         hh = uicontrol('Style','text',...
@@ -155,7 +163,7 @@ while good ==0
         % colormap jet
         % subplot(2,2,5)
         % imshow(MFRDnew_phase(:,:,s0),[-pi pi],'Colormap',cmap2)
-        % colormap prism
+        colormap gray
         drawnow;
     end
 end;

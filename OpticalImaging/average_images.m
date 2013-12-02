@@ -63,7 +63,7 @@ elseif strcmp(outmeth,'indframes'),
     stddev=avg;
 end;
 
-%ffrr={};
+ffrr={};
 for i=1:length(filenames),
     disp(['AVERAGE_IMAGES: Working on '  filenames{i} '.']);
     if strcmp(normmeth,'subtract')||strcmp(normmeth,'divide'),
@@ -73,7 +73,7 @@ for i=1:length(filenames),
             info.n_images,1,compression,0);
         nrm=mean(nrm,3);
     end;
-%    fr={};
+   fr={};
     for j=1:length(conditions),
         if strcmp(normmeth,'subtractframe')||strcmp(normmeth,'subtractframe_ror')
             block_offset=(conditions(j)-1)*info.n_images+normflag;
@@ -83,7 +83,7 @@ for i=1:length(filenames),
         for k=1:length(frames),
             block_offset=(conditions(j)-1)*info.n_images+frames(k);
             img=read_oi_compressed(filenames{i},block_offset,1,1,compression,0,fileinfo);
-%            fr=[fr,img];
+           fr=[fr,img];
             switch normmeth
                 case 'subtract'
                     img=img-nrm;
@@ -108,14 +108,13 @@ for i=1:length(filenames),
             end;
         end;
     end;
-%    ffrr=[ffrr,fr];
+   ffrr=[ffrr,fr];
 end;
 %fprintf('\n');
-%pth = fileparts(filenames{1});
-%save(fullfile(pth,'spontaneous_frames.mat'),'ffrr')
+pth = fileparts(filenames{1});
+% save(fullfile(pth,'spontaneous_frames.mat'),'ffrr')
 % save(fullfile('D:\Data\2013\05\28\','spontaneous_frames.mat'),'ffrr')
 % save(fullfile('D:\Data\2013\05\28\','spontaneous_frames.mat'),'ffrr')
-
 
 if strcmp(outmeth,'avgframes'),
     N = length(frames)*length(filenames);
