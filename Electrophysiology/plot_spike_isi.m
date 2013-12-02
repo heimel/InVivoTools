@@ -13,7 +13,7 @@ params = ecprocessparams(record);
 
 n_cells = size(isi,1);
 
-if n_cells>10
+if n_cells>15
     disp('PLOT_SPIKE_ISI: Too many cells, I am too lazy to plot them.');
     return
 end
