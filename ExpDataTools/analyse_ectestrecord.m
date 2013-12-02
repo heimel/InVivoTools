@@ -409,6 +409,14 @@ for r=1:length(nr) % for all refs
                 cellmeasures.rate_peak;
         end
         
+        try % compute selectivity index
+            for t = 1:length(cellmeasures.rate)
+                cellmeasures.selectivity_index{t} = ...
+                    (max(cellmeasures.rate{t})-min(cellmeasures.rate{t})) / ...
+                    max(cellmeasures.rate{t});
+            end % t
+        end            
+        
         try
             % compute signal to noise ratio (don't confuse with cell quality snr)
             cellmeasures.response_snr= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
