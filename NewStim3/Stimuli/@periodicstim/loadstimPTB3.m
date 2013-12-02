@@ -20,7 +20,8 @@ StimWindowGlobals;
 
 colors = pscolors(PSstim);
 
-%1 goes to max deflection above background bg + (chromehigh-chromelow)*light
+%1 goes to max deflection above background bg +
+%(chromehigh-chromelow)*light
 %-1 goes to min deflection below background + (chromhigh-chromelow)*dark
 %0 goes to background (chromlow+(chromehigh-chromelow)*background
 

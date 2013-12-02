@@ -5,9 +5,9 @@ function oi_correlation_map( record )
 %
 
 params.pick_starting_clusters = false;
-params.average_over_trials = false;
+params.average_over_trials = true;
 params.remove_trial_average = true;
-n_clusters = 6;
+n_clusters = 5;
 
 if nargin<1
     record = [];
@@ -23,6 +23,12 @@ for i=1:length(ffrr)
     data(:,:,i) = ffrr{i};
 end
 
+% for i=1:size(data,1)
+%     for j=1:size(data,2)
+%         data(i,j,:)=detrend(squeeze(data(i,j,:)));
+%     end
+% end
+
 hfig = figure;
 subplot(1,3,1)
 imagesc(mean(data,3)');
@@ -35,7 +41,7 @@ yl = [1 size(data,2)];
 
 %xl = [20 120];
 %yl = [50 140];
-step = 3;
+step = 1;
 
 data = data(xl(1):step:xl(2),yl(1):step:yl(2),:);
 subplot(1,3,2)
@@ -45,8 +51,8 @@ axis image
 
 [n_x n_y n_images] = size(data);
 
-n_trials = 5;
-n_conditions = 6;
+n_trials = 14;
+n_conditions = 4;
 n_frames = n_images / n_trials /n_conditions;
 data = reshape(data,n_x,n_y,n_frames,n_conditions,n_trials);
 

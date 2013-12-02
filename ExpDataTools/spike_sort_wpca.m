@@ -1,8 +1,8 @@
 function [SPs,NumClust] = spike_sort_wpca(SPIKESdata,cll1)
 spikes1=zeros(30,size(SPIKESdata,1));
-for i=1:length(SPIKESdata)
+for i=1:size(SPIKESdata,1)
     A=wavelet_decompose(SPIKESdata(i,:),3,'db4');
-    spikes1(:,i)=A(1:30,3);
+    spikes1(:,i)=A(1:30,1);
 end;
 Spikes1=spikes1';
 spikes1=Spikes1(:,1:20);
@@ -14,7 +14,8 @@ XX=[cll1.spike_amplitude,cll1.spike_peak_trough_ratio/range(cll1.spike_peak_trou
 % subplot(2,2,2);plot(score(:,1),score(:,3),'.')
 % subplot(2,2,3);plot(score(:,1),score(:,4),'.')
 % subplot(2,2,4);plot(score(:,2),score(:,4),'.')
-NumClust=5;
+NumClust=3;
+
 [IDX,f1,f2,D] = kmeans(score(:,[1:4]),NumClust);
 SPs=struct([]);
 for i=1:NumClust

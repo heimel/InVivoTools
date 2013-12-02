@@ -53,7 +53,7 @@ switch lower(record.setup)
         %         EVENT.timerange(2)-EVENT.strons.tril(1)+(1/EVENT.snips.Snip.sampf);
         %         EVENT.Start = +(1/EVENT.snips.Snip.sampf);
         EVENT.Start = 0;
-        read_chan1=[2 7 8 9 10];
+        read_chan1=[4 5 6 7 8];
         disp(['ANALYSE_ECTEST: FOR ONLY CHANNEL # ',num2str(read_chan1)]);
 
         total_length=EVENT.timerange(2)-EVENT.strons.tril(1);
@@ -235,23 +235,23 @@ if isempty(cells)
     return
 end
 
-if processparams.sort_with_klustakwik
-    cells = sort_with_klustakwik(cells,record);
-elseif processparams.compare_with_klustakwik
-    kkcells = sort_with_klustakwik(cells,record);
-    if ~isempty(kkcells)
-        cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');
-        cells = compare_spike_sortings( cells, kkcells);
-    end
-end
-
-% switch lower(record.setup)
-%     case 'antigua'
-%         % dont compute spike intervals
-%         isi = [];
-%     otherwise
-        isi = get_spike_interval( cells );
+% if processparams.sort_with_klustakwik
+%     cells = sort_with_klustakwik(cells,record);
+% elseif processparams.compare_with_klustakwik
+%     kkcells = sort_with_klustakwik(cells,record);
+%     if ~isempty(kkcells)
+%         cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');
+%         cells = compare_spike_sortings( cells, kkcells);
+%     end
 % end
+
+switch lower(record.setup)
+    case 'antigua'
+        % dont compute spike intervals
+        isi = [];
+    otherwise
+       isi = get_spike_interval( cells );
+end
 
 % save all spikes
 spikesfile = fullfile(ecdatapath(record),record.test,'_spikes.mat');
@@ -408,6 +408,14 @@ for r=1:length(nr) % for all refs
             cellmeasures.ri= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
                 cellmeasures.rate_peak;
         end
+        
+        try % compute selectivity index
+            for t = 1:length(cellmeasures.rate)
+                cellmeasures.selectivity_index{t} = ...
+                    (max(cellmeasures.rate{t})-min(cellmeasures.rate{t})) / ...
+                    max(cellmeasures.rate{t});
+            end % t
+        end  
         
         try
             % compute signal to noise ratio (don't confuse with cell quality snr)

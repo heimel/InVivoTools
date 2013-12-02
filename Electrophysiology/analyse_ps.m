@@ -171,6 +171,8 @@ switch measures.variable
         measures = compute_contrast_measures(measures);
     case 'angle'
         measures = compute_angle_measures(measures); % also shifts range around preferred
+    case 'gnddirection'
+        measures = compute_angle_measures(measures);
 end
 
 

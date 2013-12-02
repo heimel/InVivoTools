@@ -226,6 +226,7 @@ for c=1:n_cells
             y = printfield(measure,'rate_spont',y,0.5);
             y = printfield(measure,'time_peak',y);
             y = printfield(measure,'selectivity',y);
+            y = printfield(measure,'selectivity_index',y);
             if isfield(measure,'rate_change')
                 y = printtext(subst_ctlchars(['Drate  : ' num2str(measure.rate_change*100,'%2.0f') '%' ]),y);
             end
@@ -233,7 +234,7 @@ for c=1:n_cells
             
             
             switch measure.variable
-                case 'angle'
+                case {'angle', 'figdirection','gnddirection'}
                     y = printfield(measure,'orientation_index',y);
                     y = printfield(measure,'tuningwidth',y);
                     y = printfield(measure,'direction_index',y);
@@ -260,7 +261,7 @@ for c=1:n_cells
             end
 
             switch measure.variable
-                case 'angle'
+                case {'angle', 'figdirection','gnddirection'}
                     col = 3;
                     subplot('position',...
                         [relsubwidth*(col-1) reltitlepos-(row-0.2)*relsubheight relsubwidth*0.8 relsubheight*0.8]);
