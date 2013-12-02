@@ -29,7 +29,7 @@ switch where
             case {'PCWIN','PCWIN64'}
                 base='C:\Data\InVivo';
             case {'MACI64','MACI'}
-                base = '/Users/user/Dropbox';
+                base = ['/Users/',user,'/Dropbox'];
         end
 end
 dbpath=fullfile(base,'Databases');
