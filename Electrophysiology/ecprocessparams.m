@@ -19,8 +19,8 @@ else
 end
 
 % defaults
-params.pre_window = [-inf 0];
-params.post_window = [0 inf];
+params.pre_window = [-Inf 0];
+params.post_window = [0 Inf];
 params.separation_from_prev_stim_off = 0.5;  % time (s) to stay clear of prev_stim_off
 %params.early_response_window = [0.05 0.2];  % not implemented yet
 %params.late_response_window = [0.5 inf]; % not implemented yet
@@ -32,9 +32,10 @@ switch protocol
         params.post_window = [0 inf];
         disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
             case '13.20'
-        params.pre_window = [-1 0];
-        params.post_window = [0 1];
+%         params.pre_window = [-0.5 0];
+%         params.post_window = [0 0.5];
         disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
+        disp(['ECPROCESSPARAMS: Setting post_window to ' mat2str(params.post_window)]);
 end
 
 params.vep_poweranalysis_type = 'wavelet'; % or 'periodogram' or 'wavelet'
