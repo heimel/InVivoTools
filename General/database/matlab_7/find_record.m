@@ -234,10 +234,16 @@ if ~isempty(pos)
                 %   end
             case '!',
                 for i=1:length(db)
-                    
-                    if streq(entries{i}, expr)==0
+                    content = entries{i};
+                    if iscell(content) 
+                        content = flatten(content);
+                    end
+                    if ischar(content) && size(content,1)>1
+                        content = flatten(content')';
+                    end
+                    if streq(content, expr)==0
                         ind(end+1)=i;
-                    elseif isempty(entries{i})
+                    elseif isempty(content)
                         ind(end+1)=i;
                     end
                 end

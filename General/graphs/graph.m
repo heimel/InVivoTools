@@ -295,18 +295,32 @@ switch style
                 [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins);
             end
             for i=1:2:(length(y)-1)
-                h = polar( rose_theta(i,:)-pi/bins, rose_r(i,:)./(0.0000001+rose_r(i+1,:))/sum(rose_r(i,:))*sum(rose_r(i+1,:)));
+                h.polar(i) = polar( rose_theta(i,:)-pi/bins, rose_r(i,:)./(0.0000001+rose_r(i+1,:))/sum(rose_r(i,:))*sum(rose_r(i+1,:)));
                 hold on
-                set(h,'Color',color{(i-1)/2+1});
+                set(h.polar(i),'Color',color{(i-1)/2+1});
             end
         else
             % default
-            for i=1:length(y)
-                [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins);
-                h = polar( rose_theta(i,:)-pi/bins, rose_r(i,:));
-                hold on
-                set(h,'Color',color{i});
+            if 0 % for friederike
+                for i=1:length(y)
+                    [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins); %%%????
+                    h.polar(i) = polar( rose_theta(i,:)-pi/bins, rose_r(i,:));
+                    hold on
+                    set(h.polar(i),'Color',color{i});
+                end
+            else
+                for i=1:length(y)
+%                     if max(bins>45) % i.e. probably degrees
+%                         bins = bins/180*pi;
+%                     end
+                    
+                    [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins);
+                    h.polar(i) = polar( rose_theta(i,:)-pi/bins, rose_r(i,:));
+                    hold on
+                    set(h.polar(i),'Color',color{i});
+                end
             end
+            
         end
         if strcmp(test,'chi2') % calculate significance
             for i = 1:length(y)
