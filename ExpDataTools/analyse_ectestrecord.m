@@ -53,11 +53,7 @@ switch lower(record.setup)
         %         EVENT.timerange(2)-EVENT.strons.tril(1)+(1/EVENT.snips.Snip.sampf);
         %         EVENT.Start = +(1/EVENT.snips.Snip.sampf);
         EVENT.Start = 0;
-<<<<<<< HEAD
         read_chan1=[4 5 6 7 8];
-=======
-        read_chan1=[9 10 11 12 13];
->>>>>>> 67031a5b7cb746f4a2a6c8caf23e29bf0def912a
         disp(['ANALYSE_ECTEST: FOR ONLY CHANNEL # ',num2str(read_chan1)]);
 
         total_length=EVENT.timerange(2)-EVENT.strons.tril(1);
