@@ -147,8 +147,8 @@ for i = 1:length(uniqx)
     ind = find(curve(1,:)==uniqx(i));
     newcurve(1,i) = uniqx(i);
     newcurve(2,i) = mean(curve(2,ind));
-    newcurve(3,i) = sqrt(sum(curve(3,ind).^2)/length(ind));
-    n = (curve(3,ind)./curve(4,ind)).^2;
+    newcurve(3,i) = std(curve(2,ind))+ sqrt(sum(curve(3,ind).^2)/length(ind));
+    n = ((curve(3,ind)+0.00000001)./(curve(4,ind)+0.00000001)).^2;
     newn = sum(n);
     newcurve(4,i) = newcurve(3,i) / sqrt(newn);
 end

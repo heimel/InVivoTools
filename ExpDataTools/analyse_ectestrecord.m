@@ -53,7 +53,11 @@ switch lower(record.setup)
         %         EVENT.timerange(2)-EVENT.strons.tril(1)+(1/EVENT.snips.Snip.sampf);
         %         EVENT.Start = +(1/EVENT.snips.Snip.sampf);
         EVENT.Start = 0;
+<<<<<<< HEAD
         read_chan1=[4 5 6 7 8];
+=======
+        read_chan1=[9 10 11 12 13];
+>>>>>>> 67031a5b7cb746f4a2a6c8caf23e29bf0def912a
         disp(['ANALYSE_ECTEST: FOR ONLY CHANNEL # ',num2str(read_chan1)]);
 
         total_length=EVENT.timerange(2)-EVENT.strons.tril(1);
@@ -235,23 +239,23 @@ if isempty(cells)
     return
 end
 
-if processparams.sort_with_klustakwik
-    cells = sort_with_klustakwik(cells,record);
-elseif processparams.compare_with_klustakwik
-    kkcells = sort_with_klustakwik(cells,record);
-    if ~isempty(kkcells)
-        cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');
-        cells = compare_spike_sortings( cells, kkcells);
-    end
-end
-
-% switch lower(record.setup)
-%     case 'antigua'
-%         % dont compute spike intervals
-%         isi = [];
-%     otherwise
-        isi = get_spike_interval( cells );
+% if processparams.sort_with_klustakwik
+%     cells = sort_with_klustakwik(cells,record);
+% elseif processparams.compare_with_klustakwik
+%     kkcells = sort_with_klustakwik(cells,record);
+%     if ~isempty(kkcells)
+%         cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');
+%         cells = compare_spike_sortings( cells, kkcells);
+%     end
 % end
+
+switch lower(record.setup)
+    case 'antigua'
+        % dont compute spike intervals
+        isi = [];
+    otherwise
+       isi = get_spike_interval( cells );
+end
 
 % save all spikes
 spikesfile = fullfile(ecdatapath(record),record.test,'_spikes.mat');
@@ -415,7 +419,7 @@ for r=1:length(nr) % for all refs
                     (max(cellmeasures.rate{t})-min(cellmeasures.rate{t})) / ...
                     max(cellmeasures.rate{t});
             end % t
-        end            
+        end  
         
         try
             % compute signal to noise ratio (don't confuse with cell quality snr)

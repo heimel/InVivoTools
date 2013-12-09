@@ -7,7 +7,7 @@ function [params,values] = varied_parameters( script )
 params = {};
 values = {};
 
-possible_params = {'contrast','angle','sFrequency','tFrequency','sPhaseShift','size','typenumber'};
+possible_params = {'contrast','angle','sFrequency','tFrequency','sPhaseShift','size','typenumber','figdirection','gnddirection','phase'};
 
 ss = get(script);
 for i = 1:length(ss)

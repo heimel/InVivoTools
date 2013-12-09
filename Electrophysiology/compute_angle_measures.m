@@ -7,7 +7,7 @@ function measures = compute_angle_measures( measures )
 % 2013 Alexander Heimel
 %
 
-if ~strcmp(measures.variable,'angle')
+if ~strcmp(measures.variable,'angle') && ~strcmp(measures.variable,'gnddirection')
     return
 end
 
