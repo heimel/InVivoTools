@@ -319,6 +319,14 @@ end
 if exist('eyes','var') % eye is already used for matlab function
     cond=[cond ', eye=*' eyes '*'];
 end
+if exist('hemisphere','var') 
+    if strcmp(hemisphere,'notleft') 
+        % to make both right, ugly 2013-12-12
+        cond=[cond ', hemisphere!*left*'];
+    else
+        cond=[cond ', hemisphere=*' hemisphere '*'];
+    end
+end
 
 indtests=find_record(testdb,cond);
 %    disp(['found ' num2str(length(indtests)) ' records']);
