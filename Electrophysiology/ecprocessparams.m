@@ -38,6 +38,19 @@ switch protocol
         disp(['ECPROCESSPARAMS: Setting post_window to ' mat2str(params.post_window)]);
 end
 
+% sg parameters
+% after 0.4 s there is generally little response
+% I realize that 0.4 s already includes 2 frames if run at 5 Hz
+% 20ms taken as lead time for first responses to appear
+params.rc_interval=[0.0205 0.4205];
+params.rc_timeres=0.2;
+switch protocol
+    case '13.20' 
+        params.rc_interval=[0.0205 0.2205];
+end
+
+
+
 params.vep_poweranalysis_type = 'wavelet'; % or 'periodogram' or 'wavelet'
 
 params.vep_remove_line_noise = 'temporal_domain'; % 'frequency_domain' or 'none' or 'temporal_domain'
