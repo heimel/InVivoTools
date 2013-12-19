@@ -11,11 +11,18 @@ function [osi,dsi] = compute_orientation_selectivity_index( angles, rates )
 %     by the sum of all responses: 
 %     OSI = ((?R(?i)sin(2?i))^2 + (?R(?i)cos(2?i))^2)^(1/2)/?R(?i),
 %     where ?i is the orientation of each stimulus and R(?i) is the 
-%     response to that stimulus (Ringach et al., 2002 and Wörgötter and 
-%     Eysel, 1987; Note: OSI = 1 – circular variance)"
+%     response to that stimulus (Ringach et al., 2002 and Wï¿½rgï¿½tter and 
+%     Eysel, 1987; Note: OSI = 1 ï¿½ circular variance)"
 %     and for the suppression index
 %
 % 2013, Daniela Camillo
+if nargin<2
+    rates = [];
+end
+if isempty(rates)
+    rates = ones(size(angles));
+end
+
 
 osi = [];
 dsi = [];
