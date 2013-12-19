@@ -92,8 +92,11 @@ switch lower(record.setup)
         EVENT.Myblock = blocknames;
         EVENT = importtdt(EVENT);
         numchannel = max([EVENT.strms.channels]);
-        channels_to_read = 1:numchannel;
-        channels_to_read = [3 11]; % [3 4 5 6 7 8 11 12 13 14 15 16]
+        if isfield(record, 'channels') &&  ~isempty(record.channels)
+            channels_to_read = record.channels;
+        else
+            channels_to_read = 1:numchannel;
+        end
         disp(['ANALYSE_VEPS: FOR DEBUGGING ONLY CHANNELS # ',num2str(channels_to_read)]);
         %         numchannel = 2;
         EVENT.Myevent = 'LFPs';

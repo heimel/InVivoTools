@@ -83,7 +83,7 @@ elseif pst==0 && pre>0,  % BGpretime used
     spontlabel='spontaneous / stimulus';
     scint = [ min(interval(:,1)) min(Cinterval(:,1)) ];
     processparams = ecprocessparams;
-    if (scint(2)-scint(1)) >= (processparams.take_bgpretime_from_offset+1)
+    if (scint(2)-scint(1)) >= (processparams.take_bgpretime_from_offset+0.5)
         scint(1)=scint(1)+processparams.take_bgpretime_from_offset;
     end
 else

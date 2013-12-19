@@ -53,30 +53,34 @@ switch lower(record.setup)
         %         EVENT.timerange(2)-EVENT.strons.tril(1)+(1/EVENT.snips.Snip.sampf);
         %         EVENT.Start = +(1/EVENT.snips.Snip.sampf);
         EVENT.Start = 0;
-        read_chan1=[9 10 11 12 13];
+        if isfield(record, 'channels') &&  ~isempty(record.channels)
+            read_chan1 = record.channels;
+        else
+            read_chan1= 1:EVENT.strms(1).channels;
+        end
         disp(['ANALYSE_ECTEST: FOR ONLY CHANNEL # ',num2str(read_chan1)]);
-
+        
         total_length=EVENT.timerange(2)-EVENT.strons.tril(1);
         WaveTime_Fpikes=struct([]);
         for i=1:length(read_chan1)
-        WaveTime_fpikes.time=[];
-        WaveTime_fpikes.data=[];
-        
-        for kk=1:ceil(total_length/60)
-           % clear WaveTime_chspikes
-            EVENT.Triallngth = min(60,total_length-60*(kk-1));
-            WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
-            WaveTime_fpikes.time=[WaveTime_fpikes.time;WaveTime_chspikes(read_chan1(i),1).time];
-            WaveTime_fpikes.data=[WaveTime_fpikes.data;WaveTime_chspikes(read_chan1(i),1).data];
-        end
-        
-        WaveTime_Fpikes=[WaveTime_Fpikes;WaveTime_fpikes];
+            WaveTime_fpikes.time=[];
+            WaveTime_fpikes.data=[];
+            
+            for kk=1:ceil(total_length/60)
+                % clear WaveTime_chspikes
+                EVENT.Triallngth = min(60,total_length-60*(kk-1));
+                WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
+                WaveTime_fpikes.time=[WaveTime_fpikes.time;WaveTime_chspikes(read_chan1(i),1).time];
+                WaveTime_fpikes.data=[WaveTime_fpikes.data;WaveTime_chspikes(read_chan1(i),1).data];
+            end
+            
+            WaveTime_Fpikes=[WaveTime_Fpikes;WaveTime_fpikes];
         end
         % always only ONE channel (at this time)
-
-%         WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1));
-%         read_chan1=[6]; % always only ONE channel (at this time)
-
+        
+        %         WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1));
+        %         read_chan1=[6]; % always only ONE channel (at this time)
+        
         numchannel1 =length(read_chan1);
         numchannel=0;
         %         Fells={};
@@ -84,11 +88,19 @@ switch lower(record.setup)
         for ii=1:numchannel1
             clear kll
             clear spikes
-            kll.sample_interval = 1/EVENT.snips.Snip.sampf;
-            kll.data = WaveTime_Fpikes(ii,1).time;
-            spikes=WaveTime_Fpikes(ii,1).data;
-            kll = get_spike_features(spikes, kll );
-            [wtime_sp,nchan] = spike_sort_wpca(spikes,kll);
+                        kll.sample_interval = 1/EVENT.snips.Snip.sampf;
+                        kll.data = WaveTime_Fpikes(ii,1).time;
+                        spikes=WaveTime_Fpikes(ii,1).data;
+                        kll = get_spike_features(spikes, kll );
+                        [wtime_sp,nchan] = spike_sort_wpca(spikes,kll);
+            %% just for making the figure
+%             cc=find(max(WaveTime_Fpikes.data(:,:)')>0.15);
+%             WW.data=WaveTime_Fpikes.data(cc,:);
+%             WW.time=WaveTime_Fpikes.time(cc);
+%             WaveTime_Spikes=[WaveTime_Spikes;WW];
+%             nchan=1;
+%             numchannel=numchannel+nchan;
+            %%
             WaveTime_Spikes=[WaveTime_Spikes;wtime_sp];
             numchannel=numchannel+nchan;
             ii
@@ -226,7 +238,7 @@ switch lower(record.setup)
         
     otherwise
         % import spike2 data into experiment file
-        cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');     
+        cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');
         read_chan1=[1];
 end
 
@@ -250,7 +262,7 @@ switch lower(record.setup)
         % dont compute spike intervals
         isi = [];
     otherwise
-       isi = get_spike_interval( cells );
+        isi = get_spike_interval( cells );
 end
 
 % save all spikes
@@ -415,7 +427,7 @@ for r=1:length(nr) % for all refs
                     (max(cellmeasures.rate{t})-min(cellmeasures.rate{t})) / ...
                     max(cellmeasures.rate{t});
             end % t
-        end  
+        end
         
         try
             % compute signal to noise ratio (don't confuse with cell quality snr)

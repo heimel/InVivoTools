@@ -34,7 +34,8 @@ para_rc=getparameters(rc);
 % after 0.4 s there is generally little response
 % I realize that 0.4 s already includes 2 frames if run at 5 Hz
 % 20ms taken as lead time for first responses to appear
-para_rc.interval=[0.0205 0.4205];
+% para_rc.interval=[0.0205 0.2205];   %% for OFF RF : [0.0205 0.2205], Mehran
+para_rc.interval=[0.0205 0.2205];
 para_rc.timeres=0.2;
 
 para_rc.bgcolor=2;
