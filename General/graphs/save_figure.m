@@ -80,7 +80,7 @@ else % windows pc or recent matlab linux
         %        saveas(h,[filename '.eps'],'epsc2');
         %        saveas(h,[filename '.fig'],'fig');
         
-        disp('SAVE_FIGURE: Turned off svg save.');
+        %disp('SAVE_FIGURE: Turned off svg save.');
         if 0
             plot2svg( [filename '.svg'],h,'png');
         end

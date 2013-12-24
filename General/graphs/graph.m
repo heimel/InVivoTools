@@ -1,26 +1,54 @@
 function h=graph(y,x,varargin)
 %GRAPH produces scientific plots
 %
-%  H=GRAPH(Y,X,VARARG)
+%  H = GRAPH(Y,X,VARARG)
 %
-%  Y is cell list of cell list of data vectors
+%  Y,X is cell list of cell list of data vectors Y and X 
 %    Y{measures}{group}[data]
-%s
-%  TYPE is type of graph, e.g. 'bar', 'box', 'xy', 'hist', 'cumul'
-%  ERRORBARS is type of errorbars, e.g. 'sem'
-%
-%  EXTRAOPTIONS is a comma-separated string containing option and value
-%        sort_y,asc or dec, sorts wrt y-values ascending or descending
-%        min_n, # , where # is the minimal number of y-values to include a
-%                           group in the graph
-%
-%        rotate_xticklabels, #, where # is the rotation in degrees
-%        fit, linear
 %
 %  H is structure containing image handles and info
 %
-% 2006-2011, Alexander Heimel
+%  VARARG is a selection of option names and values. List of options is 
+%  given below ([] denotes default value):
+%     'axishandle',[]
+%     'showpoints',{0,[1],2}
+%     'test',{['ttest'],'kruskal_wallis_test'}
+%     'spaced',{[0],1}    % spacing points in bar plot
+%     'color',0.7*[1 1 1]
+%     'errorbars','sem' 
+%     'style',{['bar'],'xy','box','hist','cumul','rose'}
+%     'signif_y',[]
+%     'prefax',[]
+%     'xticklabels',[]
+%     'xlab',''
+%     'ylab',''
+%     'extra_code',''
+%     'rotate_xticklabels',[0] % is the rotation in degrees
+%     'markers', {'none','open_triangle','closed_triangle','open_circle',['closed_circle']}
+%     'markersize',[8]
+%     'fontsize',[20]
+%     'fontname',['arial']
+%     'linestyles',''
+%     'linewidth',[3]
+%     'ystd',[]
+%     'ny',[]
+%     'bins',[]  % for (cumulative) histogram and rose
+%     'tail','both'   % for significance tests
+%     'legnd',''  % legend,example legnd,{wt,t1}
+%     'save_as',''
+%     'z',{}
+%     'extra_options',''
 %
+%  EXTRA_OPTIONS is a comma-separated string containing option and value
+%        sort_y,asc or dec, sorts wrt y-values ascending or descending
+%        min_n, # , where # is the minimal number of y-values to include a
+%                           group in the graph
+%        fit, linear
+%
+%
+% 2006-2013, Alexander Heimel
+%
+
 h=[];
 if nargin<2
     x=[];
@@ -325,7 +353,7 @@ switch style
         if strcmp(test,'chi2') % calculate significance
             for i = 1:length(y)
                 for j=i+1:length(y)
-                    disp(['p of chi2class test of groups ' num2str(i) ' and ' num2str(j) ' = ' num2str(chi2class( [rose_r(i,2:4:end) ;rose_r(j,2:4:end)]))]);
+                    disp(['GRAPH: p of chi2class test of groups ' num2str(i) ' and ' num2str(j) ' = ' num2str(chi2class( [rose_r(i,2:4:end) ;rose_r(j,2:4:end)]))]);
                 end
             end
         end
@@ -494,7 +522,7 @@ switch style
                                 [],[],[],[],tail);
                         end
                         if 1 % h.p_sig{i,j}<0.1
-                            disp(['Significance: ' num2str(nsig)...
+                            disp(['GRAPH: Significance: ' num2str(nsig)...
                                 ' = grp ' num2str(i) ' vs grp ' num2str(j) ...
                                 ' p=' num2str(h.p_sig{i,j}) ...
                                 ' , t=' num2str(t_statistic) ...
@@ -666,9 +694,9 @@ switch style
                     for i=1:length(ry)
                         rc=nanmean(ry{i})/nanmean(rx{i});
                         fity{i}=rc*fitx;
-                        disp(['Proportionality: rc = ' num2str(rc)  ]);
+                        disp(['GRAPH: Proportionality: rc = ' num2str(rc)  ]);
                         [rcoef,n,p,t,df]=nancorrcoef(rx{i},ry{i});
-                        disp(['   correlation coeff = ' num2str(rcoef) ...
+                        disp(['GRAPH:   correlation coeff = ' num2str(rcoef) ...
                             ' , p = ' num2str(p) ' , df = ' num2str(df) ...
                             ' , t = ' num2str(t) ]);
                     end
@@ -678,9 +706,9 @@ switch style
                         rc=rc(1,2);
                         offset=nanmean(ry{i})-rc*nanmean(rx{i});
                         fity{i}=rc*fitx+offset;
-                        disp(['fit: rc = ' num2str(rc) ', offset = ' num2str(offset) ]);
+                        disp(['GRAPH: fit: rc = ' num2str(rc) ', offset = ' num2str(offset) ]);
                         [rcoef,n,p,t,df]=nancorrcoef(rx{i},ry{i});
-                        disp(['   correlation coeff = ' num2str(rcoef) ...
+                        disp(['GRAPH:   correlation coeff = ' num2str(rcoef) ...
                             ' , p = ' num2str(p) ' , df = ' num2str(df) ...
                             ' , t = ' num2str(t) ]);
                     end
@@ -688,13 +716,13 @@ switch style
                     for i=1:length(ry)
                         [tau,r]=fit_exponential(rx{i},ry{i});
                         fity{i}=r*exp(fitx/tau);
-                        disp(['fit: exponential r = ' num2str(r) ', tau = ' num2str(tau) ]);
+                        disp(['GRAPH: fit: exponential r = ' num2str(r) ', tau = ' num2str(tau) ]);
                     end
                 case 'powerlaw'
                     for i=1:length(ry)
                         [exponent,r]=fit_powerlaw(rx{i},ry{i});
                         fity{i}=r*fitx.^exponent;
-                        disp(['fit: powerlaw r = ' num2str(r) ', exponent = ' num2str(exponent) ]);
+                        disp(['GRAPH: fit: powerlaw r = ' num2str(r) ', exponent = ' num2str(exponent) ]);
                     end
                 case 'spline'
                     for i=1:length(ry)
@@ -704,7 +732,7 @@ switch style
                     for i=1:length(ry)
                         [rc, offset]=fit_thresholdlinear(rx{i},ry{i});
                         fity{i}=thresholdlinear(rc*fitx+offset);
-                        disp(['fit: thresholdlinear rc = ' num2str(rc) ', offset = ' num2str(offset) ]);
+                        disp(['GRAPH: fit: thresholdlinear rc = ' num2str(rc) ', offset = ' num2str(offset) ]);
                     end
                 case {'nakarushton','naka_rushton'}
                     fitx=fitx(fitx>0);

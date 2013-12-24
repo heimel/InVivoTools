@@ -160,6 +160,12 @@ switch dataset
         control{end+1}=dlmread('tlg_20110506_33050_2.csv',';');
         control{end+1}=dlmread('tlg_20110601_33243_1.csv',';');
         control{end+1}=dlmread('tlg_20110615.csv',';');        
+
+        disp('LOAD_MINI_DATA: DONT KNOW IF NEXT ONES ARE TRANSGENIC');
+        transgenic{end+1}=dlmread('d131213_cell1_0002_0003_converted.csv','\t');
+        transgenic{end+1}=dlmread('d131213_cell3_0001_converted.csv','\t');
+        transgenic{end+1}=dlmread('d131213_cell5_0002_converted.csv','\t');
+
         
     case 'TrkB/Inh'
         cd(fullfile(basedir,dataset));
@@ -320,4 +326,6 @@ description{15}='Burst_nr';
 description{16}='Burste_nr';
 description{17}='1090slope';
 description{18}='Rel_time';
+
+
 
