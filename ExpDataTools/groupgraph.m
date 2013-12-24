@@ -195,7 +195,7 @@ for g=1:n_groups
             ind_m=find_record(mousedb,filter);
         end
         if isempty(ind_m)
-            disp(['Cannot find group ' allgroups{g} '. Exiting']);
+            errormsg(['Cannot find group ' allgroups{g} '.']);
             return
         end
         group = groupdb([]); % to get structure
@@ -325,9 +325,8 @@ switch style
         end
 end
 if wrong_number_labels
-    errordlg(['Expecting ' num2str(expecting) ...
-        ' or zero measure labels.'],'Group graph')
-    disp('GROUPGRAPH: Wrong number of measurelabels')
+    errormsg(['Expecting ' num2str(expecting) ...
+        ' or zero measure labels.'])
     return
 end
 
