@@ -171,7 +171,11 @@ for i=1:length(do_analyze_i),
     if ~isempty(timeint),
         interval(i,:) = s.mti{stimind}.frameTimes(1) + timeint;
     else
-        interval(i,:) = [ s.mti{stimind}.frameTimes(1) s.mti{stimind}.startStopTimes(3)];
+        stimtime = s.mti{stimind}.startStopTimes(3)-s.mti{stimind}.startStopTimes(2);
+        response_window =[params.response_window(1) min(stimtime,params.response_window(2))];
+       % timeint = [0 response_window];
+     %  interval(i,:) = [ s.mti{stimind}.frameTimes(1) s.mti{stimind}.startStopTimes(3)];
+       interval(i,:) = s.mti{stimind}.startStopTimes(2) + response_window;
     end;
     
     dp = struct(getdisplayprefs(get(s.stimscript,do(i))));
@@ -192,8 +196,12 @@ for i=1:length(do_analyze_i),
             spinterval(i,:)=[s.mti{stimind}.startStopTimes(1)-BGposttime+1 s.mti{stimind}.startStopTimes(1)];
             spinterval(i,:)=[s.mti{stimind}.startStopTimes(1)-BGposttime+1 s.mti{stimind}.startStopTimes(1)];
         elseif BGpretime > 0,
-                        buffer = 0.25; %s 
-            spinterval(i,:)=[s.mti{stimind}.startStopTimes(1)+buffer s.mti{stimind}.frameTimes(1)];
+            if BGpretime > params.separation_from_prev_stim_off
+                separation_from_prev_stim_off =  params.separation_from_prev_stim_off; %s
+            else
+                separation_from_prev_stim_off = 0;
+            end
+            spinterval(i,:)=[s.mti{stimind}.startStopTimes(1)+separation_from_prev_stim_off s.mti{stimind}.frameTimes(1)];
         end;
     end;
 end;
@@ -209,6 +217,7 @@ else
         end;
     end;
     [data,t] = data2intervals(pixels.data,pixels.t,[interval; spinterval]-starttime);
+
 end;
 
 for p=1:size(data,2) % roi p
@@ -254,13 +263,21 @@ for p=1:size(data,2) % roi p
     
     myind = 1;
 
-    
+ %   figure
+ %           hold on;
+%clr='kbrgyc';
+            
     for i=1:numStims(s.stimscript)
         if theblankid~=i,
             li = find(do(do_analyze_i)==i);
+            
+            
             if ~isempty(li), % make sure the stim was actually shown
                 ind{myind} = []; indf{myind} = [];
                 for j=1:length(li),
+
+%                    plot(data{li(j),3},clr(i));
+                    
                     mn = nanmean(data{li(j),p}');
                     %ind{myind} = cat(1,ind{myind},(mn-indspont(li(j)))/indspont(li(j)));
                     ind{myind} = cat(1,ind{myind},(mn-baseline(li(j)))/baseline(li(j)));
@@ -418,7 +435,6 @@ for p=1:size(data,2) % roi p
         smaller_font(-8);
         bigger_linewidth(2);
     end % plotit
-    
    resp(p) = record.measures(p);
 end % roi p
 
@@ -428,13 +444,13 @@ end % roi p
 %     responses(end+1:end+length(li),1) =  cellfun(@mean,data(li,p));
 %     responses(end-length(li)+1:end,2 ) = i;
 % end
-% 
 
 try
 mdata = cellfun(@mean,data); % mean response
 edata = cellfun(@(x) x(end),data); % last point 
-mdata = mdata(1:end/2,:) - edata(end/2+1:end,:); %subtract spontaneous
-[responsive,p] = ttest(mdata);
+%mdata = mdata(1:end/2,:) - edata(end/2+1:end,:); %subtract spontaneous
+%[responsive,p] = ttest(mdata(1:end/2,:))
+[responsive,p] = ttest(mdata(1:end/2,:) - mdata(end/2+1:end,:)  )
 for c=1:size(data,2)
     record.measures(c).responsive = responsive(c);
     record.measures(c).responsive_p = p(c);

@@ -188,14 +188,13 @@ switch record.experiment
         params.get_intensities = false;
 end
 
-disp('TPPROCESSPARAMS: Alexander is reintroducing time option to tptuningcurve');
 switch lower(record.experiment)
     case 'examples'
-        params.baseline_window = [-inf 0];
-        params.response_window = [0 inf];
+        params.separation_from_prev_stim_off = 0.5;
+        params.response_window = [0.5 inf];
     otherwise
-        params.baseline_window = [-inf 0];
-        params.response_window = [0 inf];
+        params.separation_from_prev_stim_off = 1.5; % high for GCaMPs
+        params.response_window = [0.5 inf];
 end
 
 
