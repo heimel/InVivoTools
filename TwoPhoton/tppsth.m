@@ -238,7 +238,7 @@ minavg = min(flatten(myavg));
 rangavg = maxavg-minavg;
 ymax = maxavg + 0.2*rangavg;
 ymin = minavg - 0.2*rangavg;
-for cel=1:size(myt,2)
+for cel=1:n_selected_rois
     dat = [];
     for stim=1:length(stimcodes)
         subplot(size(myt,2),length(stimcodes),(cel-1)*length(stimcodes)+stim);
@@ -251,8 +251,8 @@ for cel=1:size(myt,2)
         plot(bins{stim,cel},myavg{stim,cel},clr(stim) ,'linewidth',2 ); %clr(stim)
     ylim([ymin ymax]);
     end % stim
-    %[record.measures(i).responsive,p] = ttest(dat);
-    [h,p] = ttest(dat);
+    [record.measures(cel).responsive,p] = ttest(dat);
+    %[h,p] = ttest(dat);
     disp(['TPPSTH: Cell ' num2str(cel) ' Responsive p = ' num2str(p)]);
 end % cel
     

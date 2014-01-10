@@ -445,17 +445,17 @@ end % roi p
 %     responses(end-length(li)+1:end,2 ) = i;
 % end
 
-try
-mdata = cellfun(@mean,data); % mean response
-edata = cellfun(@(x) x(end),data); % last point 
-%mdata = mdata(1:end/2,:) - edata(end/2+1:end,:); %subtract spontaneous
-%[responsive,p] = ttest(mdata(1:end/2,:))
-[responsive,p] = ttest(mdata(1:end/2,:) - mdata(end/2+1:end,:)  )
-for c=1:size(data,2)
-    record.measures(c).responsive = responsive(c);
-    record.measures(c).responsive_p = p(c);
-end
-catch
-    disp('TPTUNINGCURVE: COULD NOT COMPUTE RESPONSIVE: FIX ALEXANDER');
-end
+% try
+% mdata = cellfun(@mean,data); % mean response
+% edata = cellfun(@(x) x(end),data); % last point 
+% %mdata = mdata(1:end/2,:) - edata(end/2+1:end,:); %subtract spontaneous
+% %[responsive,p] = ttest(mdata(1:end/2,:))
+% [responsive,p] = ttest(mdata(1:end/2,:) - mdata(end/2+1:end,:)  )
+% for c=1:size(data,2)
+%     record.measures(c).responsive = responsive(c);
+%     record.measures(c).responsive_p = p(c);
+% end
+% catch
+%     disp('TPTUNINGCURVE: COULD NOT COMPUTE RESPONSIVE: FIX ALEXANDER');
+% end
     
