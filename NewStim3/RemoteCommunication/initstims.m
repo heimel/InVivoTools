@@ -122,7 +122,7 @@ case 'sockets',
 		sockcon = pnet('tcpsocket',Remote_Comm_port);
 		if sockcon >= 0,
 			Remote_Comm_conn = pnet(sockcon,'tcplisten'); % will wait here until connected
-		else, 
+		else,
 			error(['Could not open socket on port ' int2str(Remote_Comm_port) '.']);
 		end;
 		fprintf('Received remote connection, awaiting commands.\n');

@@ -16,6 +16,10 @@ StimWindowGlobals;
 
 [img, frames, ds_userfield] = animate(PSstim);
 
+
+
+
+
  % contrast/color parameters
 
 colors = pscolors(PSstim);
@@ -41,12 +45,24 @@ clut = StimWindowPreviousCLUT; % we no longer need anything special here
 clut=repmat(linspace(0,1,256)'*255,1,3);  % alexander
 % clut(1,:) = colors.backdropRGB; % commented by alexander
 
+% moving image mehran
+% if 1
+%     
+%     destrect = df.rect; % make sure it is a column vector
+%     destrects = zeros(4,length(df.frames),length(ds.offscreen));
+%     for i=1:length(ds.offscreen),
+%         destrects(:,:,i) = repmat(destrect(:),1,length(df.frames));
+%     end;
+%     ds.userfield.Movie_destrects = destrects;
+% end
+
 dp_stim = {'fps',StimWindowRefresh,'rect',destination_rect,'frames',frames,PSstim.PSparams.dispprefs{:} };
 DP_stim = displayprefs(dp_stim);
 dS_stim = { 'displayType', 'Movie', 'displayProc', 'standard', ...
          'offscreen', gratingtex, 'frames', frames, 'clut_usage', clut_usage, 'depth', 8, ...
 		 'clut_bg', clut_bg, 'clut', clut, 'clipRect', [] , 'makeClip', 0,'userfield',ds_userfield };
 DS_stim = displaystruct(dS_stim);
+
 
 ds_userfield = MovieParams2MTI(DS_stim,DP_stim);
 
