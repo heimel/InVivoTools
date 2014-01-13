@@ -21,7 +21,11 @@ end
 
 
 if length(angles)<8
+    warning('COMPUTE_ORIENTATIONINDEX:FEW_ANGLES','COMPUTE_ORIENTATIONINDEX: Not computing for fewer than 8 distinct angles');
+    warning('off','COMPUTE_ORIENTATIONINDEX:FEW_ANGLES');
     return
+else
+    warning('on','COMPUTE_ORIENTATIONINDEX:FEW_ANGLES');
 end
 
 [m,ind]=max(rates);

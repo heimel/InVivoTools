@@ -399,14 +399,12 @@ end
 evalin('base','global measures');
 evalin('base','global analysed_script');
 analysed_stimulus = getstimsfile(record);
-try
-    analysed_script = analysed_stimulus.saveScript; %#ok<NASGU>
-catch
+if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
+    analysed_script = analysed_stimulus.saveScript; 
+else
     disp('RESULTS_ECTESTRECORD: No savedscript');
 end
 disp('RESULTS_ECTESTRECORD: Measures available in workspace as ''measures'', stimulus as ''analysed_script''.');
-
-
 
 return
 
@@ -702,7 +700,7 @@ for i=1:length(curves)
     polar(0,m,'w');
     hold on
     curve = curves{i};
-    polar([curve(1,:) curve(1,1)]/180*pi,[curve(2,:) curve(2,1)],[ linestyle clr(i)]);
+    polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]),[ linestyle clr(i)]);
     %phi =linspace(0,2*pi,100);
     %polar(phi,measure.rate_spont(i)*ones(size(phi)),[clr(i) '--']);
 end

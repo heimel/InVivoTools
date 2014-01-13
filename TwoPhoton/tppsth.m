@@ -64,6 +64,7 @@ end;
 s.stimscript = stims.saveScript;
 s.mti = stims.MTI2;
 
+
 [s.mti,starttime]=tpcorrectmti(s.mti,record);
 
 do = getDisplayOrder(s.stimscript);
@@ -114,7 +115,7 @@ for j=1:length(stimcodes)
             [ s.mti{stimcodelocs(i)}.frameTimes(1) (s.mti{stimcodelocs(i)}.startStopTimes(3) + ...
             0.5*(s.mti{stimcodelocs(i)}.startStopTimes(3)-s.mti{stimcodelocs(i)}.startStopTimes(1)) + BGpretime +BGposttime) ];
         
-        disp('TPPSTH: TEMP SHORTENED INTEVRAL');
+%        disp('TPPSTH: TEMP SHORTENED INTEVRAL');
         interval(i,:) = ...
             [ s.mti{stimcodelocs(i)}.frameTimes(1) (s.mti{stimcodelocs(i)}.startStopTimes(3)+ BGpretime +BGposttime) ];
 
@@ -223,33 +224,18 @@ for j=1:length(stimcodes), % different uniq stimuli
         bins{j,k} = Xn';
         myavg{j,k} = Yn';
         warning(warns);
-
-
-    end;
+    end
     waitbar(j/length(stimcodes));
 end;
 close(hwait); 
 
-% debug
-clr = 'bgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykw';
-figure
-maxavg = max(flatten(myavg));
-minavg = min(flatten(myavg));
-rangavg = maxavg-minavg;
-ymax = maxavg + 0.2*rangavg;
-ymin = minavg - 0.2*rangavg;
+% responsive calculation
 for c=1:n_selected_rois
     dat = [];
     for stim=1:length(stimcodes)
-        subplot(size(myt,2),length(stimcodes),(c-1)*length(stimcodes)+stim);
-        hold on
         for rep=1:size(mydata{stim,c},1) % rep
-            plot(myt{stim,c}{rep,1},mydata{stim,c}{rep,1},'k' );% stim clr(stim));
-            plot(myt{stim,c}{rep,2},mydata{stim,c}{rep,2},'k');% spont ,clr(stim));
             dat = [dat; mydata{stim,c}{rep,1}];
         end
-        plot(bins{stim,c},myavg{stim,c},clr(stim) ,'linewidth',2 ); %clr(stim)
-    ylim([ymin ymax]);
     end % stim
     [record.measures(c).responsive,p] = ttest(dat);
     %[h,p] = ttest(dat);
@@ -261,9 +247,43 @@ for i=1:n_selected_rois
     record.measures(i).psth_response{1} = cat(1,myavg{:,i});
 end
 
+if 1 % plot 
+    clr = 'bgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykw';
+    figure('Numbertitle','off','Name','PSTH');
+    maxavg = max(flatten(myavg));
+    minavg = min(flatten(myavg));
+    rangavg = maxavg-minavg;
+    ymax = maxavg + 0.2*rangavg;
+    ymin = minavg - 0.2*rangavg;
+    for c=1:n_selected_rois
+        for stim=1:length(stimcodes)
+            subplot(size(myt,2),length(stimcodes),(c-1)*length(stimcodes)+stim);
+            hold on
+            for rep=1:size(mydata{stim,c},1) % rep
+                plot(myt{stim,c}{rep,1},mydata{stim,c}{rep,1},'k' );% stim clr(stim));
+                plot(myt{stim,c}{rep,2},mydata{stim,c}{rep,2},'k');% spont ,clr(stim));
+            end
+            plot(bins{stim,c},myavg{stim,c},clr(stim) ,'linewidth',2 ); %clr(stim)
+            ylim([ymin ymax]);
+            plot([0 0],[ymin ymax],'color',[1 1 0]);
+            if c<n_selected_rois
+                set(gca,'xtick',[]);
+            else
+                xlabel('Time (s)');
+            end
+            if stim>1
+                set(gca,'ytick',[]);
+            else
+                %ylabel(tpresponselabel(channel));
+                ylabel(names{c});
+            end
+            
+        end % stim
+    end % cell c
+end
 
 
-if plotit
+if plotit % old routine
     colors = [ 1 0 0 ; 0 1 0; 0 0 1; 1 1 0 ; 0 1 1; 1 0.5 1; 0.5 0 0 ; 0 0.5 0; 0 0 0.5; 0.5 0.5 0; 0.5 0.5 0.5];
     stimcodecell = {};
     for k=1:size(data,2),
@@ -271,23 +291,31 @@ if plotit
         hold on;
         legs = {};
         hl = [];
-        for j=1:length(stimcodes),
+        for j=1:length(stimcodes)
             stimcodecell{j} = int2str(stimcodes(j));
             ind = mod(j,length(colors)); if ind==0, ind = length(colors); end;
             for i=1:size(colors,1), plot(0,0,'color',colors(i,:),'visible','off'); end;
             if plotit==1,
                 for i=1:size(mydata{j,k},1),
-                    if j==theblankid, lw=20; else, lw = 6; end;
-                    h = plot(myt{j,k}{i,1},mydata{j,k}{i,1},'.','color',colors(ind,:),'markersize',lw);
-                    plot(myt{j,k}{i,2},mydata{j,k}{i,2},'.','color',colors(ind,:),'markersize',lw);
+                    if j==theblankid 
+                        lw=20; 
+                    else
+                        lw = 6; 
+                    end
+                    h = plot(myt{j,k}{i,1},mydata{j,k}{i,1},'.-','color',colors(ind,:),'markersize',lw);
+                    plot(myt{j,k}{i,2},mydata{j,k}{i,2},'.-','color',colors(ind,:),'markersize',lw);
                 end;
                 if ~isempty(h)
                     hl(end+1) = h(1);
                     legs{end+1} = stimcodecell{j};
                 end
             elseif plotit==2,
-                if j==theblankid, lw=2; else, lw = 1; end;
-                hl(end+1) = plot(bins{j,k},myavg{j,k},'','color',colors(ind,:),'linewidth',lw);
+                if j==theblankid
+                    lw=2; 
+                else
+                    lw = 1; 
+                end
+                hl(end+1) = plot(bins{j,k},myavg{j,k},'-','color',colors(ind,:),'linewidth',lw);
                 legs{end+1} = stimcodecell{j};
             end;
         end;
