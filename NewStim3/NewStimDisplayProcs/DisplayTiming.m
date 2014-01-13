@@ -159,3 +159,19 @@ for i=1:length(dispOrder)
 	MTI{i}.ClipRgnParams = ClipRgnParams2MTI(ds,df);
     
 end;
+%     % moving image mehran
+% if 1
+%     if ~isstruct(ds), ds = struct(ds); end;
+% if ~isstruct(df), df = struct(df); end;
+%     destrect = df.rect; % make sure it is a column vector
+%     destrects = zeros(4,length(df.frames),length(ds.offscreen));
+%     for i=1:length(ds.offscreen),
+%         destrects(:,:,i) = repmat(destrect(:),1,length(df.frames));
+%     end;
+%     ds.userfield.Movie_destrects = destrects;
+%     for t=1:size(ds.userfield.Movie_destrects,3) % textures
+%         for f=1:size(ds.userfield.Movie_destrects,1)
+%             ds.userfield.Movie_destrects(1,f,t) = f;
+%         end
+%     end
+% end
