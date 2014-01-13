@@ -95,9 +95,7 @@ mydata = {}; myt = {};
 masterint = []; masterspint = []; masterintind = []; masterspintind = [];
 hwait = waitbar(0,'Calculating PSTH');
 for j=1:length(stimcodes)
-    %disp(['Stimcodes : ' int2str(stimcodes(j)) '.']);
     stimcodelocs = find(do==stimcodes(j));
-    
     interval = [];
     spinterval = [];
     
@@ -111,17 +109,16 @@ for j=1:length(stimcodes)
         if isnan(BGposttime) 
             BGposttime = 0;
         end
-        interval(i,:) = ...
-            [ s.mti{stimcodelocs(i)}.frameTimes(1) (s.mti{stimcodelocs(i)}.startStopTimes(3) + ...
-            0.5*(s.mti{stimcodelocs(i)}.startStopTimes(3)-s.mti{stimcodelocs(i)}.startStopTimes(1)) + BGpretime +BGposttime) ];
-        
+%        interval(i,:) = ...
+%             [ s.mti{stimcodelocs(i)}.frameTimes(1) (s.mti{stimcodelocs(i)}.startStopTimes(3) + ...
+%             0.5*(s.mti{stimcodelocs(i)}.startStopTimes(3)-s.mti{stimcodelocs(i)}.startStopTimes(1)) + BGpretime +BGposttime) ];
 %        disp('TPPSTH: TEMP SHORTENED INTEVRAL');
         interval(i,:) = ...
             [ s.mti{stimcodelocs(i)}.frameTimes(1) (s.mti{stimcodelocs(i)}.startStopTimes(3)+ BGpretime +BGposttime) ];
 
         if BGposttime > 0
             %spinterval(i,:)=[s.mti{stimcodelocs(i)}.startStopTimes(3) s.mti{stimcodelocs(i)}.startStopTimes(4)];
-            spinterval(i,:)=[s.mti{stimcodelocs(i)}.startStopTimes(1)-BGposttime+1 s.mti{stimcodelocs(i)}.startStopTimes(1)];
+            spinterval(i,:) = [s.mti{stimcodelocs(i)}.startStopTimes(1)-BGposttime+1 s.mti{stimcodelocs(i)}.startStopTimes(1)];
         elseif BGpretime > 0
             if BGpretime > params.separation_from_prev_stim_off
                 separation_from_prev_stim_off =  params.separation_from_prev_stim_off; %s
@@ -129,19 +126,13 @@ for j=1:length(stimcodes)
                 separation_from_prev_stim_off = 0;
             end
             spinterval(i,:)=[s.mti{stimcodelocs(i)}.startStopTimes(1)+ separation_from_prev_stim_off  s.mti{stimcodelocs(i)}.frameTimes(1)];
-        end;
-
-%         disp('TPQUICKPSTHSLIDING: quick fix when no bgpretime is taken');
-%             spinterval(i,:)=[s.mti{stimcodelocs(i)}.startStopTimes(1)-2 s.mti{stimcodelocs(i)}.frameTimes(1)];
-
-    
-    end;
-    
+        end
+    end % stimcodeloc i
     masterint = [masterint ; interval];
     masterintind = [masterintind ; repmat(j,size(interval,1),1)];
     masterspint = [ masterspint ; spinterval];
     masterspintind = [masterspintind ; repmat(j,size(interval,1),1)];
-end;
+end % stimcode j
 
 meanforbaselines = [];
 
@@ -156,8 +147,6 @@ else
     [data,t] = data2intervals(pixels.data,pixels.t,[masterint; masterspint]-starttime);
 end;
 
-%bins=min(0,min(masterspint(:,1)-masterint(:,1))):binsize:...
-%		max(max(masterint(:,2)-masterint(:,1)),max(masterspint(:,2)-masterint(:,1)));
 window_start = min(0,min(masterspint(:,1)-masterint(:,1)))-windowsize/2;
 window_end = max(max(masterint(:,2)-masterint(:,1)),max(masterspint(:,2)-masterint(:,1)))+windowsize/2;
 
@@ -169,10 +158,8 @@ for j=1:length(stimcodes), % different uniq stimuli
         totalspont = [];
         for i=1:length(theindssp),
             totalspont = cat(1,totalspont,data{length(masterintind)+theindssp(i),k});
-        end;
-        meanspont = nanmean(totalspont);
-        
-        if baselinemethod==3,
+        end
+        if baselinemethod==3
             if theblankid>0,
                 li = find(masterintind==theblankid);
                 baseline = [];
@@ -182,15 +169,15 @@ for j=1:length(stimcodes), % different uniq stimuli
                 baseline = nanmean(baseline);
             else
                 baseline = meanforbaselines(k);
-            end;
-        end;
+            end
+        end
         
         newdata = {}; newt = {};
         newdatacat = []; newtcat = [];
         for i=1:length(theinds),
             if baselinemethod==0, % mean of spontaneous data for each interval
                 baseline = nanmean(data{length(masterintind)+theindssp(i),k});
-            end;
+            end
             if isnan(baseline)
                 disp('TPPSTH: Baseline is NaN (perhaps no spontaneous data). Taking mean baseline');
                 baseline = nanmean(data{theinds(i),k});
@@ -200,7 +187,7 @@ for j=1:length(stimcodes), % different uniq stimuli
             mynewtinds = find(~isnan(newt{i,1}));
             newdatacat = cat(1,newdatacat,newdata{i,1}(mynewtinds));
             newtcat = cat(1,newtcat,newt{i,1}(mynewtinds));
-        end;
+        end
         for i=1:length(theindssp), % add spontaneous data
             if baselinemethod==0
                 baseline = nanmean(data{length(masterintind)+theindssp(i),k});
@@ -230,24 +217,23 @@ end;
 close(hwait); 
 
 % responsive calculation
-for c=1:n_selected_rois
-    dat = [];
-    for stim=1:length(stimcodes)
-        for rep=1:size(mydata{stim,c},1) % rep
-            dat = [dat; mydata{stim,c}{rep,1}];
-        end
-    end % stim
-    [record.measures(c).responsive,p] = ttest(dat);
-    %[h,p] = ttest(dat);
-    disp(['TPPSTH: Cell ' num2str(c) ' Responsive p = ' num2str(p)]);
-end % cell c
+% for c=1:n_selected_rois
+%     dat = [];
+%     for stim=1:length(stimcodes)
+%         for rep=1:size(mydata{stim,c},1) % rep
+%             dat = [dat; mydata{stim,c}{rep,1}];
+%         end
+%     end % stim
+%     [record.measures(c).responsive,record.measures(c).responsive_p] = ttest(dat);
+%     disp(['TPPSTH: Cell ' num2str(c) ' Responsive p = ' num2str(record.measures(c).responsive_p)]);
+% end % cell c
     
 for i=1:n_selected_rois
     record.measures(i).psth_tbins{1} = cat(1,bins{:,i});
     record.measures(i).psth_response{1} = cat(1,myavg{:,i});
 end
 
-if 1 % plot 
+if 1 && n_selected_rois>0 % plot 
     clr = 'bgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykw';
     figure('Numbertitle','off','Name','PSTH');
     maxavg = max(flatten(myavg));

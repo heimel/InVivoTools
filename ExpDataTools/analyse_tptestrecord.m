@@ -95,11 +95,9 @@ for i=1:n_rois
     record.measures(i).present = logical(record.ROIs.celllist(i).present);
 end
 
-disp('ANALYSE_TPTESTRECORD: TEMPORARILY ADDING LABELS FOR ANNEMARIE. CAN GO WHEN SHE HAS GONE.');
 for i=1:n_rois
     record.measures(i).labels = record.ROIs.celllist(i).labels;
 end
-
 
 for label = labels
     field = subst_specialchars(lower(label{1}));

@@ -31,8 +31,7 @@ function [newtimes,frame2dirnum] = tpcorrecttptimes(records)
 
 %disp('TPCORRECTTPTIMES is not (yet) using frame trigger information');
 
-tpsetup(records(1))
-
+tpsetup(records(1));
 
 %starttime = 0; % if no stimulus file available
 for i = 1:length(records)

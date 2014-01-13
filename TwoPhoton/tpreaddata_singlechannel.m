@@ -100,9 +100,9 @@ if exist(driftfilename,'file'),
     dr=struct('x',[],'y',[]);
     dr.x = [dr.x; drfile.drift.x];
     dr.y = [dr.y; drfile.drift.y];
-    disp(['Drift correction method = ',drfile.method]);
+    disp(['TPREADDATA_SINGLECHANNEL: Drift correction method = ',drfile.method]);
 else
-    disp(['No driftcorrect file named ' driftfilename]);
+    disp(['TPREADDATA_SINGLECHANNEL: No driftcorrect file named ' driftfilename]);
 end;
 
 % these variables will be used to calculate the time of each pixel within a frame

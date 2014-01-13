@@ -445,17 +445,52 @@ end % roi p
 %     responses(end-length(li)+1:end,2 ) = i;
 % end
 
-% try
-% mdata = cellfun(@mean,data); % mean response
-% edata = cellfun(@(x) x(end),data); % last point 
-% %mdata = mdata(1:end/2,:) - edata(end/2+1:end,:); %subtract spontaneous
-% %[responsive,p] = ttest(mdata(1:end/2,:))
-% [responsive,p] = ttest(mdata(1:end/2,:) - mdata(end/2+1:end,:)  )
+
+responsedata = cellfun(@mean,data(1:end/2,:)); % mean F over interval
+spontdata = cellfun(@mean,data(end/2+1:end,:)); % mean F over interval
+
+last_spont = cellfun(@(x) x(end),data(end/2+1:end,:)); % last F (for spontaneous data)
+first_response = cellfun(@(x) x(end),data(1:end/2,:)); % first F (for response data)
+betweenF = (last_spont + first_response)/2;
+
+[responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF,params.responsive_alpha,'right');
+% [responsive,p]=kruskal_wallis_test(responsedata-betweenF,spontdata-betweenF);
+%mdata = mdata(1:end/2,:) - edata(end/2+1:end,:); %subtract spontaneous
+%[responsive,p] = ttest(mdata(1:end/2,:))
+%[responsive,p] = ttest(mdata(1:end/2,:) - mdata(end/2+1:end,:)  )
+
+
+%responsive = and(responsive,mean(responsedata-spontdata)>0 );
+for c=1:size(data,2)
+    record.measures(c).responsive = responsive(c);
+    record.measures(c).responsive_p = p(c);
+    disp(['TPTUNINGCURVE: Cell ' num2str(c) ...
+        ' Responsive = ' num2str(record.measures(c).responsive) ...
+        ', p = ' num2str(record.measures(c).responsive_p)]);
+end
+    
+
 % for c=1:size(data,2)
+%     % take maximally responsive stimulus
+%     [dummy,ind] = max(record.measures(c).response{1}); %#ok<ASGLU>
+%     responsedata = cellfun(@mean,data(1:end/2,:)); % mean F over interval
+%     spontdata = cellfun(@mean,data(end/2+1:end,:)); % mean F over interval
+%     last_spont = cellfun(@(x) x(end),data(end/2+1:end,:)); % last F (for spontaneous data)
+%     first_response = cellfun(@(x) x(end),data(1:end/2,:)); % first F (for response data)
+%     betweenF = (last_spont + first_response)/2;
+%     responsedata = responsedata(do==ind,:);
+%     spontdata = spontdata(do==ind,:);
+%     betweenF = betweenF(do==ind,:);
+%     [responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF);
+%     
+%     % multiple test correction
+%     % p = min(1,p*size(curve,2));
+%     
 %     record.measures(c).responsive = responsive(c);
 %     record.measures(c).responsive_p = p(c);
+%     disp(['TPTUNINGCURVE: Cell ' num2str(c) ...
+%         ' Responsive = ' num2str(record.measures(c).responsive) ...
+%         ', p = ' num2str(record.measures(c).responsive_p)]);
 % end
-% catch
-%     disp('TPTUNINGCURVE: COULD NOT COMPUTE RESPONSIVE: FIX ALEXANDER');
-% end
-    
+
+

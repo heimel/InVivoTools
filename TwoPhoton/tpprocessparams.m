@@ -188,6 +188,7 @@ switch record.experiment
         params.get_intensities = false;
 end
 
+% stimulus analysis
 switch lower(record.experiment)
     case 'examples'
         params.separation_from_prev_stim_off = 0.5;
@@ -196,6 +197,7 @@ switch lower(record.experiment)
         params.separation_from_prev_stim_off = 1.5; % high for GCaMPs
         params.response_window = [0.5 inf];
 end
+params.responsive_alpha = 0.1; % could also be 0.05
 
 
 % extra analysis functions
