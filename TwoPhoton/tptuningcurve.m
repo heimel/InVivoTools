@@ -446,6 +446,7 @@ end % roi p
 % end
 
 
+try
 responsedata = cellfun(@mean,data(1:end/2,:)); % mean F over interval
 spontdata = cellfun(@mean,data(end/2+1:end,:)); % mean F over interval
 
@@ -454,15 +455,21 @@ first_response = cellfun(@(x) x(end),data(1:end/2,:)); % first F (for response d
 betweenF = (last_spont + first_response)/2;
 
 [responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF,params.responsive_alpha,'right');
+catch me
+    disp(me.message);
+    responsive = nan(size(data,2),1);
+    p = nan(size(data,2),1);
 % [responsive,p]=kruskal_wallis_test(responsedata-betweenF,spontdata-betweenF);
 %mdata = mdata(1:end/2,:) - edata(end/2+1:end,:); %subtract spontaneous
 %[responsive,p] = ttest(mdata(1:end/2,:))
 %[responsive,p] = ttest(mdata(1:end/2,:) - mdata(end/2+1:end,:)  )
-
+end
 
 %responsive = and(responsive,mean(responsedata-spontdata)>0 );
 for c=1:size(data,2)
-    record.measures(c).responsive = responsive(c);
+    if ~isnan(responsive(c))
+        record.measures(c).responsive = responsive(c);
+    end
     record.measures(c).responsive_p = p(c);
     disp(['TPTUNINGCURVE: Cell ' num2str(c) ...
         ' Responsive = ' num2str(record.measures(c).responsive) ...
