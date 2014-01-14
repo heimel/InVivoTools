@@ -469,28 +469,29 @@ for c=1:size(data,2)
         ', p = ' num2str(record.measures(c).responsive_p)]);
 end
     
-
-% for c=1:size(data,2)
-%     % take maximally responsive stimulus
-%     [dummy,ind] = max(record.measures(c).response{1}); %#ok<ASGLU>
-%     responsedata = cellfun(@mean,data(1:end/2,:)); % mean F over interval
-%     spontdata = cellfun(@mean,data(end/2+1:end,:)); % mean F over interval
-%     last_spont = cellfun(@(x) x(end),data(end/2+1:end,:)); % last F (for spontaneous data)
-%     first_response = cellfun(@(x) x(end),data(1:end/2,:)); % first F (for response data)
-%     betweenF = (last_spont + first_response)/2;
-%     responsedata = responsedata(do==ind,:);
-%     spontdata = spontdata(do==ind,:);
-%     betweenF = betweenF(do==ind,:);
-%     [responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF);
-%     
-%     % multiple test correction
-%     % p = min(1,p*size(curve,2));
-%     
-%     record.measures(c).responsive = responsive(c);
-%     record.measures(c).responsive_p = p(c);
-%     disp(['TPTUNINGCURVE: Cell ' num2str(c) ...
-%         ' Responsive = ' num2str(record.measures(c).responsive) ...
-%         ', p = ' num2str(record.measures(c).responsive_p)]);
-% end
+if 0 % alternative responsive calculation
+for c=1:size(data,2)
+    % take maximally responsive stimulus
+    [dummy,ind] = max(record.measures(c).response{1}); %#ok<ASGLU>
+    responsedata = cellfun(@mean,data(1:end/2,:)); % mean F over interval
+    spontdata = cellfun(@mean,data(end/2+1:end,:)); % mean F over interval
+    last_spont = cellfun(@(x) x(end),data(end/2+1:end,:)); % last F (for spontaneous data)
+    first_response = cellfun(@(x) x(end),data(1:end/2,:)); % first F (for response data)
+    betweenF = (last_spont + first_response)/2;
+    responsedata = responsedata(do==ind,:);
+    spontdata = spontdata(do==ind,:);
+    betweenF = betweenF(do==ind,:);
+    [responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF);
+    
+    % multiple test correction
+    % p = min(1,p*size(curve,2));
+    
+    record.measures(c).responsive = responsive(c);
+    record.measures(c).responsive_p = p(c);
+    disp(['TPTUNINGCURVE: Cell ' num2str(c) ...
+        ' Responsive = ' num2str(record.measures(c).responsive) ...
+        ', p = ' num2str(record.measures(c).responsive_p)]);
+end
+end
 
 
