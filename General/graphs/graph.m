@@ -483,6 +483,17 @@ switch style
             
             if ~( length(signif_y)==1 && signif_y==0)
                 for i=1:length(y)
+                    switch test
+                        case 'ttest'
+                            % check normality
+                            p_norm = kolmogorov_smirnov_test(y{i},'notequal','norm',mean(y{i}),std(y{i}));
+                            if p_norm<1  %<0.05
+                                 disp(['GRAPH: Group ' num2str(i) ' is not normal. p = ' num2str(p_norm) '. Consider changing test to kruskal_wallis_test']);
+                            end
+                    end
+                        
+                    
+                    
                     for j=i+1:length(y)
                         nsig=(i-1)*length(y)+j;
                         
