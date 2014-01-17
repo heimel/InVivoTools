@@ -486,14 +486,20 @@ switch style
                     switch test
                         case 'ttest'
                             % check normality
-                            p_norm = kolmogorov_smirnov_test(y{i},'notequal','norm',mean(y{i}),std(y{i}));
-                            if p_norm<0.05
-                                 disp(['GRAPH: Group ' num2str(i) ' is not normal. p = ' num2str(p_norm) '. Consider changing test to kruskal_wallis_test']);
+                            [h_norm,p_norm] = swtest(y{i});
+                            if h_norm
+                                disp(['GRAPH: Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to kruskal_wallis']);
+                            end
+                        case 'paired_ttest'
+                            % check normality
+                            [h_norm,p_norm] = swtest(y{i});
+                            if h_norm
+                                disp(['GRAPH: Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to signrank.']);
                             end
                     end
-                        
                     
-                    
+                end
+                for i=1:length(y)
                     for j=i+1:length(y)
                         nsig=(i-1)*length(y)+j;
                         
@@ -532,7 +538,7 @@ switch style
                                 plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
                                 [],[],[],[],tail);
                         end
-                        if 1 % h.p_sig{i,j}<0.1
+                        if h.p_sig{i,j}<1
                             disp(['GRAPH: Significance: ' num2str(nsig)...
                                 ' = grp ' num2str(i) ' vs grp ' num2str(j) ...
                                 ' p=' num2str(h.p_sig{i,j}) ...

@@ -34,4 +34,4 @@ disp('WHIT_TAO_DATA: Control vs MD correlations are significantly different: p =
 disp('WHIT_TAO_DATA: Absolute ODI differences');
 absdiff{1} = abs( y{1}-x{1});
 absdiff{2} = abs( y{2}-x{2});
-graph(absdiff,[],'xticklabels',{'Ctl','MD'},'showpoints',0,'color',{[0 1 0],[0 0.4 0]},'ylab','Absolute ODI difference','save_as','whit_odi_abs_diff.png');
+graph(absdiff,[],'xticklabels',{'Ctl','MD'},'showpoints',0,'color',{[0 1 0],[0 0.4 0]},'ylab','Absolute ODI difference','save_as','whit_odi_abs_diff.png','test','kruskal-wallis');

@@ -49,12 +49,18 @@ r2=r2(find(~isnan(r2)));
 
 
 h=0;
-if length(r1)>1 & length(r2)>1
+if length(r1)>1 && length(r2)>1
 	switch test
 		case {'paired_ttest'}
          try
             [h,p,ci,stats]=ttest(r1,r2,0.05,tail);
             t_statistic=stats.tstat;
+            dof=stats.df;
+         end
+		case {'wilcoxon','signrank'}
+         try
+            [p,h,stats]=signrank(r1,r2,'alpha',0.05);
+            z_statistic=stats.zval;
             dof=stats.df;
          end
 		case {'ttest','ttest2'}
