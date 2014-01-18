@@ -1,4 +1,4 @@
-function [h,p,statistic,statistic_name,dof]=plot_significance(r1,x1,r2,x2,y,height,w,test,r1std,n1,r2std,n2,tail)
+function [h,p,statistic,statistic_name,dof,testperformed]=plot_significance(r1,x1,r2,x2,y,height,w,test,r1std,n1,r2std,n2,tail)
 %PLOT_SIGNIFICANCE calculates significance level and plots stars
 %
 % [H,P,STATISTIC,STATISTIC_NAME,DOF]=PLOT_SIGNIFICANCE(R1,X1,R2,X2,Y,HEIGHT,W,TEST,
@@ -25,8 +25,19 @@ if nargin<7;w=[];end
 if nargin<6;height=[];end
 
 if isempty(test)
-    test='ttest';
-    %test='kruskal-wallis';
+    if isnormal(r1) && isnormal(r2)
+        if length(r1)==length(r2) % assume paired
+            test = 'paired_ttest';
+        else
+            test = 'ttest';
+        end
+    else
+        if length(r1)==length(r2) % assume paired
+            test = 'signrank';
+        else
+            test = 'kruskal-wallis';
+        end
+    end
 end
 if isempty(tail)
     tail='both';
@@ -44,6 +55,7 @@ statistic = nan;
 statistic_name = '';
 dof = nan;
 p = 1;
+testperformed = '';
 
 r1=r1(~isnan(r1));
 r2=r2(~isnan(r2));
@@ -51,13 +63,14 @@ r2=r2(~isnan(r2));
 
 h=0;
 if length(r1)>1 && length(r2)>1
-    switch test
-        case {'paired_ttest'}
+    switch lower(test)
+        case {'paired_ttest','paired ttest'}
             if length(r1)==length(r2)
                 [h,p,ci,stats]=ttest(r1,r2,0.05,tail); %#ok<ASGLU>
                 statistic=stats.tstat;
                 statistic_name = 't';
                 dof=stats.df;
+                testperformed = 'Paired t-test';
             end
         case {'wilcoxon','signrank'}
             if length(r1)==length(r2)
@@ -69,15 +82,19 @@ if length(r1)>1 && length(r2)>1
                 if isfield(stats,'df')
                     dof = stats.df;
                 end
+                testperformed = 'Wilcoxon signed rank test';
             end
         case {'ttest','ttest2'}
             [h,p,ci,stats]=ttest2(r1,r2,0.05,tail); %#ok<ASGLU>
             statistic = stats.tstat;
             statistic_name = 't';
             dof=stats.df;
-        case {'kruskal-wallis','kruskal_wallis'}
-            p = kruskal_wallis_test(r1,r2);
+            testperformed = 't-test';
+        case {'kruskal-wallis','kruskal_wallis','kruskal wallis'}
+            [p,statistic,dof] = kruskal_wallis_test(r1,r2);
+            statistic_name = 'K';
             h = (p<0.05);
+            testperformed = 'Kruskal-Wallis test';
         case {'chi2','chisquare','chi_square'}
             disp('PLOT_SIGNIFICANCE: Chi2 not implemented yet.');
     end
@@ -89,6 +106,7 @@ elseif ~isempty(r1std) && ~isempty(r2std) && strcmp(test,'ttest')==1
     dof=n1+n2-2;
     p=2*tcdf(t_statistic,dof);
     h=(p<0.05);
+    testperformed = 't-test';
 end
 
 if h==1 && ~isnan(y)
