@@ -543,10 +543,10 @@ switch style
                                 if ~isempty(dof) && ~isnan(dof)
                                     outstat = [outstat ...
                                         ', ' statistic_name ...
-                                        '[' num2str(dof) '] = ' num2str(statistic,2) ]; %#ok<AGROW>
+                                        '[' num2str(dof) '] = ' num2str(statistic) ]; %#ok<AGROW>
                                 else
                                     outstat = [outstat ...
-                                        ', ' statistic_name ' = ' num2str(statistic,2) ]; %#ok<AGROW>
+                                        ', ' statistic_name ' = ' num2str(statistic) ]; %#ok<AGROW>
                                 end         
                             end
                             disp(outstat);
