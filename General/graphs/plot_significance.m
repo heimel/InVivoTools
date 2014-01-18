@@ -62,9 +62,9 @@ if length(r1)>1 && length(r2)>1
         case {'wilcoxon','signrank'}
             if length(r1)==length(r2)
                 [p,h,stats]=signrank(r1,r2,'alpha',0.05);
-                if isfield(stats,'zval')
-                    statistic=stats.zval;
-                    statistic_name = 'z';
+                if isfield(stats,'signedrank')
+                    statistic=stats.signedrank;
+                    statistic_name = 'W';
                 end
                 if isfield(stats,'df')
                     dof = stats.df;
