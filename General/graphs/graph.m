@@ -46,7 +46,7 @@ function h=graph(y,x,varargin)
 %        fit, linear
 %
 %
-% 2006-2013, Alexander Heimel
+% 2006-2014, Alexander Heimel
 %
 
 h=[];
@@ -530,11 +530,11 @@ switch style
                         
                         % matlab significance test using sample data
                         if iscell(ystd) && iscell(ny)
-                            [h.h_sig{i,j},h.p_sig{i,j},t_statistic,dof]=...
+                            [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof]=...
                                 plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
                                 ystd{i},ny{i},ystd{j},ny{j},tail);
                         else
-                            [h.h_sig{i,j},h.p_sig{i,j},t_statistic,dof]=...
+                            [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof]=...
                                 plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
                                 [],[],[],[],tail);
                         end
@@ -542,9 +542,8 @@ switch style
                             disp(['GRAPH: Significance: ' num2str(nsig)...
                                 ' = grp ' num2str(i) ' vs grp ' num2str(j) ...
                                 ' p=' num2str(h.p_sig{i,j}) ...
-                                ' ' test ...
-                                ' , t=' num2str(t_statistic) ...
-                                ' , dof=' num2str(dof)]);
+                                ' ' test ', ' statistic_name ...
+                                '[' num2str(dof) ']=' num2str(statistic) ]);
                         end
                         
                     end
@@ -654,13 +653,14 @@ switch style
                 for i=1:length(pointsy)
                     for j=i+1:length(pointsy)
                         try
-                            [h.h_sig{i,j},h.p_sig{i,j},t_statistic,dof]=...
+                            [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof]=...
                                 plot_significance(pointsy{i}{k},x{i}(k),...
                                 pointsy{j}{k},x{j}(k),max([y{i}(k)+ystd{i}(k) y{j}(k)+ystd{j}(k)]),0,0,test);
                         catch
                             h.h_sig{i,j}=nan;
                             h.p_sig{i,j}=nan;
-                            t_statistic=nan;
+                            statistic=nan;
+                            statistic_name = '';
                             dof=nan;
                         end
                         if h.h_sig{i,j}==1
