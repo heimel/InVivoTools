@@ -506,7 +506,6 @@ switch style
                         ind_y=[];
                         
                         if ~isempty(signif_y)
-                            
                             if size(signif_y,2)==1 % single column, specify which to do
                                 if isempty(find(signif_y==nsig,1))
                                     continue
@@ -525,8 +524,6 @@ switch style
                         else
                             y_star=signif_y(ind_y(1),2);
                         end
-                        
-                        
                         
                         % matlab significance test using sample data
                         if iscell(ystd) && iscell(ny)

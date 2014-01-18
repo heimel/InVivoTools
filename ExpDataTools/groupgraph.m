@@ -4,7 +4,9 @@ function [r,p,filename,h]=groupgraph(groups,measures,varargin)
 %  [R,P,FILENAME,H]=GROUPGRAPH(GROUPS,MEASURES,VARARGIN);
 %
 %
-% 2007-2013, Alexander Heimel, based on POPGRAPH
+% 2007-2014, Alexander Heimel, based on POPGRAPH
+
+global values_x values_y
 
 r = [];
 p = [];
@@ -654,6 +656,7 @@ h = graph(gy,gx,...
     'test',test,'showpoints',showpoints,'extra_options',extra_options,...
     'extra_code',extra_code,'ystd',ystd,'ny',ny,'z',gz);
 
+
 if isfield(h,'p_sig')
     p=h.p_sig;
 else
@@ -668,3 +671,8 @@ if save_option
     filename=save_figure(filename,path);
 end
 
+values_x = gx;
+values_y = gy;
+
+evalin('base','global values_x values_y');
+disp('GROUPGRAPH: Values available in workspace as values_x values_y.');
