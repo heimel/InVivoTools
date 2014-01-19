@@ -7,5 +7,9 @@ function res = isnormal( y )
 %
 % 2014, Alexander Heimel
 
+if all(diff(y)==0)
+    res = 0;
+end
+
 res = ~swtest( y );
 
