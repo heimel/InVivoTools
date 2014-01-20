@@ -13,6 +13,10 @@ NewStimGlobals;
 
 b = NS_PTBv;
 
+if isempty(b)
+    b = 0;
+end
+
 return;
 
  % should superceed what is below
