@@ -17,6 +17,8 @@ switch record.experiment
         labels = {'CFP','YFP'};
     case {'12.76','12.76_GCaMP6','13.29'}
         labels = {'','CCK','CR','SST','PV','VIP','Astrocyte'};
+    case {'13.29'}
+        labels ={'','CR','Tom'}
     otherwise
         labels = {'GFP','RFP'};
 end

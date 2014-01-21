@@ -27,7 +27,7 @@ crit = ['\(\(Action like \''alive\''\) or \(Action like \''om af te voeren\''\) 
 %crit = [crit ' and \(' strains '\)'];
 
 db = import_mdb([],[],crit);
-strains = '(Transgene=T5)|(Transgene=DBA)|(Cre=Kazu,KOdKI=GCamp3)|(KOdKI=R26TOM)|(Cre=GAD*)';
+strains = '(Transgene=T5)|(Transgene=DBA)|(Cre=Kazu,KOdKI=GCamp3)|(KOdKI=R26TOM)|(Cre=GAD*)|(Cre=Kazu,Typing_KOdKI!hom*,Typing_KOdKI!het*)';
 db = db(find_record( db,strains));
 
 if isempty(db)
