@@ -279,6 +279,9 @@ end
 if isfield(testdb,'experimenter') && exist('experimenter','var')
     cond=[cond ', (experimenter=' experimenter ')' ];
 end
+if isfield(testdb,'stim_onset') && exist('stim_onset','var')
+    cond=[cond ', (stim_onset=' stim_onset ')' ];
+end
 if isfield(testdb,'comment') &&  exist('comment','var')
     comment=trim(comment);
     if comment(1)=='{'
