@@ -34,8 +34,28 @@ switch data_type
 end
 
 tit(tit=='_')='-';
-    
+
 measures = record.measures;
+
+% add measures from measures file
+switch record.datatype
+    case 'tp'
+        measuresfile = fullfile(tpdatapath(record),'tp_measures');
+        load(measuresfile);
+        measures_on_disk = measures;
+end
+if ~isempty(measures_on_disk) && length(measures)==length(record.measures)
+    f = fields(measures);
+    f_on_disk = fields(measures_on_disk);
+    sf = intersect(setdiff(f,f_on_disk),f_on_disk);
+    for i = 1:length(measures)
+        for f = 1:length(sf)
+            measures(i).(sf{f}) = measures_on_disk(i).(sf{f});
+        end
+    end
+end
+
+
 n_cells=length(measures);
 
 

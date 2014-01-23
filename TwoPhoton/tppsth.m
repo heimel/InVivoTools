@@ -231,9 +231,10 @@ end % cell c
 end
 
 for i=1:n_selected_rois
-    record.measures(i).psth_tbins{1} = cat(1,bins{:,i});
-    record.measures(i).psth_response{1} = cat(1,myavg{:,i});
+     record.measures(i).psth_tbins{1} = cat(1,bins{:,i});
+     record.measures(i).psth_response{1} = cat(1,myavg{:,i});
 end
+
 
 if 1 && n_selected_rois>0 % plot 
     clr = 'bgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykw';
@@ -315,4 +316,3 @@ if plotit % old routine
 end;
 
 
-                

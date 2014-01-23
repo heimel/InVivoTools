@@ -351,8 +351,8 @@ for p=1:size(data,2) % roi p
     record.measures(p).curve = curve;
     record.measures(p).ind = {ind};
     record.measures(p).spont = spont;
-    record.measures(p).indspont = indspont;
-    record.measures(p).indf = {indf};
+%    record.measures(p).indspont = indspont;
+%    record.measures(p).indf = {indf};
     record.measures(p).channel = channel;
     if exist('blankresp','var')==1,
         record.measures(p).blankresp = blankresp;
@@ -471,7 +471,7 @@ for c=1:size(data,2)
         record.measures(c).responsive = responsive(c);
     end
     record.measures(c).responsive_p = p(c);
-    disp(['TPTUNINGCURVE: Cell ' num2str(c) ...
+    disp(['TPTUNINGCURVE: Cell ' num2str(c,'%3d') ...
         ' Responsive = ' num2str(record.measures(c).responsive) ...
         ', p = ' num2str(record.measures(c).responsive_p)]);
 end
