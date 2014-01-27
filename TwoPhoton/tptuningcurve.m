@@ -105,9 +105,11 @@ spinterval = [];
 stims = getstimsfile( record );
 if isempty(stims)
     % create stims file
-    stiminterview(record);
-    stims = getstimsfile( record );
-end;
+%     stiminterview(record);
+%     stims = getstimsfile( record );
+  errormsg(['No stimulus file present for ' recordfilter(record) ', Skipping analysis.']);
+  return
+end
 
 
 % get paramname
