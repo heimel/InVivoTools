@@ -57,7 +57,7 @@ for i = 1:n_x*n_y
     col=i-1-row*n_x;
     
     pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
-    pspar.rect = CenterRectOnPoint(default_rect,1267,213);
+    % pspar.rect = CenterRectOnPoint(default_rect,1267,213);
     % above line added to center shift the change with tilt
     pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
     angles = angles( randperm(length(angles)) );
