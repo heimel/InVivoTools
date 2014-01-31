@@ -209,6 +209,20 @@ if isfield(record.measures,'present') && ...
                 record.measures = rmfield(record.measures,'mito_was_close');
             end
         end
+
+        if isfield(ref_record.measures,'bouton_close')
+            for i=1:n_rois
+                record.measures(i).bouton_was_close = NaN;
+                ref_i = [ref_record.measures.index]==record.measures(i).index;
+                if any(ref_i)
+                    record.measures(i).bouton_was_close = ref_record.measures(ref_i).bouton_close;
+                end
+            end
+            if all(isnan([record.measures.bouton_was_close]))
+                record.measures = rmfield(record.measures,'bouton_was_close');
+            end
+        end
+
         
         for measure = series_measures
             measure_series = [measure{1} '_series'];
@@ -251,6 +265,9 @@ end
 
 if isfield(record,'measures') && isfield(record.measures,'mito') && any([record.measures(:).mito])
     record = tp_mito_close( record );
+end
+if isfield(record,'measures') && isfield(record.measures,'bouton') && any([record.measures(:).bouton])
+    record = tp_bouton_close( record );
 end
 
 % getting densities
