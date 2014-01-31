@@ -271,6 +271,11 @@ cond=[cond ', datatype=' measure.datatype  ];
 if ~isempty(measure.stim_type)
     cond=[cond ', stim_type=' measure.stim_type  ];
 end
+if isfield(testdb,'stim_type') && exist('stim_type','var')
+    cond=[cond ', (stim_type=' stim_type ')' ];
+end
+ 
+
 % 2013-05-28 moved reliable checking to within record, because it can be
 % done for separate cells
 % if isfield(testdb,'reliable') && reliable==1
