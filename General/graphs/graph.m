@@ -670,7 +670,7 @@ switch style
                             dof=nan;
                         end
                         if h.h_sig{i,j}==1
-                            disp(['Differences at x=' num2str(x{j}(k),2)...
+                            disp(['GRAPH: Differences at x=' num2str(x{j}(k),2)...
                                 ' are significant. p=' num2str(h.p_sig{i,j},2)  ]);
                         end
                     end

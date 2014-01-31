@@ -36,13 +36,16 @@ end
 tit(tit=='_')='-';
 
 measures = record.measures;
-
+measures_on_disk = [];
+ 
 % add measures from measures file
 switch record.datatype
     case 'tp'
         measuresfile = fullfile(tpdatapath(record),'tp_measures');
-        load(measuresfile);
-        measures_on_disk = measures;
+        if exist([measuresfile '.mat'],'file')
+            load(measuresfile);
+            measures_on_disk = measures;
+        end
 end
 if ~isempty(measures_on_disk) && length(measures)==length(record.measures)
     f = fields(measures);

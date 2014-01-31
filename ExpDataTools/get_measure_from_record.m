@@ -120,7 +120,7 @@ if isfield(record,'measures')
                         get = 0;
                     end
                 elseif isfield(measures,'index')
-                    if length(record.reliable)<measures(c).index
+                    if length(record.reliable)<measures(c).index+1
                         str=['Reliable vector too short for ' recordfilter(record) '. Note that the first entry is the multi-unit.' ];
                         disp(['GET_MEASURE_FROM_RECORD: ' str]);
                         errordlg(str,'Get measure from record');
@@ -310,9 +310,13 @@ if isfield(record,'measures')
                     case 'linked2neurite'
                         tempval = record.ROIs.celllist(c).neurite(1);
                     case 'psth.tbins' %deprecated, analysis should put measure in measures and use routines above
-                        tempval = measures(c).psth.tbins;
+                        if isfield(measures(c),'psth') && isfield(measures(c).psth,'tbins')
+                            tempval = measures(c).psth.tbins;
+                        end
                     case 'psth.data' %deprecated, analysis should put measure in measures and use routines above
-                        tempval = measures(c).psth.data;
+                        if isfield(measures(c),'psth') && isfield(measures(c).psth,'data')
+                            tempval = measures(c).psth.data;
+                        end
                     case 'depth'
                         tempval = record.depth-record.surface;
                     case {'range','parameter'} % parameter is deprecated
