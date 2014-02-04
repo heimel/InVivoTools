@@ -25,7 +25,7 @@ pos_args={...  %  'reliable',1,...  % 1 to only use reliable records, 0 to use a
     'showpoints',1,...
     'test','',... % ttest',...
     'color',0.7*[1 1 1],...
-    'spaced',0,...
+    'spaced',1,...
     'errorbars','sem',...
     'save_option',1,...
     'signif_y',[],...
@@ -210,7 +210,7 @@ n_groups=length(groups); % it can be that multiple groups match group criteria
 
 
 % parse criteria
-criteria = split(criteria,','); %#ok<NODEF>
+criteria = split(criteria,',',true); %#ok<NODEF>
 n_criteria = length(criteria);
 
 
@@ -573,7 +573,11 @@ switch style
             glabel={};
             xticklabels='';
             xlab=grouplabels(1,:);
-            ylab=grouplabels(2,:);
+            if size(grouplabels,1)>1
+                ylab=grouplabels(2,:);
+            else 
+                ylab = '';
+            end
         end
     otherwise % eg {'bars','bar','box','cumul','hist','rose'}
         switch group_by

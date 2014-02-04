@@ -125,7 +125,8 @@ if isfield(record,'measures')
                         errormsg(['Problem with criteria: ' criteria '. Perhaps forgotten accolades?']);
                         throw(me);
                     otherwise
-                        disp(me.identifier);
+                        logmsg(me.message);
+                        logmsg(me.identifier);
                 end
             end
         end
