@@ -29,6 +29,7 @@ load_mclust = 1;
 load_gephyrin = 0;
 load_trkb = 0;
 load_bcat = 1;
+load_mitos = 1;
 
 % set default lab, can be overruled depending on host:
 % alternatives 'Fitzpatrick','Levelt','Lohmann'
@@ -339,6 +340,10 @@ end
 
 if load_bcat
     addpath(fullfile(majorprefix,'Studies','BCat'));
+end
+
+if load_mitos
+    addpath(fullfile(majorprefix,'Studies','Mitochondria'));
 end
 
 %  switch host

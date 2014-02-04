@@ -120,10 +120,10 @@ if isfield(record,'measures')
                         get = 0;
                     case 'MATLAB:undefinedVariable'
                         errormsg(['Problem with criteria: ' criteria '. Perhaps forgotten to append ''measures.''?']);
-                        throw(me);
+                        rethrow(me);
                     case 'MATLAB:UndefinedFunction'
-                        errormsg(['Problem with criteria: ' criteria '. Perhaps forgotten accolades?']);
-                        throw(me);
+                        errormsg(['Problem with criteria: ' criteria '. Perhaps forgotten accolades or forgotten to append ''measures.''?']);
+                        rethrow(me);
                     otherwise
                         logmsg(me.message);
                         logmsg(me.identifier);
