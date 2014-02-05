@@ -16,7 +16,7 @@ end
 processparams = tpprocessparams([],record);
 
 
-disp('TP_BOUTON_CLOSE: Maximum distance bouton to mitochondrion set in tpprocesparams');
+%disp('TP_BOUTON_CLOSE: Maximum distance bouton to mitochondrion set in tpprocesparams');
 
 
 

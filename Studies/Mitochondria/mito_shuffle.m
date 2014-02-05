@@ -31,20 +31,23 @@ distance2mito_shuf = [];
 n_shuffles = 10;
 
 for i=1:length(db)
-    distance2mito_org = [distance2mito_org [db(i).measures(:).distance2mito]];
+    distance2mito_org = [distance2mito_org [db(i).measures([db(i).measures.bouton]).distance2mito]];
     for j=1:n_shuffles
-        shuffled_record = analyse_tptestrecord( shuffle_mitos_record( db(i)) );
-        distance2mito_shuf = [distance2mito_shuf [shuffled_record.measures(:).distance2mito] ];
+        shuffled_record = tp_mito_close( shuffle_mitos_record( db(i)) );
+        distance2mito_shuf = [distance2mito_shuf [shuffled_record.measures([shuffled_record.measures.bouton]).distance2mito] ];
     end
 end
 
-figure; hold on;
-[n_org,x]=hist(distance2mito_org,20);
+
+[n_org,x]=hist(distance2mito_org,80);
 n_org = n_org / length(distance2mito_org);
-h.org = bar(x,n_org);
-set(h.org,'facecolor',[1 0 0]);
 [n_shuf,x]=hist(distance2mito_shuf,x);
 n_shuf = n_shuf / length(distance2mito_shuf);
+
+figure; 
+hold on;
+h.org = bar(x,n_org);
+set(h.org,'facecolor',[1 0 0]);
 h.shu = bar(x+mean(diff(x))/6,n_shuf);
 c.su = get(h.shu, 'child');
 set(c.su,'facea',0.3);
@@ -53,9 +56,11 @@ ylabel('Fraction');
 legend('Data','Shuffled')
 legend boxoff
 
-[h,p] = kstest2(distance2mito_org,distance2mito_shuf)
+save_figure('mito_shuffle_distance2mito.png');
 
-keyboard
+[h,p] = kstest2(distance2mito_org,distance2mito_shuf);
+
+logmsg(['p = ' num2str(p,3) ', Kolmogorov-Smirnov']);
 
 
 function record = shuffle_mitos_record( record)
