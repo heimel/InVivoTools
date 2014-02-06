@@ -19,7 +19,6 @@ processparams = tpprocessparams([],record);
 %disp('TP_MITO_CLOSE: Maximum distance bouton to mitochondrion set in tpprocesparams');
 
 
-
 roilist = record.ROIs.celllist;
 n_rois = length(roilist);
 ind_mito = strmatch('mito',{roilist.type});
@@ -38,9 +37,13 @@ for i = ind_no_mito(:)'
     record.measures(i).mito_close = false;
     record.measures(i).distance2mito = inf;
     for j = ind_mito(:)'
-       if  roilist(j).present
-           record.measures(i).distance2mito  = min(record.measures(i).distance2mito, norm(r(i,:)-r(j,:))*params.x_step );
+       if  roilist(j).present && roilist(j).neurite(1)==roilist(i).neurite(1)
+           record.measures(i).distance2mito  = ...
+               min(record.measures(i).distance2mito, norm(r(i,:)-r(j,:))*params.x_step );
        end
+    end
+    if record.measures(i).distance2mito == inf
+        record.measures(i).distance2mito = NaN;
     end
     if record.measures(i).distance2mito <=processparams.max_bouton_mito_distance_um
         record.measures(i).mito_close = true;
