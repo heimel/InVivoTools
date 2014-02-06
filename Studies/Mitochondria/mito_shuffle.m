@@ -74,7 +74,7 @@ distance2mito_org = distance2mito_org(~isnan(distance2mito_org));
 distance2mito_shuf = distance2mito_shuf(~isnan(distance2mito_shuf));
 
 % make figures
-edges = 0:0.5:100;
+edges = 0:1:100;
 
 [n_org]=histc(distance2mito_org,edges);
 n_org = n_org / length(distance2mito_org);
