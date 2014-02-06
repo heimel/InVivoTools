@@ -28,18 +28,22 @@ ind_no_bouton = setdiff(1:length(roilist),ind_bouton);
 
 r = zeros(n_rois,3);
 for i = 1:n_rois
-    r(i,1) = median(roilist(i).xi); % take center
-    r(i,2) = median(roilist(i).yi); % take center
-    r(i,3) = median(roilist(i).zi); % take center
+%     r(i,1) = median(roilist(i).xi); % take center
+%     r(i,2) = median(roilist(i).yi); % take center
+%     r(i,3) = median(roilist(i).zi); % take center
+    r(i,1) = mean(roilist(i).xi); % take center
+    r(i,2) = mean(roilist(i).yi); % take center
+    r(i,3) = mean(roilist(i).zi); % take center
 end
 
+r = r.*repmat([params.x_step params.y_step params.z_step],size(r,1),1); 
 
 for i = ind_no_bouton(:)'
     record.measures(i).bouton_close = false;
     record.measures(i).distance2bouton = inf;
     for j = ind_bouton(:)'
        if  roilist(j).present
-           record.measures(i).distance2bouton  = min(record.measures(i).distance2bouton, norm(r(i,:)-r(j,:))*params.x_step );
+           record.measures(i).distance2bouton  = min(record.measures(i).distance2bouton, norm(r(i,:)-r(j,:)) );
        end
     end
     if record.measures(i).distance2bouton <=processparams.max_bouton_mito_distance_um

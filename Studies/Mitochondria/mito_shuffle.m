@@ -7,14 +7,14 @@ function mito_shuffle
 
 global testdb
 
-n_shuffles = 10;
-groupname = '11.12 no lesion';
-%groupname = '11.12 lesion';
+n_shuffles = 20;
+%groupname = '11.12 no lesion';
+groupname = '11.12 lesion';
 
 logmsg('Refine sampling of axons for picking random locations');
 
 experiment(11.12);
-if ~exist('testdb') || isempty(testdb) % temp for script
+if ~exist('testdb','var') || isempty(testdb) % temp for script
     testdb = load_expdatabase('tptestdb_olympus');
 end
 
@@ -35,6 +35,8 @@ db = testdb(ind);
 distance2mito_org = [];
 distance2mito_shuf = [];
 
+default_params = tpreadconfig( testdb(1) );
+
 
 for i=1:length(db)
     logmsg(['Record ' num2str(i) ' of ' num2str(length(db))]);
@@ -45,14 +47,17 @@ for i=1:length(db)
     
     params = tpreadconfig( db(i) );
     if isempty(params)
-        continue
+        params = default_params;
     end
+    
+%    params.z_step = 0;
+    
     db(i) = interpolate_axons( db(i), params );
     
     db(i) = pull_mito2axons( db(i), params );
     
     db(i) = tp_mito_close( db(i),params);
-    if ~isempty(db(i).measures)
+    if ~isempty(db(i).measures) && isfield(db(i).measures,'bouton')
         distance2mito_org = [distance2mito_org [db(i).measures([db(i).measures.bouton] & [db(i).measures.present]).distance2mito]];
 
         for j=1:n_shuffles
@@ -138,7 +143,7 @@ for i=1:length(ind_axons)
     axon.xi = interp1(x,axon.xi,nx);
     axon.yi = interp1(x,axon.yi,nx);
     if length(axon.zi)>1
-        axon.zi = interp1(x,axon.zi,nx);
+        axon.zi = interp1(x,axon.zi,nx,'spline');
     end
     celllist(ind_axons(i)) = axon;
 end
