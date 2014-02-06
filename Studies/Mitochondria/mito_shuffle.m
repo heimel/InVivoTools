@@ -7,16 +7,25 @@ function mito_shuffle
 
 global db
 
+logmsg('Refine sampling of axons for picking random locations');
+logmsg('mito_bouton distance should be calculated for same axons puncta only');
+
+
 experiment(11.12);
 if ~exist('db') || isempty(db) % temp for script
     db = load_expdatabase('tptestdb_olympus');
     
 end
 
-%selection = 'reliable=1';
-selection = 'mouse=11.12.15|mouse=11.12.28|mouse=11.12.31'; % no lesion
+groupdb = load_groupdb;
 
-logmsg(['Selection is ' selection ]);
+%groupname = '11.12 no lesion';
+groupname = '11.12 lesion';
+
+ind = find_record(groupdb,['name=' groupname]);
+selection = groupdb(ind).filter;
+
+logmsg(['Group is ' groupname ', selection is ' selection ]);
 ind = find_record(db,selection);
 
 % logmsg('take first only, temporary')
@@ -28,18 +37,20 @@ db = db(ind);
 distance2mito_org = [];
 distance2mito_shuf = [];
 
-n_shuffles = 10;
+n_shuffles = 5;
 
 for i=1:length(db)
-    distance2mito_org = [distance2mito_org [db(i).measures([db(i).measures.bouton]).distance2mito]];
-    for j=1:n_shuffles
-        shuffled_record = tp_mito_close( shuffle_mitos_record( db(i)) );
-        distance2mito_shuf = [distance2mito_shuf [shuffled_record.measures([shuffled_record.measures.bouton]).distance2mito] ];
+    if ~isempty(db(i).measures)
+        distance2mito_org = [distance2mito_org [db(i).measures([db(i).measures.bouton]).distance2mito]];
+        for j=1:n_shuffles
+            shuffled_record = tp_mito_close( shuffle_mitos_record( db(i)) );
+            distance2mito_shuf = [distance2mito_shuf [shuffled_record.measures([shuffled_record.measures.bouton]).distance2mito] ];
+        end
     end
 end
 
 
-[n_org,x]=hist(distance2mito_org,80);
+[n_org,x]=hist(distance2mito_org,120);
 n_org = n_org / length(distance2mito_org);
 [n_shuf,x]=hist(distance2mito_shuf,x);
 n_shuf = n_shuf / length(distance2mito_shuf);
@@ -77,13 +88,18 @@ for i=1:length(ind_axons)
     if length(axon.zi) == length(axon.xi)
         random_z = axon.zi(random_pos_on_axon);
     else
-        random_z = axon.zi*ones(size(axon.xi));
+        random_z = axon.zi*ones(1,length(random_pos_on_axon));
     end
         
     for j=1:length(ind_mito_on_axon) % move mito to random position on axon
         mito = celllist(ind_mito_on_axon(j));
         mito.xi = mito.xi - mean(mito.xi) + random_x(j);
         mito.yi = mito.yi - mean(mito.yi) + random_y(j);
+
+%         logmsg('Offset and swap for debugging');
+%         mito.xi = mito.xi - mean(mito.xi) + random_y(j);
+%         mito.yi = mito.yi - mean(mito.yi) + random_x(j)+100;
+        
         mito.zi = mito.zi - mean(mito.zi) + random_z(j);
         celllist(ind_mito_on_axon(j)) = mito;
         % pixelinds is not updated!
