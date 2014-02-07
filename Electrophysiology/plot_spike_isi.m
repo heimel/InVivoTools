@@ -13,6 +13,11 @@ params = ecprocessparams(record);
 
 n_cells = size(isi,1);
 
+if n_cells~=length(record.measures)
+    errormsg('Number of cells in ISI is not equal to number of cells in measures. Recompute?');
+    return
+end
+
 if n_cells>15
     disp('PLOT_SPIKE_ISI: Too many cells, I am too lazy to plot them.');
     return

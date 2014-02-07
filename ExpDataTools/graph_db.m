@@ -14,8 +14,8 @@ end
 
 clear functions
 
-[graphdb,filename]=load_graphdb( create);
-if isempty(graphdb)
+[db,filename]=load_graphdb( create);
+if isempty(db)
    disp('GRAPH_DB: Empty graph database.');
    return
 end

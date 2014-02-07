@@ -9,6 +9,7 @@ if ~isempty(rnonnan)
       else
         h=0;
       end
+      h = 0;
       hp=plot(x(:)+linspace(0,0,length(r))',r(:)+linspace(-h,h,length(r))','ok');
     case 1 % show spaced
       w=0.3;

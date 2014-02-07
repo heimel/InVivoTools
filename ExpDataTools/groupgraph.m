@@ -16,8 +16,8 @@ path=''; % to overload matlab-function PATH
 color=[]; % to overload matlab-function COLOR
 
 % possible varargins with default values
-pos_args={...
-    'reliable',1,...  % 1 to only use reliable records, 0 to use all
+pos_args={...  %  'reliable',1,...  % 1 to only use reliable records, 0 to use all
+    'criteria',[],...
     'testdb',[],...
     'mousedb',[],...  % if empty, will use load_mousedb
     'groupdb',[],...
@@ -25,7 +25,7 @@ pos_args={...
     'showpoints',1,...
     'test','',... % ttest',...
     'color',0.7*[1 1 1],...
-    'spaced',0,...
+    'spaced',1,...
     'errorbars','sem',...
     'save_option',1,...
     'signif_y',[],...
@@ -33,8 +33,6 @@ pos_args={...
     'grouplabels',[],...
     'measurelabels',[],...
     'style','bar',...
-    'eyes','',...
-    'celltype','su',...     % one of 'all','mu','su'
     'extra_options','',...
     'extra_code','',...
     'filename','',...
@@ -108,7 +106,7 @@ end
 
 disp(['GROUPGRAPH: Collecting data for figure ' name ]);
 
-if isempty(mousedb)
+if isempty(mousedb) %#ok<NODEF>
     mousedb = load_mousedb;
 end
 
@@ -211,6 +209,28 @@ end
 n_groups=length(groups); % it can be that multiple groups match group criteria
 
 
+% parse criteria
+criteria = split(criteria,',',true); %#ok<NODEF>
+n_criteria = length(criteria);
+
+
+if ~isfield(groups,'criteria')
+    groups(1).criteria = '';
+end
+
+if n_criteria>0
+    count = 1;
+    for c=1:n_criteria
+        for g=1:n_groups
+            ngroups(count) = groups(g);
+            ngroups(count).criteria = criteria{c};
+            count = count+1;
+        end
+    end
+    groups = ngroups;
+    n_groups = length(groups);
+end
+
 % parse filters
 groupfilters={};
 for g=1:n_groups
@@ -219,7 +239,6 @@ for g=1:n_groups
         groupfilters{g}=['strain=' groups(g).name];
     end
 end
-
 
 % parse grouplabels
 if isempty(grouplabels)
@@ -238,8 +257,7 @@ grouplabels=shorten_bxdnames(grouplabels);
 [r,dr,def_measurelabels]=get_compound_measurements(groups,measures,...
     'testdb',testdb,...
     'mousedb',mousedb,...
-    'groupdb',groupdb,...
-    'reliable',reliable,...
+    'groupdb',groupdb,...  %    'reliable',reliable,...
     'value_per',value_per,...
     'extra_options',extra_options ...
     );
@@ -437,24 +455,45 @@ end
 
 % center grouplabels for use in captions
 grouplabels=strjust(char(grouplabels),'center');
-if size(grouplabels,1)~=n_groups
-    disp('GROUPGRAPH: Wrong number of grouplabels')
-    disp(grouplabels)
+switch style
+    case 'xy'
+        if size(grouplabels,1)>n_groups*n_measures/2
+            errormsg(['Wrong number of grouplabels. ' ...
+                num2str(size(grouplabels,1)) ' given, ' num2str(n_groups*n_measures/2) ' expected.' ]);
+            disp(grouplabels)
+            return
+        elseif size(grouplabels,1)<n_groups*n_measures/2
+            logmsg(['Wrong number of grouplabels. ' ...
+                num2str(size(grouplabels,1)) ' given, ' num2str(n_groups*n_measures/2) ' expected.' ]);
+            disp(grouplabels)
+            for i=size(grouplabels,1)+1:n_groups*n_measures/2
+               % grouplabels{i} = '';
+                grouplabels(i,:) = ' ';
+            end
+        end
+    otherwise
+        if size(grouplabels,1)~=n_groups
+            errormsg(['Wrong number of grouplabels. ' ...
+                num2str(size(grouplabels,1)) ' given, ' num2str(n_groups) ' expected.' ]);
+            disp(grouplabels)
+            return
+        end
 end
 
+
 % assign figure filename
-l=grouplabels(:)';
-m=measurelabels;
+l = grouplabels(:)';
+m = measurelabels;
 if isempty(filename)
     if isempty(name)
-        filename=['pop_' l(1:min(end,15)) '_' m{:} '_' eyes ];
+        filename = ['pop_' l(1:min(end,15)) '_' m{:} ];
     else
-        filename=name;
+        filename = name;
     end
 end
 
 if n_measures==1
-    group_by='measure';
+    group_by = 'measure';
 end
 
 
@@ -534,7 +573,11 @@ switch style
             glabel={};
             xticklabels='';
             xlab=grouplabels(1,:);
-            ylab=grouplabels(2,:);
+            if size(grouplabels,1)>1
+                ylab=grouplabels(2,:);
+            else 
+                ylab = '';
+            end
         end
     otherwise % eg {'bars','bar','box','cumul','hist','rose'}
         switch group_by

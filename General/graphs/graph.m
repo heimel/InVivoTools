@@ -72,7 +72,7 @@ pos_args={...
     'axishandle',[],...
     'showpoints',1,...
     'test','',... %'ttest',...
-    'spaced',0,...
+    'spaced',1,...
     'color',0.7*[1 1 1],...
     'errorbars','sem',...
     'style',trim(char(double(length(x)==length(y))*'xy '+ ...
@@ -98,6 +98,7 @@ pos_args={...
     'legnd','',...  % legend,example legnd,{wt,t1}
     'save_as','',...
     'z',{},...
+    'smoothing',0,...
     };
 
 assign(pos_args{:});
@@ -149,6 +150,13 @@ else
     errorbars_tick = [];
 end
 
+if exist('smoothing','var')
+    smoothing = str2double(smoothing);
+else
+    smoothing = 0;
+end
+
+
 if exist('markersize','var')
     if ischar(markersize)
         markersize = str2double(markersize);
@@ -197,7 +205,8 @@ end
 % reformat y into cell-structure
 if ~iscell(y)
     if ndims(y)>2
-        error('unable to handle arrays of more than 2 dimensions');
+        errormsg('Unable to handle arrays of more than 2 dimensions');
+        return
     end
     old_y=y;
     y={};
@@ -628,6 +637,14 @@ switch style
             end
         end
         
+        if exist('smoothing','var') && smoothing>0
+            for i=1:length(y)
+                y{i}=smooth(y{i},smoothing);
+                y{i}=y{i}(:)';
+            end
+        end
+ 
+        
         % plot errors
         if ~exist('errorbars_sides','var')
             errorbars_sides='both';
@@ -670,7 +687,7 @@ switch style
                             dof=nan;
                         end
                         if h.h_sig{i,j}==1
-                            disp(['Differences at x=' num2str(x{j}(k),2)...
+                            disp(['GRAPH: Differences at x=' num2str(x{j}(k),2)...
                                 ' are significant. p=' num2str(h.p_sig{i,j},2)  ]);
                         end
                     end
@@ -925,7 +942,12 @@ end
 if ~isempty(extra_code)
     %evaluate_extra_code(extra_code);
     child=get(gca,'children'); %#ok<NASGU> % to be used in extra_code
-    eval(extra_code); % do evaluation here to allow access to local variables
+    try
+        eval(extra_code); % do evaluation here to allow access to local variables
+    catch me
+        errormsg(['Problem in extra code: ' extra_code]);
+        %rethrow(me);
+    end
 end
 
 

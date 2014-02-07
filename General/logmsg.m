@@ -6,6 +6,9 @@ function logmsg( msg, caller )
 % 2013, Alexander Heimel
 %
 
+if nargin<1
+    msg = '[Empty message]';
+end
 if nargin<2
     stack = dbstack(1);
     if ~isempty(stack)

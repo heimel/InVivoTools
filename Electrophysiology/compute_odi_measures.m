@@ -54,6 +54,17 @@ if isfield(record.measures,'response')
             disp('COMPUTE_ODI_MEASURES: No response field for contra test. Please re-evaluate contra test.');
             return
         end
+        if ~isfield(contra_measures,'rate')
+            errordlg('No rate field for contra test. Please re-evaluate contra test.');
+            disp('COMPUTE_ODI_MEASURES: No rate field for contra test. Please re-evaluate contra test.');
+            return
+        end
+         if ~isfield(ipsi_measures,'response')
+            errordlg('No response field for ipsi test. Please re-evaluate ipsi test.');
+            disp('COMPUTE_ODI_MEASURES: No response field for ipsi test. Please re-evaluate contra test.');
+            return
+        end
+       
         record.measures(i).odi_rate_based =  compute_odi( contra_measures(i).rate,ipsi_measures(i).rate);
         record.measures(i).odi_response_based =  compute_odi( contra_measures(i).response,ipsi_measures(i).response);
         record.measures(i).odi =  record.measures(i).odi_response_based;

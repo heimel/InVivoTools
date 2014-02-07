@@ -1,6 +1,8 @@
 function [vals,mousedb,testdb]=make_histogram(groups,measure,varargin)
 %MAKE_HISTOGRAM deprecated function
 %
+%  DEPRECATED. WILL BE REMOVED
+%
 % 2007, Alexander Heimel
 %
 %
@@ -77,7 +79,7 @@ for s=1:length(groups)
     val=[];
     for r=ind
       record=testdb(r);
-      value=get_measure_from_record(record,measure,celltype);
+      value=get_measure_from_record(record,measure);
       if isempty(value)
         value=nan;
       end

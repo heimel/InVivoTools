@@ -38,15 +38,14 @@ void loop() {
   sensorValue = sensorValue +   2 * (1-digitalRead(5));
   sensorValue = sensorValue +   4 * (1-digitalRead(4));
   sensorValue = sensorValue +   8 * (1-digitalRead(3));
-  sensorValue = sensorValue  +  16 * (1-digitalRead(2));
-  sensorValue = sensorValue +  32 * (1-digitalRead(8));
-  sensorValue = sensorValue +  64 * (1-digitalRead(0));
+  sensorValue = sensorValue +  16 * (1-digitalRead(2));
+  sensorValue = sensorValue +  32 * (1-digitalRead(0));
+  sensorValue = sensorValue +  64 * (1-digitalRead(8));
   sensorValue = sensorValue + 128 * (1-digitalRead(7));
   Serial.write(sensorValue);
-  
-  delay(10);
-  
 }
+
+
 
 
 
