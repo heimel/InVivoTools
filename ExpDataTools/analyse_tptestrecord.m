@@ -266,8 +266,11 @@ end
 % save measures file
 measuresfile = fullfile(tpdatapath(record),'tp_measures.mat');
 measures = record.measures; %#ok<NASGU>
-save(measuresfile,'measures');
-
+try 
+    save(measuresfile,'measures');
+catch
+    errormsg(['Could not write measures file ' measuresfile ]);
+end
 % remove fields that take too much memory
 record.measures = rmfields(record.measures,{'psth_tbins','psth_response'});
 
