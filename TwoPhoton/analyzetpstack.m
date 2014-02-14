@@ -1357,14 +1357,17 @@ switch command,
         if ~isempty(stimstr), stimlist = eval(stimstr); else stimlist = []; end;
         dF = get(ft(fig,'moviedFCB'),'value');
         sorted=get(ft(fig,'movieSortCB'),'value');
-        movfname = [ud.record.date '_' ud.record.epoch '_' get(ft(fig,'movieFileEdit'),'string')];
+        movietype = 'plain';
+        movfname = [ud.record.date '_' ud.record.epoch '_' get(ft(fig,'movieFileEdit'),'string') '_' movietype];
         movfname = fullfile(tpdatapath(ud.record),movfname);
         fprintf('Preparing movie...will take several seconds...\n');
         cfg = tpreadconfig( ud.record );
         movie_sync_factor = 1.02;
         fps = 1/cfg.frame_period * movie_sync_factor;
         disp(['ANALYZETPSTACK: Using movie_sync_factor ' num2str(movie_sync_factor) ]);
-        tpmovie(ud.record,ud.channel,trialslist,stimlist,sorted,dF,fps,movfname);
+        
+        
+        tpmovie(ud.record,ud.channel,trialslist,stimlist,sorted,dF,fps,movfname,movietype);
     case 'QuickMapBt'
         paramname = trim(get(ft(fig,'stimparamnameEdit'),'string'));
         scratchname = tpscratchfilename(ud.record,[],['analysis_' paramname]);
