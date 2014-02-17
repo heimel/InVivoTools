@@ -38,6 +38,8 @@ processparams = ecprocessparams(record);
 
 WaveTime_Spikes = struct([]);
 
+
+
 switch lower(record.setup)
     case 'antigua'
         Tankname = 'Mouse';
@@ -53,13 +55,12 @@ switch lower(record.setup)
         %         EVENT.timerange(2)-EVENT.strons.tril(1)+(1/EVENT.snips.Snip.sampf);
         %         EVENT.Start = +(1/EVENT.snips.Snip.sampf);
         EVENT.Start = 0;
-        if isfield(record, 'channels') &&  ~isempty(record.channels)
-            read_chan1 = record.channels;
-        else
-            read_chan1= 1:EVENT.strms(1).channels;
-        end
-        disp(['ANALYSE_ECTEST: FOR ONLY CHANNEL # ',num2str(read_chan1)]);
+
+        read_chan1 = get_channels2analyze( record );
         
+        if isempy(read_chan1)
+            read_chan1 = 1:EVENT.strms(1).channels;
+        end        
         total_length=EVENT.timerange(2)-EVENT.strons.tril(1);
         WaveTime_Fpikes=struct([]);
         for i=1:length(read_chan1)
@@ -554,3 +555,18 @@ record = add_distance2preferred_stimulus( record );
 
 return
 
+
+
+function  channels = get_channels2analyze( record )
+h_db = get_fighandle('Ec database*')
+if length(h_db)>1
+    h_db = h_db(1);
+end
+h = ft(h_db,'channels_edit')
+if ~isempty(h)
+    try
+        channels = str2num( get(h,value));
+    catch
+        channels = [];
+    end
+end
