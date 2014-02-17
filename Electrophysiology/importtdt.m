@@ -5,8 +5,8 @@ function EVENT = importtdt(EVENT)
 %the timing data of strobe events from a TDT Tank
 %
 %If used in a batch file you must initialize these values:
-%input: EVENT.Mytank = 'the tank you want to read from';
-%       EVENT.Myblock = 'the block you want to read from';
+%input: EVENT.Mytank = full path to the tank you want to read from 
+%       EVENT.Myblock = name of the block you want to read from
 %
 %output: EVENT ;  a structure containing a lot of info
 %        Trilist ; an array containing timing info about all the trials

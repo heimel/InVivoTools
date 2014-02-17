@@ -58,7 +58,7 @@ switch lower(record.setup)
 
         read_chan1 = get_channels2analyze( record );
         
-        if isempy(read_chan1)
+        if isempty(read_chan1)
             read_chan1 = 1:EVENT.strms(1).channels;
         end        
         total_length=EVENT.timerange(2)-EVENT.strons.tril(1);
@@ -570,3 +570,6 @@ if ~isempty(h)
         channels = [];
     end
 end
+
+function obj = ft(fig, name)
+obj = findobj(fig,'Tag',name);
