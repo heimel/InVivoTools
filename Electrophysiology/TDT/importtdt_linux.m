@@ -33,8 +33,8 @@ E.SNIP = hex2dec('8201');  % Snip "Snip"
 
 if nargin<1
     EVENT.Mytank = '~/Desktop/TDT_invivotools';
-    EVENT.Mytank = '/home/data/InVivo/Electrophys/Antigua/2013/12/18/Mouse/t-2';
-    EVENT.Myblock = 'Mouse_t-2';
+    EVENT.Mytank = '/home/data/InVivo/Electrophys/Antigua/2013/12/18/Mouse';
+    EVENT.Myblock = 't-2';
 end
 
 tank = EVENT.Mytank;
@@ -54,7 +54,7 @@ if isempty(blockname)
 end
 
 
-filebase = fullfile( tank,blockname);
+filebase = fullfile( tank,blockname,['Mouse_' blockname]);
 tev_path = [filebase '.tev'];
 tsq_path = [filebase '.tsq'];
 %  store_id1 = 'PDec';
@@ -136,6 +136,8 @@ end
 % get strons
 ind = find(data.type == E.STRON);
 EVENT.strons.(code2string(data.namecode(ind))) = data.timestamp(ind);
+
+EVENT.timerange = [data.timestamp(2) data.timestamp(end)]; 
 
 logmsg(['Finished reading ' blockname ' in tank ' tank]);
 

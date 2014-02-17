@@ -17,6 +17,13 @@ function EVENT = importtdt(EVENT)
 %
 %uses GetEpocsV to retrieve stobe-on epocs; Updated 17/04/2007
 
+switch computer
+    case 'GLNX86'
+        logmsg('Using TDTREAD on linux.');
+        EVENT = tdtread(EVENT);
+        return
+end
+
 
 matfile = fullfile(EVENT.Mytank,EVENT.Myblock); %name of file used to save event structure
 MatFile=fullfile(matfile,EVENT.Myblock);
