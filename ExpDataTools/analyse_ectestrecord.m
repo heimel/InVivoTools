@@ -558,11 +558,11 @@ return
 
 
 function  channels = get_channels2analyze( record )
-h_db = get_fighandle('Ec database*')
+h_db = get_fighandle('Ec database*');
 if length(h_db)>1
     h_db = h_db(1);
 end
-h = ft(h_db,'channels_edit')
+h = ft(h_db,'channels_edit');
 if ~isempty(h)
     try
         channels = str2num( get(h,value));
