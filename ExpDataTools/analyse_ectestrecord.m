@@ -70,6 +70,7 @@ switch lower(record.setup)
             for kk=1:ceil(total_length/60)
                 % clear WaveTime_chspikes
                 EVENT.Triallngth = min(60,total_length-60*(kk-1));
+                % AH: One should use EVENT.CHAN = read_chan1(i) here
                 WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
                 WaveTime_fpikes.time=[WaveTime_fpikes.time;WaveTime_chspikes(read_chan1(i),1).time];
                 WaveTime_fpikes.data=[WaveTime_fpikes.data;WaveTime_chspikes(read_chan1(i),1).data];
@@ -558,11 +559,11 @@ return
 
 
 function  channels = get_channels2analyze( record )
-h_db = get_fighandle('Ec database*')
+h_db = get_fighandle('Ec database*');
 if length(h_db)>1
     h_db = h_db(1);
 end
-h = ft(h_db,'channels_edit')
+h = ft(h_db,'channels_edit');
 if ~isempty(h)
     try
         channels = str2num( get(h,value));

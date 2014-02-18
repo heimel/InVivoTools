@@ -1,7 +1,7 @@
-function EVENT = tdtread( EVENT )
-%TDTREAD reads from TDT tank in format of tdt2ml
+function EVENT = importtdt_linux( EVENT )
+%IMPORTTDT_LINUX reads from TDT tank in format of tdt2ml
 %
-%  EVENT = TDTREAD( EVENT )
+%  EVENT = IMPORTTDT_LINUX( EVENT )
 %
 %If used in a batch file you must initialize these values:
 %input: EVENT.Mytank = full path to the tank you want to read from

@@ -20,7 +20,7 @@ function EVENT = importtdt(EVENT)
 switch computer
     case 'GLNX86'
         logmsg('Using TDTREAD on linux.');
-        EVENT = tdtread(EVENT);
+        EVENT = importtdt_linux(EVENT);
         return
 end
 

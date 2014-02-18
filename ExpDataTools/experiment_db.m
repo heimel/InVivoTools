@@ -47,6 +47,7 @@ blind_data_enabled = 0;
 analyse_all_enabled = 0;
 reverse_data_enabled = 0;
 open_data_enable = 0;
+channels_enabled = 0;
 
 switch type
     case 'oi'

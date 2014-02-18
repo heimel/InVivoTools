@@ -20,6 +20,14 @@ function CSnip = ExsnipTDT(EVENT, Trials)
 %Chris van der Togt, 11/11/2005
 %updated 01/06/2006
 
+
+switch computer
+    case 'GLNX86'
+        CSnip = ExsnipTDT_linux(EVENT, Trials);
+        return
+end
+
+
 CSnip = [];
 % Rt = strmatch(EVENT.Myevent, {EVENT.snips.Snip.name} );
 % if isempty(Rt)
