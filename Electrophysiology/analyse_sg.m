@@ -27,8 +27,8 @@ if isempty(rc)
     errordlg(msg, 'Analyse sg')
     return
 end
-    
-    
+
+
 para_rc=getparameters(rc);
 
 processparams = ecprocessparams(record);

@@ -116,7 +116,7 @@ switch lower(record.setup)
         %             return
         %         end
         
-        if isempty(WaveTime_Fpikes)
+        if isempty(WaveTime_Spikes)
             return
         end
         
@@ -260,7 +260,7 @@ end
 % end
 
 switch lower(record.setup)
-    case 'antigua'
+    case 'antiguas'
         % dont compute spike intervals
         isi = [];
     otherwise

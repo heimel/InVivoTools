@@ -100,6 +100,20 @@ switch type
             end
         end
 end
+% temporarily adding anesthetic field % 2013-03-18
+switch type
+    case {'ec'}
+        if ~isfield(db,'analysis')
+            for i=1:length(db)
+                db(i).analysis = '';
+            end
+            stat = checklock(filename);
+            if stat~=1
+                filename = save_db(db,filename,'');
+                rmlock(filename);
+            end
+        end
+end
 % temporarily adding measurement field % 2013-03-22
 %  switch type
 %      case {'tp'}

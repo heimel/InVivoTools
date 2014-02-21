@@ -81,7 +81,7 @@ switch record.datatype
     case 'ec'
         results_ectestrecord( ud.db(ud.current_record));
     case 'lfp'
-        if ~isempty(record.measures)
+        if ~isempty(record.measures) && ~strcmp(record.electrode,'wspectrum') % Mehran temporarily
             results_lfptestrecord( ud.db(ud.current_record) );
         end
     case 'tp'
