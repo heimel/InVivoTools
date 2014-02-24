@@ -1,9 +1,17 @@
-function whatever
-
+%function whatever
+%close all
 dbstop if error
 
+doplot.condition_stats = 0;
+doplot.raw_changes = 0;
+doplot.mean_psth = 0;
+doplot.spontaneous_light = 0;
+doplot.normalized_changes = 0;
+doplot.center_only = 0;
+doplot.lighteffect_normalized_data = 1;
+
 %Analyse Flash to get CSD response
-chnorder = [1:16];
+chnorder = 1:16;
 spikeon = 0;
 makedata =0;
 
@@ -12,7 +20,7 @@ makedata =0;
 base = '/home/data/InVivo/Electrophys/Antigua_Cogent';
 
 %addpath('D:\MouseLaminar\Analysis\TDT2ML')
-datadir = 'D:\MouseLaminar\Data\';
+datadir = fullfile(base,'Data');
 logdir = fullfile(base,'StimuliandLogs');
 suadir = 'D:\MouseLaminar\SUA\';
 addpath(genpath('D:\MouseLaminar\Wavelet'))
@@ -29,641 +37,50 @@ allconds(:,:,2) = isoconds;
 allconds(:,:,3) = crossconds;
 allconds(:,:,4) = surronly;
 
+logmsg('centconds = [2 3;4 5];isoconds = [6 8;12 14];crossconds = [7 9;13 15];surronly = [10 11;16 17];');
 
+
+%Conditions ar eas follows:
+%1 - Baseline
+%2 - ORI 1 SZ 1 Centre Only (grey)
+%3 - ORI 2 SZ 1 Centre Only (blue)
+%4 - ORI 1 SZ 2 Centre Only (cyan)
+%5 - ORI 2 SZ 2 Centre Only (yellow)
+
+%6 -  ORI 1 SZ 1 centre/surround (iso)   (red)
+%7 -  ORI 1 SZ 1 centre/surround (cross) (orange)
+%8 -  ORI 2 SZ 1 centre/surround (iso)   (red)
+%9 -  ORI 2 SZ 1 centre/surround (cross) (orange)
+%10 - ORI 1 SZ 1 (Surround only)
+%11 - ORI 2 SZ 1 (Surround only)
+
+%12 -  ORI 1 SZ 2 centre/surround (iso)
+%13 -  ORI 1 SZ 2 centre/surround (cross)
+%14 -  ORI 2 SZ 2 centre/surround (iso)
+%15 -  ORI 2 SZ 2 centre/surround (cross)
+%16 -  ORI 1 SZ 2 (Surround only)
+%17 -  ORI 2 SZ 2 (Surround only)
+
+%  1 = light off, 2 = light on.  (1-17 light off, 18-34 light on)
+% channels:  1 is deepest and 16 is shallowest.
+% corrected channels: depths -5:-1 to be deep, 0:1 as layer 4 and 2:4 as superficial where 0 is the layer 4 reversal point.
+%
 if makedata
-    
-    mgISP = [];
-    mgISP2 = [];
-    mgISP2_det = [];
-    mgISP3 = [];
-    mgISP3_det = [];
-    mgMUA = [];
-    mgNMUA = [];
-    mgLFP = [];
-    mgPSTH = [];
-    mgNPSTH = [];
-    mgSNR = [];
-    mgSpkSNR = [];
-    details = [];
-    windetails = [];
-    w = 0;
-    makefilt = 0;
-    notch = 0;
-    figure
-    for N = 1:length(info)
-        
-        %Reversal?
-        R = info(N).L4;
-        
-        %Includable channels, generally let's go for
-        incchans = R-5:R+4;
-        lowchan = R-5;
-        highchan = R+4;
-        
-        Stem = info(N).name;
-        Tankname = ['Mouse_',Stem];
-        nblocks = length(info(N).surroundblocks);
-        prevt = 0;
-        MATBUF = [];
-        Word = [];
-        stimon = [];
-        stimon4spk = [];
-        clear EVENT,clear Env,clear Spikes
-        
-        %Average over blocks
-        for B = 1:nblocks
-            
-            Blockno = num2str(info(N).surroundblocks(B));
-            blocknames = ['Block-',Blockno];
-            [pathstr,name,ext,versn] = fileparts(Tankname);
-            
-            %Load up the logfile for this session
-            %Mh will make this into an automatic detection
-            logfile = [Stem,'_B',Blockno];
-            logfile = fullfile(logdir,logfile);
-            load(logfile)
-            MATBUF = [MATBUF;MAT];
-            
-            clear EVENT
-            EVENT.Mytank = fullfile(datadir,Tankname);
-            EVENT.Myblock = blocknames;
-            %This will obtain the headers for the stream data (Env and LFP)
-            %The word and stimulus bits (strons)
-            %The trials structure (Trials)
-            %And snips header
-
-            EVENT = Exinf4_matt(EVENT);
-            %EVENT = tdtread(EVENT);
-            
-            %Now we need to the ephys data
-            EVENT.Myevent = 'Envl';  %must be a stream event
-            EVENT.type = 'strms';   %must be a stream event
-            EVENT.Triallngth =  2.5; %Total length
-            EVENT.Start =      -1; %Time relative to stim bit
-            EVENT.CHAN = [1:16];
-            f = find(~isnan(EVENT.Trials.stim_onset)); %This is monkey related
-            Trials = EVENT.Trials.stim_onset(f); %get stimulus onset times
-            
-            if nblocks > 1
-                buf = Exd4(EVENT, Trials);   %This functions retrieves the data for each trial
-                %Add to the env struct array
-                for chn = chnorder
-                    for n = 1:length(Trials)
-                        nn = n+prevt;
-                        Env{chn,1}(:,nn) =  buf{chn}(:,n);
-                    end
-                end
-                
-                EVENT.Myevent = 'LFPs';  %must be a stream event
-                buf = Exd4(EVENT, Trials);
-                %Add to the LFP struct array
-                for chn = chnorder
-                    for n = 1:length(Trials)
-                        nn = n+prevt;
-                        Lfp{chn,1}(:,nn) =  buf{chn}(:,n);
-                    end
-                end
-                
-                if spikeon
-                    EVENT.Myevent = 'Snip';  %must be a stream event
-                    EVENT.type = 'snips';   %must be a stream event
-                    %For 20120209 onwards this is fastsurround (1s exposure)
-                    buf = Exsnip1(EVENT, Trials);
-                    %Add to the spiks struct array
-                    for chn = chnorder
-                        for n = 1:length(Trials)
-                            nn = n+prevt;
-                            Spikes{chn,nn} = buf{chn,n};
-                        end
-                    end
-                    spchans = EVENT.snips.channels;
-                end
-                
-                
-                prevt = prevt+length(Trials);
-            else
-                Env = Exd4(EVENT, Trials);   %This functions retrieves the data for each trial
-                
-                EVENT.Myevent = 'LFPs';  %must be a stream event
-                Lfp = Exd4(EVENT, Trials);
-                
-                if spikeon
-                    EVENT.Myevent = 'Snip';  %must be a stream event
-                    EVENT.type = 'snips';   %must be a stream event
-                    Spikes = Exsnip1(EVENT, Trials);
-                    %How many spike channels are there
-                    spchans = EVENT.snips.channels;
-                end
-                
-            end
-            
-            %Sampling frequency
-            Fs = EVENT.strms(1).sampf;
-            
-            if makefilt
-                %Filters
-                fc = [50 100 150];
-                fw = 2;
-                ord = 20;
-                type = 'butter';
-                for fnm = 1:length(fc)
-                    d = fdesign.bandstop('N,F3dB1,F3dB2',fw,fc(fnm)-fw,fc(fnm)+fw,Fs);
-                    eval(['Hd' num2str(fnm) ' = design(d,type);']);
-                end
-                makefilt = 0;
-            end
-            
-              %Thesecare the times of the stimulus bits - the time of the
-            %first stimulus...
-            stimon = [stimon;EVENT.Trials.stim_onset-EVENT.Trials.stim_onset(1)];
-            stimon4spk = [stimon4spk;EVENT.Trials.stim_onset];
-            
-            %Read in the word bit
-            Word = [Word;EVENT.Trials.word];
-            
-            
-            
-        end
-        
-        %reassign MAT
-        MAT = MATBUF;
-        
-        wn = find(isnan(Word));
-        Word(wn) = [];
-        
-           %Save out the ITI
-        ITI = stimon(2:1:end)-stimon(1:1:end-1);
-        ITI = [NaN;ITI];
-        
-        %         if strmatch(Stem,'20120913') & B == 1
-        %             MAT(1101:1104,:) = [];
-        %         end
-        
-        if strmatch(Tankname,'Mouse_20130122') & Blockno == '9'
-            Word(830:end) = [];
-            MAT(830:end,:) = [];
-        end
-        
-        if strmatch(Tankname,'Mouse_20130226') & Blockno == '11'
-            Word = [30;Word];
-            Word(1013:end) = [];
-            stimon(1013:end) = [];
-            stimon4spk(1013:end) = [];
-            for chn = 1:16
-                a = Env{chn};
-                a(:,1013:end) = [];
-                Env{chn} = a;
-            end
-        end
-        
-        
-        if strmatch(Tankname,'Mouse_20130305') & Blockno == '7'
-            MAT(1001:end,:) = [];
-            Word(1001:end) = [];
-            stimon(1001:end) = [];
-            stimon4spk(1001:end) = [];
-            for chn = 1:16
-                a = Env{chn};
-                a(:,1001:end) = [];
-                Env{chn} = a;
-            end
-        end
-        
-        if strmatch(Tankname,'Mouse_20130305') & Blockno == '11'
-            MAT(1022,:) = [];
-        end
-        
-        if length(Word) ~= length(MAT)
-            disp('Word/MAt length mismatch')
-            a = 1;
-            return
-        end
-        
-        if sum(Word ~= MAT(:,4))
-            disp('Word/MAt details mismatch')
-            return
-        end
-        
-        
-        %Design notch - not used anymore
-        
-        %         if notch
-        %             no = 2;
-        %             wn = [48 52]./(Fs./2);
-        %             [fb,fa] = butter(no,wn,'stop');
-        %             Hd = dfilt.df2t(fb,fa);
-        %         end
-        
-        %look for outliers%%%%%%%%%%%%
-        for chn = chnorder
-            
-            
-            
-            %Look at mean across time
-            a = Env{chn};
-            %look at sample vals
-            av = reshape(a,size(a,1).*size(a,2),1);
-            %remove negative values
-            av(av<0) = NaN;
-            
-            %remove outliers with double z-score removal
-            zav = (av-nanmean(av))./nanstd(av);
-            av(abs(zav)>4) = NaN;
-            zav = (av-nanmean(av))./nanstd(av);
-            av(abs(zav)>4) = NaN;
-            
-            %remove trials with extreme means
-            a = reshape(av,size(a,1),size(a,2));
-            amp = nanmean(a);
-            zamp = (amp-mean(amp))./std(amp);
-            a(:,abs(zamp)>4) = NaN;
-            
-            Env{chn} = a;
-            
-        end
-        
-        %read in sizes
-        allwords = unique(Word);
-        aws(N) = length(allwords)
-        
-        %Go through trialtypes and get neural data
-        px = ((0:(Fs.*EVENT.Triallngth))./Fs)+EVENT.Start;
-        preT = find(px > -0.3 & px < 0);
-        peakT = find(px > 0.05 & px < 0.25);
-        anaT = find(px > 0 & px < 1);
-        binwidth = 0.01;
-        
-        %PSTH timebase
-        TB = EVENT.Start:binwidth:(EVENT.Start+EVENT.Triallngth);
-        TB = TB(1:end-1);
-        preTB = find(TB>-0.3 & TB<0);
-        anaTB = find(TB>0 & TB<1);
-        peakTB = find(TB>0.05 & TB<0.25);
-        
-        
-        %this is the part that calculates the mean response to each size
-        m = 0;
-        clear TRIALLFP,clear TRIALMUA
-        clear trialdetails
-        for chn = chnorder
-            
-            ENV = Env{chn};
-            FPT = Lfp{chn};
-            
-            if strmatch(Tankname,'Mouse_20130122') & Blockno == '9'
-                ENV(:,830:end) = [];
-            end
-            
-            meanMUA = [];
-            meanLFP = [];
-            SNR = [];
-            statmua = [];
-            statdets = [];
-            
-            for a = 1:length(allwords)
-                
-                %Find all the rows of the MAT matrix of a particular size
-                f = find(Word == allwords(a));
-                ntrials(a,N) = length(f);
-                
-                z = 0;
-                MUA = [];
-                LFP = [];
-                %SUA, MUA, LFP
-                Alltimes = [];
-                for x = 1:length(f)  %repetitions of this size
-                    z = z+1;
-                    if spikeon
-                        if chn <= spchans
-                            buf = Spikes{chn,f(x)};
-                            if ~isempty(buf)
-                                T = [];
-                                for u = 1:length(buf)
-                                    T(u) = buf(u).time;
-                                end
-                                Rast(z).T = T-stimon4spk(f(x));
-                                Alltimes = [Alltimes,T-stimon4spk(f(x))];
-                            end
-                        end
-                    end
-                    
-                    %Asign MUA data
-                    MUA(z,:) = ENV(:,f(x))';
-                end
-                
-                %Makes PSTH, not currently baseline corrected
-                if spikeon
-                    if ~isempty(Alltimes)
-                        TB = EVENT.Start:binwidth:(EVENT.Start+EVENT.Triallngth);
-                        PSTH = histc(Alltimes,TB)./binwidth./z;
-                        TB = TB(1:end-1);
-                        meanPSTH(a,:) = PSTH(1:end-1);
-                        
-                        %Make an SNR
-                        %Number spikes in stimon time
-                        PkSpk = length(find(Alltimes>0.05 & Alltimes < 0.35));
-                        BkSpk = length(find(Alltimes<0));
-                        RespSpk = PkSpk-BkSpk;
-                        
-                        BkSpkT = zeros(1,z);
-                        for h = 1:length(Rast)
-                            BkSpkT(h) = length(find(Rast(h).T<0));
-                        end
-                        SpkStd = std(BkSpkT);
-                        
-                        SpkSNR(a) = RespSpk./SpkStd;
-                        
-                    else
-                        meanPSTH(a,:) = ones(1,length(TB)).*NaN;
-                        SpkSNR(a) = NaN;
-                    end
-                end
-                
-                
-                %Mean MUA
-                meanMUA(a,:) = nanmean(MUA);
-                
-                %SAve out the MUA for individual channel stats
-                statmua = [statmua;MUA];
-                statdets = [statdets;ones(ntrials(a,N),1).*a];
-                
-                
-                %Work out a SNR for this response
-                %Currently the peak response divided by the std of the mean
-                %baseline
-                SNR(a) = mean(meanMUA(a,peakT))./std(meanMUA(a,preT));
-                
-            end
-            
-            %Measure baseline
-            %USe baseline from the NONOPTO conditions
-            base = nanmean(nanmean(meanMUA(1:17,preT),2));
-            
-            %Individual channel stats, subtract off across conditions
-            %baseline
-            statmua = statmua-base;
-            
-            %Normalise MUA to maximum smoothed MUA from teh centre only
-            %condition.
-            clear buf
-            for a = 2:3
-                buf(a) = max(smooth(meanMUA(a,peakT)-base,10));
-            end
-            mx = max(buf);
-            normMUA = (meanMUA-base)./mx;
-            
-            %Normalize PSTH and subtract off baseline rate
-            if spikeon
-                
-                %PSTH baseline
-                TBbase = nanmean(nanmean(meanPSTH(1:17,preTB),2));
-                
-                clear buf
-                h = 0;
-                for a = 2:3
-                    h = h+1;
-                    buf(h) = max(smooth(meanPSTH(a,peakTB)-TBbase,4));
-                end
-                mx = max(buf);
-                
-                NPSTH = (meanPSTH-TBbase)./mx;
-                
-                mgPSTH = [mgPSTH;meanPSTH];
-                mgNPSTH = [mgNPSTH;NPSTH];
-                mgSpkSNR = [mgSpkSNR;SpkSNR'];
-            end
-            
-            %Now add these mean values to the MEGA matrix
-            mgMUA = [mgMUA;meanMUA];
-            mgNMUA = [mgNMUA;normMUA];
-            %             mgLFP = [mgLFP;meanLFP];
-            mgSNR = [mgSNR;SNR'];
-            
-            %PEN no, channel number, adjusted channel number, cond
-            details = [details;[repmat([N,chn,chn-R],length(allwords),1),[1:length(allwords)]']];
-            
-            %STATS
-            %Individual condition light on/off tests
-            clear stat
-            for a = 1:17
-                f = find(statdets == a);
-                on = nanmean(statmua(f,anaT),2);
-                f = find(statdets == a+17);
-                off = nanmean(statmua(f,anaT),2);
-                
-                %2 sample non-para test
-                stat(a,1) = ranksum(on(~isnan(on)),off(~isnan(off)));
-            end
-            isp(chn,:,N) = stat';
-            mgISP = [mgISP;[stat;NaN(17,1)]];
-            
-            %Grouped conditions
-            q = 0;
-            for a = 1:4
-                for sz = 1:2
-                    q = q+1;
-                    f = find(statdets == allconds(sz,1,a) | statdets == allconds(sz,2,a));
-                    on = nanmean(statmua(f,anaT),2);
-                    f = find(statdets == allconds(sz,1,a)+17 | statdets == allconds(sz,2,a)+17);
-                    off = nanmean(statmua(f,anaT),2);
-                    
-                    %2 sample non-para test
-                    isp2(chn,q,N) = ranksum(on(~isnan(on)),off(~isnan(off)));
-                    mgISP2 = [mgISP2;isp2(chn,q,N)];
-                    mgISP2_det = [mgISP2_det;[N,chn,chn-R,q]];
-                end
-            end
-            
-            %Does light affect baseline?
-            f = find(statdets < 18);
-            off = nanmean(statmua(f,preT),2);
-            f = find(statdets > 17);
-            on = nanmean(statmua(f,preT),2);
-            mgISP3 = [mgISP3;ranksum(on(~isnan(on)),off(~isnan(off)))];
-            mgISP3_det = [mgISP3_det;[N,chn,chn-R]];
-            
-            
-        end
-        
-        %End of channels
-        subplot(6,4,N),imagesc(isp2(:,:,N)<0.05)
-        
-        if 0
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %Here we can do the LFP analysis
-            %MEasure power in certain time range
-            beg = 0.1;
-            fin = 0.5;
-            tf = find(px >= beg & px <= fin);
-            
-            %Build up the 3d data (samples x chans x trials)
-            z = 0;
-            clear RDS
-            for chn = incchans
-                z = z+1;
-                f = find(trialdetails(:,1) == chn & trialdetails(:,2) == 9);
-                slfp = TRIALLFP(f,:);
-                %Subtract off mean LFP/MUA?
-                slfp = slfp-repmat(nanmean(slfp),size(slfp,1),1);
-                RDS(:,z,:) = slfp';
-            end
-            RDS = sinfit50(RDS,Fs);
-            [TAChn frq] = GetPowerWavelet(RDS);
-            frqs = frq.*Fs;
-            
-            %Save out for averaging
-            TFP(:,:,N) = TAChn;
-            FRQ(N,:) = frqs;
-            
-            if 0
-                %%PLOTS
-                figure; surf(px(tf),Fs*frq,mean(TAChn(:,tf,:),3),'EdgeColor','none')
-                xlabel('Time from stimulus oNSaet (ms)');
-                set(gca, 'yscale', 'log', 'ytick', [5.0 10.0 25.0 50.0 100.0 150.0])
-                ylabel('Frequencies (Hz)');
-                set(gca,'FontSize',22);
-                axis tight; axis square; view(0,90);
-                % shading interp
-                
-                % Line plot of LFP power in modulation period
-                figure; plot(Fs*frq,squeeze(mean(mean(TAChn(:,tf,:),3),2))')
-                xlabel('Frequencies (Hz)');
-                set(gca, 'xscale', 'log', 'xtick', [5.0 10.0 25.0 50.0 100.0 150.0])
-                ylabel('LFP Power');
-                set(gca,'FontSize',22);
-                axis tight; axis square; box off;
-            end
-            
-            %Get power in certain bands
-            Range = [1 3;8 12;13 19;30 80];
-            for r = 1:size(Range,1)
-                f = find(Fs*frq >= Range(r,1) & Fs*frq <= Range(r,2));
-                Power(N,r) = mean(squeeze(mean(mean(TAChn(f,tf,:),3),2)));
-            end
-            Power
-            
-            N
-        end
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        
-    end  %On to next dataset
-    
-    %First data pres: SurroundDataOpto_1
-    
-   logmsg('Temporarily not saving');
-   % save SurroundDataOpto_1   
-else
-    
-    load SurroundDataOpto_1
+    Mouse_Surround2SZ_OPTO_BATCH_make_data; %#ok<*UNRCH>
+elseif ~exist('loaded_data','var') || loaded_data == 0
+    load(fullfile(datadir,'SurroundDataOpto_1.mat'));
+    loaded_data = 1;
 end % makedata
 
-% if makedata
-%     return
-% end
+logmsg('Details [Tx5] = Pen no, channel number, adjusted channel number, cond, include');
 
-gt = find(px >= 0 & px <= 1);
-cutoff = 0;
-
-%Color
-szcol = [0 0 0;0.5 0.5 0.5;0 0 0;0 1 1;0 0 1;1 0 0;1 0.6 0.2;1 0 0;1 0.6 0.2;0 1 0;0.2 0.8 0.2;1 0 0;1 0.6 0.2;1 0 0;1 0.6 0.2;0 1 0;0.2 0.8 0.2];
-surrcol = [0 0 0;0.5 0.5 0.5;1 0 0;1 0.6 0.2;0 1 0];
-
-incchans = [-5:1:4];
-nchans = length(incchans);
-
-
-%Plot otu significance effetcs
-%FOR COND BY COND
-figure
-stat = NaN(10,17,N);
-for n = 1:N
-    for chn = 1:length(incchans)
-        for a = 1:17
-            f = find(details(:,3) == incchans(chn) & details(:,4) == a & details(:,1) == n);
-            if ~isempty(f)
-                stat(chn,a,n) = mgISP(f)<0.05;
-            end
-        end
-    end
-    subplot(6,4,n),imagesc(flipud(stat(:,:,n)))
-end
-figure,imagesc(flipud(nanmean(stat,3)))
-title('Individual condition stats')
-
-%FOR GROUPED CONDS
-figure
-stat = NaN(10,8,N);
-for n = 1:N
-    for chn = 1:length(incchans)
-        for a = 1:8
-            %N,chn,chn-R,cond
-            f = find(mgISP2_det(:,3) == incchans(chn) & mgISP2_det(:,4) == a & mgISP2_det(:,1) == n);
-            if ~isempty(f)
-                stat(chn,a,n) = mgISP2(f)<0.05;
-            end
-        end
-    end
-    subplot(6,4,n),imagesc(flipud(stat(:,:,n)))
-end
-figure,imagesc(flipud(nanmean(stat,3)))
-title('Grouped condition stats')
-
-
-%Raw light indiced changes in response
-figure
-for n = 1:N
-    clear Mn
-    %Get mean responses to all conds
-    tm = find(px>0 & px<1);
-    for o = 1:2
-        for chn = 1:length(incchans)
-            for a = 1:17
-                %PEN no, channel number, adjusted channel number, cond
-                cond = a+((o-1)*17);
-                f = find(details(:,3) == incchans(chn) & details(:,4) == cond & details(:,1) == n);
-                %Take mean actitivity caross pens
-                Mn(chn,a,o) = nanmean(nanmean(mgNMUA(f,tm)));
-                Mns(chn,a,o) = std(nanmean(mgNMUA(f,tm)))./sqrt(length(f));
-            end
-        end
-    end
-    %Changes ion raw data
-    change = Mn(:,:,2)-Mn(:,:,1);
-    subplot(6,4,n),bar(incchans,change);
-    title('Light induced changes in raw data')
-    %     legend({'Spont','Sz 1, Ori 1','Sz 1, Ori 2','Sz 2, Ori 1','Sz 2, Ori 2'})
-    
-end
-
-%SAme for PSTH, (also include SNR in the equation-not done yet)
-figure
-for n = 1:N
-    clear Mn
-    %Get mean responses to all conds
-    tbm = find(TB>0 & TB<1);
-    for o = 1:2
-        for chn = 1:length(incchans)
-            for a = 1:17
-                %PEN no, channel number, adjusted channel number, cond
-                cond = a+((o-1)*17);
-                f = find(details(:,3) == incchans(chn) & details(:,4) == cond & details(:,1) == n);
-                %Take mean actitivity caross pens
-                Mn(chn,a,o) = nanmean(nanmean(mgNPSTH(f,tbm)));
-                Mns(chn,a,o) = std(nanmean(mgNPSTH(f,tbm)))./sqrt(length(f));
-            end
-        end
-    end
-    %Changes ion raw data
-    change = Mn(:,:,2)-Mn(:,:,1);
-    subplot(6,4,n),bar(incchans,change);
-    title('Light induced changes in raw data - PSTH')
-    %     legend({'Spont','Sz 1, Ori 1','Sz 1, Ori 2','Sz 2, Ori 1','Sz 2, Ori 2'})
-    
-end
 
 %Exclude any PENS?
 %MAe another col of detauils (col 5) which contains an inclusion flag
 exclude = [1 2 14 19];
+include = setdiff(1:N, exclude);
+logmsg(['Excluding ' mat2str(exclude) ] );
+
 details(:,5) = ones(size(details,1),1);
 for e = 1:length(exclude)
     f = find(details(:,1) == exclude(e));
@@ -671,30 +88,379 @@ for e = 1:length(exclude)
 end
 
 
-%PSTHS
-legtext = ['Cent ';'Iso  ';'Cross';'Surr '];
-for sz = 1:2
-    figure
-    for a = 1:4 %cent,iso,cross
-        %size, inccchans
-        cn1 = allconds(sz,1,a);
-        cn2 = allconds(sz,2,a);
-        f = find(details(:,5) & (details(:,4) == cn1 | details(:,4) == cn2 )  & (details(:,3) >= 0 & details(:,3) <= 2));
-        buf = mean(mgNMUA(f,:));
-        bufs = std(mgNMUA(f,:))./sqrt(length(f));
-        h = errorbar(px(2:end),smooth(buf,5),smooth(bufs,5));
-        errorbar_tick(h,0,'units')
-        set(h,'Color',surrcol(a+1,:))
-        hold on
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% ALEXANDER
+
+
+incchans = [-5:1:4];
+nchans = length(incchans);
+
+suppression_index = nan(N,nchans,2);
+suppression2_index = nan(N,nchans,2);
+crossiso_index = nan(N,nchans,2);
+
+response_period = (px>0 & px<1);
+
+response_threshold = -inf; % x std, use -Inf to set no threshold
+logmsg(['Response threshold = ' num2str(response_threshold) ' x std']);
+
+mgresponses = mean(mgMUA(:,response_period),2);
+mgresponsesstd = std(mgMUA(:,response_period),[],2);
+
+
+
+
+for ch = 1:length(incchans)
+    ach = incchans(ch);
+    for p=include
+        r = nan(17,2);
+        for t=1:2
+            ind_baseline = find(details(:,1)==p & details(:,3)==ach & details(:,4)==(t-1)*17+1);
+            
+            threshold = mgresponses(ind_baseline)+response_threshold*mgresponsesstd(ind_baseline);
+            
+            
+            for c=1:17
+                tc = (t-1)*17+c;
+                ind = find(details(:,1)==p & details(:,3)==ach & details(:,4)==tc);
+                if length(ind)>1
+                    errormsg('Multiple entries');
+                end
+                if ~isempty(ind) && (mgresponses(ind)>threshold||c==1)
+                    r(c,t) = mgresponses(ind);
+                end
+                mgresponding(ind) = (mgresponses(ind)>threshold|c==1);
+            end
+            suppression_index(p,ch,t) = (r(3,t)+r(2,t)-r(8,t)-r(6,t))/(r(3,t)+r(2,t)-2*r(1,t));  % baseline subtracted SI
+            suppression2_index(p,ch,t) = (r(4,t)+r(5,t)-r(12,t)-r(14,t))/(r(4,t)+r(5,t)-2*r(1,t));  % baseline subtracted SI
+            crossiso_index(p,ch,t) = (r(7,t)+r(9,t)-r(8,t)-r(6,t))/(r(7,t)+r(9,t)-2*r(1,t));  % baseline subtracted SI
+
+        end
+        if suppression_index(p,ch,1)>0.38 && suppression_index(p,ch,1)<1 && suppression_index(p,ch,2)<0.29
+           % p,ch
+        end
     end
-    legend(legtext);
-    xlim([0 0.3])
 end
+% suppression_index = clip(suppression_index,0.5,0.5);
+%     suppression_index = suppression_index(include,:);
+%     suppression2_index = suppression2_index(include,:);
+%    crossiso_index = crossiso_index(include,:);
+
+suppression_index(exclude,:,:) = nan;
+suppression2_index(exclude,:,:) = nan;
+crossiso_index(exclude,:) = nan;
+
+name = 'Suppresion index';
+h = figure('name',name);
+plot(suppression_index(:,:,1),suppression_index(:,:,2),'k.','markersize',20)
+xlabel('Suppression index (Off)');
+ylabel('Suppression index (On)');
+xlim([0 0.6]);  % could be too narrow
+ylim([0 0.6]);  % could be too narrow
+box off
+xyline;
+bigger_linewidth(2);
+save_figure(subst_filechars(name),getdesktopfolder,h);
+p = signrank(flatten(suppression_index(:,:,1)),flatten(suppression_index(:,:,2)));
+logmsg(['Change in suppression index, p = ' num2str(p,3) ', wilcoxon (not all independent!)']);
+
+pv.si = nan(nchans,1);
+pv.si2 = nan(nchans,1);
+pv.cii = nan(nchans,1);
+
+for ch = 1:length(incchans)
+    ind_suppressed = (suppression_index(:,ch,1)>0.2);
+    ind_suppressed2 = (suppression2_index(:,ch,1)>0.2);
+    % figure('name','Suppresion index light on light off');
+    % plot(suppression_index(:,1),suppression_index(:,2),'.')
+    % axis([0 1 0 1]);
+    % xyline
+try
+    pv.si(ch) = signrank(suppression_index(ind_suppressed,ch,1),suppression_index(ind_suppressed,ch,2));
+end    %  logmsg(['Change in SI, Adjusted channel = ' num2str(ach) ' signrank test, p = ' num2str(pv.si(ch),3)]);
+    % figure('name','Suppresion2 index light on light off');
+    % plot(suppression2_index(:,1),suppression2_index(:,2),'.')
+    % axis([0 1 0 1]);
+    % xyline
+   try
+       pv.si2(ch) = signrank(suppression2_index(ind_suppressed2,ch,1),suppression2_index(ind_suppressed2,ch,2));
+   end
+       %   logmsg(['Change in SI2, Adjusted channel = ' num2str(ach) ' signrank test, p = ' num2str(pv.si2(ch),3)]);
+    %   pv.sivsi2(ch) = signrank(suppression_index(:,1),suppression2_index(:,1));
+    try
+    pv.cii(ch) = signrank(crossiso_index(:,ch,1),crossiso_index(:,ch,2));
+    end
+    %    logmsg(['Change in CII, Adjusted channel = ' num2str(ach) ' signrank test, p = ' num2str(pv.cii(ch),3)]);
+end
+name = 'Optogenetic modulation of suppression, p-value';
+h = figure('Name',name);
+hold on
+plot(incchans,pv.si,'k');
+plot(incchans,pv.si2,'r');
+plot(incchans,pv.cii,'b');
+plot([min(incchans) max(incchans)],[0.05 0.05],'k--');
+legend('p change SI','p change SI2','p change CII')
+xlabel('Channel (Deep -> Shallow)');
+ylabel('p-value, Optogenetic modulation of suppression');
+save_figure(subst_filechars(name),getdesktopfolder,h);
+
+
+% now compute NMUA PSTH for specific layer 
+ch = 8;
+ach =incchans(ch);
+mnmua = nan(N,17,2,size(mgMUA,2));
+for p=include
+    for t=1:2
+        for c=1:17
+            tc = (t-1)*17+c;
+            ind = (details(:,1)==p & details(:,3)==ach & details(:,4)==tc);
+            r(c,t) = mgresponses(ind);
+            if mgresponding(ind) &&  suppression_index(p,ch,1)>0 % otherwise center smaller than rf
+                mnmua(p,c,t,:) = mgMUA(ind,:);
+            end
+        end
+        for c=2:17
+            mnmua(p,c,t,:) = mnmua(p,c,t,:) - mnmua(p,1,t,:); % subtract baseline
+        end
+    end
+    for t=1:2
+        for c=1:17
+            %nmnmua(p,c,t,:) = mnmua(p,c,t,:) / (max(mnmua(p,2,1,:)+mnmua(p,3,1,:))/2); % max
+            nmnmua(p,c,t,:) = mnmua(p,c,t,:) / (mean(mnmua(p,2,1,:)+mnmua(p,3,1,:))/2); 
+        end
+    end
+end
+
+name = ['Surround suppression through feedback - adj channel ' num2str(ach)];
+h = figure('name',name);
+hold on
+plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,2,1,:)+nmnmua(:,3,1,:),1)),50)/2,'k');
+plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,2,2,:)+nmnmua(:,3,2,:),1)),50)/2,'k--');
+plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,6,1,:)+nmnmua(:,8,1,:),1)),50)/2,'r');
+plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,6,2,:)+nmnmua(:,6,2,:),1)),50)/2,'r--');
+xlim([-0.1 0.7]);
+xlabel('Time (s)');
+ylabel('Response');
+legend('Center','Center + Light','C+S','C+S + Light','location','southeast'); legend boxoff
+bigger_linewidth(2);
+save_figure(subst_filechars(name),getdesktopfolder,h);
+
+
+name = ['Cross iso suppression through feedback - adj channel ' num2str(ach)];
+h = figure('name',name);
+hold on
+plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,2,1,:)+nmnmua(:,3,1,:),1)),50)/2,'k');
+plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,2,2,:)+nmnmua(:,3,2,:),1)),50)/2,'k--');
+plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,6,1,:)+nmnmua(:,8,1,:),1)),50)/2,'r');
+plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,6,2,:)+nmnmua(:,6,2,:),1)),50)/2,'r--');
+plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,7,1,:)+nmnmua(:,9,1,:),1)),50)/2,'g');
+plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,7,2,:)+nmnmua(:,9,2,:),1)),50)/2,'g--');
+xlim([-0.1 0.7]);
+xlabel('Time (s)');
+ylabel('Response');
+legend('Center','Center + Light','C+Iso','C+Iso + Light','C+Cross','C+Cross + Light','location','southeast'); legend boxoff
+bigger_linewidth(2);
+save_figure(subst_filechars(name),getdesktopfolder,h);
+
+
+% p = 16;
+% ch = 8;
+% figure
+% hold on
+% ind1 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==1);
+% ind2 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==2);
+% ind3 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==3);
+% ind6 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==6);
+% ind8 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==8);
+% r_center = mgMUA(ind2,:)+mgMUA(ind3,:)-2*mgMUA(ind1,:);
+% r_surround = mgMUA(ind6,:)+mgMUA(ind8,:)-2*mgMUA(ind1,:);
+% plot(px(2:end),smooth(r_center,10),'k');
+% plot(px(2:end),smooth(r_surround,10),'r');
+% ind = (px>0 & px<1);
+% (mean(r_center(ind))-mean(r_surround(ind)))/mean(r_center(ind))
+% 
+% ind11 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==1+17);
+% ind21 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==2+17);
+% ind31 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==3+17);
+% ind61 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==6+17);
+% ind81 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==8+17);
+% r_center = mgMUA(ind21,:)+mgMUA(ind31,:)-2*mgMUA(ind11,:);
+% r_surround = mgMUA(ind61,:)+mgMUA(ind81,:)-2*mgMUA(ind11,:);
+% plot(px(2:end),smooth(r_center,10),'k--');
+% plot(px(2:end),smooth(r_surround,10),'r--');
+% ind = (px>0 & px<1);
+% (mean(r_center(ind))-mean(r_surround(ind)))/mean(r_center(ind))
+% 
+
+
+
+
+
+return
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+gt = find(px >= 0 & px <= 1);
+cutoff = 0;
+
+%Color
+szcol = [0 0 0;0.5 0.5 0.5;0 0 0;0 1 1;0 0 1;1 0 0;1 0.6 0.2;1 0 0;1 0.6 0.2;0 1 0;0.2 0.8 0.2;1 0 0;1 0.6 0.2;1 0 0;1 0.6 0.2;0 1 0;0.2 0.8 0.2; ];
+surrcol = [0 0 0;0.5 0.5 0.5;1 0 0;1 0.6 0.2;0 1 0];
+
+
+
+%Plot otu significance effects
+if doplot.condition_stats % stats
+    %FOR COND BY COND
+    figure
+    stat = NaN(10,17,N);
+    for n = 1:N
+        for chn = 1:length(incchans)
+            for a = 1:17
+                f = find(details(:,3) == incchans(chn) & details(:,4) == a & details(:,1) == n);
+                if ~isempty(f)
+                    stat(chn,a,n) = mgISP(f)<0.05;
+                end
+            end
+        end
+        subplot(6,4,n);
+        imagesc(flipud(stat(:,:,n)));
+        if mod(n,4)==1
+            ylabel('Channel');
+        end
+        if n>20
+            xlabel('Condition');
+        end
+    end
+    figure
+    imagesc(flipud(nanmean(stat,3)))
+    xlabel('Condition');
+    ylabel('Channel');
+    title('Individual condition stats')
+    
+    %FOR GROUPED CONDS
+    figure
+    stat = NaN(10,8,N);
+    for n = 1:N
+        for chn = 1:length(incchans)
+            for a = 1:8
+                %N,chn,chn-R,cond
+                f = find(mgISP2_det(:,3) == incchans(chn) & mgISP2_det(:,4) == a & mgISP2_det(:,1) == n);
+                if ~isempty(f)
+                    stat(chn,a,n) = mgISP2(f)<0.05;
+                end
+            end
+        end
+        subplot(6,4,n),imagesc(flipud(stat(:,:,n)))
+        if mod(n,4)==1
+            ylabel('Channel');
+        end
+        if n>20
+            xlabel('Condition');
+        end
+    end
+    figure;
+    imagesc(flipud(nanmean(stat,3)))
+    xlabel('Grouped condition');
+    ylabel('Channel');
+    title('Grouped condition stats')
+end
+
+
+if doplot.raw_changes
+    %Raw light indiced changes in response
+    figure('Name','Light induced changes in raw data');
+    for n = 1:N
+        clear Mn
+        %Get mean responses to all conds
+        tm = find(px>0 & px<1);
+        for o = 1:2
+            for chn = 1:length(incchans)
+                for a = 1:17
+                    %PEN no, channel number, adjusted channel number, cond
+                    cond = a+((o-1)*17);
+                    f = find(details(:,3) == incchans(chn) & details(:,4) == cond & details(:,1) == n);
+                    %Take mean actitivity caross pens
+                    Mn(chn,a,o) = nanmean(nanmean(mgNMUA(f,tm))); %#ok<*SAGROW>
+                    Mns(chn,a,o) = std(nanmean(mgNMUA(f,tm)))./sqrt(length(f));
+                end
+            end
+        end
+        %Changes ion raw data
+        change = Mn(:,:,2)-Mn(:,:,1);
+        subplot(6,4,n),bar(incchans,change);
+        %     legend({'Spont','Sz 1, Ori 1','Sz 1, Ori 2','Sz 2, Ori 1','Sz 2, Ori 2'})
+    end
+    
+    
+    
+    %SAme for PSTH, (also include SNR in the equation-not done yet)
+    figure('Name','Light induced changes in raw data - PSTH');
+    for n = 1:N
+        clear Mn
+        %Get mean responses to all conds
+        tbm = find(TB>0 & TB<1);
+        for o = 1:2
+            for chn = 1:length(incchans)
+                for a = 1:17
+                    %PEN no, channel number, adjusted channel number, cond
+                    cond = a+((o-1)*17);
+                    f = find(details(:,3) == incchans(chn) & details(:,4) == cond & details(:,1) == n);
+                    %Take mean actitivity caross pens
+                    Mn(chn,a,o) = nanmean(nanmean(mgNPSTH(f,tbm)));
+                    Mns(chn,a,o) = std(nanmean(mgNPSTH(f,tbm)))./sqrt(length(f));
+                end
+            end
+        end
+        %Changes ion raw data
+        change = Mn(:,:,2)-Mn(:,:,1);
+        subplot(6,4,n),bar(incchans,change);
+        %     legend({'Spont','Sz 1, Ori 1','Sz 1, Ori 2','Sz 2, Ori 1','Sz 2, Ori 2'})
+    end
+end
+
+
+
+
+%PSTHS
+if doplot.mean_psth
+    
+    legtext = ['Cent ';'Iso  ';'Cross';'Surr '];
+    for sz = 1:2
+        figure('name',['PSTH - Size ' num2str(sz)]);
+        for a = 1:4 %cent,iso,cross
+            %size, inccchans
+            cn1 = allconds(sz,1,a);
+            cn2 = allconds(sz,2,a);
+            f = find(details(:,5) & (details(:,4) == cn1 | details(:,4) == cn2 )  & (details(:,3) >= 0 & details(:,3) <= 2));
+            buf = mean(mgNMUA(f,:));
+            bufs = std(mgNMUA(f,:))./sqrt(length(f));
+            h = errorbar(px(2:end),smooth(buf,5),smooth(bufs,5));
+            errorbar_tick(h,0,'units')
+            set(h,'Color',surrcol(a+1,:))
+            hold on
+        end
+        legend(legtext);
+        xlim([0 0.3])
+        xlabel('Time (s)');
+        ylabel('NMUA');
+    end
+    
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Get the mean response to allconditons
 %Then plot out comparisons
-incchans = [-5:4];
+incchans = [-5:4]; %#ok<*NBRAK>
 clear Mn
 tm = find(px>0 & px<0.5);
 for o = 1:2
@@ -710,43 +476,68 @@ for o = 1:2
     end
 end
 
+
 %plot out raw data
-figure,subplot(2,1,1),bar(incchans,Mn(:,1:5,1));
-% hold on,errorbar(incchans,Mn(:,2:5,1),Mns(:,2:5,1))
-title('Responses to center only condition')
-subplot(2,1,2),bar(incchans,Mn(:,1:5,2))
-% hold on,errorbar(incchans,Mn(:,2:5,2),Mns(:,2:5,2))
-legend({'Spont','Sz 1, Ori 1','Sz 1, Ori 2','Sz 2, Ori 1','Sz 2, Ori 2'})
-title('Normalized data')
+if doplot.center_only
+    figure;
+    subplot(2,1,1);
+    bar(incchans,Mn(:,1:5,1));
+    % hold on,errorbar(incchans,Mn(:,2:5,1),Mns(:,2:5,1))
+    title('Responses to center only condition')
+    xlabel('Channel (Deep - Top)');
+    
+    subplot(2,1,2);
+    bar(incchans,Mn(:,1:5,2))
+    % hold on,errorbar(incchans,Mn(:,2:5,2),Mns(:,2:5,2))
+    legend({'Spont','Sz 1, Ori 1','Sz 1, Ori 2','Sz 2, Ori 1','Sz 2, Ori 2'})
+    title('Normalized data')
+    xlabel('Channel (Deep - Top)');
+end
+
 
 %Spontaneuos activity
-figure,errorbar(incchans,Mn(:,1,1),Mns(:,1,1),'k')
-hold on,errorbar(incchans,Mn(:,1,2),Mns(:,1,2),'b')
+if doplot.spontaneous_light
+    figure,errorbar(incchans,Mn(:,1,1),Mns(:,1,1),'k')
+    hold on,errorbar(incchans,Mn(:,1,2),Mns(:,1,2),'b')
+    title('Spontaneous activity');
+    xlabel('Channel (Deep - Top)');
+end
 
-%Changes ion raw data
-change = Mn(:,1:5,2)-Mn(:,1:5,1);
-figure,bar(incchans,change);
-title('Light induced changes in normalized data (Centre only)')
-legend({'Spont','Sz 1, Ori 1','Sz 1, Ori 2','Sz 2, Ori 1','Sz 2, Ori 2'})
+%Changes in raw data
+if doplot.normalized_changes
+    change = Mn(:,1:5,2)-Mn(:,1:5,1);
+    figure,bar(incchans,change);
+    title('Light induced changes in normalized data (Centre only)')
+    legend({'Spont','Sz 1, Ori 1','Sz 1, Ori 2','Sz 2, Ori 1','Sz 2, Ori 2'})
+    xlabel('Channel (Deep - Top)');
+end
 
-% %Plot out normalized data
-% figure,subplot(2,1,1),bar(incchans,Mn(:,2:5,1)./repmat(Mn(:,2,1),1,4))
-% title('Responses to center only condition')
-% subplot(2,1,2),bar(incchans,Mn(:,2:5,2)./repmat(Mn(:,2,1),1,4))
-% legend({'Sz 1, Ori 1','Sz 1, Ori 2','Sz 2, Ori 1','Sz 2, Ori 2'})
-% title('Normalized to no opto cond 1')
+if doplot.lighteffect_normalized_data
+    
+    % %Plot out normalized data
+    % figure,subplot(2,1,1),bar(incchans,Mn(:,2:5,1)./repmat(Mn(:,2,1),1,4))
+    % title('Responses to center only condition')
+    % subplot(2,1,2),bar(incchans,Mn(:,2:5,2)./repmat(Mn(:,2,1),1,4))
+    % legend({'Sz 1, Ori 1','Sz 1, Ori 2','Sz 2, Ori 1','Sz 2, Ori 2'})
+    % title('Normalized to no opto cond 1')
+    
+    %Any effect on size tuniong?
+    %Small sz cent, large sz cent, iso
+    small = squeeze(mean(Mn(:,2:3,:),2));
+    large = squeeze(mean(Mn(:,4:5,:),2));
+    iso = squeeze(mean(Mn(:,[6 8 12 14],:),2));
+    small_s = squeeze(mean(Mns(:,2:3,:),2)) / sqrt(2);
+    large_s = squeeze(mean(Mns(:,4:5,:),2)) /sqrt(2);
+    iso_s = squeeze(mean(Mns(:,[6 8 12 14],:),2)) /sqrt(4);
+    figure('Name','Feedback effect on normalized MUA');
+    title('Size tuning effects')
+    h = errorscatter(incchans',[small,large,iso],[small_s,large_s,iso_s]);
+    xlabel('Channel (Deep - Top)');
+    ylabel('NMUA');
+    legend(h,'Small center, OFF','Small center, ON','Large center OFF','Large center ON','Center+iso surr OFF','Center+iso surr ON','location','northwest');
+    legend boxoff
+end
 
-%Any effect on size tuniong?
-%Small sz cent, large sz cent, iso
-small = squeeze(mean(Mn(:,2:3,:),2));
-large = squeeze(mean(Mn(:,4:5,:),2));
-iso = squeeze(mean(Mn(:,[6 8 12 14],:),2));
-small_s = squeeze(mean(Mns(:,2:3,:),2));
-large_s = squeeze(mean(Mns(:,4:5,:),2));
-iso_s = squeeze(mean(Mns(:,[6 8 12 14],:),2));
-figure
-title('Size tuning effects')
-errorscatter(incchans',[small,large,iso],[small_s,large_s,iso_s])
 
 %Let's make a more sophisticado version
 clear Mn
@@ -776,6 +567,8 @@ for o = 1:2
         SS(chn,o) = small-large;
     end
 end
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Get the mean response to the grouped conditions
@@ -817,6 +610,8 @@ vecse = [Gns(:,1,2,1),Gns(:,1,2,2),Gns(:,2,2,1),Gns(:,2,2,2),Gns(:,3,2,1),Gns(:,
 errorscatter(incchans,vec,vecse,col)
 title('Effects of light on Center,Iso,Cross, no spont sub, size 2')
 
+
+
 %%ALSO WITH SPONT SUBTRACTED
 %SIZE 1
 figure,
@@ -835,6 +630,7 @@ errorscatter(incchans,vec,vecse,col)
 title('Effects of light on Center,Iso,Cross,spont sub, size 2')
 
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Calculate changes in mod
 %This calculates (Cross-Iso] at the level of individual pens then takes the
@@ -846,8 +642,8 @@ fillcol = [0.7 0.7 0.7;0.4 0.7 1];
 ci_stat = [];
 ci_det = [];
 cent_stat = [];
- iso_stat = [];
-            cross_stat = [];
+iso_stat = [];
+cross_stat = [];
 for sz = 1:2
     figure
     for o = 1:2
@@ -891,11 +687,11 @@ for sz = 1:2
             CNTdf(chn,sz,o) = nanmean(nanmean(cent));
             CNTdfs(chn,sz,o) = std(nanmean(cent,2))./sqrt(size(cent,1));
             
-             %For iso ionly
+            %For iso ionly
             ISOdf(chn,sz,o) = nanmean(nanmean(iso));
             ISOdfs(chn,sz,o) = std(nanmean(iso,2))./sqrt(size(iso,1));
             
-             %For ross ionly
+            %For ross ionly
             CRSdf(chn,sz,o) = nanmean(nanmean(cross));
             CRSdfs(chn,sz,o) = std(nanmean(cross,2))./sqrt(size(cross,1));
             
@@ -917,6 +713,9 @@ for sz = 1:2
         end
     end
 end
+
+return
+
 
 %Changes in modulation%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %No errorbars yet%%%%%%%%%%%%%%%
@@ -987,7 +786,7 @@ title('Size 2, change in cross only')
 %STATISTICS and scatter plot
 clear p
 figure
-cvind = jet(length(incchans))
+cvind = jet(length(incchans));
 for sz = 1:2
     subplot(1,2,sz)
     for chn = 1:length(incchans)
@@ -1013,7 +812,7 @@ end
 %Also plot the timecourse of teh modulation
 tm = find(px>0 & px<0.5);
 optocol = [0 0 0;0 0.3 0.9];
-fillcol = [0.7 0.7 0.7;0.4 0.7 1];
+%fillcol = [0.7 0.7 0.7;0.4 0.7 1];
 ci_stat = [];
 ci_det = [];
 for sz = 1:2
@@ -1087,11 +886,11 @@ col = [0 0 0;0.5 0.5 0.5;0 0 0;0 1 1;0 0 1;...
     1 0 0;1 0.6 0.2;1 0 0;1 0.6 0.2;0 1 0;0.2 0.8 0.2;...
     1 0 1;1 0 1;1 0 1;1 0 1];
 col = [col;col];
- px = ((1:(Fs.*EVENT.Triallngth))./Fs)+EVENT.Start;
+%px = ((1:(Fs*EVENT.Triallngth))./Fs)+EVENT.Start;
 if 0
     %Plot out the centre only conditions
     % tm = find(px(tf)>0 & px(tf)<1)
-   
+    
     for s = 1:2
         figure
         for chn = 1:length(incchans)
@@ -1182,26 +981,6 @@ if 0
 end
 
 
-%Conditions ar eas follows:
-%1 - Baseline
-%2 - ORI 1 SZ 1 Centre Only (grey)
-%3 - ORI 2 SZ 1 Centre Only (blue)
-%4 - ORI 1 SZ 2 Centre Only (cyan)
-%5 - ORI 2 SZ 2 Centre Only (yellow)
-
-%6 -  ORI 1 SZ 1 centre/surround (iso)   (red)
-%7 -  ORI 1 SZ 1 centre/surround (cross) (orange)
-%8 -  ORI 2 SZ 1 centre/surround (iso)   (red)
-%9 -  ORI 2 SZ 1 centre/surround (cross) (orange)
-%10 - ORI 1 SZ 1 (Surround only)
-%11 - ORI 2 SZ 1 (Surround only)
-
-%12 -  ORI 1 SZ 2 centre/surround (iso)
-%13 -  ORI 1 SZ 2 centre/surround (cross)
-%14 -  ORI 2 SZ 2 centre/surround (iso)
-%15 -  ORI 2 SZ 2 centre/surround (cross)
-%16 -  ORI 1 SZ 2 (Surround only)
-%17 -  ORI 2 SZ 2 (Surround only)
 
 if 0
     %Compare cross conditions across light
@@ -1454,10 +1233,6 @@ for s = 1:2
     end
 end
 
-% return
-
-
-
 
 %Compare size-tuning and power analysis
 if 0
@@ -1585,128 +1360,132 @@ end
 %LINE-UP THE PENS according to the CSD%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CSD ANALYSIS
-%Make the CSD then put it back into alarge MATRIX indexed by details
-clear CSD
-sep = 2; %This changes the differentiation grid
-full = 1:16;
-start = full(1)+sep;
-fin = full(end)-sep;
-mgCSD = NaN(size(mgLFP,1),size(mgLFP,2));
-for a = 1:length(allwords)
-    for p = 1:N
-        clear buf,clear pull
-        for ch= 1:16
-            pull(ch) = find(details(:,2) == ch & details(:,4) == a & details(:,1) == p);
-            buf(ch,:) = mgLFP(pull(ch),:);
-        end
-        for ch = start:fin
-            mgCSD(pull(ch),:) = -0.4.*(buf(ch-sep,:)-(2.*buf(ch,:))+buf(ch+sep,:))./(((100.*10.^-6).*sep).^2);
-        end
-    end
-end
-
-%NOW look at individual penetrations (centonly)
-%Pull out channels around reversal (i.e. use incchans)
-clear label
-for i = 1:length(incchans)
-    label{i} = incchans(length(incchans)-i+1);
-end
-csdjet = flipud(jet(64));
-
-sampt = find(px > 0.08 & px < 0.14);
-figure
-clear X, clear Y
-for p = 1:N
-    subplot(3,4,p)
-    clear csd
-    for ch= 1:length(incchans)
-        f = find(details(:,3) == incchans(ch) & (details(:,4)> 1 & details(:,4) < 5) & details(:,1) == p);
-        csd(ch,:) = nanmean(mgCSD(f,sampt));
-    end
-    dx = incchans;
-    dy = px(sampt);
-    dxf = incchans(1):0.1:incchans(end);
-    [X,Y] = meshgrid(dy,dx);
-    [XI,YI] = meshgrid(dy,dxf);
-    ZI = interp2(X,Y,csd,XI,YI);
-    colormap(csdjet);
-    imagesc(dy,dxf,flipud(ZI))
+if ~isempty(mgLFP)
     
-    set(gca,'YTick',incchans)
-    set(gca,'YTickLabels',label)
-    
-    title(info(p).name)
-end
-
-
-%Can we match the penetartions using an auto-adjust?
-%Take the CSD from 70ms to 140ms
-%Penetartion #4 has the nicest lookign data
-sampt = find(px > 0.08 & px < 0.14);
-clear csd
-for ch= 1:length(incchans)
-    f = find(details(:,3) == incchans(ch) & details(:,4) == 6 & details(:,1) == 7);
-    csd(ch,:) = mgCSD(f,sampt);
-end
-
-%Now go through all other csds to get the shiftvalue.
-%then change detials(:,5) appropriately
-details(:,5) = details(:,3);
-clear penshift
-for p = 1:N
-    shift = [-2:1:2];
-    clear diff
-    for s = 1:length(shift)
-        clear buf
-        for ch= 1:length(incchans)
-            f = find(details(:,3) == incchans(ch)+shift(s) & details(:,4) == 6 & details(:,1) == p);
-            if ~isempty(f)
-                buf(ch,:) = mgCSD(f,sampt);
-            else
-                buf(ch,:) = NaN(1,length(sampt));
+    %Make the CSD then put it back into alarge MATRIX indexed by details
+    clear CSD
+    sep = 2; %This changes the differentiation grid
+    full = 1:16;
+    start = full(1)+sep;
+    fin = full(end)-sep;
+    mgCSD = NaN(size(mgLFP,1),size(mgLFP,2));
+    for a = 1:length(allwords)
+        for p = 1:N
+            clear buf,clear pull
+            for ch= 1:16
+                pull(ch) = find(details(:,2) == ch & details(:,4) == a & details(:,1) == p);
+                buf(ch,:) = mgLFP(pull(ch),:);
+            end
+            for ch = start:fin
+                mgCSD(pull(ch),:) = -0.4.*(buf(ch-sep,:)-(2.*buf(ch,:))+buf(ch+sep,:))./(((100.*10.^-6).*sep).^2);
             end
         end
-        
-        %Find didffrence between csds
-        diff(s) = nansum(nansum((buf-csd).^2));
     end
-    [i,j] = min(diff);
-    penshift(p) = shift(j);
-    %And change details(:,3) score accordingly
-    f = find(details(:,1) == p);
-    details(f,5) = details(f,5)-penshift(p);
-end
-%USe details(:,5) ionstead of (:,3)!
-
-%Afetr shifting to check
-myfig = figure;
-mgNCSD = mgCSD;
-for p = 1:N
-    subplot(4,5,p)
+    
+    
+    %NOW look at individual penetrations (centonly)
+    %Pull out channels around reversal (i.e. use incchans)
+    clear label
+    for i = 1:length(incchans)
+        label{i} = incchans(length(incchans)-i+1);
+    end
+    csdjet = flipud(jet(64));
+    
+    sampt = find(px > 0.08 & px < 0.14);
+    figure
+    clear X, clear Y
+    for p = 1:N
+        subplot(3,4,p)
+        clear csd
+        for ch= 1:length(incchans)
+            f = find(details(:,3) == incchans(ch) & (details(:,4)> 1 & details(:,4) < 5) & details(:,1) == p);
+            csd(ch,:) = nanmean(mgCSD(f,sampt));
+        end
+        dx = incchans;
+        dy = px(sampt);
+        dxf = incchans(1):0.1:incchans(end);
+        [X,Y] = meshgrid(dy,dx);
+        [XI,YI] = meshgrid(dy,dxf);
+        ZI = interp2(X,Y,csd,XI,YI);
+        colormap(csdjet);
+        imagesc(dy,dxf,flipud(ZI))
+        
+        set(gca,'YTick',incchans)
+        set(gca,'YTickLabels',label)
+        
+        title(info(p).name)
+    end
+    
+    
+    %Can we match the penetartions using an auto-adjust?
+    %Take the CSD from 70ms to 140ms
+    %Penetartion #4 has the nicest lookign data
+    sampt = find(px > 0.08 & px < 0.14);
     clear csd
     for ch= 1:length(incchans)
-        f = find(details(:,5) == incchans(ch) & details(:,4) == 6 & details(:,1) == p);
-        csd(ch,:) = mgCSD(f,gt);
+        f = find(details(:,3) == incchans(ch) & details(:,4) == 6 & details(:,1) == 7);
+        csd(ch,:) = mgCSD(f,sampt);
     end
     
-    %Could we normalize the csd to diff betwen peak and trough?
-    diff = max(max(csd))-min(min(csd));
-    f = find(details(:,1) == p);
-    mgNCSD(f,:) = mgCSD(f,:)./diff;
+    %Now go through all other csds to get the shiftvalue.
+    %then change detials(:,5) appropriately
+    details(:,5) = details(:,3);
+    clear penshift
+    for p = 1:N
+        shift = [-2:1:2];
+        clear diff
+        for s = 1:length(shift)
+            clear buf
+            for ch= 1:length(incchans)
+                f = find(details(:,3) == incchans(ch)+shift(s) & details(:,4) == 6 & details(:,1) == p);
+                if ~isempty(f)
+                    buf(ch,:) = mgCSD(f,sampt);
+                else
+                    buf(ch,:) = NaN(1,length(sampt));
+                end
+            end
+            
+            %Find didffrence between csds
+            diff(s) = nansum(nansum((buf-csd).^2));
+        end
+        [i,j] = min(diff);
+        penshift(p) = shift(j);
+        %And change details(:,3) score accordingly
+        f = find(details(:,1) == p);
+        details(f,5) = details(f,5)-penshift(p);
+    end
+    %USe details(:,5) ionstead of (:,3)!
     
-    
-    dx = incchans;
-    dy = px(gt);
-    dxf = incchans(1):0.1:incchans(end);
-    [X,Y] = meshgrid(dy,dx);
-    [XI,YI] = meshgrid(dy,dxf);
-    ZI = interp2(X,Y,csd,XI,YI);
-    colormap(csdjet);
-    imagesc(dy,dxf,flipud(ZI))
-    set(gca,'YTick',incchans)
-    set(gca,'YTickLabel',label)
-    title(info(p).name)
-    %     colorbar
+    %Afetr shifting to check
+    myfig = figure;
+    mgNCSD = mgCSD;
+    for p = 1:N
+        subplot(4,5,p)
+        clear csd
+        for ch= 1:length(incchans)
+            f = find(details(:,5) == incchans(ch) & details(:,4) == 6 & details(:,1) == p);
+            csd(ch,:) = mgCSD(f,gt);
+        end
+        
+        %Could we normalize the csd to diff betwen peak and trough?
+        diff = max(max(csd))-min(min(csd));
+        f = find(details(:,1) == p);
+        mgNCSD(f,:) = mgCSD(f,:)./diff;
+        
+        
+        dx = incchans;
+        dy = px(gt);
+        dxf = incchans(1):0.1:incchans(end);
+        [X,Y] = meshgrid(dy,dx);
+        [XI,YI] = meshgrid(dy,dxf);
+        ZI = interp2(X,Y,csd,XI,YI);
+        colormap(csdjet);
+        imagesc(dy,dxf,flipud(ZI))
+        set(gca,'YTick',incchans)
+        set(gca,'YTickLabel',label)
+        title(info(p).name)
+        %     colorbar
+    end
 end
 
 
@@ -1916,7 +1695,8 @@ for sz = 1:2
     image(px(gt),incchans,buf)
     axis xy
     title('Cent only')
-    h = colorbar,set(h,'YTick',labelpos),set(h,'YTickLabel',label)
+    h = colorbar,set(h,'YTick',labelpos);
+    set(h,'YTickLabel',label);
     
     subplot(1,3,2);
     ZI = interp2(X,Y,isoonly(:,gt),XI,YI);
@@ -1924,7 +1704,8 @@ for sz = 1:2
     image(px(gt),incchans,buf)
     axis xy
     title('Iso only')
-    h = colorbar,set(h,'YTick',labelpos),set(h,'YTickLabel',label)
+    h = colorbar,set(h,'YTick',labelpos);
+    set(h,'YTickLabel',label);
     
     subplot(1,3,3);
     ZI = interp2(X,Y,crossonly(:,gt),XI,YI);
@@ -1932,7 +1713,8 @@ for sz = 1:2
     image(px(gt),incchans,buf)
     axis xy
     title('Cross only')
-    h = colorbar,set(h,'YTick',labelpos),set(h,'YTickLabel',label)
+    h = colorbar,set(h,'YTick',labelpos);
+    set(h,'YTickLabel',label);
     
     %Plot out isosupp and cross-iso effect
     figure,subplot(1,2,1);
@@ -1966,95 +1748,94 @@ ylim([-0.05 0.18])
 
 %%%HOW ABOUT SOME
 %%%CSDs%%%here?%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%Average for conditions
-for sz = 1:2
-    figure
-    for a = 1:4
-        clear csd
-        subplot(1,4,a)
-        for ch= 1:length(incchans)
-            %channel, size, pen>5
-            cn1 = allconds(sz,1,a);
-            cn2 = allconds(sz,2,a);
-            f = find((details(:,4) == cn1 | details(:,4) == cn2 ) & details(:,5) == incchans(ch));
-            csd(ch,:) = nanmean(mgCSD(f,gt));
-            
-            csdresp(ch,:,a,sz) = nanmean(mgCSD(f,gt));
-            muaresp(ch,:,a,sz)  = nanmean(mgNMUA(f,gt));
+if exist('mgCSD','var')
+    %Average for conditions
+    for sz = 1:2
+        figure
+        for a = 1:4
+            clear csd
+            subplot(1,4,a)
+            for ch= 1:length(incchans)
+                %channel, size, pen>5
+                cn1 = allconds(sz,1,a);
+                cn2 = allconds(sz,2,a);
+                f = find((details(:,4) == cn1 | details(:,4) == cn2 ) & details(:,5) == incchans(ch));
+                csd(ch,:) = nanmean(mgCSD(f,gt));
+                
+                csdresp(ch,:,a,sz) = nanmean(mgCSD(f,gt));
+                muaresp(ch,:,a,sz)  = nanmean(mgNMUA(f,gt));
+            end
+            dx = incchans;
+            dy = px(gt);
+            dxf = incchans(1):0.1:incchans(end);
+            [X,Y] = meshgrid(dy,dx);
+            [XI,YI] = meshgrid(dy,dxf);
+            ZI(:,:,a,sz) = interp2(X,Y,csd,XI,YI);
+            colormap(csdjet);
+            mn = -3000;
+            mx = 2000;
+            buf = 64.*((ZI(:,:,a,sz)-mn)./(mx-mn));
+            image(dy,dxf,flipud(buf))
+            xlim([0 0.3])
+            set(gca,'YTick',incchans)
+            set(gca,'YTickLabels',label)
+            colorbar
         end
-        dx = incchans;
-        dy = px(gt);
-        dxf = incchans(1):0.1:incchans(end);
-        [X,Y] = meshgrid(dy,dx);
-        [XI,YI] = meshgrid(dy,dxf);
-        ZI(:,:,a,sz) = interp2(X,Y,csd,XI,YI);
-        colormap(csdjet);
-        mn = -3000;
-        mx = 2000;
-        buf = 64.*((ZI(:,:,a,sz)-mn)./(mx-mn));
-        image(dy,dxf,flipud(buf))
-        xlim([0 0.3])
+    end
+    
+    
+    %Centre vs Iso
+    figure
+    for sz = 1:2
+        subplot(1,2,sz)
+        diff = ZI(:,:,1,sz)-ZI(:,:,2,sz);
+        imagesc(dy,dxf,flipud(diff))
         set(gca,'YTick',incchans)
         set(gca,'YTickLabels',label)
-        colorbar
+        colormap(csdjet);
     end
+    
+    
+    %Cross vs Iso
+    figure
+    for sz = 1:2
+        subplot(1,2,sz)
+        diff = ZI(:,:,3,sz)-ZI(:,:,2,sz);
+        imagesc(dy,dxf,flipud(diff))
+        set(gca,'YTick',incchans)
+        set(gca,'YTickLabels',label)
+        colormap(csdjet);
+    end
+    
+    %Surround only
+    figure
+    for sz = 1:2
+        subplot(1,2,sz)
+        diff = ZI(:,:,1,sz)-ZI(:,:,4,sz);
+        imagesc(dy,dxf,flipud(diff))
+        set(gca,'YTick',incchans)
+        set(gca,'YTickLabels',label)
+        colormap(csdjet);
+    end
+    
+    
+    
+    %Pull out CSDs from upper layers
+    lay = 10;
+    figure
+    col = ['k','r','m'];
+    for c = 1:3
+        subplot(2,1,1)
+        csd = csdresp(lay,:,c,1);
+        plot(px(gt),csd,col(c))
+        hold on,xlim([0 0.3])
+        subplot(2,1,2)
+        mua = smooth(muaresp(lay,:,c,1),10);
+        plot(px(gt),mua,col(c))
+        hold on,xlim([0 0.3])
+    end
+    
 end
-
-
-%Centre vs Iso
-figure
-for sz = 1:2
-    subplot(1,2,sz)
-    diff = ZI(:,:,1,sz)-ZI(:,:,2,sz);
-    imagesc(dy,dxf,flipud(diff))
-    set(gca,'YTick',incchans)
-    set(gca,'YTickLabels',label)
-    colormap(csdjet);
-end
-
-
-%Cross vs Iso
-figure
-for sz = 1:2
-    subplot(1,2,sz)
-    diff = ZI(:,:,3,sz)-ZI(:,:,2,sz);
-    imagesc(dy,dxf,flipud(diff))
-    set(gca,'YTick',incchans)
-    set(gca,'YTickLabels',label)
-    colormap(csdjet);
-end
-
-%Surround only
-figure
-for sz = 1:2
-    subplot(1,2,sz)
-    diff = ZI(:,:,1,sz)-ZI(:,:,4,sz);
-    imagesc(dy,dxf,flipud(diff))
-    set(gca,'YTick',incchans)
-    set(gca,'YTickLabels',label)
-    colormap(csdjet);
-end
-
-
-
-%Pull out CSDs from upper layers
-lay = 10;
-figure
-col = ['k','r','m'];
-for c = 1:3
-    subplot(2,1,1)
-    csd = csdresp(lay,:,c,1);
-    plot(px(gt),csd,col(c))
-    hold on,xlim([0 0.3])
-    subplot(2,1,2)
-    mua = smooth(muaresp(lay,:,c,1),10);
-    plot(px(gt),mua,col(c))
-    hold on,xlim([0 0.3])
-end
-
-
-return
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2068,7 +1849,9 @@ for n = 1:nchans
         f = find(details(:,3) == incchans(n) & details(:,4) == a);
         presp(n,:,a) = smooth(nanmean(mgNPSTH(f,:)),4);
         h = plot(TB,presp(n,:,a));
-        set(h,'Color',szcol(a,:))
+        if a<=size(szcol,1)
+            set(h,'Color',szcol(a,:))
+        end
         xlim([0 0.6])
         hold on
     end
@@ -2093,174 +1876,168 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+%
+% %Get relevant part
+% beg = -0.1;
+% fin = 0.8;
+% spacer = 0.1;
+% tf = find(px >= beg & px <= fin);
+% td = px(tf);
+% ptf = find(TB >= beg & TB <= fin);
+% ptd = TB(ptf);
+%
+% %Now for each channel average for each type
+% figure
+% % incchans = [2:11];
+% szcol = jet(length(allwords));
+% for chn = chnorder
+%     %size
+%     subplot(4,4,chn)
+%     for a = 1:length(allwords)
+%         h = plot(td,smooth(CHAN(chn).MUA(a,tf),20))
+%         set(h,'Color',szcol(a,:))
+%         hold on
+%     end
+%     xlim([-0.1 0.7])
+% end
+% title('MUA')
+%
+% %linear
+% figure
+% z = 0;
+% for chn = incchans
+%     z = z+1;
+%     %orienttion
+%
+%     for a = 1:length(allwords)
+%         subplot(2,1,1)
+%         h = plot(td+((fin-beg)*(z-1))+(spacer*(z-1)),smooth(CHAN(chn).MUA(a,tf),20))
+%         set(h,'Color',szcol(a,:))
+%         hold on
+%         xlim([-0.2 (fin-beg)*(length(incchans)-1)+(spacer*(length(incchans)-1))+(fin-beg)])
+%         subplot(2,1,2)
+%         h = plot(td+((fin-beg)*(z-1))+(spacer*(z-1)),smooth(CHAN(chn).NMUA(a,tf),20))
+%         set(h,'Color',szcol(a,:))
+%         hold on
+%         xlim([-0.2 (fin-beg)*(length(incchans)-1)+(spacer*(length(incchans)-1))+(fin-beg)])
+%     end
+%
+%     if chn == incchans(end)
+%         legend(num2str(allwords(1)),num2str(allwords(2)),num2str(allwords(3)),num2str(allwords(4)),...
+%             num2str(allwords(5)),num2str(allwords(6)),num2str(allwords(7)),num2str(allwords(8)),num2str(allwords(9)))
+%     end
+% end
+% title('MUA')
+%
+% %linear
+% figure
+% z = 0;
+% for chn = incchans
+%     z = z+1;
+%     %orienttion
+%
+%     for a = 1:length(allwords)
+%         subplot(2,1,1)
+%         h = plot(ptd+((fin-beg)*(z-1))+(spacer*(z-1)),smooth(CHAN(chn).PSTH(a,ptf),20))
+%         set(h,'Color',szcol(a,:))
+%         hold on
+%         xlim([-0.2 (fin-beg)*(length(incchans)-1)+(spacer*(length(incchans)-1))+(fin-beg)])
+%         subplot(2,1,2)
+%         h = plot(ptd+((fin-beg)*(z-1))+(spacer*(z-1)),smooth(CHAN(chn).NPSTH(a,ptf),20))
+%         set(h,'Color',szcol(a,:))
+%         hold on
+%         xlim([-0.2 (fin-beg)*(length(incchans)-1)+(spacer*(length(incchans)-1))+(fin-beg)])
+%     end
+%
+%     if chn == incchans(end)
+%         legend(num2str(allwords(1)),num2str(allwords(2)),num2str(allwords(3)),num2str(allwords(4)),...
+%             num2str(allwords(5)),num2str(allwords(6)),num2str(allwords(7)),num2str(allwords(8)),num2str(allwords(9)))
+%     end
+% end
+% title('SUA')
+%
+%
+% %TAKE time-window averages
+% %Stimulu comes on at 0 and stays on for 1 sec
+% pk = find(px>0.05 & px < 0.15);
+% sus = find(px>0.15 & px < 0.5);
+% col = jet(length(incchans));
+% figure
+% for chn = 1:length(incchans)
+%     M{chn} = num2str(incchans(chn));
+% end
+% z = 0;
+% for chn = incchans
+%
+%     z = z+1;
+%     %size
+%     subplot(1,3,1)
+%     buf = nanmean(CHAN(chn).NMUA(:,tf),2);
+%     h = plot(allwords,buf);
+%     set(h,'Color',col(z,:))
+%     hold on
+%     xlim([0 max(allwords)])
+%
+%     subplot(1,3,2)
+%     buf = nanmean(CHAN(chn).NMUA(:,pk),2);
+%     h = plot(allwords,buf);
+%     set(h,'Color',col(z,:))
+%     hold on
+%     xlim([0 max(allwords)])
+%
+%     subplot(1,3,3)
+%     buf = nanmean(CHAN(chn).NMUA(:,sus),2);
+%     h = plot(allwords,buf);
+%     set(h,'Color',col(z,:))
+%     hold on
+%     xlim([0 max(allwords)])
+%     if chn == incchans(end)
+%         legend(M)
+%     end
+%
+% end
+% title('MUA')
+%
+% %Single-unti summed
+% %Stimulu comes on at 0 and stays on for 1 sec
+% sutb = find(TB>=0);
+% pk = find(TB>0.05 & TB < 0.15);
+% sus = find(TB>0.15 & TB < 0.5);
+% figure
+% z = 0;
+% for chn = incchans
+%
+%     %orienttion
+%     %orienttion
+%     z = z+1;
+%     subplot(1,3,1)
+%     buf = nanmean(CHAN(chn).NPSTH(:,sutb),2);
+%     h = plot(allwords,buf);
+%     set(h,'Color',col(z,:))
+%     hold on
+%     xlim([0 max(allwords)])
+%
+%     subplot(1,3,2)
+%     buf = nanmean(CHAN(chn).NPSTH(:,pk),2);
+%     h = plot(allwords,buf);
+%     set(h,'Color',col(z,:))
+%     hold on
+%     xlim([0 max(allwords)])
+%
+%     subplot(1,3,3)
+%     buf = nanmean(CHAN(chn).NPSTH(:,sus),2);
+%     h = plot(allwords,buf);
+%     set(h,'Color',col(z,:))
+%     hold on
+%     xlim([0 max(allwords)])
+%     if chn == incchans(end)
+%         legend(M)
+%     end
+%
+% end
+% title('SUA')
+%
 
-%Get relevant part
-beg = -0.1;
-fin = 0.8;
-spacer = 0.1;
-tf = find(px >= beg & px <= fin);
-td = px(tf);
-ptf = find(TB >= beg & TB <= fin);
-ptd = TB(ptf);
-
-%Now for each channel average for each type
-figure
-% incchans = [2:11];
-szcol = jet(length(allwords));
-for chn = chnorder
-    %size
-    subplot(4,4,chn)
-    for a = 1:length(allwords)
-        h = plot(td,smooth(CHAN(chn).MUA(a,tf),20))
-        set(h,'Color',szcol(a,:))
-        hold on
-    end
-    xlim([-0.1 0.7])
-end
-title('MUA')
-
-%linear
-figure
-z = 0;
-for chn = incchans
-    z = z+1;
-    %orienttion
-    
-    for a = 1:length(allwords)
-        subplot(2,1,1)
-        h = plot(td+((fin-beg)*(z-1))+(spacer*(z-1)),smooth(CHAN(chn).MUA(a,tf),20))
-        set(h,'Color',szcol(a,:))
-        hold on
-        xlim([-0.2 (fin-beg)*(length(incchans)-1)+(spacer*(length(incchans)-1))+(fin-beg)])
-        subplot(2,1,2)
-        h = plot(td+((fin-beg)*(z-1))+(spacer*(z-1)),smooth(CHAN(chn).NMUA(a,tf),20))
-        set(h,'Color',szcol(a,:))
-        hold on
-        xlim([-0.2 (fin-beg)*(length(incchans)-1)+(spacer*(length(incchans)-1))+(fin-beg)])
-    end
-    
-    if chn == incchans(end)
-        legend(num2str(allwords(1)),num2str(allwords(2)),num2str(allwords(3)),num2str(allwords(4)),...
-            num2str(allwords(5)),num2str(allwords(6)),num2str(allwords(7)),num2str(allwords(8)),num2str(allwords(9)))
-    end
-end
-title('MUA')
-
-%linear
-figure
-z = 0;
-for chn = incchans
-    z = z+1;
-    %orienttion
-    
-    for a = 1:length(allwords)
-        subplot(2,1,1)
-        h = plot(ptd+((fin-beg)*(z-1))+(spacer*(z-1)),smooth(CHAN(chn).PSTH(a,ptf),20))
-        set(h,'Color',szcol(a,:))
-        hold on
-        xlim([-0.2 (fin-beg)*(length(incchans)-1)+(spacer*(length(incchans)-1))+(fin-beg)])
-        subplot(2,1,2)
-        h = plot(ptd+((fin-beg)*(z-1))+(spacer*(z-1)),smooth(CHAN(chn).NPSTH(a,ptf),20))
-        set(h,'Color',szcol(a,:))
-        hold on
-        xlim([-0.2 (fin-beg)*(length(incchans)-1)+(spacer*(length(incchans)-1))+(fin-beg)])
-    end
-    
-    if chn == incchans(end)
-        legend(num2str(allwords(1)),num2str(allwords(2)),num2str(allwords(3)),num2str(allwords(4)),...
-            num2str(allwords(5)),num2str(allwords(6)),num2str(allwords(7)),num2str(allwords(8)),num2str(allwords(9)))
-    end
-end
-title('SUA')
-
-
-%TAKE time-window averages
-%Stimulu comes on at 0 and stays on for 1 sec
-pk = find(px>0.05 & px < 0.15);
-sus = find(px>0.15 & px < 0.5);
-col = jet(length(incchans));
-figure
-for chn = 1:length(incchans)
-    M{chn} = num2str(incchans(chn));
-end
-z = 0;
-for chn = incchans
-    
-    z = z+1;
-    %size
-    subplot(1,3,1)
-    buf = nanmean(CHAN(chn).NMUA(:,tf),2);
-    h = plot(allwords,buf);
-    set(h,'Color',col(z,:))
-    hold on
-    xlim([0 max(allwords)])
-    
-    subplot(1,3,2)
-    buf = nanmean(CHAN(chn).NMUA(:,pk),2);
-    h = plot(allwords,buf);
-    set(h,'Color',col(z,:))
-    hold on
-    xlim([0 max(allwords)])
-    
-    subplot(1,3,3)
-    buf = nanmean(CHAN(chn).NMUA(:,sus),2);
-    h = plot(allwords,buf);
-    set(h,'Color',col(z,:))
-    hold on
-    xlim([0 max(allwords)])
-    if chn == incchans(end)
-        legend(M)
-    end
-    
-end
-title('MUA')
-
-%Single-unti summed
-%Stimulu comes on at 0 and stays on for 1 sec
-sutb = find(TB>=0);
-pk = find(TB>0.05 & TB < 0.15);
-sus = find(TB>0.15 & TB < 0.5);
-figure
-z = 0;
-for chn = incchans
-    
-    %orienttion
-    %orienttion
-    z = z+1;
-    subplot(1,3,1)
-    buf = nanmean(CHAN(chn).NPSTH(:,sutb),2);
-    h = plot(allwords,buf);
-    set(h,'Color',col(z,:))
-    hold on
-    xlim([0 max(allwords)])
-    
-    subplot(1,3,2)
-    buf = nanmean(CHAN(chn).NPSTH(:,pk),2);
-    h = plot(allwords,buf);
-    set(h,'Color',col(z,:))
-    hold on
-    xlim([0 max(allwords)])
-    
-    subplot(1,3,3)
-    buf = nanmean(CHAN(chn).NPSTH(:,sus),2);
-    h = plot(allwords,buf);
-    set(h,'Color',col(z,:))
-    hold on
-    xlim([0 max(allwords)])
-    if chn == incchans(end)
-        legend(M)
-    end
-    
-end
-title('SUA')
-
-
-
-
-
-
-
-return
 
 
 

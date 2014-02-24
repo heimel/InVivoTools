@@ -15,7 +15,7 @@ info(N).flashblock =7;
 info(N).RFx = -75;
 info(N).RFy = 0;
 info(N).RFblock = 8;
-info(N).surroundblocks = [19];  %Also onset version on B12
+info(N).surroundblocks = [19];  %#ok<*NBRAK> %Also onset version on B12
 info(N).oriblock = 14; %1s on 1s off (OPTOORI)
 info(N).oritime = 1; %1s on 1s off
 %sua size-tune
@@ -88,7 +88,7 @@ info(N).SUAclus = [1 3 1 3 2 1  2  2  3  4  2];
 info(N).SUAqual = [3 2 2 2 3 1  2  3  1  1  0];
 
 % return
-N = 0
+N = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %5
 N = N+1;
