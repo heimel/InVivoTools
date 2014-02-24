@@ -57,8 +57,11 @@ if isempty(pixels), error(['No pixel regions specified.']); end;
 stims = getstimsfile( record );
 if isempty(stims)
     % create stims file
-    stiminterview(record);
-    stims = getstimsfile( record );
+%     stiminterview(record);
+%     stims = getstimsfile( record );
+      errormsg(['No stimulus file present for ' recordfilter(record) ', Skipping analysis.']);
+  return
+
 end;
 
 s.stimscript = stims.saveScript;
@@ -231,11 +234,12 @@ end % cell c
 end
 
 for i=1:n_selected_rois
-    record.measures(i).psth_tbins{1} = cat(1,bins{:,i});
-    record.measures(i).psth_response{1} = cat(1,myavg{:,i});
+     record.measures(i).psth_tbins{1} = cat(1,bins{:,i});
+     record.measures(i).psth_response{1} = cat(1,myavg{:,i});
 end
 
-if 1 && n_selected_rois>0 % plot 
+
+if 0 && n_selected_rois>0 % plot 
     clr = 'bgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykwbgrcmykw';
     figure('Numbertitle','off','Name','PSTH');
     maxavg = max(flatten(myavg));
@@ -315,4 +319,3 @@ if plotit % old routine
 end;
 
 
-                

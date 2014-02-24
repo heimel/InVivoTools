@@ -119,7 +119,7 @@ for i=ind
     end
     prevvariable = prevrec.measures(1).variable;
     if isfield(record.measures,'variable') && strcmp(prevvariable,record.measures(1).variable)
-        continue
+        continue % if current test is over same variable
     end
     if length(prevrec.measures(1).range{1})==1
         continue % i.e. not varied in prevrec

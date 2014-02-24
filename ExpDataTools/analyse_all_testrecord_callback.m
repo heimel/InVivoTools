@@ -57,12 +57,12 @@ for count=1:length(ud.ind)
             ud.db(i) = record;
         case 'ec'
             ud.db(i)=analyse_ectestrecord( ud.db(i), false);
-            if strcmp(ud.db(i).eye,'ipsi')
+            if strcmp(ud.db(i).eye,'ipsi') || strcmp(ud.db(i).eye,'contra')
                 ud.db(i) = compute_odi_measures( ud.db(i),ud.db);
             end
         case 'lfp'
             ud.db(i)=analyse_lfptestrecord( ud.db(i), 0);
-            if strcmp(ud.db(i).eye,'ipsi')
+            if strcmp(ud.db(i).eye,'ipsi') || strcmp(ud.db(i).eye,'contra')
                 ud.db(i) = compute_odi_measures( ud.db(i),ud.db);
             end
         case 'tp'

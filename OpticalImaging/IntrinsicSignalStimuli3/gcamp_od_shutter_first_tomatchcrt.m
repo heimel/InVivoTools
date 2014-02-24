@@ -83,6 +83,8 @@ try
             if stim~=0 % not blank
 %                 stim=and(stim,31); % remove shutter bits Alexander said I
 %                 removed it (Mehran 10-8-2013)
+stim1=and([de2bi(stim),zeros(1,8-length(de2bi(stim)))],[de2bi(63),zeros(1,8-length(de2bi(63)))]);
+stim=bi2de(stim1(1:2));
                 pause(pspar.prestim_time);
                 MTI = DisplayTiming(retinotopy_script(stim));
                 DisplayStimScript(retinotopy_script(stim),MTI,0,0);

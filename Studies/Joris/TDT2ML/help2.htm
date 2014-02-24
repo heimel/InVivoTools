@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Vision and Cognition Tdt2ml help</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body>
+<p align="center"><strong><font size="+3">The Tdt2ml help</font></strong></p>
+<p><font color="#993300" size="+2"><a name="Intro" id="Intro">Introduction</a></font></p>
+<p>Tdt2ml is a visual interface for retrieving data from TDT Tanks. </p>
+<p>This matlab script uses several activeX components to select and retrieve data. 
+  A major component is the TTank server (TTank.exe) which does all the work of 
+  retrieving data from the TDT tanks, a special database in which all data from 
+  the TDT system is stored. Three other activeX controls are included to make 
+  the selection of data easy. One to select a tank, one to select a block of data 
+  and one to select an event of interest. </p>
+<p><font color="#993300"><a name="WhatsinaTank"></a>Whats in a tank</font><br>
+  The TDT system distinguishes stream, snip and strobe events. Only the stream 
+  and snip events contain actual neurophysiological data. The strobe events are 
+  just flags representing the time some event occured. The strobe events are important 
+  for us because they are used to determine the condition of each separate trial. 
+  During experiments, the stimulus computer sets these events by setting bits 
+  on and off on the output ports of it's digital analog IO card. When the voltage 
+  goes up on these IO ports, TDT detects this and records a STROBE event. These 
+  events store our triggers, e.g. trial onset ('tril'), stimulus onset ('stim'), 
+  saccade onset ('sacc'), trial correct ( 'corr'), trial error ('erro'), and the 
+  word ('word') with associated data containing a value that describes the condition 
+  of the trial. All this stuff is retrieved and stored in a matlab structure called 
+  EVENT.</p>
+<p> The 'word' event. is of particular importance, Not it's time, but the associated 
+  value. This value, made up of 15 bits can be used in several ways. </p>
+<p><font color="#993300" size="+2"><a name="UsingTdt2ml"></a>Using Tdt2ml</font></p>
+<p><font color="#993300"><a name="whatyoucando"><font color="#993300">What you 
+  can do with Tdt2ml</font></a><br>
+  </font>Right now, what you can do with Tdt2ml is very limited. You can retrive 
+  trials according to your filter specification, and, after the program averages 
+  over all trials, you can plot a PSTH for all the channels. In addition, you 
+  can export the trials, the trigger array, and the EVENT structure to the global 
+  workspace of matlab and use this data for further processing.</p>
+<p>To retrieve and display data you would basically do the following:</p>
+<p>Call Tdt2ml in you matlab workspace. Then consecutively choose a tank, a Block 
+  and then an Event (stream of snip only). After pressing one of the Tank options, 
+  the Block list is filled. Selecting a Block resets the Event list. Slecting 
+  an Event changes the whole GUI to display Data selection options. At this point 
+  you can just press <strong>Retrieve Trials</strong> without further limiting 
+  the selection and data will be retrieved for each trial ordered around stimulus 
+  onset within a 3D matrix (samples, channels, trials).</p>
+<p><img src="interface.jpg" width="549" height="670"></p>
+<p>This illustrates the Tdt2ml Gui and its basic functionality.</p>
+<p><font color="#993300">Selecting Tanks, Blocks and Events</font> should be easy 
+  enough, just click on an item in one the lists presented by the three activeX 
+  controls. First a tank, then a block and an event. Reading the event info and 
+  the neurophysiological data can take time. Below the three controls is a status 
+  bar showing what Tdt2ml might be doing, i.e. <font color="#996600">Busy...retreving 
+  info</font> or <font color="#996600">Busy...retrieving data</font></p>
+<p> After you click/select an event, a panel appears with editable areas to select 
+  channels, trial onset, trial length and trial conditions. </p>
+<p>You can also enter parameters (trialstart, trial length, and an array of channels) 
+  to select the trials that you want to extract from the tank. Data retrieval 
+  can further be restricted by entering values in the selection filters. For example 
+  to select correct trials one whould change the entry after Correct to <strong>find( 
+  C== 1)</strong></p>
+<p>After entering these parameters a subset from the Trials array is extracted 
+  which together define the time window and channels that need to be retrieved. 
+  When you press <strong>Retrieve Trials</strong> only this data is retrieved 
+  from the tank.</p>
+<p>To have a quick view of the retrieved data press <strong>Dataview</strong> 
+  in the Menu. </p>
+<p>To export your data and the EVENT structure, press <strong>Export to Base</strong><br>
+</p>
+<p><font color="#993300"><a name="Retrievinginfo"></a>Retrieving info and catagorizing 
+  trials</font><br>
+  Tdt2ml, forms a shell for two scripts, <strong>Exinf3.m</strong> and <strong>Exd2.m</strong>. 
+  The first script reads all the event info neccessary to form an array containing 
+  data about the conditions and timing of events for each experimental trial. 
+  To do so Exinf3.m opens the tank through requests to the TTank server and then 
+  contructs an EVENT structure to hold information about the tankname, blockname, 
+  all the event names, their types, timing and so on. A message on the status 
+  line will appear telling you that the program is retrieving this info. After 
+  that, Exinf3 constructs a trigger array (<strong>Trilist</strong>) which determines 
+  for each trial; the time value of stimulus onset, saccade onset, whether the 
+  trial was correct, if an error occured, and so on. When the script returns it 
+  outputs the event structure and the trial/trigger array to the caller. </p>
+<p>You can also call Exinf3.m yourself with : <strong>EVENT = Exinf3( EVENT );</strong> 
+  The EVENT structure should be initialized with EVENT.Tankname and EVENT.Blockname. 
+</p>
+<p>The EVENT structure coantains all relevant event timing information, is automatically 
+  saved to a mat file and named to identify the tank and block it was retrieved 
+  from. </p>
+<p>One of the objects in the EVENT structure is the <strong>Trials </strong>array. 
+  Each row in this array is a trial based on the number of a tril strobe events 
+  in a block of data. Each row can contain nine columns with the following data:<br>
+  1. Stimulus onset; 2. Trial onset; 3. Saccade onset; 4. Target onset; 5 Correct 
+  (1 or 0); 6 Reward; 7 Error (1 or 0); 8 Micr_stim 8Word info (1-2^15). If one 
+  or more of these strobe events may not appear in the array. However, if the 
+  tril bit is missing this will lead to an error in the script and the data should 
+  be discarded.</p>
+<p>After you select a stream or snip event in the user interface, retrieve and 
+  export your trials, the EVENT structure and the data will be exported to the 
+  Matlab workspace. The data shows up as <strong>sign</strong> in the workspace. 
+  Besides EVENT and sign, two other objects are exported. A <strong>Trials</strong> 
+  array and a <strong>Names</strong> array. Even when you select all trials in 
+  the user interface, only trials will be retrieved that contain a stimulus onset 
+  event. These are the experimentally interesting trials. Since they can contain 
+  trials from diverse experimental conditions, the Trials array will contain all 
+  relevent strobe event data to distinguish different conditions and behavioral 
+  outcomes. The number of rows in the exported Trials array should therefore be 
+  equal to the length of the third dimension of sign. The Trials array can therefore 
+  be used to make sub selections of the data in sign, based on some or other condition 
+  you are interested in. Because, you cannot see what information Trials array 
+  represents, a cell array is also exported with the strobe event names corresponding 
+  to the columns in the Trials array. </p>
+<p>Names = </p>
+<p> 'stim_onset' ________time(s)<br>
+  'trial_onset'________ time(s) <br>
+  'saccade_onset'_____time(s)<br>
+  'target_onset'_______time(s)<br>
+  'correct'___________(1 or 0)<br>
+  'reward'___________(1 or 0)<br>
+  'error'____________(1 or 0)<br>
+  'word'____________(15bit value)</p>
+<p><strong>Entries displaying time info (1, 2, 3, 4) contain either a time in 
+  seconds or a nan if the bit was not set. If time info for a particular bit is 
+  not present at all within a block of data, the array entries for this bit will 
+  contain only zeros.</strong></p>
+<p>The actual data is retrieved by Exd2.m. The visual interface for data selection, 
+  and filtering contructs the neccessary input parameters for Exd2.m. Again, you 
+  could also call this script yourself. </p>
+<p>SIG = EXd2(EVENT, Trials); <br>
+  Calling this function requires that three variables in EVENT are initialized: 
+  <br>
+  EVENT.Triallnght = s; lenght of trial in seconds and EVENT.Start = s; start 
+  of trial relative to (stimulus onset or some other time) and EVENT.Chans, an 
+  array of channels to extract. The input variable the Trials array should be 
+  a subset selected from the Trilist array, containing an array of times (e.g. 
+  stim onset) determining together with Start and Triallngth the time windows 
+  used to select data from a block, in a tank.</p>
+<p><strong>Saving trials</strong></p>
+<p>One way to save trials is simply to export the data to a mat file using the 
+  matlab save function. </p>
+<p>Another option, provided in the menu (<strong>save to HDF</strong>), is to 
+  save all data to a HDF file. HDF is a scientific, from which one can quickly 
+  add and retrieve data. Support has been added to save and retrieve data from 
+  HDF files with the scripts; H5read and H5save. </p>
+<p>The advantage of using HDF is twofold. Retrieval of data is much faster in 
+  comparison with the retrieval from the original tanks, and using HDF reduces 
+  the amount of disk space taken up by the original tank. This is because we do 
+  not need the PDec signal later and because a lot of other data in the tank may 
+  be just as spurious. I can imagine this would be less a problem if we could 
+  edit Tanks.</p>
+<p>&nbsp;</p>
+</body>
+</html>

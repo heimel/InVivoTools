@@ -38,6 +38,8 @@ processparams = ecprocessparams(record);
 
 WaveTime_Spikes = struct([]);
 
+
+
 switch lower(record.setup)
     case 'antigua'
         Tankname = 'Mouse';
@@ -53,13 +55,12 @@ switch lower(record.setup)
         %         EVENT.timerange(2)-EVENT.strons.tril(1)+(1/EVENT.snips.Snip.sampf);
         %         EVENT.Start = +(1/EVENT.snips.Snip.sampf);
         EVENT.Start = 0;
-        if isfield(record, 'channels') &&  ~isempty(record.channels)
-            read_chan1 = record.channels;
-        else
-            read_chan1= 1:EVENT.strms(1).channels;
-        end
-        disp(['ANALYSE_ECTEST: FOR ONLY CHANNEL # ',num2str(read_chan1)]);
+
+        read_chan1 = get_channels2analyze( record );
         
+        if isempty(read_chan1)
+            read_chan1 = 1:EVENT.strms(1).channels;
+        end        
         total_length=EVENT.timerange(2)-EVENT.strons.tril(1);
         WaveTime_Fpikes=struct([]);
         for i=1:length(read_chan1)
@@ -69,6 +70,7 @@ switch lower(record.setup)
             for kk=1:ceil(total_length/60)
                 % clear WaveTime_chspikes
                 EVENT.Triallngth = min(60,total_length-60*(kk-1));
+                % AH: One should use EVENT.CHAN = read_chan1(i) here
                 WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
                 WaveTime_fpikes.time=[WaveTime_fpikes.time;WaveTime_chspikes(read_chan1(i),1).time];
                 WaveTime_fpikes.data=[WaveTime_fpikes.data;WaveTime_chspikes(read_chan1(i),1).data];
@@ -114,7 +116,7 @@ switch lower(record.setup)
         %             return
         %         end
         
-        if isempty(WaveTime_Fpikes)
+        if isempty(WaveTime_Spikes)
             return
         end
         
@@ -258,7 +260,7 @@ end
 % end
 
 switch lower(record.setup)
-    case 'antigua'
+    case 'antiguas'
         % dont compute spike intervals
         isi = [];
     otherwise
@@ -554,3 +556,21 @@ record = add_distance2preferred_stimulus( record );
 
 return
 
+
+
+function  channels = get_channels2analyze( record )
+h_db = get_fighandle('Ec database*');
+if length(h_db)>1
+    h_db = h_db(1);
+end
+h = ft(h_db,'channels_edit');
+if ~isempty(h)
+    try
+        channels = str2num( get(h,value));
+    catch
+        channels = [];
+    end
+end
+
+function obj = ft(fig, name)
+obj = findobj(fig,'Tag',name);

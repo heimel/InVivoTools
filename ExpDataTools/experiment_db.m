@@ -47,6 +47,7 @@ blind_data_enabled = 0;
 analyse_all_enabled = 0;
 reverse_data_enabled = 0;
 open_data_enable = 0;
+channels_enabled = 0;
 
 switch type
     case 'oi'
@@ -55,6 +56,7 @@ switch type
     case 'ec'
         average_tests_enabled=0;
         export_tests_enabled=0;
+        channels_enabled = 1;
     case 'tp' % twophoton
         color = [0.4 0.5 1];
         average_tests_enabled=0;
@@ -90,6 +92,20 @@ switch type
         if ~isfield(db,'anesthetic')
             for i=1:length(db)
                 db(i).anesthetic = '';
+            end
+            stat = checklock(filename);
+            if stat~=1
+                filename = save_db(db,filename,'');
+                rmlock(filename);
+            end
+        end
+end
+% temporarily adding anesthetic field % 2013-03-18
+switch type
+    case {'ec'}
+        if ~isfield(db,'analysis')
+            for i=1:length(db)
+                db(i).analysis = '';
             end
             stat = checklock(filename);
             if stat~=1
@@ -382,6 +398,19 @@ if reverse_data_enabled
     maxleft=max(maxleft,left);
 end
 
+if channels_enabled
+    h.channels = ...
+        uicontrol('Style','edit','Parent',h_fig, ...
+        'Units','pixels', ...
+        'BackgroundColor',1*[1 1 1],...
+        'Callback','', ...
+        'ListboxTop',0, ...
+        'Position',[left top buttonwidth buttonheight], ...
+        'TooltipString','Which channels to analyse',...
+        'Tag','channels_edit',...
+        'String','        ');
+    maxleft=max(maxleft,left);
+end
 
 
 
