@@ -28,7 +28,7 @@ switch record.electrode
         F=length(CSO);
         figure
         for i=1:F
-            subplot(F,1,i);imagesc(-1:1,8:1,CSO{1,i},[-0.00001 0.000006]);
+            subplot(F,1,i);imagesc(-1:1,8:1,CSO{1,i},[-0.0001 0.0001]);
         end
         return
 end

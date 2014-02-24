@@ -27,10 +27,10 @@ end
 
 matfile = fullfile(EVENT.Mytank,EVENT.Myblock); %name of file used to save event structure
 MatFile=fullfile(matfile,EVENT.Myblock);
-if exist([MatFile '.mat'], 'file')
-    load(MatFile);
-    return
-end
+% if exist([MatFile '.mat'], 'file')
+%     load(MatFile);
+%     return
+% end
 
 
 %E.UNKNOWN = hex2dec('0');  %"Unknown"

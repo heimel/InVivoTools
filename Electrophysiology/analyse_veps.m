@@ -30,8 +30,11 @@ switch record.electrode
     case 'CSO'
         CSO = analyse_CSO(record,stimsfile,50,verbose); % contact point distance for SC 50, for VC 100
         return
-            case 'coherence'
+    case 'coherence'
         WCoh = analyse_wavecoh(record,stimsfile); % contact point distance for SC 50, for VC 100
+        return
+    case 'wspectrum'
+        Wlfp = analyse_waveletlfp(record,stimsfile) % contact point distance for SC 50, for VC 100
         return
 end
 
@@ -240,7 +243,7 @@ for lfpch=1:numLFPchannels
             for j = 1:length(stims)
                 pars = getparameters(stims{j});
                 if ~isempty(analyse_second_parameter)
-                    if pars.(analyse_parameter) == val && pars.(analyse_second_parameter) == parameter_second_values{1}(5) % Mehran
+                    if pars.(analyse_parameter) == val && pars.(analyse_second_parameter) == parameter_second_values{1}(4) % Mehran
                         ind = [ind find(do==j)];
                     end
                 else
@@ -329,7 +332,7 @@ for lfpch=1:numLFPchannels
             if process_params.vep_remove_vep_mean
                 data = remove_vep_mean( data );
             end
-            Fs = 380; % temporarily Mehran
+%             Fs = 380; % temporarily Mehran
             [powerm.power(:,:,i),powerm.freqs,powerm.time] = ...
                 GetPowerWavelet(data,Fs,onsettime,verbose);
 
@@ -469,7 +472,7 @@ end
 
 switch params.vep_poweranalysis_type
     case 'wavelet'
-        Fs = 380;
+%         Fs = 380;
         [pxx,freqs,time] = GetPowerWavelet(reshape(waves,numel(waves),1,1),Fs,verbose);
     case 'periodogram'
         [pxx,freqs]=periodogram(waves,[],[],Fs);
