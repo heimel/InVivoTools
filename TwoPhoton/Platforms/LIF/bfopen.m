@@ -1,10 +1,29 @@
-function [result] = bfopen(id)
-% A script for opening microscopy images in MATLAB using Bio-Formats.
+function [result] = bfopen(id, varargin)
+% Open microscopy images using Bio-Formats.
 %
-% The function returns a list of image series; i.e., a cell array of cell
-% arrays of (matrix, label) pairs, with each matrix representing a single
-% image plane, and each inner list of matrices representing an image
-% series. See below for examples of usage.
+% SYNOPSIS r = bfopen(id)
+%          r = bfopen(id, x, y, w, h)
+%
+% Input
+%    r - the reader object (e.g. the output bfGetReader)
+%
+%    x - (Optional) A scalar giving the x-origin of the tile.
+%    Default: 1
+%
+%    y - (Optional) A scalar giving the y-origin of the tile.
+%    Default: 1
+%
+%    w - (Optional) A scalar giving the width of the tile. 
+%    Set to the width of the plane by default.
+%
+%    h - (Optional) A scalar giving the height of the tile.
+%    Set to the height of the plane by default.
+%
+% Output
+%
+%    result - a cell array of cell arrays of (matrix, label) pairs, 
+%    with each matrix representing a single image plane, and each inner 
+%    list of matrices representing an image series.
 %
 % Portions of this code were adapted from:
 % http://www.mathworks.com/support/solutions/en/data/1-2WPAYR/
@@ -25,51 +44,29 @@ function [result] = bfopen(id)
 % NB: Internet Explorer sometimes erroneously renames the Bio-Formats library
 %     to loci_tools.zip. If this happens, rename it back to loci_tools.jar.
 %
-% Here are some examples of accessing data using the bfopen function:
+% For many examples of how to use the bfopen function, please see:
+%     http://trac.openmicroscopy.org.uk/ome/wiki/BioFormats-Matlab
+
+% OME Bio-Formats package for reading and converting biological file formats.
 %
-%     % read the data using Bio-Formats
-%     data = bfopen('C:/data/experiment.lif');
+% Copyright (C) 2007 - 2013 Open Microscopy Environment:
+%   - Board of Regents of the University of Wisconsin-Madison
+%   - Glencoe Software, Inc.
+%   - University of Dundee
 %
-%     % unwrap some specific image planes from the result
-%     numSeries = size(data, 1);
-%     series1 = data{1, 1};
-%     series2 = data{2, 1};
-%     series3 = data{3, 1};
-%     metadataList = data{1, 2};
-%     % ...etc.
-%     series1_numPlanes = size(series1, 1);
-%     series1_plane1 = series1{1, 1};
-%     series1_label1 = series1{1, 2};
-%     series1_plane2 = series1{2, 1};
-%     series1_label2 = series1{2, 2};
-%     series1_plane3 = series1{3, 1};
-%     series1_label3 = series1{3, 2};
-%     % ...etc.
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as
+% published by the Free Software Foundation, either version 2 of the
+% License, or (at your option) any later version.
 %
-%     % plot the 1st series's 1st image plane in a new figure
-%     series1_colorMaps = data{1, 3};
-%     figure('Name', series1_label1);
-%     if isempty(series1_colorMaps{1})
-%         colormap(gray);
-%     else
-%         colormap(series1_colorMaps{1});
-%     end
-%     imagesc(series1_plane1);
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
 %
-%     % Or if you have the image processing toolbox, you could use:
-%     % imshow(series1_plane1, []);
-%
-%     % Or animate as a movie (assumes 8-bit unsigned data)
-%     v = linspace(0, 1, 256)';
-%     cmap = [v v v];
-%     for p = 1:series1_numPlanes
-%         M(p) = im2frame(uint8(series1{p, 1}), cmap);
-%     end
-%     movie(M);
-%
-%     % Query some metadata fields (keys are format-dependent)
-%     subject = metadataList.get('Subject');
-%     title = metadataList.get('Title');
+% You should have received a copy of the GNU General Public License along
+% with this program; if not, write to the Free Software Foundation, Inc.,
+% 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 % -- Configuration - customize this section to your liking --
 
@@ -98,54 +95,47 @@ stitchFiles = 0;
 % -- Main function - no need to edit anything past this point --
 
 % load the Bio-Formats library into the MATLAB environment
-if autoloadBioFormats
-    cp = javaclasspath;
-    cp = strfind(cp,'loci_tools');
-    cp = [cp{:}];
-    if isempty(cp)
-        path = fullfile(fileparts(mfilename('fullpath')), 'loci_tools.jar');
-        javaaddpath(path);
-    end
+status = bfCheckJavaPath(autoloadBioFormats);
+assert(status, ['Missing Bio-Formats library. Either add loci_tools.jar '...
+    'to the static Java path or add it to the Matlab path.']);
+
+% Prompt for a file if not input
+if nargin == 0 || exist(id, 'file') == 0
+  [file, path] = uigetfile(bfGetFileExtensions, 'Choose a file to open');
+  id = [path file];
+  if isequal(path, 0) || isequal(file, 0), return; end
 end
-
-% set LuraWave license code, if available
-if exist('lurawaveLicense')
-    path = fullfile(fileparts(mfilename('fullpath')), 'lwf_jsdk2.6.jar');
-    javaaddpath(path);
-    java.lang.System.setProperty('lurawave.license', lurawaveLicense);
-end
-
-% check MATLAB version, since typecast function requires MATLAB 7.1+
-canTypecast = versionCheck(version, 7, 1);
-
-% check Bio-Formats version, since makeDataArray2D function requires trunk
-bioFormatsVersion = char(loci.formats.FormatTools.VERSION);
-isBioFormatsTrunk = versionCheck(bioFormatsVersion, 5, 0);
 
 % initialize logging
 loci.common.DebugTools.enableLogging('INFO');
 
-r = loci.formats.ChannelFiller();
-r = loci.formats.ChannelSeparator(r);
-if stitchFiles
-    r = loci.formats.FileStitcher(r);
+% Get the channel filler
+r = bfGetReader(id, stitchFiles);
+
+% Test plane size
+if nargin >=4
+    planeSize = loci.formats.FormatTools.getPlaneSize(r, varargin{3}, varargin{4});
+else
+    planeSize = loci.formats.FormatTools.getPlaneSize(r);
 end
 
-r.setMetadataStore(loci.formats.MetadataTools.createOMEXMLMetadata());
-r.setId(id);
+if planeSize/(1024)^3 >= 2,
+    error(['Image plane too large. Only 2GB of data can be extracted '...
+        'at one time. You can workaround the problem by opening '...
+        'the plane in tiles.']);
+end
+
 numSeries = r.getSeriesCount();
 result = cell(numSeries, 2);
+
+globalMetadata = r.getGlobalMetadata();
+
 for s = 1:numSeries
-    fprintf('BFOPEN: Reading series #%d', s);
+    fprintf('Reading series #%d', s);
     r.setSeries(s - 1);
-    width = r.getSizeX();
-    height = r.getSizeY();
     pixelType = r.getPixelType();
     bpp = loci.formats.FormatTools.getBytesPerPixel(pixelType);
-    fp = loci.formats.FormatTools.isFloatingPoint(pixelType);
-    sgn = loci.formats.FormatTools.isSigned(pixelType);
     bppMax = power(2, bpp * 8);
-    little = r.isLittleEndian();
     numImages = r.getImageCount();
     imageList = cell(numImages, 2);
     colorMaps = cell(numImages);
@@ -154,7 +144,7 @@ for s = 1:numSeries
             fprintf('\n    ');
         end
         fprintf('.');
-        plane = r.openBytes(i - 1);
+        arr = bfGetPlane(r, i, varargin{:});
 
         % retrieve color map data
         if bpp == 1
@@ -162,78 +152,26 @@ for s = 1:numSeries
         else
             colorMaps{s, i} = r.get16BitLookupTable()';
         end
+        
         warning off
         if ~isempty(colorMaps{s, i})
-            newMap = colorMaps{s, i};
-            m = newMap < 0;
-            newMap(m) = newMap(m) + bppMax;
+            newMap = single(colorMaps{s, i});
+            newMap(newMap < 0) = newMap(newMap < 0) + bppMax;
             colorMaps{s, i} = newMap / (bppMax - 1);
         end
         warning on
 
-        % convert byte array to MATLAB image
-        if isBioFormatsTrunk && (sgn || ~canTypecast)
-            % can get the data directly to a matrix
-            arr = loci.common.DataTools.makeDataArray2D(plane, ...
-                bpp, fp, little, height);
-        else
-            % get the data as a vector, either because makeDataArray2D
-            % is not available, or we need a vector for typecast
-            arr = loci.common.DataTools.makeDataArray(plane, ...
-                bpp, fp, little);
-        end
-
-        % Java does not have explicitly unsigned data types;
-        % hence, we must inform MATLAB when the data is unsigned
-        if ~sgn
-            if canTypecast
-                % TYPECAST requires at least MATLAB 7.1
-                % NB: arr will always be a vector here
-                switch class(arr)
-                    case 'int8'
-                        arr = typecast(arr, 'uint8');
-                    case 'int16'
-                        arr = typecast(arr, 'uint16');
-                    case 'int32'
-                        arr = typecast(arr, 'uint32');
-                    case 'int64'
-                        arr = typecast(arr, 'uint64');
-                end
-            else
-                % adjust apparent negative values to actual positive ones
-                % NB: arr might be either a vector or a matrix here
-                mask = arr < 0;
-                adjusted = arr(mask) + bppMax / 2;
-                switch class(arr)
-                    case 'int8'
-                        arr = uint8(arr);
-                        adjusted = uint8(adjusted);
-                    case 'int16'
-                        arr = uint16(arr);
-                        adjusted = uint16(adjusted);
-                    case 'int32'
-                        arr = uint32(arr);
-                        adjusted = uint32(adjusted);
-                    case 'int64'
-                        arr = uint64(arr);
-                        adjusted = uint64(adjusted);
-                end
-                adjusted = adjusted + bppMax / 2;
-                arr(mask) = adjusted;
-            end
-        end
-
-        if isvector(arr)
-            % convert results from vector to matrix
-            shape = [width height];
-            arr = reshape(arr, shape)';
-        end
 
         % build an informative title for our figure
         label = id;
         if numSeries > 1
-            qs = int2str(s);
-            label = [label, '; series ', qs, '/', int2str(numSeries)];
+            seriesName = char(r.getMetadataStore().getImageName(s - 1));
+            if ~isempty(seriesName)
+                label = [label, '; ', seriesName];
+            else
+                qs = int2str(s);
+                label = [label, '; series ', qs, '/', int2str(numSeries)];
+            end
         end
         if numImages > 1
             qi = int2str(i);
@@ -270,25 +208,15 @@ for s = 1:numSeries
         imageList{i, 2} = label;
     end
 
-    % extract metadata table for this series
-    metadataList = r.getMetadata();
-
     % save images and metadata into our master series list
     result{s, 1} = imageList;
-    result{s, 2} = metadataList;
+
+    % extract metadata table for this series
+    seriesMetadata = r.getSeriesMetadata();
+    loci.formats.MetadataTools.merge(globalMetadata, seriesMetadata, 'Global ');
+    result{s, 2} = seriesMetadata;
     result{s, 3} = colorMaps;
     result{s, 4} = r.getMetadataStore();
     fprintf('\n');
 end
 r.close();
-
-% -- Helper functions --
-
-function [result] = versionCheck(v, maj, min)
-
-tokens = regexp(v, '[^\d]*(\d+)[^\d]+(\d+).*', 'tokens');
-majToken = tokens{1}(1);
-minToken = tokens{1}(2);
-major = str2num(majToken{1});
-minor = str2num(minToken{1});
-result = major > maj || (major == maj && minor >= min);
