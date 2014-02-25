@@ -2,7 +2,7 @@ function s1 = serial_arduino( port )
 %OPEN_ARDUINO opens serial connection to arduino
 %
 %  S1 = SERIAL_ARDUINO( PORT )
-% 
+%
 %   Stills need to be followed by fopen
 %
 %    Expects arduino at
@@ -10,8 +10,10 @@ function s1 = serial_arduino( port )
 %              make link by 'sudo ln -s /dev/ttyAXXX /dev/ttyS100'
 %        windows: COM11
 %
-% 2013, Alexander Heimel
+% 2014, Alexander Heimel
 %
+
+global VdaqPort
 
 s1 = [];
 
@@ -19,19 +21,23 @@ if nargin<1
     port = '';
 end
 
+if isempty(port) && ~isempty(VdaqPort)
+    port = VdaqPort;
+end
+
 if isempty(port)
     switch computer
         case 'GLNX86'
-            port = '/dev/ttyS100'; 
+            port = '/dev/ttyS100';
         case {'PCWIN','PCWIN64'}
-            port = 'COM11'; 
+            port = 'COM11';
         otherwise
             disp('OPEN_ARDUINO: Do not know to which COM port Arduino is connected.');
             errordlg('Do not know to which COM port Arduino is connected.','Open_arduino');
             return
     end
 end
-     
+
 % first check existing open port
 s1 = instrfind({'Port','Status'},{port,'open'});
 if isempty(s1)
@@ -49,9 +55,9 @@ if isempty(s1)
 else
     s1 = s1(1);
 end
-try 
-   fopen(s1);
-   fclose(s1);
+try
+    fopen(s1);
+    fclose(s1);
 catch me
     switch(me.identifier)
         case 'MATLAB:serial:fopen:opfailed'
@@ -60,5 +66,5 @@ catch me
     errordlg(me.message,'Open_arduino');
     s1 = [];
 end
-   
+
 
