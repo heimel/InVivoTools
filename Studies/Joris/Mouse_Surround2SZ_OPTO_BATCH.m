@@ -78,6 +78,7 @@ logmsg('Details [Tx5] = Pen no, channel number, adjusted channel number, cond, i
 %Exclude any PENS?
 %MAe another col of detauils (col 5) which contains an inclusion flag
 exclude = [1 2 14 19];
+%exclude = [];
 include = setdiff(1:N, exclude);
 logmsg(['Excluding ' mat2str(exclude) ] );
 
@@ -103,14 +104,14 @@ crossiso_index = nan(N,nchans,2);
 
 response_period = (px>0 & px<1);
 
-response_threshold = -inf; % x std, use -Inf to set no threshold
+%response_threshold = -inf; % x std, use -Inf to set no threshold
+response_threshold = 2; % x std, use -Inf to set no threshold
 logmsg(['Response threshold = ' num2str(response_threshold) ' x std']);
 
 mgresponses = mean(mgMUA(:,response_period),2);
 mgresponsesstd = std(mgMUA(:,response_period),[],2);
 
-
-
+mgresponding = zeros(size(mgMUA,1),1);
 
 for ch = 1:length(incchans)
     ach = incchans(ch);
@@ -126,20 +127,29 @@ for ch = 1:length(incchans)
                 tc = (t-1)*17+c;
                 ind = find(details(:,1)==p & details(:,3)==ach & details(:,4)==tc);
                 if length(ind)>1
-                    errormsg('Multiple entries');
+                    errormsg('Multiple entries. Not built for that.');
+                    return
                 end
-                if ~isempty(ind) && (mgresponses(ind)>threshold||c==1)
+                if mgresponses(ind)>threshold % if any condition responding
+                    ind1 = find(details(:,1)==p & details(:,3)==ach);
+                    mgresponding(ind1) = 1; % then make all responding
+                    continue
+                end
+            end
+            for c=1:17
+                tc = (t-1)*17+c;
+                ind = find(details(:,1)==p & details(:,3)==ach & details(:,4)==tc);
+                if ~isempty(ind) && mgresponding(ind)
                     r(c,t) = mgresponses(ind);
                 end
-                mgresponding(ind) = (mgresponses(ind)>threshold|c==1);
             end
             suppression_index(p,ch,t) = (r(3,t)+r(2,t)-r(8,t)-r(6,t))/(r(3,t)+r(2,t)-2*r(1,t));  % baseline subtracted SI
             suppression2_index(p,ch,t) = (r(4,t)+r(5,t)-r(12,t)-r(14,t))/(r(4,t)+r(5,t)-2*r(1,t));  % baseline subtracted SI
             crossiso_index(p,ch,t) = (r(7,t)+r(9,t)-r(8,t)-r(6,t))/(r(7,t)+r(9,t)-2*r(1,t));  % baseline subtracted SI
-
+            
         end
         if suppression_index(p,ch,1)>0.38 && suppression_index(p,ch,1)<1 && suppression_index(p,ch,2)<0.29
-           % p,ch
+            % p,ch
         end
     end
 end
@@ -157,8 +167,8 @@ h = figure('name',name);
 plot(suppression_index(:,:,1),suppression_index(:,:,2),'k.','markersize',20)
 xlabel('Suppression index (Off)');
 ylabel('Suppression index (On)');
-xlim([0 0.6]);  % could be too narrow
-ylim([0 0.6]);  % could be too narrow
+% xlim([0 0.6]);  % could be too narrow
+% ylim([0 0.6]);  % could be too narrow
 box off
 xyline;
 bigger_linewidth(2);
@@ -177,20 +187,20 @@ for ch = 1:length(incchans)
     % plot(suppression_index(:,1),suppression_index(:,2),'.')
     % axis([0 1 0 1]);
     % xyline
-try
-    pv.si(ch) = signrank(suppression_index(ind_suppressed,ch,1),suppression_index(ind_suppressed,ch,2));
-end    %  logmsg(['Change in SI, Adjusted channel = ' num2str(ach) ' signrank test, p = ' num2str(pv.si(ch),3)]);
+    try
+        pv.si(ch) = signrank(suppression_index(ind_suppressed,ch,1),suppression_index(ind_suppressed,ch,2));
+    end    %  logmsg(['Change in SI, Adjusted channel = ' num2str(ach) ' signrank test, p = ' num2str(pv.si(ch),3)]);
     % figure('name','Suppresion2 index light on light off');
     % plot(suppression2_index(:,1),suppression2_index(:,2),'.')
     % axis([0 1 0 1]);
     % xyline
-   try
-       pv.si2(ch) = signrank(suppression2_index(ind_suppressed2,ch,1),suppression2_index(ind_suppressed2,ch,2));
-   end
-       %   logmsg(['Change in SI2, Adjusted channel = ' num2str(ach) ' signrank test, p = ' num2str(pv.si2(ch),3)]);
+    try
+        pv.si2(ch) = signrank(suppression2_index(ind_suppressed2,ch,1),suppression2_index(ind_suppressed2,ch,2));
+    end
+    %   logmsg(['Change in SI2, Adjusted channel = ' num2str(ach) ' signrank test, p = ' num2str(pv.si2(ch),3)]);
     %   pv.sivsi2(ch) = signrank(suppression_index(:,1),suppression2_index(:,1));
     try
-    pv.cii(ch) = signrank(crossiso_index(:,ch,1),crossiso_index(:,ch,2));
+        pv.cii(ch) = signrank(crossiso_index(:,ch,1),crossiso_index(:,ch,2));
     end
     %    logmsg(['Change in CII, Adjusted channel = ' num2str(ach) ' signrank test, p = ' num2str(pv.cii(ch),3)]);
 end
@@ -204,10 +214,10 @@ plot([min(incchans) max(incchans)],[0.05 0.05],'k--');
 legend('p change SI','p change SI2','p change CII')
 xlabel('Channel (Deep -> Shallow)');
 ylabel('p-value, Optogenetic modulation of suppression');
-save_figure(subst_filechars(name),getdesktopfolder,h);
+save_figure(subst_filechars(name),userfolder,h);
 
 
-% now compute NMUA PSTH for specific layer 
+% now compute NMUA PSTH for specific layer
 ch = 8;
 ach =incchans(ch);
 mnmua = nan(N,17,2,size(mgMUA,2));
@@ -217,7 +227,7 @@ for p=include
             tc = (t-1)*17+c;
             ind = (details(:,1)==p & details(:,3)==ach & details(:,4)==tc);
             r(c,t) = mgresponses(ind);
-            if mgresponding(ind) &&  suppression_index(p,ch,1)>0 % otherwise center smaller than rf
+            if mgresponding(ind) %&&  suppression_index(p,ch,1)>0 % otherwise center smaller than rf
                 mnmua(p,c,t,:) = mgMUA(ind,:);
             end
         end
@@ -228,25 +238,26 @@ for p=include
     for t=1:2
         for c=1:17
             %nmnmua(p,c,t,:) = mnmua(p,c,t,:) / (max(mnmua(p,2,1,:)+mnmua(p,3,1,:))/2); % max
-            nmnmua(p,c,t,:) = mnmua(p,c,t,:) / (mean(mnmua(p,2,1,:)+mnmua(p,3,1,:))/2); 
+            nmnmua(p,c,t,:) = mnmua(p,c,t,:) / (mean(mnmua(p,2,1,:)+mnmua(p,3,1,:))/2);
         end
     end
 end
 
-name = ['Surround suppression through feedback - adj channel ' num2str(ach)];
-h = figure('name',name);
-hold on
-plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,2,1,:)+nmnmua(:,3,1,:),1)),50)/2,'k');
-plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,2,2,:)+nmnmua(:,3,2,:),1)),50)/2,'k--');
-plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,6,1,:)+nmnmua(:,8,1,:),1)),50)/2,'r');
-plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,6,2,:)+nmnmua(:,6,2,:),1)),50)/2,'r--');
-xlim([-0.1 0.7]);
-xlabel('Time (s)');
-ylabel('Response');
-legend('Center','Center + Light','C+S','C+S + Light','location','southeast'); legend boxoff
-bigger_linewidth(2);
-save_figure(subst_filechars(name),getdesktopfolder,h);
-
+if 0
+    name = ['Surround suppression through feedback - adj channel ' num2str(ach)];
+    h = figure('name',name);
+    hold on
+    plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,2,1,:)+nmnmua(:,3,1,:),1)),50)/2,'k');
+    plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,2,2,:)+nmnmua(:,3,2,:),1)),50)/2,'k--');
+    plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,6,1,:)+nmnmua(:,8,1,:),1)),50)/2,'r');
+    plot(px(2:end),smooth(squeeze(nanmean(nmnmua(:,6,2,:)+nmnmua(:,6,2,:),1)),50)/2,'r--');
+    xlim([-0.1 0.7]);
+    xlabel('Time (s)');
+    ylabel('Response');
+    legend('Center','Center + Light','C+S','C+S + Light','location','southeast'); legend boxoff
+    bigger_linewidth(2);
+    save_figure(subst_filechars(name),userfolder,h);
+end
 
 name = ['Cross iso suppression through feedback - adj channel ' num2str(ach)];
 h = figure('name',name);
@@ -262,7 +273,7 @@ xlabel('Time (s)');
 ylabel('Response');
 legend('Center','Center + Light','C+Iso','C+Iso + Light','C+Cross','C+Cross + Light','location','southeast'); legend boxoff
 bigger_linewidth(2);
-save_figure(subst_filechars(name),getdesktopfolder,h);
+save_figure(subst_filechars(name),userfolder,h);
 
 
 % p = 16;
@@ -280,7 +291,7 @@ save_figure(subst_filechars(name),getdesktopfolder,h);
 % plot(px(2:end),smooth(r_surround,10),'r');
 % ind = (px>0 & px<1);
 % (mean(r_center(ind))-mean(r_surround(ind)))/mean(r_center(ind))
-% 
+%
 % ind11 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==1+17);
 % ind21 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==2+17);
 % ind31 = find(details(:,1)==p & details(:,3)==incchans(ch) & details(:,4)==3+17);
@@ -292,7 +303,7 @@ save_figure(subst_filechars(name),getdesktopfolder,h);
 % plot(px(2:end),smooth(r_surround,10),'r--');
 % ind = (px>0 & px<1);
 % (mean(r_center(ind))-mean(r_surround(ind)))/mean(r_center(ind))
-% 
+%
 
 
 
