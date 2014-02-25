@@ -47,7 +47,7 @@ pspar.windowShape = 0;
 pspar.dispprefs = {'BGpretime',0,'BGposttime',0};
 pspar.angle = 45;
 total_duration = 3;
-pspar.prestim_time = 3;  
+pspar.prestim_time = 3;
 angles = [0:pspar.angle:360-pspar.angle];
 
 for i = 1:n_x*n_y
@@ -57,7 +57,8 @@ for i = 1:n_x*n_y
     col=i-1-row*n_x;
     
     pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
-    
+    % pspar.rect = CenterRectOnPoint(default_rect,1267,213);
+    % above line added to center shift the change with tilt
     pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
     angles = angles( randperm(length(angles)) );
     for angle = angles
@@ -87,8 +88,7 @@ try
         end
         if go && ready
             if stim~=0 % not blank
-%                 stim=and(stim,31); % remove shutter bits Alexander said I
-%                 removed it (Mehran 10-8-2013)
+%                 stim=and(de2bi(stim),de2bi(31)); % remove shutter bits
 stim1=and([de2bi(stim),zeros(1,8-length(de2bi(stim)))],[de2bi(63),zeros(1,8-length(de2bi(63)))]);
 stim=bi2de(stim1(1:2));
                 pause(pspar.prestim_time);
