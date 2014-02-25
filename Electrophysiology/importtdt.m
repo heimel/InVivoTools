@@ -5,8 +5,8 @@ function EVENT = importtdt(EVENT)
 %the timing data of strobe events from a TDT Tank
 %
 %If used in a batch file you must initialize these values:
-%input: EVENT.Mytank = 'the tank you want to read from';
-%       EVENT.Myblock = 'the block you want to read from';
+%input: EVENT.Mytank = full path to the tank you want to read from 
+%       EVENT.Myblock = name of the block you want to read from
 %
 %output: EVENT ;  a structure containing a lot of info
 %        Trilist ; an array containing timing info about all the trials
@@ -17,13 +17,20 @@ function EVENT = importtdt(EVENT)
 %
 %uses GetEpocsV to retrieve stobe-on epocs; Updated 17/04/2007
 
+switch computer
+    case 'GLNX86'
+        logmsg('Using TDTREAD on linux.');
+        EVENT = importtdt_linux(EVENT);
+        return
+end
+
 
 matfile = fullfile(EVENT.Mytank,EVENT.Myblock); %name of file used to save event structure
 MatFile=fullfile(matfile,EVENT.Myblock);
-if exist([MatFile '.mat'], 'file')
-    load(MatFile);
-    return
-end
+% if exist([MatFile '.mat'], 'file')
+%     load(MatFile);
+%     return
+% end
 
 
 %E.UNKNOWN = hex2dec('0');  %"Unknown"

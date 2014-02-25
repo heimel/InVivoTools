@@ -1,7 +1,7 @@
-function M = tpmovie(record, channel, trials, thestims, sorted, diffnc, fps, filename) 
+function M = tpmovie(record, channel, trials, thestims, sorted, diffnc, fps, filename, movietype) 
 %  TPMOVIE - Movie of Prairieview two-photon data
 %
-%  MOVIE=TPMOVIE(RECORD, CHANNEL, TRIALS, STIMS, SORT, DIFF, FPS, FILENAME)
+%  MOVIE=TPMOVIE(RECORD, CHANNEL, TRIALS, STIMS, SORT, DIFF, FPS, FILENAME, MOVIETYPE)
 %
 %    Computes a movie for two-photon data that is linked to the
 %  stimulus presentation.  DIRNAME is the name of the directory.
@@ -22,6 +22,15 @@ function M = tpmovie(record, channel, trials, thestims, sorted, diffnc, fps, fil
 % FPS is the frames-per-second viewing rate of the movie.
 %
 % FILENAME is the name of the output AVI file.
+%
+% MOVIETYPE is 'plain' or 'twocolor'
+
+if nargin<9
+    movietype = '';
+end
+if isempty(movietype)
+    movietype = 'twocolor';
+end
 
 trials = 1;
 %thestims = 1;
@@ -177,14 +186,23 @@ for i=1:size(interval,1),
         deltafoverf = deltaf ./  (bgim(:,:,2)*mxbg(channel));
         deltafoverf = (template>0).*deltafoverf;
         deltafoverf = spatialfilter( deltafoverf,4,'pixel');
+
+        
         
         deltafoverf = rescale(deltafoverf,[0 0.2],[0 1]);
-        img = bgim;
-        img(:,:,3) = deltafoverf .* (template>0) .* template.^.5;
-        img(:,:,2) = img(:,:,2) + 0.3*img(:,:,3); %deltafoverf;
-        img(:,:,1) = img(:,:,1) + 0.3*img(:,:,3); %deltafoverf;
 
-        img = rescale(img,[0 1],[0 1]);
+        switch movietype
+            case 'twocolor'
+                img = bgim;
+                img(:,:,3) = deltafoverf .* (template>0) .* template.^.5;
+                img(:,:,2) = img(:,:,2) + 0.3*img(:,:,3); %deltafoverf;
+                img(:,:,1) = img(:,:,1) + 0.3*img(:,:,3); %deltafoverf;
+                
+                img = rescale(img,[0 1],[0 1]);
+            case 'plain'
+                img(:,:,3) = deltafoverf;
+        end
+        
         image(img);
         axis off
 		M(end+1) = getframe(H);

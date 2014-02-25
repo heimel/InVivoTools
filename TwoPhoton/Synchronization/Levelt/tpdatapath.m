@@ -22,8 +22,8 @@ switch host
         localroot='C:\Data';
     case 'nin233' % daan's desktop
         localroot='E:\2PhotonData';
-%     case 'nin421' %Ania's desktop
-%         localroot='C:\Users\szmuksta\Dropbox\Data_Ania';
+     case 'nin192' % Laura's desktop
+         localroot='E:\Data\InVivo\Twophoton';
     otherwise
         switch computer
             case 'MACI64' % i.e. Daan's home mac

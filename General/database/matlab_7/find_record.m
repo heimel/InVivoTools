@@ -120,7 +120,7 @@ ind=[];
 pos=sort([findstr(crit,'=') findstr(crit,'!') ...
     findstr(crit,'>') findstr(crit,'<') findstr(crit,'~')]);
 if length(pos)>1
-    disp(['Warning: FIND_RECORD only uses first comparison in ' crit ]);
+    disp(['FIND_RECORD: Only uses first comparison in ' crit ]);
     pos=pos(1);
 end
 if isempty(pos)
@@ -154,7 +154,7 @@ if ~isempty(pos)
         catch %exception
             
             if ~isfield(db,field)
-                disp(['warning: find_record: ' field ' is not a valid field']);
+                disp(['FIND_RECORD: ' field ' is not a valid field']);
                 ind=[];
                 return
                 %else

@@ -29,6 +29,7 @@ load_mclust = 1;
 load_gephyrin = 0;
 load_trkb = 0;
 load_bcat = 1;
+load_mitos = 1;
 
 % set default lab, can be overruled depending on host:
 % alternatives 'Fitzpatrick','Levelt','Lohmann'
@@ -320,6 +321,10 @@ end
 
 
 % Studies, specific analyses for studies
+if 1 % Vangeneugden et al. in prep 
+    addpath(fullfile(majorprefix,'Studies','Joris'));
+    addpath(fullfile(majorprefix,'Studies','Joris','TDT2ML'));
+end    
 if 1 % Saiepour et al. 2014 
     addpath(fullfile(majorprefix,'Studies','OD_optogenetics'));
 end    
@@ -339,6 +344,10 @@ end
 
 if load_bcat
     addpath(fullfile(majorprefix,'Studies','BCat'));
+end
+
+if load_mitos
+    addpath(fullfile(majorprefix,'Studies','Mitochondria'));
 end
 
 %  switch host

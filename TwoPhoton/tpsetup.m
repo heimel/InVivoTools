@@ -29,6 +29,8 @@ switch lower(setup)
         setup = 'DeZeeuw';
     case 'scanimage'
         setup = 'ScanImage';
+    case 'imagej'
+        setup = 'ImageJ';
     otherwise
         setup = 'FluoView';
 end

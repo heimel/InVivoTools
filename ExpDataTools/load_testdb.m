@@ -97,7 +97,13 @@ switch whichdb
             db_empty = load(fullfile(expdatabasepath(where),'Empty', 'tptestdb_olympus_empty'));
             db_empty = db_empty.db;
             db_single = structconvert(db_single,db_empty);
+%         elseif ~isempty(db_single) &&  isfield(db_single(1),'electrode') % i.e. microscopy record
+%             % matching structure to tptestdb_olympus_empty
+%             db_empty = load(fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty'));
+%             db_empty = db_empty.db;
+%             db_single = structconvert(db_single,db_empty);
         end
+
         
         db = [db db_single]; 
 end

@@ -9,7 +9,7 @@ function [results,dresults,measurelabel] = get_measurements( groups, measure, va
 %       SEM in the individual measurements
 %    MEASURELABEL is cell list of string
 %
-% 2007-2013, Alexander Heimel
+% 2007-2014, Alexander Heimel
 %
 
 persistent expdb_cache
@@ -18,8 +18,7 @@ results={};
 dresults={};
 
 pos_args={...
-    'value_per','measurement',... % 'group','mouse','test','measurement', 'stack','neurite'
-    'reliable',1,...  % 1 to only use reliable records (record.reliable!0), 0 to use all
+    'value_per','measurement',... % 'group','mouse','test','measurement', 'stack','neurite' %'reliable',1,...  % 1 to only use reliable records (record.reliable!0), 0 to use all
     'testdb',[],...
     'mousedb',[],...
     'groupdb',[],...
@@ -52,22 +51,22 @@ if nvarargin>0
             end
         end
         if ~found_arg
-            warning(['could not parse argument ' varargin{i}]);
+            errormsg(['Could not parse argument ' varargin{i}]);
             return
         end
     end
 end
 
-if isempty(mousedb)
+if isempty(mousedb) %#ok<NODEF>
     mousedb=load_mousedb;
 end
-if isempty(groupdb)
+if isempty(groupdb) %#ok<NODEF>
     groupdb=load_groupdb;
 end
-if isempty(measuredb)
+if isempty(measuredb) %#ok<NODEF>
     measuredb=load_measuredb;
 end
-if ischar(extra_options)
+if ischar(extra_options) %#ok<NODEF>
     extra_options=split(extra_options,',');
 end
 for i=1:2:length(extra_options)
@@ -137,7 +136,7 @@ end
 
 for g=1:n_groups
     newlinehead=[linehead groupss(g).name ';'];
-    [results{g},dresults{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,reliable,extra_options,newlinehead);
+    [results{g},dresults{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
     measurelabel=measuress.label;
     n=sum(~isnan(results{g})) ;
     if n<min_n
@@ -166,7 +165,7 @@ end % g (groups)
 return
 
 
-function [results, dresults]=get_measurements_for_group( group, measure, value_per, mousedb,testdb,reliable,extra_options,linehead)
+function [results, dresults]=get_measurements_for_group( group, measure, value_per, mousedb,testdb,extra_options,linehead)
 results=[];
 dresults=[];
 
@@ -184,7 +183,7 @@ end
 for i_mouse=indmice
     mouse=mousedb(i_mouse);
     newlinehead=[linehead mouse.mouse ';'];
-    [res,dres]=get_measurements_for_mouse( mouse, measure, value_per,mousedb,testdb,reliable,extra_options,newlinehead);
+    [res,dres]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,mousedb,testdb,extra_options,newlinehead);
     
     switch value_per
         case 'mouse' %{'mouse','group'}
@@ -226,8 +225,8 @@ for i_mouse=indmice
 end % i_mouse (mice)
 return
 
-%
-function [results, dresults]=get_measurements_for_mouse( mouse, measure, value_per, mousedb,testdb,reliable,extra_options,linehead)
+
+function [results, dresults]=get_measurements_for_mouse( mouse, measure, criteria,value_per, mousedb,testdb,extra_options,linehead)
 results=[];
 dresults=[];
 
@@ -271,11 +270,11 @@ cond=[cond ', datatype=' measure.datatype  ];
 if ~isempty(measure.stim_type)
     cond=[cond ', stim_type=' measure.stim_type  ];
 end
-% 2013-05-28 moved reliable checking to within record, because it can be
-% done for separate cells
-% if isfield(testdb,'reliable') && reliable==1
-%     cond=[cond ', reliable!0'];
-% end
+if isfield(testdb,'stim_type') && exist('stim_type','var')
+    cond=[cond ', (stim_type=' stim_type ')' ];
+end
+ 
+
 if isfield(testdb,'experimenter') && exist('experimenter','var')
     cond=[cond ', (experimenter=' experimenter ')' ];
 end
@@ -350,7 +349,7 @@ for i_test=indtests
     elseif isfield(testrecord,'epoch')
         newlinehead = [newlinehead testrecord.epoch ';' testrecord.stack ';' testrecord.slice ';']; %#ok<AGROW>
     end
-    [res dres]=get_measurements_for_test( testrecord,mouse, measure,value_per,reliable,extra_options,newlinehead);
+    [res dres]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
 
     
     
@@ -389,30 +388,20 @@ for i_test=indtests
     end
     if any(size(results)~=size(dresults))
         disp('GET_MEASUREMENTS: sizes of RESULTS and DRESULTS are not equal');
-        %keyboard
     end
-    
-    
-    % was:, changed on 2011-04-01
-    %results=[results res];
-    %dresults=[dresults dres];
 end % test records
 
 
-
-%
-function [results, dresults]=get_measurements_for_test(testrecord, mouse, measure, value_per,reliable,extra_options,linehead)
+function [results, dresults]=get_measurements_for_test(testrecord, mouse, measure, criteria,value_per,extra_options,linehead)
 results = [];
 dresults = [];
-celltype = '';
-
-
-if reliable==1 && length(testrecord.reliable)==1 && testrecord.reliable==0
-    return % no need to check individual cells
-end
 
 for i=1:2:length(extra_options)
     assign(extra_options{i},extra_options{i+1});
+end
+
+if exist('reliable','var') && reliable==1 && length(testrecord.reliable)==1 && testrecord.reliable==0
+    return % no need to check individual cells
 end
 
 if exist('min_blocks','var')
@@ -473,11 +462,11 @@ switch measure.measure
                 %                 disp(['GET_MEASUREMENTS: ' saved_data_file ' does not exist.']);
             end
         else
-            [results dresults]=get_measure_from_record(testrecord,measure.measure,celltype,reliable,extra_options);            
+            [results dresults]=get_measure_from_record(testrecord,measure.measure,criteria,extra_options);            
             results = double(results);
             dresults = double(dresults);
             if strcmpi(value_per,'neurite')
-                linked2neurite = get_measure_from_record(testrecord,'linked2neurite',celltype,reliable,extra_options);
+                linked2neurite = get_measure_from_record(testrecord,'linked2neurite',extra_options);
                 if length(linked2neurite)~=length(results)
                     errormsg('Not an equal number of values and neurite numbers.');
                     return

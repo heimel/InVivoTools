@@ -46,7 +46,7 @@ ud.db(ud.current_record)=record;
 set(ud.h.fig,'Userdata',ud);
 
 % compute odi 
-if isfield(record,'eye') && strcmp(record.eye,'ipsi')
+if isfield(record,'eye') && ( strcmp(record.eye,'ipsi') || strcmp(record.eye,'contra'))
     record = compute_odi_measures( record,ud.db);
     ud.db(ud.current_record)=record;
     set(ud.h.fig,'Userdata',ud);
@@ -81,7 +81,7 @@ switch record.datatype
     case 'ec'
         results_ectestrecord( ud.db(ud.current_record));
     case 'lfp'
-        if ~isempty(record.measures)
+        if ~isempty(record.measures) && ~strcmp(record.electrode,'wspectrum') % Mehran temporarily
             results_lfptestrecord( ud.db(ud.current_record) );
         end
     case 'tp'
