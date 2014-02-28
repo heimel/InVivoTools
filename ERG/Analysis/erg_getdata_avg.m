@@ -32,7 +32,7 @@ function [channels_avg stims prepulse_period] = erg_getdata_avg(filename, mode)
         sweeps_size  = str2num(d.numrepeats);
         sweeps_count = str2num(d.pulse_steps);
         for (i = 1:sweeps_count)
-          [resultset(i,:), nRemoved(i)] = erg_analysis_avgpulse(dataset((i-1)*sweeps_size+1:i*sweeps_size,:),0);
+          [resultset(i,:), nRemoved(i)] = erg_analysis_avgpulse(dataset((i-1)*sweeps_size+1:i*sweeps_size,:),1);
           stims(i) = Srt(2,i*sweeps_size);
         end
         avg.resultset = resultset;

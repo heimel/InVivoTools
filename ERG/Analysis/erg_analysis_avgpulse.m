@@ -24,6 +24,15 @@ function [data_out, nRemoved] = erg_analysis_avgpulse(data_in, graphs)
 
   if (graphs) 
     global f1 f2 f3;
+    if isempty(f1) || ~ishandle(f1)
+        f1 = figure;
+    end
+    if isempty(f2)|| ~ishandle(f2)
+        f2 = figure;
+    end
+    if isempty(f3)|| ~ishandle(f3)
+        f3 = figure;
+    end
     figure(f1); hold off; plot(sweepDivRun'); 
     figure(f2); hold off; plot(sweepDivRMS,'g.'); hold on;
     w=m     ; plot([1 i], [w,w], 'r:');   
