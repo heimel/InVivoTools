@@ -106,6 +106,13 @@ switch lower(record.setup)
         EVENT.Start =  -max_pretime;
         EVENT.Triallngth =  post_ttl+pre_ttl;
         results.sample_interval=1/EVENT.strms(1,3).sampf;
+        
+        
+        if length(EVENT.strons.tril)>1
+            errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+            EVENT.strons.tril(1)=EVENT.strons.tril(end);
+        end
+        
         startindTDT=EVENT.strons.tril(1)-pre_ttl;
         SIG = signalsTDT(EVENT,stimulus_start+startindTDT);
         for j=1:length(channels_to_read)
