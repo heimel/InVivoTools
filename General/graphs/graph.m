@@ -98,6 +98,7 @@ pos_args={...
     'legnd','',...  % legend,example legnd,{wt,t1}
     'save_as','',...
     'z',{},...
+    'smoothing',0,...
     };
 
 assign(pos_args{:});
@@ -148,6 +149,13 @@ if exist('errorbars_tick','var')
 else
     errorbars_tick = [];
 end
+
+if exist('smoothing','var')
+    smoothing = str2double(smoothing);
+else
+    smoothing = 0;
+end
+
 
 if exist('markersize','var')
     if ischar(markersize)
@@ -629,6 +637,14 @@ switch style
             end
         end
         
+        if exist('smoothing','var') && smoothing>0
+            for i=1:length(y)
+                y{i}=smooth(y{i},smoothing);
+                y{i}=y{i}(:)';
+            end
+        end
+ 
+        
         % plot errors
         if ~exist('errorbars_sides','var')
             errorbars_sides='both';
@@ -926,7 +942,12 @@ end
 if ~isempty(extra_code)
     %evaluate_extra_code(extra_code);
     child=get(gca,'children'); %#ok<NASGU> % to be used in extra_code
-    eval(extra_code); % do evaluation here to allow access to local variables
+    try
+        eval(extra_code); % do evaluation here to allow access to local variables
+    catch me
+        errormsg(['Problem in extra code: ' extra_code]);
+        %rethrow(me);
+    end
 end
 
 

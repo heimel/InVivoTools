@@ -38,6 +38,8 @@ processparams = ecprocessparams(record);
 
 WaveTime_Spikes = struct([]);
 
+
+
 switch lower(record.setup)
     case 'antigua'
         Tankname = 'Mouse';
@@ -46,6 +48,11 @@ switch lower(record.setup)
         EVENT.Mytank = datapath;
         EVENT.Myblock = blocknames;
         EVENT = importtdt(EVENT);
+        
+        if length(EVENT.strons.tril)>1
+            errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+            EVENT.strons.tril(1)=EVENT.strons.tril(end);
+        end
         Dells=EVENT.snips.Snip.times;
         EVENT.Myevent = 'Snip';
         EVENT.type = 'snips';
@@ -53,13 +60,20 @@ switch lower(record.setup)
         %         EVENT.timerange(2)-EVENT.strons.tril(1)+(1/EVENT.snips.Snip.sampf);
         %         EVENT.Start = +(1/EVENT.snips.Snip.sampf);
         EVENT.Start = 0;
-        if isfield(record, 'channels') &&  ~isempty(record.channels)
-            read_chan1 = record.channels;
-        else
-            read_chan1= 1:EVENT.strms(1).channels;
-        end
-        disp(['ANALYSE_ECTEST: FOR ONLY CHANNEL # ',num2str(read_chan1)]);
         
+        read_chan1 = get_channels2analyze( record );
+        %        read_chan1 = 5;
+        if any(read_chan1>EVENT.snips.Snip.channels)
+            errormsg(['Did not record more than ' num2str(EVENT.snips.Snip.channels) ' channels.']);
+            return
+        end
+
+
+        if isempty(read_chan1)
+%            read_chan1 = 1:EVENT.strms(1).channels;
+            read_chan1 = 1:EVENT.snips.Snip.channels;
+        end        
+        logmsg(['Analyzing channels: ' num2str(read_chan1)]);
         total_length=EVENT.timerange(2)-EVENT.strons.tril(1);
         WaveTime_Fpikes=struct([]);
         for i=1:length(read_chan1)
@@ -69,6 +83,7 @@ switch lower(record.setup)
             for kk=1:ceil(total_length/60)
                 % clear WaveTime_chspikes
                 EVENT.Triallngth = min(60,total_length-60*(kk-1));
+                % AH: One should use EVENT.CHAN = read_chan1(i) here
                 WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
                 WaveTime_fpikes.time=[WaveTime_fpikes.time;WaveTime_chspikes(read_chan1(i),1).time];
                 WaveTime_fpikes.data=[WaveTime_fpikes.data;WaveTime_chspikes(read_chan1(i),1).data];
@@ -86,8 +101,12 @@ switch lower(record.setup)
         %         Fells={};
         %         WaveTime_Spikes=struct([]);
         for ii=1:numchannel1
+            logmsg(['Sorting channel ' num2str(read_chan1(ii))]);
             clear kll
             clear spikes
+            if isempty(WaveTime_Fpikes(ii,1).time)
+                continue
+            end
                         kll.sample_interval = 1/EVENT.snips.Snip.sampf;
                         kll.data = WaveTime_Fpikes(ii,1).time;
                         spikes=WaveTime_Fpikes(ii,1).data;
@@ -103,7 +122,7 @@ switch lower(record.setup)
             %%
             WaveTime_Spikes=[WaveTime_Spikes;wtime_sp];
             numchannel=numchannel+nchan;
-            ii
+            
             %             Fells=[Fells;Dells{read_chan1(ii),1}];
             %             WaveTime_Spikes=[WaveTime_Spikes;WaveTime_Fpikes(read_chan1(ii),1)];
         end
@@ -114,7 +133,7 @@ switch lower(record.setup)
         %             return
         %         end
         
-        if isempty(WaveTime_Fpikes)
+        if isempty(WaveTime_Spikes)
             return
         end
         
@@ -554,3 +573,27 @@ record = add_distance2preferred_stimulus( record );
 
 return
 
+
+
+function  channels = get_channels2analyze( record )
+h_db = get_fighandle('Ec database*');
+if length(h_db)>1
+    warning('ANALYSE_ECTESTRECORD:MULTIPLE_DB','Multiple EC database control windows. Take first for determining channel');
+    warning('off','ANALYSE_ECTESTRECORD:MULTIPLE_DB');
+    h_db = h_db(1);
+end
+if isempty(h_db)
+    channels = [];
+    logmsg('Cannot find database control window to find Channels to analyze.');
+end
+h = ft(h_db,'channels_edit');
+if ~isempty(h)
+    try
+        channels = str2num( get(h,'String'));
+    catch
+        channels = [];
+    end
+end
+
+function obj = ft(fig, name)
+obj = findobj(fig,'Tag',name);

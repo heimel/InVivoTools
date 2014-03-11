@@ -107,9 +107,9 @@ function button_calib_UV_Callback(hObject, eventdata, handles)
 
 function button_calib_green_Callback(hObject, eventdata, handles)
     global calib;
-    do_calib('greenLow' ,(-4:1:4), 5);  
+    do_calib('greenLow' ,(-4:1:4), 5);  % was 5 instead of 15
 %    do_calib('greenLow' ,(-4:1:4), 1);  
-    do_calib('greenHigh',(-4:0.5:4), 2);  
+    do_calib('greenHigh',(-4:0.5:4), 2); % was 2  
     calib.fromfile(1) = 0;
     plot_all_calib(handles);
 

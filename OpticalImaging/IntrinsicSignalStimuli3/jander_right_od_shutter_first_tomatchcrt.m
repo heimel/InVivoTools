@@ -41,7 +41,7 @@ pspar.animType = 4;
 pspar.tFrequency = 2;
 pspar.sFrequency = 0.05;
 pspar.nCycles = 1.5;
-pspar.background = 0.5
+pspar.background = 0.5;
 pspar.backdrop = 0.5;
 pspar.windowShape = 0;
 pspar.dispprefs = {'BGpretime',0,'BGposttime',0};
@@ -51,12 +51,16 @@ pspar.prestim_time = 9;
 angles = [0:pspar.angle:360-pspar.angle];
 
 for i = 1:n_x*n_y
+    if i == 1
     retinotopy_script(i) = StimScript(0);
     
     row=floor( (i-1)/n_x);
     col=i-1-row*n_x;
-    
-    pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+%     row = 1;
+%     col = 2;
+    default_rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+%     pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+    pspar.rect = CenterRectOnPoint(default_rect,1267,213);
     % pspar.rect = CenterRectOnPoint(default_rect,1267,213);
     % above line added to center shift the change with tilt
     pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
@@ -67,6 +71,70 @@ for i = 1:n_x*n_y
         retinotopy_script(i) = append(retinotopy_script(i),retinotopy_stim);
     end
     retinotopy_script(i) = loadStimScript(retinotopy_script(i));
+    end
+        if i == 2
+    retinotopy_script(i) = StimScript(0);
+    
+    row=floor( (i-1)/n_x);
+    col=i-1-row*n_x;
+%     row = 1;
+%     col = 2;
+    default_rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+%     pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+    pspar.rect = CenterRectOnPoint(default_rect,1267,213);
+    % pspar.rect = CenterRectOnPoint(default_rect,1267,213);
+    % above line added to center shift the change with tilt
+    pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
+    angles = angles( randperm(length(angles)) );
+    for angle = angles
+        pspar.angle = angle;
+        retinotopy_stim = periodicstim(pspar);
+        retinotopy_script(i) = append(retinotopy_script(i),retinotopy_stim);
+    end
+    retinotopy_script(i) = loadStimScript(retinotopy_script(i));
+        end
+        if i == 3
+    retinotopy_script(i) = StimScript(0);
+    
+    row=floor( (i-1)/n_x);
+    col=i-1-row*n_x;
+%     row = 1;
+%     col = 2;
+    default_rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+%     pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+    pspar.rect = CenterRectOnPoint(default_rect,1267,213);
+    % pspar.rect = CenterRectOnPoint(default_rect,1267,213);
+    % above line added to center shift the change with tilt
+    pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
+    angles = angles( randperm(length(angles)) );
+    for angle = angles
+        pspar.angle = angle;
+        retinotopy_stim = periodicstim(pspar);
+        retinotopy_script(i) = append(retinotopy_script(i),retinotopy_stim);
+    end
+    retinotopy_script(i) = loadStimScript(retinotopy_script(i));
+        end
+        if i == 4
+    retinotopy_script(i) = StimScript(0);
+    
+    row=floor( (i-1)/n_x);
+    col=i-1-row*n_x;
+%     row = 1;
+%     col = 2;
+    default_rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+%     pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+    pspar.rect = CenterRectOnPoint(default_rect,1267,213);
+    % pspar.rect = CenterRectOnPoint(default_rect,1267,213);
+    % above line added to center shift the change with tilt
+    pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
+    angles = angles( randperm(length(angles)) );
+    for angle = angles
+        pspar.angle = angle;
+        retinotopy_stim = periodicstim(pspar);
+        retinotopy_script(i) = append(retinotopy_script(i),retinotopy_stim);
+    end
+    retinotopy_script(i) = loadStimScript(retinotopy_script(i));
+    end
 end
 
 tic

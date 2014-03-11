@@ -1,6 +1,10 @@
 function s=sem(x,dim)
 %SEM returns STD / SQRT #X
-
+%
+%  S = SEM(X,DIM)
+%
+% Alexander Heimel?
+%
 
 if nargin==1
   s=nanstd(x)./sqrt(sum(~isnan(x)));

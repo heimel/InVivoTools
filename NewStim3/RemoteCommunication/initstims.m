@@ -58,6 +58,7 @@ if Remote_Comm_isremote
     wp = getparameters(warmupps)
     wp.imageType = 2;
     wp.dispprefs={'BGpretime',1,'BGposttime',1};
+    wp.sFrequency = 1.5;% to check linearization
     warmupps = periodicstim(wp);
     %
     

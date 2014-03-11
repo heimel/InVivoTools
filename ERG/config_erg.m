@@ -14,8 +14,10 @@ function [ output_args ] = config_erg( input_args )
             ergConfig.datadir = ['F:\Data'];
         case 'eto'  % alexander's laptop
             ergConfig.datadir='/home/data/InVivo/ERG';
-        case 'nin278'
+        case 'nin278' % lucie's old computer
             ergConfig.datadir='C:\Users\pellissier\Documents\ERG';
+        case 'nin381' % lucie's new computer
+            ergConfig.datadir='C:\Users\pellissier\My Documents\MATLAB';
         otherwise % assume on network
             ergConfig.datadir = fullfile(networkpathbase,'ERG');
             if ~exist(ergConfig.datadir,'dir')

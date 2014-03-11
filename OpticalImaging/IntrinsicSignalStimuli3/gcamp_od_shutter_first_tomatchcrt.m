@@ -8,6 +8,12 @@
 %         Screen('Preference', 'SkipSyncTests', 2)
 % end
 
+display (['IMP: If stimuli is tilted change NewStimTilt in'])
+display (['NewStimConfiguration to 0 (normal), 10 (left) or -10 (right)'])
+display (['Press space to proceed ..........'])
+
+pause
+
 NewStimInit;
 ReceptiveFieldGlobals;
 
@@ -41,7 +47,7 @@ pspar.windowShape = 0;
 pspar.dispprefs = {'BGpretime',0,'BGposttime',0};
 pspar.angle = 45;
 total_duration = 3;
-pspar.prestim_time = 3;
+pspar.prestim_time = 3;  
 angles = [0:pspar.angle:360-pspar.angle];
 
 for i = 1:n_x*n_y
