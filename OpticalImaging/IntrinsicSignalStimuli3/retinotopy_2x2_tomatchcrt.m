@@ -1,4 +1,4 @@
- %RETINOTOPY_2x2
+  %RETINOTOPY_2x2
 %
 % RETINOTOPY_2x2, NewStim3 version
 % 
@@ -10,9 +10,8 @@
 
 display (['IMP: If stimuli is tilted change NewStimTilt in'])
 display (['NewStimConfiguration to 0 (normal), 10 (left) or -10 (right)'])
-display (['Press space to proceed ..........'])
-
-pause
+ 
+pause(1)
 
 NewStimInit;
 ReceptiveFieldGlobals;
@@ -60,7 +59,7 @@ for i = 1:n_x*n_y
     % location
     row=floor( (i-1)/n_x);
     col=i-1-row*n_x;
-    pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+    pspar.rect = [   x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
     % R = jander_screen_rotate(pspar.rect,10); %new line for rotation
     % pspar.rect=R; %new line for rotation
     pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
@@ -86,7 +85,7 @@ try
     ready=0;
     stop=0;
     while ~stop
-        [go,stim]=get_gostim(lpt)
+        [go,stim]=get_gostim(lpt);
         if ~go    % go has to be off, before another stimulus is shown
             ready=1;
         end

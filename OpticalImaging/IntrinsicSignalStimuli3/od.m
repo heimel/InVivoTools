@@ -68,6 +68,9 @@ try
     stop=0;
     while ~stop
         [go,stim]=get_gostim(lpt);
+        stim = stim && (255-32);
+        stim = stim && (255-16);
+        
         if ~go    % go has to be off, before another stimulus is shown
             ready=1;
         end
