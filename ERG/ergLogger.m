@@ -186,7 +186,7 @@ function ergLogger_update()
   try
     save([ergConfig.datadir ergLog.dataSubDir filesep ergLog.dataFilePrefix  '000 - LOGFILE.mat'], 'ergLog'); 
   catch
-    disp(['Problem saving logfile in ergLogger_update() - FilePath = [' ergConfig.datadir ergLog.dataSubDir filesep ergLog.dataFilePrefix  '000 - LOGFILE.mat' ']'])
+    disp(['ERGLOGGER: Problem saving logfile in ergLogger_update() - FilePath = [' ergConfig.datadir ergLog.dataSubDir filesep ergLog.dataFilePrefix  '000 - LOGFILE.mat' ']'])
   end
   
   

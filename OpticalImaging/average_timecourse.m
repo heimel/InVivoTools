@@ -289,7 +289,12 @@ if size(tresponse,1)>1
   q3=prctile(tresponse',75);
   iq=q3-q1;
   outliers=[];
+  
+  if size(tresponse,2)==1 % when we have ONLY ONE condition, by Mehran
+      tresponse = tresponse';
+  end;
   all=(1:size(tresponse,2));
+  
   for cond=1:size(tresponse,1)
     outliers{cond}=find( tresponse(cond,:)<q1(cond)-1.5*iq(cond) );
     outliers{cond}=[outliers{cond} ...
