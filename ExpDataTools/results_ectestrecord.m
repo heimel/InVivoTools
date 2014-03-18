@@ -122,7 +122,7 @@ for c=1:n_cells
     else
         y =  printtext(subst_ctlchars(['Number: ' num2str(c)]),1);
     end
-    y = printfield(measure,'type',y,0.5);
+    y = printfield(measure,'type',1,0.5);
     printfield(measure,'usable',y);
     y = printfield(measure,'SNR',y,0.5);
     y = printfield(measure,'responsive',y);
@@ -164,15 +164,11 @@ for c=1:n_cells
             plot_psth(measure);
         case {'hupe','lammemotion','lammetexture'}
             color = 'bgrcmybgrcmy';
-            
-            if isfield(measure,'lamme_modulation')
-                y=printtext(subst_ctlchars(  ['lamme mod: ' num2str(measure.lamme_modulation,2)    ]),y);
-            end
-            if isfield(measure,'hupe_modulation')
-                y=printtext(subst_ctlchars(  ['hupe mod: ' num2str(measure.hupe_modulation,2)    ]),y);
-            end
-            y=printtext(subst_ctlchars(['start stim difference: ' num2str(measure.start_stim_difference,3) ]),y);
-            y=printtext(subst_ctlchars(['stim duration: ' num2str(measure.duration,3) ]),y);
+                
+            y = printfield(measure,'lamme_modulation',y,0.5);
+            y = printfield(measure,'hupe_modulation',y);
+            y = printfield(measure,'start_stim_difference',y);
+            y = printfield(measure,'duration',y);
             
             curves = measure.curve;
             psths = measure.psth;
@@ -241,9 +237,7 @@ for c=1:n_cells
                 return
             end
             
-           % printfield(measure,'variable',y);
             y = printfield(measure,'preferred_stimulus',y);
-            
             y = printfield(measure,'friedman_p',y);
             printfield(measure,'rate_max',y);
             y = printfield(measure,'rate_spont',y,0.5);

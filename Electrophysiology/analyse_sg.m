@@ -91,7 +91,7 @@ end
 
 rf_on=(rf> (feamean+3*feamean_sem));
 measures.rf_n_on=sum(rf_on(:));
-measures.rf_onsize_sqdeg=compute_rf_size_sqdeg( rf_on,record.monitorpos, para_stim, saved_stims);
+measures.rf_onsize_sqdeg=compute_rf_size_sqdeg( rf_on,record.monitorpos, para_stim, saved_stims,record);
 
 if rf_on==0
   disp('ANALYSE_SG: No rf on-patches');
@@ -309,7 +309,7 @@ halfmax_dist=fitdist(halfmax_ind); % in number of patches
 rf=zeros(size(rf));
 rf(rfy,rfx)=1;
 
-centerpatch_area_sqdeg=compute_rf_size_sqdeg( rf ,record.monitorpos, para_stim, saved_stims);
+centerpatch_area_sqdeg=compute_rf_size_sqdeg( rf ,record.monitorpos, para_stim, saved_stims, record);
 measures.halfmax_deg=sqrt(centerpatch_area_sqdeg)*halfmax_dist;
 % spontaneous rate calculation
 % only works for 1 repetition!!
@@ -425,7 +425,7 @@ return
 
 
 
-function area_patch_sqdeg=compute_rf_size_sqdeg( rf ,monitorpos, para_stim, saved_stims)
+function area_patch_sqdeg=compute_rf_size_sqdeg( rf ,monitorpos, para_stim, saved_stims, record)
 
 n_patches=sum(rf(:));
 
@@ -438,13 +438,14 @@ if isfield(saved_stims,'NewStimPixelsPerCm')
     pixels_per_cm = saved_stims.NewStimPixelsPerCm;
     stimscreen_width_cm=para_stim.rect(3)/pixels_per_cm;
     stimscreen_height_cm=para_stim.rect(4)/pixels_per_cm;
-else
-    % stimulus screen dimensions in cm
+else % stimulus screen dimensions in cm
     stimscreen_width_cm = 75;
     stimscreen_height_cm = 58;
     pixels_per_cm = 640 / 75;
-    warning('ANALYSE_SG:UNKNOWN_PIXELS_PER_DEGREE',...
-        'ANALYSE_SG: Using custom pixels_per_cm and screen size. Should be avoided. This info should be in sg parameters.');
+    if datenum(record.date)>datenum('2009-10-01') % don't know when the change was made exactly
+        warning('ANALYSE_SG:UNKNOWN_PIXELS_PER_DEGREE',...
+            'ANALYSE_SG: Using custom pixels_per_cm and screen size. Should be avoided. This info should be in sg parameters.');
+    end
 end
 
 % shortest distance from mouse to stimulus screen in cm
@@ -453,8 +454,10 @@ if length(monitorpos)==2 % only x and y
         distance_mouse2screen_cm = saved_stims.NewStimViewingDistance;
     else
         distance_mouse2screen_cm=40;
-        warning('ANALYSE_SG:UNKNOWN_MONITOR_DISTANCE',...
-            'ANALYSE_SG: Using custom monitor distance. Should be avoided. this info should be in sg parameters.');
+        if datenum(record.date)>datenum('2009-10-01') % don't know when the change was made exactly
+            warning('ANALYSE_SG:UNKNOWN_MONITOR_DISTANCE',...
+                'ANALYSE_SG: Using custom monitor distance. Should be avoided. this info should be in sg parameters.');
+        end
     end
 else
     distance_mouse2screen_cm = monitorpos(3);

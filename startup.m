@@ -241,7 +241,7 @@ if load_invivotools % InVivoTools
             if isempty(ptbver)
                 global Psychtoolbox
                 Psychtoolbox=[];
-                pause(0.01);
+                pause(0.03);
                 ptbver =  PsychtoolboxVersion;
             end                
             ptbver(end+1)=10;

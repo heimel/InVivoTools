@@ -139,7 +139,7 @@ for i = 1:length(inps) % loop over multiple triggers
     end
     h_hupe_gnd = h_hupe_gnd & (nanmean(psth_hupe_gnd(response_ind)) > nanmean(psth_hupe_gnd(before_ind)));
     if ~any([h_hupe_bg h_hupe_fig h_hupe_gnd])
-        disp('No significant responses on any of figure, background and ground stimulus.');
+        logmsg('No significant responses on any of figure, background and ground stimulus.');
         measures.usable = 0;
     end
         

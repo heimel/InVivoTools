@@ -25,6 +25,7 @@ smaller_font(-12);
 
 p = get(gca,'position');
 
+p(2) = max([p(2) 0.1]);
 subplot('position',[p(1) 0 p(3) p(2)*0.9]);
 image(im);
 box off;

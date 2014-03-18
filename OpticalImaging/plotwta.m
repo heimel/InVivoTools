@@ -30,6 +30,15 @@ else
     max_count = 1;
 end
    
+
+%  logmsg('Temporarily manually changing gain of certain stimuli');
+% % data(:,:,2) = data(:,:,2)*0.95;
+% % data(:,:,3) = data(:,:,3)*1.15;
+% % data(:,:,4) = data(:,:,4)*1.1;
+%  data(:,:,6) = data(:,:,6)*0.9;
+%  data(:,:,11) = data(:,:,11)*2;
+
+
 count = 1; 
 while count<=max_count
     max_img = data(:,:,stimlist(1));

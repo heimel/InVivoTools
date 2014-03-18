@@ -273,7 +273,7 @@ end
 if n_groups>1
     use_color_for='groups';
     for g=1:n_groups
-        if isempty(groups(g).color)
+        if isempty(groups(g).color) ||  ~isempty(color)
             color{g}=tmpcolor( mod(g-1,size(tmpcolor,1))+1 , :);
         else
             color{g}=groups(g).color;

@@ -222,13 +222,18 @@ if ~isempty(record)
 end
 
 if spatial_filter % spatial filter
-  filter=[];
-  fp = 3;
-  disp(['ANALYSE_RETINOTOPY: Filter width set to ' num2str(fp)]);
-  filter.width=max(1,fp/fileinfo.xbin/compression);  
-  filter.unit='pixel';
-  avg=spatialfilter(avg,filter.width,filter.unit);
-  stddev=spatialfilter(stddev,filter.width,filter.unit)/sqrt(filter.width^2);
+    params = oiprocessparams( record );
+    
+    
+    filter=[];
+    fp = params.spatial_filter_width;
+    if ~isnan(fp)
+        disp(['ANALYSE_RETINOTOPY: Filter width set to ' num2str(fp)]);
+        filter.width=max(1,fp/fileinfo.xbin/compression);
+        filter.unit='pixel';
+        avg=spatialfilter(avg,filter.width,filter.unit);
+        stddev=spatialfilter(stddev,filter.width,filter.unit)/sqrt(filter.width^2);
+    end
 end
 
 if ledtest

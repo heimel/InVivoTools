@@ -400,9 +400,15 @@ for i=1:2:length(extra_options)
     assign(extra_options{i},extra_options{i+1});
 end
 
-if exist('reliable','var') && reliable==1 && length(testrecord.reliable)==1 && testrecord.reliable==0
+if exist('reliable','var') && eval(reliable)==1 && length(testrecord.reliable)==1 && testrecord.reliable==0
     return % no need to check individual cells
 end
+
+if ~exist('reliable','var') && length(testrecord.reliable)==1 && testrecord.reliable==0
+    return % no need to check individual cells
+end
+
+
 
 if exist('min_blocks','var')
     if ischar(min_blocks) %#ok<NODEF>
