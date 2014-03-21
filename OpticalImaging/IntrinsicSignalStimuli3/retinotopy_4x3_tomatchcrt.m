@@ -33,7 +33,7 @@ x_offset = round( (r(3)-r(1)-fullwidth)/2);
 width = round( fullwidth/n_x);
 height = round( fullheight/n_y);
 
-ps=periodicstim('default');
+ps=periodicstim('default'); 
 pspar = getparameters(ps);
 pspar.distance = NewStimViewingDistance;
 pspar.imageType = 1;

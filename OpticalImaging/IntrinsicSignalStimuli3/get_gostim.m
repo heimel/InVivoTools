@@ -32,6 +32,13 @@ switch class(lpt)
             otherwise % 
                 stim = bitand(status,2^7-1); % remove bit 7 (GO bit)
                 go = (bitand(status,2^7)>0);
+                
+                
+%                 logmsg('TEMPORARY CHANGING 8 to 4');
+%                 if stim==8
+%                     stim = 4;
+%                 end
+                
         end
     otherwise % assume lpt
         status = lpt.read;
