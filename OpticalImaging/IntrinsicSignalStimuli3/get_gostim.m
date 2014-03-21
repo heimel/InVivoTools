@@ -17,7 +17,8 @@ switch class(lpt)
         try
             fopen(lpt);
         end
-        readasync(lpt);status = fread(lpt);
+        readasync(lpt);
+        status = fread(lpt);
         switch lower(host)
             case 'andrewstim'
                 go = (bitand(status,8)==8);
