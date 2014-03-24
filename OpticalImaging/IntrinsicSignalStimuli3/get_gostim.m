@@ -14,10 +14,21 @@ stim = 0;
 
 switch class(lpt)
     case 'serial' % assume arduino
-        try
-            fopen(lpt);
+        if ~strcmp(lpt.status,'open')
+            try
+                fopen(lpt);
+            catch me
+                disp(me.message);
+            end
         end
-        readasync(lpt);
+        readasync(lpt,1);
+%        readasync(lpt);
+%         tic
+%         while lpt.BytesAvailable==0
+%             pause(0.001);
+%         end
+%         toc
+%        status = fread(lpt,1,'uint8');
         status = fread(lpt);
         switch lower(host)
             case 'andrewstim'
@@ -33,13 +44,7 @@ switch class(lpt)
             otherwise % 
                 stim = bitand(status,2^7-1); % remove bit 7 (GO bit)
                 go = (bitand(status,2^7)>0);
-                
-                
-%                 logmsg('TEMPORARY CHANGING 8 to 4');
-%                 if stim==8
-%                     stim = 4;
-%                 end
-                
+
         end
     otherwise % assume lpt
         status = lpt.read;

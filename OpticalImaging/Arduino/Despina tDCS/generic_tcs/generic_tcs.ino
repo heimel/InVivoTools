@@ -5,9 +5,9 @@
 
 //sine wave + DC pulses
 
-int waveform = 1; // 1:AC Stimulation        2:DC Stimulation
+int waveform = 2; // 1:AC Stimulation        2:DC Stimulation
 int AC = 1;       // 1:Complete sine wave    2:Anodal sine        3:Cathodal sine
-int DC = 1;       // 1:Anodal DC             2:Cathodal DC
+int DC = 1;       // 1:Anodal DC (positive)  2:Cathodal DC (negative)
 
 //Sine wave:
 double elec_diameter = 2.4; //in mm  ~Set diameter~
