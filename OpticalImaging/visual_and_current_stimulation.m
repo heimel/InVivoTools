@@ -46,12 +46,9 @@ wp.imageType = 1;  % square wave
 wp.animType = 4;
 wp.dispprefs={'BGpretime',nan,'BGposttime',nan};
 wp.sFrequency = 0.05;% to check linearization
-wp.tFrequency = 2;% to check linearization
+wp.tFrequency = 2;% to check linearization                
 wp.rect = StimWindowRect;
 wp.nCycles = 1;
-
-
-
 % wp.contrast = 0;
 
 
