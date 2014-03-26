@@ -12,7 +12,8 @@ if isempty(s)
     changed = true;
 end
 
-flds = fields(template);
+%flds = fields(template);
+flds = fieldnames(template);
 for f = flds'
     if ~isfield(s,f{1})
         changed = true;

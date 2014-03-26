@@ -100,6 +100,7 @@ end
 disp(['LOAD_EXPDATABASE: Loading ' filename ]);
 htemp=figure;
 file=load(filename,'-mat');
+%file=load(filename);
 close(htemp); % strange, but necessary to remove spuriously appearing graph when load ectestdb
 db=file.db;
 

@@ -1,4 +1,9 @@
 function [SPs,NumClust] = spike_sort_wpca(SPIKESdata,cll1)
+%
+%
+% 2013, Mehran Ahmadlou
+%
+
 spikes1=zeros(30,size(SPIKESdata,1));
 for i=1:size(SPIKESdata,1)
     A=wavelet_decompose(SPIKESdata(i,:),3,'db4');

@@ -1,8 +1,12 @@
 function plot_spike_isi( isi, record )
 %PLOTS_SPIKE_ISI plot isis obtained with get_spike_interval
 %
-% 2013, Alexander Heimel
+% 2013-2014, Alexander Heimel
 %
+
+if isempty(isi)
+    return
+end
 
 if nargin<2
     record.test = '';

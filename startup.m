@@ -137,7 +137,7 @@ if load_invivotools % InVivoTools
         addpath(twophoton_path);
         addpath(fullfile(twophoton_path, 'Reid_cell_finder' ));
         addpath(fullfile(twophoton_path, 'Reid_cell_finder' , 'basic_findcell'));
-        if usejava('jvm')
+        if exist('java','file') && usejava('jvm')
             javaaddpath(fullfile(twophoton_path,'Reid_cell_finder/java'));
             
             % now check if ij.jar file is allready in the javaclasspath

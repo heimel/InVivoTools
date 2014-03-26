@@ -9,7 +9,7 @@ function CSnip = ExsnipTDT(EVENT, Trials)
 %       data (array of data samples (singles) containing the wave form)
 
 %usage in analyse_ectestrecord m-file:
-%define the following variables in EVENT
+%define the following variables in EVENTtrial
 %Input : EVENT.Triallngth = s; % lenght of trial in seconds
 %        EVENT.Start = s;      % start of trial relative to stimulus onset
 %        EVENT.type = 'snips';
@@ -23,7 +23,7 @@ function CSnip = ExsnipTDT(EVENT, Trials)
 
 switch computer
     case 'GLNX86'
-        CSnip = ExsnipTDT_linux(EVENT, Trials);
+        [EVENT,CSnip] = importtdt_linux(EVENT); %#ok<ASGLU>
         return
 end
 
