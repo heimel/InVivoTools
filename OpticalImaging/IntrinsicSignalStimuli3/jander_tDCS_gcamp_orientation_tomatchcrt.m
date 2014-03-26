@@ -1,9 +1,6 @@
-%RETINOTOPY_4x3
-%
-% RETINOTOPY_4x3, NewStim3 version
-% 
-% 2012, Alexander Heimel
-%
+% continious orientation stimulus for tDCS
+
+% Mehran & Despoina, 04 March 2014
 
 % To skip initial tests
 % Screen('Preference', 'SkipSyncTests', 2)
@@ -12,67 +9,52 @@
 NewStimInit;
 ReceptiveFieldGlobals;
 NewStimGlobals;
-        
+
 CloseStimScreen;
 ShowStimScreen;
- 
+
 StimWindowGlobals
 
 % how many blocks
-n_x = 4;
-n_y = 3;
 
 r = StimWindowRect; % screen size
-r = [0 0 1440 900];
 
-
-fullheight = r(4)-r(2);
-fullwidth = fullheight/3*4; % to match 4:3 dimensions of old CRT
-
-x_offset = round( (r(3)-r(1)-fullwidth)/2);
-width = round( fullwidth/n_x);
-height = round( fullheight/n_y);
-
-ps=periodicstim('default'); 
+ps=periodicstim('default');
 pspar = getparameters(ps);
 pspar.distance = NewStimViewingDistance;
 pspar.imageType = 1;
 pspar.animType = 4;
 pspar.tFrequency = 2;
 pspar.sFrequency = 0.05;
-pspar.nCycles = 1.5;
+pspar.nCycles = 10;
 pspar.background = 0.5;
 pspar.backdrop = 0.5;
 pspar.windowShape = 0;
 pspar.dispprefs = {'BGpretime',0,'BGposttime',0};
-pspar.angle = 45;
-total_duration = 3;
-pspar.prestim_time = 2;
+pspar.angle = 30;
+total_duration = 5*12;
+pspar.prestim_time = 0;
 angles = [0:pspar.angle:360-pspar.angle];
+iss_script = StimScript(0);
+pspar.rect = r;
+pspar.nCycles = total_duration * pspar.tFrequency / (length(angles));
 
-for i = 1:n_x*n_y
-    iss_script(i) = StimScript(0);
-   
-    % location
-    row=floor( (i-1)/n_x);
-    col=i-1-row*n_x;
-    pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
-    
-    pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
+for i=1:10
     angles = angles( randperm(length(angles)) );
     for angle = angles
         pspar.angle = angle;
-        retinotopy_stim = periodicstim(pspar);
-        iss_script(i) = append(iss_script(i),retinotopy_stim);
+        ori_stim = periodicstim(pspar);
+        iss_script = append(iss_script,ori_stim);
     end
-    iss_script(i) = loadStimScript(iss_script(i));
 end
+    iss_script = loadStimScript(iss_script);
 
-tic
+% tic
 % show script as test
-MTI = DisplayTiming(iss_script(4));
-DisplayStimScript(iss_script(4),MTI,0,0);
-toc
+% MTI = DisplayTiming(iss_script(4));
+% DisplayStimScript(iss_script,MTI,0,0);
+% toc
+
 
 try
     % waiting for stimulus signal on parallelport
@@ -87,8 +69,8 @@ try
         if go && ready
             if stim~=0 % not blank
                 pause(pspar.prestim_time);
-                MTI = DisplayTiming(iss_script(stim));
-                DisplayStimScript(iss_script(stim),MTI,0,0);
+                MTI = DisplayTiming(iss_script);
+                DisplayStimScript(iss_script,MTI,0,0);
             else
                 % blank (do nothing)
             end
@@ -105,4 +87,3 @@ catch me
     CloseStimScreen;
     rethrow(me);
 end
-

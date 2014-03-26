@@ -35,7 +35,7 @@ fullwidth = fullheight/3*4; % to match 4:3 dimensions of old CRT
 x_offset = round( (r(3)-r(1)-fullwidth)/2);
 width = round( fullwidth/n_x);
 height = round( fullheight/n_y);
-
+ 
 ps=periodicstim('default');
 pspar = getparameters(ps);
 pspar.distance = NewStimViewingDistance;
