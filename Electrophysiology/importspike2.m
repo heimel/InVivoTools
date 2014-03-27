@@ -170,6 +170,7 @@ for cl=1:n_classes
   cll.sample_interval = sample_interval;
   cll.desc_long = desc_long;
   cll.desc_brief = desc_brief;
+  cll.channel = 1;
   ind = find( data_units.markers(:,1)==cl-1);
   cll.index = cl-1; % will be used to identify cell
   cll.data=data_units.timings( ind);
