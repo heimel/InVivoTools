@@ -60,14 +60,14 @@ end
 
 % select on cells on channels of interest
 channels = get_channels2analyze( record );
-if ~isempty(channels)
+if ~isempty(channels) && isfield(measures,'channel')
     i = 1;
     while i<=length(measures)
         if ~ismember(measures(i).channel,channels)
             measures(i) = [];
         else
             i = i+1;
-    end
+        end
     end
 end
 
