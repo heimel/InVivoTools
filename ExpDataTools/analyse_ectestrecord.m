@@ -238,7 +238,7 @@ for r=1:length(nr) % for all refs
     end
     loadstr = ['''' g{1} ''''];
     for i=2:length(g)
-        loadstr = [loadstr ',''' g{i} ''''];
+        loadstr = [loadstr ',''' g{i} '''']; %#ok<AGROW>
     end
     eval(['d = load(getexperimentfile(cksds),' loadstr ',''-mat'');']);
     
@@ -373,9 +373,9 @@ for r=1:length(nr) % for all refs
         if isfield(cells,'channel') % then check area
             cellmeasures.channel = cells(i).channel;
             if ~isempty(area)
-                for i=1:length(area)
-                    if ismember(cellmeasures.channel,area(i).channels)
-                        cellmeasures.area = area(i).name;
+                for a=1:length(area)
+                    if ismember(cellmeasures.channel,area(a).channels)
+                        cellmeasures.area = area(a).name;
                     end
                 end
             end
@@ -466,16 +466,16 @@ area = [];
 if isfield(record,'channel_info') && ~isempty(record.channel_info)
     channel_info = split(record.channel_info);
     if length(channel_info)==1
-        recorded_channels = sort(str2num(channel_info{1}));
+        recorded_channels = sort(str2num(channel_info{1})); %#ok<ST2NM>
     else
         for i=1:2:length(channel_info)
-            area( (i+1)/2 ).channels = sort(str2num(channel_info{i}));
-            area( (i+1)/2 ).name = lower(channel_info{i+1});
+            area( (i+1)/2 ).channels = sort(str2num(channel_info{i})); %#ok<ST2NM,AGROW>
+            area( (i+1)/2 ).name = lower(channel_info{i+1}); %#ok<AGROW>
             if ~isempty(intersect(recorded_channels,area( (i+1)/2 ).channels))
                 errormsg('There is a channel assigned to two areas');
                 return
             end
-            recorded_channels = [recorded_channels area( (i+1)/2 ).channels];
+            recorded_channels = [recorded_channels area( (i+1)/2 ).channels]; %#ok<AGROW>
         end
         recorded_channels = sort( recorded_channels );
     end
