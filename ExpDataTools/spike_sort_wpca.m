@@ -4,6 +4,16 @@ function [SPs,NumClust] = spike_sort_wpca(SPIKESdata,cll1)
 % 2013, Mehran Ahmadlou
 %
 
+if size(SPIKESdata,1)<10 % cant sort with less than 10 spikes
+    logmsg('Fewer than 10 spikes. Not sorting channel');
+    SPs.data=SPIKESdata;
+    SPs.time=cll1.data;
+    NumClust = 1;
+    return
+end
+
+    
+    
 spikes1=zeros(30,size(SPIKESdata,1));
 for i=1:size(SPIKESdata,1)
     A=wavelet_decompose(SPIKESdata(i,:),3,'db4');

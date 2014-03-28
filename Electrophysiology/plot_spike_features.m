@@ -68,8 +68,8 @@ for ch=channels
                 plot(cells(cl).(features{j})(ind),...
                     cells(cl).(features{i})(ind),[clr '.']);
                 if ~isnan(lims(i,1)) % Mehran
-                    xlim( lims(j,:));
-                    ylim( lims(i,:));
+                    xlim( lims(j,:)+[0 0.0001]);
+                    ylim( lims(i,:)+[0 0.0001]);
                 else
                     xlim([-0.1 0.3]);
                     ylim([-0.5 10]);
