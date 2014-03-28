@@ -36,14 +36,19 @@ switch host
             base = 'D:\Data';
         end
     case 'jander'
-        base = 'C:\Data\InVivo\Imaging\Jander\';
+        if isunix
+            base = '/home/data';
+        else
+            base = 'C:\Data';
+        end
+        base = fullfile(base,'InVivo','Imaging',capitalize(host));
     otherwise
         if isunix
-            base=['/home/data'];
+            base = '/home/data';
         else
-            base=['C:\Data'];
+            base = 'C:\Data';
         end
-        base=fullfile(base,'InVivo','Imaging',record.setup);
+        base = fullfile(base,'InVivo','Imaging',record.setup);
 end
 
 datapath=fullfile(base,pathend);

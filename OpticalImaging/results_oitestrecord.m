@@ -47,11 +47,34 @@ fileinfo=imagefile_info( fullfile(datapath,...
     [ tests{1} 'B0.BLK']));
 
 switch record.stim_type
-    case 'retinotopy'
+    case {'orientation','direction'}
+        if ~isempty(imgdata)
+            fulltitle = [capitalize(record.stim_type) tit]; 
+            figure('Name',fulltitle,'NumberTitle','off');
+            title(fulltitle)
+            imgpic=double(imgdata);
+            if ~isempty(roi) % highlight roi outline
+                roioutline=1+10*image_outline(roi);
+                imgpic(:,:,1)=imgpic(:,:,1).*roioutline;
+                imgpic(:,:,2)=imgpic(:,:,2).*roioutline;
+                imgpic(:,:,3)=imgpic(:,:,3).*roioutline;
+            end
+            if 0 && ~isempty(ror) % highlight ror outline
+                roroutline=1+10*image_outline(ror);
+                imgpic(:,:,1)=imgpic(:,:,1).*roroutline;
+                imgpic(:,:,2)=imgpic(:,:,2).*roroutline;
+                imgpic(:,:,3)=imgpic(:,:,3).*roroutline;
+            end
+            imgpic=uint8(imgpic);
+            image(imgpic); % show retinotopy with highlights
+            axis image off;
+        end
+        
+        show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
+
+    case {'retinotopy'}
         figure;
-        
         h_image=subplot(3,4,[1 2 5 6  ]);
-        
         
         if ~isempty(imgdata)
             imgpic=double(imgdata);
@@ -129,7 +152,8 @@ switch record.stim_type
                else
                     roi_tf_outline=max(0,imresize(roi_outline,fileinfo.xbin));
                     roi_full_outline=zeros(size(img));
-                    roi_full_outline(fileinfo.yoffset+ [1:size(roi_tf_outline,1)],fileinfo.xoffset+ [1:size(roi_tf_outline,2)])=roi_tf_outline;
+                    roi_full_outline(fileinfo.yoffset+ (1:size(roi_tf_outline,1)), ...
+                        fileinfo.xoffset+ (1:size(roi_tf_outline,2)))=roi_tf_outline;
                end
                 imgrgb(:,:,1)=imgrgb(:,:,1).*(1-roi_full_outline);
                 imgrgb(:,:,2)=imgrgb(:,:,2).*(1-roi_full_outline);
@@ -137,34 +161,16 @@ switch record.stim_type
                 imgrgb(:,:,1)=imgrgb(:,:,1)+roi_full_outline;
             end
             
-                image(imgrgb);
-                %Joris save this image to plot it separately in full screen
-                %mode to more easily mark V1 and borders
+            image(imgrgb);
+            %Joris save this image to plot it separately in full screen
+            %mode to more easily mark V1 and borders
             tmp_imgrgb_fullscreen = imgrgb;
-            
             axis image
             axis off
-            
-            %keyboard;
-            
-            
             hold on
             h=plot(lambda_x,lambda_y,'+r');
             set(h,'MarkerSize',10);
-            
-%             set(gca,'units','pixels');
-%             text(lambda_x,lambda_y,'.','HorizontalAlignment','center','color',[1 ...
-%                 0.3 0],'FontSize',50)
-%             set(gca,'units','normalized');
-            
-            
-            
         end
-        %  catch
-        %    disp(['Warning: could not load ' reffname ]);
-        %  end
-        
-        
         
         subplot(3,4,9); % retinotopy colors
         cols=retinotopy_colormap(record.stim_parameters(1), ...
@@ -189,12 +195,13 @@ switch record.stim_type
             figure(100);
             try
                 imshow(tmp_imgrgb_fullscreen)
-            catch
+            catch me
+                logmsg(me.message);
                 close(100);
             end
         end
         
-    case 'ks',
+    case 'ks'
         if isempty(record.imagefile)
             disp('RESULTS_OITESTRECORD: No data available');
             return
@@ -204,11 +211,9 @@ switch record.stim_type
         for ind=ind_compare_to
             compare_record=ud.db(ind);
             [compare_imgdata,compare_roi,compare_ror,compare_data]=...
-                load_testrecord( compare_record);
+                load_testrecord( compare_record); %#ok<ASGLU>
             if ~isempty(compare_imgdata)
                 if prod(size(compare_data)==size(data))==1
-                    
-                    
                     if compare_record.stim_parameters~=record.stim_parameters
                         % plot absolute map
                         caption=['Absolute map ' tit ' & ' compare_to ];
@@ -216,36 +221,27 @@ switch record.stim_type
                         plot_absolute_map(data,compare_data,caption);
                     end
                     if strcmp(compare_record.eye,record.eye)==0
-                        % show OD
-                        figure;
+                        figure;                        % show OD
                         od_ratio=record.timecourse_ratio/ ...
                             compare_record.timecourse_ratio;
-                        
                         m=max(abs([data(:); compare_data(:)] ));
-                        
-                        
                         subplot(1,2,1);
-                        
                         colormap hot
                         c=colormap;
-                        
                         image(abs(data')/m*length(c));axis off image;
                         caption=[record.eye ' \newline' record.test];
-                        caption(find(caption=='_'))='-';
+                        caption(caption=='_')='-';
                         title(caption)
                         ax=axis;
-                        
                         caption=['Mouse ' record.mouse  ...
                             '       OD ratio: ' num2str(od_ratio,2) ];
-                        caption(find(caption=='_'))='-';
+                        caption(caption=='_')='-';
                         text(ax(1),ax(3)-0.3*(ax(4)-ax(3)),...
                             caption);
-                        
                         subplot(1,2,2);
-                        
                         image(abs(compare_data')/m*length(c));axis off image;
                         caption=[compare_record.eye ' \newline' compare_record.test];
-                        caption(find(caption=='_'))='-';
+                        caption(caption=='_')='-';
                         title(caption)
                         smaller_font(-4);
                     end
@@ -254,13 +250,13 @@ switch record.stim_type
         end
     otherwise
         if isempty(record.response)
-            disp('No responses known');
+            logmsg('No responses known');
             return
         end
         
         tests=convert_cst2cell(record.test);
         
-        h=plot_testresults(fullfilelist(datapath,tests),...
+        plot_testresults(fullfilelist(datapath,tests),...
             record.response,...
             record.response_sem,...
             record.response_all,...
@@ -302,7 +298,6 @@ newud=ud;
 evalin('base','global record');
 
 disp('RESULTS_OITESTRECORD: Record available in workspace as ''record''.');
-
 return
 
 
@@ -321,13 +316,12 @@ if ~isempty(record.ref_image)
     % transform monitor center to unbinned coordinates
     x=round(x)*fileinfo.xbin;
     y=round(y)*fileinfo.ybin;
-%     x=0;
-%     y=0;
+    
     % and shift to absolute unbinned coordinates
     x=x+fileinfo.xoffset;
     y=y+fileinfo.yoffset;
     
-    if ~isempty(lambda_x) & ~isempty(lambda_y)
+    if ~isempty(lambda_x) && ~isempty(lambda_y)
         x=x-lambda_x;
         y=y-lambda_y;
         
@@ -342,7 +336,6 @@ end
 return
 
 
-%
 function plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y)
 
 if isempty(record.response)
@@ -351,8 +344,6 @@ if isempty(record.response)
 end
 
 subplot(h_image);
-
-
 
 % convert x y back to image scale
 xy=record.response/record.scale;
@@ -378,7 +369,7 @@ x=round(x)/fileinfo.xbin;
 y=round(y)/fileinfo.ybin;
 
 hold on
-h=plot(x,y,'ow');
+plot(x,y,'ow');
 h=plot(x,y,'ow');
 set(h,'MarkerSize',10);
 

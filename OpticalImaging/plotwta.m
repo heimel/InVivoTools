@@ -1,10 +1,10 @@
 function [h,wtaimg]=plotwta(data,stimlist,blank_stim,colortab_0,maskinds,maskcoltab_0,...
-maskcoltab_1,record)
+maskcoltab_1,record,cmap)
 
 % PLOTWTA - Plots winner-take-all plot of intrinsic imaging data
 %
 %   H=PLOTWTA(DATA, STIMLIST, BLANK_STIM, COLORTAB_0, MASKINDS,MASKCOLTAB_0,
-%     ...MASKCOLTAB_1)
+%     ...MASKCOLTAB_1,RECORD,CMAP)
 %
 %  Plots winner-take-all plot of intrinsic imaging data using color map
 %  entries COLORTAB_0..COLORTAB_0+length(STIMLIST) for each stimulus and
@@ -14,7 +14,6 @@ maskcoltab_1,record)
 %
 %  Example: h=plotwta(avg_data,2:8,1,256,0,256);
 
-global retinotopy_colors;
 
 if nargin<8
     record = [];
@@ -30,15 +29,6 @@ else
     max_count = 1;
 end
    
-
-%  logmsg('Temporarily manually changing gain of certain stimuli');
-% % data(:,:,2) = data(:,:,2)*0.95;
-% % data(:,:,3) = data(:,:,3)*1.15;
-% % data(:,:,4) = data(:,:,4)*1.1;
-%  data(:,:,6) = data(:,:,6)*0.9;
-%  data(:,:,11) = data(:,:,11)*2;
-
-
 count = 1; 
 while count<=max_count
     max_img = data(:,:,stimlist(1));
@@ -98,7 +88,7 @@ mask(maskinds)=maximg(maskinds);
 
 maximg=clip(maximg,nanmedian(maximg(:)),3*nanstd(maximg(:)));
 %maximg(find(maximg==max(maximg(:))))=min(maximg(:));
-h=image_intensity(wtaimg',maximg',retinotopy_colors);
+h=image_intensity(wtaimg',maximg',cmap);
 
 
 % show with intensity based on difference of maximum and mean

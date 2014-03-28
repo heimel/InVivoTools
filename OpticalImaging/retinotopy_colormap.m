@@ -25,23 +25,11 @@ dark_red=[0.7 0.3 0];
 
 
 if numstims==4,
-    %     cols(1,:)=red;
-    %     cols(2,:)=green;
-    %     cols(3,:)=blue;
-    %     cols(4,:)=yellow;
-    %     cols(5,:)=gray;
-    
-    %disp('RETINOTOPY_COLORMAP: temp change of colors for Joris');
-%     cols(1,:)=red;
-%     cols(2,:)=green;
-%     cols(3,:)=yellow;
-%     cols(4,:)=blue;
-%     cols(5,:)=gray;
-%     cols(1,:)=red;
-        cols(2,:)=green;
-        cols(3,:)=blue;
-        cols(4,:)=yellow;
-        cols(5,:)=gray;
+    cols(1,:)=red;
+    cols(2,:)=green;
+    cols(3,:)=blue;
+    cols(4,:)=yellow;
+    cols(5,:)=gray;
 elseif numstims==6
     cols(1,:)=red;
     cols(2,:)=yellow;
