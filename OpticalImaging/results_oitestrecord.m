@@ -48,7 +48,35 @@ fileinfo=imagefile_info( fullfile(datapath,...
 
 switch record.stim_type
     case {'orientation','direction'}
-        if ~isempty(imgdata)
+        file = fullfile(oidatapath(record),[record.test '_B' ...
+                mat2str([min(record.blocks) max(record.blocks)]) ...
+                '_' record.stim_type '.png']);
+        if exist(file, 'file')
+            img = imread(file);
+            figure('name',file,'NumberTitle','off');
+            image(img)
+            axis image off;
+            label = subst_ctlchars(['Orientation, mouse=' record.mouse ',date=' record.date ',test=' record.test]);
+            title(label);
+        end
+     
+        switch record.stim_type
+            case 'orientation'
+                file = fullfile(oidatapath(record),[record.test '_B' ...
+                    mat2str([min(record.blocks) max(record.blocks)]) ...
+                    '_hor-ver' '.png']);
+                if exist(file, 'file')
+                    img = imread(file);
+                    figure('name',file,'NumberTitle','off');
+                    image(img)
+                    axis image off;
+                    label = subst_ctlchars(['Horizontal-vertical, mouse=' record.mouse ',date=' record.date ',test=' record.test]);
+                    title(label);
+
+                end
+        end
+        
+        if 0 && ~isempty(imgdata)
             fulltitle = [capitalize(record.stim_type) tit]; 
             figure('Name',fulltitle,'NumberTitle','off');
             title(fulltitle)
@@ -70,7 +98,7 @@ switch record.stim_type
             axis image off;
         end
         
-        show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
+        % show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
 
     case {'retinotopy'}
         figure;

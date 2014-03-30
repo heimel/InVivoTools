@@ -11,7 +11,8 @@ if isfield(record,'blocks')
     end
 end
 
-avg=[];stddev=[];
+avg=[];
+stddev=[];
 
 % get compression rate from record.comment
 compression_pos=findstr(record.comment,'compression');
@@ -348,7 +349,44 @@ switch record.stim_type
     case 'retinotopy',
         % retinotopy center is asked in results_oitestrecord
     case 'orientation'
+        % Horizontal minus vertical
+        stim_parameters = mod(record.stim_parameters,180);
+        ind_hor = find(stim_parameters==0,1);
+        ind_ver = find(stim_parameters==90,1);
+        
+         figure('name','Orientation horizontal - vertical');
+         hor_ver = avg(:,:,ind_hor)-avg(:,:,ind_ver);
+         filename= fullfile(oidatapath(record),[record.test '_B' ...
+                mat2str([min(record.blocks) max(record.blocks)]) '_hor-ver.png']);
+         cmap = colormap('gray');
+         hor_ver = round(rescale(hor_ver,[min(hor_ver(:)) max(hor_ver(:))],[1 size(cmap,1)]));
+
+         imwrite( ind2rgb(hor_ver,cmap) ,filename, 'png');
+         logmsg(['Horizontal-vertical map saved as: ' filename]);
+         close(h);
+
+         % polar orientation map
+         polavg = zeros(size(avg,1),size(avg,2));
+         for c=1:size(avg,3)
+             polavg =polavg+ avg(:,:,c) * exp(2*pi*1i*record.stim_parameters(c)/180); 
+         end
+         cmap = colormap('hsv');
+         or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
+         h = image_intensity(or_angs,max(avg,[],3),cmap);
+         filename= fullfile(oidatapath(record),[record.test '_B' ...
+                mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
+         imwrite(get(get(gca,'children'), 'cdata') ,filename, 'png');
+         logmsg(['Orientation map saved as: ' filename]);
+         close(h);
+         
+         
+    case 'direction'
+        
         logmsg('WORKING HERE')
+        
+         figure('name','Direction 1-5');
+         imagesc(avg(:,:,1)-avg(:,:,5))
+                
     case 'significance'
         % calculate significance with ANOVA using means and stddevs
         

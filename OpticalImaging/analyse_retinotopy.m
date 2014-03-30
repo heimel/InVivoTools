@@ -227,6 +227,25 @@ if 0 % dccorrection
     end
 end
 
+if ~isempty(record) && strcmp(record.stim_type,'orientation')
+    % possibly combine directions 
+    stim_parameters = mod(record.stim_parameters,180);
+    i = 1;
+    while i<=size(avg,3)
+        ind = find(stim_parameters(i+1:end)==stim_parameters(i),1);
+        while ~isempty(ind)
+            avg(:,:,i) = avg(:,:,i)+ avg(:,:,i+ind);
+            avg(:,:,i+ind) = [];
+            stim_parameters(i+ind) = [];
+            stimlist(i+ind) = [];
+            dimensions(2) = dimensions(2)-1;
+            ind = find(stim_parameters(i+1:end)==stim_parameters(i),1);
+        end
+        i = i+1;
+    end
+end
+            
+            
 spatial_filter = true;
 if ~isempty(record)
     switch record.stim_type
