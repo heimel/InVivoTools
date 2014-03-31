@@ -182,7 +182,7 @@ axis off;
 
 
 % plot responses
-if size(response_all,2)>1
+if numel(response_all,2)~=length(response_all)
 	subplot(2,2,1);
 	[x,y]=meshgrid( (1:size(response_all,2)),...
 		linspace(-0.25,0.25,size(response_all,1)));
