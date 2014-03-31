@@ -361,7 +361,7 @@ switch record.stim_type
          cmap = colormap('gray');
          hor_ver = round(rescale(hor_ver,[min(hor_ver(:)) max(hor_ver(:))],[1 size(cmap,1)]));
 
-         imwrite( ind2rgb(hor_ver,cmap) ,filename, 'png');
+         imwrite( ind2rgb(hor_ver',cmap) ,filename, 'png');
          logmsg(['Horizontal-vertical map saved as: ' filename]);
          close(h);
 
@@ -372,7 +372,9 @@ switch record.stim_type
          end
          cmap = colormap('hsv');
          or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
-         h = image_intensity(or_angs,max(avg,[],3),cmap);
+         or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 size(cmap,1)]));
+%         h = image_intensity(or_angs',max(avg,[],3)',cmap);
+         h = image_intensity(or_angs',or_abs',cmap);
          filename= fullfile(oidatapath(record),[record.test '_B' ...
                 mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
          imwrite(get(get(gca,'children'), 'cdata') ,filename, 'png');

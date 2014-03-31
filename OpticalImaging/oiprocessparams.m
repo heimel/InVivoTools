@@ -33,5 +33,5 @@ end
 params.spatial_filter_width = 3; % pixels
 switch experiment
     case '13.61'
-        params.spatial_filter_width = 1; % pixels use nan to turn off filter
+        params.spatial_filter_width = 6; % pixels use nan to turn off filter
 end
