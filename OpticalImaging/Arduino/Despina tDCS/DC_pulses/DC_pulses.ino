@@ -1,6 +1,6 @@
 //DC pulses
 
-double elec_diameter = 2.4; //in mm  ~Set diameter~
+double elec_diameter = 3; //in mm  ~Set diameter~
   const int zerolevel = 2043;
 
 const double pi = 3.14159;

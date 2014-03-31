@@ -3,8 +3,17 @@
   const int sample = 120;     //samples in sine[] table
   const int zerolevel = 2043;
   
+  double elec_diameter = 3; //in mm  ~Set diameter~
+  double current_density = 0.057;    //in mA/mm^2  ~Set density~
+
+  const double pi = 3.14159;
+  double elec_surface = pi * sq(elec_diameter / 2);
+  double stimulation_current = current_density * elec_surface; //in mA  I = J*A = [mA/mm^2] * [mm]
+  double voltage_out = 1 * stimulation_current;  // depending on current gerenerator properties -> with output range at ISOLATOR: x10
+
+ 
   int oneHzSample = 1000000/sample ; // sample for the 1Hz signal expressed in microseconds 
-  int  frequency = 10;  //in Hz 
+  int  frequency = 40;  //in Hz 
   
    int sine[] = {
       0x7ff, 0x86a, 0x8d5, 0x93f, 0x9a9, 0xa11, 0xa78, 0xadd, 0xb40, 0xba1,
@@ -23,7 +32,7 @@
   
   float f_sine[sample];
   int signal_sine[sample];
-  float volt = 2.6;  // Set Voltage amplitude in Volts ~~maximum 3.4Volts
+  //float volt = 2.6;  // Set Voltage amplitude in Volts ~~maximum 3.4Volts
   float timestep = oneHzSample/frequency-5.5;   //(-5.5) fine for EEG frequencies (1~100Hz) ...  **Frequency doesn't go higher than 1.3kHz
   
   int inPin = 2;
@@ -43,7 +52,7 @@ double prestim_period = 5; // in s
     } 
     
     for(int i=0; i<sample; i++) {
-      f_sine[i] = ((f_sine[i]/3.4)*volt)+2048-(4096/3.4)*(volt/2);  //gives the right amplitude --> volt 
+      f_sine[i] = ((f_sine[i]/3.4)*voltage_out)+2048-(4096/3.4)*(voltage_out/2);  //gives the right amplitude --> volt 
     } 
     
     for(int i=0; i<sample; i++) {
