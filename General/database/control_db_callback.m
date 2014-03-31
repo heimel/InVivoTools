@@ -100,7 +100,11 @@ switch windowname
                 set(ud.h.current_record,'String',num2str(ud.current_record));
                 control_db_callback(ud.h.current_record);
             case 'duplicate'
-                ud.db=insert_record(ud.db,get_record(ud.record_form), ...
+                record = get_record(ud.record_form);
+                if isfield(record,'measures') % not copying measures
+                    record.measures = [];
+                end
+                ud.db=insert_record(ud.db,record, ...
                     ud.current_record+1);
                 set(ud.h.current_record,'String',num2str(ud.current_record+1));
                 ud.ind=(1:length(ud.db));

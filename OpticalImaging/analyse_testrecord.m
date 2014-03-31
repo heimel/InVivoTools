@@ -3,7 +3,7 @@ function record=analyse_testrecord( record)
 %
 %   RECORD=ANALYSE_TESTRECORD( RECORD )
 %
-% 2005-2013, Alexander Heimel
+% 2005-2014, Alexander Heimel
 
 if isfield(record,'blocks')
     if ischar(record.blocks)
@@ -11,7 +11,8 @@ if isfield(record,'blocks')
     end
 end
 
-avg=[];stddev=[];
+avg=[];
+stddev=[];
 
 % get compression rate from record.comment
 compression_pos=findstr(record.comment,'compression');
@@ -101,18 +102,10 @@ switch roifile
     case '', % do nothing here
     case 'standard',
         % use circular ROI constructed around point relative to lambda
-        %roi=ones(n_y,n_x);
         
         % position of screen center from all adult mice
-        % old:
-        %rel_x=2314 + 300; % L-M position rel to Lambda in micron
-        %rel_y= 605  - 100;  % A-P position rel to Lambda in micron
-        
         rel_x=2500 + 1000/sqrt(2); % L-M position rel to Lambda in micron
         rel_y=1000 - 1000/sqrt(2);  % A-P position rel to Lambda in micron
-        
-        %rel_x=0; % L-M position rel to Lambda in micron
-        %rel_y=0;  % A-P position rel to Lambda in micron
         
         rel_x=rel_x / record.scale; % L-M rel to Lambda in pxls
         rel_y=rel_y / record.scale; % A-P rel to Lambda in pxls
@@ -127,7 +120,6 @@ switch roifile
         
         rel_x=rel_x/fileinfo.xbin; % L-M rel to top left ROI in binned pxls
         rel_y=rel_y/fileinfo.ybin; % A-P rel to top left ROI in binned pxls
-        
         
         [dy,dx]=meshgrid(1:n_y,1:n_x);
         dist=sqrt(  (dy-rel_y).^2 + (dx-rel_x).^2 );
@@ -207,18 +199,22 @@ if isempty(record.imagefile) ...
         || fileinfo.headeronly~=1
     % produce image
     switch record.stim_type
-        case {'retinotopy','sf','sf_contrast','contrast_sf','sf_low_tf','tf','od','od_bin','od_mon','contrast','rt_response','ledtest','significance'},
-            if strcmp(record.stim_type,'retinotopy')||...
-                    strcmp(record.stim_type,'rt_response')||...
-                    strcmp(record.stim_type,'significance')
-                if isnumeric(record.stim_parameters)
-                    dimensions=record.stim_parameters;
-                else
-                    dimensions=str2num(record.stim_parameters); %#ok<ST2NM>
-                end
-            else
-                dimensions=[];
+        case 'ks',
+            if isempty(record.stim_tf)
+                disp('Error: no frequency given (stim_tf)');
+                return
             end
+            [img,ks_data]=ks_analysis(...
+                fullfile(datapath,[record.test 'B0.BLK']),...
+                record.stim_tf,compression,...
+                [],[],[],[],record.stim_onset,record.stim_offset);
+            imagefile= [ record.test '_auto_ks_c' ...
+                num2str(compression) '.mat'];
+            imagepath=fullfile(analysispath,imagefile);
+            data=get(img,'CData');
+            save(imagepath,'ks_data','data','-mat');
+            record.imagefile=imagefile;
+        otherwise
             early_frames=(1: ceil(record.stim_onset/frame_duration)  );
             late_frames=setdiff( (1:ceil(record.stim_offset/frame_duration)),...
                 early_frames);
@@ -242,12 +238,12 @@ if isempty(record.imagefile) ...
                 early_frames=-1;
             end
             [h,avg,stddev,blocks]=analyse_retinotopy(fullfile(datapath,tests{1}),...
-                dimensions,record.blocks,early_frames,...
+                record.blocks,early_frames,...
                 late_frames,...
                 roi,ror,[],compression,response_sign,record);
             
             if h==-1
-                disp('Warning: could not get image');
+                logmsg('Could not get image');
             else
                 imagefile= [ record.test '_auto_wta_c' ...
                     num2str(compression) '.png'];
@@ -261,26 +257,6 @@ if isempty(record.imagefile) ...
                 record.imagefile=imagefile;
                 close(h);
             end
-            
-        case 'ks',
-            if isempty(record.stim_tf)
-                disp('Error: no frequency given (stim_tf)');
-                return
-            end
-            [img,ks_data]=ks_analysis(...
-                fullfile(datapath,[record.test 'B0.BLK']),...
-                record.stim_tf,compression,...
-                [],[],[],[],record.stim_onset,record.stim_offset);
-            imagefile= [ record.test '_auto_ks_c' ...
-                num2str(compression) '.mat'];
-            imagepath=fullfile(analysispath,imagefile);
-            data=get(img,'CData');
-            save(imagepath,'ks_data','data','-mat');
-            record.imagefile=imagefile;
-        otherwise,
-            disp(['Error: Stimulus type ' record.stim_type ...
-                ' is not (fully) implemented.']);
-            return
     end
 end
 
@@ -295,7 +271,7 @@ if isempty(roifile) ||  ~exist(roifile,'file')
     
     if ~isfield(fileinfo,'xsize') || size(roi,2)==0
         compression=1;
-    else        
+    else
         compression=floor(fileinfo.xsize/size(roi,2));
     end
     if isempty(record.roifile)
@@ -334,11 +310,10 @@ end
 % make bandwith figures
 switch record.stim_type
     case {'sf','tf'}
-        
         avg_norm = avg-repmat(min(avg,[],3),[ 1 1 size(avg,3)]);
         roi_edge = edge(roi);
-
-        % low 
+        
+        % low
         avg_low = avg_norm(:,:,1)./max(avg_norm,[],3);
         figure;
         im = avg_low;
@@ -346,7 +321,7 @@ switch record.stim_type
         imagesc(im');
         axis off image
         title(subst_ctlchars(['R_1/R_max: mouse=' record.mouse ',date=' record.date ',test=' record.test]));
-
+        
         % high
         avg_high = avg_norm(:,:,end-1)./max(avg_norm,[],3);
         figure;
@@ -355,7 +330,7 @@ switch record.stim_type
         imagesc(im');
         axis off image
         title(subst_ctlchars(['R_(end-1)/R_max: mouse=' record.mouse ',date=' record.date ',test=' record.test]));
-
+        
 end
 
 
@@ -363,9 +338,6 @@ end
 switch record.stim_type
     case {'od','od_bin','od_mon','sf','tf','contrast',...
             'rt_response','sf_contrast','contrast_sf','sf_low_tf','ledtest'},
-        
-        % make bandwith figure
-        
         % compute timecourse
         [record.response,record.response_sem,record.response_all,...
             record.timecourse_roi,record.timecourse_ror,...
@@ -376,6 +348,47 @@ switch record.stim_type
             record,0);
     case 'retinotopy',
         % retinotopy center is asked in results_oitestrecord
+    case 'orientation'
+        % Horizontal minus vertical
+        stim_parameters = mod(record.stim_parameters,180);
+        ind_hor = find(stim_parameters==0,1);
+        ind_ver = find(stim_parameters==90,1);
+        
+         figure('name','Orientation horizontal - vertical');
+         hor_ver = avg(:,:,ind_hor)-avg(:,:,ind_ver);
+         filename= fullfile(oidatapath(record),[record.test '_B' ...
+                mat2str([min(record.blocks) max(record.blocks)]) '_hor-ver.png']);
+         cmap = colormap('gray');
+         hor_ver = round(rescale(hor_ver,[min(hor_ver(:)) max(hor_ver(:))],[1 size(cmap,1)]));
+
+         imwrite( ind2rgb(hor_ver',cmap) ,filename, 'png');
+         logmsg(['Horizontal-vertical map saved as: ' filename]);
+         close(h);
+
+         % polar orientation map
+         polavg = zeros(size(avg,1),size(avg,2));
+         for c=1:size(avg,3)
+             polavg =polavg+ avg(:,:,c) * exp(2*pi*1i*record.stim_parameters(c)/180); 
+         end
+         cmap = colormap('hsv');
+         or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
+         or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 size(cmap,1)]));
+%         h = image_intensity(or_angs',max(avg,[],3)',cmap);
+         h = image_intensity(or_angs',or_abs',cmap);
+         filename= fullfile(oidatapath(record),[record.test '_B' ...
+                mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
+         imwrite(get(get(gca,'children'), 'cdata') ,filename, 'png');
+         logmsg(['Orientation map saved as: ' filename]);
+         close(h);
+         
+         
+    case 'direction'
+        
+        logmsg('WORKING HERE')
+        
+         figure('name','Direction 1-5');
+         imagesc(avg(:,:,1)-avg(:,:,5))
+                
     case 'significance'
         % calculate significance with ANOVA using means and stddevs
         
@@ -410,7 +423,7 @@ switch record.stim_type
         record.timecourse_roi=[];
         record.timecourse_ror=[];
         record.timecourse_ratio=[];
-    case 'ks',
+    case 'ks'
         record.timecourse_roi=mean(abs(ks_data(roi'>0)));
         record.timecourse_ror=mean(abs(ks_data(ror'>0)));
         record.timecourse_ratio=record.timecourse_roi/record.timecourse_ror;
@@ -418,5 +431,5 @@ switch record.stim_type
         disp([ 'stim_type ' record.stim_type ' is not implemented.']);
 end
 
-disp('ANALYSE_TESTRECORD: Finished analysis');
+logmsg('Finished analysis');
 record.analysed=datestr(now);

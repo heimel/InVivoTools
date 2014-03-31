@@ -1,9 +1,9 @@
 function record=analyse_ectestrecord(record,verbose)
 %ANALYSE_ECTESTRECORD
 %
-%   RECORD=ANALYSE_ECTESTRECORD( RECORD)
+%   RECORD=ANALYSE_ECTESTRECORD( RECORD, VERBOSE )
 %
-% 2007-2013, Alexander Heimel
+% 2007-2014, Alexander Heimel, Mehran Ahmadlou
 
 if nargin<2
     verbose = [];
@@ -36,137 +36,100 @@ cksds=cksdirstruct(datapath);
 
 processparams = ecprocessparams(record);
 
+[recorded_channels,area] = get_recorded_channels( record );
+
+channels2analyze = get_channels2analyze( record );
+
+if isempty(channels2analyze)
+    channels2analyze = recorded_channels;
+end
+
 WaveTime_Spikes = struct([]);
-
-
-
 switch lower(record.setup)
     case 'antigua'
-        Tankname = 'Mouse';
         blocknames = [record.test];
         clear EVENT
         EVENT.Mytank = datapath;
         EVENT.Myblock = blocknames;
         EVENT = importtdt(EVENT);
-        
+        if ~isfield(EVENT,'strons')
+            return
+        end
         if length(EVENT.strons.tril)>1
             errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
             EVENT.strons.tril(1)=EVENT.strons.tril(end);
         end
-        Dells=EVENT.snips.Snip.times;
         EVENT.Myevent = 'Snip';
         EVENT.type = 'snips';
-        %         EVENT.Triallngth =
-        %         EVENT.timerange(2)-EVENT.strons.tril(1)+(1/EVENT.snips.Snip.sampf);
-        %         EVENT.Start = +(1/EVENT.snips.Snip.sampf);
         EVENT.Start = 0;
         
-        read_chan1 = get_channels2analyze( record );
-        %        read_chan1 = 5;
-        if any(read_chan1>EVENT.snips.Snip.channels)
+        if any(channels2analyze>EVENT.snips.Snip.channels)
             errormsg(['Did not record more than ' num2str(EVENT.snips.Snip.channels) ' channels.']);
             return
         end
-
-
-        if isempty(read_chan1)
-%            read_chan1 = 1:EVENT.strms(1).channels;
-            read_chan1 = 1:EVENT.snips.Snip.channels;
-        end        
-        logmsg(['Analyzing channels: ' num2str(read_chan1)]);
+        
+        if isempty(channels2analyze)
+            channels2analyze = 1:EVENT.snips.Snip.channels;
+        end
+        logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
         total_length=EVENT.timerange(2)-EVENT.strons.tril(1);
-        WaveTime_Fpikes=struct([]);
-        for i=1:length(read_chan1)
-            WaveTime_fpikes.time=[];
-            WaveTime_fpikes.data=[];
-            
-            for kk=1:ceil(total_length/60)
-                % clear WaveTime_chspikes
-                EVENT.Triallngth = min(60,total_length-60*(kk-1));
-                % AH: One should use EVENT.CHAN = read_chan1(i) here
-                WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
-                WaveTime_fpikes.time=[WaveTime_fpikes.time;WaveTime_chspikes(read_chan1(i),1).time];
-                WaveTime_fpikes.data=[WaveTime_fpikes.data;WaveTime_chspikes(read_chan1(i),1).data];
+        clear('WaveTime_Fpikes');
+        if ~isunix
+            for i=1:length(channels2analyze)
+                WaveTime_fpikes.time=[];
+                WaveTime_fpikes.data=[];
+                for kk=1:ceil(total_length/60)
+                    EVENT.Triallngth = min(60,total_length-60*(kk-1));
+                    WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
+                    WaveTime_fpikes.time = [WaveTime_fpikes.time;WaveTime_chspikes(channels2analyze(i),1).time];
+                    WaveTime_fpikes.data = [WaveTime_fpikes.data;WaveTime_chspikes(channels2analyze(i),1).data];
+                end
+                WaveTime_Fpikes(i,1) =  WaveTime_fpikes;
             end
-            
-            WaveTime_Fpikes=[WaveTime_Fpikes;WaveTime_fpikes];
-        end
-        % always only ONE channel (at this time)
-        
-        %         WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1));
-        %         read_chan1=[6]; % always only ONE channel (at this time)
-        
-        numchannel1 =length(read_chan1);
-        numchannel=0;
-        %         Fells={};
-        %         WaveTime_Spikes=struct([]);
-        for ii=1:numchannel1
-            logmsg(['Sorting channel ' num2str(read_chan1(ii))]);
-            clear kll
-            clear spikes
-            if isempty(WaveTime_Fpikes(ii,1).time)
-                continue
-            end
-                        kll.sample_interval = 1/EVENT.snips.Snip.sampf;
-                        kll.data = WaveTime_Fpikes(ii,1).time;
-                        spikes=WaveTime_Fpikes(ii,1).data;
-                        kll = get_spike_features(spikes, kll );
-                        [wtime_sp,nchan] = spike_sort_wpca(spikes,kll);
-            %% just for making the figure
-%             cc=find(max(WaveTime_Fpikes.data(:,:)')>0.15);
-%             WW.data=WaveTime_Fpikes.data(cc,:);
-%             WW.time=WaveTime_Fpikes.time(cc);
-%             WaveTime_Spikes=[WaveTime_Spikes;WW];
-%             nchan=1;
-%             numchannel=numchannel+nchan;
-            %%
-            WaveTime_Spikes=[WaveTime_Spikes;wtime_sp];
-            numchannel=numchannel+nchan;
-            
-            %             Fells=[Fells;Dells{read_chan1(ii),1}];
-            %             WaveTime_Spikes=[WaveTime_Spikes;WaveTime_Fpikes(read_chan1(ii),1)];
+        else % linux
+            EVENT.CHAN = channels2analyze;
+            WaveTime_Fpikes = ExsnipTDT(EVENT);
         end
         
-        read_chan=1:numchannel;
-        
-        %         if isempty(Cells)
-        %             return
-        %         end
-        
-        if isempty(WaveTime_Spikes)
+        if isempty(WaveTime_Fpikes)
             return
         end
         
-        %     EVENT.Start =  0;
-        %     EVENT.Triallngth =  EVENT.timerange(2);
-        %     SPIKES=ExsnipTDT(EVENT);
+        % spike sorting
+        for ii=1:length(channels2analyze)
+            logmsg(['Sorting channel ' num2str(channels2analyze(ii))]);
+            clear kll
+            if isempty(WaveTime_Fpikes(ii,1).time)
+                continue
+            end
+            kll.sample_interval = 1/EVENT.snips.Snip.sampf;
+            kll.data = WaveTime_Fpikes(ii,1).time;
+            spikes = WaveTime_Fpikes(ii,1).data;
+            kll = get_spike_features(spikes, kll );
+            
+            [wtime_sp,nclusters] = spike_sort_wpca(spikes,kll);
+            for cluster = 1:nclusters
+                wtime_sp(cluster).channel = channels2analyze(ii);
+            end
+            WaveTime_Spikes = [WaveTime_Spikes;wtime_sp]; %#ok<AGROW>
+        end
+        n_cells = length(WaveTime_Spikes);
         
         % load stimulus starttime
         smrfilename=fullfile(EVENT.Mytank,EVENT.Myblock);
-        
-        %         stimsfilename=fullfile(smrfilename,'stims.mat');
-        %         stimsfile=load(stimsfilename);
         [stimsfile,stimsfilename] = getstimsfile( record );
         EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
         
-        %         ssts = getstimscripttimestruct(cksds,EVENT.Myblock);
-        %
         desc_long=[smrfilename ':' stimsfilename];
         desc_brief=EVENT.Myblock;
         detector_params=[];
         
         intervals=[stimsfile.start ...
             stimsfile.MTI2{end}.frameTimes(end)+10];
-        %
-        % % shift time to fit with TTL and stimulustimes
-        timeshift=stimsfile.start-EVENT.strons.tril(1);
-        % % disp('IMPORTSPIKE2: Taking first TTL for time synchronization');
-        %
-        timeshift=timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
-        %
-        %  cells={};
-        cells=struct([]);
-        
+        % shift time to fit with TTL and stimulustimes
+        % disp('IMPORTSPIKE2: Taking first TTL for time synchronization');
+        timeshift = stimsfile.start-EVENT.strons.tril(1);
+        timeshift = timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
         
         % load acquisitionfile for electrode name
         % to get samplerate acqParams_out should be used instead of _in
@@ -185,65 +148,36 @@ switch lower(record.setup)
         end
         
         
-        [px,expf] = getexperimentfile(cksds,1);
-        
-        %         cellnamedel=sprintf('cell_%s_%s_%.4d*',acqinfo(1).name,'irrelevant',acqinfo(1).ref);
-        deleteexpvar(cksds,'cell*'); % delete all old representations
-        
-        cl = 1;
-        for ch = 1:numchannel
-            % cellname needs to start with 'cell' to be recognized
-            % by cksds
-            %             if isempty(Cells{ch})
-            %                 continue
-            %             end
+        cells=struct([]);
+        unitchannelname = 'snips' ;
+        cll.name = '';
+        cll.intervals = intervals;
+        cll.sample_interval = 1/EVENT.snips.Snip.sampf;
+        cll.detector_params=detector_params;
+        for ch = 1:n_cells
             if isempty(WaveTime_Spikes(ch,1))
                 continue
             end
-            clear('cll');
-            %             cll.name=sprintf('cell_%s_%s_%.4d_%.3d',...
-            %                 num2str(cl));
-            
-            unitchannelname = 'snips' ;
             cll.name=sprintf('cell_%s_%s_%.4d_%.3d',...
-                acqinfo(1).name,unitchannelname,acqinfo(1).ref,read_chan(ch));
-            
-            
-            cll.intervals = intervals;
-            cll.sample_interval = 1/EVENT.snips.Snip.sampf;
+                acqinfo(1).name,unitchannelname,acqinfo(1).ref,ch);
             cll.desc_long = desc_long;
             cll.desc_brief = desc_brief;
-            cll.index = read_chan(ch); % will be used to identify cell
-            %             cll.data = WaveTime_Spikes(ch,1).time * processparams.secondsmultiplier + timeshift;
+            cll.channel = WaveTime_Spikes(ch,1).channel;
+            cll.index = (cll.channel-1)*10 + ch; % will be used to identify cell
             cll.data = WaveTime_Spikes(ch,1).time * processparams.secondsmultiplier + timeshift;
-            cll.detector_params=detector_params;
             cll.trial=EVENT.Myblock;
             spikes=WaveTime_Spikes(ch,1).data;
-            %             spikes=zeros(20,size(WaveTime_Spikes(chan,1).data,1));
-            %             for i=1:length(WaveTime_Spikes(chan,1).data)
-            %                 A=wavelet_decompose(WaveTime_Spikes(chan,1).data(i,:),3,'db4');
-            %                 spikes(:,i)=A(1:20,3);
-            %             end;
-            %             spikes=spikes';
             cll.wave = mean(spikes,1);
             cll.std = std(spikes,1);
             cll.snr = (max(cll.wave)-min(cll.wave))/mean(cll.std);
             cll = get_spike_features(spikes, cll );
-            %   cells(1,cl) = cll;
-            %   spikes = double(data_units.adc(ind,:))/10; % to get mV     me: why 10?
-            
-            cells = [cells,cll];
-            cl = cl+1;
+            cells = [cells,cll]; %#ok<AGROW>
         end
         
         % transfer cells into experiment file of cksds object
         cksds = cksdirstruct(EVENT.Mytank);
-        
-        %        cellnamedel=sprintf('cell_%s_%s_%.4d_*',acqinfo(1).name,unitchannelname,acqinfo(1).ref);
-        %cellnamedel=sprintf('cell_%s_%s_%.4d_*',acqinfo(1).name,'irrelevant',acqinfo(1).ref);
-        %cellnamedel = '*'
+        getexperimentfile(cksds,1); % to create experiment file if necessary
         deleteexpvar(cksds,'cell*'); % delete all old representations
-        
         for cl=1:length(cells)
             acell=cells(cl);
             thecell=cksmultipleunit(acell.intervals,acell.desc_long,...
@@ -251,37 +185,31 @@ switch lower(record.setup)
             saveexpvar(cksds,thecell,acell.name,1);
         end
         
-        %
-        % nr = getallnamerefs(cksds);
-        %     g = getcells(cksds,nr(1))
-        
     otherwise
         % import spike2 data into experiment file
+        channels2analyze = 1;
         cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');
-        read_chan1=[1];
 end
-
 
 if isempty(cells)
     return
 end
 
-% if processparams.sort_with_klustakwik
-%     cells = sort_with_klustakwik(cells,record);
-% elseif processparams.compare_with_klustakwik
-%     kkcells = sort_with_klustakwik(cells,record);
-%     if ~isempty(kkcells)
-%         cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');
-%         cells = compare_spike_sortings( cells, kkcells);
-%     end
-% end
+if processparams.sort_with_klustakwik
+    cells = sort_with_klustakwik(cells,record);
+elseif processparams.compare_with_klustakwik
+    kkcells = sort_with_klustakwik(cells,record);
+    if ~isempty(kkcells)
+        cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');
+        cells = compare_spike_sortings( cells, kkcells);
+    end
+end
 
 switch lower(record.setup)
-    case 'antigua'
-        % dont compute spike intervals
-        isi = [];
+    case 'antigua'   % dont compute spike intervals
+        isi = []; %#ok<NASGU>
     otherwise
-        isi = get_spike_interval( cells );
+        isi = get_spike_interval( cells ); %#ok<NASGU>
 end
 
 % save all spikes
@@ -308,19 +236,10 @@ for r=1:length(nr) % for all refs
     if isempty(g)
         continue
     end
-    %     switch lower(record.setup) % Mehran
-    %         case 'antigua'
-    %             fg=g;
-    %             g={};
-    %             for j=1:numchannel
-    %                 g=[g;fg{read_chan(j),1}];
-    %             end
-    %     end
-    % load cells from experimentfile
     loadstr = ['''' g{1} ''''];
     for i=2:length(g)
-        loadstr = [loadstr ',''' g{i} ''''];
-    end;
+        loadstr = [loadstr ',''' g{i} '''']; %#ok<AGROW>
+    end
     eval(['d = load(getexperimentfile(cksds),' loadstr ',''-mat'');']);
     
     if length(g)>10 % dont show more than 10 cells in the analysis
@@ -336,29 +255,8 @@ for r=1:length(nr) % for all refs
         inp.st=ssts;
         inp.spikes={};
         inp.cellnames = {};
-        %         switch lower(record.setup) % Mehran
-        %             case 'antigua'
-        %                 inp.spikes=cells(1,i).data;
-        %             otherwise
         inp.spikes=d.(g{i});
-        %         end
-        
         n_spikes=0;
-        %         switch lower(record.setup) % Mehran
-        %             case 'antigua'
-        %                 for k=1:length(ssts.mti)
-        %                     try
-        %                         n_spikes=n_spikes+length(get_dataTDT(inp.spikes,...
-        %                             [ssts.mti{k}.startStopTimes(1),...
-        %                             ssts.mti{k}.startStopTimes(end)]));
-        %                     catch
-        %                         n_spikes=n_spikes+length(get_dataTDT(inp.spikes,...
-        %                             [ssts.mti{k}.startStopTimes(1),...
-        %                             ssts.mti{k}.startStopTimes(end-1)]));
-        %                     end
-        %                 end
-        %                 inp.spikes={inp.spikes};
-        %             otherwise
         for k=1:length(ssts.mti)
             try
                 n_spikes=n_spikes+length(get_data(inp.spikes,...
@@ -370,18 +268,10 @@ for r=1:length(nr) % for all refs
                     ssts.mti{k}.startStopTimes(end-1)]));
             end
         end
-        %         end
         inp.cellnames{1} = [g{i}];
         inp.title=[g{i}]; % only used in period_curve
         disp(['ANALYSE_ECTESTRECORD: Cell ' num2str(i) ' of ' num2str( length(g) ) ...
             ', ' g{i} ', ' num2str(n_spikes) ' spikes']);
-        
-        %         if n_spikes == 0
-        %             cellmeasures.contains_data = false;
-        %             cellmeasures.usable = false;
-        %             measures = [measures cellmeasures];
-        %             continue
-        %         end
         
         stim_type = record.stim_type;
         try
@@ -394,7 +284,6 @@ for r=1:length(nr) % for all refs
             end
         end
         
-        
         switch stim_type
             case {'sg','sg_adaptation'}
                 cellmeasures = analyse_sg(inp,n_spikes,record);
@@ -404,21 +293,7 @@ for r=1:length(nr) % for all refs
                 cellmeasures = analyse_ps(inp,record,verbose);
         end
         
-        
         cellmeasures.usable = 1;
-        %          try
-        %              if cellmeasures.rate_early<cellmeasures.rate_spont
-        %                  disp('spont rate higher than early response rate')
-        %                  cellmeasures.usable=0;
-        %              end
-        %          end
-        
-        %         try
-        %             if cellmeasures.time_onset<0.005
-        %                 disp('onset time is too early');
-        %                 cellmeasures.usable=0;
-        %             end
-        %         end
         
         if ~isempty(find_record(record,['comment=*' num2str(i) ':axon*']))
             cellmeasures.usable=0;
@@ -434,8 +309,7 @@ for r=1:length(nr) % for all refs
             cellmeasures.type='su';
         end
         
-        try
-            % compute Reponse Index
+        try % compute Reponse Index
             cellmeasures.ri= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
                 cellmeasures.rate_peak;
         end
@@ -496,6 +370,17 @@ for r=1:length(nr) % for all refs
         
         cellmeasures.depth = record.depth-record.surface;
         
+        if isfield(cells,'channel') % then check area
+            cellmeasures.channel = cells(i).channel;
+            if ~isempty(area)
+                for a=1:length(area)
+                    if ismember(cellmeasures.channel,area(a).channels)
+                        cellmeasures.area = area(a).name;
+                    end
+                end
+            end
+        end
+        
         measures = [measures cellmeasures];
     end % cell i
     
@@ -505,95 +390,93 @@ for r=1:length(nr) % for all refs
         cluster_spikes = false;
         disp('ANALYSE_ECTESTRECORD: No fuzzy toolbox present for spike clustering');
     end
-    
-    % compute cluster overlap
-    n_cells = length(measures);
-    if cluster_spikes
-        clust=zeros(n_cells);
         
-        for i=1:n_cells
-            spike_features{i} = [];
-            for field = spike_flds
-                spike_features{i} = [ spike_features{i};cells(i).(field{1})'];
+    if cluster_spikes            % compute cluster overlap
+        for c = channels2analyze % do this per channel
+            ind = find([measures.channel]==c);
+            n_cells = length(measures(ind));
+            clust=zeros(n_cells);
+            spike_features = cell(n_cells,1);
+            for i=1:n_cells
+                for field = spike_flds
+                    spike_features{i} = [ spike_features{i};cells(ind(i)).(field{1})'];
+                end
             end
-        end
-        
-        max_spikes = 200;
-        cluster_features = [ 1 2 3 4 ]; % 5 ruins it
-        cluster_features = [ 1 2 3 ]; % 5 ruins it
-        for i=2:n_cells
-            if isempty(spike_features{i})
-                continue
-            end
-            n_spikesi = min(max_spikes,size(spike_features{i},2));
-            for j=1:i-1
-                if isempty(spike_features{j})
+            max_spikes = 200;
+            cluster_features = [ 1 2 3 ]; % 5 ruins it
+            for i=2:n_cells
+                if isempty(spike_features{i})
                     continue
                 end
-                n_spikesj = min(max_spikes,size(spike_features{j},2));
-                
-                features = [spike_features{i}(cluster_features,1:n_spikesi),spike_features{j}(cluster_features,1:n_spikesj)]';
-                orglabel = [ones(1,n_spikesi),zeros(1,n_spikesj)];
-                %  [~,ind] = sort(rand(n_spikesi+n_spikesj,1));
-                %  orglabel = orglabel(ind);
-                %  features = features(ind,:);
-                
-                [dummy,Ulabel] =fcm(features,2,[2 50 1e-4 0]); %#ok<ASGLU>
-                
-                newlabel = double(Ulabel(1,:)>0.5);
-                
-                
-                clust(i,j) = 2 * (sum(orglabel~=newlabel)/(n_spikesi+n_spikesj));
-                if clust(i,j)>1
-                    clust(i,j)=2-clust(i,j);
+                n_spikesi = min(max_spikes,size(spike_features{i},2));
+                for j=1:i-1
+                    if isempty(spike_features{j})
+                        continue
+                    end
+                    n_spikesj = min(max_spikes,size(spike_features{j},2));
+                    features = [spike_features{i}(cluster_features,1:n_spikesi),spike_features{j}(cluster_features,1:n_spikesj)]';
+                    orglabel = [ones(1,n_spikesi),zeros(1,n_spikesj)];
+                    [dummy,Ulabel] =fcm(features,2,[2 50 1e-4 0]); %#ok<ASGLU>
+                    newlabel = double(Ulabel(1,:)>0.5);
+                    clust(i,j) = 2 * (sum(orglabel~=newlabel)/(n_spikesi+n_spikesj));
+                    if clust(i,j)>1
+                        clust(i,j)=2-clust(i,j);
+                    end
                 end
-                
-                %                 ACC = [(sum(abs(double(Ulabel(1,:)>0.5)-orglabel(1,:))))/size(fl1,2),...
-                %                     (sum(abs(double(Ulabel(1,:)>0.5)-orglabel(2,:))))/size(fl1,2)];
-                %                 ACC = [(sum(abs(newlabel-orglabel(1,:))))/size(orglabel,2),...
-                %                     (sum(abs(newlabel-orglabel(2,:))))/size(orglabel,2)];
-                %                 clust(i,j) = min(ACC); % overlap
             end
-        end
-        clust = clust + clust' + eye(length(clust));
-        for i=1:n_cells
-            measures(i).clust = clust(i,:);
-        end
+            clust = clust + clust' + eye(length(clust));
+            for i=1:n_cells
+                measures(ind(i)).clust = clust(i,:); %#ok<AGROW>
+            end
+        end % channel c
     end % if cluster_spikes
 end % reference r
 
 
-measuresfile = fullfile(ecdatapath(record),record.test,['_measures',num2str(read_chan1),'.mat']);
+measuresfile = fullfile(ecdatapath(record),record.test,['_measures',num2str(channels2analyze),'.mat']);
 save(measuresfile,'measures','WaveTime_Spikes');
 
-record.analysed = datestr(now);
-record.measures = measures;
+% insert measures into record.measures
+if (length(channels2analyze)==length(recorded_channels) && all( sort(channels2analyze)==sort(recorded_channels)))...
+        || ~isfield(measures,'channel')|| ~isfield(record.measures,'channel')
+    record.measures = measures;
+else
+    try
+        record.measures(ismember([record.measures.channel],channels2analyze)) = []; % remove old
+        record.measures = [record.measures measures];
+        [dummy,ind] = sort([record.measures.index]); %#ok<ASGLU>
+        record.measures = record.measures(ind);
+    catch me % in case measures struct definition has changed
+        logmsg(me.message);
+        record.measures = measures;
+    end
+    
+end
 
 record = add_distance2preferred_stimulus( record );
+
+record.analysed = datestr(now);
 
 return
 
 
-
-function  channels = get_channels2analyze( record )
-h_db = get_fighandle('Ec database*');
-if length(h_db)>1
-    warning('ANALYSE_ECTESTRECORD:MULTIPLE_DB','Multiple EC database control windows. Take first for determining channel');
-    warning('off','ANALYSE_ECTESTRECORD:MULTIPLE_DB');
-    h_db = h_db(1);
-end
-if isempty(h_db)
-    channels = [];
-    logmsg('Cannot find database control window to find Channels to analyze.');
-end
-h = ft(h_db,'channels_edit');
-if ~isempty(h)
-    try
-        channels = str2num( get(h,'String'));
-    catch
-        channels = [];
+function [recorded_channels,area] = get_recorded_channels( record )
+recorded_channels = [];
+area = [];
+if isfield(record,'channel_info') && ~isempty(record.channel_info)
+    channel_info = split(record.channel_info);
+    if length(channel_info)==1
+        recorded_channels = sort(str2num(channel_info{1})); %#ok<ST2NM>
+    else
+        for i=1:2:length(channel_info)
+            area( (i+1)/2 ).channels = sort(str2num(channel_info{i})); %#ok<ST2NM,AGROW>
+            area( (i+1)/2 ).name = lower(channel_info{i+1}); %#ok<AGROW>
+            if ~isempty(intersect(recorded_channels,area( (i+1)/2 ).channels))
+                errormsg('There is a channel assigned to two areas');
+                return
+            end
+            recorded_channels = [recorded_channels area( (i+1)/2 ).channels]; %#ok<AGROW>
+        end
+        recorded_channels = sort( recorded_channels );
     end
 end
-
-function obj = ft(fig, name)
-obj = findobj(fig,'Tag',name);

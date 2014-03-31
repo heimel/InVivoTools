@@ -23,14 +23,26 @@ switch where
             dbpath=dbpath_local;
             return
         end
-        switch comp
-            case {'GLNX86','LNX86'}
-                base='/home/data/InVivo';
-            case {'PCWIN','PCWIN64'}
+%        switch comp
+%            case {'GLNX86','LNX86'}
+%                base='/home/data/InVivo';
+%            case {'PCWIN','PCWIN64'}
+%                base='C:\Data\InVivo';
+%            case {'MACI64','MACI'}
+%               base = ['/Users/',user,'/Dropbox'];
+%        end
+	if isunix
+        	base='/home/data/InVivo';
+	elseif ispc	
                 base='C:\Data\InVivo';
-            case {'MACI64','MACI'}
+	elseif ismac 
                 base = ['/Users/',user,'/Dropbox'];
-        end
+	else
+		logmsg('Unknown operating system');
+		base = '';
+	end
+
+
 end
 dbpath=fullfile(base,'Databases');
 

@@ -58,9 +58,20 @@ if ~isempty(measures_on_disk) && length(measures)==length(record.measures)
     end
 end
 
+% select on cells on channels of interest
+channels = get_channels2analyze( record );
+if ~isempty(channels) && isfield(measures,'channel')
+    i = 1;
+    while i<=length(measures)
+        if ~ismember(measures(i).channel,channels)
+            measures(i) = [];
+        else
+            i = i+1;
+        end
+    end
+end
 
 n_cells=length(measures);
-
 
 subheight=150; % pixel
 subwidth=200; % pixel

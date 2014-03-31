@@ -100,7 +100,7 @@ switch type
             end
         end
 end
-% temporarily adding anesthetic field % 2013-03-18
+% temporarily adding analysis field % 2014?
 switch type
     case {'ec'}
         if ~isfield(db,'analysis')
@@ -114,6 +114,22 @@ switch type
             end
         end
 end
+% temporarily adding channel info 2014-03-25
+switch type
+    case {'ec'}
+        if ~isfield(db,'channel_info')
+            for i=1:length(db)
+                db(i).channel_info = '';
+            end
+            stat = checklock(filename);
+            if stat~=1
+                filename = save_db(db,filename,'');
+                rmlock(filename);
+            end
+        end
+end
+
+
 % temporarily adding measurement field % 2013-03-22
 %  switch type
 %      case {'tp'}
