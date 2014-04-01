@@ -58,7 +58,8 @@ end
 function erg_master_window_OpeningFcn(hObject, eventdata, handles, varargin)
   % Check if stuff is actually already running...
   if (ismember('output',fieldnames(handles))) return; end
-
+  ud.persistent = 1;
+  set(handles.figure1,'userdata',ud);
   config_erg();
   handles.output = hObject;
   guidata(hObject, handles);

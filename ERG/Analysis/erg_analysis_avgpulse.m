@@ -2,15 +2,24 @@
 % Outlier sweeps are removed. 
 
 function [data_out, nRemoved] = erg_analysis_avgpulse(data_in, graphs)
-  if (nargin < 2) graphs = 0; end
+  if (nargin < 2) 
+      graphs = 0; 
+  end
+  
   [nSweeps,nSamples] = size(data_in);
-  if (nSweeps <=1) data_out = data_in; nRemoved = [0]; return; end;
+  if (nSweeps <=1) 
+      data_out = data_in; 
+      nRemoved = [0]; 
+      return; 
+  end
 
   data_out = mean(data_in);
   
   for (i = 1:nSweeps)
     StripMean =  data_out-data_in(i,:);
-    if (graphs) sweepDivRun(i,:) = StripMean; end;
+    if (graphs) 
+        sweepDivRun(i,:) = StripMean; 
+    end
     sweepDivRMS(i) = sqrt(sum(StripMean.*StripMean));
   end
   

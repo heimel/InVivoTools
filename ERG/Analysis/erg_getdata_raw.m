@@ -7,6 +7,13 @@
 
 function [data_saved] = erg_getdata_raw(filename)
   global ergConfig;
+  
+  if ~exist(filename,'file')
+      errormsg(['File ' filename ' does not exist.']);
+      data_saved = [];
+      return
+  end
+  
   load(filename,'data_saved');
  
   %Backwards compatibility
