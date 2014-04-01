@@ -33,6 +33,7 @@ set(s, 'DataBits', 8);
 set(s, 'StopBits', 1);
 set(s, 'BaudRate', 9600);
 set(s, 'Parity', 'none');
+set(s, 'Timeout',0.5);
 fopen(s);
 frequency = 10; %Hz
 
@@ -50,7 +51,7 @@ wp.imageType = 1;  % square wave
 wp.animType = 4;
 wp.dispprefs={'BGpretime',nan,'BGposttime',nan};
 wp.sFrequency = 0.05;% to check linearization
-wp.tFrequency = 3;% to check linearization
+wp.tFrequency = 2;% to check linearization
 wp.rect = StimWindowRect;
 wp.nCycles = 1;
 %wp.contrast = 0;
@@ -72,11 +73,16 @@ prevgo = NaN;
 tic
 while 1
     p = randperm(length(MTIs));
-toc
     for i = p
         MTI = MTIs{i}{1};
         vbl = Screen('Flip',StimWindow,0);
         for frameNum=2:length(MTI.df.frames);
+            t = toc;
+            tic
+            if t>1/StimWindowRefresh
+                disp(frameNum);
+               continue
+            end
             textures = MTI.MovieParams.Movie_textures{frameNum};
             Screen('DrawTextures',StimWindow,MTI.ds.offscreen(textures),...
                 squeeze(MTI.MovieParams.Movie_sourcerects(:,frameNum,textures)),...  % sourceRects
@@ -85,8 +91,10 @@ toc
                 squeeze(MTI.MovieParams.Movie_globalalphas(:,frameNum,textures)),... % globalAlpha
                 [],[],[], ... % modulateColor,textureShader,specialFlags
                 squeeze(MTI.MovieParams.Movie_auxparameters(:,frameNum,textures))); % auxParameters
-            vbl=Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(frameNum-1)-0.5)/StimWindowRefresh);
-            
+            vbl=Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(frameNum-1))/StimWindowRefresh);
+            %vbl=Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(frameNum-1)-0.5)/StimWindowRefresh);
+            %           Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(frameNum-1)-0.5)/StimWindowRefresh);
+
             % getting vdaq stimulus number
             [go,stim]=get_gostim(lpt);
             if  prevstim~=stim
@@ -95,12 +103,15 @@ toc
                 
                 disp(['stim = ' num2str(stim)]);
                 frequency = stim;
+                
                 status = uint8(0);
-                while status==0
-                    status = fread(s,1,'uint8');
-                    pause(0.01);
-                end
+            end
+            
+            if status~=frequency
                 fwrite(s, frequency, 'uint8', 'sync');
+                readasync(s,1);
+                status = fread(s,1,'uint8');
+                disp(['Req = ' num2str(frequency) ', Set = ' num2str(status)]);
             end
         end
         if KbCheck
