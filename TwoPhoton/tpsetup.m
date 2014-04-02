@@ -21,7 +21,7 @@ else
 end
 
 switch lower(setup)
-    case 'lif'
+    case {'lif','leica'}
         setup = 'LIF';
     case 'lohmann'
         setup = 'Lohmann';

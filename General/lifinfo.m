@@ -6,7 +6,7 @@ function inf = lifinfo(id,stored,infname)
 %
 
 if nargin<3
-    infname = [imgname '_lifinfo.mat'];
+    infname = [id '_lifinfo.mat'];
 end
 
 if nargin<2
@@ -88,39 +88,83 @@ for s = 1:numSeries
     inf.BitsPerSample = 8 * loci.formats.FormatTools.getBytesPerPixel(pixelType);
     
     % check methods(r) for what else we can get out of r
-    metadata = r.getMetadata.char;
-    metadata = split(metadata,',');
-    series = metadata{1};
-    p = find(series==' ',1);
-    series = series(2:p-1);
-    try
-        xline = metadata{strmatch([' ' series ' HardwareSetting|ScannerSettingRecord|dblVoxelX'],metadata)};
-    catch
-        xline = metadata{strmatch(['{' series ' HardwareSetting|ScannerSettingRecord|dblVoxelX'],metadata)};
-    end
-    yline = metadata{strmatch([' ' series ' HardwareSetting|ScannerSettingRecord|dblVoxelY'],metadata)};
-    zline = metadata{strmatch([' ' series ' HardwareSetting|ScannerSettingRecord|dblVoxelZ'],metadata)};
-    
-    
-    disp('LIFINFO: unknown x and y steps');
-    inf.x_step  = str2double(xline(find(xline=='=')+1:end))*1e6;
-    inf.x_unit = 'um'; % i.e. unknown, hidden in the metadata
-    inf.y_step  = str2double(yline(find(yline=='=')+1:end))*1e6;
-    inf.y_unit = 'um' ;% i.e. unknown, hidden in the metadata
+    if ismethod(r,'getMetadata') % old loci version before 5.0
+        metadata = r.getMetadata.char;
+        metadata = split(metadata,',');
+        series = metadata{1};
+        p = find(series==' ',1);
+        series = series(2:p-1);
+        try
+            xline = metadata{strmatch([' ' series ' HardwareSetting|ScannerSettingRecord|dblVoxelX'],metadata)};
+        catch
+            xline = metadata{strmatch(['{' series ' HardwareSetting|ScannerSettingRecord|dblVoxelX'],metadata)};
+        end
+        yline = metadata{strmatch([' ' series ' HardwareSetting|ScannerSettingRecord|dblVoxelY'],metadata)};
+        zline = metadata{strmatch([' ' series ' HardwareSetting|ScannerSettingRecord|dblVoxelZ'],metadata)};
+        
+        
+        disp('LIFINFO: unknown x and y steps');
+        inf.x_step  = str2double(xline(find(xline=='=')+1:end))*1e6;
+        inf.x_unit = 'um'; % i.e. unknown, hidden in the metadata
+        inf.y_step  = str2double(yline(find(yline=='=')+1:end))*1e6;
+        inf.y_unit = 'um' ;% i.e. unknown, hidden in the metadata
     if inf.NumberOfFrames > 1
         % more than 1 frame
         if r.getSizeT > 1
-            disp('LIFINFO: unknown frame period');
+            disp('LIFINFO: unknown frame period. Ask Alexander to improve code');
             inf.third_axis_name  = 't';
             inf.third_axis_unit = 'frame'; % i.e. unknown
             inf.frame_period = 1; 
             inf.frame_timestamp = inf.frame_period * (0:(inf.NumberOfFrames-1));
-        else
+        elseif r.getSizeZ > 1
             inf.third_axis_name = 'z';
             inf.z_step  = str2double(zline(find(zline=='=')+1:end))*1e6;
             inf.z_unit = 'um';
         end
     end
+    
+    
+    else % > loci 5.0
+        % check methods(r) for more info
+
+        linelength = str2double(r.getSeriesMetadataValue('DimensionDescription|Length'));
+        zoom = str2double(r.getSeriesMetadataValue('ATLConfocalSettingDefinition|Zoom'));
+        if isnan(zoom)
+            errormsg('I am in doubt about the pixel size. Ask Alexander to check this file');
+            zoom = 1;
+        end
+        inf.x_step  =linelength/r.getSizeX/zoom*1e6;
+        inf.x_unit = 'um';
+        if r.getSizeX~=r.getSizeY
+            errormsg('I am in doubt about the pixel size. Ask Alexander to check this file');
+        end
+        if r.getSizeX~=512 && r.getSizeX~=1024 
+            errormsg('I am in doubt about the pixel size. Ask Alexander to check this file');
+        end
+        inf.y_step  =inf.x_step;
+inf.y_unit = inf.x_unit;
+    
+    if inf.NumberOfFrames > 1
+        % more than 1 frame
+        if r.getSizeT > 1
+            disp('LIFINFO: unknown frame period. Ask Alexander to improve code');
+            inf.third_axis_name  = 't';
+            inf.third_axis_unit = 'frame'; % i.e. unknown
+            inf.frame_period = 1; 
+            inf.frame_timestamp = inf.frame_period * (0:(inf.NumberOfFrames-1));
+        elseif r.getSizeZ > 1
+            errormsg('I am in doubt about the z-step size. Ask Alexander to check this file');
+            inf.third_axis_name = 'z';
+            stacklength = str2double(r.getSeriesMetadataValue('DimensionDescription|Length'));
+            inf.z_step  = stacklength/r.getSizeZ;
+            inf.z_unit = 'um';
+        end
+    end
+
+    end
+    
+    
+
     result{s} = inf;
 end
 
