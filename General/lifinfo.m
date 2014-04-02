@@ -23,6 +23,39 @@ if stored
     end
 end
 
+if ~exist(id,'file')
+    error(['File ' id ' not found.']);
+end
+
+fid = fopen(id);
+buf = fread(fid,30000);
+fclose(fid);
+txt = char(buf(14:2:end))';
+% tag = '</LMSDataContainerHeader>';
+% ind = findstr(txt,tag);
+% xml = txt(1:ind(end)+length(tag)-1);
+% xmls = xml2struct(xml);
+% xmls = xmls.Children(1).Children(4).Children.Children(1).Children.Children(2).Children(2);
+%</LMSDataContainerHeader>
+
+tag = '<Dimensions>';
+ind1 = findstr(txt,tag)+length(tag);
+tag = '</Dimensions>';
+ind2 = findstr(txt,tag)-1;
+txt = txt(ind1:ind2);
+
+tag1 = '<DimensionDescription';
+ind1 = findstr(txt,tag1)+length(tag1);
+tag2 = '</DimensionDescription';
+ind2 = findstr(txt,tag2)-2;
+
+for i=1:length(ind1)
+   m='m'; % for unit
+   code = [strrep(txt(ind1(i):ind2(i)),' ',['; dd(' num2str(i) ').'] ) ';'];
+   code(code=='"') = ''; 
+   eval(code);
+end
+
 
 
 autoloadBioFormats = 1;
@@ -130,19 +163,19 @@ for s = 1:numSeries
         linelength = str2double(r.getSeriesMetadataValue('DimensionDescription|Length'));
         zoom = str2double(r.getSeriesMetadataValue('ATLConfocalSettingDefinition|Zoom'));
         if isnan(zoom)
-            errormsg('I am in doubt about the pixel size. Ask Alexander to check this file');
             zoom = 1;
         end
-        inf.x_step  =linelength/r.getSizeX/zoom*1e6;
+        if ~strcmp(dd(1).Unit,'m')
+            errormsg(['Unknown unit ' dd(1).Unit ]);
+        end
+        inf.x_step  = dd(1).Length/dd(1).NumberOfElements*1e6;
         inf.x_unit = 'um';
-        if r.getSizeX~=r.getSizeY
-            errormsg('I am in doubt about the pixel size. Ask Alexander to check this file');
+        if ~strcmp(dd(2).Unit,'m')
+            errormsg(['Unknown unit ' dd(2).Unit ]);
         end
-        if r.getSizeX~=512 && r.getSizeX~=1024 
-            errormsg('I am in doubt about the pixel size. Ask Alexander to check this file');
-        end
-        inf.y_step  =inf.x_step;
-inf.y_unit = inf.x_unit;
+        inf.y_step  = dd(2).Length/dd(2).NumberOfElements*1e6;
+        inf.y_unit = 'um';
+        
     
     if inf.NumberOfFrames > 1
         % more than 1 frame
@@ -153,11 +186,13 @@ inf.y_unit = inf.x_unit;
             inf.frame_period = 1; 
             inf.frame_timestamp = inf.frame_period * (0:(inf.NumberOfFrames-1));
         elseif r.getSizeZ > 1
-            errormsg('I am in doubt about the z-step size. Ask Alexander to check this file');
-            inf.third_axis_name = 'z';
-            stacklength = str2double(r.getSeriesMetadataValue('DimensionDescription|Length'));
-            inf.z_step  = stacklength/r.getSizeZ;
+            if ~strcmp(dd(3).Unit,'m')
+                errormsg(['Unknown unit ' dd(3).Unit ]);
+            end
+            inf.z_step  = dd(3).Length/dd(3).NumberOfElements*1e6;
             inf.z_unit = 'um';
+
+            inf.third_axis_name = 'z';
         end
     end
 
