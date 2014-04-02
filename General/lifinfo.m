@@ -160,6 +160,35 @@ for s = 1:numSeries
     else % > loci 5.0
         % check methods(r) for more info
 
+        metadata = r.getSeriesMetadata.char;
+        metadata = metadata(2:end-1);
+        metadata = split(metadata,',');
+        
+        for i=1:length(metadata)
+            p = find(metadata{i}=='=');
+            
+            field = metadata{i}(1:p-1);
+            field=subst_specialchars(field);
+            field(field=='_')='u';
+            
+%            md.(field) = metadata{i}(p+1:end);
+            
+            try
+                if exist(md,'field')
+                    field
+                    keyboard
+                end
+                v = eval(metadata{i}(p+1:end));
+                if v>0 && v~=1
+                    md.(field) = v;
+                end
+            catch
+               % md.(field) = metadata{i}(p+1:end);
+            end
+        end
+        
+        
+        
         linelength = str2double(r.getSeriesMetadataValue('DimensionDescription|Length'));
         zoom = str2double(r.getSeriesMetadataValue('ATLConfocalSettingDefinition|Zoom'));
         if isnan(zoom)
