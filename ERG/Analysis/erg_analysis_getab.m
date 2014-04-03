@@ -41,7 +41,7 @@ function [baseline awave atime bwave btime] = erg_analysis_getab(data, prepulse_
   [bwave,btime] = max(bwavedata(bwave_find_start:bwave_find_end));
 
   %The next two lines do the noise-filtering part to correct for min/max bias
-  if 1
+  if 0
       bwave = bwave - min(prctile(data(1:prepulse_samples/2)-mean(data(1:prepulse_samples/2)),95),prctile(data(prepulse_samples/2+1:prepulse_samples)-mean(data(prepulse_samples/2+1:prepulse_samples)),95));
   end
   if 0
@@ -50,6 +50,9 @@ function [baseline awave atime bwave btime] = erg_analysis_getab(data, prepulse_
   
   awave = -awave;
   bwave = bwave + awave;
+  if bwave<awave
+      bwave = awave;
+  end
   
  % figure;
   hold on

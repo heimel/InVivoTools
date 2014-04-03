@@ -219,10 +219,9 @@ function ergLogger_listCallback(hObject, eventdata)
   end
   set(ergLog.listPanelItem.analysis,'Value',analysis2nr(ergLog.Entry(cur).analysis, get(ergLog.listPanelItem.analysis,'String')));
   
-if  ergLog.Entry(cur).start > datenum('2014-03-01')
-    logmsg('Experiment done after 2014-03-01. ');
+if  ergLog.Entry(cur).start > datenum('2014-03-17')
+    logmsg('Experiment done after 2014-03-17. ');
       ergConfig.voltage_amplification = 1000;
-     
 else
       ergConfig.voltage_amplification = 10000;
 end  

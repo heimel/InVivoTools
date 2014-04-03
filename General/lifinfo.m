@@ -28,7 +28,7 @@ if ~exist(id,'file')
 end
 
 fid = fopen(id);
-buf = fread(fid,30000);
+buf = fread(fid,500000);
 fclose(fid);
 txt = char(buf(14:2:end))';
 % tag = '</LMSDataContainerHeader>';
