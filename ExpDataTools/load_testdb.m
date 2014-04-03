@@ -68,28 +68,39 @@ switch whichdb
         whichdb='testdb.mat';
         filename=fullfile(expdatabasepath(where),whichdb);
     case {'ectestdb','ectestdb.mat'} % join ec databases
-        if verbose
-            disp('LOAD_TESTDB: Concatenating all experimental databases. Changes will not be saved to original database!');
-            disp('LOAD_TESTDB: Use e.g. experiment_db(''ec'',''nori001'') to open specific database, or use host(''nori001'')');
-        end
-        
-        % matching structure to ectestdb_daneel_empty
-        db_empty = load(fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty'));
-        db_empty = db_empty.db;
+        switch experiment 
+            case 'examples'
+                 % matching structure to ectestdb_daneel_empty
+                db_empty = load(fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty'));
+                db_empty = db_empty.db;
+                
+                [db,filename] = load_expdatabase(whichdb,where,[],load_main,verbose);
+                db = structconvert(db,db_empty);
 
-        % load separate testdatabases and merge
-        setups = {'nori001','nin380','daneel','antigua'};
-        for s = 1:length(setups)
-            if ~isempty(db)
-                load_main = false;
-            end
-            dbt = load_expdatabase( ['ectestdb_' setups{s}],where,[],load_main,verbose );
-            dbt = structconvert(dbt,db_empty);
-            db = [db dbt]; %#ok<AGROW>
+            otherwise
+                if verbose
+                    disp('LOAD_TESTDB: Concatenating all experimental databases. Changes will not be saved to original database!');
+                    disp('LOAD_TESTDB: Use e.g. experiment_db(''ec'',''nori001'') to open specific database, or use host(''nori001'')');
+                end
+                
+                % matching structure to ectestdb_daneel_empty
+                db_empty = load(fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty'));
+                db_empty = db_empty.db;
+                
+                % load separate testdatabases and merge
+                setups = {'nori001','nin380','daneel','antigua'};
+                for s = 1:length(setups)
+                    if ~isempty(db)
+                        load_main = false;
+                    end
+                    dbt = load_expdatabase( ['ectestdb_' setups{s}],where,[],load_main,verbose );
+                    dbt = structconvert(dbt,db_empty);
+                    db = [db dbt]; %#ok<AGROW>
+                end
+                
+                whichdb = 'ectestdb.mat';
+                filename=fullfile(expdatabasepath(where),whichdb);
         end
-        
-        whichdb = 'ectestdb.mat';
-        filename=fullfile(expdatabasepath(where),whichdb);
     otherwise
         [db_single,filename] = load_expdatabase(whichdb,where,[],load_main,verbose);
         if ~isempty(db_single) &&  isfield(db_single(1),'stack') % i.e. microscopy record

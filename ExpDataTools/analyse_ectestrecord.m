@@ -154,6 +154,7 @@ switch lower(record.setup)
         cll.intervals = intervals;
         cll.sample_interval = 1/EVENT.snips.Snip.sampf;
         cll.detector_params=detector_params;
+        channels_new_index = (0:1000)*10+1; % works for up to 1000 channels, and max 10 cells per channel
         for ch = 1:n_cells
             if isempty(WaveTime_Spikes(ch,1))
                 continue
@@ -163,7 +164,8 @@ switch lower(record.setup)
             cll.desc_long = desc_long;
             cll.desc_brief = desc_brief;
             cll.channel = WaveTime_Spikes(ch,1).channel;
-            cll.index = (cll.channel-1)*10 + ch; % will be used to identify cell
+            cll.index = channels_new_index(cll.channel); % will be used to identify cell
+            channels_new_index(cll.channel) = channels_new_index(cll.channel) + 1;
             cll.data = WaveTime_Spikes(ch,1).time * processparams.secondsmultiplier + timeshift;
             cll.trial=EVENT.Myblock;
             spikes=WaveTime_Spikes(ch,1).data;
@@ -207,7 +209,8 @@ end
 
 switch lower(record.setup)
     case 'antigua'   % dont compute spike intervals
-        isi = []; %#ok<NASGU>
+        isi = get_spike_interval( cells ); %#ok<NASGU>
+%        isi = []; %#ok<NASGU>
     otherwise
         isi = get_spike_interval( cells ); %#ok<NASGU>
 end
