@@ -372,8 +372,16 @@ switch record.stim_type
          end
          cmap = colormap('hsv');
          or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
-         or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 size(cmap,1)]));
-%         h = image_intensity(or_angs',max(avg,[],3)',cmap);
+         or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 size(cmap,1)]));         or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 100]));
+         
+  %      h = image_intensity(or_angs',size(cmap,1)*ones(size(or_angs))',cmap);
+   %      h = image_intensity(or_angs',mean(avg,3)',cmap);
+   figure     
+   image(or_angs');
+   axis image off
+   colormap hsv
+        
+     %    h = image_intensity(or_angs',max(avg,[],3)',cmap);
          h = image_intensity(or_angs',or_abs',cmap);
          filename= fullfile(oidatapath(record),[record.test '_B' ...
                 mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
