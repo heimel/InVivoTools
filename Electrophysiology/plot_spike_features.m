@@ -9,6 +9,10 @@ if nargin<2
     record.date = '';
 end
 
+if isempty(cells)
+    return
+end
+
 params = ecprocessparams(record);
 
 flds = fields(cells);
@@ -36,6 +40,9 @@ for ch=channels
     if isfield(allcells,'channel')
         cells = allcells( [allcells.channel]==ch);
     end        
+    if isempty(cells)
+        continue
+    end
     
     n_cells = length(cells);
     % plot clusters

@@ -15,9 +15,9 @@ end
 
 params = ecprocessparams(record);
 
- 
-    xl = [-0.05 0.05];
-    x = xl(1):0.001:xl(2);
+
+xl = [-0.05 0.05];
+x = xl(1):0.001:xl(2);
 if isstruct(isi)
     
     
@@ -30,8 +30,8 @@ if isstruct(isi)
     
     chan = unique( [isi.channel]);
     for ch = chan
-        figure('Name',['Spike intervals: ' record.test ',' record.date ',channel=' num2str(ch)] ,'Numbertitle','off');
         isi_on_channel = isi(logical(flatten(cellfun(@(x) x(1)==ch&x(2)==ch,{isi.channel},'UniformOutput',false))));
+        figure('Name',['Spike intervals: ' record.test ',' record.date ',channel=' num2str(ch)] ,'Numbertitle','off');
         indices = unique([isi_on_channel.pair]);
         n_cells = length(indices);
         for i=1:length(isi_on_channel)
@@ -42,7 +42,7 @@ if isstruct(isi)
             xlim(xl);
         end
     end
-
+    
 else % deprecated way from before 2014-04-04
     n_cells = size(isi,1);
     

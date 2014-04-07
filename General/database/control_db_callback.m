@@ -316,14 +316,12 @@ switch windowname
                 help_local = fullfile(fileparts(which('startup')),'Manual','ManualInVivoTools.html'); 
                 switch computer
                     case {'PCWIN','PCWIN64'}
-                        msgbox(['Database and record available by ''global global_db global_record''']);
+                        msgbox('Database and record available by ''global global_db global_record''');
                         dos(['start ' help_url]);
                     otherwise
                         web(help_local)
                         disp(['ANALYZETPSTACK: Load ' help_url ' in your favorite browser. Database and record available by ''global global_db global_record''']);
                 end
-                
-                %msgbox(help('control_db'),'Help on CONTROL_DB','help');
                 global global_db global_record
                 global_db = ud.db;
                 global_record = ud.db(ud.current_record);
@@ -343,16 +341,19 @@ switch windowname
                 end
                 if ~isempty(ud.record_form)
                     try
-                        close(ud.record_form);
+%                        close(ud.record_form);
+                        delete(ud.record_form);
                         ud.record_form=[];
                         set(h_fig,'Userdata',ud);
                     end
                 end
-                if ~isempty(find(ud.perm=='w'))
+                if ~isempty(find(ud.perm=='w',1))
                     rmlock(ud.filename);
                 end
-                set(h_fig,'CloseRequestFcn','closereq');
-                close(h_fig);
+                if ishandle(h_fig)
+                    set(h_fig,'CloseRequestFcn','closereq');
+                    close(h_fig);
+                end
             case 'close figs',
                 close_figs;
             case 'table'

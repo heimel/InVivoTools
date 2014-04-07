@@ -1,10 +1,21 @@
-function isi = get_spike_interval(allcells)
+function isi = get_spike_interval(allcells, isi_old)
 %GET_SPIKE_INTERVAL gets all interspike intervals
 %
-% ISI = GET_SPIKE_INTERVAL( CELLS )
+% ISI = GET_SPIKE_INTERVAL( CELLS, ISI_OLD )
+%      ISI_OLD is old ISI to concatenate
 %
-% 2013, Alexander Heimel
+% 2013-2014, Alexander Heimel
 %
+
+
+if nargin<2
+    isi_old = [];
+end
+
+if isempty(allcells)
+    isi = isi_old;
+    return
+end
 
 max_spikes = 2000; 
 max_interval = 0.05;
@@ -34,3 +45,16 @@ for ch=chans % only do per channel for the moment.
     end
 end
  
+if iscell(isi_old) % no idea why this would be necessary, 2014-04-05
+    isi_old = [];
+end
+
+i = 1;
+while i<length(isi_old)
+    if ~isfield(isi_old,'channel') || any(ismember(isi_old(i).channel,chans))
+        isi_old(i) = [];
+    else
+        i = i+1;
+    end
+end
+isi = [isi_old isi];

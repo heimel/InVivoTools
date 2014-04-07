@@ -82,27 +82,32 @@ end
 
 switch lower(record.setup)
     case {'antigua','daneel'}
-        params.sort_with_klustakwik = false;
+        params.spike_sorting_routine = '';
         params.compare_with_klustakwik = false;
     otherwise
         switch record.mouse(1:min(end,5))
             case {'05.01','07.30'}
-                params.sort_with_klustakwik = false;
+                params.spike_sorting_routine = '';
                 params.compare_with_klustakwik = false;
             case {'13.20'}
-                params.sort_with_klustakwik = true;
+                params.spike_sorting_routine = 'klustakwik';
                 params.compare_with_klustakwik = true;
+            case {'11.35'}
+                params.spike_sorting_routine = '';
+                params.compare_with_klustakwik = true;
+
             otherwise
-                params.sort_with_klustakwik = false;
+                params.spike_sorting_routine = '';
                 params.compare_with_klustakwik = true;
         end
 end
-
+%params.spike_sorting_routine = 'klustakwik';
+ 
 % time calibration
 switch lower(record.setup)
     case 'antigua' 
-        params.trial_ttl_delay=0.00; % s delay of visual stimulus after trial start TTL
-        params.secondsmultiplier=1.000017000; % multiplification factor of electrophysical signal time
+        params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
+        params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time
     otherwise
         warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
         warning('off', 'ECPROCESSPARAMS:TIMING');

@@ -118,102 +118,106 @@ end % i
 
 
 ind = find(data.type == E.SNIP);
-EVENT.snips.Snip.size = data.size(ind(1))-10;
-EVENT.snips.Snip.sampf = data.frequency(ind(1));
-switch data.format(ind(1))
-    case 0
-        bytes_per_sample = 4;
-    case 2
-        bytes_per_sample = 2;
-    case 4
-        bytes_per_sample = 4;
-end
-EVENT.snips.Snip.channels = max(data.chan(ind)); % assume start at top channel
-EVENT.snips.Snip.bytes = EVENT.snips.Snip.size *  bytes_per_sample;
-EVENT.snips.Snip.name = code2string( data.namecode(ind(1)) );
-for c = 1: EVENT.snips.Snip.channels
-    EVENT.snips.Snip.times{c,1} = data.timestamp(ind(data.chan(ind)==c))';
-end
-
-% get strons
-ind = find(data.type == E.STRON);
-EVENT.strons.(code2string(data.namecode(ind))) = data.timestamp(ind);
-
-EVENT.timerange = [data.timestamp(2) data.timestamp(end)];
-
-logmsg(['Finished reading ' blockname ' in tank ' tank]);
-
-
-if nargout>1
-    %an example of reading A/D samples from tev. You can use the same code to read
-    %the snip-type data (sorted waveforms). Just replace the store ID.
-    table = { 'float',  1, 'float';
-        'long',   1, 'int32';
-        'short',  2, 'short';
-        'byte',   4, 'schar';
-        'unknown', 4, 'unknown';
-        }; % a look-up table
-    
-    tev = fopen(tev_path);
-    % typecast Store ID (such as 'Evnt', 'eNeu', and 'LPFs') to number
-    namecode = 256.^(0:3)*double('Snip')';
-    
-    % select tsq headers by the Store ID
-    row = (namecode == data.namecode);
-    
-    %EVENTCODE = [data.timestamp(row) data.strobe(row)];
-    %
-    first_row = find(1==row,1);
-    format    = data.format(first_row)+1; % from 0-based to 1-based
-    %
-    SNIPS.format        = table{format,1};
-    SNIPS.sampling_rate = data.frequency(first_row);
-    SNIPS.chan_info     = [data.timestamp(row) double(data.chan(row))];
-    % For the snip type, you may want the sortcode additionally.
-    % SPIKE.chan_info = [data.timestamp(row) data.chan(row) data.sortcode(row)];
-    
-    fp_loc  = data.fp_loc(row);
-    nsample = (data.size(row)-10) * table{format,2};
-    SNIPS.sample_point = NaN(length(fp_loc),max(nsample));
-    for n=1:length(fp_loc)
-        fseek(tev,fp_loc(n),'bof');
-        % For the snip type, each row of sample_point corresponds to each waveform.
-        SNIPS.sample_point(n,1:nsample(n)) = fread(tev,[1 nsample(n)],table{format,3});
+if isempty(ind) 
+    logmsg('No spikes available');
+    return
+else
+    EVENT.snips.Snip.size = data.size(ind(1))-10;
+    EVENT.snips.Snip.sampf = data.frequency(ind(1));
+    switch data.format(ind(1))
+        case 0
+            bytes_per_sample = 4;
+        case 2
+            bytes_per_sample = 2;
+        case 4
+            bytes_per_sample = 4;
     end
-    fclose(tev);
-    
-    
-    % Channels stuff if temporary copied
-    if iscell(EVENT.snips.Snip.channels)
-        ChaNm = length(EVENT.snips.Snip.channels); %channels in block is a cell
-    else
-        ChaNm = EVENT.snips.Snip.channels;
+    EVENT.snips.Snip.channels = max(data.chan(ind)); % assume start at top channel
+    EVENT.snips.Snip.bytes = EVENT.snips.Snip.size *  bytes_per_sample;
+    EVENT.snips.Snip.name = code2string( data.namecode(ind(1)) );
+    for c = 1: EVENT.snips.Snip.channels
+        EVENT.snips.Snip.times{c,1} = data.timestamp(ind(data.chan(ind)==c))';
     end
     
-    if isfield(EVENT, 'CHAN') && length(EVENT.CHAN) <= ChaNm
-        Chans = EVENT.CHAN;  %SELECTED CHANNELS
-        if size(Chans,2) == 1
-            Chans = Chans';  %should be a row vector
+    % get strons
+    ind = find(data.type == E.STRON);
+    EVENT.strons.(code2string(data.namecode(ind))) = data.timestamp(ind);
+    
+    EVENT.timerange = [data.timestamp(2) data.timestamp(end)];
+    
+    logmsg(['Finished reading ' blockname ' in tank ' tank]);
+    
+    
+    if nargout>1
+        %an example of reading A/D samples from tev. You can use the same code to read
+        %the snip-type data (sorted waveforms). Just replace the store ID.
+        table = { 'float',  1, 'float';
+            'long',   1, 'int32';
+            'short',  2, 'short';
+            'byte',   4, 'schar';
+            'unknown', 4, 'unknown';
+            }; % a look-up table
+        
+        tev = fopen(tev_path);
+        % typecast Store ID (such as 'Evnt', 'eNeu', and 'LPFs') to number
+        namecode = 256.^(0:3)*double('Snip')';
+        
+        % select tsq headers by the Store ID
+        row = (namecode == data.namecode);
+        
+        %EVENTCODE = [data.timestamp(row) data.strobe(row)];
+        %
+        first_row = find(1==row,1);
+        format    = data.format(first_row)+1; % from 0-based to 1-based
+        %
+        SNIPS.format        = table{format,1};
+        SNIPS.sampling_rate = data.frequency(first_row);
+        SNIPS.chan_info     = [data.timestamp(row) double(data.chan(row))];
+        % For the snip type, you may want the sortcode additionally.
+        % SPIKE.chan_info = [data.timestamp(row) data.chan(row) data.sortcode(row)];
+        
+        fp_loc  = data.fp_loc(row);
+        nsample = (data.size(row)-10) * table{format,2};
+        SNIPS.sample_point = NaN(length(fp_loc),max(nsample));
+        for n=1:length(fp_loc)
+            fseek(tev,fp_loc(n),'bof');
+            % For the snip type, each row of sample_point corresponds to each waveform.
+            SNIPS.sample_point(n,1:nsample(n)) = fread(tev,[1 nsample(n)],table{format,3});
         end
-    else
-        Chans = 1:ChaNm;
+        fclose(tev);
+        
+        
+        % Channels stuff if temporary copied
+        if iscell(EVENT.snips.Snip.channels)
+            ChaNm = length(EVENT.snips.Snip.channels); %channels in block is a cell
+        else
+            ChaNm = EVENT.snips.Snip.channels;
+        end
+        
+        if isfield(EVENT, 'CHAN') && length(EVENT.CHAN) <= ChaNm
+            Chans = EVENT.CHAN;  %SELECTED CHANNELS
+            if size(Chans,2) == 1
+                Chans = Chans';  %should be a row vector
+            end
+        else
+            Chans = 1:ChaNm;
+        end
+        
+        
+        
+        Nc = 1;
+        for i = Chans
+            ind = (SNIPS.chan_info(:,2)==i);
+            %         D2 = 1000*Data(:,ChnIdx == i);
+            %         T2 = Times(ChnIdx == i);
+            CSnip(Nc,1).time = SNIPS.chan_info(ind,1);
+            CSnip(Nc,1).data = 1000*SNIPS.sample_point(SNIPS.chan_info(:,2)==i,:);
+            Nc = Nc + 1;
+        end
+        logmsg(['Retrieved spikes of ' blockname ' for channels ' mat2str(Chans)]);
+        
     end
-    
-    
-    
-    Nc = 1;
-    for i = Chans
-        ind = (SNIPS.chan_info(:,2)==i);
-        %         D2 = 1000*Data(:,ChnIdx == i);
-        %         T2 = Times(ChnIdx == i);
-        CSnip(Nc,1).time = SNIPS.chan_info(ind,1);
-        CSnip(Nc,1).data = 1000*SNIPS.sample_point(SNIPS.chan_info(:,2)==i,:);
-        Nc = Nc + 1;
-    end
-    logmsg(['Retrieved spikes of ' blockname ' for channels ' mat2str(Chans)]);
-    
 end
-
 
 
 % data =
