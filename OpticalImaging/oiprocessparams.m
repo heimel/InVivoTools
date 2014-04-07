@@ -22,6 +22,8 @@ params.wta_equalize_area = false; % default
 switch experiment
     case '12.54'
         params.wta_equalize_area = false;
+    case '13.61'
+        params.wta_equalize_area = true;
     otherwise
         switch record.stim_type
             case 'orientation'
@@ -33,5 +35,5 @@ end
 params.spatial_filter_width = 3; % pixels
 switch experiment
     case '13.61'
-        params.spatial_filter_width = 6; % pixels use nan to turn off filter
+        params.spatial_filter_width = nan; % pixels use nan to turn off filter
 end
