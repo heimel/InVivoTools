@@ -35,7 +35,8 @@ switch windowname
                 if current_record > length(ud.db)
                     current_record=length(ud.db);
                     if isempty(ud.db)
-                        close(ud.record_form);
+                        delete(ud.record_form);
+                        %close(ud.record_form);
                         ud.record_form=[];
                         set(h_fig,'Userdata',ud);
                         return
@@ -243,7 +244,8 @@ switch windowname
                 end
                 [ud.db,ud.filename,ud.perm,ud.lockfile]=open_db( '',fileparts(ud.filename));
                 if ~isempty(ud.db) && ~isnumeric(ud.filename)
-                    close(ud.record_form);
+                    %close(ud.record_form);
+                    delete(ud.record_form);
                     ud.record_form=[];
                     set(ud.h.current_record,'String','1');
                     ud.changed=0;
