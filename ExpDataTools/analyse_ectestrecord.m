@@ -127,8 +127,7 @@ switch lower(record.setup)
         timeshift = stimsfile.start-EVENT.strons.tril(1);
         timeshift = timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
        
-        
-        
+               
         cells = struct([]);
         cll.name = '';
         cll.intervals = intervals;
