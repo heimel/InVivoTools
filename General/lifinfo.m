@@ -37,7 +37,7 @@ if ~exist(id,'file')
 end
 
 fid = fopen(id);
-buf = fread(fid,500000);
+buf = fread(fid,1000000);
 fclose(fid);
 txt = char(buf(14:2:end))';
 
@@ -45,19 +45,25 @@ tag = '<Dimensions>';
 ind1 = findstr(txt,tag)+length(tag);
 tag = '</Dimensions>';
 ind2 = findstr(txt,tag)-1;
-txt = txt(ind1:ind2);
 
-tag1 = '<DimensionDescription';
-ind1 = findstr(txt,tag1)+length(tag1);
-tag2 = '</DimensionDescription';
-ind2 = findstr(txt,tag2)-2;
-
-for i=1:length(ind1) % setting dimensions structs
-    m='m'; % for unit
-    code = [strrep(txt(ind1(i):ind2(i)),' ',['; dd(' num2str(i) ').'] ) ';'];
-    code(code=='"') = '';
-    eval(code);
+if length(ind1)>length(ind2)
+    logmsg(['Not read all of header of LIF file ' id]);
 end
+
+for i=1:length(ind1)
+    txts = txt(ind1(i):ind2(i));
+    tag1 = '<DimensionDescription';
+    inds1 = findstr(txts,tag1)+length(tag1);
+    tag2 = '</DimensionDescription';
+    inds2 = findstr(txts,tag2)-2;
+    for j=1:length(inds1) % setting dimensions structs
+        m='m'; % for unit
+        code = [strrep(txts(inds1(j):inds2(j)),' ',['; dd(' num2str(i) ',' num2str(j) ').'] ) ';'];
+        code(code=='"') = '';
+        eval(code);
+    end
+end
+
 
 autoloadBioFormats = 1;
 
@@ -78,6 +84,7 @@ r.setId(id);
 numSeries = r.getSeriesCount();
 result = cell(numSeries,1);
 for s = 1:numSeries
+    inf = [];
     fprintf('Reading series #%d', s);
     r.setSeries(s - 1);
     inf.Series = s;
@@ -127,49 +134,21 @@ for s = 1:numSeries
                 inf.z_unit = 'um';
             end
         end
-        
-        
     else % > loci 5.0
-        % check methods(r) for more info
-        
-%         metadata = r.getSeriesMetadata.char;
-%         metadata = metadata(2:end-1);
-%         metadata = split(metadata,',');
-        
-%         for i=1:length(metadata)
-%             p = find(metadata{i}=='=');
-%             field = metadata{i}(1:p-1);
-%             field=subst_specialchars(field);
-%             field(field=='_')='u';
-%             try
-%                 if exist(md,'field')
-%                     field
-%                     keyboard
-%                 end
-%                 v = eval(metadata{i}(p+1:end));
-%                 if v>0 && v~=1
-%                     md.(field) = v;
-%                 end
-%             catch
-%                 % md.(field) = metadata{i}(p+1:end);
-%             end
-%         end
-        
         inf.image_name = r.getSeriesMetadataValue('Image name');
-        
         zoom = str2double(r.getSeriesMetadataValue('ATLConfocalSettingDefinition|Zoom'));
         if isnan(zoom)
             zoom = 1;
         end
-        if ~strcmp(dd(1).Unit,'m')
-            errormsg(['Unknown unit ' dd(1).Unit ]);
+        if ~strcmp(dd(s,1).Unit,'m')
+            errormsg(['Unknown unit ' dd(s,1).Unit ]);
         end
-        inf.x_step  = dd(1).Length/dd(1).NumberOfElements*1e6;
+        inf.x_step  = dd(s,1).Length/dd(s,1).NumberOfElements*1e6;
         inf.x_unit = 'um';
         if ~strcmp(dd(2).Unit,'m')
-            errormsg(['Unknown unit ' dd(2).Unit ]);
+            errormsg(['Unknown unit ' dd(s,2).Unit ]);
         end
-        inf.y_step  = dd(2).Length/dd(2).NumberOfElements*1e6;
+        inf.y_step  = dd(s,2).Length/dd(s,2).NumberOfElements*1e6;
         inf.y_unit = 'um';
         
         if inf.NumberOfFrames > 1
@@ -181,10 +160,10 @@ for s = 1:numSeries
                 inf.frame_period = 1;
                 inf.frame_timestamp = inf.frame_period * (0:(inf.NumberOfFrames-1));
             elseif r.getSizeZ > 1
-                if ~strcmp(dd(3).Unit,'m')
-                    errormsg(['Unknown unit ' dd(3).Unit ]);
+                if ~strcmp(dd(s,3).Unit,'m')
+                    errormsg(['Unknown unit ' dd(s,3).Unit ]);
                 end
-                inf.z_step  = dd(3).Length/dd(3).NumberOfElements*1e6;
+                inf.z_step  = dd(s,3).Length/dd(s,3).NumberOfElements*1e6;
                 inf.z_unit = 'um';
                 inf.third_axis_name = 'z';
             end
@@ -192,12 +171,9 @@ for s = 1:numSeries
     end
     result{s} = inf;
 end % series s
-
 r.close();
 
-
 inf = result; % to comply with tiffinfo
-
 imagenames = cellfun(@(x) x.image_name,inf,'uniformoutput',0);
 if isempty(imagename)
     logmsg(['LIF file contains ' num2str(length(inf)) ' images:']);
