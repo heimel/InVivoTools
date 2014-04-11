@@ -102,7 +102,7 @@ switch windowname
                 control_db_callback(ud.h.current_record);
             case 'duplicate'
                 record = get_record(ud.record_form);
-                if isfield(record,'measures') % not copying measures
+                if isfield(record,'measures') && isstruct(record.measures) % not copying measures
                     record.measures = [];
                 end
                 ud.db=insert_record(ud.db,record, ...

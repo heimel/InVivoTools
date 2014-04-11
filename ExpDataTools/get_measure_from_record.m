@@ -125,6 +125,7 @@ if isfield(record,'measures')
                         errormsg(['Problem with criteria: ' criteria '. Perhaps forgotten accolades or forgotten to append ''measures.''?']);
                         rethrow(me);
                     otherwise
+                        logmsg(['Problem with criteria: ' criteria ' for ' recordfilter(record)]);
                         logmsg(me.message);
                         logmsg(me.identifier);
                 end
