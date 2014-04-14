@@ -135,7 +135,7 @@ else
 end
 
 for g=1:n_groups
-    newlinehead=[linehead groupss(g).name ';'];
+    newlinehead=[linehead groupss(g).name ': '];
     [results{g},dresults{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
     measurelabel=measuress.label;
     n=sum(~isnan(results{g})) ;
@@ -182,7 +182,8 @@ end
 
 for i_mouse=indmice
     mouse=mousedb(i_mouse);
-    newlinehead=[linehead mouse.mouse ';'];
+    %newlinehead=[linehead 'mouse=' mouse.mouse ','];
+    newlinehead = linehead;
     [res,dres]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,mousedb,testdb,extra_options,newlinehead);
     
     switch value_per
@@ -333,21 +334,35 @@ end
 indtests=find_record(testdb,cond);
 %    disp(['found ' num2str(length(indtests)) ' records']);
 for i_test=indtests
+
     testrecord=testdb(i_test);
-    if isfield(testrecord,'setup')
-        setup = testrecord.setup;
+    if 0
+        if isfield(testrecord,'setup')
+            setup = testrecord.setup;
+        else
+            setup = '';
+        end
+        newlinehead = linehead;
+        if isfield(testrecord,'date')
+            newlinehead = [newlinehead 'date=' testrecord.date ','];
+        end
+        if ~isempty(setup)
+            newlinehead=[newlinehead 'setup=' setup ','];
+        end
+        if isfield(testrecord,'test') && ~isempty(testrecord.test)
+            newlinehead = [newlinehead 'test=' testrecord.test ',']; %#ok<AGROW>
+        end
+        if isfield(testrecord,'epoch') && ~isempty(testrecord.epoch)
+            newlinehead = [newlinehead 'epoch=' testrecord.epoch ',']; %#ok<AGROW>
+        end
+        if isfield(testrecord,'stack') && ~isempty(testrecord.stack)
+            newlinehead = [newlinehead 'stack=' testrecord.stack  ',']; %#ok<AGROW>
+        end
+        if isfield(testrecord,'slice') && ~isempty(testrecord.slice)
+            newlinehead = [newlinehead  'slice=' testrecord.slice ',']; %#ok<AGROW>
+        end
     else
-        setup = '';
-    end
-    newlinehead = linehead;
-    if isfield(testrecord,'date')
-        newlinehead = [newlinehead testrecord.date ';'];
-    end
-    newlinehead=[newlinehead setup ';'];
-    if isfield(testrecord,'test')
-        newlinehead = [newlinehead testrecord.test ';']; %#ok<AGROW>
-    elseif isfield(testrecord,'epoch')
-        newlinehead = [newlinehead testrecord.epoch ';' testrecord.stack ';' testrecord.slice ';']; %#ok<AGROW>
+        newlinehead = [linehead recordfilter(testrecord) ':'];
     end
     [res dres]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
 

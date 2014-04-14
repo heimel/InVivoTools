@@ -59,18 +59,19 @@ if ~isempty(measures_on_disk) && length(measures)==length(record.measures)
 end
 
 % select on cells on channels of interest
-channels = get_channels2analyze( record );
-if ~isempty(channels) && isfield(measures,'channel')
-    i = 1;
-    while i<=length(measures)
-        if ~ismember(measures(i).channel,channels)
-            measures(i) = [];
-        else
-            i = i+1;
+if isfield(measures,'rate_spont') %ec
+    channels = get_channels2analyze( record );
+    if ~isempty(channels) && isfield(measures,'channel')
+        i = 1;
+        while i<=length(measures)
+            if ~ismember(measures(i).channel,channels)
+                measures(i) = [];
+            else
+                i = i+1;
+            end
         end
     end
 end
-
 n_cells=length(measures);
 
 subheight=150; % pixel
@@ -136,7 +137,11 @@ for c=1:n_cells
     y = printfield(measure,'type',1,0.5);
     printfield(measure,'usable',y);
     y = printfield(measure,'SNR',y,0.5);
-    y = printfield(measure,'responsive',y);
+    if y==1
+        y = printfield(measure,'responsive',y,0.4);
+    else
+        y = printfield(measure,'responsive',y);
+    end
     if isfield(measure,'labels')
         y = printfield(measure,'labels',y);
     end
@@ -263,9 +268,9 @@ for c=1:n_cells
             
             switch measure.variable
                 case {'angle', 'figdirection','gnddirection'}
-                    y = printfield(measure,'orientation_index',y);
-                    y = printfield(measure,'tuningwidth',y);
-                    y = printfield(measure,'direction_index',y);
+                    y = printfield(measure,'orientation_selectivity_index',y);
+                    %y = printfield(measure,'tuningwidth',y);
+                    y = printfield(measure,'direction_selectivity_index',y);
                 case 'size' 
                     y = printfield(measure,'suppression_index',y);
                 case 'contrast'
@@ -789,7 +794,7 @@ if isfield(measure,field)
             val = mat2str(val,2);
         end
     end
-    y = printtext(subst_ctlchars([capitalize(field) ' : ' val ]),y,x);
+    y = printtext(subst_ctlchars([capitalize(field(1:(min(16,end)))) ' : ' val ]),y,x);
 else
     y = printtext('',y,x);
 end
