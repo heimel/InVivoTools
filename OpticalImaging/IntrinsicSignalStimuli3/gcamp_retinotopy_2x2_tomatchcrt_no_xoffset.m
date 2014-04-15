@@ -1,47 +1,41 @@
-%RETINOTOPY_11x6
+%RETINOTOPY_2x2
 %
-% RETINOTOPY_11x6, NewStim3 version
+% RETINOTOPY_2x2, NewStim3 version
 % 
-% 2014, Alexander Heimel
+% 2012, Alexander Heimel
 %
 
 % To skip initial tests
 % Screen('Preference', 'SkipSyncTests', 2)
 
+display (['IMP: If stimuli is tilted change NewStimTilt in'])
+display (['NewStimConfiguration to 0 (normal), 10 (left) or -10 (right)'])
+display (['Press space to proceed ..........'])
+ 
+pause
 
 NewStimInit;
 ReceptiveFieldGlobals;
 NewStimGlobals;
-        
-NewStimTilt = -10;
-logmsg(['NewStimTilt = ' num2str(NewStimTilt)]);
 
 CloseStimScreen;
 ShowStimScreen;
  
 StimWindowGlobals
- 
+
 % how many blocks
-n_x = 11; 
-n_y = 6;
+n_x = 5;
+n_y = 4;
 
 r = StimWindowRect; % screen size
 
-
 fullheight = r(4)-r(2);
-fullwidth = fullheight/6*11; 
+fullwidth = fullheight/3*4; % to match 4:3 dimensions of old CRT
 
-fullwidth = r(3)-r(1);
-fullheight = fullheight/11*6; 
-
-x_offset = round( (r(3)-r(1)-fullwidth)/2);
+x_offset = 0; % round( (r(3)-r(1)-fullwidth)/2);
 width = round( fullwidth/n_x);
 height = round( fullheight/n_y);
-
-width = 174;
-height = 174;
-x_offset = 3;
-
+ 
 ps=periodicstim('default');
 pspar = getparameters(ps);
 pspar.distance = NewStimViewingDistance;
@@ -55,8 +49,8 @@ pspar.backdrop = 0.5;
 pspar.windowShape = 0;
 pspar.dispprefs = {'BGpretime',0,'BGposttime',0};
 pspar.angle = 45;
-total_duration = 6;
-pspar.prestim_time = 3;
+total_duration = 3;
+pspar.prestim_time = 2;
 angles = [0:pspar.angle:360-pspar.angle];
 
 for i = 1:n_x*n_y
@@ -113,6 +107,5 @@ try
 catch me
     CloseStimScreen;
     rethrow(me);
-end 
+end
 
- 

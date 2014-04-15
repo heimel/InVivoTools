@@ -53,7 +53,8 @@ pspar.prestim_time = 3;
 % pspar.size=12; % Ok no
 angles = [0:pspar.angle:360-pspar.angle];
 
-for i = 1:n_x*n_y
+for i = 1:n_x*n_y                 
+    
     iss_script(i) = StimScript(0);
    
     % location

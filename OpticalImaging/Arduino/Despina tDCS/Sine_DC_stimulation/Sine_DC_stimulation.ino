@@ -1,12 +1,12 @@
 //sine wave + DC pulses
 
-int waveform = 2; // 1:AC Stimulation        2:DC Stimulation
-int AC = 1;       // 1:Complete sine wave    2:Anodal sine        3:Cathodal sine
-int DC = 1;       // 1:Anodal DC             2:Cathodal DC
+int waveform = 1; // 1:AC Stimulation        2:DC Stimulation
+int AC = 3;       // 1:Complete sine wave    2:Anodal sine        3:Cathodal sine
+int DC = 2;       // 1:Anodal DC             2:Cathodal DC
 
 //Sine wave:
 double elec_diameter = 3; //in mm  ~Set diameter~
-double current_density = 0.16;    //in mA/mm^2  ~Set density~
+double current_density = 0.057;    //in mA/mm^2  ~Set density~
 
 const double pi = 3.14159;
 double elec_surface = pi * sq(elec_diameter / 2);
