@@ -39,10 +39,11 @@ end
 
 if iscell(inf)
     %inf = inf{1}; % only take first=last? session
-    errormsg('Multiple images in lif file. Select image name and add in slice field. Check Matlab command window for possibilities.');
+    logmsg('Multiple images in lif file. Select image name and add in slice field. Check Matlab command window for possibilities.');
     disp(imagenames);
-    params = [];
-    return
+    logmsg('Defaulting to first image.');
+    inf = inf{1};
+    inf.Series = 1;
 end
 
 params = inf; 

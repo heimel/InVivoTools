@@ -27,6 +27,7 @@ end
 
 if stored
     if exist(infname,'file')
+        imagenames = {};
         load(infname);
         return
     end
