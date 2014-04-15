@@ -32,8 +32,8 @@ switch protocol
         params.post_window = [0 inf];
         disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
             case '13.20'
-        params.pre_window = [-2 0];
-        params.post_window = [0 2];
+%         params.pre_window = [-2 0];
+%         params.post_window = [0 2];
         disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
         disp(['ECPROCESSPARAMS: Setting post_window to ' mat2str(params.post_window)]);
 end

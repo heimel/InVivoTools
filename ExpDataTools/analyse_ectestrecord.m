@@ -209,7 +209,8 @@ end
 
 switch lower(record.setup)
     case 'antigua'   
-        isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+%         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+        isi = [];
     otherwise
         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
 end
