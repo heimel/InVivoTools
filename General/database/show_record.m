@@ -15,6 +15,7 @@ else
     bc = get(h_control_fig,'Color');
 end
 
+comment_lines = 3;
 
 if isempty(h_fig)
     screensize=get(0,'ScreenSize');
@@ -26,7 +27,7 @@ if isempty(h_fig)
     labelheight=17;
     
     editheight=labelheight+3;
-    editwidth=200;
+    editwidth=250;
     
     linesep=1;
     colsep=3;
@@ -34,7 +35,7 @@ if isempty(h_fig)
     colwidth=labelleft+labelwidth+editwidth+3*colsep;
     
     height=(length(fields)+...
-        length(strmatch('comment',fields)))*lineheight;
+        (comment_lines-1)*length(strmatch('comment',fields)))*lineheight;
     
     
     
@@ -53,7 +54,8 @@ if isempty(h_fig)
     set(h_fig,'MenuBar','none');
     set(h_fig,'NumberTitle','off');
     
-    
+    set(h_fig,'CloseRequestFcn',['ud=get(' num2str(h_control_fig) ',''UserData'');control_db_callback(ud.h.close)']);
+
     
     for i=1:length(fields)
         left=labelleft;
@@ -86,17 +88,17 @@ if isempty(h_fig)
                 'Tag',[ fields{i} ]);
             top=top-lineheight;
         else
-            top=top-lineheight;
+            top=top-(comment_lines-1)*lineheight;
             h_edit(i)= ...
                 uicontrol('Parent',h_fig, ...
                 'Units','pixels', ...
                 'BackgroundColor',[1 1 1],...
                 'ListboxTop',0, ...
-                'Position',[left top+2 editwidth editheight*2], ...
+                'Position',[left top+2 editwidth editheight*comment_lines], ...
                 'String','', ...
                 'HorizontalAlignment','left',...
                 'Style','edit', ...
-                'Units','pixels','max',2,'min', 0,...
+                'Units','pixels','max',comment_lines,'min', 0,...
                 'Callback','genercallback',...
                 'Tag',[ fields{i} ]);
             top=top-1*lineheight;
@@ -144,14 +146,19 @@ ud.h_edit=h_edit;
 ud.orgrecord=record;
 
 
-switch computer
-    case {'PCWIN','PCWIN64'}
-        windowvbordersize=26;
-        windowhbordersize=6;
-    otherwise
-        windowvbordersize=20;
-        windowhbordersize=6;
-end
+p = get(h_fig,'position');
+op = get(h_fig,'outerposition');
+windowvbordersize = op(4)-p(4);
+windowhbordersize = op(3)-p(3);
+
+% switch computer
+%     case {'PCWIN','PCWIN64'}
+%         windowvbordersize=26;
+%         windowhbordersize=6;
+%     otherwise
+%         windowvbordersize=35;
+%         windowhbordersize=6;
+% end
 
 if isfield(ud,'db_form')
     posdb=get(ud.db_form,'Position');

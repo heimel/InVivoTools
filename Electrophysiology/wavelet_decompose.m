@@ -12,6 +12,8 @@ details = zeros(sig_length, scale);
 
 for i=1:scale,
   approximations(:,i) = wrcoef('a', C, L, wavelet, i);
-  details(:,i) = wrcoef('d', C, L, wavelet, i);
+  if nargout>1
+      details(:,i) = wrcoef('d', C, L, wavelet, i);
+  end
 end
 

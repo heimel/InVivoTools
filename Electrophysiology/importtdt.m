@@ -143,10 +143,10 @@ if ~isnan(EVS)
             EVENT.snips.(Epoch).name = Epoch;
             EVENT.snips.(Epoch).times = Times;
         else
-            EVENT.snips(Epoch).name = Epoch;
-            EVENT.snips(Epoch).size = nan; %number of samples per epoch event
-            EVENT.snips(Epoch).sampf = nan; %9 = sample frequency
-            EVENT.snips(Epoch).times = [];
+            EVENT.snips.(Epoch).name = Epoch;
+            EVENT.snips.(Epoch).size = nan; %number of samples per epoch event
+            EVENT.snips.(Epoch).sampf = nan; %9 = sample frequency
+            EVENT.snips.(Epoch).times = [];
         end
     end
 end

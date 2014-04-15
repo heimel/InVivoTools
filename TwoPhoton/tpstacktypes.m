@@ -17,7 +17,7 @@ switch record.experiment
         stacktypes = {'shaft','spine','dendrite','unknown','aggregate','pia'};
     case {'11.12'}
         stacktypes = {'mito','bouton','spine','axon','dendrite'};
-    case {'12.81'}
+    case {'12.81','12.81 mariangela'}
         stacktypes = {'spine','shaft','dendrite','unknown','line'};
     case {'12.76','13.29'}
         stacktypes = {'cell','neuron','glia'};

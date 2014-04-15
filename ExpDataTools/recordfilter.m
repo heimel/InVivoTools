@@ -30,7 +30,12 @@ while ~unique_record && f<=length(flds)
         f = f + 1;
         continue
     end
-    s = [s ',' flds{f} '=' record.(flds{f})];
+    if isnumeric(record.(flds{f}))
+        val = mat2str(record.(flds{f}));
+    else
+        val = record.(flds{f});
+    end
+    s = [s ',' flds{f} '=' val ];
     ind = find_record(db,s);
     unique_record = (length(ind)==1);
     f = f + 1;

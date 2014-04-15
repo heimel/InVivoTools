@@ -12,7 +12,7 @@ sigma = ergConfig.gaussianfilter_bwave / sampletime;
  
 data_out = smoothen( data_in, sigma);
 
-if 1
+if 0
    % disp('ERG_ANALYSIS_SMOOTHEN: Showing smooth trace');
     figure;
     plot(data_in,'k');

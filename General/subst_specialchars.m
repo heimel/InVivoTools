@@ -26,6 +26,7 @@ y(y=='-')='_';
 y(y=='^')='c';
 y(y=='#')='h';
 y(y=='$')='d';
+y(y=='|')='I';
 
 doublehyphen=1;
 while doublehyphen==1

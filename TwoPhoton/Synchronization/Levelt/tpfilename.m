@@ -63,6 +63,13 @@ end
 
 
 function fname = getfname( record,processed,fmiddle,optcode,ext)
+stack = record.stack;
+if strcmpi(stack(end-length(ext)+1:end),ext)
+    ext = stack(end-length(ext)+1:end); % case could be different from org ext
+    stack = stack(1:end-length(ext));
+end
+
 fname = fullfile( tpdatapath( record ),processed,...
-    [record.stack fmiddle optcode ext]);
+    [stack fmiddle optcode ext]);
+
 

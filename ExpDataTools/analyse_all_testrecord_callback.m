@@ -8,14 +8,6 @@ global stop_analysis
 stop_analysis = false;
 
 newud = ud;
-%disp('Press key to start...')
-%pause(2)
-
-% answer = questdlg('Reanalyse the current selection of records?','Reanalyse','Cancel','Ok','Cancel');
-% switch answer
-%     case 'Cancel'
-%         return
-% end
 
 disp('ANALYSE_ALL_TESTRECORD_CALLBACK: started');
 

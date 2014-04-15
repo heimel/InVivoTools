@@ -13,6 +13,12 @@ function [block duration stimuli] = erg_getdata_div(filename)
    return;
  else
    data_saved = erg_getdata_raw(filename);
+   if isempty(data_saved)
+       block = [];
+       duration = [];
+       stimuli = [];
+       return
+   end
    block = data_saved.block;
    duration = data_saved.msecs;
    stimuli = data_saved.stimuli;

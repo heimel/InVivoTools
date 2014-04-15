@@ -1,8 +1,15 @@
-function [SPs,NumClust] = spike_sort_wpca(SPIKESdata,cll1)
+function [SPs,NumClust] = spike_sort_wpca(SPIKESdata,cll1,verbose)
 %
 %
 % 2013, Mehran Ahmadlou
 %
+
+if nargin<3
+    verbose = [];
+end
+if isempty(verbose)
+    verbose = 0;
+end
 
 if size(SPIKESdata,1)<10 % cant sort with less than 10 spikes
     logmsg('Fewer than 10 spikes. Not sorting channel');
@@ -39,14 +46,21 @@ for i=1:NumClust
     SPs=[SPs;sps];
 end
 
-subp1=floor(sqrt(NumClust+1));
-subp2=ceil(sqrt(NumClust));
-figure;
-Col3=rand(1,NumClust);
-for i=1:NumClust
-%     D=spikes(IDX==i,:);subplot(subp1,subp2,i);plot(D','Color',[i/NumClust (NumClust-i)/NumClust Col3(i)]);ylim([-.12,.12]);xlim([0,20]);hold on;plot(mean(D,1),'Color',[0 0 0],'LineWidth',3)
-    D=SPs(i,1).data(:,1:20);subplot(subp1,subp2,i);plot(D','Color',[i/NumClust (NumClust-i)/NumClust Col3(i)]);ylim([-.12,.12]);xlim([0,20]);hold on;plot(mean(D,1),'Color',[0 0 0],'LineWidth',3)
-end;
+if verbose
+    subp1=floor(sqrt(NumClust+1));
+    subp2=ceil(sqrt(NumClust));
+    figure;
+    Col3=rand(1,NumClust);
+    for i=1:NumClust
+        D=SPs(i,1).data(:,1:20);
+        subplot(subp1,subp2,i);
+        plot(D','Color',[i/NumClust (NumClust-i)/NumClust Col3(i)]);
+        ylim([-.12,.12]);
+        xlim([0,20]);
+        hold on;
+        plot(mean(D,1),'Color',[0 0 0],'LineWidth',3)
+    end
+end
 
 return
 % figure;hold on;

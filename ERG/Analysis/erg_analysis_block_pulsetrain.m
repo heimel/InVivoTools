@@ -16,19 +16,27 @@ global ergConfig;
 
 [block duration stimuli] = erg_getdata_div(filename);
 accepted_types = {'pulsetrain'};
-if (~ismember(block.type,accepted_types)) disp('Can not analyze this blocktype with this type of analysis, I am so sorry!'); return; end;
-load(calibfilename, 'calib_saved');
-[channel_avg stims prepulse_period] = erg_getdata_avg(filename);
-[channel_bsc prepulse_samples stims] = erg_getdata_bsc(filename);
-
-try
-	figure(ergConfig.subplotfig);
-	subplot1(block.numchannels,4); % used to be 16, Alexander 2012-05-03
-catch
-	ergConfig.subplotfig =  figure(1);
-	%subplot1(4,4,'Gap',[0.02 0.02]); hold off;
-	subplot1(block.numchannels,4,'Gap',[0.1 0.1]); hold off; % used to be 4x4, Alexander 2012-05-03
+if isempty(block)
+    return
 end
+
+if (~ismember(block.type,accepted_types)) 
+    errormsg('Can not analyze this blocktype with this type of analysis, I am so sorry!'); 
+    return
+end;
+load(calibfilename, 'calib_saved');
+[channel_avg stims prepulse_period] = erg_getdata_avg(filename); % get average waveforms
+[channel_bsc prepulse_samples stims] = erg_getdata_bsc(filename);  % get a- and b-wave amplitudes
+
+%try
+    %	figure(ergConfig.subplotfig);
+    ergConfig.subplotfig = figure;
+	subplot1(block.numchannels,4,'Gap',[0.1 0.1]); % used to be 16, Alexander 2012-05-03
+%catch
+%	ergConfig.subplotfig =  figure(1);
+	%subplot1(4,4,'Gap',[0.02 0.02]); hold off;
+%	subplot1(block.numchannels,4,'Gap',[0.1 0.1]); hold off; % used to be 4x4, Alexander 2012-05-03
+%end
 
 sweeps_start = 1;
 sweeps_end = size(channel_avg{1}.resultset,1);
@@ -39,7 +47,7 @@ for chan = 1:block.numchannels
 
 	% plotting measures
 	figname = ['ERG Analysis'];
-	figure(ergConfig.subplotfig);
+    	figure(ergConfig.subplotfig);
 	set(ergConfig.subplotfig,'Name',figname,'NumberTitle','off');
 	avg = channel_avg{chan};
 	bsc = channel_bsc{chan};
@@ -48,8 +56,8 @@ for chan = 1:block.numchannels
 	subplot1(1+(chan-1)*4); hold off;
 
 	intensities  = log10(stims(sweeps_start:sweeps_end)*ergConfig.convert2cd.blue); % log cd s / m^2
-	awave_amplitudes = -(bsc.awave-bsc.baseline)/ergConfig.voltage_amplification*1000000; % uV
-	bwave_amplitudes = (bsc.bwave-bsc.awave)/ergConfig.voltage_amplification*1000000; % uV
+	awave_amplitudes = bsc.awave; %-(bsc.awave-bsc.baseline);%/ergConfig.voltage_amplification*1000000; % uV
+	bwave_amplitudes = bsc.bwave; %(bsc.bwave-bsc.awave);%/ergConfig.voltage_amplification*1000000; % uV
 
 	plot(intensities,awave_amplitudes,'b',...
 		intensities,bwave_amplitudes,'r');
@@ -74,11 +82,16 @@ for chan = 1:block.numchannels
 
 	[export_path,export_basename]=fileparts(filename);
     if block.numchannels>1
-        export_basename = [export_basename '_chan' num2str(chan)];
+        export_basename = [export_basename '_chan' num2str(chan)]; %#ok<AGROW>
     end
     
 	export_filename = [export_basename '.xls'];
 
+    
+    if isunix
+        logmsg('No Excel, thus writing csv-file.');
+        warning('off','MATLAB:xlswrite:NoCOMServer');
+    end
 	xlswrite(fullfile(export_path,export_filename),...
         [intensities' awave_amplitudes' bwave_amplitudes']);
 
@@ -87,7 +100,7 @@ for chan = 1:block.numchannels
 
 
 	% plotting wave forms
-	figure; clf;
+	figure('Name',['Overlayed wave forms - channel ' num2str(chan)],'NumberTitle','off');
 	dstart = max([prepulse_samples,1]);
 	dend = min([prepulse_samples+2000,totsamples]);
 	X = repmat((dstart-round(prepulse_samples):dend-round(prepulse_samples))/(totsamples/duration),[sweeps_effective,1])';
@@ -95,8 +108,9 @@ for chan = 1:block.numchannels
 	Y = Y /ergConfig.voltage_amplification*1000000;
 	plot(X,Y);
 	xlim([X(1),X(end)]);
-	hold on; plot(0,ylim);
-	hold on; plot(repmat(xlim,[sweeps_effective,1])',[bsc.bwave;bsc.bwave]);
+	hold on; 
+    plot(0,ylim);
+	%plot(repmat(xlim,[sweeps_effective,1])',[bsc.bwave;bsc.bwave]);
 	title(['Channel ' num2str(chan) ' averages']);
 	ylabel('Amplitude (\muV)');
 	xlabel('Time (ms)');
@@ -105,7 +119,8 @@ for chan = 1:block.numchannels
 	saveas(gcf,fullfile(export_path,export_filename),'png');
 
 	% plotting wave forms strectched out
-	h = figure; clf;
+	h = figure('Name',['Stacked wave forms' num2str(chan)],'NumberTitle','off'); 
+    clf;
 	p = get(h,'position');
 	p(3) = p(3) / 3;
 	set(h,'position',p);
@@ -135,4 +150,4 @@ for chan = 1:block.numchannels
 
 	export_filename = [export_basename '_separated_waveforms.png'];
 	saveas(gcf,fullfile(export_path,export_filename),'png');
-end
+end % channels

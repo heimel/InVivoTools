@@ -468,11 +468,11 @@ pos=get(h_fig,'Position');
 pos(3)=max(maxleft,pos(3));
 set(h_fig,'Position',pos);
 
-pos_screen = get(0,'ScreenSize');
-pos_control = get(h_fig,'Position');
-pos_control(1) = windowhbordersize; 
-pos_control(2) = pos_screen(4)-pos_control(4)-windowvbordersize;
-set(h_fig,'Position',pos_control);
+% pos_screen = get(0,'ScreenSize');
+% pos_control = get(h_fig,'Position');
+% pos_control(1) = windowhbordersize; 
+% pos_control(2) = pos_screen(4)-pos_control(4)-windowvbordersize;
+% set(h_fig,'Position',pos_control);
 
 % set current record
 control_db_callback( h.current_record );

@@ -47,12 +47,12 @@ end
 WaveTime_Spikes = struct([]);
 switch lower(record.setup)
     case 'antigua'
-        blocknames = [record.test];
-        clear EVENT
         EVENT.Mytank = datapath;
-        EVENT.Myblock = blocknames;
+        EVENT.Myblock = record.test;
         EVENT = importtdt(EVENT);
         if ~isfield(EVENT,'strons')
+            logmsg(['No triggers present in ' recordfilter(record)]);
+            record.measures = [];
             return
         end
         if length(EVENT.strons.tril)>1
@@ -91,9 +91,9 @@ switch lower(record.setup)
             WaveTime_Fpikes = ExsnipTDT(EVENT);
         end
         
-        if isempty(WaveTime_Fpikes)
-            return
-        end
+%         if isempty(WaveTime_Fpikes)
+%             return
+%         end
         
         % spike sorting
         for ii=1:length(channels2analyze)
@@ -116,13 +116,9 @@ switch lower(record.setup)
         n_cells = length(WaveTime_Spikes);
         
         % load stimulus starttime
-        smrfilename=fullfile(EVENT.Mytank,EVENT.Myblock);
-        [stimsfile,stimsfilename] = getstimsfile( record );
+        stimsfile = getstimsfile( record );
         EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
         
-        desc_long=[smrfilename ':' stimsfilename];
-        desc_brief=EVENT.Myblock;
-        detector_params=[];
         
         intervals=[stimsfile.start ...
             stimsfile.MTI2{end}.frameTimes(end)+10];
@@ -130,43 +126,28 @@ switch lower(record.setup)
         % disp('IMPORTSPIKE2: Taking first TTL for time synchronization');
         timeshift = stimsfile.start-EVENT.strons.tril(1);
         timeshift = timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
-        
-        % load acquisitionfile for electrode name
-        % to get samplerate acqParams_out should be used instead of _in
-        ff=fullfile(getpathname(cksds),record.test,'acqParams_in');
-        f=fopen(ff,'r');
-        if f==-1
-            disp(['Error: could not open ' ff ]);
-            return;
-        end
-        fclose(f);  % just to get proper error
-        acqinfo=loadStructArray(ff);
-        
-        ffout=[ff(1:end-2) 'out'];
-        if exist(ffout,'file')~=2
-            copyfile(ff,ffout,'f');
-        end
-        
-        
-        cells=struct([]);
-        unitchannelname = 'snips' ;
+       
+               
+        cells = struct([]);
         cll.name = '';
         cll.intervals = intervals;
         cll.sample_interval = 1/EVENT.snips.Snip.sampf;
-        cll.detector_params=detector_params;
-        for ch = 1:n_cells
-            if isempty(WaveTime_Spikes(ch,1))
+        cll.detector_params = [];
+        cll.trial = record.test;
+        cll.desc_long = fullfile(datapath,record.test);
+        cll.desc_brief = record.test;
+        channels_new_index = (0:1000)*10+1; % works for up to 1000 channels, and max 10 cells per channel
+        for c = 1:n_cells
+            if isempty(WaveTime_Spikes(c,1))
                 continue
             end
-            cll.name=sprintf('cell_%s_%s_%.4d_%.3d',...
-                acqinfo(1).name,unitchannelname,acqinfo(1).ref,ch);
-            cll.desc_long = desc_long;
-            cll.desc_brief = desc_brief;
-            cll.channel = WaveTime_Spikes(ch,1).channel;
-            cll.index = (cll.channel-1)*10 + ch; % will be used to identify cell
-            cll.data = WaveTime_Spikes(ch,1).time * processparams.secondsmultiplier + timeshift;
-            cll.trial=EVENT.Myblock;
-            spikes=WaveTime_Spikes(ch,1).data;
+            cll.channel = WaveTime_Spikes(c,1).channel;
+            cll.index = channels_new_index(cll.channel); % used to identify cell
+            channels_new_index(cll.channel) = channels_new_index(cll.channel) + 1;
+            cll.name = sprintf('cell_%s_%.3d',...
+                subst_specialchars(record.test),cll.index);
+            cll.data = WaveTime_Spikes(c,1).time * processparams.secondsmultiplier + timeshift;
+            spikes = WaveTime_Spikes(c,1).data;
             cll.wave = mean(spikes,1);
             cll.std = std(spikes,1);
             cll.snr = (max(cll.wave)-min(cll.wave))/mean(cll.std);
@@ -174,47 +155,65 @@ switch lower(record.setup)
             cells = [cells,cll]; %#ok<AGROW>
         end
         
-        % transfer cells into experiment file of cksds object
-        cksds = cksdirstruct(EVENT.Mytank);
-        getexperimentfile(cksds,1); % to create experiment file if necessary
-        deleteexpvar(cksds,'cell*'); % delete all old representations
-        for cl=1:length(cells)
-            acell=cells(cl);
-            thecell=cksmultipleunit(acell.intervals,acell.desc_long,...
-                acell.desc_brief,acell.data,acell.detector_params);
-            saveexpvar(cksds,thecell,acell.name,1);
-        end
-        
+
     otherwise
         % import spike2 data into experiment file
         channels2analyze = 1;
-        cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');
+        cells = importspike2([record.test filesep 'data.smr'],record.test,datapath,'Spikes','TTL',[],[],record.amplification);
 end
+
+n_spikes = 0;
+for i=1:length(cells);
+    n_spikes = n_spikes+ length(cells(i).data);
+end
+
 
 if isempty(cells)
+    logmsg('Imported no cells.');
     return
+else
+    logmsg(['Imported ' num2str(length(cells)) ' cells with ' num2str(n_spikes ) ' spikes.']);
 end
 
-if processparams.sort_with_klustakwik
-    cells = sort_with_klustakwik(cells,record);
-elseif processparams.compare_with_klustakwik
+
+switch processparams.spike_sorting_routine
+    case 'klustakwik'
+        cells = sort_with_klustakwik(cells,record);
+        logmsg('WORKING HERE');
+    case 'sort_wpca'
+        cells = sort_with_wpca(cells,record);
+    otherwise
+        % no sorting
+end
+
+if processparams.compare_with_klustakwik
     kkcells = sort_with_klustakwik(cells,record);
     if ~isempty(kkcells)
-        cells = importspike2([record.test filesep 'data.smr'],record.test,getpathname(cksds),'Spikes','TTL');
         cells = compare_spike_sortings( cells, kkcells);
     end
 end
 
-switch lower(record.setup)
-    case 'antigua'   % dont compute spike intervals
-        isi = []; %#ok<NASGU>
-    otherwise
-        isi = get_spike_interval( cells ); %#ok<NASGU>
+logmsg(['After sorting ' num2str(length(cells)) ' cells.']);
+
+transfer2cksdirstruct(cells,datapath);
+
+spikesfile = fullfile(ecdatapath(record),record.test, '_spikes.mat');
+
+isi = [];
+if exist(spikesfile,'file')
+    old = load( spikesfile);
+    if isfield(old,'isi')
+        isi = old.isi;
+    end
 end
 
-% save all spikes
-spikesfile = fullfile(ecdatapath(record),record.test,'_spikes.mat');
-
+switch lower(record.setup)
+    case 'antigua'   
+%         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+        isi = [];
+    otherwise
+        isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+end
 save(spikesfile,'cells','isi');
 
 ssts = getstimscripttimestruct(cksds,record.test);
@@ -230,11 +229,12 @@ end
 
 measures=[];
 
-nr = getallnamerefs(cksds);
-for r=1:length(nr) % for all refs
-    g = getcells(cksds,nr(r));
+%nr = getallnamerefs(cksds);
+%for r=1:length(nr) % for all refs
+%    g = getcells(cksds,nr(r));
+    g = getcells(cksds);
     if isempty(g)
-        continue
+        return
     end
     loadstr = ['''' g{1} ''''];
     for i=2:length(g)
@@ -243,6 +243,7 @@ for r=1:length(nr) % for all refs
     eval(['d = load(getexperimentfile(cksds),' loadstr ',''-mat'');']);
     
     if length(g)>10 % dont show more than 10 cells in the analysis
+        logmsg('More than 10 cells, going into silence mode');
         verbose = 0;
     end
     
@@ -430,7 +431,7 @@ for r=1:length(nr) % for all refs
             end
         end % channel c
     end % if cluster_spikes
-end % reference r
+%end % reference r
 
 
 measuresfile = fullfile(ecdatapath(record),record.test,['_measures',num2str(channels2analyze),'.mat']);

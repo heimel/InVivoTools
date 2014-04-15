@@ -35,13 +35,16 @@ if ~exist(fname,'file')
     return
 end
 
-%data = bfopen(fname);
+[inf,imagenames] = lifinfo(fname,record.slice,1,tpscratchfilename(record,[],'lifinfo') );
 
-inf = lifinfo(fname,1, tpscratchfilename(record,[],'lifinfo') );
-
-inf = inf{1}; % only take first=last? session
-
-
+if iscell(inf)
+    %inf = inf{1}; % only take first=last? session
+    logmsg('Multiple images in lif file. Select image name and add in slice field. Check Matlab command window for possibilities.');
+    disp(imagenames);
+    logmsg('Defaulting to first image.');
+    inf = inf{1};
+    inf.Series = 1;
+end
 
 params = inf; 
 

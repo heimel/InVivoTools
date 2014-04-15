@@ -61,9 +61,27 @@ screensize=get(0,'ScreenSize');
 
 figwidth=510;
 figheight=140;
+
+leftp = 0;
+topp = screensize(4)-figheight-60;
+w = get(0,'children');
+for c=w(:)';
+    wud=get(c,'userdata');
+    if isfield(wud,'persistent')&&wud.persistent
+        p = get(c,'outerposition');
+        leftp = max(leftp,p(1)+p(3));
+    end
+end
+screensize = get(0,'ScreenSize');
+if leftp>screensize(3)-figwidth
+    leftp = 0; 
+    topp = topp-200;
+end
+
+
 h.fig = ...
     figure('Name','Database control',... %  'Color',bc,...
-    'Position',[screensize(3)-figwidth screensize(4)-figheight-30 ...
+    'Position',[leftp topp ... % top left
     figwidth figheight], ...
     'Tag','control_db_callback', ...
     'Units','pixels',...
@@ -73,6 +91,10 @@ h.fig = ...
 set(h.fig,'MenuBar','none');
 set(h.fig,'NumberTitle','off');
 %set(h.fig,'WindowStyle','modal');
+
+drawnow
+
+
 
 ud.type = 'generic'; % type of database
 
@@ -426,7 +448,7 @@ maxleft=max(maxleft,left);
 % left=left+buttonwidth*1.2+colsep;
 % maxleft=max(maxleft,left);
 
-if strcmp(user,'heimel')
+%if strcmp(user,'heimel')
     h.table = ...
         uicontrol('Parent',h.fig, ...
         'Units','pixels', ...
@@ -439,8 +461,7 @@ if strcmp(user,'heimel')
         'Tooltipstring','Show as table.');
     left=left+buttonwidth+colsep;
     maxleft=max(maxleft,left);
-end
-
+%end
 
 ud.persistent=1;
 ud.h=h;

@@ -6,12 +6,13 @@ function cells = sort_with_klustakwik(orgcells,record)
 % 2013, Alexander Heimel
 %
 
+
+
 cells = [];
 
 kkexecutable = 'KlustaKwik';
 
 [status,res] = system(kkexecutable);
-
 
 if status~=1
     kkexecutable = 'MaskedKlustaKwik';
@@ -19,42 +20,45 @@ if status~=1
 end
 
 if status~=1
-    disp('SORT_WITH_KLUSTAKWIK: KlustaKwik not present');
+    logmsg('KlustaKwik not present');
     return
 end
 
 
-try
-    cells = import_klustakwik(record,orgcells);
-catch
-    cells = [];
-end
+cells = import_klustakwik(record,orgcells);
+
 if isempty(cells) %|| 1
-    write_spike_features_for_klustakwik( orgcells, record );
+    channels = unique([orgcells.channel]);
+
+    
+    
+    write_spike_features_for_klustakwik( orgcells, record,channels );
     savepwd = pwd;
     cd(fullfile(ecdatapath(record),record.test));
     arguments = [ ...
          ' -ElecNo 1' ...
          ' -nStarts 1' ...
         ' -MinClusters 1' ...   % 20
-        ' -MaxClusters 10' ...   % 30
-         ' -MaxPossibleClusters 30' ...  % 100
+        ' -MaxClusters 5' ...   % 30
+         ' -MaxPossibleClusters 5' ...  % 100
          ' -UseDistributional 0' ... 
          ' -PriorPoint 1'...
          ' -FullStepEvery 20'...
-        ' -UseFeatures 10111'...   % 11111
+        ' -UseFeatures 11111'...   %10111 11111
          ' -SplitEvery 40' ...
          ' -RandomSeed 1' ...
          ' -MaxIter 500' ...  % 500  
         ' -DistThresh 6.9' ...   % 6.9
         ' -ChangedThresh 0.05' ... % 0.05
-        ' -PenaltyK 0'...
-        ' -PenaltyKLogN 1' ];
+        ' -PenaltyK 0'... % 0 
+        ' -PenaltyKLogN 1' ]; % 1
 
 %             ' -UseMaskedInitialConditions 1'...  % 1
 %         ' -AssignToFirstClosestMask 1'... 
 
-    system([kkexecutable ' klustakwik 1' arguments]);
+    for ch=channels
+        system([kkexecutable ' klustakwik ' num2str(ch) ' ' arguments]);
+    end
     cd(savepwd);
     cells = import_klustakwik(record,orgcells);
 end

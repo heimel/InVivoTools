@@ -4,30 +4,25 @@ function [im,fname]=tpreadframe(record,channel,frame,opt)
 %  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME )
 %
 %
-% 2011, Alexander Heimel
+% 2011-2014, Alexander Heimel
 %
+persistent readfname images
 
 if length(channel)>1
     warning('TPREADFRAME:MULTIPLE_CHANNELS','TPREADFRAME:TPREADFRAME WILL IN FUTURE ONLY ACCEPT SINGLE CHANNEL');
 end
     
-    
 if nargin<4
     opt = [];
 end
 
-persistent readfname images
-
-
 fname = tpfilename( record, frame, channel, opt);
 
-
 % check if matlabstored file is present
-if strcmp(readfname,fname)==0 % not read in yet
-    disp('TPREADFRAME: first time loading this stack. reading all frames');
+if strcmp(readfname,[fname ':' record.slice])==0 % not read in yet
+    logmsg('First time loading this stack. reading all frames');
     org_fname = tpfilename( record, frame, channel); % no options
     iminf = tpreadconfig(record);
-    
     if iminf.BitsPerSample~=16
         warning('TPREADFRAME:not_16bits','TPREADFRAME: Bits per samples is unequal to 16');
     end
@@ -45,8 +40,7 @@ if strcmp(readfname,fname)==0 % not read in yet
         end
     else % i.e. no right processed file exist
         %images(:,:,fr,ch)
-        
-        data = bfopen(org_fname); % only use first=last? session
+        data = bfopen_single_series(org_fname,iminf.Series); % only use first=last? session
         for ch = 1:iminf.NumberOfChannels
             for fr = 1:iminf.NumberOfFrames
                 
@@ -65,7 +59,7 @@ if strcmp(readfname,fname)==0 % not read in yet
         fluoviewtiffwrite(images,fname,iminf)
     end
     disp('TPREADFRAME: finished reading')
-    readfname=fname; % when completely loaded set readfname
+    readfname=[fname ':' record.slice]; % when completely loaded set readfname
 else
     % disp(['reading frame ' num2str(frame)]);
 end
