@@ -17,10 +17,10 @@ switch record.experiment
         labels = {'GFP','L1','L2/3','RLN','Syt2','SOM','VGLUT2','VIP'};
     case '11.12'
         labels = {'CFP','YFP'};
-    case {'12.76','12.76_GCaMP6','13.29'}
-        labels = {'','CCK','CR','SST','PV','VIP','Astrocyte'};
+    case {'12.76','12.76_GCaMP6'}
+        labels = {'','CR','CCK','SST','PV','VIP','Astrocyte'};
     case {'13.29'}
-        labels ={'','CR','Tom'}
+        labels = {'','CR','Tom'};
     otherwise
         labels = {'GFP','RFP'};
 end
