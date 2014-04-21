@@ -61,7 +61,7 @@ else, % it is a callback
             set(lbloc,'String',g,'value',[]);
             RemoteScriptEditor('EnableDisable',theFig);
         case 'UpdateRem',
-            save_str={'cd(pwd);try;save(''fromremote'',''s'',''-mat'');catch;wait(0.1);save(''fromremote'',''s'',''-mat'');end;' 
+            save_str={'cd(pwd);try;save(''fromremote'',''s'',''-mat'');catch;pause(0.1);save(''fromremote'',''s'',''-mat'');end;' 
                 'try;delete(''gotit'');end;'
                 'save(''gotit'',''g'',''-mat'');'};
             str = cat(1,update_str,save_str);
