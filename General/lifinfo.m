@@ -59,6 +59,7 @@ for i=1:length(ind1)
     inds2 = findstr(txts,tag2)-2;
     for j=1:length(inds1) % setting dimensions structs
         m='m'; % for unit
+        Pixel = 'Pixel' ; 
         code = [strrep(txts(inds1(j):inds2(j)),' ',['; dd(' num2str(i) ',' num2str(j) ').'] ) ';'];
         code(code=='"') = '';
         eval(code);
