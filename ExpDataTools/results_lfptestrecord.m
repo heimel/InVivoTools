@@ -5,11 +5,12 @@ function results_lfptestrecord( record )
 %
 %  2009-2012, Alexander Heimel
 %
-global measures analysed_stimulus
-
-
+global measures analysed_stimulus powerm channels waves_time
 
 measures = record.measures;
+
+% channels = get_channels2analyze( record );
+
 NUMLFP = length(measures);
 
 datapath = ecdatapath(record);
@@ -32,9 +33,9 @@ switch record.electrode
         end
         return
 end
-
-saved_data = fullfile(ecdatapath(record),record.test,'saved_data.mat');
-if exist(saved_data,'file')
+% channels = [1,2];
+saved_data = fullfile(ecdatapath(record),record.test,['saved_data',num2str(channels)]);
+if exist([saved_data,'.mat'],'file')
     load(saved_data);
 end
 
