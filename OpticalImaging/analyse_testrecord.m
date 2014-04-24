@@ -354,49 +354,65 @@ switch record.stim_type
         ind_hor = find(stim_parameters==0,1);
         ind_ver = find(stim_parameters==90,1);
         
-         figure('name','Orientation horizontal - vertical');
-         hor_ver = avg(:,:,ind_hor)-avg(:,:,ind_ver);
-         filename= fullfile(oidatapath(record),[record.test '_B' ...
-                mat2str([min(record.blocks) max(record.blocks)]) '_hor-ver.png']);
-         cmap = colormap('gray');
-         hor_ver = round(rescale(hor_ver,[min(hor_ver(:)) max(hor_ver(:))],[1 size(cmap,1)]));
-
-         imwrite( ind2rgb(hor_ver',cmap) ,filename, 'png');
-         logmsg(['Horizontal-vertical map saved as: ' filename]);
-         close(h);
-
-         % polar orientation map
-         polavg = zeros(size(avg,1),size(avg,2));
-         for c=1:size(avg,3)
-             polavg =polavg+ avg(:,:,c) * exp(2*pi*1i*record.stim_parameters(c)/180); 
-         end
-         cmap = colormap('hsv');
-         or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
-         or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 size(cmap,1)]));         or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 100]));
-         
-  %      h = image_intensity(or_angs',size(cmap,1)*ones(size(or_angs))',cmap);
-   %      h = image_intensity(or_angs',mean(avg,3)',cmap);
-   figure     
-   image(or_angs');
-   axis image off
-   colormap hsv
+        roi_edge = edge(roi);
+        cmap = colormap('hsv');
+        or_abs = round(rescale(mean(avg,3),[min(avg(:)) max(avg(:))],[1 size(cmap,1)]));       
         
-     %    h = image_intensity(or_angs',max(avg,[],3)',cmap);
-         h = image_intensity(or_angs',or_abs',cmap);
-         filename= fullfile(oidatapath(record),[record.test '_B' ...
-                mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
-         imwrite(get(get(gca,'children'), 'cdata') ,filename, 'png');
-         logmsg(['Orientation map saved as: ' filename]);
-         close(h);
-         
-         
+%         logmsg('Removing means. May reduce orientation preference. Use with caution');
+%         avg(:,:,ind_hor) = avg(:,:,ind_hor) - mean(mean(avg(:,:,ind_hor)));
+%         avg(:,:,ind_ver) = avg(:,:,ind_ver) - mean(mean(avg(:,:,ind_ver)));
+%         
+        %    figure('name','Orientation horizontal - vertical');
+        hor_ver = avg(:,:,ind_hor)-avg(:,:,ind_ver);
+        filename= fullfile(oidatapath(record),[record.test '_B' ...
+            mat2str([min(record.blocks) max(record.blocks)]) '_hor-ver.png']);
+        cmap = colormap('gray');
+        hor_ver = round(rescale(hor_ver,[min(hor_ver(:)) max(hor_ver(:))],[1 size(cmap,1)]));
+        hor_ver(roi_edge'==1)=max(hor_ver(:)); % show ROI
+        
+        imwrite( ind2rgb(hor_ver',cmap) ,filename, 'png');
+        logmsg(['Horizontal-vertical map saved as: ' filename]);
+        %     close(h);
+        
+        % polar orientation map
+        polavg = zeros(size(avg,1),size(avg,2));
+        for c=1:size(avg,3)
+            polavg =polavg+ avg(:,:,c) * exp(2*pi*1i*record.stim_parameters(c)/180);
+        end
+        or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
+        %or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 size(cmap,1)]));         or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 100]));
+        
+        
+        
+        %      h = image_intensity(or_angs',size(cmap,1)*ones(size(or_angs))',cmap);
+        %      h = image_intensity(or_angs',mean(avg,3)',cmap);
+        figure
+        or_angs(roi_edge'==1) = 0;
+        image(or_angs');
+        axis image off
+        colormap hsv
+        
+        %    h = image_intensity(or_angs',max(avg,[],3)',cmap);
+        h = image_intensity(or_angs',or_abs',cmap);
+        filename= fullfile(oidatapath(record),[record.test '_B' ...
+            mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
+        imwrite(get(get(gca,'children'), 'cdata') ,filename, 'png');
+        logmsg(['Orientation map saved as: ' filename]);
+        close(h);
+        
+    %    oi_correlation_map( record )
+        
     case 'direction'
         
         logmsg('WORKING HERE')
+           ind_up = find(record.stim_parameters==0,1);
+        ind_right = find(record.stim_parameters==90,1);
+           ind_down = find(record.stim_parameters==180,1);
+           ind_left = find(record.stim_parameters==270,1);
         
-         figure('name','Direction 1-5');
-         imagesc(avg(:,:,1)-avg(:,:,5))
-                
+        figure('name','Direction 1-5');
+        imagesc(avg(:,:,ind_up)-avg(:,:,ind_down))
+        
     case 'significance'
         % calculate significance with ANOVA using means and stddevs
         

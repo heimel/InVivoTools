@@ -231,7 +231,7 @@ if ~isempty(record) && strcmp(record.stim_type,'orientation')
     % possibly combine directions 
     stim_parameters = mod(record.stim_parameters,180);
     i = 1;
-    while i<=size(avg,3)
+    while i<= size(avg,3) %length(stim_parameters)  %
         ind = find(stim_parameters(i+1:end)==stim_parameters(i),1);
         while ~isempty(ind)
             avg(:,:,i) = avg(:,:,i)+ avg(:,:,i+ind);
@@ -289,8 +289,13 @@ end
 
 
 % plot winner takes all
-h=plotwta(response_sign*avg,stimlist,blank_stim,0,bv_mask,5,256,record,...
+% h=plotwta(response_sign*avg,stimlist,blank_stim,0,bv_mask,5,256,record,...
+%     retinotopy_colormap(dimensions(1),dimensions(2)));
+
+
+h=plotwta(response_sign*avg,stimlist,blank_stim,0,find(roi'),5,256,record,...
     retinotopy_colormap(dimensions(1),dimensions(2)));
+
 
 label=[ ' BLK=' num2str(min(blocks)) ':' ...
     num2str(max(blocks)) ' ' extension ];

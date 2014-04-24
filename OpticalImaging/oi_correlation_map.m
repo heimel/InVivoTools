@@ -7,7 +7,7 @@ function oi_correlation_map( record )
 params.pick_starting_clusters = false;
 params.average_over_trials = true;
 params.remove_trial_average = true;
-n_clusters = 5;
+n_clusters = 9;
 
 if nargin<1
     record = [];
@@ -52,7 +52,7 @@ axis image
 [n_x n_y n_images] = size(data);
 
 n_trials = 14;
-n_conditions = 4;
+n_conditions = 8;
 n_frames = n_images / n_trials /n_conditions;
 data = reshape(data,n_x,n_y,n_frames,n_conditions,n_trials);
 

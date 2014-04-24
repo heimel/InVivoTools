@@ -74,14 +74,17 @@ elseif n==4 && m==6,
     cols(19,:)=[0.0 0.0 0.9];cols(20,:)=[0.0 0.5 0.8];cols(21,:)=[0.0 0.8 0.8];
     cols(22,:)=[0.0 0.0 0.9];cols(23,:)=[0.0 0.5 0.8];cols(24,:)=[0.0 0.8 0.8];
 elseif numstims==12
-    colorz = colormap;
+    colorz = colormap('jet');
     for tmp=1:12
         cols(tmp,:)=colorz(5*tmp,:);
     end
+cols
 else
     cols = [prism(numstims); 0.7 0.7 0.7];
 end;
 %  colormap(cols)
+% cols = [prism(numstims); 0.7 0.7 0.7];
+cols = hsv(numstims);
 
 if nargout==2
     h=figure;

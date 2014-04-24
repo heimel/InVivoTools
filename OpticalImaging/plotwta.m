@@ -13,18 +13,23 @@ maskcoltab_1,record,cmap)
 %  XxYxNUMSTIM matrix of imaging data.
 %
 %  Example: h=plotwta(avg_data,2:8,1,256,0,256);
-
+if nargin<9
+    cmap = [];
+end
 
 if nargin<8
     record = [];
 end
 
+if isempty(cmap)
+    cmap = retinotopy_colormap(length(stimlist),1);
+end
 processparams = oiprocessparams(record);
 
 equalize_area = processparams.wta_equalize_area;
 disp(['PLOTWTA: Equalize area is ' num2str(equalize_area)]);
 if equalize_area
-    max_count = 20;
+    max_count = 100;
 else
     max_count = 1;
 end
@@ -42,11 +47,16 @@ while count<=max_count
     for i=stimlist
         ind = find(max_img==data(:,:,i));
         max_inds(ind) = i;
+        
+        ind = intersect(ind,maskinds);
+        
         area_condition(i) = length(ind);
     end
     
     [~,max_area] = max(area_condition);
-    data(:,:,max_area) =  data(:,:,max_area)*.9; 
+    std(area_condition)
+    data(:,:,max_area) =  data(:,:,max_area)*.95; 
+    logmsg(['Adjusting response of condition ' num2str(max_area)]);
     count = count+1;
 end
 

@@ -111,8 +111,8 @@ for i=1:length(filenames),
    ffrr=[ffrr,fr];
 end;
 %fprintf('\n');
-%pth = fileparts(filenames{1});
-% save(fullfile(pth,'spontaneous_frames.mat'),'ffrr')
+% pth = fileparts(filenames{1});
+%  save(fullfile(pth,'spontaneous_frames.mat'),'ffrr')
 % save(fullfile('D:\Data\2013\05\28\','spontaneous_frames.mat'),'ffrr')
 % save(fullfile('D:\Data\2013\05\28\','spontaneous_frames.mat'),'ffrr')
 

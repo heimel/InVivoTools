@@ -66,7 +66,6 @@ set(h.figure,'position',pos);
 
 uniform_scaling =  true;
 scaling = false;
-
 if uniform_scaling && scaling
     immax = 0;
     immin = inf;
