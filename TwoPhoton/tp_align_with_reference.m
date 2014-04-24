@@ -3,9 +3,8 @@ function record = tp_align_with_reference( record )
 %
 %  RECORD = TP_ALIGN_WITH_REFERENCE( RECORD )
 %
-% 2011-2013, Alexander Heimel
+% 2011-2014, Alexander Heimel
 %
-
 
 ref_record = tp_get_refrecord( record );
 if isempty(ref_record)
@@ -20,18 +19,22 @@ h.align = figure ('Name','Match ROIs with reference epoch','Position',[328 295 8
 image_height = 0.8;
 
 ti = tpreadconfig(record); % tiffinfo(tpfilename(record));
+
+params = tpprocessparams([],record);
+channels = params.align_channel;
+channels = min(channels,ti.NumberOfChannels);
+logmsg(['Aligning on channel ' num2str(channels)]);
+
 switch ti.third_axis_name
     case 'T' % XYT
-        channels = 1;
         determine_optimal_zshift = false;
-      %  determine_optimal_angle = false;
+        %  determine_optimal_angle = false;
         brightnesscorrect = true;
         image_processing.unmixing = 0;
         image_processing.spatial_filter = 0;
     otherwise % XYZ
-        channels = 2;
         determine_optimal_zshift = true;
-       % determine_optimal_angle = true;
+        % determine_optimal_angle = true;
         brightnesscorrect = true; % used to be false
         image_processing.unmixing = 1;
         image_processing.spatial_filter = 1;

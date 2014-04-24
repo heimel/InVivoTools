@@ -144,6 +144,13 @@ switch lower(record.experiment)
 end
 
 
+% alignment parameters
+switch lower(record.experiment)
+    otherwise
+        params.align_channel = 2; % for Daan's original stacks
+end
+
+
 % change user specific options
 switch host
     case 'nin326' % juliette
