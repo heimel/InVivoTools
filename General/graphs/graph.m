@@ -389,6 +389,29 @@ switch style
             hh = findobj(gca,'Type','patch');
             set(hh(1),'FaceColor',color{i});%,'EdgeColor','w')
         end
+    case 'pie' 
+        h.pie = pie([cellfun(@mean,y)]);
+        
+        my = [cellfun(@mean,y)];
+        cm=[color{:}];
+        cm = reshape(cm',3,length(cm)/3)';
+        colormap(cm);
+        axis off
+        
+        axis off square
+    case 'stackedbar' 
+        set(gcf,'PaperPositionMode','auto');
+        width=0.2;
+        left=0.5-width/2;
+        subplot('position',[left 0.20 width 0.7]);
+        hold on;
+        
+        my = [cellfun(@mean,y)];
+        h.stackedbar = bar([my;my],'stacked');xlim([.5 1.5]);
+        cm=[color{:}];
+        cm = reshape(cm',3,length(cm)/3)';
+        colormap(cm);
+        axis off
         
     case {'bar','box'}
         if isempty(x)
@@ -966,6 +989,11 @@ if exist('legnd','var') && ~isempty(legnd)
             handle = '[h.bar{:}],';
         case 'cumul'
             handle = 'h.cumul,';
+        case 'stackedbar'
+            handle = 'h.stackedbar,' ; 
+        case 'pie'
+            handle = 'h.pie,' ; 
+            
     end
     
     eval(['legend(' handle legnd(2:end-1) ')']);

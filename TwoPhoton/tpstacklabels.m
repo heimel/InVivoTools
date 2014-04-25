@@ -25,3 +25,13 @@ switch record.experiment
         labels = {'GFP','RFP'};
 end
 
+if ~isempty(strfind(lower(record.comment),'satb2'))
+    labels{end+1} = 'Satb2';
+end
+if ~isempty(strfind(lower(record.comment),'smi32'))
+    labels{end+1} = 'SMI32';
+end
+
+
+
+
