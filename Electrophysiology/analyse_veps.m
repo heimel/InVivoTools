@@ -125,9 +125,12 @@ switch lower(record.setup)
         results.sample_interval=1/EVENT.strms(1,3).sampf;
         
         
-        if length(EVENT.strons.tril)>1
+        if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
             errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
             EVENT.strons.tril(1)=EVENT.strons.tril(end);
+        elseif isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1
+            errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+            EVENT.strons.tril(1)=EVENT.strons.tril(length(EVENT.strons.tril)-length(EVENT.strons.OpOn));
         end
         
         startindTDT=EVENT.strons.tril(1)-pre_ttl;

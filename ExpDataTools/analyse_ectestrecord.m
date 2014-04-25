@@ -55,9 +55,13 @@ switch lower(record.setup)
             record.measures = [];
             return
         end
-        if length(EVENT.strons.tril)>1
+        
+        if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
             errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
             EVENT.strons.tril(1)=EVENT.strons.tril(end);
+        elseif isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1
+            errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+            EVENT.strons.tril(1)=EVENT.strons.tril(length(EVENT.strons.tril)-length(EVENT.strons.OpOn));
         end
         EVENT.Myevent = 'Snip';
         EVENT.type = 'snips';
