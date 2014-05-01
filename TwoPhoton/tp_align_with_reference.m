@@ -45,9 +45,25 @@ imgimg = tppreview(record,300,0,[],image_processing);
 ref_imgimg = tppreview(ref_record,300,0,[],image_processing);
 
 % subtract modes
+
 img_mode = mode(reshape(imgimg(:,:,1),size(imgimg,1)*size(imgimg,2),1));
+if img_mode == 4096-1
+    ind = find(imgimg==4095);
+    imgimg(ind) = NaN;
+    img_mode = mode(reshape(imgimg(:,:,1),size(imgimg,1)*size(imgimg,2),1));
+    imgimg(ind) = 4095;
+end
 imgimg = thresholdlinear(imgimg - img_mode);
+
 ref_img_mode = mode(reshape(ref_imgimg(:,:,1),size(ref_imgimg,1)*size(ref_imgimg,2),1));
+if ref_img_mode == 4096-1
+    ind = find(ref_imgimg==4095);
+    ref_imgimg(ind) = NaN;
+    ref_img_mode = mode(reshape(ref_imgimg(:,:,1),size(ref_imgimg,1)*size(ref_imgimg,2),1));
+    ref_imgimg(ind) = 4095;
+end
+
+
 ref_imgimg = thresholdlinear(ref_imgimg - ref_img_mode);
 
 if ~isempty(record.ref_transform)
