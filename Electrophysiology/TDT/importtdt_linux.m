@@ -141,6 +141,12 @@ else
     
     % get strons
     ind = find(data.type == E.STRON);
+    if length(ind)>1
+        errormsg([ num2str(length(ind)) ' triggers present. Taking last.']);
+        ind = ind(end);
+    end
+    
+    
     EVENT.strons.(code2string(data.namecode(ind))) = data.timestamp(ind);
     
     EVENT.timerange = [data.timestamp(2) data.timestamp(end)];
