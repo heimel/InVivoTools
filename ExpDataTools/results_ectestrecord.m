@@ -299,6 +299,11 @@ for c=1:n_cells
                     subplot('position',...
                         [relsubwidth*(col-1) reltitlepos-(row-0.2)*relsubheight relsubwidth*0.8 relsubheight*0.8]);
                     plot_polar_curve(measure,'-');
+                    switch lower(record.setup)
+                        case {'nin380','nori001','antigua'}
+                            set(gca,'xdir','reverse' ); 
+                    end
+                    
                     hold on
                 case 'position'
                     % overlap = str2double(answer{3})/100;
@@ -733,7 +738,10 @@ for i=1:length(curves)
     polar(0,m,'w');
     hold on
     curve = curves{i};
-    polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]),[ linestyle clr(i)]);
+%     polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:)
+%     curve(2,1)]),[ linestyle clr(i)]);
+        polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
+
     %phi =linspace(0,2*pi,100);
     %polar(phi,measure.rate_spont(i)*ones(size(phi)),[clr(i) '--']);
 end
