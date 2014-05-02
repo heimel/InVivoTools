@@ -105,6 +105,9 @@ switch lower(record.experiment)
     case {'10.24','11.12'}
         params.unmixing = true; % channel unmixing
         params.spatial_filter = true;
+    case {'11.74'}
+        params.unmixing = true; % channel unmixing
+        params.spatial_filter = true;
     otherwise
         params.unmixing = false; % channel unmixing
         params.spatial_filter = false;
@@ -137,6 +140,12 @@ switch lower(record.experiment)
     case '11.21'
         params.viewing_default_min = -1*ones(1,n_channels); % for n_channels channels, i.e. set to minimum intensity
         params.viewing_default_max = -0.1*ones(1,n_channels);% for n_channels channels, i.e. saturate 0.1%
+    case '11.74' %Mariangela
+        params.viewing_default_min = -1*ones(1,n_channels); % for n_channels channels, i.e. set to minimum intensity
+        params.viewing_default_max = -0.1*ones(1,n_channels);% for n_channels channels, i.e. saturate 0.1%
+        params.viewing_default_max(2) = -1;%
+        warning('TPPROCESSPARAMS:SATURATE_CHANNEL2','TPPROCESSPARAMS: default viewing of channel 2 to saturate 1%%.');
+        warning('OFF','TPPROCESSPARAMS:SATURATE_CHANNEL2')
     case '10.38'
         params.viewing_default_min = zeros(1,n_channels); % for n_channels channels, i.e. set to minimum intensity
         params.viewing_default_min(2) = -1; % i.e. set to minimum intensity
