@@ -1,47 +1,36 @@
-function onlinemaps(avg,framezero_avg,n_x,fname,ledtest)
+function onlinemaps(avg,framezero_avg,n_x,fname,ledtest,record)
 %ONLINEMAPS
 %
 %
-% 2004, Alexander Heimel
+% 2004-2014, Alexander Heimel
 %
 
+if nargin<6
+    record = [];
+end
 if nargin<5
-  ledtest=[];
+    ledtest=[];
 end
 if isempty(ledtest)
-  ledtest=0;
+    ledtest=0;
 end
-
 if nargin<4
-	fname=[];
+    fname=[];
 end
-
 if nargin<2
-	framezero_avg=[];
+    framezero_avg=[];
 end
 if isempty(framezero_avg)
-	framezero_avg=0*avg;
+    framezero_avg=0*avg;
 end
 if nargin<3
-	n_x=2;
+    n_x=2;
 end
 
+params = oiprocessparams( record );
+clip = params.single_condition_clipping;
 
-clip=5;
-
-noemer=1;
-
-h1=figure;
-
-
-%figure;imagesc(avg(:,:,teller)');
-%figure;imagesc(avg(:,:,noemer)');
-
-% normalize all the same as map 1
-%kaart=(avg(:,:,2)-framezero_avg(:,:,2))./avg(:,:,noemer);
-%maxkaart=max(kaart(:));
-%minkaart=min(kaart(:));
-%col=colormap(gray);
+%h1=figure;
 
 n_stims=size(avg,3);
 maxavg=-inf;
@@ -49,66 +38,65 @@ minavg=+inf;
 
 % subtract zero-frames
 if ledtest
-  avg(:,:,2)=avg(:,:,2)-avg(:,:,1);
+    avg(:,:,2)=avg(:,:,2)-avg(:,:,1);
 else
-
-  for stim=1:n_stims
-	avg(:,:,stim)=avg(:,:,stim)-framezero_avg(:,:,stim);
-  end
+    for stim=1:n_stims
+        avg(:,:,stim)=avg(:,:,stim)-framezero_avg(:,:,stim);
+    end
 end
 
 %avg=dccorrection(avg);
+if params.single_condition_normalize_response
+    for stim=1:n_stims
+        avg(:,:,stim)=avg(:,:,stim)/max(max(avg(:,:,stim)));
+    end
+end
+
+if params.single_condition_differential
+    
+    
+    avgavg = mean(avg,3);
+    avg = avg - repmat(avgavg,[1 1 n_stims]);
+    logmsg('Computing differential single condition maps.');
+end
 
 % clipping range
-  deviatie=std(avg(:));
-  gemiddelde=median(avg(:));
+deviatie=std(avg(:));
+gemiddelde=median(avg(:));
 
 for stim=1:n_stims
-	h_image(stim)=subplot(n_x,ceil((n_stims)/n_x),stim);
-	kaart=avg(:,:,stim);
+    kaart=avg(:,:,stim);
+    
+    kaart(kaart(:)>gemiddelde+clip*deviatie) = gemiddelde+clip*deviatie;
+    kaart(kaart(:)<gemiddelde-clip*deviatie) = gemiddelde-clip*deviatie;
+    kaart = (kaart -(gemiddelde-clip*deviatie))/2./(gemiddelde+clip*deviatie);
 
-	% clip
-	%deviatie=std(kaart(:))
-	%gemiddelde=median(kaart(:))
-
-	  kaart(find(kaart(:)>gemiddelde+clip*deviatie))=gemiddelde+clip*deviatie;
-	  kaart(find(kaart(:)<gemiddelde-clip*deviatie))=gemiddelde-clip*deviatie;
-%    disp( ['stim: ' num2str(stim-1) ' mean: ' num2str(mean(kaart(:)),2)]);
-	
-        kaart=(kaart -(gemiddelde-clip*deviatie))/2./(gemiddelde+clip*deviatie);
-	imgmap{stim}=image(kaart'*64);
-	%    imgmap{stim}=imagesc(kaart');
-	%	 set(h_image(stim),'Clim',[gemiddelde-clip*deviatie,gemiddelde+clip*deviatie]);
-	axis equal off;
-	colormap gray
-
-	maxkaart=max(kaart(:));
-	if maxkaart>maxavg
-		maxavg=maxkaart;
-	end
-	minkaart=min(kaart(:));
-	if minkaart<minavg
-		minavg=minkaart;
-	end
-	maps{stim}=kaart;
-	text(0,0,num2str(stim),'HorizontalAlignment','right');
-
+    maxkaart=max(kaart(:));
+    if maxkaart>maxavg
+        maxavg=maxkaart;
+    end
+    minkaart=min(kaart(:));
+    if minkaart<minavg
+        minavg=minkaart;
+    end
+    maps{stim}=kaart;
 end
-close(h1)
-
-
 
 if ~isempty(fname)
-	hh=figure;
-	for stim=1:n_stims
-		image(maps{stim}'*64);
-		axis image;axis off;colormap gray
-		%		set(gca,'Clim',[gemiddelde-clip*deviatie,gemiddelde+clip*deviatie]);
-		filename=[fname 'single_cond' num2str(stim) '.png'];
-		%		saveas(gcf,filename,'png');
-		imwrite(maps{stim}',filename,'png')
-	end
-	close(hh);
+    filename=[fname 'single_cond*.png'];
+    delete(filename);
+    
+    
+    hh=figure;
+    for stim=1:n_stims
+        image(maps{stim}'*64);
+        axis image;
+        axis off;
+        colormap gray
+        filename=[fname 'single_cond' num2str(stim) '.png'];
+        imwrite(maps{stim}',filename,'png')
+    end
+    close(hh);
 end
 
 

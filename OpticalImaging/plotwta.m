@@ -53,7 +53,6 @@ while count<=max_count % equalizing area
     end
     
     [~,max_area] = max(area_condition);
-    std(area_condition)
     if max_count>1
         data(:,:,max_area) =  data(:,:,max_area)*.95;
     end

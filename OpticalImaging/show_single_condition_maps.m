@@ -23,8 +23,6 @@ if ~isempty(maps)
 	showing_online_maps=0;
 else
 	maps=dir([fname{1} '_map*']);
-
-	
 	if ~isempty(maps)
 		maps=sort_db(maps);
 	end
@@ -70,7 +68,6 @@ set(h.figure,'position',pos);
 %     immap(:,:,i)=imread(fullfile(filedir,maps(i).name));
 % end
 
-
 uniform_scaling =  true;
 scaling = false;
 if uniform_scaling && scaling
@@ -102,11 +99,14 @@ for i=1:n_maps
         immax = max(immap(:));
         immin = min(immap(:));
     end
-	%draw roi
-	immap(image_outline(roi)>0.08)=immax; 
-	% draw ror
-	immap(image_outline(ror)>0.08)=immin; 
-	
+    
+    if 0
+        %draw roi
+        immap(image_outline(roi)>0.08)=immax;
+        % draw ror
+        immap(image_outline(ror)>0.08)=immin;
+    end
+    
     if scaling
         imagesc(double(immap));
     else

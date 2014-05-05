@@ -262,8 +262,10 @@ else
   dataframes=setdiff( (1:size(ratio,1)),firstframes);
 end
 
+dataframes = dataframes(dataframes<=fileinfo.n_images);
+
 logmsg(['First frames: ' mat2str(firstframes) ...
-    ', data frames: ' mat2str(dataframes(dataframes<=fileinfo.n_images)]));
+    ', data frames: ' mat2str(dataframes)]);
 
 
 normratio=ratio(firstframes(end),:);  % align ratio's at last frame

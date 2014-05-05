@@ -363,15 +363,18 @@ switch record.stim_type
 %         avg(:,:,ind_ver) = avg(:,:,ind_ver) - mean(mean(avg(:,:,ind_ver)));
 %         
         %    figure('name','Orientation horizontal - vertical');
-        hor_ver = avg(:,:,ind_hor)-avg(:,:,ind_ver);
-        filename= fullfile(oidatapath(record),[record.test '_B' ...
-            mat2str([min(record.blocks) max(record.blocks)]) '_hor-ver.png']);
-        cmap = colormap('gray');
-        hor_ver = round(rescale(hor_ver,[min(hor_ver(:)) max(hor_ver(:))],[1 size(cmap,1)]));
-        hor_ver(roi_edge'==1)=max(hor_ver(:)); % show ROI
         
-        imwrite( ind2rgb(hor_ver',cmap) ,filename, 'png');
-        logmsg(['Horizontal-vertical map saved as: ' filename]);
+        if 0
+            hor_ver = avg(:,:,ind_hor)-avg(:,:,ind_ver);
+            filename= fullfile(oidatapath(record),[record.test '_B' ...
+                mat2str([min(record.blocks) max(record.blocks)]) '_hor-ver.png']);
+            cmap = colormap('gray');
+            hor_ver = round(rescale(hor_ver,[min(hor_ver(:)) max(hor_ver(:))],[1 size(cmap,1)]));
+            hor_ver(roi_edge'==1)=max(hor_ver(:)); % show ROI
+            
+            imwrite( ind2rgb(hor_ver',cmap) ,filename, 'png');
+            logmsg(['Horizontal-vertical map saved as: ' filename]);
+        end
         %     close(h);
         
         % polar orientation map

@@ -262,11 +262,7 @@ if spatial_filter % spatial filter
     end
 end
 
-if ledtest
-    onlinemaps(avg,[],dimensions(1),fname,ledtest);
-else
-    onlinemaps(avg,[],dimensions(1),fname);
-end
+onlinemaps(avg,[],dimensions(1),fname,ledtest,record);
 
 
 % normalize if early frames subtracted

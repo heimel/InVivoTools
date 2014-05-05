@@ -48,7 +48,7 @@ switch host
         else
             base = 'C:\Data';
         end
-        base = fullfile(base,'InVivo','Imaging',record.setup);
+        base = fullfile(base,'InVivo','Imaging',capitalize(record.setup));
 end
 
 datapath=fullfile(base,pathend);

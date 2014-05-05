@@ -69,21 +69,22 @@ switch record.stim_type
             label = subst_ctlchars(['Orientation, mouse=' record.mouse ',date=' record.date ',test=' record.test]);
             title(label);
         end
-     
-        switch record.stim_type
-            case 'orientation'
-                file = fullfile(oidatapath(record),[record.test '_B' ...
-                    mat2str([min(record.blocks) max(record.blocks)]) ...
-                    '_hor-ver' '.png']);
-                if exist(file, 'file')
-                    img = imread(file);
-                    figure('name',file,'NumberTitle','off');
-                    image(img)
-                    axis image off;
-                    label = subst_ctlchars(['Horizontal-vertical, mouse=' record.mouse ',date=' record.date ',test=' record.test]);
-                    title(label);
-
-                end
+        
+        if 0
+            switch record.stim_type
+                case 'orientation'
+                    file = fullfile(oidatapath(record),[record.test '_B' ...
+                        mat2str([min(record.blocks) max(record.blocks)]) ...
+                        '_hor-ver' '.png']);
+                    if exist(file, 'file')
+                        img = imread(file);
+                        figure('name',file,'NumberTitle','off');
+                        image(img)
+                        axis image off;
+                        label = subst_ctlchars(['Horizontal-vertical, mouse=' record.mouse ',date=' record.date ',test=' record.test]);
+                        title(label);
+                    end
+            end
         end
         
         if 0 && ~isempty(imgdata)
