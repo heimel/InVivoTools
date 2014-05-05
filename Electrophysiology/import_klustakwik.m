@@ -86,7 +86,7 @@ for ch = channels
     logmsg('Loading Klustakwik data');
 
     cellnumbers = find(spikecount>0);
-    for c=cellnumbers
+    for c=cellnumbers(:)'
         cells(c).data = zeros(spikecount(c),1);
         cells(c).spike_amplitude = zeros(spikecount(c),1);
         cells(c).spike_trough2peak_time = zeros(spikecount(c),1);

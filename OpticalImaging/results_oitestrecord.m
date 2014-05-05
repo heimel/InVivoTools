@@ -3,7 +3,7 @@ function newud=results_oitestrecord( ud )
 %
 %  RESULTS_OITESTRECORD( UD )
 %
-%  2005, Alexander Heimel
+%  2005-2014, Alexander Heimel
 %
 
 global record
@@ -48,6 +48,16 @@ fileinfo=imagefile_info( fullfile(datapath,...
 
 switch record.stim_type
     case {'orientation','direction'}
+        
+        % WTA map
+        figure;
+        image(imgdata)
+        title(['WTA ' tit]);
+
+        % single conditions
+        show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
+
+        
         file = fullfile(oidatapath(record),[record.test '_B' ...
                 mat2str([min(record.blocks) max(record.blocks)]) ...
                 '_' record.stim_type '.png']);
@@ -98,7 +108,6 @@ switch record.stim_type
             axis image off;
         end
         
-        % show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
 
     case {'retinotopy'}
         figure;

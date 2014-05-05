@@ -63,6 +63,13 @@ pos([2 3 4])=[pos(2)-ny*300+pos(4)  nx*300 ny*300];
 
 set(h.figure,'position',pos);
 
+% load maps
+% immap(:,:) = imread(fullfile(filedir,maps(i).name));
+% immap = zeros(size(immap,1),size(immap,2),n_maps);
+% for i=1:n_maps
+%     immap(:,:,i)=imread(fullfile(filedir,maps(i).name));
+% end
+
 
 uniform_scaling =  true;
 scaling = false;
@@ -107,9 +114,6 @@ for i=1:n_maps
     end
     disp(['SHOW_SINGLE_CONDITIONS_MAPS: min = ' num2str(min(immap(:))) ', mean = ' num2str(mean(immap(:))) ...
         ', max = ' num2str(max(immap(:)))]);
-	
-	% for image of mouse=05.01.2.39,stim_type=sf
-	%imagesc(double(immap),[-20 290]);
 	
 	if i==n_maps
 		draw_scalebar(record.scale*fileinfo.xbin);

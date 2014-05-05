@@ -262,8 +262,8 @@ else
   dataframes=setdiff( (1:size(ratio,1)),firstframes);
 end
 
-firstframes
-dataframes=dataframes(find(dataframes<=fileinfo.n_images))
+logmsg(['First frames: ' mat2str(firstframes) ...
+    ', data frames: ' mat2str(dataframes(dataframes<=fileinfo.n_images)]));
 
 
 normratio=ratio(firstframes(end),:);  % align ratio's at last frame
@@ -275,7 +275,6 @@ ratio_sem=100*ratio_sem./repmat(normratio,size(ratio,1),1);
 tresponse=squeeze(mean( tratio(dataframes,:,:),1)) ./ ...
 	  squeeze( tratio(firstframes(end),:,:))-1;
 tresponse=-tresponse*100; % make perc and positive
-
 
 
 if size(tresponse,1)>1
@@ -322,12 +321,6 @@ if size(tresponse,1)>1
     end
     
   end
- 
-
-  
-  
-  
-  
 else
   response=tresponse;
 end

@@ -27,15 +27,15 @@ end
 processparams = oiprocessparams(record);
 
 equalize_area = processparams.wta_equalize_area;
-disp(['PLOTWTA: Equalize area is ' num2str(equalize_area)]);
 if equalize_area
     max_count = 100;
+    logmsg('Equalizing area');
 else
     max_count = 1;
 end
    
 count = 1; 
-while count<=max_count
+while count<=max_count % equalizing area
     max_img = data(:,:,stimlist(1));
     for i=stimlist
         maxinds = find( max_img>=data(:,:,i) );
@@ -49,14 +49,15 @@ while count<=max_count
         max_inds(ind) = i;
         
         ind = intersect(ind,maskinds);
-        
         area_condition(i) = length(ind);
     end
     
     [~,max_area] = max(area_condition);
     std(area_condition)
-    data(:,:,max_area) =  data(:,:,max_area)*.95; 
-    logmsg(['Adjusting response of condition ' num2str(max_area)]);
+    if max_count>1
+        data(:,:,max_area) =  data(:,:,max_area)*.95;
+    end
+    %logmsg(['Adjusting response of condition ' num2str(max_area)]);
     count = count+1;
 end
 
@@ -73,7 +74,7 @@ wtaimg = (maskcoltab_1-maskcoltab_0)*wtaimg/max(max(wtaimg))+maskcoltab_0;
 img0 = wtaimg;
 
 for i=stimlist
-  wtaimg(find(max_inds==i)) = colortab_0 + i;
+  wtaimg(max_inds==i) = colortab_0 + i;
 end;
 
 % to make bloodvessel mask gray

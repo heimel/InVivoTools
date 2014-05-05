@@ -228,21 +228,14 @@ if 0 % dccorrection
 end
 
 if ~isempty(record) && strcmp(record.stim_type,'orientation')
-    % possibly combine directions 
-    stim_parameters = mod(record.stim_parameters,180);
-    i = 1;
-    while i<= size(avg,3) %length(stim_parameters)  %
-        ind = find(stim_parameters(i+1:end)==stim_parameters(i),1);
-        while ~isempty(ind)
-            avg(:,:,i) = avg(:,:,i)+ avg(:,:,i+ind);
-            avg(:,:,i+ind) = [];
-            stim_parameters(i+ind) = [];
-            stimlist(i+ind) = [];
-            dimensions(2) = dimensions(2)-1;
-            ind = find(stim_parameters(i+1:end)==stim_parameters(i),1);
-        end
-        i = i+1;
+    % combine directions to single orientation
+    stim_parameters = uniq(sort(mod(record.stim_parameters,180)));
+    new_avg = zeros( size(avg,1),size(avg,2),length(stim_parameters));
+    for i = 1:length(stim_parameters)
+        new_avg(:,:,i) = mean( avg(:,:,record.stim_parameters==stim_parameters(i)),3);
     end
+    avg = new_avg;
+    stimlist = 1:size(avg,3);
 end
             
             

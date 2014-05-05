@@ -350,7 +350,7 @@ switch record.stim_type
         % retinotopy center is asked in results_oitestrecord
     case 'orientation'
         % Horizontal minus vertical
-        stim_parameters = mod(record.stim_parameters,180);
+        stim_parameters = uniq(sort(mod(record.stim_parameters,180)));
         ind_hor = find(stim_parameters==0,1);
         ind_ver = find(stim_parameters==90,1);
         
