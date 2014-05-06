@@ -721,26 +721,28 @@ function plot_polar_curve(measure,linestyle)
 if nargin<2
     linestyle = '.';
 end
-curves=measure.curve;
-if ~iscell(curves)
-    curves = {curves};
-end
+% curves=measure.curve;
+% if ~iscell(curves)
+%     curves = {curves};
+% end
 
 % run first to get maximum limit
 clr = 'kbry';
 m = 0;
-for i=1:length(curves)
-    curve = curves{i};
-    m = max([m curve(2,:)]);
+for i=1:length(measure.response)
+    m = max([m measure.response{i}]);
 end
 
-for i=1:length(curves)
+for i=1:length(measure.response)
     polar(0,m,'w');
     hold on
-    curve = curves{i};
+%    curve = curves{i};
 %     polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:)
 %     curve(2,1)]),[ linestyle clr(i)]);
-        polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
+%        polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
+        polar([measure.range{i} measure.range{i}(1)]/180*pi,...
+            thresholdlinear([measure.response{i} measure.response{i}(1)]),...
+            [ linestyle clr(i)]);
 
     %phi =linspace(0,2*pi,100);
     %polar(phi,measure.rate_spont(i)*ones(size(phi)),[clr(i) '--']);
