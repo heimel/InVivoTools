@@ -215,10 +215,12 @@ if isempty(record.imagefile) ...
             save(imagepath,'ks_data','data','-mat');
             record.imagefile=imagefile;
         otherwise
-            early_frames=(1: ceil(record.stim_onset/frame_duration)  );
-            late_frames=setdiff( (1:ceil(record.stim_offset/frame_duration)),...
-                early_frames);
+            %             early_frames=(1: ceil(record.stim_onset/frame_duration)  );
+            %             late_frames=setdiff( (1:ceil(record.stim_offset/frame_duration)),...
+            %                 early_frames);
             
+            [late_frames,early_frames] = oi_get_framenumbers(record);
+
             if ~isempty(late_frames)
                 if late_frames(end)>fileinfo.n_images
                     disp(['ANALYSE_TESTRECORD: Number of frames in file not consistent with' ...
