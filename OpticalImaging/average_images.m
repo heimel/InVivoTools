@@ -31,9 +31,7 @@ function [avg,stddev]=average_images(filenames,cond,framesuse,outmeth,normmeth,n
 %              'avgframes','none',[]);
 %
 %  2004 Steve Van Hooser
-%  2005-01-31 JFH: changed read_oi_frames to read_oi_compressed and
-%                  added compression to argumentlist
-%  2013, Alexander Heimel
+%  2005-2014, Alexander Heimel
 
 if nargin<7
     compression=1;
@@ -45,7 +43,6 @@ end
 if strcmp(normmeth,'subtractframe_ror')
     rort=ror'/sum(ror(:));
 end
-
 
 info = imagefile_info(filenames{1}); % assume all files same structure
 if ~isempty(cond),conditions=cond; else conditions=1:info.n_conditions; end;
@@ -63,7 +60,6 @@ elseif strcmp(outmeth,'indframes'),
     stddev=avg;
 end;
 
-ffrr={};
 for i=1:length(filenames),
     disp(['AVERAGE_IMAGES: Working on '  filenames{i} '.']);
     if strcmp(normmeth,'subtract')||strcmp(normmeth,'divide'),
@@ -73,7 +69,6 @@ for i=1:length(filenames),
             info.n_images,1,compression,0);
         nrm=mean(nrm,3);
     end;
-   fr={};
     for j=1:length(conditions),
         if strcmp(normmeth,'subtractframe')||strcmp(normmeth,'subtractframe_ror')
             block_offset=(conditions(j)-1)*info.n_images+normflag;
@@ -83,7 +78,7 @@ for i=1:length(filenames),
         for k=1:length(frames),
             block_offset=(conditions(j)-1)*info.n_images+frames(k);
             img=read_oi_compressed(filenames{i},block_offset,1,1,compression,0,fileinfo);
-           fr=[fr,img];
+           %fr=[fr,img];
             switch normmeth
                 case 'subtract'
                     img=img-nrm;
@@ -108,13 +103,9 @@ for i=1:length(filenames),
             end;
         end;
     end;
-   ffrr=[ffrr,fr];
-end;
-%fprintf('\n');
-% pth = fileparts(filenames{1});
-%  save(fullfile(pth,'spontaneous_frames.mat'),'ffrr')
-% save(fullfile('D:\Data\2013\05\28\','spontaneous_frames.mat'),'ffrr')
-% save(fullfile('D:\Data\2013\05\28\','spontaneous_frames.mat'),'ffrr')
+end
+%
+% FOR SPONTANEOUS FRAMES USE FUNCTION OI_READ_ALL_DATA
 
 if strcmp(outmeth,'avgframes'),
     N = length(frames)*length(filenames);
@@ -124,4 +115,4 @@ elseif strcmp(outmeth,'indframes'),
     N = length(filenames);
     stddev=sqrt((stddev-N*avg.*avg)/(N-1));
     avg=avg/N;
-end;
+end

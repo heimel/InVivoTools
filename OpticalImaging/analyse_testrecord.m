@@ -31,7 +31,7 @@ end
 
 datapath=oidatapath( record);
 if ~exist(datapath,'dir')
-    disp(['WARNING: datapath ' datapath ' does not exist.']);
+    errormsg(['Datapath ' datapath ' does not exist.']);
     return
 end
 
@@ -199,7 +199,7 @@ if isempty(record.imagefile) ...
         || fileinfo.headeronly~=1
     % produce image
     switch record.stim_type
-        case 'ks',
+        case 'ks'
             if isempty(record.stim_tf)
                 disp('Error: no frequency given (stim_tf)');
                 return
@@ -330,9 +330,7 @@ switch record.stim_type
         imagesc(im');
         axis off image
         title(subst_ctlchars(['R_(end-1)/R_max: mouse=' record.mouse ',date=' record.date ',test=' record.test]));
-        
 end
-
 
 % Do analysis
 switch record.stim_type
@@ -348,20 +346,20 @@ switch record.stim_type
             record,0);
     case 'retinotopy',
         % retinotopy center is asked in results_oitestrecord
-    case 'orientation'
+    case {'orientation','direction'}
         % Horizontal minus vertical
-        stim_parameters = uniq(sort(mod(record.stim_parameters,180)));
-        ind_hor = find(stim_parameters==0,1);
-        ind_ver = find(stim_parameters==90,1);
+        %     stim_parameters = uniq(sort(mod(record.stim_parameters,180)));
+        %      ind_hor = find(stim_parameters==0,1);
+        %      ind_ver = find(stim_parameters==90,1);
         
         roi_edge = edge(roi);
         cmap = colormap('hsv');
         or_abs = round(rescale(mean(avg,3),[min(avg(:)) max(avg(:))],[1 size(cmap,1)]));       
         
-%         logmsg('Removing means. May reduce orientation preference. Use with caution');
-%         avg(:,:,ind_hor) = avg(:,:,ind_hor) - mean(mean(avg(:,:,ind_hor)));
-%         avg(:,:,ind_ver) = avg(:,:,ind_ver) - mean(mean(avg(:,:,ind_ver)));
-%         
+        %         logmsg('Removing means. May reduce orientation preference. Use with caution');
+        %         avg(:,:,ind_hor) = avg(:,:,ind_hor) - mean(mean(avg(:,:,ind_hor)));
+        %         avg(:,:,ind_ver) = avg(:,:,ind_ver) - mean(mean(avg(:,:,ind_ver)));
+        %
         %    figure('name','Orientation horizontal - vertical');
         
         if 0
@@ -377,25 +375,20 @@ switch record.stim_type
         end
         %     close(h);
         
+        multfac = 1+strcmpi(record.stim_type,'orientation');
+        
         % polar orientation map
         polavg = zeros(size(avg,1),size(avg,2));
         for c=1:size(avg,3)
-            polavg =polavg+ avg(:,:,c) * exp(2*pi*1i*record.stim_parameters(c)/180);
+            polavg = polavg + avg(:,:,c) * exp(multfac*pi*1i*record.stim_parameters(c)/180);
         end
         or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
-        %or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 size(cmap,1)]));         or_abs = round(rescale(abs(polavg),[min(abs(polavg(:))) max(abs(polavg(:)))],[1 100]));
-        
-        
-        
-        %      h = image_intensity(or_angs',size(cmap,1)*ones(size(or_angs))',cmap);
-        %      h = image_intensity(or_angs',mean(avg,3)',cmap);
-        figure
         or_angs(roi_edge'==1) = 0;
-        image(or_angs');
-        axis image off
-        colormap hsv
-        
-        %    h = image_intensity(or_angs',max(avg,[],3)',cmap);
+
+        %figure
+        %image(or_angs');
+        %axis image off
+        %colormap hsv
         h = image_intensity(or_angs',or_abs',cmap);
         filename= fullfile(oidatapath(record),[record.test '_B' ...
             mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
@@ -405,45 +398,31 @@ switch record.stim_type
         
     %    oi_correlation_map( record )
         
-    case 'direction'
-        
-        logmsg('WORKING HERE')
-           ind_up = find(record.stim_parameters==0,1);
-        ind_right = find(record.stim_parameters==90,1);
-           ind_down = find(record.stim_parameters==180,1);
-           ind_left = find(record.stim_parameters==270,1);
-        
-        figure('name','Direction 1-5');
-        imagesc(avg(:,:,ind_up)-avg(:,:,ind_down))
-        
     case 'significance'
         % calculate significance with ANOVA using means and stddevs
         
         %   first flatten avg and stddev
-        if ~isempty(findstr(record.rorfile,'ror'))
-            % add zero response
-            disp('adding zero response condition')
+        if 0            % add zero response
+            logmsg('Adding zero response condition')
             avg(:,:,end+1)=0;
             stddev(:,:,end+1)=mean(stddev,3);
         end
         
         ravg=reshape(avg,size(avg,1)*size(avg,2),size(avg,3));
         rstddev=reshape(stddev,size(stddev,1)*size(stddev,2),size(stddev,3));
-        if isempty(roi)
-            pvals=significant_pixels_avg_stddev(ravg,rstddev);
-        else
-            pvals=ones(size(avg,1)*size(avg,2),1);
-            roi_ind=find(roi'>0);
-            %  pvals(roi_ind)=significant_pixels_avg_stddev(ravg(roi_ind,:),rstddev(roi_ind,:),100);
-            pvals(roi_ind)=significant_pixels_avg_stddev(ravg(roi_ind,:),rstddev(roi_ind,:),length(blocks));
-        end
-        % structure pvals back into frame
+        pvals=significant_pixels_avg_stddev(ravg,rstddev);
         pvals=reshape(pvals,size(avg,1),size(avg,2));
-        
-        n_roi=length(find(roi>0));
-        frac05=length(find(pvals<0.05))/n_roi;
-        frac01=length(find(pvals<0.01)) / n_roi;
-        frac001=length(find(pvals<0.001))/n_roi;
+        if ~isempty(roi)
+            pvals_roi = ones(size(avg,1)*size(avg,2),1);
+            roi_ind = find(roi'>0);
+            pvals_roi(roi_ind) = significant_pixels_avg_stddev(ravg(roi_ind,:),rstddev(roi_ind,:),length(blocks));
+            pvals_roi = reshape(pvals_roi,size(avg,1),size(avg,2));
+        end
+
+        n_roi = sum(roi(:)>0);
+        frac05 = sum(pvals_roi(:)<0.05)/n_roi;
+        frac01 = sum(pvals_roi(:)<0.01) / n_roi;
+        frac001 = sum(pvals_roi(:)<0.001)/n_roi;
         record.response=[frac05 frac01 frac001];
         record.response_sem=[];
         record.response_all=[];

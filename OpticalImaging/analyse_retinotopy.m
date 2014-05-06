@@ -26,16 +26,11 @@ if nargin<4; late_frames=[]; end
 if nargin<3; early_frames=[]; end
 if nargin<2; blocks=[]; end
 if nargin<1;
-    disp('Experiment name required, e.g. analyse_retinotopy 2004-11-24/mouse_E3');
+    logmsg('Experiment name required, e.g. analyse_retinotopy 2004-11-24/mouse_E3');
     return
 end
 
-if early_frames==-1
-    ledtest=1;
-else
-    ledtest=0;
-end
-
+ledtest = (early_frames==-1);
 
 if strcmp(record.stim_type,'retinotopy')||...
         strcmp(record.stim_type,'rt_response')||...
@@ -48,9 +43,6 @@ if strcmp(record.stim_type,'retinotopy')||...
 else
     dimensions=[];
 end
-
-
-bv_mask=[];
 
 base=fname;
 filter=[ base 'B*.BLK'];
@@ -78,7 +70,7 @@ if fileinfo.n_total_images==0
     experimentlist={experimentlist{1:end-1}};
 end
 if isempty(experimentlist)
-    disp('ANALYSE_RETINOTOPY: No blockfiles ready yet.')
+    logmsg('No blockfiles ready yet.')
     return
 end
 fileinfo = imagefile_info(experimentlist{1}) %#ok<NOPRT>
@@ -87,16 +79,12 @@ if isempty(dimensions)
     dimensions=[1 fileinfo.n_conditions];
 end
 
-
-
-
 if isempty(late_frames)
     late_frames=(6:15);
     if isempty(early_frames)
         early_frames=(1:5);
     end
 end
-
 
 if isempty(blank_stim)
     firststim=1;
@@ -105,7 +93,6 @@ else
 end
 stimlist=(firststim:fileinfo.n_conditions);
 
-% some checks
 if isempty(blank_stim)
     n_stims=length(stimlist);
 else
@@ -117,8 +104,7 @@ if fileinfo.n_conditions<n_stims
     return
 end
 if fileinfo.n_conditions~=n_stims
-    disp(['ANALYSE_RETINOTOPY: Number of conditions in data unequal to specified' ...
-        ' list']);
+    logmsg('Number of conditions in data unequal to specified list');
 end
 
 if isempty(ror)
@@ -210,11 +196,12 @@ if 0
             thresh=peak;
         end
     end
-    %thresh=mean(logstd(:))+3*std(logstd(:));
-    thresh=prctile(logstd(:),85);
+    thresh = prctile(logstd(:),85);
     
     doplot=1;
-    [bv_mask] = blood_vessel_mask_std(logstd(:,:,1),thresh,doplot);
+    bv_mask = blood_vessel_mask_std(logstd(:,:,1),thresh,doplot);
+else
+    bv_mask=[];
 end
 
 if 0 % dccorrection
@@ -238,32 +225,19 @@ if ~isempty(record) && strcmp(record.stim_type,'orientation')
     stimlist = 1:size(avg,3);
 end
             
-            
-spatial_filter = true;
-if ~isempty(record)
-    switch record.stim_type
-        case {'tf','sf'}
-            spatial_filter = true;
-    end
-end
+params = oiprocessparams( record );
 
-if spatial_filter % spatial filter
-    params = oiprocessparams( record );
-    
-    
+fp = params.spatial_filter_width;
+if ~isnan(fp)
     filter=[];
-    fp = params.spatial_filter_width;
-    if ~isnan(fp)
-        disp(['ANALYSE_RETINOTOPY: Filter width set to ' num2str(fp)]);
-        filter.width=max(1,fp/fileinfo.xbin/compression);
-        filter.unit='pixel';
-        avg=spatialfilter(avg,filter.width,filter.unit);
-        stddev=spatialfilter(stddev,filter.width,filter.unit)/sqrt(filter.width^2);
-    end
+    logmsg(['Filter width set to ' num2str(fp) ' pixels.']);
+    filter.width = max(1,fp/fileinfo.xbin/compression);
+    filter.unit = 'pixel';
+    avg = spatialfilter(avg,filter.width,filter.unit);
+    stddev = spatialfilter(stddev,filter.width,filter.unit)/sqrt(filter.width^2);
 end
 
 onlinemaps(avg,[],dimensions(1),fname,ledtest,record);
-
 
 % normalize if early frames subtracted
 if 0
@@ -276,22 +250,14 @@ if 0
     end
 end
 
-
-% plot winner takes all
-% h=plotwta(response_sign*avg,stimlist,blank_stim,0,bv_mask,5,256,record,...
-%     retinotopy_colormap(dimensions(1),dimensions(2)));
-
-
-h=plotwta(response_sign*avg,stimlist,blank_stim,0,find(roi'),5,256,record,...
+h = plotwta(response_sign*avg,stimlist,blank_stim,0,find(roi'),5,256,record,...
     retinotopy_colormap(dimensions(1),dimensions(2)));
-
-
 label=[ ' BLK=' num2str(min(blocks)) ':' ...
     num2str(max(blocks)) ' ' extension ];
 title(label);
-
 filename=[base 'wta' extension '.png'];
 saveas(gcf,filename ,'png');
-disp(['ANALYSE_RETINOTOPY: winner-take-all map saved as: ' filename]);
+logmsg(['Winner-take-all map saved as: ' filename]);
+
 return
 

@@ -10,6 +10,7 @@ end
 if isempty(record)
     record.mouse = '';
     record.datatype = 'oi';
+    record.stim_type = 'rt_response';
 end
 
 if length(record.mouse)>5
@@ -17,8 +18,6 @@ if length(record.mouse)>5
 else 
     experiment = '';
 end
-
-
 
 params.wta_equalize_area = false; % default
 switch experiment
@@ -52,4 +51,14 @@ switch record.stim_type
         params.single_condition_clipping = 10;
         params.single_condition_differential = true;
         params.single_condition_normalize_response = true;
+end
+
+switch record.datatype
+    case 'oi'
+        params.extra_baseline_time = 0.6; % extra frames to use for baseline
+        % using one, because in first 600 ms after stimulus not much effect
+        params.extra_time_after_offset = 2; % s
+    case 'fp'
+        params.extra_baseline_time = 0.3; % extra frames to use for baseline
+        params.extra_time_after_offset = 2; % s
 end

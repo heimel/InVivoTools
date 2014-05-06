@@ -3,14 +3,14 @@ function reliable=check_reliability(record)
 %
 %  RELIABLE=CHECK_RELIABILITY(RECORD)
 %
-% 2007, Alexander Heimel
+% 2007-2014, Alexander Heimel
 %
 
 reliable=[];
 response=record.response;
 
-if isempty(response)
-  return;
+if isempty(response) || isempty(record.timecourse_ratio)
+  return
 end
 
 baseline_fluc=std(mean(record.timecourse_ratio(1:3,:),1));
@@ -18,6 +18,6 @@ baseline_fluc=std(mean(record.timecourse_ratio(1:3,:),1));
 rel_baseline_fluc=std(mean(record.timecourse_ratio(1:3,:),1)) /...
     max(abs(record.timecourse_ratio(:)));
 
-disp(['baseline fluctuations: ' num2str(baseline_fluc) ...
+logmsg(['baseline fluctuations: ' num2str(baseline_fluc) ...
   ' (abs) ' num2str(rel_baseline_fluc) ...
   ' (rel) ']);
