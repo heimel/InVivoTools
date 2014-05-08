@@ -4,9 +4,18 @@ function record = oi_compute_significance( record )
 % 2014, Alexander Heimel
 %
 
+
+
 [response_framenumbers,baseline_framenumbers] = oi_get_framenumbers(record);
 
+
+
 data = oi_read_all_data( record );
+
+% combine conditions
+data = data(:,:,:,:,[1 3]);
+logmsg('ONLY DOING GROUP 1 AND 3 AT THE MOMENT');
+
 [n_x n_y n_frames n_blocks n_conditions] = size(data); %#ok<ASGLU>
 
 response = data(:,:,response_framenumbers,:,:);
