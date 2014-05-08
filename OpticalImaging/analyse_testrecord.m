@@ -401,31 +401,8 @@ switch record.stim_type
     %    oi_correlation_map( record )
         
     case 'significance'
-        % calculate significance with ANOVA using means and stddevs
-        
-        %   first flatten avg and stddev
-        if 0            % add zero response
-            logmsg('Adding zero response condition')
-            avg(:,:,end+1)=0;
-            stddev(:,:,end+1)=mean(stddev,3);
-        end
-        
-        ravg=reshape(avg,size(avg,1)*size(avg,2),size(avg,3));
-        rstddev=reshape(stddev,size(stddev,1)*size(stddev,2),size(stddev,3));
-        pvals=significant_pixels_avg_stddev(ravg,rstddev);
-        pvals=reshape(pvals,size(avg,1),size(avg,2));
-        if ~isempty(roi)
-            pvals_roi = ones(size(avg,1)*size(avg,2),1);
-            roi_ind = find(roi'>0);
-            pvals_roi(roi_ind) = significant_pixels_avg_stddev(ravg(roi_ind,:),rstddev(roi_ind,:),length(blocks));
-            pvals_roi = reshape(pvals_roi,size(avg,1),size(avg,2));
-        end
-
-        n_roi = sum(roi(:)>0);
-        frac05 = sum(pvals_roi(:)<0.05)/n_roi;
-        frac01 = sum(pvals_roi(:)<0.01) / n_roi;
-        frac001 = sum(pvals_roi(:)<0.001)/n_roi;
-        record.response=[frac05 frac01 frac001];
+        record = oi_compute_significance(record);
+        record.response=[]; %[frac05 frac01 frac001];
         record.response_sem=[];
         record.response_all=[];
         record.timecourse_roi=[];
