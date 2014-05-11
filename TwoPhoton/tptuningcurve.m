@@ -369,8 +369,7 @@ for p=1:size(data,2) % roi p
             end
             record.measures(p) = newmeasures;
         case 'size'
-            record.measures(p).suppression_index = (max(curve(2,:))-curve(2,end))/max(curve(2,:));
-            
+            record.measures(p).suppression_index = compute_suppression_index( curve(1,:), curve(2,:) );
         case 'position'
             record.measures(p).rect = stimrect;                              
             resp_by_pos = reshape(curve(2,:),n_x,n_y)';
