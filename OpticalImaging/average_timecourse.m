@@ -9,9 +9,7 @@ function [response,response_sem,response_all,tc_roi,tc_ror,ratio,tc_roi_sem,tc_r
 %				      COMPRESSION,RECORD,SHOW)
 %
 %
-%   2005, Alexander Heimel
-%
-% 2006-06-13 corrected normalization of ratio
+% 2005-2014, Alexander Heimel
 %
 
 response=record.response;
@@ -63,35 +61,28 @@ if isempty(show)
     show=1;
 end
 
-
-
-
 if ~iscell(fname)
     fname={fname};
 end
 
-
-
-
 experimentlist={};
-cancel=0;
 orgfname=fname{1};
-while ~cancel & isempty(experimentlist)
+while isempty(experimentlist)
     extension='';
     blocks_file={};
     n_file=[];
     for i=1:length(fname)
-        base=fname{i}
-        files=dir([base 'B*.BLK']);
+        base = fname{i};
+        files = dir([base 'B*.BLK']);
         n_file(i)=length(files);
         
         if isempty(blocks)
             blocks_file{i}=(0:n_file(i)-1);
         else
-            blocks_file{i}=blocks(find(blocks<n_file(i)));
+            blocks_file{i}=blocks(blocks<n_file(i));
         end
         blocks=blocks-n_file(i);
-        blocks=blocks(find(blocks>=0));
+        blocks=blocks(blocks>=0);
         
         disp([  fname{i} ': calculating timecourse over blocks:' ]);
         disp(  num2str(blocks_file{i}) );
@@ -108,14 +99,12 @@ while ~cancel & isempty(experimentlist)
             'Missing BLK files','Yes','No','Yes');
         switch button
             case 'No'
-                cancel=1;
                 return
             case 'Yes'
-                
                 [pathname,filename]=fileparts(fname{1});
                 filt=[filename 'B*.BLK'];
                 [filename,newpath]=uigetfile(filt,['Locate BLK files of ' orgfname] )
-                if isequal(filename,0) | isequal(newpath,0)
+                if isequal(filename,0) || isequal(newpath,0)
                     return
                 end
                 
@@ -131,9 +120,8 @@ while ~cancel & isempty(experimentlist)
 end
 
 if isempty(experimentlist)
-    error('could not open any BLK-files');
+    error('Could not open any BLK-files');
 end
-
 
 
 % check if last file is ready
@@ -143,7 +131,7 @@ if fileinfo.n_total_images==0
     experimentlist={experimentlist{1:end-1}};
 end
 if isempty(experimentlist)
-    disp('No blockfiles ready yet.')
+    logmsg('No blockfiles ready yet.')
     return
 end
 
@@ -241,27 +229,32 @@ tc_ror_sem=sem(ttc_ror,3);
 ratio=mean(tratio,3);
 ratio_sem=sem(tratio,3);
 
-params = oiprocessparams(record);
+%params = oiprocessparams(record);
+%
+% firstframes=[];
+% 
+% 
+% if ~isempty(stim_onset)
+%     if isempty(frame_duration)
+%         firstframes=(1:stim_onset);
+%     else
+%         firstframes=(1: ceil((stim_onset+ params.extra_baseline_time)/frame_duration)  );
+%     end
+% end
+% 
+% if ~isempty(stim_offset)
+%     dataframes=setdiff( (1:ceil( (stim_offset+params.extra_time_after_offset) /frame_duration)),firstframes);
+% else
+%     dataframes=setdiff( (1:size(ratio,1)),firstframes);
+% end
+% 
+% dataframes = dataframes(dataframes<=fileinfo.n_images);
 
-firstframes=[];
-if ~isempty(stim_onset)
-    if isempty(frame_duration)
-        firstframes=(1:stim_onset);
-    else
-        firstframes=(1: ceil((stim_onset+ params.extra_baseline_time)/frame_duration)  );
-    end
-end
+[dataframes,firstframes] = oi_get_framenumbers(record);
 if isempty(firstframes)
     firstframes=1;
 end
 
-if ~isempty(stim_offset)
-    dataframes=setdiff( (1:ceil( (stim_offset+params.extra_time_after_offset) /frame_duration)),firstframes);
-else
-    dataframes=setdiff( (1:size(ratio,1)),firstframes);
-end
-
-dataframes = dataframes(dataframes<=fileinfo.n_images);
 
 logmsg(['First frames: ' mat2str(firstframes) ...
     ', data frames: ' mat2str(dataframes)]);
