@@ -108,7 +108,7 @@ if length(ind)>1
 	return
 end
 if isempty(ind)
-	disp(['Error: cannot find mouse with name ' record.mouse ...
+	logmsg(['Cannot find mouse with name ' record.mouse ...
 		' in mouse_db']);
 	return
 end

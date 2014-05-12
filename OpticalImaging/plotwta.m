@@ -13,6 +13,17 @@ maskcoltab_1,record,cmap)
 %  XxYxNUMSTIM matrix of imaging data.
 %
 %  Example: h=plotwta(avg_data,2:8,1,256,0,256);
+if nargin<4
+    colortab_0 = 0;
+end
+
+if nargin<6
+    maskcoltab_0 = 0;
+end
+if nargin<7
+    maskcoltab_1 = 0;
+end
+
 if nargin<9
     cmap = [];
 end
@@ -20,7 +31,19 @@ end
 if nargin<8
     record = [];
 end
-
+if nargin<5
+    maskinds = [];
+end
+if nargin<3
+    blank_stim = [];
+end
+if nargin<2
+    stimlist = [];
+end
+if isempty(stimlist)
+    stimlist = 1:size(data,3);
+end
+    
 if isempty(cmap)
     cmap = retinotopy_colormap(length(stimlist),1);
 end
@@ -81,9 +104,9 @@ if 0
   wtaimg(find(maskinds)) = img0(find(maskinds));
 end
   
-%figure;
-%img=image(wtaimg'); axis equal off;
-%colormap(retinotopy_colors);
+% figure;
+% img=image(wtaimg'); axis equal off;
+% colormap(cmap);
 
 
 
