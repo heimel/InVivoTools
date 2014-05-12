@@ -4,8 +4,6 @@ function record = oi_compute_significance( record )
 % 2014, Alexander Heimel
 %
 
-
-
 [response_framenumbers,baseline_framenumbers] = oi_get_framenumbers(record);
 
 
