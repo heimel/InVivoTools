@@ -59,6 +59,11 @@ switch record.stim_type
         imagesc(signif_between_groups')
         axis image off
         colorbar 
+
+        figure('Name','Significantly different between groups, thresholded');
+        imagesc(signif_between_groups'<0.05)
+        axis image off
+        colorbar 
     case {'orientation','direction'}
         
         % WTA map
