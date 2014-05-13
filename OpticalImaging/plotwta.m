@@ -103,10 +103,6 @@ end;
 if 0
   wtaimg(find(maskinds)) = img0(find(maskinds));
 end
-  
-% figure;
-% img=image(wtaimg'); axis equal off;
-% colormap(cmap);
 
 
 
@@ -136,3 +132,10 @@ if 0   % changed to zero 2006-10-20
   image_intensity(wtaimg',intensity',retinotopy_colors);
   axis equal off;
 end
+
+
+% if 1 % no intensity scaling
+%     figure;
+%     img=image(wtaimg'); axis equal off;
+%     colormap(cmap);
+% end

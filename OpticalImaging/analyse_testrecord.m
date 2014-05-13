@@ -384,13 +384,22 @@ switch record.stim_type
         for c=1:size(avg,3)
             polavg = polavg + avg(:,:,c) * exp(multfac*pi*1i*record.stim_parameters(c)/180);
         end
+        
+        %substract mean bias in ROI
+        %polavg = polavg - mean(polavg(roi'==1));
+        
         or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
         or_angs(roi_edge'==1) = 0;
 
-        %figure
-        %image(or_angs');
-        %axis image off
-        %colormap hsv
+        figure
+        image(or_angs');
+        axis image off
+        colormap hsv
+        
+        figure;
+        logmsg('HISTOGRAM FOR ALL PIXELS');
+        hist(mod(angle(polavg(:))/pi*180/multfac,180))
+        
         h = image_intensity(or_angs',or_abs',cmap);
         filename= fullfile(oidatapath(record),[record.test '_B' ...
             mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
