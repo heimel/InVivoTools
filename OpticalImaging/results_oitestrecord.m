@@ -51,12 +51,12 @@ switch record.stim_type
         fname = fullfile(oidatapath(record),[record.test '_significance.mat']);
         load(fname);
         figure('Name','Significant response');
-        imagesc(signif_response)
+        imagesc(signif_response')
         axis image off
         colorbar
         
         figure('Name','Significantly different between groups');
-        imagesc(signif_between_groups)
+        imagesc(signif_between_groups')
         axis image off
         colorbar 
     case {'orientation','direction'}
