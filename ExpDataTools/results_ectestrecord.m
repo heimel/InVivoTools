@@ -740,10 +740,10 @@ for i=1:length(measure.response)
 %     polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:)
 %     curve(2,1)]),[ linestyle clr(i)]);
 %        polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
-        polar([measure.range{i} measure.range{i}(1)]/180*pi,...
+        polar([measure.range{i}+measure.preferred_stimulus{i} measure.range{i}(1)+measure.preferred_stimulus{i}]/180*pi,...
             thresholdlinear([measure.response{i} measure.response{i}(1)]),...
             [ linestyle clr(i)]);
-
+    set(gca,'view',[-90 90]);
     %phi =linspace(0,2*pi,100);
     %polar(phi,measure.rate_spont(i)*ones(size(phi)),[clr(i) '--']);
 end
