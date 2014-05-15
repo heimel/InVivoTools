@@ -1157,9 +1157,6 @@ switch command,
         end
         
         
-        
-        
-        
         % use only selected cells
         data = data(:,selected_cells);
         t = t(:,selected_cells);
@@ -1369,18 +1366,19 @@ switch command,
         
         tpmovie(ud.record,ud.channel,trialslist,stimlist,sorted,dF,fps,movfname,movietype);
     case 'QuickMapBt'
-        paramname = trim(get(ft(fig,'stimparamnameEdit'),'string'));
-        scratchname = tpscratchfilename(ud.record,[],['analysis_' paramname]);
-        if ~exist(scratchname,'file')
-            analyzetpstack('AnalyzeParamBt',[],fig);
-        end
-        if ~exist(scratchname,'file')
-            errordlg('Can''t open analysis file.  Please analyze data first by calculating tuning.');
-            return
-        end
-        g = load(scratchname,'resps','listofcells','listofcellnames','-mat');
+        %         paramname = trim(get(ft(fig,'stimparamnameEdit'),'string'));
+        %         scratchname = tpscratchfilename(ud.record,[],['analysis_' paramname]);
+        %         if ~exist(scratchname,'file')
+        %             analyzetpstack('AnalyzeParamBt',[],fig);
+        %         end
+        %         if ~exist(scratchname,'file')
+        %             errordlg('Can''t open analysis file.  Please analyze data first by calculating tuning.');
+        %             return
+        %         end
+        %         g = load(scratchname,'resps','listofcells','listofcellnames','-mat');
         thresh = str2double(get(ft(fig,'mapthreshEdit'),'string'));
-        tpquickmap(ud.record,ud.channel,g.resps,g.listofcells,1,'threshold',thresh);
+        listofcells = getpresentcells(ud,fig);
+        tpquickmap(ud.record,ud.channel,ud.record.measures,listofcells,1,'threshold',thresh);
         %     case 'baselineBt',
         %         dirname = get(ft(fig,'stimdirnameEdit'),'string');
         %         %refdirname = getrefdirname(ud,dirname);
