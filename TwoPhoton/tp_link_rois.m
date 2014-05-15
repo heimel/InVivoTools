@@ -33,7 +33,7 @@ end
 
 
 for i = ind_no_neurites
-    roilist(i).neurite = [NaN inf];
+    roilist(i).neurite = [NaN Inf];
     center_roi1.xi = median(roilist(i).xi); % take center
     center_roi1.yi = median(roilist(i).yi); % take center
     center_roi1.zi = median(roilist(i).zi); % take center
@@ -53,6 +53,15 @@ for i = ind_no_neurites
         end
     end % i
 end % j
+
+if isfield(roilist,'neurite')
+    for i = 1:length(roilist)
+        record.measures(i).distance2neurite = roilist(i).neurite(2) *  params.x_step;
+        if isinf(record.measures(i).distance2neurite)
+            record.measures(i).distance2neurite = NaN;
+        end
+    end
+end
 
 record.ROIs.celllist = roilist; 
 
