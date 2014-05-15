@@ -6,7 +6,7 @@
 
 %persistent db mousedb
 
-exp = '13.61';
+exp = '';
 
 experiment(exp); % to select for which specific experiment to load the data
 
@@ -19,7 +19,7 @@ if ~exist('db','var') || isempty(db)
 end
 
 mousedb = mousedb(find_record(mousedb,'strain!*BXD*,strain!*DBA*'));
-mousedb = mousedb(find_record(mousedb,['mouse=' exp '.*']));
+%mousedb = mousedb(find_record(mousedb,['mouse=' exp '.*']));
 
 close_figs; % to close non-persistent figures
 figure;
@@ -37,12 +37,14 @@ for m = 1:length(mousedb) % loop over mice
         if length(record.stim_parameters)~=2 || ~all(record.stim_parameters==[2 2]) % only do 2x2 maps
             continue
         end
-        
-%         if ~strcmpi(record.hemisphere,'left')
-%             continue
-%         end
-logmsg('TEMPORARILY NOT SELECTING FOR HEMISPHERE');
 
+        if 1
+            if ~strcmpi(record.hemisphere,'left')
+                continue
+            end
+        else
+            logmsg('TEMPORARILY NOT SELECTING FOR HEMISPHERE'); %#ok<UNRCH>
+        end
 
         filename = fullfile(oidatapath(record),'analysis',record.imagefile);
         if ~exist(filename,'file') || exist(filename,'dir')
@@ -60,8 +62,6 @@ logmsg('TEMPORARILY NOT SELECTING FOR HEMISPHERE');
         impatch(:,:,3) = img(:,:,3); % blue
         impatch(:,:,4) = img(:,:,1) - impatch(:,:,1);
         impatch = double(impatch);
-
-        
         
         % lambda is in unbinned pixel coordinates
         % reference image is unbinned
@@ -69,7 +69,7 @@ logmsg('TEMPORARILY NOT SELECTING FOR HEMISPHERE');
         if isempty(lambda_x)
             continue
         end
-        imgref=imread(refname,'bmp');
+        imgref = imread(refname,'bmp'); % unbinned
 
         % convert comma separated lists into cell list of tests
         % e.g. 'mouse_E2,mouse_E3' -> {'mouse_E2','mouse_E3'}
@@ -110,9 +110,7 @@ logmsg('TEMPORARILY NOT SELECTING FOR HEMISPHERE');
             axis image off
         end
         
-        
-        logmsg('ENNY WORKING ON IMAGE OVERLAYING');
+        logmsg('ENNY WORKING HERE ON IMAGE OVERLAYING');
         pause
-        
     end % test i
 end % mouse m
