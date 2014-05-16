@@ -26,7 +26,11 @@ im1 = rescale(im1,[min(min(im1)) max(max(im1))],[0 1]);
 im2 = im1; im3 = im1;
 
 numcolors = length(resps(1).curve{1}(1,:));
-ctab = jet(numcolors);
+if 1 % orientation
+ctab = [hsv(numcolors/2);hsv(numcolors/2)];
+else
+ctab = hsv(numcolors);
+end
 
 for i=1:length(resps),
 	if strcmp(method,'threshold'),
