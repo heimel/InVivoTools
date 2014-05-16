@@ -18,15 +18,16 @@ if length(protocolpath)>1
         record.protocol(1:5) '. Taking first']);
     protocolpath = protocolpath(1);
 end
-
+decpath = '\\vs01.herseninstituut.knaw.nl\MVP\Shared\DEC';
 filename = fullfile(decpath,protocolpath.name,record.filename);
 
-if ~exist(filename,'file')
-    disp(['SHOW_PROTOCOL: Cannot find ' filename ]);
-    return
-end
+% if ~exist(filename,'file')
+%     disp(['SHOW_PROTOCOL: Cannot find ' filename ]);
+%     return
+% end
+
 if ispc
-    winopen('filename.pdf')
+    winopen(filename)
 else
     system(['acroread ''' filename '''']);
 end
