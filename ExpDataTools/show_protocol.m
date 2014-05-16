@@ -21,10 +21,10 @@ end
 decpath = '\\vs01.herseninstituut.knaw.nl\MVP\Shared\DEC';
 filename = fullfile(decpath,protocolpath.name,record.filename);
 
-% if ~exist(filename,'file')
-%     disp(['SHOW_PROTOCOL: Cannot find ' filename ]);
-%     return
-% end
+if ~exist(filename,'file')
+    disp(['SHOW_PROTOCOL: Cannot find ' filename ]);
+    return
+end
 
 if ispc
     winopen(filename)
