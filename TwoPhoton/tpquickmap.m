@@ -25,23 +25,31 @@ im1 = tppreview(record,200,1,channel);
 im1 = rescale(im1,[min(min(im1)) max(max(im1))],[0 1]);
 im2 = im1; im3 = im1;
 
-numcolors = length(resps(1).curve{1}(1,:));
-if 1 % orientation
-ctab = [hsv(numcolors/2);hsv(numcolors/2)];
+if iscell(resps(1).curve)
+    numcolors = length(resps(1).curve{1}(1,:));
 else
-ctab = hsv(numcolors);
+    numcolors = length(resps(1).curve(1,:));
+end
+if 0 % orientation
+    ctab = [hsv(numcolors/2);hsv(numcolors/2)];
+else
+    ctab = hsv(numcolors);
 end
 
 for i=1:length(resps),
-	if strcmp(method,'threshold'),
-		[m,pki] = max(resps(i).curve{1}(2,:));
-		pki = pki(1); m = m(1);
-		if m>param1,
-			im1(pixels{i}) = ctab(pki,1);
-			im2(pixels{i}) = ctab(pki,2);
-			im3(pixels{i}) = ctab(pki,3);
-		end;
-	end;
+    if strcmp(method,'threshold'),
+        if iscell(resps(i).curve)
+            [m,pki] = max(resps(i).curve{1}(2,:));
+        else
+            [m,pki] = max(resps(i).curve(2,:));
+        end
+        pki = pki(1); m = m(1);
+        if m>param1,
+            im1(pixels{i}) = ctab(pki,1);
+            im2(pixels{i}) = ctab(pki,2);
+            im3(pixels{i}) = ctab(pki,3);
+        end;
+    end;
 end;
 
 im = cat(3,im1,im2,im3);
@@ -54,8 +62,8 @@ if 0
 end
 
 if plotit
-	figure('Name',['Quickmap ' recordfilter(record)],'NumberTitle','off');
-	image(im);
+    figure('Name',['Quickmap ' recordfilter(record)],'NumberTitle','off');
+    image(im);
     axis image
     axis off
 end;
