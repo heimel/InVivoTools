@@ -321,7 +321,9 @@ end
 
 
 % Studies, specific analyses for studies
-if 1 % Vangeneugden et al. in prep 
+
+if 1 % Vangeneugden, Self et al. in prep 
+    addpath(fullfile(majorprefix,'Studies','Mapmaking'));
     addpath(fullfile(majorprefix,'Studies','Joris'));
     addpath(fullfile(majorprefix,'Studies','Joris','TDT2ML'));
 end    

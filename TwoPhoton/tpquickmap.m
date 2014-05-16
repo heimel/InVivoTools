@@ -21,16 +21,16 @@ function [im]  = tpquickmap(record,channel,resps,pixels,plotit,method,param1)
 %  (more to be added)
 
 
-im1 = tppreview(record,50,1,channel);
+im1 = tppreview(record,200,1,channel);
 im1 = rescale(im1,[min(min(im1)) max(max(im1))],[0 1]);
 im2 = im1; im3 = im1;
 
-numcolors = length(resps(1).curve(1,:));
+numcolors = length(resps(1).curve{1}(1,:));
 ctab = jet(numcolors);
 
 for i=1:length(resps),
 	if strcmp(method,'threshold'),
-		[m,pki] = max(resps(i).curve(2,:));
+		[m,pki] = max(resps(i).curve{1}(2,:));
 		pki = pki(1); m = m(1);
 		if m>param1,
 			im1(pixels{i}) = ctab(pki,1);
@@ -50,7 +50,7 @@ if 0
 end
 
 if plotit
-	figure;
+	figure('Name',['Quickmap ' recordfilter(record)],'NumberTitle','off');
 	image(im);
     axis image
     axis off
