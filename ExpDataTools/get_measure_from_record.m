@@ -17,7 +17,7 @@ layer='';
 max_snr='inf';
 min_snr='0';
 for i=1:2:length(extra_options)
-    assign(extra_options{i},extra_options{i+1});
+    assign(trim(extra_options{i}),extra_options{i+1});
 end
 min_snr=eval(min_snr);
 max_snr=eval(max_snr);
@@ -156,12 +156,10 @@ if isfield(record,'measures')
             end
         end
         if exist('anesthetic','var')
-            if isempty(findstr(anesthetic,record.anesthetic))
+            if isempty(findstr(lower(anesthetic),lower(record.anesthetic)))
                 get = 0;
             end
         end
-        
-        
         if exist('depth','var') && ~isempty(depth) && depth~=0
             if record.depth ~= str2double(depth)
                 get = 0;

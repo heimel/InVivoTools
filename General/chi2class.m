@@ -3,14 +3,25 @@ function [p,chi2,E] = chi2class(D)
 %
 %    [ P,CHI2,E ] = CHI2CLASS( D )
 %
-%       D is the number of observations for each class
+%       D is the number of observations for each class in two or more
+%       groups
 %
 %       e.g. 40 females have blond hair, 10 females have brown hair
 %            20 males have blond hair, 20 males have brown hair
 %            is intelligence equally shared out over males and females?
 %            d = [40 10;20 20]; p = chi2class( d )
 %
-% Alexander Heimel (?)
+%       if D is a single column, it tests whether the distribution is
+%       equally distributed over all the classes
+%
+% -2014, Alexander Heimel (?)
+
+if length(D) == numel(D) % i.e. single column
+    D = D(:)'; % column vector
+    D(2,:) = 100000 * ones(1,length(D));
+end
+
+
 
 [c,r] = size(D);
 rsum = sum(D')';

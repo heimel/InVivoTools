@@ -70,7 +70,7 @@ if ischar(extra_options) %#ok<NODEF>
     extra_options=split(extra_options,',');
 end
 for i=1:2:length(extra_options)
-    assign(extra_options{i},extra_options{i+1});
+    assign(trim(extra_options{i}),extra_options{i+1});
 end
 
 if ischar(measure)
@@ -233,7 +233,7 @@ dresults=[];
 
 isolation='';
 for i=1:2:length(extra_options)
-    assign(extra_options{i},extra_options{i+1});
+    assign(trim(extra_options{i}),extra_options{i+1});
 end
 
 if strcmpi(measure.datatype,'genenetwork')
@@ -412,7 +412,7 @@ results = [];
 dresults = [];
 
 for i=1:2:length(extra_options)
-    assign(extra_options{i},extra_options{i+1});
+    assign(trim(extra_options{i}),extra_options{i+1});
 end
 
 if exist('reliable','var') && eval(reliable)==1 && length(testrecord.reliable)==1 

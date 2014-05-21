@@ -134,7 +134,7 @@ if ischar(extra_options)
     extra_options=split(extra_options,',');
 end
 for i=1:2:length(extra_options)
-    assign(extra_options{i},extra_options{i+1});
+    assign(trim(extra_options{i}),extra_options{i+1});
 end
 
 if exist('errorbars_sides','var')
