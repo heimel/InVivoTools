@@ -84,7 +84,7 @@ switch whichdb
                 end
                 
                 % matching structure to ectestdb_daneel_empty
-                db_empty = load(fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty'));
+                db_empty = load(fullfile(expdatabasepath(where),'Empty', 'ectestdb_empty'));
                 db_empty = db_empty.db;
                 
                 % load separate testdatabases and merge

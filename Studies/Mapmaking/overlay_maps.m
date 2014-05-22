@@ -29,10 +29,11 @@ if ~exist('db','var') || isempty(db)
 end
 
 %Where to save?
-savepath{1} = 'C:\Software\';
-savepath{2} = '\\vs01\MVP\Shared\InVivo\Databases\Enny\';
+savepath{1} = 'C:\Software';
+savepath{2} = '\\vs01\MVP\Shared\InVivo\Databases\Enny';
+savepath{3} = getdesktopfolder;
 
-cd(savepath{1})
+%cd(savepath{1})
 
 mousedb = mousedb(find_record(mousedb,'strain!*BXD*,strain!*DBA*'));
 %mousedb = mousedb(find_record(mousedb,['mouse=' exp '.*']));
@@ -41,7 +42,7 @@ close_figs; % to close non-persistent figures
 figure;
 
 %Pre-define or load probability_matrix
-if exist('ProbMapV1.mat')
+if exist('ProbMapV1.mat','file')
     load('ProbMapV1.mat')
 else
     ProbMapV1_Matr = nan(125,125,4,800); %125x125 pixels for all images, 4 for 4 colors start with 800 maps
@@ -129,13 +130,12 @@ for m = 1:length(mousedb) % loop over mice
         imagesc(imgref);
         axis image off
         hold on
-        plot(lambda_x,lambda_y,'+r','MarkerSize',10); % plot Lambda
+        h_lambda = plot(lambda_x,lambda_y,'+r','MarkerSize',10); % plot Lambda
         
         % plot Imaged Region
         line([xoffset xoffset+xsize*fileinfo.xbin xoffset+xsize*fileinfo.xbin xoffset xoffset],...
             [yoffset yoffset yoffset+ysize*fileinfo.ybin yoffset+ysize*fileinfo.ybin yoffset]);
         
-        hold off
         colmap = colormap('gray');
         for c=1:4
             subplot(3,2,2+c);
@@ -148,12 +148,19 @@ for m = 1:length(mousedb) % loop over mice
         logmsg(['Record: ' record.date ' ' record.test])
         
         %Check whether lambda is at proper location
-        correct_lambd = input('Lambda at proper location? (y/n)\n','s');
-        while strcmp(correct_lambd,'n')
+        disp('Lambda at proper location? (y/n)');
+        k = waitforbuttonpress;
+        correct_lambd = get(gcf,'currentcharacter');
+        while ~strcmpi(correct_lambd,'y')
             subplot(3,2,2)
             [lambda_x lambda_y] = ginput(1);
-            correct_lambd = input('Lambda at proper location? (y/n)\n','s');
+            delete(h_lambda);
+            h_lambda = plot(lambda_x,lambda_y,'+r','MarkerSize',10); % plot Lambda
+            disp('Lambda at proper location? (y/n)');
+            k = waitforbuttonpress;
+            correct_lambd = get(gcf,'currentcharacter');
         end
+        
                   
         %Current Bin Size & Scale
         Cur_scale = record.scale;
@@ -170,18 +177,21 @@ for m = 1:length(mousedb) % loop over mice
         new_yoffset = round(yshift + lambd_allign(2)); %already in new bins
                 
         %Convert to new scale & binsize
-        if new_scale~=Cur_scale | Cur_xbin ~= new_bin | Cur_ybin ~= new_bin
+        if new_scale~=Cur_scale || Cur_xbin ~= new_bin || Cur_ybin ~= new_bin
             nr_row = ((ysize*Cur_ybin*Cur_scale)/(new_scale))/new_bin; %ysize times bin gives nr pixels. Times scale gives total amount of micron
             nr_col = ((xsize*Cur_xbin*Cur_scale)/(new_scale))/new_bin; %Divided by new scale gives new amount of pixels needed. This is what you bin in the new bin gives needed amount of rows and columns
             GSized_impatch = zeros(nr_row,nr_col,size(impatch,3));
             %nr_row and nr_col should be 68 and 76 respectively, if not
             %it's wrong
-            if nr_row ~= nr_row | nr_col ~= nr_col
+            if nr_row ~= nr_row || nr_col ~= nr_col
                 error('Nr_rows or nr_cols is not right..!')
             end
             %Calculate the difference in nr_rows and nr_cols with original image
             ydif = size(impatch,1)/nr_row;
             xdif = size(impatch,2)/nr_col;
+            
+            % Alexander: nice routine below, but did you consider IMRESIZE?
+            % 
             
             %Now bin the impatch again
             for ridx = 1:nr_row
@@ -216,6 +226,8 @@ for m = 1:length(mousedb) % loop over mice
         %Normalize GSized_impatch colours from 0 to 1
         Norm_impatch = (GSized_impatch - min(GSized_impatch(:)))/max(GSized_impatch(:)) - min(GSized_impatch(:));
         
+        % next bit could be made more robust, if new_yoffset or new_xoffset are <=0       
+        
         %Now every image has to shift that amount in the ColorMatPerMouse
         ProbMapV1_Matr([new_yoffset:new_yoffset+size(Norm_impatch,1)-1],[new_xoffset:new_xoffset+size(Norm_impatch,2)-1],:,nr_map) = Norm_impatch;
         
@@ -226,7 +238,7 @@ for m = 1:length(mousedb) % loop over mice
                 subplot(2,2,ccl)
                 imagesc(ProbMapV1_Matr(:,:,ccl,nr_map))
                 hold on
-                plot(LambdaX_bin,LambdaY_bin,'+r','Markersize',10)
+                plot(lambd_allign(1),lambd_allign(2),'+r','Markersize',10)
             end
             colmap = colormap('gray');
         end
@@ -243,10 +255,16 @@ for m = 1:length(mousedb) % loop over mice
         db(i).new_scale = new_scale;
           %Save Probability map and mapIndx
         for sp = 1:length(savepath)
-            save([savepath{sp} 'ProbMapV1'],'ProbMapV1_Matr','mapIndx','nr_map','lambd_allign','new_bin')
+            if exist(savepath{sp},'dir')
+                save(fullfile(savepath{sp},'ProbMapV1'),'ProbMapV1_Matr','mapIndx','nr_map','lambd_allign','new_bin')
+            end
         end
         
+        % saving is slow, probably better to move save_db to after the for
+        % loops and make it possible to break out.
+        
         %Save Database
+        rmlock(filename2save); % a little unsafe
         save_db(db,filename2save)
         
     end % test i
