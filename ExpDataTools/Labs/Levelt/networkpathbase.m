@@ -20,6 +20,9 @@ else % assume windows
   if ~exist(base,'dir')
       base = '\\vs01.herseninstituut.knaw.nl\MVP\Shared\InVivo';
   end
+  if ~exist(base,'dir')
+      base = '\\vs01\MVP\Shared\InVivo';
+  end
 end
 
   
