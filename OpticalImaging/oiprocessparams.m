@@ -23,6 +23,8 @@ params.wta_equalize_area = false; % default
 switch experiment
     case '12.54'
         params.wta_equalize_area = false;
+    case '11.12'
+        params.wta_equalize_area = true;
     case '13.61'
           params.wta_equalize_area = true;
     case '13.62'
@@ -39,6 +41,8 @@ end
 
 params.spatial_filter_width = 3; % pixels
 switch experiment
+    case '11.12'
+        params.spatial_filter_width = 3; % pixels use nan to turn off filter
     case '13.61'
         params.spatial_filter_width = 1; % pixels use nan to turn off filter
 end
