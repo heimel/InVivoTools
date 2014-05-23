@@ -9,12 +9,7 @@
 exp = 'enny';
 host('daneel')
 
-%On which coordinate is lambda alligned?
-lambd_allign = [20 20]; %location [x,y] on figure in binned-pixels
-
-new_bin = 6; %How many pixels do you want to have binned?
-new_scale = 11.04; %How many micron per pixel?
-Check_newBin = 1; % DO you want to plot the different colours when binned again?
+Check_newBin = 0; % DO you want to plot the different colours when binned again?
 Check_ProbMap = 1; %Do you want to plot the probability map?
 
 %%
@@ -31,30 +26,34 @@ end
 %Where to save?
 savepath{1} = 'C:\Software';
 savepath{2} = '\\vs01\MVP\Shared\InVivo\Databases\Enny';
-savepath{3} = getdesktopfolder;
+% savepath{3} = getdesktopfolder;
 
 %cd(savepath{1})
-
 mousedb = mousedb(find_record(mousedb,'strain!*BXD*,strain!*DBA*'));
 %mousedb = mousedb(find_record(mousedb,['mouse=' exp '.*']));
 
-close_figs; % to close non-persistent figures
-figure;
 
+flag = 0;
 %Pre-define or load probability_matrix
 if exist('ProbMapV1.mat','file')
     load('ProbMapV1.mat')
 else
-    ProbMapV1_Matr = nan(125,125,4,800); %125x125 pixels for all images, 4 for 4 colors start with 800 maps
+    Sum_Map = nan(500,500,4); %500 x 500 pixels for all images, 4 for 4 colors start with 800 m
+    SumSq_Map = nan(500,500,4);
     nr_map = 1;
     %index of which map is used to overlay
     mapIndx = zeros(1,length(db));
+    %On which coordinate is lambda alligned?
+    lambd_align = [100 100]; %location [x,y] on figure in binned-pixels
+    new_bin = 2; %How many pixels do you want to have binned?
+    new_scale = 11.04; %How many micron per pixel?
 end
 
 for m = 1:length(mousedb) % loop over mice
     ind = find_record(db,['mouse=' mousedb(m).mouse ',stim_type=retinotopy,reliable!0']);
     for i = ind % loop over tests
-        
+        close_figs; % to close non-persistent figures
+        h = figure('units','normalized');
         record = db(i);
         
         %Check whether this map is already considered
@@ -95,6 +94,7 @@ for m = 1:length(mousedb) % loop over mice
         impatch(:,:,3) = img(:,:,3); % blue
         impatch(:,:,4) = img(:,:,1) - impatch(:,:,1); %Yellow
         impatch = double(impatch);
+        
         
         % lambda is in unbinned pixel coordinates
         % reference image is unbinned (and I assume same scale?)
@@ -148,69 +148,74 @@ for m = 1:length(mousedb) % loop over mice
         logmsg(['Record: ' record.date ' ' record.test])
         
         %Check whether lambda is at proper location
-        disp('Lambda at proper location? (y/n)');
-        k = waitforbuttonpress;
-        correct_lambd = get(gcf,'currentcharacter');
-        while ~strcmpi(correct_lambd,'y')
-            subplot(3,2,2)
-            [lambda_x lambda_y] = ginput(1);
-            delete(h_lambda);
-            h_lambda = plot(lambda_x,lambda_y,'+r','MarkerSize',10); % plot Lambda
+        
+        if isempty(db(i).lambda)
             disp('Lambda at proper location? (y/n)');
+            set(h,'outerposition',[0 0 1 1])
             k = waitforbuttonpress;
             correct_lambd = get(gcf,'currentcharacter');
+            while ~strcmpi(correct_lambd,'y')
+                subplot(3,2,2)
+                [lambda_x lambda_y] = ginput(1);
+                delete(h_lambda);
+                h_lambda = plot(lambda_x,lambda_y,'+r','MarkerSize',10); % plot Lambda
+                disp('Lambda at proper location? (y/n)');
+                k = waitforbuttonpress;
+                correct_lambd = get(gcf,'currentcharacter');
+            end
+        else
+            display('Lambda already confirmed')
         end
         
-                  
+        set(h,'OuterPosition',[0.25 0.25 0.6 0.6])
+        
+        %Whether to include this map into the average?
+        button_correctlypressed = 0;
+        while button_correctlypressed ~= 1
+            disp('Include this map in average map? (y/n)')
+            k = waitforbuttonpress;
+            incl = get(gcf,'currentcharacter');
+            if strcmpi(incl,'y')
+                button_correctlypressed = 1;
+                db(i).overlay_included = 1;
+            elseif strcmpi(incl,'n')
+                button_correctlypressed = 1;
+                db(i).overlay_included = 0;
+            else
+                disp('Wrong button')
+            end
+        end
+        
+        %If you do not want to include this map, continue to the next
+        if db(i).overlay_included == 0;
+            continue
+        end
+        
         %Current Bin Size & Scale
         Cur_scale = record.scale;
         Cur_xbin = fileinfo.xbin;
         Cur_ybin = fileinfo.ybin;
-           
+        
         %Now lambda is checked, determine position of lambda to left corner
         %of imaged region
-        yshift = (((yoffset - lambda_y)*Cur_scale)/new_scale)/new_bin; %in 
+        yshift = (((yoffset - lambda_y)*Cur_scale)/new_scale)/new_bin; %in
         xshift = (((xoffset - lambda_x)*Cur_scale)/new_scale)/new_bin;
-               
+        
         % xshift + new lambda location is new offset for imaged region
-        new_xoffset = round(xshift + lambd_allign(1)); %already in new bins
-        new_yoffset = round(yshift + lambd_allign(2)); %already in new bins
-                
+        new_xoffset = round(xshift + lambd_align(1)); %already in new bins
+        new_yoffset = round(yshift + lambd_align(2)); %already in new bins
+        
         %Convert to new scale & binsize
-        if new_scale~=Cur_scale || Cur_xbin ~= new_bin || Cur_ybin ~= new_bin
-            nr_row = ((ysize*Cur_ybin*Cur_scale)/(new_scale))/new_bin; %ysize times bin gives nr pixels. Times scale gives total amount of micron
-            nr_col = ((xsize*Cur_xbin*Cur_scale)/(new_scale))/new_bin; %Divided by new scale gives new amount of pixels needed. This is what you bin in the new bin gives needed amount of rows and columns
-            GSized_impatch = zeros(nr_row,nr_col,size(impatch,3));
-            %nr_row and nr_col should be 68 and 76 respectively, if not
-            %it's wrong
-            if nr_row ~= nr_row || nr_col ~= nr_col
-                error('Nr_rows or nr_cols is not right..!')
-            end
-            %Calculate the difference in nr_rows and nr_cols with original image
-            ydif = size(impatch,1)/nr_row;
-            xdif = size(impatch,2)/nr_col;
-            
-            % Alexander: nice routine below, but did you consider IMRESIZE?
-            % 
-            
-            %Now bin the impatch again
-            for ridx = 1:nr_row
-                for cidx = 1:nr_col
-                    sty_val = ridx*ydif-(ydif-1); %start y value
-                    stpy_val = ridx*ydif;
-                    stx_val = cidx*xdif-(xdif-1);
-                    stpx_val = cidx*xdif;
-                    %Check whether the end exceeds size impatch
-                    if stpy_val > size(impatch,1)
-                        stpy_val = size(impatch,1);
-                    end
-                    if stpx_val > size(impatch,2)
-                        stpx_val = size(impatch,2);
-                    end
-                    GSized_impatch(ridx,cidx,:) = squeeze(mean(mean(impatch(sty_val:stpy_val,stx_val:stpx_val,:),1),2));
-                end
-            end
+        if exist('ProbMapV1.mat','file') %if Already a current map exists,
+            % nr_rows  and nr_cols should be the same
+            fprintf('Number or rows %.0f and columns %.0f\n',nr_row,nr_col)
+        else
+            %Or calculate nr_rows & cols needed
+            nr_row = round(((ysize*Cur_ybin*Cur_scale)/(new_scale))/new_bin); %ysize times bin gives nr pixels. Times scale gives total amount of micron
+            nr_col = round(((xsize*Cur_xbin*Cur_scale)/(new_scale))/new_bin); %Divided by new scale gives new amount of pixels needed. This is what you bin in the new bin gives needed amount of rows and columns
         end
+        % Alexander: nice routine below, but did you consider IMRESIZE?
+        GSized_impatch = imresize(impatch,[nr_row nr_col]);
         
         %Check:
         if Check_newBin == 1
@@ -226,47 +231,77 @@ for m = 1:length(mousedb) % loop over mice
         %Normalize GSized_impatch colours from 0 to 1
         Norm_impatch = (GSized_impatch - min(GSized_impatch(:)))/max(GSized_impatch(:)) - min(GSized_impatch(:));
         
-        % next bit could be made more robust, if new_yoffset or new_xoffset are <=0       
-        
         %Now every image has to shift that amount in the ColorMatPerMouse
-        ProbMapV1_Matr([new_yoffset:new_yoffset+size(Norm_impatch,1)-1],[new_xoffset:new_xoffset+size(Norm_impatch,2)-1],:,nr_map) = Norm_impatch;
+        new_Fig = nan(size(Sum_Map,1),size(Sum_Map,2),size(Sum_Map,3));
+        new_Fig([new_yoffset:new_yoffset+size(Norm_impatch,1)-1],[new_xoffset:new_xoffset+size(Norm_impatch,2)-1],:) = Norm_impatch;
         
-        %Check probability map?
+        %nansum makes 0 of sum of 2 nans. You don't want that
+        NanMat = isnan(new_Fig) + isnan(Sum_Map);
+        
+        %Maps to save
+        Sum_Map = nansum(cat(4,Sum_Map,new_Fig),4); %nansum up every map
+        Sum_Map(NanMat>1) = NaN;
+        
+        NanMat = isnan(new_Fig) + isnan(SumSq_Map);
+        SumSq_Map = nansum(cat(4,SumSq_Map,new_Fig.^2),4); %To calculate the std later
+        SumSq_Map(NanMat>1) = NaN; %Bring back the Nans
+        
+        Mean_Map = Sum_Map/nr_map; %Mean map
+        std_Map = (SumSq_Map)./nr_map - (Mean_Map.^2); %std map
+        %Nan should only be removed when in both cases no nan...
+        
+        
+        Mapnames = {'Sum_Map','SumSq_Map','Mean_Map','std_Map'};
+        %Check probability maps?
         if Check_ProbMap == 1
-            figure
-            for ccl = 1:size(ProbMapV1_Matr,3)
-                subplot(2,2,ccl)
-                imagesc(ProbMapV1_Matr(:,:,ccl,nr_map))
-                hold on
-                plot(lambd_allign(1),lambd_allign(2),'+r','Markersize',10)
+            for mp = [1,3] %only sum and mean_map
+                figure
+                map2plot = eval(Mapnames{mp});
+                for ccl = 1:size(map2plot,3)
+                    subplot(2,2,ccl)
+                    imagescnan(map2plot(:,:,ccl))
+                    hold on
+                    plot(lambd_align(1),lambd_align(2),'+r','Markersize',10)
+                end
+                colmap = colormap('gray');
+                suplabel(Mapnames{mp},'t');
             end
-            colmap = colormap('gray');
         end
-
-            
         
         nr_map = nr_map+1;
-        db(i).overlay_included = 1;
-          
+        
         % If checked, put in record
         db(i).lambda.x = lambda_x;
         db(i).lambda.y = lambda_y;
         db(i).new_bin = new_bin;
         db(i).new_scale = new_scale;
-          %Save Probability map and mapIndx
-        for sp = 1:length(savepath)
-            if exist(savepath{sp},'dir')
-                save(fullfile(savepath{sp},'ProbMapV1'),'ProbMapV1_Matr','mapIndx','nr_map','lambd_allign','new_bin')
-            end
-        end
+        
         
         % saving is slow, probably better to move save_db to after the for
         % loops and make it possible to break out.
+        flag = flag + 1;
+        %Save Database every 15
+        if flag == 15
+            rmlock(filename2save); % a little unsafe
+            disp('Saving...')
+            save_db(db,filename2save)
+            
+            %Save Probability map and mapIndx
+            for sp = 1:length(savepath)
+                if exist(savepath{sp},'dir')
+                    save(fullfile(savepath{sp},'ProbMapV1'),'Sum_Map','SumSq_Map','Mean_Map','std_Map','mapIndx','nr_map','new_bin','nr_row','nr_col','lambd_align','new_scale')
+                end
+            end
+                        
+            flag = 0;
+            
+        end
         
-        %Save Database
-        rmlock(filename2save); % a little unsafe
-        save_db(db,filename2save)
+        disp('Press button to continue')
+        pause
         
     end % test i
 end % mouse m
+
+
 
