@@ -55,6 +55,7 @@ if load_general, % general
     addpath(fullfile(path2general,'Wavelet','Wavelet Basics')); % used for erp analysis, Timo
     addpath(fullfile(path2general,'Wavelet','sinefit')); % used for erp analysis, Timo
     addpath(fullfile(path2general,'uitools'));
+    addpath(fullfile(path2general,'CircStat'));
     % database has some routines which are optimized for newer matlabs
     matlabversion=version;
     switch matlabversion(1:2)
