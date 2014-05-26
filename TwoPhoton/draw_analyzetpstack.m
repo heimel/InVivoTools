@@ -238,7 +238,8 @@ guicreate(txt,'String','px','Enable','on','width','auto','parent',hroilabelspane
 guicreate(button,'String','Neurite','Tag','drawNeuriteBt','left','left','tooltipstring','Draw neurite','Enable','on','width','auto','parent',hroilabelspanel,'move','right');
 % Snap to
 guicreate(txt,'String','Snap','Enable','on','width','auto','parent',hroilabelspanel,'move','right');
-guicreate(popup,'String',{'','1','2','3'},'Tag','snaptoPopup','Enable','on','width',30,'parent',hroilabelspanel,'move','right','callback','genercallback');
+guicreate(popup,'String',['no' cellfun(@num2str,num2cell(1:ti.NumberOfChannels,[ti.NumberOfChannels 1]),...
+    'UniformOutput',false)],'Tag','snaptoPopup','Enable','on','width',35,'parent',hroilabelspanel,'move','right','callback','genercallback');
 
 % Export
 guicreate(button,'String','Export','Tag','exportROIsBt','Enable','on','tooltipstring','Export ROIs','width','auto','parent',hroilabelspanel,'move','down');
