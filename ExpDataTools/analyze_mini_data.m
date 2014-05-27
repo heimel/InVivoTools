@@ -96,6 +96,8 @@ for c=1:length(control)
     ctl_means(c,:)=mean(control{c});
     ctl_medians(c,:)=median(control{c});
     ctl_std(c,:)=std(control{c});
+    
+    disp(['Control cell ' num2str(c) ',median interval,' num2str(ctl_medians(c,19)) ',mean interval,' num2str(ctl_means(c,19))]);
 end
 
 trg_means=nan*zeros(length(transgenic),size(transgenic{1},2));
@@ -103,6 +105,8 @@ for c=1:length(transgenic)
     trg_means(c,:)=mean(transgenic{c});
     trg_medians(c,:)=median(transgenic{c});
     trg_std(c,:)=std(transgenic{c});
+
+    disp(['Transgenic cell ' num2str(c) ',median interval,' num2str(ctl_medians(c,19)) ',mean interval,' num2str(ctl_means(c,19))]);
 end
 
 %% analyze all fields
@@ -112,13 +116,25 @@ for fn = [3 19] %fn=[3 4 5 6 7 8  19]
         continue
     end
     disp(description{fn})
+
+    
+    
+    
     disp(['control    mean of cell means: ' num2str(mean(ctl_means(:,fn)),3) ...
         ' +- ' num2str(sem(ctl_means(:,fn)),3) ...
         '  (n = ' num2str(size(ctl_means,1)) ')' ]);
     disp(['transgenic mean of cell means: ' num2str(mean(trg_means(:,fn)),3)...
         ' +- ' num2str(sem(trg_means(:,fn)),3) ...
         '  (n = ' num2str(size(trg_means,1)) ')']);
+    
+    
+    
+    
     [h,p]=ttest2(ctl_means(:,fn),trg_means(:,fn));
+
+    
+    
+    
     disp(['ttest on cell means: p = ' num2str(p,3)]);
     p=kruskal_wallis_test(ctl_means(:,fn),trg_means(:,fn));
     disp(['kruskal wallis on cell means: p = ' num2str(p,3)]);
