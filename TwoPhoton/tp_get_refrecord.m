@@ -44,6 +44,9 @@ else
         ind_cur = find_record(db,crit_current);
     end    
     if length(ind_cur)>1
+        if any(record.comment==',')
+            errormsg('Comma in comment field can lead to surprising things. Better remove' );
+        end
         crit_current = [crit_current ',comment=' record.comment];
         ind_cur = find_record(db,crit_current);
     end    
