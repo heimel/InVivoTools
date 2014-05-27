@@ -24,6 +24,8 @@ switch host
         localroot='E:\2PhotonData';
      case 'nin192' % Laura's desktop
          localroot='E:\Data\InVivo\Twophoton';
+    case 'MacBook-Air-van-Rosanne.local' 
+        localroot = '/Users/rrmtuip/Documents/Data/InVivo/TwoPhoton';
     otherwise
         switch computer
             case 'MACI64' % i.e. Daan's home mac

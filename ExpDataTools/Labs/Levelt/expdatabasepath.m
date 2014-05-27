@@ -32,7 +32,11 @@ switch where
 %               base = ['/Users/',user,'/Dropbox'];
 %        end
 	if isunix
+        if ismac
+                base = ['/Users/',user,'/Documents/Data/InVivo'];
+        else
         	base='/home/data/InVivo';
+        end
 	elseif ispc	
                 base='C:\Data\InVivo';
 	elseif ismac 
