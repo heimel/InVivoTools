@@ -63,6 +63,9 @@ if ~strcmp(experimentname,experimentname_pers) && ...
     end
 end
 
+if isempty(experimentname)
+    experimentname = '';
+end
 
 notfirstentry = true;
 

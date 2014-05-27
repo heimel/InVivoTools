@@ -26,7 +26,7 @@ end
 control={};
 transgenic={};
 
-nin = false;
+nin = true;
 vu = false;
 nin12 = true;
 
@@ -206,12 +206,22 @@ switch dataset
         end
         
 
-        if nin12
-            control{end+1}=dlmread('Apr2012/03Jan35021Cell3p.csv',',');
-            control{end+1}=dlmread('Apr2012/05March35534Cell3p.csv',',');
-            control{end+1}=dlmread('Apr2012/07March35535Cell2p.csv',',');
-        end
 
+        if nin12
+            control{end+1}=dlmread('Apr2012/02Dec33324Cell3.csv',',');
+            control{end+1}=dlmread('Apr2012/06Jan35022Cell11.csv',',');
+            control{end+1}=dlmread('Apr2012/07Dec34417Cell1.csv',',');
+            control{end+1}=dlmread('Apr2012/07Dec34417Cell2.csv',',');
+            control{end+1}=dlmread('Apr2012/15March35649Cell2.csv',',');
+            control{end+1}=dlmread('Apr2012/18Jan35019Cell21-check.csv',',');
+            control{end+1}=dlmread('Apr2012/19Jan35070Cell11.csv',',');
+            control{end+1}=dlmread('Apr2012/23Dec34591Cell1.csv',',');
+            control{end+1}=dlmread('Apr2012/28Dec34593Cell2.csv',',');
+            control{end+1}=dlmread('Apr2012/28Dec34593Cell4.csv',',');
+            control{end+1}=dlmread('Apr2012/29Dec34594Cell1.csv',',');
+            control{end+1}=dlmread('Apr2012/29Dec34594Cell3.csv',',');
+        end
+        
 
         
         
@@ -257,20 +267,10 @@ switch dataset
         end
         
         if nin12
-            transgenic{end+1}=dlmread('Apr2012/02Dec33324Cell3.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/06Jan35022Cell11.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/07Dec34417Cell1.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/07Dec34417Cell2.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/15March35649Cell2.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/18Jan35019Cell21-check.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/19Jan35070Cell11.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/23Dec34591Cell1.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/28Dec34593Cell2.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/28Dec34593Cell4.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/29Dec34594Cell1.csv',',');
-            transgenic{end+1}=dlmread('Apr2012/29Dec34594Cell3.csv',',');
+            transgenic{end+1}=dlmread('Apr2012/03Jan35021Cell3p.csv',',');
+            transgenic{end+1}=dlmread('Apr2012/05March35534Cell3p.csv',',');
+            transgenic{end+1}=dlmread('Apr2012/07March35535Cell2p.csv',',');
         end
-        
         
         
     case 'TrkB/Exc'

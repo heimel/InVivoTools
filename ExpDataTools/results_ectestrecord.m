@@ -8,6 +8,11 @@ function results_ectestrecord( record )
 
 global measures analysed_script
 
+%
+logmsg('TEMPORARILY FOR MEHRAN PAPER')
+compute_fraction_overlapping_spikes(record)
+%
+
 if isfield(record,'electrode') % i.e. ecdata
     data_type = 'ec';
 elseif isfield(record,'laser') % i.e. tpdata

@@ -8,8 +8,8 @@ if isempty(dataset)
     % check /home/data/Slice/Minis
     %dataset='TrkB/Inh';
     % dataset='Gephyrin';
-    % dataset='TrkB/Inh'; % check /home/data/Slice/Minis
-    dataset='TrkB_Mosaic/Inh'; % check /home/data/Slice/Minis
+     dataset='TrkB/Inh'; % check /home/data/Slice/Minis
+    %dataset='TrkB_Mosaic/Inh'; % check /home/data/Slice/Minis
     %dataset='TrkB/Exc'; % check /home/data/Slice/Minis
     %dataset='unfiltered_data';
 end
@@ -106,7 +106,7 @@ for c=1:length(transgenic)
 end
 
 %% analyze all fields
-for fn=[3 4 5 6 7 8  19]
+for fn = [3 19] %fn=[3 4 5 6 7 8  19]
     %for fn=[3 19]
     if mean(ctl_means(:,fn))==0 || mean(ctl_means(:,fn))==-1
         continue
