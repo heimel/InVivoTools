@@ -10,8 +10,8 @@ function base=networkpathbase
 
 if isunix
     switch computer
-        case 'MACI64'
-            base = '/Volumes/MVP/Common/InVivo';
+        case {'MACI64','MACI'} 
+            base = '/Volumes/MVP/Shared/InVivo';
         otherwise
             base = '/mnt/InVivo';
     end

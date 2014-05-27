@@ -40,11 +40,13 @@ if exist('ProbMapV1.mat','file')
 else
     Sum_Map = nan(500,500,4); %500 x 500 pixels for all images, 4 for 4 colors start with 800 m
     SumSq_Map = nan(500,500,4);
+    AllColSum_Map = nan(500,500);
+    AllColSumSq_Map = nan(500,500);
     nr_map = 1;
     %index of which map is used to overlay
     mapIndx = zeros(1,length(db));
     %On which coordinate is lambda alligned?
-    lambd_align = [100 100]; %location [x,y] on figure in binned-pixels
+    lambd_align = [200 200]; %location [x,y] on figure in binned-pixels
     new_bin = 2; %How many pixels do you want to have binned?
     new_scale = 11.04; %How many micron per pixel?
 end
@@ -56,6 +58,11 @@ for m = 1:length(mousedb) % loop over mice
         h = figure('units','normalized');
         record = db(i);
         
+        %If necessary; reset one
+%         if i == 2806
+%             mapIndx(i) = 0;
+%         end
+%         
         %Check whether this map is already considered
         if mapIndx(i) == 1
             continue
@@ -148,14 +155,27 @@ for m = 1:length(mousedb) % loop over mice
         logmsg(['Record: ' record.date ' ' record.test])
         
         %Check whether lambda is at proper location
-        
+        db(i).experimenter
         if isempty(db(i).lambda)
+            LF = figure;
+            
+            imagesc(imgref);
+            axis image off
+            hold on
+            h_lambda = plot(lambda_x,lambda_y,'+r','MarkerSize',10); % plot Lambda
+            
+            % plot Imaged Region
+            line([xoffset xoffset+xsize*fileinfo.xbin xoffset+xsize*fileinfo.xbin xoffset xoffset],...
+                [yoffset yoffset yoffset+ysize*fileinfo.ybin yoffset+ysize*fileinfo.ybin yoffset]);
+            
+            colmap = colormap('gray');
+            
             disp('Lambda at proper location? (y/n)');
-            set(h,'outerposition',[0 0 1 1])
+            %             set(h,'outerposition',[0 0 1 1])
+            
             k = waitforbuttonpress;
             correct_lambd = get(gcf,'currentcharacter');
             while ~strcmpi(correct_lambd,'y')
-                subplot(3,2,2)
                 [lambda_x lambda_y] = ginput(1);
                 delete(h_lambda);
                 h_lambda = plot(lambda_x,lambda_y,'+r','MarkerSize',10); % plot Lambda
@@ -163,6 +183,10 @@ for m = 1:length(mousedb) % loop over mice
                 k = waitforbuttonpress;
                 correct_lambd = get(gcf,'currentcharacter');
             end
+            close(LF)
+            disp('Are you sure about this position? (y/n)')
+            k = waitforbuttonpress;
+            certainty = get(gcf,'currentcharacter');
         else
             display('Lambda already confirmed')
         end
@@ -172,22 +196,25 @@ for m = 1:length(mousedb) % loop over mice
         %Whether to include this map into the average?
         button_correctlypressed = 0;
         while button_correctlypressed ~= 1
-            disp('Include this map in average map? (y/n)')
+            disp('Include this map in average map? (y/n/m) for yes/no/maybe')
             k = waitforbuttonpress;
             incl = get(gcf,'currentcharacter');
             if strcmpi(incl,'y')
                 button_correctlypressed = 1;
-                db(i).overlay_included = 1;
+                db(i).overlay_included = 'yes';
             elseif strcmpi(incl,'n')
                 button_correctlypressed = 1;
-                db(i).overlay_included = 0;
+                db(i).overlay_included = 'no';
+            elseif strcmpi(incl,'m')
+                button_correctlypressed = 1;
+                db(i).overlay_included = 'maybe'
             else
                 disp('Wrong button')
             end
         end
         
         %If you do not want to include this map, continue to the next
-        if db(i).overlay_included == 0;
+        if ~strcmpi(db(i).overlay_included,'yes');
             continue
         end
         
@@ -229,7 +256,7 @@ for m = 1:length(mousedb) % loop over mice
         end
         
         %Normalize GSized_impatch colours from 0 to 1
-        Norm_impatch = (GSized_impatch - min(GSized_impatch(:)))/max(GSized_impatch(:)) - min(GSized_impatch(:));
+        Norm_impatch = (GSized_impatch - min(GSized_impatch(:)))/(max(GSized_impatch(:)) - min(GSized_impatch(:)));
         
         %Now every image has to shift that amount in the ColorMatPerMouse
         new_Fig = nan(size(Sum_Map,1),size(Sum_Map,2),size(Sum_Map,3));
@@ -250,24 +277,42 @@ for m = 1:length(mousedb) % loop over mice
         std_Map = (SumSq_Map)./nr_map - (Mean_Map.^2); %std map
         %Nan should only be removed when in both cases no nan...
         
+        NanMat = isnan(AllColSum_Map) + isnan(new_Fig(:,:,1))+isnan(new_Fig(:,:,2))+isnan(new_Fig(:,:,3))+isnan(new_Fig(:,:,4));
         
-        Mapnames = {'Sum_Map','SumSq_Map','Mean_Map','std_Map'};
+        % Same for All colors together
+        AllColSum_Map = nansum(cat(3,AllColSum_Map,nansum(Sum_Map,3)),3);
+        AllColSum_Map(NanMat>4) = NaN;
+        
+        NanMat = isnan(AllColSumSq_Map) +  isnan(new_Fig(:,:,1))+isnan(new_Fig(:,:,2))+isnan(new_Fig(:,:,3))+isnan(new_Fig(:,:,4));
+        AllColSumSq_Map = nansum(cat(3,AllColSumSq_Map,new_Fig.^2),3);
+        AllColSumSq_Map(NanMat>4) = NaN;
+        
+        All_Col_meanMap = AllColSum_Map./nr_map;
+        All_Col_stdMap = AllColSumSq_Map./nr_map - (All_Col_meanMap.^2);
+        
+        Mapnames = {'Sum_Map','Mean_Map','AllColSum_Map','All_Col_meanMap'};
         %Check probability maps?
         if Check_ProbMap == 1
-            for mp = [1,3] %only sum and mean_map
+            for mp = [2,4] %only sum and mean_map
                 figure
                 map2plot = eval(Mapnames{mp});
                 for ccl = 1:size(map2plot,3)
-                    subplot(2,2,ccl)
+                    subplot(ceil(size(map2plot,3)/2),ceil(size(map2plot,3)/2),ccl)
                     imagescnan(map2plot(:,:,ccl))
                     hold on
                     plot(lambd_align(1),lambd_align(2),'+r','Markersize',10)
+                    if mp == 3 || mp == 4
+                        colorbar
+                    end
                 end
-                colmap = colormap('gray');
+                %                 colmap = colormap('gray');
+
                 suplabel(Mapnames{mp},'t');
+
             end
         end
         
+        nr_map
         nr_map = nr_map+1;
         
         % If checked, put in record
@@ -275,27 +320,28 @@ for m = 1:length(mousedb) % loop over mice
         db(i).lambda.y = lambda_y;
         db(i).new_bin = new_bin;
         db(i).new_scale = new_scale;
+        db(i).Lambda_certainty = certainty;
         
         
         % saving is slow, probably better to move save_db to after the for
         % loops and make it possible to break out.
         flag = flag + 1;
         %Save Database every 15
-        if flag == 15
+        if flag == 5
             rmlock(filename2save); % a little unsafe
             disp('Saving...')
             save_db(db,filename2save)
             
-            %Save Probability map and mapIndx
-            for sp = 1:length(savepath)
-                if exist(savepath{sp},'dir')
-                    save(fullfile(savepath{sp},'ProbMapV1'),'Sum_Map','SumSq_Map','Mean_Map','std_Map','mapIndx','nr_map','new_bin','nr_row','nr_col','lambd_align','new_scale')
-                end
-            end
-                        
             flag = 0;
             
         end
+        %Save Probability map and mapIndx
+        for sp = 1:length(savepath)
+            if exist(savepath{sp},'dir')
+                save(fullfile(savepath{sp},'ProbMapV1'),'All_Col_meanMap','All_Col_stdMap','AllColSum_Map','AllColSumSq_Map','Sum_Map','SumSq_Map','Mean_Map','std_Map','mapIndx','nr_map','new_bin','nr_row','nr_col','lambd_align','new_scale')
+            end
+        end
+        
         
         disp('Press button to continue')
         pause
