@@ -9,9 +9,6 @@ function results_ectestrecord( record )
 global measures analysed_script
 
 %
-logmsg('TEMPORARILY FOR MEHRAN PAPER')
-compute_fraction_overlapping_spikes(record)
-%
 
 if isfield(record,'electrode') % i.e. ecdata
     data_type = 'ec';
@@ -31,12 +28,17 @@ switch data_type
             record.eye ', ' ...
             record.comment];
         rate_label = 'Rate (Hz)';
+        if isfield(params,'compute_fraction_overlapping_spikes') && params.compute_fraction_overlapping_spikes
+            compute_fraction_overlapping_spikes(record)
+        end
     case 'tp'
         params = tpprocessparams;
         tit=[record.epoch ', ' record.mouse ', ' record.date ', ' ...
             record.comment];
         rate_label = '\DeltaF/F';
 end
+
+
 
 tit(tit=='_')='-';
 

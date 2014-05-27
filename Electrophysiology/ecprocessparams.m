@@ -30,12 +30,12 @@ switch protocol
     case '11.35'
         params.pre_window = [-inf 0];
         params.post_window = [0 inf];
-        disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
+%        disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
             case '13.20'
 %         params.pre_window = [-2 0];
 %         params.post_window = [0 2];
-        disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
-        disp(['ECPROCESSPARAMS: Setting post_window to ' mat2str(params.post_window)]);
+%        disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
+ %       disp(['ECPROCESSPARAMS: Setting post_window to ' mat2str(params.post_window)]);
 end
 
 % sg parameters
@@ -112,4 +112,10 @@ switch lower(record.setup)
         warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
         warning('off', 'ECPROCESSPARAMS:TIMING');
 
+end
+
+params.compute_fraction_overlapping_spikes = false;
+switch experiment
+    case '13.20'
+        params.compute_fraction_overlapping_spikes = true;
 end

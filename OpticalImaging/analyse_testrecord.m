@@ -349,34 +349,9 @@ switch record.stim_type
     case 'retinotopy',
         % retinotopy center is asked in results_oitestrecord
     case {'orientation','direction'}
-        % Horizontal minus vertical
-        %     stim_parameters = uniq(sort(mod(record.stim_parameters,180)));
-        %      ind_hor = find(stim_parameters==0,1);
-        %      ind_ver = find(stim_parameters==90,1);
-        
         roi_edge = edge(roi);
         cmap = colormap('hsv');
         or_abs = round(rescale(mean(avg,3),[min(avg(:)) max(avg(:))],[1 size(cmap,1)]));       
-        
-        %         logmsg('Removing means. May reduce orientation preference. Use with caution');
-        %         avg(:,:,ind_hor) = avg(:,:,ind_hor) - mean(mean(avg(:,:,ind_hor)));
-        %         avg(:,:,ind_ver) = avg(:,:,ind_ver) - mean(mean(avg(:,:,ind_ver)));
-        %
-        %    figure('name','Orientation horizontal - vertical');
-        
-        if 0
-            hor_ver = avg(:,:,ind_hor)-avg(:,:,ind_ver);
-            filename= fullfile(oidatapath(record),[record.test '_B' ...
-                mat2str([min(record.blocks) max(record.blocks)]) '_hor-ver.png']);
-            cmap = colormap('gray');
-            hor_ver = round(rescale(hor_ver,[min(hor_ver(:)) max(hor_ver(:))],[1 size(cmap,1)]));
-            hor_ver(roi_edge'==1)=max(hor_ver(:)); % show ROI
-            
-            imwrite( ind2rgb(hor_ver',cmap) ,filename, 'png');
-            logmsg(['Horizontal-vertical map saved as: ' filename]);
-        end
-        %     close(h);
-        
         multfac = 1+strcmpi(record.stim_type,'orientation');
         
         % polar orientation map
@@ -396,9 +371,6 @@ switch record.stim_type
         axis image off
         colormap hsv
         
-        figure;
-        logmsg('HISTOGRAM FOR ALL PIXELS');
-        hist(mod(angle(polavg(:))/pi*180/multfac,180))
         
         h = image_intensity(or_angs',or_abs',cmap);
         filename= fullfile(oidatapath(record),[record.test '_B' ...
@@ -407,8 +379,37 @@ switch record.stim_type
         logmsg(['Orientation map saved as: ' filename]);
         close(h);
         
-    %    oi_correlation_map( record )
+        %    oi_correlation_map( record )
         
+        switch record.stim_type
+            case 'orientation'
+                logmsg('Selectivity maps are better made with the full data through selecting stim_type = direction');
+            case 'direction'
+                avg = avg-repmat(min(avg,[],3),[1 1 size(avg,3)]); % subtracting minimal response
+                % thus not the real OSI and DSI
+                
+                osi_map =  zeros(size(polavg));
+                dsi_map =  zeros(size(polavg));
+                for i=1:size(avg,1)
+                    for j=1:size(avg,2)
+                        [osi_map(i,j) dsi_map(i,j)]= ...
+                            compute_orientation_selectivity_index(record.stim_parameters(1:size(avg,3)), ...
+                            avg(i,j,:));
+                    end % i
+                end %j
+                osi_map(osi_map>1) = 1;
+                osi_map(osi_map<0) = 0;
+                dsi_map(dsi_map>1) = 1;
+                dsi_map(dsi_map<0) = 0;
+                
+                figure('Name','OSI bias map');
+                imagesc(osi_map');
+                axis image off;
+
+                figure('Name','DSI bias map');
+                imagesc(dsi_map');
+                axis image off;
+        end
     case 'significance'
         record = oi_compute_significance(record);
         record.response=[]; %[frac05 frac01 frac001];
