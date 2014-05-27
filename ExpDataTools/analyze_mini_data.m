@@ -106,7 +106,7 @@ for c=1:length(transgenic)
     trg_medians(c,:)=median(transgenic{c});
     trg_std(c,:)=std(transgenic{c});
 
-    disp(['Transgenic cell ' num2str(c) ',median interval,' num2str(ctl_medians(c,19)) ',mean interval,' num2str(ctl_means(c,19))]);
+    disp(['Transgenic cell ' num2str(c) ',median interval,' num2str(trg_medians(c,19)) ',mean interval,' num2str(trg_means(c,19))]);
 end
 
 %% analyze all fields
