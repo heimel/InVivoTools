@@ -322,6 +322,9 @@ end
 
 
 % Studies, specific analyses for studies
+if 1 % Ahmadlou & Heimel, in prep
+    addpath(fullfile(majorprefix,'Studies','SC'));
+end
 
 if 1 % Vangeneugden, Self et al. in prep 
     addpath(fullfile(majorprefix,'Studies','Mapmaking'));
