@@ -19,7 +19,8 @@ end
 
 switch record.setup
     case 'antigua'
-        datapath=fullfile(base,record.date(1:4),record.date(6:7),record.date(9:10),'Mouse');
+%         datapath=fullfile(base,record.date(1:4),record.date(6:7),record.date(9:10),'Mouse');
+datapath=fullfile('V:\InVivo\Electrophys\Antigua',record.date(1:4),record.date(6:7),record.date(9:10),'Mouse');
 %         case 'nin380'
 %         datapath=fullfile('V:\InVivo\Electrophys\Nin380',record.date(1:4),record.date(6:7),record.date(9:10)); % temporarily
     otherwise
