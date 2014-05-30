@@ -99,6 +99,7 @@ pos_args={...
     'save_as','',...
     'z',{},...
     'smoothing',0,...
+    'merge_x',[],...
     };
 
 assign(pos_args{:});
@@ -148,6 +149,10 @@ if exist('errorbars_tick','var')
     errorbars_tick = str2double(errorbars_tick);
 else
     errorbars_tick = [];
+end
+
+if ~isempty(merge_x)
+    merge_x = str2double(merge_x);
 end
 
 if exist('smoothing','var')
@@ -642,17 +647,32 @@ switch style
                 uniqx=uniq(x{i});
                 uniqy=zeros(1,length(uniqx));
                 uniqystd=zeros(1,length(uniqx));
+                      
+                if ~isempty(merge_x)
+                    logmsg('TEMPORARY FIX FOR DANI SF TUNING');
+                    dx = diff(uniqx)./uniqx(1:end-1);
+                    ind = find(dx<merge_x);
+                    for j = ind
+                        x{i}(x{i}==uniqx(j)) = uniqx(j+1);
+                    end
+                end
+                
+                logmsg('Next routine throws away values. Not ideal!');
                 
                 for j=1:length(uniqx)
-                    if sum(x{i}==uniqx(j))> length(y{i})/length(uniqx)*0.5
+                    if sum(x{i}==uniqx(j))> length(y{i})/length(uniqx)*0;%*0.5;%0.5
                         uniqy(j) = nanmean(y{i}(x{i}==uniqx(j)));
                         uniqystd(j) = nansem(y{i}(x{i}==uniqx(j))); % notice SEM!
                         pointsy{i}{j} = (y{i}(x{i}==uniqx(j)));   % for significance calculations
                     else
+                        
                         uniqy(j) = nan;
                         uniqystd(j) = nan;
                     end
                 end
+                
+                
+                
                 ind = find(~isnan(uniqy));
                 x{i} = uniqx(ind);
                 y{i} = uniqy(ind);
