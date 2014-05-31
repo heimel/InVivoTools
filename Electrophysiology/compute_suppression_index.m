@@ -19,7 +19,7 @@ function si = compute_suppression_index( x, response )
 response = response(ind);
 
 m = max(response);
-rp = find(response>0.95*m,1);
+rp = response(find(response>0.95*m,1));
 rl = response(end);
 
 si = (rp-rl)/rp;
