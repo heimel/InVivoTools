@@ -649,7 +649,6 @@ switch style
                 uniqystd=zeros(1,length(uniqx));
                       
                 if ~isempty(merge_x)
-                    logmsg('TEMPORARY FIX FOR DANI SF TUNING');
                     dx = diff(uniqx)./uniqx(1:end-1);
                     ind = find(dx<merge_x);
                     for j = ind
