@@ -972,7 +972,9 @@ switch command,
                     
                     center_at_position([x y],fig);
                     
-                    delete(h_temp_line);
+                    if ishandle(h_temp_line)
+                        delete(h_temp_line);
+                    end
                     h_temp_line = line(newneurite.xi,newneurite.yi,'color',[1 1 0]);
                 case 28
                     move_slice_up;
