@@ -1,4 +1,4 @@
-%function overlay_maps_Single_conditions
+% function overlay_maps_Single_conditions
 %OVERLAY_MAPS loads intrinsic signal winner-take-all maps and overlays them
 %
 % 2014, Enny van Beest, Alexander Heimel
@@ -11,7 +11,7 @@ host('daneel')
 
 Check_newBin = 0; % DO you want to plot the different colours when binned again?
 Check_ProbMap = 1; %Do you want to plot the probability map?
-
+nr_maps2Incl = 147; %HOw many maps do you want to include?
 %%
 experiment(exp); % to select for which specific experiment to load the data
 
@@ -33,10 +33,9 @@ mousedb = mousedb(find_record(mousedb,'strain!*BXD*,strain!*DBA*'));
 %mousedb = mousedb(find_record(mousedb,['mouse=' exp '.*']));
 
 
-flag = 0;
 %Pre-define or load probability_matrix
-if exist('ProbMapV1.mat','file')
-    load('ProbMapV1.mat')
+if exist('ProbMapV1_single.mat','file')
+    load('ProbMapV1_single.mat')
 else
     Sum_Map = nan(500,500,4); %500 x 500 pixels for all images, 4 for 4 colors start with 800 m
     SumSq_Map = nan(500,500,4);
@@ -51,19 +50,18 @@ else
     new_bin = 2; %How many pixels do you want to have binned?
     new_scale = 11.04; %How many micron per pixel?
 end
+flag = 0;
 
 % for m = 1:length(mousedb) % loop over mice - not necessary
 ind = find_record(db,['stim_type=retinotopy,reliable!0,hemisphere=left']);
 for i = ind(end:-1:1) % loop over tests
+    if nr_map >= nr_maps2Incl;
+        break
+    end
     close_figs; % to close non-persistent figures
     h = figure('units','normalized');
     record = db(i);
     
-    %If necessary; reset one
-    %         if i == 2806
-    %             mapIndx(i) = 0;
-    %         end
-    %
     %Check whether this map is already considered
     if mapIndx(i) == 1
         continue
@@ -71,6 +69,10 @@ for i = ind(end:-1:1) % loop over tests
         mapIndx(i) = 1;
     end
     
+    %For now only take those records from 2012
+    if datenum(record.date)<datenum('2012-01-01')
+        continue
+    end
     if isempty(record.ref_image) || isempty(record.imagefile)
         continue
     end
@@ -86,7 +88,7 @@ for i = ind(end:-1:1) % loop over tests
         logmsg('TEMPORARILY NOT SELECTING FOR HEMISPHERE'); %#ok<UNRCH>
     end
     
-    if isfield(db(i),'overlay_included') & ~strcmpi(db(i).overlay_included,'yes')
+    if isfield(db(i),'overlay_included') & ~isempty(db(i).overlay_included) & ~strcmpi(db(i).overlay_included,'yes')
         continue
     end
     
@@ -94,7 +96,11 @@ for i = ind(end:-1:1) % loop over tests
     remind = strfind(record.imagefile,'_auto');
     % filename = fullfile(oidatapath(record),'analysis',[record.imagefile]);
     %List all files in folder
-    sublist = dir(fullfile(oidatapath(record),[record.imagefile(1:remind-1) 'single*.png']))
+    %Some people put multiple names in one record. That's confusing but we
+    %have enough maps anyway...
+    sublist = dir(fullfile(oidatapath(record),[record.imagefile(1:remind-1) 'single*.png']));
+    
+    
     no_pic = 0; %To count nr of pictures missing
     
     for subname = 1:length(sublist)
@@ -122,7 +128,7 @@ for i = ind(end:-1:1) % loop over tests
         img = changem(img,sort_vec_scale(2,:),sort_vec_scale(1,:));
         
         impatch(:,:,subname) = img;
-
+        
         %         impatch(:,:,1) = (img(:,:,1)-img(:,:,2)); % red
         %         impatch(:,:,2) = (img(:,:,2)-img(:,:,1)); % green
         %         impatch(:,:,3) = img(:,:,3); % blue
@@ -132,12 +138,12 @@ for i = ind(end:-1:1) % loop over tests
     end
     
     %if one of the conditions is missing
-    if no_pic > 0
+    if isempty(sublist) || no_pic > 0
         continue
     end
     
     impatch = double(impatch);
-   
+    
     win_img =  imread(fullfile(oidatapath(record),'analysis',[record.imagefile]));
     if ~isa(win_img,'uint8')
         logmsg(['Image of ' recordfilter(record) ' is not a uint8.']);
@@ -281,7 +287,7 @@ for i = ind(end:-1:1) % loop over tests
     new_yoffset = round(yshift + lambd_align(2)); %already in new bins
     
     %Convert to new scale & binsize
-    if exist('ProbMapV1.mat','file') %if Already a current map exists,
+    if exist('ProbMapV1_single.mat','file') %if Already a current map exists,
         % nr_rows  and nr_cols should be the same
         fprintf('Number or rows %.0f and columns %.0f\n',nr_row,nr_col)
     else
@@ -382,6 +388,9 @@ for i = ind(end:-1:1) % loop over tests
                     if mp == 3 || mp == 4
                         colorbar
                     end
+                    if mp == 2
+                        title(col_names{ccl})
+                    end
                 end
                 %                 colmap = colormap('gray');
                 
@@ -389,18 +398,107 @@ for i = ind(end:-1:1) % loop over tests
                 
             end
         end
+        %Save Probability map and mapIndx
         
-        %             disp('Press button to continue')
-        %             pause
+        disp('Press button to continue')
+        pause
+        
     end
-    %Save Probability map and mapIndx
     for sp = 1:length(savepath)
         if exist(savepath{sp},'dir')
-            save(fullfile(savepath{sp},'ProbMapV1'),'All_Col_meanMap','All_Col_stdMap','AllColSum_Map','AllColSumSq_Map','Sum_Map','SumSq_Map','Mean_Map','std_Map','mapIndx','nr_map','new_bin','nr_row','nr_col','lambd_align','new_scale','pixel_nr_map')
+            save(fullfile(savepath{sp},'ProbMapV1_single'),'All_Col_meanMap','All_Col_stdMap','AllColSum_Map','AllColSumSq_Map','Sum_Map','SumSq_Map','Mean_Map','std_Map','mapIndx','nr_map','new_bin','nr_row','nr_col','lambd_align','new_scale','pixel_nr_map')
         end
     end
-    
 end % test i
+Mapnames = {'Sum_Map','Mean_Map','AllColSum_Map','All_Col_meanMap'};
+col_names = {'red','green','blue','yellow'};
 
+
+%Save one last time in the end:
+for sp = 1:length(savepath)
+    if exist(savepath{sp},'dir')
+        save(fullfile(savepath{sp},'ProbMapV1_single'),'All_Col_meanMap','All_Col_stdMap','AllColSum_Map','AllColSumSq_Map','Sum_Map','SumSq_Map','Mean_Map','std_Map','mapIndx','nr_map','new_bin','nr_row','nr_col','lambd_align','new_scale','pixel_nr_map')
+    end
+end
+% rmlock(filename2save); % a little unsafe
+% disp('Saving...')
+% save_db(db,filename2save)
+%
+for mp = [2,4] %only sum and mean_map
+    figure
+    map2plot = eval(Mapnames{mp});
+    least_maps = floor(nr_map*0.2); %nr of maps at least needed for pixel to be shown in map (10%)
+    NaNMat = repmat((pixel_nr_map<least_maps),[1 1 size(map2plot,3)]);
+    map2plot(NaNMat) = NaN;
+    
+    for ccl = 1:size(map2plot,3)
+        subplot(ceil(size(map2plot,3)/2),ceil(size(map2plot,3)/2),ccl)
+        imagescnan(map2plot(:,:,ccl))
+        hold on
+        plot(lambd_align(1),lambd_align(2),'+r','Markersize',10)
+        if mp == 3 || mp == 4
+            colorbar
+        end
+        if mp == 2
+            title(col_names{ccl})
+        end
+    end
+    %                 colmap = colormap('gray');
+    
+        suplabel(Mapnames{mp},'t');
+        saveas(gcf,['single_cond ' Mapnames{mp}],'jpg')
+        saveas(gcf,['single_cond ' Mapnames{mp}],'fig')
+    
+end
+
+
+%%
+% Scale to absolute distance
+% Scale to absolute distance
+map2plot = Mean_Map;
+least_maps = floor(nr_map*0.2); %nr of maps at least needed for pixel to be shown in map (10%)
+NaNMat = repmat((pixel_nr_map<least_maps),[1 1 size(map2plot,3)]);
+map2plot(NaNMat) = NaN;
+
+%Change axis of map
+map2plot = permute(map2plot,[2 1 3]);
+
+%Plot the WTA map
+plotwta(-map2plot)
+hold on
+plot(lambd_align(1),lambd_align(2),'+r','Markersize',10)
+set(gca,'Visible','on')
+
+% Put absolute Distance in plot
+pixelmm = (new_scale*new_bin)/1000;
+xt = length(get(gca,'XTick'));
+yt = length(get(gca,'YTick'));
+xline = linspace(-(lambd_align(1)*pixelmm),(size(Mean_Map,1)-lambd_align(1))*pixelmm,xt);
+yline = linspace(-(lambd_align(2)*pixelmm),(size(Mean_Map,2)-lambd_align(2))*pixelmm,yt);
+xline = round(xline*10)/10; %Just for rounding
+yline = round(yline*10)/10; %just for rounding
+set(gca,'XTickLabel',xline,'YTickLabel',yline)
+xlabel('mm')
+ylabel('mm')
+
+title(['WTA map of V1, single condition, nr maps = ' num2str(nr_map)])
+
+%Select Borders
+display('Select V1')
+[BW, xi, yi] = roipoly;
+
+%Draw border
+for i = 1:length(xi)
+    if i~=length(xi)
+        line([xi(i) xi(i+1)],[yi(i) yi(i+1)],'Color',[1 1 1])
+    else
+        line([xi(i) xi(1)],[yi(i) yi(1)],'Color',[1 1 1])
+    end
+end
+
+saveas(gcf,['single maps V1 border Map'],'jpg')
+saveas(gcf,['single maps V1 border Map'],'fig')
+
+%% Plot Vector expression
 
 
