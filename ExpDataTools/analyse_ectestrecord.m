@@ -248,7 +248,7 @@ measures=[];
     
     if length(g)>10 % dont show more than 10 cells in the analysis
         logmsg('More than 10 cells, going into silence mode');
-        verbose = 0;
+       % verbose = 0;
     end
     
     for i=1:length(g) % for all cells

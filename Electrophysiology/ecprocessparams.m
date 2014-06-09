@@ -81,7 +81,7 @@ end
 
 
 switch lower(record.setup)
-    case {'antigua','daneel'}
+    case {'antigua','daneel','nin380'}
         params.spike_sorting_routine = '';
         params.compare_with_klustakwik = false;
     otherwise
