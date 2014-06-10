@@ -96,7 +96,14 @@ if length(r1)>1 && length(r2)>1
             h = (p<0.05);
             testperformed = 'Kruskal-Wallis test';
         case {'chi2','chisquare','chi_square'}
-            disp('PLOT_SIGNIFICANCE: Chi2 not implemented yet.');
+            d(1,1)=sum( r1(~isnan(r1))==0 );
+            d(1,2)=sum( r1(~isnan(r1))==1 );
+            d(2,1)=sum( r2(~isnan(r2))==0 );
+            d(2,2)=sum( r2(~isnan(r2))==1 );
+            [p,statistic] = chi2class(d);
+            statistic_name = 'chi2-stat';
+            h = (p<0.05);
+            testperformed = 'Chi2 test';
     end
 elseif ~isempty(r1std) && ~isempty(r2std) && strcmp(test,'ttest')==1
     s_X1_X2=sqrt( ((n1-1)*r1std^2 + (n2-1)*r2std^2) /...

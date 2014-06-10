@@ -502,15 +502,9 @@ switch style
                 d(i,1)=sum( y{i}(~isnan(y{i}))==0 );
                 d(i,2)=sum( y{i}(~isnan(y{i}))==1 );
             end
-%             disp('GRAPH: TEMPORARY CHI2 FOR VERA AND SOPHIE')
-%             gr1=y{1}(~isnan(y{1}));
-%             gr2=y{2}(~isnan(y{2}));
-%             d(1,1)=sum(gr1==0);
-%             d(1,2)=sum(gr1==1);
-%             d(2,1)=sum(gr2==0);
-%             d(2,2)=sum(gr2==1);
-   disp(['GRAPH: p of chi2class test = ' num2str(chi2class( d)) ', No post-hoc tests yet.' ]);
-
+            [p_chi2,chi2] = chi2class( d);
+            disp(['GRAPH: p of chi2class test = ' num2str(p_chi2) ...
+                ' over all groups. chi2-statistic = ' num2str(chi2)]);
         end
         
         if strcmp(test,'none')~=1
