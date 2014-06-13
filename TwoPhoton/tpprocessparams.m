@@ -198,7 +198,7 @@ end
 params.max_bouton_mito_distance_um = 2; 
 
 switch record.experiment
-    case '12.81'    
+    case {'12.81','Examples','14.26'}    
         params.get_intensities = true;
     otherwise
         params.get_intensities = false;
