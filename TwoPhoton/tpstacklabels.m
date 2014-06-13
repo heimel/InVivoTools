@@ -14,7 +14,24 @@ switch record.experiment
     case {'12.81','14.25','14.26','99.99'}
         labels = {'CR','GFP','L1','L2/3','PV','RLN','Syt2','SOM','VGLUT2','VIP'};
     case {'12.81 mariangela'}
-        labels = {'GFP','L1','L2/3','RLN','Syt2','SOM','VGLUT2','VIP'};
+        labels = {'GFP','L1','L2/3'};
+        if ~isempty(strfind(lower(record.stack),'reelin'))
+            labels{end+1} = 'RLN';
+        end
+        if ~isempty(strfind(lower(record.stack),'syt2'))
+            labels{end+1} = 'Syt2';
+        end
+        if ~isempty(strfind(lower(record.stack),'sst'))
+            labels{end+1} = 'SOM';
+        end
+        if ~isempty(strfind(lower(record.stack),'vglut2'))
+            labels{end+1} = 'VGLUT2';
+        end
+        if ~isempty(strfind(lower(record.stack),'vip'))
+            labels{end+1} = 'VIP';
+        end
+        
+        
     case '11.12'
         labels = {'CFP','YFP'};
     case {'12.76','12.76_GCaMP6'}
