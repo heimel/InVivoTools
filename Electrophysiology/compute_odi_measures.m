@@ -15,12 +15,26 @@ comment = record.comment;
 
 %comment(comment==',') = '*';
 
-filter_base = ['mouse= ' record.mouse ',date=' record.date ...
-    ',surface=' num2str(record.surface) ',depth=' num2str(record.depth) ...
-    ',hemisphere=' record.hemisphere ',stim_type=' record.stim_type ...
-    ',comment=' comment  ...
-    ',datatype=' record.datatype ];
 
+switch record.datatype
+    case {'ec','lfp'}
+        filter_base = ['mouse=' record.mouse ',date=' record.date ...
+            ',surface=' num2str(record.surface) ',depth=' num2str(record.depth) ...
+            ',hemisphere=' record.hemisphere ',stim_type=' record.stim_type ...
+            ',comment=' comment  ...
+            ',datatype=' record.datatype ];
+    case 'tp'
+        location = record.location;
+        location(location==',')='*';
+        filter_base = ['mouse=' record.mouse ',date=' record.date ...
+            ',experiment=' record.experiment ',ref_epoch=' record.ref_epoch ...
+            ',hemisphere=' record.hemisphere ',stim_type=' record.stim_type ...
+            ',location=' location  ];
+        
+    otherwise
+        logmsg(['OD analysis not implemented for datatype ' record.datatype]);
+        return
+end        
 
 [ipsi_measures,ipsi_tests] = average_measures( db, [ filter_base ',eye=*ipsi*'] );
 disp(['COMPUTE_ODI_MEASURES: Filter is ' filter_base]);
@@ -56,18 +70,20 @@ if isfield(record.measures,'response')
             disp('COMPUTE_ODI_MEASURES: No response field for contra test. Please re-evaluate contra test.');
             return
         end
-        if ~isfield(contra_measures,'rate')
-            errordlg('No rate field for contra test. Please re-evaluate contra test.');
-            disp('COMPUTE_ODI_MEASURES: No rate field for contra test. Please re-evaluate contra test.');
-            return
-        end
+%         if ~isfield(contra_measures,'rate')
+%             errordlg('No rate field for contra test. Please re-evaluate contra test.');
+%             disp('COMPUTE_ODI_MEASURES: No rate field for contra test. Please re-evaluate contra test.');
+%             return
+%         end
          if ~isfield(ipsi_measures,'response')
             errordlg('No response field for ipsi test. Please re-evaluate ipsi test.');
             disp('COMPUTE_ODI_MEASURES: No response field for ipsi test. Please re-evaluate contra test.');
             return
-        end
+         end
        
-        record.measures(i).odi_rate_based =  compute_odi( contra_measures(i).rate,ipsi_measures(i).rate);
+        if isfield(contra_measures,'rate')
+            record.measures(i).odi_rate_based =  compute_odi( contra_measures(i).rate,ipsi_measures(i).rate);
+        end
         record.measures(i).odi_response_based =  compute_odi( contra_measures(i).response,ipsi_measures(i).response);
         record.measures(i).odi =  record.measures(i).odi_response_based;
         record.measures(i).computed_odi = 1;
@@ -83,13 +99,17 @@ if isfield(record.measures,'response')
         else
             record.measures(i).odi_response_difference =  cellfun(@(y) y*nan,record.measures(i).odi,'uniformoutput',false);
         end
-        record.measures(i).rate_spont_binoc_mean = num2cell(mean([contra_measures(i).rate_spont{:};ipsi_measures(i).rate_spont{:}]));
-        record.measures(i).rate_spont_binoc_rel_diff = ...
-            num2cell(abs([contra_measures(i).rate_spont{:}]-[ipsi_measures(i).rate_spont{:}]) ./ ...
-            [record.measures(i).rate_spont_binoc_mean{:}]);
-        record.measures(i).rate_max_binoc = num2cell(max([contra_measures(i).rate_max{:};ipsi_measures(i).rate_max{:}]));
-        record.measures(i).rate_max_contra = num2cell(mean([contra_measures(i).rate_max{:}],1));
-        record.measures(i).rate_max_ipsi = num2cell(mean([ipsi_measures(i).rate_max{:}],1));
+        if isfield(contra_measures,'rate_spont')
+            record.measures(i).rate_spont_binoc_mean = num2cell(mean([contra_measures(i).rate_spont{:};ipsi_measures(i).rate_spont{:}]));
+            record.measures(i).rate_spont_binoc_rel_diff = ...
+                num2cell(abs([contra_measures(i).rate_spont{:}]-[ipsi_measures(i).rate_spont{:}]) ./ ...
+                [record.measures(i).rate_spont_binoc_mean{:}]);
+        end
+        if isfield(contra_measures,'rate_max')
+            record.measures(i).rate_max_binoc = num2cell(max([contra_measures(i).rate_max{:};ipsi_measures(i).rate_max{:}]));
+            record.measures(i).rate_max_contra = num2cell(mean([contra_measures(i).rate_max{:}],1));
+            record.measures(i).rate_max_ipsi = num2cell(mean([ipsi_measures(i).rate_max{:}],1));
+        end
         record.measures(i).response_max_binoc = num2cell(max([contra_measures(i).response_max{:};ipsi_measures(i).response_max{:}]));
 
         if isfield(ipsi_measures,'rate_max_normalized')
@@ -121,7 +141,14 @@ function [meanmeasures,tests] = average_measures( db, filtercrit )
 % get measures from all trials and perform an average
 ind = find_record(db,filtercrit);
 
-tests = {db(ind).test};
+if isfield(db,'test')
+   testfield = 'test';
+else
+    testfield = 'epoch';
+end
+    
+tests = {db(ind).(testfield)};
+
 
 if isempty(ind)
     meanmeasures = [];

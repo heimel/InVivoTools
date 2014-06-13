@@ -105,9 +105,11 @@ switch whichdb
         [db_single,filename] = load_expdatabase(whichdb,where,[],load_main,verbose);
         if ~isempty(db_single) &&  isfield(db_single(1),'stack') % i.e. microscopy record
             % matching structure to tptestdb_olympus_empty
+           if 0
             db_empty = load(fullfile(expdatabasepath(where),'Empty', 'tptestdb_olympus_empty'));
             db_empty = db_empty.db;
             db_single = structconvert(db_single,db_empty);
+           end
 %         elseif ~isempty(db_single) &&  isfield(db_single(1),'electrode') % i.e. microscopy record
 %             % matching structure to tptestdb_olympus_empty
 %             db_empty = load(fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty'));

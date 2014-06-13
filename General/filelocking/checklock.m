@@ -23,8 +23,7 @@ while ~feof(fid)
   if l(1)~='#'
     p=find(l=='=');
     if isempty(p)
-        l
-      lockfile=setfield(lockfile,l,[])
+      lockfile=setfield(lockfile,l,[]);
     else
       lockfile=setfield(lockfile,l(1:p(1)-1),l(p(1)+1:end));
     end
