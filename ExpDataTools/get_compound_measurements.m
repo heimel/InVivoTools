@@ -411,3 +411,4 @@ r= ~isempty(findstr(operators,x));
 
 function x = given(x)
 x = zero2nan(x);
+x = ~isnan(x);
