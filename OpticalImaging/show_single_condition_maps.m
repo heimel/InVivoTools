@@ -127,7 +127,7 @@ for i=1:n_maps
         immin = min(immap(:));
     end
     
-    if 0
+    if 1
         %draw roi
         immap(image_outline(roi)>0.08)=immax;
         % draw ror

@@ -139,7 +139,7 @@ switch record.stim_type
                 imgpic(:,:,2)=imgpic(:,:,2).*roioutline;
                 imgpic(:,:,3)=imgpic(:,:,3).*roioutline;
             end
-            if 0 && ~isempty(ror) % highlight ror outline
+            if  ~isempty(ror) % highlight ror outline
                 roroutline=1+10*image_outline(ror);
                 imgpic(:,:,1)=imgpic(:,:,1).*roroutline;
                 imgpic(:,:,2)=imgpic(:,:,2).*roroutline;
