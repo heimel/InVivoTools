@@ -42,7 +42,6 @@ end
 
 tit(tit=='_')='-';
 
-measures = record.measures;
 measures_on_disk = [];
  
 % add measures from measures file
@@ -54,6 +53,7 @@ switch record.datatype
             measures_on_disk = measures;
         end
 end
+measures = record.measures;
 if ~isempty(measures_on_disk) && length(measures)==length(record.measures)
     f = fields(measures);
     f_on_disk = fields(measures_on_disk);
@@ -352,7 +352,11 @@ end
 
 % ODI
 if isfield(record,'eye') && strcmp(record.eye,'ipsi') && isfield(measures,'odi')
-    tit=[record.mouse ' ' record.date ' ' concat_testnames( record.measures(1).odi_tests ) ' ODI - depth=' num2str(record.depth-record.surface) ' um,' record.comment];
+    if isfield(record,'depth')
+        tit=[record.mouse ' ' record.date ' ' concat_testnames( record.measures(1).odi_tests ) ' ODI - depth=' num2str(record.depth-record.surface) ' um,' record.comment];
+    else
+        tit=[record.mouse ' ' record.date ' ' concat_testnames( record.measures(1).odi_tests ) ' ODI - location=' num2str(record.location) ',' record.comment];
+    end
     tit(tit=='_')='-';
     
     max_rows = floor((screenheight-titleheight)/subheight) ;
@@ -408,7 +412,7 @@ if isfield(record,'eye') && strcmp(record.eye,'ipsi') && isfield(measures,'odi')
             y=printtext(subst_ctlchars(['Spont  : ' num2str([measure.odi_rate_spont{:}],2) ' Hz']),y);
             y=printtext(subst_ctlchars(['Rate_max  : ' num2str([measure.odi_rate_max{:}],2) ' Hz']),y,0);
             y=printtext(subst_ctlchars(['Response_max  : ' num2str([measure.odi_response_max{:}],2) ' Hz']),y,0);
-        else
+        elseif isfield(measures,'rate_spont_binoc_mean')
             y=printtext(subst_ctlchars(['Spont  : ' num2str([measure.rate_spont_binoc_mean{:}],2) ' Hz']));
             y=printtext(subst_ctlchars(['Rate_max  : ' num2str([measure.rate_max_binoc{:}],2) ' Hz']),y,0);
             y=printtext(subst_ctlchars(['Response_max  : ' num2str([measure.response_max_binoc{:}],2) ' Hz']),y,0);

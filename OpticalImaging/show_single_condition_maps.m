@@ -1,8 +1,35 @@
-function h=show_single_condition_maps(record,fname,condnames,fileinfo,roi,ror,tit)
+function h=show_single_condition_maps(record,fname,condnames,fileinfo,roi,ror,tit,lims)
 %SHOWS_SINGLE_CONDITION_MAPS
 %
 % 2008, Alexander Heimel
 %
+
+if nargin<8
+    lims = [];
+end
+
+if nargin<7
+    tit = '';
+end
+if nargin<2
+    fname = '';
+end
+if nargin<3
+    condnames = [];
+end
+if nargin<4
+    fileinfo = [];
+end
+
+if isempty(fname)
+   tests=convert_cst2cell(record.test);
+   fname = {fullfile(oidatapath(record),tests{1})};
+end
+if isempty(fileinfo)
+    fileinfo=imagefile_info( fullfile(oidatapath(record),...
+    [ tests{1} 'B0.BLK']));
+end
+
 
 h.figure=figure('Name',tit,'NumberTitle','off');
 set(h.figure,'PaperType','a4');
@@ -125,7 +152,7 @@ for i=1:n_maps
 		set(gca,'ycolor',[1 0 0]);
 	else
 		if strcmp(record.stim_type,'sf')==0
-			xlabel(trim(condnames(i,:)));
+		%	xlabel(trim(condnames(i,:)));
 		else
 			xlabel([trim(condnames(i,:)) ' cpd']);
 		end			
@@ -134,6 +161,19 @@ for i=1:n_maps
 	set(gca,'ytick',[]);
 	axis image;
 	box on;
+    
+    p = get(h.single_condition(i),'pos');
+    p(3) = p(3)+0.02;
+    p(4) = p(4)+0.02;
+    set(h.single_condition(i),'pos',p);
+
+    if ~isempty(lims)
+        if length(lims)==1
+            zoom(lims);
+        else
+            axis(lims);
+        end
+    end
 end
 
 
@@ -143,7 +183,7 @@ set(htitle,'FontSize',8);
 pos=get(htitle,'Position');
 set(htitle,'Position',pos);
 set(htitle,'HorizontalAlignment','left');
-bigger_linewidth(3);
+%bigger_linewidth(3);
 smaller_font(-12);
 
 

@@ -56,6 +56,11 @@ switch record.stim_type
         params.single_condition_differential = true;
         params.single_condition_normalize_response = true;
 end
+switch experiment
+    case '13.61'
+        params.single_condition_clipping = 40;
+end
+
 
 switch record.datatype
     case 'oi'

@@ -6,10 +6,11 @@ function si = compute_suppression_index( x, response )
 %
 %      Computes the suppression index as by Carandini: To quantify the
 %      strength of this surround suppression, we defined a suppression
-%      index as (Rp – RL)/RL, where RL and RP are the responses
+%      index as (Rp – RL)/RP, where RL and RP are the responses
 %      to the largest size and to the preferred size. For robustness,
 %      we defined the latter as the smallest size that elicited >95% of
-%      the maximal response (Figure 1B).
+%      the maximal response (Figure 1B). (Carandini writes (Rp-RL)/RL but
+%      that's probably a type. See Cavanaugh, Bair, Movhson, JNeurophys 2002
 %
 % 2013 Alexander Heimel
 %
@@ -18,8 +19,8 @@ function si = compute_suppression_index( x, response )
 response = response(ind);
 
 m = max(response);
-rp = find(response>0.95*m,1);
+rp = response(find(response>0.95*m,1));
 rl = response(end);
 
-si = (rp-rl)/rl;
+si = (rp-rl)/rp;
 

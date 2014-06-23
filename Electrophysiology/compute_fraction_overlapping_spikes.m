@@ -7,6 +7,9 @@ function compute_fraction_overlapping_spikes( record )
 bin = 0.001;
 
 datapath = fullfile(ecdatapath( record ),record.test);
+if ~exist(fullfile(datapath,'_spikes.mat'),'file')
+    return
+end
 load(fullfile(datapath,'_spikes.mat'));
 if  ~isfield(cells,'channel')
     logmsg(['No channel field in spikes file. Need to reanalyse ' recordfilter(record)]);

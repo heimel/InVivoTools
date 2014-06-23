@@ -360,7 +360,7 @@ for p=1:size(data,2) % roi p
         record.measures(p).blankresp = blankresp;
         record.measures(p).blankind = blankind;
     end;
-    record.measures(p).response_max = max(curve(2,:));
+    record.measures(p).response_max = {max(curve(2,:))};
     switch record.measures(p).variable
         case 'angle'
             newmeasures = compute_angle_measures(record.measures(p));

@@ -252,7 +252,7 @@ for i=2:length(g)
 end
 eval(['d = load(getexperimentfile(cksds),' loadstr ',''-mat'');']);
 
-if length(g)>20 % dont show more than 10 cells in the analysis
+if length(g)>10 % dont show more than 10 cells in the analysis
     logmsg('More than 10 cells, going into silence mode');
     verbose = 0;
 end
