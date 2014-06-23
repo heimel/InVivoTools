@@ -1,6 +1,9 @@
 function params = oiprocessparams(record)
 %OIPROCESSPARAMS contains experiment dependent process parameters
 %
+%  Local changes to settings should be made in processparams_local.m
+%  This should be an edited copy of processparams_local_org.m
+%
 % 2013-2014, Alexander Heimel
 %
 
@@ -70,4 +73,9 @@ switch record.datatype
     case 'fp'
         params.extra_baseline_time = 0.3; % extra frames to use for baseline
         params.extra_time_after_offset = 2; % s
+end
+
+if exist('processparams_local.m','file')
+    logmsg('Overriding oiprocessparams with possible local settings');
+    params = processparams_local( params );
 end

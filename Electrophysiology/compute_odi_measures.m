@@ -37,14 +37,20 @@ switch record.datatype
 end        
 
 [ipsi_measures,ipsi_tests] = average_measures( db, [ filter_base ',eye=*ipsi*'] );
-disp(['COMPUTE_ODI_MEASURES: Filter is ' filter_base]);
-if isempty(ipsi_measures)
-    disp('COMPUTE_ODI_MEASURES: No *reliable* ipsi eye records. Check whether hemisphere,surface,depth,stim_type and reliable are set. Only taking records with identical comments.');
+
+if strcmpi(record.eye,'ipsi')
+    disp(['COMPUTE_ODI_MEASURES: Filter is ' filter_base]);
+end
+
+if isempty(ipsi_measures) 
+    if strcmpi(record.eye,'ipsi')
+        disp('COMPUTE_ODI_MEASURES: No *reliable* ipsi eye records. Check whether hemisphere,surface,depth,stim_type and reliable are set. Only taking records with identical comments.');
+    end
     return
 end
 
 [contra_measures,contra_tests] = average_measures( db, [ filter_base ',eye=*contra*'] );
-if isempty(contra_measures)
+if isempty(contra_measures)  && strcmpi(record.eye,'ipsi')
     disp(['COMPUTE_ODI_MEASURES: Filter is ' filter_base]);
     disp('COMPUTE_ODI_MEASURES: No *reliable* contra eye records. Check whether hemisphere,surface,depth,stim_type and reliable are set. Only taking records with identical comments up to first comma.');
     return

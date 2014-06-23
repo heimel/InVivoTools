@@ -1,6 +1,9 @@
 function params = ecprocessparams( record )
 %ECPROCESSPARAMS parameters for ec and lfp analysis
 %
+%  Local changes to settings should be made in processparams_local.m
+%  This should be an edited copy of processparams_local_org.m
+%
 % 2012-2013, Alexander Heimel
 %
 
@@ -30,13 +33,10 @@ switch protocol
     case '11.35'
         params.pre_window = [-inf 0];
         params.post_window = [0 inf];
-%        disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
-            case '13.20'
-         params.pre_window = [-Inf -1];
-%         params.post_window = [0 1];
-params.separation_from_prev_stim_off = 5; 
-%        disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
- %       disp(['ECPROCESSPARAMS: Setting post_window to ' mat2str(params.post_window)]);
+    case '13.20'
+        % params.pre_window = [-Inf 0];
+        % params.post_window = [0 inf];
+        % params.separation_from_prev_stim_off = 5;
 end
 
 % sg parameters
@@ -50,24 +50,17 @@ switch protocol
         params.rc_interval=[0.0205 0.2205];
 end
 
-
-
 params.vep_poweranalysis_type = 'wavelet'; % or 'periodogram' or 'wavelet'
 
 params.vep_remove_line_noise = 'temporal_domain'; % 'frequency_domain' or 'none' or 'temporal_domain'
 
 params.vep_remove_vep_mean = true; % removes average VEP response before power analysis
 
-% params.pre_window = [-inf 0];
-%
-% params.post_window = [0 inf];
-
 params.vep_log10_freqs = true;
 
 params.take_bgpretime_from_offset = 0.5; % discard first X seconds of BGpretime
 
 params.cell_colors = repmat('kbgrcmy',1,50);
-
 
 % spike isolation
 params.cluster_overlap_threshold = 0.5;
@@ -111,7 +104,6 @@ switch lower(record.setup)
     otherwise
         warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
         warning('off', 'ECPROCESSPARAMS:TIMING');
-
 end
 
 params.compute_fraction_overlapping_spikes = false;
@@ -119,3 +111,8 @@ switch experiment
     case '13.20'
         params.compute_fraction_overlapping_spikes = true;
 end
+
+if exist('processparams_local.m','file')
+    params = processparams_local( params );
+end
+    

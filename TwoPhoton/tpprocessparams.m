@@ -3,6 +3,9 @@ function params = tpprocessparams( method, record )
 %
 % PARAMS = TPPROCESSPARAMS( METHOD )
 %
+%  Local changes to settings should be made in processparams_local.m
+%  This should be an edited copy of processparams_local_org.m
+%
 % 2009-2013, Alexander Heimel
 %
 
@@ -223,3 +226,8 @@ params.responsive_alpha = 0.1; % could also be 0.05
 %     otherwise
 %         params.extra_functions = {'tp_get_distance_from_pia'};
 % end
+
+if exist('processparams_local.m','file')
+    logmsg('Overriding tpprocessparams with possible local settings');
+    params = processparams_local( params );
+end
