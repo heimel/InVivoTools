@@ -2,10 +2,10 @@ function measures=analyse_ps( inp , record, verbose)
 %ANALYSE_PS analyses periodic stimulus ecdata
 %   works whenever only one stimulus parameter is varied
 %
-%  MEASURES=ANALYSE_SG( INP , RECORD, verbose)
+%  MEASURES = ANALYSE_PS( INP, RECORD, VERBOSE)
 %
 %
-% 2007-2013 Alexander Heimel
+% 2007-2014 Alexander Heimel
 %
 
 if nargin<3
@@ -19,34 +19,20 @@ measures.usable=1;
 
 paramname = varied_parameters(inp.st.stimscript);
 if isempty(paramname)
-    disp(['ANALYSE_PS: No parameter varied']);
-    paramname = {'angle'};
-    paramname = {'imageType'};
+    logmsg('No parameter varied');
+    paramname = {'imageType'}; % or 'angle'
 end
 
 ind = strmatch(record.stim_type,paramname);  % notice: changed from record.stim_parameters 2013-03-29!
 if isempty(ind)
-%     disp(['ANALYSE_PS: Parameter ' record.type ' is not varied, but trying anyway']);
-%     if isfield(getparameters(inp.st.stimscript),record.stim_parameters)
-%         paramname = record.stim_parameters;
-%     else
-%         disp(['ANALYSE_PS: Parameter ' record.stim_parameters ' for mouse ' record.mouse ',date ' record. date ' is not a parameter']);
-%         paramname = 'angle';
-%     end
     paramname = paramname{1};
 else
     paramname = paramname{ind};
 end
 
-
-%inp.paramnames=paramname; % for periodic_curve
 inp.paramname = paramname; % for tuning_curve
 inp.selection = record.stim_parameters; % selection like, 'contrast=0.4,angle=180'
-%triggers = uniq(sort(getTrigger(inp.st.stimscript)));
 
-%inp.st = select_stimuli( inp.st, record.stim_parameters);
-
-%if length(triggers)>1 % i.e. more than one type of trigger
 [sts,triggers] = split_stimscript_by_trigger( inp.st );
 for t = 1:length(sts)
     inps(t)  = inp;
@@ -55,15 +41,10 @@ end
 
 for i = 1:length(triggers) 
     inp = inps(i);
-
     measures.triggers = triggers;
     
-    %where.figure=figure;where.rect=[0 0 1 1]; where.units='normalized';
-    %orient(where.figure,'landscape');
     par = struct('res',0.01,'showrast',0,'interp',3,'drawspont',1,...
         'int_meth',0,'interval',[0 0]);
-    
-    
     
     if verbose  % dont show for more than 5 cells
         where.figure=figure;
@@ -133,7 +114,6 @@ for i = 1:length(triggers)
     measures.time_peak{i} = ind_max*binsize;
 end % trigger i
 
-
 if length(inps)==1
     measures.curve = measures.curve{1};
 else
@@ -161,10 +141,8 @@ else
     catch
         measures.friedman_p = [];
     end
-    %[stats,h] = manova(x,group,0.05)
 end
 measures.variable = paramname;
-
 
 switch measures.variable
     case 'contrast'

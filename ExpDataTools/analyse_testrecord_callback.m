@@ -3,7 +3,9 @@ function newud=analyse_testrecord_callback( ud)
 %
 %   NEWUD=ANALYSE_TESTRECORD_CALLBACK( UD)
 %
-% 2007-2013, Alexander Heimel
+% 2007-2014, Alexander Heimel
+
+warning('on','all');
 
 newud=ud;
 

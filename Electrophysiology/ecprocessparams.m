@@ -4,7 +4,7 @@ function params = ecprocessparams( record )
 %  Local changes to settings should be made in processparams_local.m
 %  This should be an edited copy of processparams_local_org.m
 %
-% 2012-2013, Alexander Heimel
+% 2012-2014, Alexander Heimel
 %
 
 if nargin<1
@@ -22,12 +22,11 @@ else
 end
 
 % defaults
-params.pre_window = [-Inf 0];
-params.post_window = [0 Inf];
+params.pre_window = [-Inf 0]; % ignored for ec and tp
+params.post_window = [0 Inf]; % ignored for tp
 params.separation_from_prev_stim_off = 0.5;  % time (s) to stay clear of prev_stim_off
 %params.early_response_window = [0.05 0.2];  % not implemented yet
 %params.late_response_window = [0.5 inf]; % not implemented yet
-
 
 switch protocol
     case '11.35'
@@ -58,8 +57,6 @@ params.vep_remove_vep_mean = true; % removes average VEP response before power a
 
 params.vep_log10_freqs = true;
 
-params.take_bgpretime_from_offset = 0.5; % discard first X seconds of BGpretime
-
 params.cell_colors = repmat('kbgrcmy',1,50);
 
 % spike isolation
@@ -88,13 +85,11 @@ switch lower(record.setup)
             case {'11.35'}
                 params.spike_sorting_routine = '';
                 params.compare_with_klustakwik = true;
-
             otherwise
                 params.spike_sorting_routine = '';
                 params.compare_with_klustakwik = true;
         end
 end
-%params.spike_sorting_routine = 'klustakwik';
 
 % time calibration
 switch lower(record.setup)

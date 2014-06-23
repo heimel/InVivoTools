@@ -1,4 +1,4 @@
-function tcn = compute(tc)
+function tcn = compute(tc,record)
 % Part of the NeuralAnalysis package
 %
 %    TCN = COMPUTE(MY_TUNING_CURVE)
@@ -10,6 +10,12 @@ function tcn = compute(tc)
 %
 % Steve Van Hooser, modified by Alexander Heimel
 %
+
+if nargin<2
+    record = [];
+end
+
+processparams = ecprocessparams(record);
 
 p = getparameters(tc);
 I = getinputs(tc);
@@ -82,9 +88,11 @@ if pre==0 && pst>0,  %BGposttime used
 elseif pst==0 && pre>0,  % BGpretime used
     spontlabel='spontaneous / stimulus';
     scint = [ min(interval(:,1)) min(Cinterval(:,1)) ];
-    processparams = ecprocessparams;
-    if (scint(2)-scint(1)) >= (processparams.take_bgpretime_from_offset+0.5)
-        scint(1)=scint(1)+processparams.take_bgpretime_from_offset;
+    if (scint(2)-scint(1)) >= (processparams.separation_from_prev_stim_off+0.5) % keep at least 0.5 s
+        scint(1)=scint(1)+processparams.separation_from_prev_stim_off;
+    else
+        warning('TUNING_CURVE:COMPUTE:SHORTBGPRETIME','Too little time between stimulus offset and next stimulus');
+        warning('off','TUNING_CURVE:COMPUTE:SHORTBGPRETIME');
     end
 else
     spontlabel='trials';
@@ -96,6 +104,11 @@ switch p.int_meth
         cinterval = [Cinterval(:,1)+p.interval(1) Cinterval(:,2)-p.interval(2)];
     case 1
         cinterval = [Cinterval(:,1)+p.interval(1) Cinterval(:,1)+p.interval(2)];
+end
+
+if ~isempty(processparams) && isfield(processparams,'post_window')
+    cinterval( cinterval(:,1)<processparams.post_window(1),1)=processparams.post_window(1);
+    cinterval( cinterval(:,2)>processparams.post_window(2),2)=processparams.post_window(2);
 end
 
 [curve_x,inds]=sort(curve_x); 

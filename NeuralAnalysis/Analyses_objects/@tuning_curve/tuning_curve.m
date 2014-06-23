@@ -1,4 +1,4 @@
-function tc = tuning_curve(inputs, parameters, where)
+function tc = tuning_curve(inputs, parameters, where, record)
 
 %  TUNING_CURVE  Creates a tuning curve based on a parameter
 %  
@@ -33,6 +33,9 @@ function tc = tuning_curve(inputs, parameters, where)
 %   int_meth  [1x1] :    0=>Analyze over [stim_start+start,stim_stop-stop]
 %                   :    1=>Analyze over [stim_start+start,stim_start+stop]
 
+if nargin<4
+    record = [];
+end
 
 computations=struct('curve',[],'maxes',[],'mins',[],'spont',[]);
 
@@ -46,11 +49,13 @@ internals = struct('rast',[],'spont',[]);
 %good = 1; disp('TUNING_CURVE: TEMPORARY IGNORING PARAMETERS' );
 if ~good,error(['INPUT: ' er]); end;
 
-nag=analysis_generic([],[],where); delete(nag); ag=analysis_generic([],[],[]);
+nag=analysis_generic([],[],where); 
+delete(nag); 
+ag=analysis_generic([],[],[]);
 
 tc = class(struct('inputs',inputs,'TCparams',[],'internals',internals,...
         'computations',computations),'tuning_curve',ag);
-tc = setparameters(tc,parameters); % must be immediately after above
+tc = setparameters(tc,parameters,record); % must be immediately after above
 delete(contextmenu(tc)); 
 tc = newcontextmenu(tc);  % install new contextmenu
   %tc = compute(tc);
