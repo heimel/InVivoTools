@@ -56,13 +56,17 @@ switch lower(record.setup)
             return
         end
         
-        if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
-            errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-            EVENT.strons.tril(1)=EVENT.strons.tril(end);
-        elseif isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1
-            errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-            EVENT.strons.tril(1)=EVENT.strons.tril(length(EVENT.strons.tril)-length(EVENT.strons.OpOn));
-        end
+                if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
+                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+                    EVENT.strons.tril(1)=EVENT.strons.tril(end);
+                elseif isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1
+                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+                    EVENT.strons.tril(1)=EVENT.strons.tril(length(EVENT.strons.tril)-length(EVENT.strons.OpOn));
+                end
+%         if length(EVENT.strons.tril)>1
+%             errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+%             EVENT.strons.tril(1)=EVENT.strons.tril(end);
+%         end
         EVENT.Myevent = 'Snip';
         EVENT.type = 'snips';
         EVENT.Start = 0;
@@ -95,9 +99,9 @@ switch lower(record.setup)
             WaveTime_Fpikes = ExsnipTDT(EVENT);
         end
         
-%         if isempty(WaveTime_Fpikes)
-%             return
-%         end
+        %         if isempty(WaveTime_Fpikes)
+        %             return
+        %         end
         
         % spike sorting
         for ii=1:length(channels2analyze)
@@ -130,8 +134,8 @@ switch lower(record.setup)
         % disp('IMPORTSPIKE2: Taking first TTL for time synchronization');
         timeshift = stimsfile.start-EVENT.strons.tril(1);
         timeshift = timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
-       
-               
+        
+        
         cells = struct([]);
         cll.name = '';
         cll.intervals = intervals;
@@ -159,7 +163,7 @@ switch lower(record.setup)
             cells = [cells,cll]; %#ok<AGROW>
         end
         
-
+        
     otherwise
         % import spike2 data into experiment file
         channels2analyze = 1;
@@ -212,13 +216,15 @@ if exist(spikesfile,'file')
 end
 
 switch lower(record.setup)
-    case 'antigua'   
-%         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+    case 'antigua'
+        %         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
         isi = [];
     otherwise
         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
 end
 save(spikesfile,'cells','isi');
+
+
 
 ssts = getstimscripttimestruct(cksds,record.test);
 
@@ -236,205 +242,205 @@ measures=[];
 %nr = getallnamerefs(cksds);
 %for r=1:length(nr) % for all refs
 %    g = getcells(cksds,nr(r));
-    g = getcells(cksds);
-    if isempty(g)
-        return
+g = getcells(cksds);
+if isempty(g)
+    return
+end
+loadstr = ['''' g{1} ''''];
+for i=2:length(g)
+    loadstr = [loadstr ',''' g{i} '''']; %#ok<AGROW>
+end
+eval(['d = load(getexperimentfile(cksds),' loadstr ',''-mat'');']);
+
+if length(g)>20 % dont show more than 10 cells in the analysis
+    logmsg('More than 10 cells, going into silence mode');
+    verbose = 0;
+end
+
+for i=1:length(g) % for all cells
+    switch record.stim_type
+        case {'sg','sg_adaptation'}
+            inp.stimtime = stimtimestruct(ssts,1); % only works for one repetition
     end
-    loadstr = ['''' g{1} ''''];
-    for i=2:length(g)
-        loadstr = [loadstr ',''' g{i} '''']; %#ok<AGROW>
-    end
-    eval(['d = load(getexperimentfile(cksds),' loadstr ',''-mat'');']);
     
-    if length(g)>10 % dont show more than 10 cells in the analysis
-        logmsg('More than 10 cells, going into silence mode');
-        verbose = 0;
-    end
-    
-    for i=1:length(g) % for all cells
-        switch record.stim_type
-            case {'sg','sg_adaptation'}
-                inp.stimtime = stimtimestruct(ssts,1); % only works for one repetition
+    inp.st=ssts;
+    inp.spikes={};
+    inp.cellnames = {};
+    inp.spikes=d.(g{i});
+    n_spikes=0;
+    for k=1:length(ssts.mti)
+        try
+            n_spikes=n_spikes+length(get_data(inp.spikes,...
+                [ssts.mti{k}.startStopTimes(1),...
+                ssts.mti{k}.startStopTimes(end)]));
+        catch
+            n_spikes=n_spikes+length(get_data(inp.spikes,...
+                [ssts.mti{k}.startStopTimes(1),...
+                ssts.mti{k}.startStopTimes(end-1)]));
         end
-        
-        inp.st=ssts;
-        inp.spikes={};
-        inp.cellnames = {};
-        inp.spikes=d.(g{i});
-        n_spikes=0;
-        for k=1:length(ssts.mti)
-            try
-                n_spikes=n_spikes+length(get_data(inp.spikes,...
-                    [ssts.mti{k}.startStopTimes(1),...
-                    ssts.mti{k}.startStopTimes(end)]));
-            catch
-                n_spikes=n_spikes+length(get_data(inp.spikes,...
-                    [ssts.mti{k}.startStopTimes(1),...
-                    ssts.mti{k}.startStopTimes(end-1)]));
+    end
+    inp.cellnames{1} = [g{i}];
+    inp.title=[g{i}]; % only used in period_curve
+    disp(['ANALYSE_ECTESTRECORD: Cell ' num2str(i) ' of ' num2str( length(g) ) ...
+        ', ' g{i} ', ' num2str(n_spikes) ' spikes']);
+    
+    stim_type = record.stim_type;
+    try
+        stim = get(inp.st.stimscript);
+        if ~isempty(stim)
+            switch class(stim{1})
+                case 'stochasticgridstim'
+                    stim_type = 'sg';
             end
         end
-        inp.cellnames{1} = [g{i}];
-        inp.title=[g{i}]; % only used in period_curve
-        disp(['ANALYSE_ECTESTRECORD: Cell ' num2str(i) ' of ' num2str( length(g) ) ...
-            ', ' g{i} ', ' num2str(n_spikes) ' spikes']);
-        
-        stim_type = record.stim_type;
-        try
-            stim = get(inp.st.stimscript);
-            if ~isempty(stim)
-                switch class(stim{1})
-                    case 'stochasticgridstim'
-                        stim_type = 'sg';
-                end
-            end
-        end
-        
-        switch stim_type
-            case {'sg','sg_adaptation'}
-                cellmeasures = analyse_sg(inp,n_spikes,record);
-            case {'hupe','border','lammemotion','lammetexture'}
-                cellmeasures = analyse_ectest_by_typenumber(inp,record);
-            otherwise
-                cellmeasures = analyse_ps(inp,record,verbose);
-        end
-        
-        cellmeasures.usable = 1;
-        
-        if ~isempty(find_record(record,['comment=*' num2str(i) ':axon*']))
-            cellmeasures.usable=0;
-        end
-        
-        if ~isempty(find_record(record,['comment=*' num2str(i) ':bad*']))
-            cellmeasures.usable=0;
-        end
-        
-        if isempty(measures) % may not be correct! check importspike2
-            cellmeasures.type='mu';
-        else
-            cellmeasures.type='su';
-        end
-        
-        try % compute Reponse Index
-            cellmeasures.ri= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
-                cellmeasures.rate_peak;
-        end
-        
-        try % compute selectivity index
-            for t = 1:length(cellmeasures.rate)
-                cellmeasures.selectivity_index{t} = ...
-                    (max(cellmeasures.rate{t})-min(cellmeasures.rate{t})) / ...
-                    max(cellmeasures.rate{t});
-            end % t
-        end
-        
-        try
-            % compute signal to noise ratio (don't confuse with cell quality snr)
-            cellmeasures.response_snr= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
-                cellmeasures.rate_spont;
-        end
-        
-        try
-            % compute Prolonged Discharge Index
-            cellmeasures.pdi=thresholdlinear( ...
-                (cellmeasures.rate_late-cellmeasures.rate_spont) /...
-                (cellmeasures.rate_early-cellmeasures.rate_spont));
-        end
-        
-        cellmeasures.index = cells(i).index;
-        if isfield(cells,'wave')
-            cellmeasures.wave = cells(i).wave;
-            cellmeasures.std = cells(i).std;
-            cellmeasures.snr = cells(i).snr;
-        else
-            cellmeasures.wave = [];
-            cellmeasures.std = [];
-            cellmeasures.snr = NaN;
-        end
-        cellmeasures.sample_interval = cells(i).sample_interval;
-        if isfield(cells,'p_multiunit')
-            cellmeasures.p_multiunit = cells(i).p_multiunit;
-        end
-        if isfield(cells,'p_subunit')
-            cellmeasures.p_subunit = cells(i).p_subunit;
-        end
-        
-        flds = fields(cells);
-        spike_flds = {flds{strmatch('spike_',flds)}};
-        for field = spike_flds
-            cellmeasures.(field{1}) = median( cells(i).(field{1}));
-        end
-        
-        if ~all(isnan(cellmeasures.wave)) || isempty(cellmeasures.wave)
-            cellmeasures.contains_data = true;
-        else
-            cellmeasures.contains_data = false;
-        end
-        if ~cellmeasures.contains_data
-            cellmeasures.usable = 0;
-        end
-        
-        cellmeasures.depth = record.depth-record.surface;
-        
-        if isfield(cells,'channel') % then check area
-            cellmeasures.channel = cells(i).channel;
-            if ~isempty(area)
-                for a=1:length(area)
-                    if ismember(cellmeasures.channel,area(a).channels)
-                        cellmeasures.area = area(a).name;
-                    end
-                end
-            end
-        end
-        
-        measures = [measures cellmeasures];
-    end % cell i
+    end
     
-    if exist('fcm','file')
-        cluster_spikes = true;
+    switch stim_type
+        case {'sg','sg_adaptation'}
+            cellmeasures = analyse_sg(inp,n_spikes,record);
+        case {'hupe','border','lammemotion','lammetexture'}
+            cellmeasures = analyse_ectest_by_typenumber(inp,record);
+        otherwise
+            cellmeasures = analyse_ps(inp,record,verbose);
+    end
+    
+    cellmeasures.usable = 1;
+    
+    if ~isempty(find_record(record,['comment=*' num2str(i) ':axon*']))
+        cellmeasures.usable=0;
+    end
+    
+    if ~isempty(find_record(record,['comment=*' num2str(i) ':bad*']))
+        cellmeasures.usable=0;
+    end
+    
+    if isempty(measures) % may not be correct! check importspike2
+        cellmeasures.type='mu';
     else
-        cluster_spikes = false;
-        disp('ANALYSE_ECTESTRECORD: No fuzzy toolbox present for spike clustering');
+        cellmeasures.type='su';
     end
-        
-    if cluster_spikes            % compute cluster overlap
-        for c = channels2analyze % do this per channel
-            ind = find([measures.channel]==c);
-            n_cells = length(measures(ind));
-            clust=zeros(n_cells);
-            spike_features = cell(n_cells,1);
-            for i=1:n_cells
-                for field = spike_flds
-                    spike_features{i} = [ spike_features{i};cells(ind(i)).(field{1})'];
+    
+    try % compute Reponse Index
+        cellmeasures.ri= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
+            cellmeasures.rate_peak;
+    end
+    
+    try % compute selectivity index
+        for t = 1:length(cellmeasures.rate)
+            cellmeasures.selectivity_index{t} = ...
+                (max(cellmeasures.rate{t})-min(cellmeasures.rate{t})) / ...
+                max(cellmeasures.rate{t});
+        end % t
+    end
+    
+    try
+        % compute signal to noise ratio (don't confuse with cell quality snr)
+        cellmeasures.response_snr= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
+            cellmeasures.rate_spont;
+    end
+    
+    try
+        % compute Prolonged Discharge Index
+        cellmeasures.pdi=thresholdlinear( ...
+            (cellmeasures.rate_late-cellmeasures.rate_spont) /...
+            (cellmeasures.rate_early-cellmeasures.rate_spont));
+    end
+    
+    cellmeasures.index = cells(i).index;
+    if isfield(cells,'wave')
+        cellmeasures.wave = cells(i).wave;
+        cellmeasures.std = cells(i).std;
+        cellmeasures.snr = cells(i).snr;
+    else
+        cellmeasures.wave = [];
+        cellmeasures.std = [];
+        cellmeasures.snr = NaN;
+    end
+    cellmeasures.sample_interval = cells(i).sample_interval;
+    if isfield(cells,'p_multiunit')
+        cellmeasures.p_multiunit = cells(i).p_multiunit;
+    end
+    if isfield(cells,'p_subunit')
+        cellmeasures.p_subunit = cells(i).p_subunit;
+    end
+    
+    flds = fields(cells);
+    spike_flds = {flds{strmatch('spike_',flds)}};
+    for field = spike_flds
+        cellmeasures.(field{1}) = median( cells(i).(field{1}));
+    end
+    
+    if ~all(isnan(cellmeasures.wave)) || isempty(cellmeasures.wave)
+        cellmeasures.contains_data = true;
+    else
+        cellmeasures.contains_data = false;
+    end
+    if ~cellmeasures.contains_data
+        cellmeasures.usable = 0;
+    end
+    
+    cellmeasures.depth = record.depth-record.surface;
+    
+    if isfield(cells,'channel') % then check area
+        cellmeasures.channel = cells(i).channel;
+        if ~isempty(area)
+            for a=1:length(area)
+                if ismember(cellmeasures.channel,area(a).channels)
+                    cellmeasures.area = area(a).name;
                 end
             end
-            max_spikes = 200;
-            cluster_features = [ 1 2 3 ]; % 5 ruins it
-            for i=2:n_cells
-                if isempty(spike_features{i})
+        end
+    end
+    
+    measures = [measures cellmeasures];
+end % cell i
+
+if exist('fcm','file')
+    cluster_spikes = true;
+else
+    cluster_spikes = false;
+    disp('ANALYSE_ECTESTRECORD: No fuzzy toolbox present for spike clustering');
+end
+
+if cluster_spikes            % compute cluster overlap
+    for c = channels2analyze % do this per channel
+        ind = find([measures.channel]==c);
+        n_cells = length(measures(ind));
+        clust=zeros(n_cells);
+        spike_features = cell(n_cells,1);
+        for i=1:n_cells
+            for field = spike_flds
+                spike_features{i} = [ spike_features{i};cells(ind(i)).(field{1})'];
+            end
+        end
+        max_spikes = 200;
+        cluster_features = [ 1 2 3 ]; % 5 ruins it
+        for i=2:n_cells
+            if isempty(spike_features{i})
+                continue
+            end
+            n_spikesi = min(max_spikes,size(spike_features{i},2));
+            for j=1:i-1
+                if isempty(spike_features{j})
                     continue
                 end
-                n_spikesi = min(max_spikes,size(spike_features{i},2));
-                for j=1:i-1
-                    if isempty(spike_features{j})
-                        continue
-                    end
-                    n_spikesj = min(max_spikes,size(spike_features{j},2));
-                    features = [spike_features{i}(cluster_features,1:n_spikesi),spike_features{j}(cluster_features,1:n_spikesj)]';
-                    orglabel = [ones(1,n_spikesi),zeros(1,n_spikesj)];
-                    [dummy,Ulabel] =fcm(features,2,[2 50 1e-4 0]); %#ok<ASGLU>
-                    newlabel = double(Ulabel(1,:)>0.5);
-                    clust(i,j) = 2 * (sum(orglabel~=newlabel)/(n_spikesi+n_spikesj));
-                    if clust(i,j)>1
-                        clust(i,j)=2-clust(i,j);
-                    end
+                n_spikesj = min(max_spikes,size(spike_features{j},2));
+                features = [spike_features{i}(cluster_features,1:n_spikesi),spike_features{j}(cluster_features,1:n_spikesj)]';
+                orglabel = [ones(1,n_spikesi),zeros(1,n_spikesj)];
+                [dummy,Ulabel] =fcm(features,2,[2 50 1e-4 0]); %#ok<ASGLU>
+                newlabel = double(Ulabel(1,:)>0.5);
+                clust(i,j) = 2 * (sum(orglabel~=newlabel)/(n_spikesi+n_spikesj));
+                if clust(i,j)>1
+                    clust(i,j)=2-clust(i,j);
                 end
             end
-            clust = clust + clust' + eye(length(clust));
-            for i=1:n_cells
-                measures(ind(i)).clust = clust(i,:); %#ok<AGROW>
-            end
-        end % channel c
-    end % if cluster_spikes
+        end
+        clust = clust + clust' + eye(length(clust));
+        for i=1:n_cells
+            measures(ind(i)).clust = clust(i,:); %#ok<AGROW>
+        end
+    end % channel c
+end % if cluster_spikes
 %end % reference r
 
 

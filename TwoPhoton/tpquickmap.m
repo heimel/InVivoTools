@@ -30,7 +30,7 @@ if iscell(resps(1).curve)
 else
     numcolors = length(resps(1).curve(1,:));
 end
-if 0 % orientation
+if 1 % orientation
     ctab = [hsv(numcolors/2);hsv(numcolors/2)];
 else
     ctab = hsv(numcolors);

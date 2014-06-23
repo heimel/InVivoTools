@@ -32,8 +32,9 @@ switch protocol
         params.post_window = [0 inf];
 %        disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
             case '13.20'
-%         params.pre_window = [-2 0];
-%         params.post_window = [0 2];
+         params.pre_window = [-Inf -1];
+%         params.post_window = [0 1];
+params.separation_from_prev_stim_off = 5; 
 %        disp(['ECPROCESSPARAMS: Setting pre_window to ' mat2str(params.pre_window)]);
  %       disp(['ECPROCESSPARAMS: Setting post_window to ' mat2str(params.post_window)]);
 end
@@ -79,9 +80,8 @@ switch record.mouse(1:min(end,5))
         params.entropy_analysis = false;
 end
 
-
 switch lower(record.setup)
-    case {'antigua','daneel'}
+    case {'antigua','daneel','nin380'}
         params.spike_sorting_routine = '';
         params.compare_with_klustakwik = false;
     otherwise
@@ -102,7 +102,7 @@ switch lower(record.setup)
         end
 end
 %params.spike_sorting_routine = 'klustakwik';
- 
+
 % time calibration
 switch lower(record.setup)
     case 'antigua' 

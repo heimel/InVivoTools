@@ -84,7 +84,7 @@ else
 end;
 %  colormap(cols)
 % cols = [prism(numstims); 0.7 0.7 0.7];
-%cols = hsv(numstims);
+% cols = hsv(numstims);
 
 if nargout==2
     h=figure;

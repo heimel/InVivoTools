@@ -141,6 +141,7 @@ intervals=[stimsfile.start ...
 
 % shift time to fit with TTL and stimulustimes
 timeshift=stimsfile.start-data_ttl(1);
+% timeshift=stimsfile.start-data_ttl(1)+1; % just for motion stim for 13.20
 % disp('IMPORTSPIKE2: Taking first TTL for time synchronization');
 
 timeshift=timeshift+ ttl_delay; % added on 24-1-2007 to account for delay in ttl
