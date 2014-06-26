@@ -141,13 +141,19 @@ else
     
     % get strons
     ind = find(data.type == E.STRON);
-    if length(ind)>1
-        errormsg([ num2str(length(ind)) ' triggers present. Taking last.']);
-        ind = ind(end);
+%     if length(ind)>1
+%         errormsg([ num2str(length(ind)) ' triggers present. Taking last.']);
+%         ind = ind(end);
+%     end
+    
+    for i = ind'
+        if isfield(EVENT,'strons') && isfield(EVENT.strons,code2string(data.namecode(i)))
+            EVENT.strons.(code2string(data.namecode(i)))(end+1) = data.timestamp(i);
+        else
+            
+            EVENT.strons.(code2string(data.namecode(i))) = data.timestamp(i);
+        end
     end
-    
-    
-    EVENT.strons.(code2string(data.namecode(ind))) = data.timestamp(ind);
     
     EVENT.timerange = [data.timestamp(2) data.timestamp(end)];
     

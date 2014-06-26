@@ -200,11 +200,16 @@ end
 % maximum bouton to mitochrondion 
 params.max_bouton_mito_distance_um = 2; 
 
+% get intensities
+params.get_intensities = false;
 switch record.experiment
-    case {'12.81','Examples','14.26'}    
+    case {'12.81','Examples','14.26'}
         params.get_intensities = true;
-    otherwise
-        params.get_intensities = false;
+    case '13.29' % dani cr
+        switch lower(record.setup)
+            case 'lif'
+                params.get_intensities = true;
+        end
 end
 
 % stimulus analysis

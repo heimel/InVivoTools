@@ -36,7 +36,7 @@ XX=[cll1.spike_amplitude,cll1.spike_peak_trough_ratio/range(cll1.spike_peak_trou
 % subplot(2,2,2);plot(score(:,1),score(:,3),'.')
 % subplot(2,2,3);plot(score(:,1),score(:,4),'.')
 % subplot(2,2,4);plot(score(:,2),score(:,4),'.')
-NumClust=1; %11
+NumClust=2; %11
 
 [IDX,f1,f2,D] = kmeans(score(:,[1:4]),NumClust);
 SPs=struct([]);
