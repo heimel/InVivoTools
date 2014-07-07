@@ -633,14 +633,53 @@ switch command,
         ud.celldrawinfo.dirname = '';
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellImage',[],fig);
-    case 'labelList',
+        
+    case 'maxzBt'
+        % take z-frame with maximum intensity as z-component
+        % for neurites this is done on a pixel by pixel basis
+        % for non-neurites this is done for all pixels together
+         v = get(ft(fig,'celllist'),'value');
+         
+         % get max_of_channel
+        str=get(ft(fig,'maxzPopup'),'string');
+        max_of_channel = str2num( str{get(ft(fig,'maxzPopup'),'value')} ); %#ok<ST2NM>
+        if isempty(max_of_channel)
+            errormsg('No channel set for maximum mapping.');
+            return
+        end
+        proj_mode = 1; % mean data for each frame
+
+        verbose = (length(v)==1);
+        if ~verbose
+            hwaitbar = waitbar(0,'Finding max Z frame...');
+        end
+        for i=1:length(v)
+            if ~verbose
+                hwaitbar = waitbar(i/length(v));
+            end
+            if is_neurite(ud.celllist(v(i)).type)
+                % do per pixel
+                logmsg('Neurite mapping to max z-projection is not implemented yet.');
+            else
+                data = tpreaddata(ud.record, [-inf inf], {ud.celllist(v(i)).pixelinds},proj_mode,max_of_channel,verbose);
+                [tempmax,frame] = max( data{1} ); %#ok<ASGLU>
+                ud.celllist(v(i)).zi = frame*ones(size(ud.celllist(v(i)).xi));
+            end
+        end
+        if ~verbose
+            close(hwaitbar);
+        end
+        set(fig,'userdata',ud);
+        analyzetpstack('UpdateCellList',[],fig);
+        analyzetpstack('UpdateCellImage',[],fig);
+    case 'labelList'
         strs = get(ft(fig,'labelList'),'string');
         vals = get(ft(fig,'labelList'),'value');
         v = get(ft(fig,'celllist'),'value');
         for i=1:length(v), ud.celllist(v(i)).labels = strs(vals); end;
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellList',[],fig);
-    case 'cellTypePopup',
+    case 'cellTypePopup'
         strs = get(ft(fig,'cellTypePopup'),'string');
         val = get(ft(fig,'cellTypePopup'),'value');
         v = get(ft(fig,'celllist'),'value');

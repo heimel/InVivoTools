@@ -1,4 +1,4 @@
-function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels)
+function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels, verbose)
 
 % TPREADDATA - Reads twophon data
 %
@@ -56,23 +56,30 @@ function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels)
 %
 %  Tested:  only tested for T-series records, not other types
 %
-%  Steve Hooser, Alexander Heimel, Dani�lle van Versendaal.
+%  Steve Hooser, Alexander Heimel, Danielle van Versendaal.
+
+if nargin<6
+    verbose = [];
+end
+if isempty(verbose)
+    verbose = true;
+end
 
 switch length(channels)
     case 1 % single channel
-        [data,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels);
+        [data,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels, verbose);
     case 2 % ratiometric
-        [data_enum,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(1) );
-        [data_denom,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(2) );
+        [data_enum,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(1), verbose );
+        [data_denom,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(2), verbose );
         for i = 1:numel(data_enum)
             if any(data_denom{i}==0)
-                disp('TPREADDATA: Measurement on denominator channel contains 0 value');
+                logmsg('Measurement on denominator channel contains 0 value');
             end
             data{i} = (data_enum{i})./(data_denom{i});
         end
         data = reshape(data,size(data_enum));
     otherwise
-        disp('TPREADDATA: Expects only one or two channels.')
+        logmsg('Expects only one or two channels.')
 end
 
 

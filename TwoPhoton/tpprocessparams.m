@@ -162,13 +162,6 @@ switch lower(record.experiment)
         params.align_channel = 2; % for Daan's original stacks
 end
 
-
-% change user specific options
-switch host
-    case 'nin326' % juliette
-        params.detect_events_threshold = 3;%1 %;2.5; % (std)
-end
-
 % maximum distance for linking ROI to neurite
 switch record.experiment
     case '11.21'
@@ -211,6 +204,8 @@ switch record.experiment
                 params.get_intensities = true;
         end
 end
+
+
 
 % stimulus analysis
 switch lower(record.experiment)

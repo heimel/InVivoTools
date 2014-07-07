@@ -1,4 +1,4 @@
-function [data, t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channel)
+function [data, t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channel,verbose)
 % TPREADDATA_SINGLECHANNEL - Reads twophon data
 %
 %  [DATA, T] = TPREADDATA(RECORDS, INTERVALS, PIXELINDS, MODE)
@@ -51,6 +51,12 @@ function [data, t] = tpreaddata_singlechannel(records, intervals, pixelinds, mod
 %
 %  Tested:  only tested for T-series records, not other types
 
+if nargin<6
+    verbose = [];
+end
+if isempty(verbose)
+    verbose = true;
+end
 
 % tpcorrecttptimes should still be change for levelt and fitzpatrick labs
 frametimes = tpcorrecttptimes(records);
@@ -62,13 +68,13 @@ end
 %disp('TEMPORARY: channel manually set to 1');
 %channel  = 0
 
-[data, t] = tpreaddata_single_record(records(1), intervals, pixelinds, mode, channel, frametimes{1});
+[data, t] = tpreaddata_single_record(records(1), intervals, pixelinds, mode, channel, frametimes{1},verbose);
 if length(records)>1
     disp('TPREADDATA: not all options are implemented correctly when reading multiple epochs');
     disp('TPREADDATA: returning results of multiple epochs as single interval. If multiple intervals are required,');
     disp('   then these should be explicitly requested in the function call.');
     for i = 2:length(records)
-        [single_data, single_t] = tpreaddata_single_record(records(i), intervals, pixelinds, mode, channel, frametimes{i});
+        [single_data, single_t] = tpreaddata_single_record(records(i), intervals, pixelinds, mode, channel, frametimes{i},verbose);
         % concatenate to other data
         for m = 1:size(data,1) % loop over intervals
             for n = 1:size(data,2) % loop over cells
@@ -80,7 +86,7 @@ if length(records)>1
 end
 
 
-function [data,t,params] = tpreaddata_single_record(record, intervals, pixelinds, mode, channel, frametimes)
+function [data,t,params] = tpreaddata_single_record(record, intervals, pixelinds, mode, channel, frametimes, verbose)
 
 params = tpreadconfig(record);
 
@@ -100,10 +106,10 @@ if exist(driftfilename,'file'),
     dr=struct('x',[],'y',[]);
     dr.x = [dr.x; drfile.drift.x];
     dr.y = [dr.y; drfile.drift.y];
-    disp(['TPREADDATA_SINGLECHANNEL: Drift correction method = ',drfile.method]);
-else
-    disp(['TPREADDATA_SINGLECHANNEL: No driftcorrect file named ' driftfilename]);
-end;
+    logmsg(['Drift correction method = ',drfile.method]);
+elseif strcmpi(params.third_axis_name,'t') 
+    logmsg(['No driftcorrect file named ' driftfilename]);
+end
 
 % these variables will be used to calculate the time of each pixel within a frame
 currScanline_period__us_ = 0;
@@ -153,13 +159,19 @@ for j=1:size(intervals,1) % loop over requested intervals
         f1=find(  frametimes(1:end-1)<=intervals(intervalorder(j),2) & ...
             frametimes(2:end)>intervals(intervalorder(j),2) );
     end
-    hwaitbar = waitbar(0,'Reading frames...');
+    
+    if verbose
+        hwaitbar = waitbar(0,'Reading frames...');
+    end
     for f=f0:f1 % loop over frames in interval
-        hwaitbar = waitbar(f/(f1-f0));
+        if verbose
+            hwaitbar = waitbar(f/(f1-f0));
+        end
         %dirid = frame2dirnum(f);  % find the directory where frame number f resides
         if sum(imsinmem)>299,  % limit 300 frames in memory at any one time
             inmem = find(imsinmem);
-            ims{inmem(1)} = []; imsinmem(inmem(1)) = 0;
+            ims{inmem(1)} = [];
+            imsinmem(inmem(1)) = 0;
         end;
         if ~imsinmem(f),
             ims{f} = tpreadframe(record,channel,f);
@@ -176,14 +188,18 @@ for j=1:size(intervals,1) % loop over requested intervals
                 warning('off','TPREADDATA_SINGLECHANNEL:BIDIRECTIONAL_TIMES');
             end
             
-            %update pixeltimes, time within each frame that each pixel was recorded
-            pixeltimes = + repmat( (0 : params.scanline_period : ...
-                (params.lines_per_frame-1)*params.scanline_period )', ...
-                1,params.pixels_per_line);
-            
-            pixeltimes = pixeltimes + repmat( 0: (params.dwell_time) : ...
-                ((params.pixels_per_line-1)*params.dwell_time), ...
-                params.lines_per_frame,1);
+            if params.scanline_period > 0
+                %update pixeltimes, time within each frame that each pixel was recorded
+                pixeltimes = + params.scanline_period * ...
+                    repmat( (0 : (params.lines_per_frame-1) )', ...
+                    1,params.pixels_per_line);
+                
+                pixeltimes = pixeltimes + params.dwell_time * ...
+                    repmat( 0 : ((params.pixels_per_line-1)), ...
+                    params.lines_per_frame,1);
+            else
+                pixeltimes = 0;
+            end
             
             %pixeltimes = pixeltimes - params.frame_period;  % if trigger is end-of-frame marker
             
@@ -193,6 +209,8 @@ for j=1:size(intervals,1) % loop over requested intervals
             currPixels_per_line=params.pixels_per_line;
         end;
         t_ = frametimes(f)+pixeltimes;
+        
+        
         for i=1:length(pixelinds)
             if ~isempty(dr) % driftcorrection
                 [ii,jj]=ind2sub(size(ims{f}),pixelinds{i});
@@ -236,7 +254,11 @@ for j=1:size(intervals,1) % loop over requested intervals
             end;
             thisdata = double(ims{f}(thepixelinds));
             thisdata(ind_outofbounds)=nan;
-            thistime = t_(thepixelinds);
+            if numel(t_)>1
+                thistime = t_(thepixelinds);
+            else
+                thistime = t_ * ones(size(thepixelinds));
+            end
             newtinds = find(thistime>=intervals(intervalorder(j),1)&thistime<=intervals(intervalorder(j),2)); % trim out-of-bounds points
             if mode==1
                 if length(newtinds)==length(thepixelinds)
@@ -285,7 +307,9 @@ for j=1:size(intervals,1) % loop over requested intervals
             end
         end
     end
-    close(hwaitbar);
+    if verbose
+        close(hwaitbar);
+    end
     if mode==3
         for i=1:length(pixelinds),
             if numb(i)>0,

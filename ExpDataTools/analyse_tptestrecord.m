@@ -59,7 +59,7 @@ end
 if 1
     record = tp_link_rois( record );
 else
-    disp('ANALYSE_TPTESTRECORD: temporarily turned off tp_link_rois') %#ok<UNRCH>
+    logmsg('Temporarily turned off tp_link_rois') %#ok<UNRCH>
 end
 
 % compute ROI lengths / circumferences

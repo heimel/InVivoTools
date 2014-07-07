@@ -58,15 +58,16 @@ if isfield(inf,'third_axis_name') && strcmp(inf.third_axis_name,'t')
     params.dwell_time = params.scanline_period / params.pixels_per_line; % pixel dwell time in us
     params.dwell_time__us =  params.dwell_time*1e6;
 else
-    warning('TPREADCONFIG:NO_SECONDSPERSCANLINE','TPREADCONFIG:NO_SECONDSPERSCANLINE: No SecondsPerScanLine in multitiff image description. Choosing arbitrary scanline time');
-    
-    warning('off','TPREADCONFIG:NO_SECONDSPERSCANLINE')
-    params.scanline_period = 1/params.lines_per_frame; % making frame period 1
+    if isfield(params,'third_axis_name') && strcmpi(params.third_axis_name,'t')
+        warning('TPREADCONFIG:NO_SECONDSPERSCANLINE','TPREADCONFIG:NO_SECONDSPERSCANLINE: No SecondsPerScanLine in multitiff image description. Choosing arbitrary scanline time');
+        warning('off','TPREADCONFIG:NO_SECONDSPERSCANLINE')
+    end
+    params.scanline_period = 0; % making frame period 0
+    %1/params.lines_per_frame; % making frame period 1
     params.scanline_period__us = params.scanline_period *1e6; %
     params.bidirectional = 0;
-   params.dwell_time = params.scanline_period / params.pixels_per_line; % pixel dwell time in us
+    params.dwell_time = params.scanline_period / params.pixels_per_line; % pixel dwell time in us
     params.dwell_time__us =  params.dwell_time*1e6;
-    
 end
 
 if ~isfield( inf, 'frame_period')

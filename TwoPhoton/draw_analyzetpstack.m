@@ -243,7 +243,6 @@ if ti.NumberOfChannels>1
 else
     snaptolist = {'no','1'};
 end
-
 guicreate(popup,'String',snaptolist,...
    'Tag','snaptoPopup','Enable','on','width',35,'parent',hroilabelspanel,'move','right','callback','genercallback');
 
@@ -263,7 +262,7 @@ guicreate(cb,'String','Sync','value',0,'move','down',...
     'width',60,'Tag','syncCB','callback','genercallback','parent',hroilabelspanel);
 
 % ROI draw panel
-hroidrawpanel = uipanel('Title','ROI','Position',[panel_left+panel_width-0.18 panel_top-panel_height 0.18 panel_height],'units','pixels','backgroundcolor',[0.8 0.8 0.8],'tag','roidrawpanel');
+hroidrawpanel = uipanel('Title','ROI','Position',[panel_left+panel_width-0.22 panel_top-panel_height 0.22 panel_height],'units','pixels','backgroundcolor',[0.8 0.8 0.8],'tag','roidrawpanel');
 
 guicreate(cb,'String','Present','value',1,'width',80,'left','left','top','top','Tag','presentCB',...
     'callback','genercallback','move','down','parent',hroidrawpanel);
@@ -271,13 +270,16 @@ guicreate(popup,'String',tpstacktypes(record),'Tag','cellTypePopup','Enable','on
 h=guicreate(listbox,'String',tpstacklabels(record),'Tag','labelList','Enable','on','left','left','height',45,'width',100,'parent',hroidrawpanel,'move','down','callback','genercallback','fontsize',9,'backgroundcolor',[1 1 1]);
 set(h,'Max',2);
 
-guicreate(button,'String','Redraw','Tag','redrawCellBt','Enable','on','width','auto','left','left','parent',hroidrawpanel,'move','down');
+guicreate(button,'String','Redraw','Tag','redrawCellBt','Enable','on','width','auto','left','left','parent',hroidrawpanel,'move','right');
+guicreate(button,'String','(M)ove','Tag','moveCellBt','Enable','on','width','auto','parent',hroidrawpanel,'move','down');
+guicreate(button,'String','Delete','Tag','deletecellBt','left','left','Enable','on','width','auto','parent',hroidrawpanel,'move','right');
+guicreate(button,'String','Renumber','Tag','setROIindexBt','Enable','on','tooltipstring','Set index to selected ROIs','width','auto','parent',hroidrawpanel,'move','down');
 
-guicreate(button,'String','(M)ove','Tag','moveCellBt','left','left','Enable','on','width','auto','parent',hroidrawpanel,'move','down');
-guicreate(button,'String','Delete','Tag','deletecellBt','left','left','Enable','on','width','auto','parent',hroidrawpanel,'move','down');
+guicreate(button,'String','Max Z','Tag','maxzBt','Enable','on','left','left','width','auto','parent',hroidrawpanel,'move','right');
+guicreate(txt,'String','chan','Enable','on','width','auto','parent',hroidrawpanel,'move','right');
+guicreate(popup,'String',snaptolist,...
+   'Tag','maxzPopup','Enable','on','width',35,'parent',hroidrawpanel,'move','down','callback','genercallback');
 
-
-guicreate(button,'String','Renumber','Tag','setROIindexBt','Enable','on','left','left','tooltipstring','Set index to selected ROIs','width','auto','parent',hroidrawpanel,'move','down');
 guicreate(button,'String','Link to idx','Tag','linkOneROIBt','Enable','on','left','left','tooltipstring','Link selected ROI to index','width','auto','parent',hroidrawpanel,'move','down');
 
 

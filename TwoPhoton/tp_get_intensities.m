@@ -4,22 +4,22 @@ function record = tp_get_intensities(record)
 %  RECORD = TP_GET_INTENSITIES( RECORD )
 %     should be run twice for proper normalizations if some ROIs are new
 % 
-% 2011, Alexander Heimel
+% 2011-2014, Alexander Heimel
 %
 
-disp('TP_GET_INTENSITIES: Should remove intensity info from cellist');
+logmsg('Should remove intensity info from cellist');
 
 process_parameters = tpprocessparams('',record);
 celllist = record.ROIs.celllist;
 
 celllist = structconvert(celllist,tp_emptyroirec);
 
-disp(['TP_GET_INTENSITIES: Processing '  'mouse=' record.mouse ',stack=' record.stack ',date=' record.date ]);
+logmsg(['Processing '  'mouse=' record.mouse ',stack=' record.stack ',date=' record.date ]);
 
 params = tpreadconfig(record);
 
 if isempty(params)
-    disp('TP_GET_INTENSITIES: Could not read config file. Returning.');
+    logmsg('Could not read config file. Returning.');
     return
 end
 
@@ -110,7 +110,7 @@ for i = ind_dendrite(:)'
         
         
         if mean(intensity)<1
-            disp(['TP_GET_INTENSITIES: mean intensity of dendrite ' num2str(roi_dendrite.index) ...
+            logmsg(['Mean intensity of dendrite ' num2str(roi_dendrite.index) ...
                 ' channel ' num2str(ch) ' is less than 1.']);
         end
         
@@ -147,7 +147,7 @@ for j = 1:length(celllist)
     celllist(j).zi = round(celllist(j).zi); % make zi integer (2011-11-06, should no longer occur)
     
     if isempty(roi.zi) || isnan(roi.zi(1))
-        disp(['TP_GET_INTENSITIES: ROI ' num2str(celllist(j).index) ' has no valid z-coordinate.']);
+        logmsg(['ROI ' num2str(celllist(j).index) ' has no valid z-coordinate.']);
         continue
     end
     
@@ -158,10 +158,9 @@ for j = 1:length(celllist)
             || any(round(roi.yi)>params.lines_per_frame) ...
             || any(round(roi.zi)<1) ...
             || any(round(roi.zi)>params.number_of_frames)
-        disp(['TP_GET_INTENSITIES: ROI ' num2str(celllist(j).index) ' is out of image.']);
+        logmsg(['ROI ' num2str(celllist(j).index) ' is out of image.']);
         continue
     end
-    
 
     bw = inpolygon(blankprev_x,blankprev_y,...
         [roi.xi roi.xi(1)],[roi.yi roi.yi(1)]);
@@ -169,24 +168,26 @@ for j = 1:length(celllist)
     computed_pixelinds = find(bw);
     
     if length(roi.pixelinds)~=length(computed_pixelinds) || any(roi.pixelinds~=computed_pixelinds)
-        disp(['TP_GET_INTENSITIES: discrepancy on pixelinds of ROI ' num2str(roi.index) '. Replacing with recalculated inds.' ]);
+        logmsg(['Discrepancy on pixelinds of ROI ' num2str(roi.index) '. Replacing with recalculated inds.' ]);
         roi.pixelinds = computed_pixelinds;
     end
     
     frame = roi.zi(1);
     if max(roi.zi)~=min(roi.zi)
-        disp(['No single plane for ROI: ' record.mouse ' ' record.stack ' ' record.date ' ROI index ' num2str(roi.index)]);
+        logmsg(['No single plane for ROI: ' record.mouse ' ' record.stack ' ' record.date ' ROI index ' num2str(roi.index)]);
         continue
     end
     if isempty(roi.pixelinds)
-        disp(['Empty pixelinds for ROI: ' record.mouse ' ' record.stack ' ' record.date ' ROI index ' num2str(roi.index)]);
+        logmsg(['Empty pixelinds for ROI: ' record.mouse ' ' record.stack ' ' record.date ' ROI index ' num2str(roi.index)]);
         continue
     end
     
     ind_dendrite = find( [celllist.index] == roi.neurite(1),1);
     if isempty(ind_dendrite)
-        disp(['TP_GET_INTENSITIES: ROI ' num2str(roi.index) ...
-            ' is assigned to non-existing neurite ' num2str(roi.neurite(1))]);
+        if any(cellfun(@is_neurite,{celllist.type}))
+            logmsg(['ROI ' num2str(roi.index) ...
+                ' is assigned to non-existing neurite ' num2str(roi.neurite(1))]);
+        end
         intensity_dendrite = NaN(size(roi.intensity_mean));
     else
         intensity_dendrite = celllist(ind_dendrite ).intensity_mean;
