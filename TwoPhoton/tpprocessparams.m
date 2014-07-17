@@ -208,15 +208,15 @@ end
 
 
 % stimulus analysis
+params.psth_posttime = 3; % for psth viewing only
+params.separation_from_prev_stim_off = 1.5; % separation from previous stim offset for analysing baseline, can be negative
+params.response_window = [0.5 inf]; % used for measuring response relative to stim onset
+params.responsive_alpha = 0.1; % could also be 0.05, used in ttest to determine cell is responsive
 switch lower(record.experiment)
     case 'examples'
         params.separation_from_prev_stim_off = 0.5;
         params.response_window = [0.5 inf];
-    otherwise
-        params.separation_from_prev_stim_off = 1.5; % high for GCaMPs
-        params.response_window = [0.5 inf];
 end
-params.responsive_alpha = 0.1; % could also be 0.05
 
 
 % extra analysis functions

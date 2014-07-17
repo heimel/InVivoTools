@@ -117,7 +117,8 @@ for j=1:length(stimcodes)
 %             0.5*(s.mti{stimcodelocs(i)}.startStopTimes(3)-s.mti{stimcodelocs(i)}.startStopTimes(1)) + BGpretime +BGposttime) ];
 %        disp('TPPSTH: TEMP SHORTENED INTEVRAL');
         interval(i,:) = ...
-            [ s.mti{stimcodelocs(i)}.frameTimes(1) (s.mti{stimcodelocs(i)}.startStopTimes(3)+ BGpretime +BGposttime) ];
+            [ s.mti{stimcodelocs(i)}.frameTimes(1) (s.mti{stimcodelocs(i)}.startStopTimes(3) + params.psth_posttime ) ];
+%            [ s.mti{stimcodelocs(i)}.frameTimes(1) (s.mti{stimcodelocs(i)}.startStopTimes(3)+ BGpretime +BGposttime ) ];
 
         if BGposttime > 0
             %spinterval(i,:)=[s.mti{stimcodelocs(i)}.startStopTimes(3) s.mti{stimcodelocs(i)}.startStopTimes(4)];

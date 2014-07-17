@@ -325,6 +325,9 @@ end
 if 1 % Ahmadlou & Heimel, in prep
     addpath(fullfile(majorprefix,'Studies','SC'));
 end
+if 1 % Camillo, Levelt & Heimel, Frontiers in Neuroanatomy 2014
+    addpath(fullfile(majorprefix,'Studies','Calretinin'));
+end
 
 if 1 % Vangeneugden, Self et al. in prep 
     addpath(fullfile(majorprefix,'Studies','Mapmaking'));
