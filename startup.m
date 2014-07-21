@@ -103,8 +103,14 @@ end
 
 
 if load_invivotools % InVivoTools
-    disp('STARTUP: Adding path to InVivoTools');
-    
+    if isunix
+        updatestr = ['To update: cd ' fileparts(mfilename('fullpath')) ...
+            '; git pull'];
+    else
+        updatestr = ['To update: open github and click on Sync.'];
+    end
+    disp([ upper(mfilename) ': Adding path to InVivoTools. ' updatestr]);
+        
     path2invivotools = majorprefix;
     
     % some calibration files for the packages that depend on each computer

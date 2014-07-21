@@ -55,8 +55,16 @@ switch record.datatype
 end
 measures = record.measures;
 if ~isempty(measures_on_disk) && length(measures)==length(record.measures)
-    f = fields(measures);
-    f_on_disk = fields(measures_on_disk);
+    if isstruct(measures)
+        f = fields(measures);
+    else
+        f = {};
+    end
+    if isstruct(measures_on_disk)
+        f_on_disk = fields(measures_on_disk);
+    else
+        f_on_disk = {};
+    end
     sf = intersect(setdiff(f_on_disk,f),f_on_disk);
     for i = 1:length(measures)
         for f = 1:length(sf)
