@@ -104,7 +104,7 @@ end
 
 if load_invivotools % InVivoTools
     if isunix
-        updatestr = ['To update: cd ' fileparts(mfilename('fullpath')) ...
+        updatestr = ['To update from terminal: cd ' fileparts(mfilename('fullpath')) ...
             '; git pull'];
     else
         updatestr = ['To update: open github and click on Sync.'];
@@ -219,10 +219,10 @@ if load_invivotools % InVivoTools
     
     % Psychophysics toolbox, must be before NewStimInit
     if load_psychtoolbox
-        disp('STARTUP: Path to PsychToolbox tools should be set by user in matlab');
+        disp([upper(mfilename) ': Path to PsychToolbox tools should be set by user in matlab.']);
         switch computer
             case 'MAC2'
-                disp('Not loading PsychToolbox2 from repository')
+                disp([upper(mfilename) ':Not loading PsychToolbox2 from repository'])
             case 'GLNX86'
                 %  disp('Not loading PsychToolbox3 from repository')
             otherwise
@@ -371,9 +371,18 @@ end
 %          movegui(h,'northeast');
 %  end
 
-clear;
-
 % Call Psychtoolbox-3 specific startup function:
-if exist('PsychStartup'), PsychStartup; end;
+if exist('PsychStartup')
+    PsychStartup; 
+end
 
-%experiment('');
+
+if ~exist('processparams_local.m','file')
+    success = copyfile(which('processparams_local_org.m'),fullfile(majorprefix,'processparams_local.m'));
+    if success
+        logmsg(['Created ' fullfile(majorprefix,'processparams_local.m')]);
+    end
+end   
+logmsg(['To override InVivoTools processing settings: edit processparams_local']);
+
+clear;

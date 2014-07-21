@@ -304,12 +304,28 @@ switch command,
         end
         
         %check if need to shift channels
-        pixelshift = 14;
+        processparams = tpprocessparams( [],ud.record );
+
+        iminf = tpreadconfig(ud.record);
+        if isfield(processparams,'pixelshift_um') && ~isempty(processparams.pixelshift_um)
+            pixelshift = ceil(processparams.pixelshift_um / iminf.x_step);
+        else
+            pixelshift = processparams.pixelshift_pixel;
+        end
+            
+        
         if compute_pixelshift
-            disp(['ANALYZETPSTACK: Shifting channel(s)' mat2str(shift_channels) ' by ' num2str(pixelshift) ' pixels'])
-            for ch=intersect(shift_channels,channels)
+            logmsg(['Shifting channel(s) ' mat2str(shift_channels(shift_channels>0)) ' up by ' num2str(pixelshift) ' pixels'])
+            for ch=intersect(shift_channels(shift_channels>0),channels)
                 temp = im(:,:,ch);
                 im(:,:,ch) = reshape(temp([pixelshift+1:end 1:pixelshift]),size(im,1),size(im,2));
+            end
+            if any(shift_channels<1)
+                logmsg(['Shifting channel(s) ' mat2str(-shift_channels(shift_channels<1)) ' left by ' num2str(pixelshift) ' pixels'])
+            for ch=intersect(-shift_channels(shift_channels<1),channels)
+                temp = im(:,:,ch)';
+                im(:,:,ch) = reshape(temp([pixelshift+1:end 1:pixelshift]),size(im,2),size(im,1))';
+            end
             end
         end
         

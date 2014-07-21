@@ -21,7 +21,7 @@ d2 = dir([pwd 'Scripts' filesep '*']);
 
 
 for i=1:length(d1),
-	if d1(i).isdir&length(d1(i).name)>=2,
+	if d1(i).isdir && length(d1(i).name)>=2,
 		if strcmp(d1(i).name(1),'@'),
 			eval([d1(i).name(2:end) ';']);
 		end;
@@ -29,7 +29,7 @@ for i=1:length(d1),
 end;
 
 for i=1:length(d2),
-	if d2(i).isdir&length(d2(i).name)>=2,
+	if d2(i).isdir && length(d2(i).name)>=2,
 		if strcmp(d2(i).name(1),'@'),
 			eval([d2(i).name(2:end) ';']);
 		end;
