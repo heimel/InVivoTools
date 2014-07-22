@@ -128,7 +128,7 @@ switch lower(record.setup)
             spikes = WaveTime_Fpikes(ii,1).data;
             kll = get_spike_features(spikes, kll );
             
-            [wtime_sp,nclusters] = spike_sort_wpca(spikes,kll);
+            [wtime_sp,nclusters] = spike_sort_wpca(spikes,kll,processparams.max_spike_clusters);
             for cluster = 1:nclusters
                 wtime_sp(cluster).channel = channels2analyze(ii);
             end
@@ -202,7 +202,7 @@ switch processparams.spike_sorting_routine
         cells = sort_with_klustakwik(cells,record);
         logmsg('WORKING HERE');
     case 'sort_wpca'
-        cells = sort_with_wpca(cells,record);
+        cells = sort_with_wpca(cells,record,processparams.max_spike_clusters);
     otherwise
         % no sorting
 end

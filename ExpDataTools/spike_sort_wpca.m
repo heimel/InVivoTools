@@ -1,10 +1,17 @@
-function [SPs,NumClust] = spike_sort_wpca(SPIKESdata,cll1,verbose)
+function [SPs,NumClust] = spike_sort_wpca(SPIKESdata,cll1,NumClust,verbose)
 %
 %
 % 2013, Mehran Ahmadlou
 %
 
 if nargin<3
+    NumClust = [];
+end
+if isempty(NumClust)
+    NumClust = 3;
+end
+
+if nargin<4
     verbose = [];
 end
 if isempty(verbose)
@@ -13,13 +20,14 @@ end
 
 if size(SPIKESdata,1)<10 % cant sort with less than 10 spikes
     logmsg('Fewer than 10 spikes. Not sorting channel');
-    SPs.data=SPIKESdata;
-    SPs.time=cll1.data;
     NumClust = 1;
-    return
 end
 
-    
+if NumClust == 1
+    SPs.data=SPIKESdata;
+    SPs.time=cll1.data;
+    return
+end
     
 spikes1=zeros(30,size(SPIKESdata,1));
 for i=1:size(SPIKESdata,1)
@@ -36,7 +44,7 @@ XX=[cll1.spike_amplitude,cll1.spike_peak_trough_ratio/range(cll1.spike_peak_trou
 % subplot(2,2,2);plot(score(:,1),score(:,3),'.')
 % subplot(2,2,3);plot(score(:,1),score(:,4),'.')
 % subplot(2,2,4);plot(score(:,2),score(:,4),'.')
-NumClust=2; %11
+
 
 [IDX,f1,f2,D] = kmeans(score(:,[1:4]),NumClust);
 SPs=struct([]);

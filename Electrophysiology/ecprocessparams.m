@@ -60,6 +60,7 @@ params.vep_log10_freqs = true;
 params.cell_colors = repmat('kbgrcmy',1,50);
 
 % spike isolation
+params.max_spike_clusters = 2;
 params.cluster_overlap_threshold = 0.5;
 
 % entropy analysis
