@@ -27,9 +27,11 @@ end
 
 time=(1:size(tc,1))*frame_duration-stim_onset;
 %plot(0,0);
-co=repmat( linspace(0,0.9,size(tc,2))',1,3);
 hold on;
-set(gca,'ColorOrder',co);
+if size(tc,2)>1
+    co=repmat( linspace(0,0.8,size(tc,2))',1,3);
+    set(gca,'ColorOrder',co);
+end
 m='ox+*sdv^<>ph';
 for i=1:size(tc,2)
   h=plot(time,tc(:,i),['-' m( mod(i,length(m))+1)]);

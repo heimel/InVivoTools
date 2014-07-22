@@ -44,6 +44,12 @@ if isempty(channels2analyze)
     channels2analyze = recorded_channels;
 end
 
+if length(record.mouse)>5 && length(find(record.mouse=='.'))>1
+    protocol = record.mouse(1:5);
+else
+    protocol = '';
+end
+
 WaveTime_Spikes = struct([]);
 switch lower(record.setup)
     case 'antigua'
@@ -56,17 +62,24 @@ switch lower(record.setup)
             return
         end
         
+        switch protocol
+            case '13.20'
                 if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
                     errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
                     EVENT.strons.tril(1)=EVENT.strons.tril(end);
                 elseif isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1
                     errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
                     EVENT.strons.tril(1)=EVENT.strons.tril(length(EVENT.strons.tril)-length(EVENT.strons.OpOn));
+                    %             EVENT.strons.tril(1)=EVENT.strons.tril(4); % just occasionally for 13.20.2.05 t-7 !!!
+                    %             EVENT.strons.OpOn=EVENT.strons.OpOn(2:end);
+                    %             EVENT.strons.OpOf=EVENT.strons.OpOf(2:end);
                 end
-%         if length(EVENT.strons.tril)>1
-%             errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-%             EVENT.strons.tril(1)=EVENT.strons.tril(end);
-%         end
+            otherwise
+                if length(EVENT.strons.tril)>1
+                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+                    EVENT.strons.tril(1)=EVENT.strons.tril(end);
+                end
+        end
         EVENT.Myevent = 'Snip';
         EVENT.type = 'snips';
         EVENT.Start = 0;
