@@ -269,7 +269,12 @@ switch command,
                 iminf = tpreadconfig(ud.record);
                 shift_channels = iminf.NumberOfChannels;
             else
-                shift_channels = str2num(ud.record.comment(ind:end)); %#ok<ST2NM>
+                ind2 = findstr(lower(ud.record.comment),']');
+                if isempty(ind2)
+                    errormsg('Missing closing ] after pixelshift.');
+                    return
+                end
+                shift_channels = str2num(ud.record.comment(ind:ind2)); %#ok<ST2NM>
             end
             compute_pixelshift = true;
         else

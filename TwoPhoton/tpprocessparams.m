@@ -218,12 +218,12 @@ switch lower(record.experiment)
         params.response_window = [0.5 inf];
 end
 
-if datenumber(record.date)<datenumber('2014-07-01') % time when introduced new pixelshift
-    params.pixelshift_pixel = 14;
-    logmsg('Pixelshift specified in pixels. Deprecated since 2014-07-01');
-else
-    params.pixelshift_um = 5; % overrides pixelshift_pixel
-end
+% if datenumber(record.date)<datenumber('2014-07-01') % time when introduced new pixelshift
+%     params.pixelshift_pixel = 14;
+%     logmsg('Pixelshift specified in pixels. Deprecated since 2014-07-01');
+% else
+     params.pixelshift_um = 5; % overrides pixelshift_pixel
+% end
 
 % extra analysis functions
 % switch record.experiment
