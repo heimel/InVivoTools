@@ -28,6 +28,13 @@ switch host
         localroot = '/Users/rrmtuip/Documents/Data/InVivo/TwoPhoton';
     case 'HuubTerra' % your name btw everything after % percentage is always a comment
         localroot='C:\Data'; % for example
+    case 'nin266' % mariangela laptop
+        switch record.experiment
+            case '12.81 mariangela'
+                localroot='E:\';
+            otherwise
+                localroot='C:\Data\InVivo\Twophoton';
+        end
     otherwise
         switch computer
             case 'MACI64' % i.e. Daan's home mac
