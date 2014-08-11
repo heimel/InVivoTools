@@ -1,4 +1,4 @@
-function params = processparams_local(oldparams)
+function params = processparams_local(params)
 %PROCESSPARAMS_LOCAL temporarily and locally override analysis parameters
 %
 %  Do not edit processparams_local_org.m but make a copy
@@ -7,11 +7,6 @@ function params = processparams_local(oldparams)
 % 2014, Alexander Heimel
 %
 
-persistent mentioned
-
-params = oldparams;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 % Changes here
 %
@@ -19,25 +14,4 @@ params = oldparams;
 % params.pre_window = [-Inf 0];
 %
 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% don't change below this line
-[identical,flds] = structdiff(params,oldparams);
-if ~identical
-    if isempty(mentioned)
-        logmsg('Overriding process parameters with possible local settings');
-    end
-    for f = flds
-        if isnumeric(params.(f{1}))
-            str = mat2str(params.(f{1}));
-        else
-            str = params.(f{1});
-        end
-        if isempty(mentioned)
-            logmsg(['Set ' f{1} '=' str]);
-        end
-    end
-    mentioned = true;
-end
 

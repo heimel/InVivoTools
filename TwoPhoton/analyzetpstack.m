@@ -305,7 +305,6 @@ switch command,
                 for ch = channels
                     im(:,:,ch) = double(squeeze(tpreadframe(ud.record,ch,frame,ud.image_processing)));
                 end
-                
         end
         
         %check if need to shift channels

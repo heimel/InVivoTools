@@ -8,8 +8,8 @@ if isempty(dataset)
     % check /home/data/Slice/Minis
     %dataset='TrkB/Inh';
     % dataset='Gephyrin';
-     dataset='TrkB/Inh'; % check /home/data/Slice/Minis
-    %dataset='TrkB_Mosaic/Inh'; % check /home/data/Slice/Minis
+    % dataset='TrkB/Inh'; % check /home/data/Slice/Minis
+    dataset='TrkB_Mosaic/Inh'; % check /home/data/Slice/Minis
     %dataset='TrkB/Exc'; % check /home/data/Slice/Minis
     %dataset='unfiltered_data';
 end
@@ -98,6 +98,7 @@ for c=1:length(control)
     ctl_std(c,:)=std(control{c});
     
     disp(['Control cell ' num2str(c) ',median interval,' num2str(ctl_medians(c,19)) ',mean interval,' num2str(ctl_means(c,19))]);
+    disp(['Control cell ' num2str(c) ',median amplitude,' num2str(ctl_medians(c,3)) ',mean amplitude,' num2str(ctl_means(c,3))]);
 end
 
 trg_means=nan*zeros(length(transgenic),size(transgenic{1},2));
@@ -107,6 +108,8 @@ for c=1:length(transgenic)
     trg_std(c,:)=std(transgenic{c});
 
     disp(['Transgenic cell ' num2str(c) ',median interval,' num2str(trg_medians(c,19)) ',mean interval,' num2str(trg_means(c,19))]);
+    disp(['Transgenic cell ' num2str(c) ',median amplitude,' num2str(trg_medians(c,3)) ',mean amplitude,' num2str(trg_means(c,3))]);
+
 end
 
 %% analyze all fields

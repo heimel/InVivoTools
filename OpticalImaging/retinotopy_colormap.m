@@ -81,6 +81,7 @@ elseif numstims==12
 cols
 else
     cols = [prism(numstims); 0.7 0.7 0.7];
+ cols = hsv(numstims);
 end;
 %  colormap(cols)
 % cols = [prism(numstims); 0.7 0.7 0.7];

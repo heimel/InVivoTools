@@ -17,9 +17,8 @@ if isempty(channel)
     end
 end
 
-
 if size(im,1)<=(2*edge) || size(im,2)<=(2*edge)
-    disp('TP_IMAGE: image size smaller than safety age size used for filtering. Not using edge. Filtered data unreliable');
+    logmsg('image size smaller than safety edge size used for filtering. Not using edge. Filtered data unreliable');
     edge = 0;
 end
 

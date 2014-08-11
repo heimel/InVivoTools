@@ -61,10 +61,12 @@ data = oi_read_all_data( record );
 % end
 % data=fdata;
 
-% combine conditions
-combine_conditions=[1,3];
-data = data(:,:,:,:,combine_conditions);
-logmsg('ONLY DOING GROUP 1 AND 3 AT THE MOMENT');
+if 0
+    % combine conditions
+    combine_conditions=[1,3];
+    data = data(:,:,:,:,combine_conditions);
+    logmsg('ONLY DOING GROUP 1 AND 3 AT THE MOMENT');
+end
 
 [n_x n_y n_frames n_blocks n_conditions] = size(data); %#ok<ASGLU>
 

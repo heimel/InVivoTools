@@ -76,6 +76,9 @@ switch record.datatype
 end
 
 if exist('processparams_local.m','file')
-    logmsg('Overriding oiprocessparams with possible local settings');
+    oldparams = params;
     params = processparams_local( params );
+    changed_process_parameters(params,oldparams);
 end
+
+
