@@ -139,8 +139,8 @@ for i=1:n_maps
     else
         image(immap); colormap gray(255);
     end
-    disp(['SHOW_SINGLE_CONDITIONS_MAPS: min = ' num2str(min(immap(:))) ', mean = ' num2str(mean(immap(:))) ...
-        ', max = ' num2str(max(immap(:)))]);
+%     disp(['SHOW_SINGLE_CONDITIONS_MAPS: min = ' num2str(min(immap(:))) ', mean = ' num2str(mean(immap(:))) ...
+%         ', max = ' num2str(max(immap(:)))]);
 	
 	if i==n_maps
 		draw_scalebar(record.scale*fileinfo.xbin);

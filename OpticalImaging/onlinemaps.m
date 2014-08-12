@@ -40,6 +40,7 @@ minavg=+inf;
 if ledtest
     avg(:,:,2)=avg(:,:,2)-avg(:,:,1);
 else
+    logmsg('Subtracting baseline frames, i.e. going to Delta F or R');
     for stim=1:n_stims
         avg(:,:,stim)=avg(:,:,stim)-framezero_avg(:,:,stim);
     end
@@ -47,23 +48,23 @@ end
 
 %avg=dccorrection(avg);
 if params.single_condition_normalize_response
+    logmsg('Normalizing by the maximum level in the image for each stimulus independently');
     for stim=1:n_stims
         avg(:,:,stim)=avg(:,:,stim)/max(max(avg(:,:,stim)));
     end
 end
 
 if params.single_condition_differential
-    
-    
+    logmsg('Computing differential single condition maps.');
     avgavg = mean(avg,3);
     avg = avg - repmat(avgavg,[1 1 n_stims]);
-    logmsg('Computing differential single condition maps.');
 end
 
 % clipping range
 deviatie=std(avg(:));
 gemiddelde=median(avg(:));
 
+logmsg(['Clipping at median plus and minus ' num2str(clip) 'x the standard deviation']);
 for stim=1:n_stims
     kaart=avg(:,:,stim);
     
