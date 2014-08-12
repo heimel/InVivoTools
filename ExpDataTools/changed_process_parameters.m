@@ -16,7 +16,7 @@ if ~identical
         if isfield(oldparams,f{1})
             if isnumeric(params.(f{1}))
                 str = mat2str(params.(f{1}));
-            elseif logical(params.(f{1}))
+            elseif islogical(params.(f{1}))
                 if params.(f{1})
                     str = 'true';
                 else

@@ -78,10 +78,10 @@ elseif numstims==12
     for tmp=1:12
         cols(tmp,:)=colorz(5*tmp,:);
     end
-cols
+%cols
 else
-    cols = [prism(numstims); 0.7 0.7 0.7];
- cols = hsv(numstims);
+   % cols = [prism(numstims); 0.7 0.7 0.7];
+ %cols = hsv(numstims);
 end;
 %  colormap(cols)
 % cols = [prism(numstims); 0.7 0.7 0.7];

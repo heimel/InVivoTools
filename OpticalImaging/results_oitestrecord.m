@@ -145,6 +145,9 @@ switch record.stim_type
                 imgpic(:,:,2)=imgpic(:,:,2).*roroutline;
                 imgpic(:,:,3)=imgpic(:,:,3).*roroutline;
             end
+            imgpic = round(imgpic);
+            imgpic(imgpic>255) = 255;
+            
             imgpic=uint8(imgpic);
             image(imgpic); % show retinotopy with highlights
             axis image off;
@@ -205,7 +208,7 @@ switch record.stim_type
                    roi_full_outline = roi_outline;
                    disp('RESULTS_OITESTRECORD: Saved imaged region as reference, instead of full camera image.');
                else
-                    roi_tf_outline=max(0,imresize(roi_outline,fileinfo.xbin));
+                    roi_tf_outline=(max(0,imresize(double(roi_outline),fileinfo.xbin))>0.01);
                     roi_full_outline=zeros(size(img));
                     roi_full_outline(fileinfo.yoffset+ (1:size(roi_tf_outline,1)), ...
                         fileinfo.xoffset+ (1:size(roi_tf_outline,2)))=roi_tf_outline;
@@ -231,7 +234,7 @@ switch record.stim_type
         cols=retinotopy_colormap(record.stim_parameters(1), ...
             record.stim_parameters(2));
         cols=cols(1:record.stim_parameters(1)*record.stim_parameters(2),:);
-        cols=uint8(cols*255);
+        cols=uint8(round(cols*255));
         image(permute(reshape(cols,record.stim_parameters(1),...
             record.stim_parameters(2),3),[2 1 3]));
         

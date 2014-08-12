@@ -21,6 +21,8 @@ if nargin<4
     fileinfo = [];
 end
 
+params = oiprocessparams(record);
+
 if isempty(fname)
    tests=convert_cst2cell(record.test);
    fname = {fullfile(oidatapath(record),tests{1})};
@@ -127,11 +129,13 @@ for i=1:n_maps
         immin = min(immap(:));
     end
     
-    if 1
+    if params.single_condition_show_roi
         %draw roi
-        immap(image_outline(roi)>0.08)=immax;
+        immap(image_outline(roi)>0.08) = immax;
+    end        
+    if params.single_condition_show_ror 
         % draw ror
-        immap(image_outline(ror)>0.08)=immin;
+        immap(image_outline(ror)>0.08) = immin;
     end
     
     if scaling

@@ -253,6 +253,7 @@ if isempty(record.imagefile) ...
                 children=get(h,'Children');
                 img=get(children(1),'Children');
                 data=get(img,'CData');
+                data = uint8(round(255*data));
                 imwrite(data,imagepath,'Software', ...
                     'analyse_record');
                 data=imread(imagepath);

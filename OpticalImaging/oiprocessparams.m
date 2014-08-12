@@ -50,7 +50,7 @@ switch experiment
         params.spatial_filter_width = 3; % pixels use nan to turn off filter
 end
 
-params.single_condition_clipping = 20;
+params.single_condition_clipping = 5;
 params.single_condition_differential = false;
 params.single_condition_normalize_response = false;
 switch record.stim_type
@@ -63,6 +63,10 @@ switch experiment
     case '13.61'
         params.single_condition_clipping = 40;
 end
+params.single_condition_show_roi = true;
+params.single_condition_show_ror = true;
+
+
 
 
 switch record.datatype

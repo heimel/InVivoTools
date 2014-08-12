@@ -95,7 +95,7 @@ if ~isempty(fname)
         axis off;
         colormap gray
         filename=[fname 'single_cond' num2str(stim) '.png'];
-        imwrite(maps{stim}',filename,'png')
+        imwrite(uint8(round(255*maps{stim}')),filename,'png')
     end
     close(hh);
 end
