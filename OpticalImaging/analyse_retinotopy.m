@@ -55,6 +55,8 @@ if isempty(blocks)
     blocks=(0:length(files)-1);
 end
 
+params = oiprocessparams( record );
+
 experimentlist={};
 extension='';
 for blk=blocks
@@ -128,11 +130,11 @@ else
     if isempty(early_frames)
         % use frame 1 for subtraction, 2008-06-16
         [late_avg,late_stddev]=average_images(experimentlist,[blank_stim stimlist], ...
-            late_frames,'avgframes','subtractframe_ror',1, ...
+            late_frames,'avgframes',params.average_image_normmethod,1, ...
             compression,ror);
     else
         [late_avg,late_stddev]=average_images(experimentlist,[blank_stim stimlist], ...
-            late_frames,'avgframes','subtractframe_ror',early_frames(end), ...
+            late_frames,'avgframes',params.average_image_normmethod,early_frames(end), ...
             compression,ror);
     end
 end
@@ -144,8 +146,7 @@ if isempty(roi)  % if no roi, use all pixels
     roi=ones(framesize)';
 end
 if size(roi,2)~=framesize(1) || size(roi,1)~=framesize(2)
-    disp('ANALYSE_RETINOTOPY: ROI size not congruent with image size');
-    errordlg('ROI size not congruent with image size','Analyse retinotopy');
+    errormsg('ROI size not congruent with image size');
     return
 end
 
@@ -226,7 +227,6 @@ if ~isempty(record) && strcmp(record.stim_type,'orientation')
     stimlist = 1:size(avg,3);
 end
             
-params = oiprocessparams( record );
 
 fp = params.spatial_filter_width;
 if ~isnan(fp)
@@ -238,7 +238,7 @@ if ~isnan(fp)
     stddev = spatialfilter(stddev,filter.width,filter.unit)/sqrt(filter.width^2);
 end
 
-onlinemaps(avg,[],dimensions(1),fname,ledtest,record);
+onlinemaps(avg,[],fname,ledtest,record);
 
 % normalize if early frames subtracted
 if 0

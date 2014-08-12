@@ -1,52 +1,41 @@
-function onlinemaps(avg,framezero_avg,n_x,fname,ledtest,record)
-%ONLINEMAPS
+function onlinemaps(avg,framezero_avg,fname,ledtest,record)
+%ONLINEMAPS saves the single condition maps for imaging
 %
+% ONLINEMAPS(AVG,FRAMEZERO_AVG,FNAME,LEDTEST,RECORD)
 %
 % 2004-2014, Alexander Heimel
 %
 
-if nargin<6
+if nargin<5
     record = [];
 end
-if nargin<5
+if nargin<4
     ledtest=[];
 end
 if isempty(ledtest)
     ledtest=0;
 end
-if nargin<4
-    fname=[];
+if nargin<3
+    fname = '';
 end
 if nargin<2
     framezero_avg=[];
 end
-if isempty(framezero_avg)
-    framezero_avg=0*avg;
-end
-if nargin<3
-    n_x=2;
-end
 
 params = oiprocessparams( record );
-clip = params.single_condition_clipping;
 
-%h1=figure;
-
-n_stims=size(avg,3);
-maxavg=-inf;
-minavg=+inf;
+n_stims = size(avg,3);
 
 % subtract zero-frames
 if ledtest
     avg(:,:,2)=avg(:,:,2)-avg(:,:,1);
-else
+elseif ~isempty(framezero_avg)
     logmsg('Subtracting baseline frames, i.e. going to Delta F or R');
     for stim=1:n_stims
         avg(:,:,stim)=avg(:,:,stim)-framezero_avg(:,:,stim);
     end
 end
 
-%avg=dccorrection(avg);
 if params.single_condition_normalize_response
     logmsg('Normalizing by the maximum level in the image for each stimulus independently');
     for stim=1:n_stims
@@ -61,45 +50,48 @@ if params.single_condition_differential
 end
 
 % clipping range
-deviatie=std(avg(:));
-gemiddelde=median(avg(:));
+deviatie = std(avg(:));
+gemiddelde = median(avg(:));
+clip = params.single_condition_clipping;
+if clip == 0
+    rang = max(abs(min(avg(:))-gemiddelde),abs(max(avg(:))-gemiddelde));
+    low = gemiddelde - rang;
+    high = gemiddelde + rang;
+else
+    logmsg(['Clipping at median plus and minus ' num2str(clip) 'x the standard deviation']);
+    low = gemiddelde-clip*deviatie;
+    high = gemiddelde+clip*deviatie;
+end
+switch params.average_image_normmethod
+    case 'subtractframe_ror'
+        meaning = ' Delta R/R_baseline';
+    otherwise
+        meaning = '';
+end
+logmsg(['Black =  ' num2str(low) ', white = ' num2str(high) ' ' meaning ]);
 
-logmsg(['Clipping at median plus and minus ' num2str(clip) 'x the standard deviation']);
+% for stim=1:n_stims
+%     kaart = avg(:,:,stim);
+%     kaart(kaart(:)>high) = high;
+%     kaart(kaart(:)<low) = low;
+%     kaart = (kaart -low)/(high-low);
+%     maps{stim}=kaart;
+% end
+
+avg(avg>high) = high;
+avg(avg<low) = low;
+avg = (avg-low)/(high-low); 
+
+filename=[fname 'single_cond*.png'];
+delete(filename);
+
 for stim=1:n_stims
-    kaart=avg(:,:,stim);
-    
-    kaart(kaart(:)>gemiddelde+clip*deviatie) = gemiddelde+clip*deviatie;
-    kaart(kaart(:)<gemiddelde-clip*deviatie) = gemiddelde-clip*deviatie;
-    kaart = (kaart -(gemiddelde-clip*deviatie))/2./(gemiddelde+clip*deviatie);
-
-    maxkaart=max(kaart(:));
-    if maxkaart>maxavg
-        maxavg=maxkaart;
-    end
-    minkaart=min(kaart(:));
-    if minkaart<minavg
-        minavg=minkaart;
-    end
-    maps{stim}=kaart;
+    filename = [fname 'single_cond' num2str(stim) '.png'];
+    imwrite(uint8(round(255*avg(:,:,stim)')),filename,'png')
 end
 
-if ~isempty(fname)
-    filename=[fname 'single_cond*.png'];
-    delete(filename);
-    
-    
-    hh=figure;
-    for stim=1:n_stims
-        image(maps{stim}'*64);
-        axis image;
-        axis off;
-        colormap gray
-        filename=[fname 'single_cond' num2str(stim) '.png'];
-        imwrite(uint8(round(255*maps{stim}')),filename,'png')
-    end
-    close(hh);
-end
-
+filename = [fname 'single_cond_range.asc'];
+save(filename,'low','high','-ascii'); % saving range for intensity bar
 
 return
 

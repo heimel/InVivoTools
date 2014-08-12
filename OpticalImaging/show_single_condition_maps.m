@@ -46,7 +46,7 @@ set(h.figure,'position',pos);
 colormap gray
 
 % show single condition maps
-maps=dir([fname{1} 'single*']);
+maps=dir([fname{1} 'single*.png']);
 if ~isempty(maps)
 	maps=sort_db(maps);
 	showing_online_maps=0;
@@ -65,6 +65,9 @@ if n_maps==0
 	close(h.figure)
 	return
 end
+
+
+
 
 switch record.stim_type
 	case {'retinotopy','rt_response'}
@@ -97,24 +100,7 @@ set(h.figure,'position',pos);
 %     immap(:,:,i)=imread(fullfile(filedir,maps(i).name));
 % end
 
-uniform_scaling =  true;
 scaling = false;
-if uniform_scaling && scaling
-    immax = 0;
-    immin = inf;
-    for i=1:n_maps
-        [immap,cmap]=imread(fullfile(filedir,maps(i).name));
-        disp(['SHOW_SINGLE_CONDITION_MAPS: Loading ' fullfile(filedir,maps(i).name)]);
-        tmax = max(immap(:));
-        if tmax>immax
-            immax = tmax;
-        end
-        tmin = min(immap(:));
-        if tmin<immin
-            immin = tmin;
-        end
-    end
-end
 if ~scaling
     immax = 255;
     immin = 0;
@@ -124,16 +110,12 @@ for i=1:n_maps
 	h.single_condition(i)=subplot(ny,nx,i);
 	[immap,cmap]=imread(fullfile(filedir,maps(i).name));
     
-    if ~uniform_scaling
-        immax = max(immap(:));
-        immin = min(immap(:));
-    end
     
-    if params.single_condition_show_roi
+    if params.single_condition_show_roi && ~isempty(roi)
         %draw roi
         immap(image_outline(roi)>0.08) = immax;
     end        
-    if params.single_condition_show_ror 
+    if params.single_condition_show_ror  && ~isempty(ror)
         % draw ror
         immap(image_outline(ror)>0.08) = immin;
     end
@@ -178,6 +160,18 @@ for i=1:n_maps
             axis(lims);
         end
     end
+end
+
+filename = [fname{1} 'single_cond_range.asc'];
+if exist(filename,'file')
+    rang = load(filename,'-ascii'); % loading range for intensity bar
+    logmsg('ALEXANDER IS WORKING HERE');
+    p = get(gca,'position');
+    subplot('position',[p(1)+p(3)+0.03 p(2) 0.98-(p(1)+p(3)+0.03) p(4) ]);
+    imagesc((255:-1:0)');
+    set(gca,'xtick',[]);
+    set(gca,'ytick',[1 255]);
+    set(gca,'yticklabel',{num2str(rang(2),2), num2str(rang(1),2)})
 end
 
 

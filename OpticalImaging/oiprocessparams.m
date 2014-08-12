@@ -22,6 +22,9 @@ else
     experiment = '';
 end
 
+
+params.average_image_normmethod = 'subtractframe_ror'; % Delta R/R_baseline / (1+delta R_ROR/ROR_baseline)
+
 params.wta_equalize_area = false;
 params.wta_show_roi = true;
 params.wta_show_ror = true;
@@ -52,7 +55,9 @@ switch experiment
         params.spatial_filter_width = 3; % pixels use nan to turn off filter
 end
 
-params.single_condition_clipping = 5;
+params.single_condition_clipping = 5; 
+  % number of standard deviations to clip and scale images to.
+  % when set to 0, no clipping occurs
 params.single_condition_differential = false;
 params.single_condition_normalize_response = false;
 params.single_condition_show_roi = true;
