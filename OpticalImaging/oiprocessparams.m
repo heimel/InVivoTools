@@ -22,7 +22,9 @@ else
     experiment = '';
 end
 
-params.wta_equalize_area = false; % default
+params.wta_equalize_area = false;
+params.wta_show_roi = true;
+params.wta_show_ror = true;
 switch experiment
     case '12.54'
         params.wta_equalize_area = false;
@@ -53,6 +55,9 @@ end
 params.single_condition_clipping = 5;
 params.single_condition_differential = false;
 params.single_condition_normalize_response = false;
+params.single_condition_show_roi = true;
+params.single_condition_show_ror = true;
+params.single_condition_show_monitor_center = true;
 switch record.stim_type
     case {'orientation','direction'}
         params.single_condition_clipping = 10;
@@ -63,9 +68,10 @@ switch experiment
     case '13.61'
         params.single_condition_clipping = 40;
 end
-params.single_condition_show_roi = true;
-params.single_condition_show_ror = true;
 
+% reference image
+params.reference_show_lambda = true;
+params.reference_show_roi = true;
 
 
 
@@ -78,6 +84,7 @@ switch record.datatype
         params.extra_baseline_time = 0.3; % extra frames to use for baseline
         params.extra_time_after_offset = 2; % s
 end
+
 
 if exist('processparams_local.m','file')
     oldparams = params;

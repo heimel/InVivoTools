@@ -38,6 +38,8 @@ end
 datapath=oidatapath(record);
 analysispath=fullfile(datapath,'analysis');
 
+params = oiprocessparams(record);
+
 % convert comma separated lists into cell list of tests
 % e.g. 'mouse_E2,mouse_E3' -> {'mouse_E2','mouse_E3'}
 tests=convert_cst2cell(record.test);
@@ -133,13 +135,13 @@ switch record.stim_type
         
         if ~isempty(imgdata)
             imgpic=double(imgdata);
-            if ~isempty(roi) % highlight roi outline
+            if ~isempty(roi) && params.wta_show_roi % highlight roi outline
                 roioutline=1+10*image_outline(roi);
                 imgpic(:,:,1)=imgpic(:,:,1).*roioutline;
                 imgpic(:,:,2)=imgpic(:,:,2).*roioutline;
                 imgpic(:,:,3)=imgpic(:,:,3).*roioutline;
             end
-            if  ~isempty(ror) % highlight ror outline
+            if  ~isempty(ror) && params.wta_show_ror  % highlight ror outline
                 roroutline=1+10*image_outline(ror);
                 imgpic(:,:,1)=imgpic(:,:,1).*roroutline;
                 imgpic(:,:,2)=imgpic(:,:,2).*roroutline;
@@ -147,7 +149,6 @@ switch record.stim_type
             end
             imgpic = round(imgpic);
             imgpic(imgpic>255) = 255;
-            
             imgpic=uint8(imgpic);
             image(imgpic); % show retinotopy with highlights
             axis image off;
@@ -188,7 +189,9 @@ switch record.stim_type
         end
         
         % show monitor center
-        plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
+        if params.single_condition_show_monitor_center
+            plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
+        end
         
         % show reference image
         subplot(3,4,[3 4 7 8 ])
@@ -199,14 +202,14 @@ switch record.stim_type
             imgrgb=ind2rgb(img,repmat(linspace(0,1,255)',1,3));
             %img=img+roi_tf_outline;
                        
-            if ~isempty(roi) % highlight roi outline
+            if ~isempty(roi) && params.reference_show_roi % highlight roi outline
                 % scale and move roi to right position on reference image
                 roi_outline=(image_outline(roi)>0.01);
                if all(size(roi)==size(img)) 
                    % i.e. saved only imaged region as reference
                    % instead of full image
                    roi_full_outline = roi_outline;
-                   disp('RESULTS_OITESTRECORD: Saved imaged region as reference, instead of full camera image.');
+                   logmsg('Saved imaged region as reference, instead of full camera image.');
                else
                     roi_tf_outline=(max(0,imresize(double(roi_outline),fileinfo.xbin))>0.01);
                     roi_full_outline=zeros(size(img));
@@ -220,14 +223,14 @@ switch record.stim_type
             end
             
             image(imgrgb);
-            %Joris save this image to plot it separately in full screen
-            %mode to more easily mark V1 and borders
             tmp_imgrgb_fullscreen = imgrgb;
             axis image
             axis off
             hold on
-            h=plot(lambda_x,lambda_y,'+r');
-            set(h,'MarkerSize',10);
+            if params.reference_show_lambda
+                h=plot(lambda_x,lambda_y,'+r');
+                set(h,'MarkerSize',10);
+            end
         end
         
         subplot(3,4,9); % retinotopy colors
@@ -249,7 +252,7 @@ switch record.stim_type
         
         %Joris: plot reference image with V1 border separately
         if ~isempty(findstr(record.experimenter,'jv'))
-            disp('RESULTS_OITESTRECORD. Showing reference image with border because ''jv'' is experimenter.');
+            logmsg('Showing reference image with border because ''jv'' is experimenter.');
             figure(100);
             try
                 imshow(tmp_imgrgb_fullscreen)
@@ -261,7 +264,7 @@ switch record.stim_type
         
     case 'ks'
         if isempty(record.imagefile)
-            disp('RESULTS_OITESTRECORD: No data available');
+            logmsg('No data available');
             return
         end
         plot_ks_data(data,tit);
@@ -329,7 +332,7 @@ switch record.stim_type
             if isempty(record.reliable)
                 record.reliable=reliable;
             elseif record.reliable~=reliable
-                disp('Warning: Discrepancy with recorded reliability');
+                logmsg('Discrepancy with recorded reliability');
             end
         end
 end
@@ -354,8 +357,7 @@ end
 newud=ud;
 
 evalin('base','global record');
-
-disp('RESULTS_OITESTRECORD: Record available in workspace as ''record''.');
+logmsg('Record available in workspace as ''record''.');
 return
 
 
