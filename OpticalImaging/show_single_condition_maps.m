@@ -170,8 +170,11 @@ if exist(filename,'file')
     subplot('position',[p(1)+p(3)+0.03 p(2) 0.98-(p(1)+p(3)+0.03) p(4) ]);
     imagesc((255:-1:0)');
     set(gca,'xtick',[]);
-    set(gca,'ytick',[1 255]);
-    set(gca,'yticklabel',{num2str(rang(2),2), num2str(rang(1),2)})
+    set(gca,'ytick',[]);
+    %set(gca,'ytick',[1 255]);
+    %set(gca,'yticklabel',{num2str(rang(2),2), num2str(rang(1),2)})
+    xlabel([num2str(rang(1)*100,2) ' %'])
+    title([num2str(rang(2)*100,2) ' %'])
 end
 
 
