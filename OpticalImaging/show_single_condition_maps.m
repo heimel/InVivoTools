@@ -162,10 +162,10 @@ for i=1:n_maps
     end
 end
 
+% intensity bar
 filename = [fname{1} 'single_cond_range.asc'];
 if exist(filename,'file')
     rang = load(filename,'-ascii'); % loading range for intensity bar
-    logmsg('ALEXANDER IS WORKING HERE');
     p = get(gca,'position');
     subplot('position',[p(1)+p(3)+0.03 p(2) 0.98-(p(1)+p(3)+0.03) p(4) ]);
     imagesc((255:-1:0)');
@@ -175,6 +175,8 @@ if exist(filename,'file')
     %set(gca,'yticklabel',{num2str(rang(2),2), num2str(rang(1),2)})
     xlabel([num2str(rang(1)*100,2) ' %'])
     title([num2str(rang(2)*100,2) ' %'])
+    line([0.5 0.8],[128 128],'color',[0 0 0])
+    line([1.2 1.5],[128 128],'color',[0 0 0])
 end
 
 

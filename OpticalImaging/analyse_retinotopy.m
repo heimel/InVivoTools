@@ -240,6 +240,8 @@ end
 
 onlinemaps(avg,[],fname,ledtest,record);
 
+%oi_compute_response_centers( avg, record);
+
 % normalize if early frames subtracted
 if 0
     if ~isempty(setxor(early_frames,late_frames)) %#ok<UNRCH>

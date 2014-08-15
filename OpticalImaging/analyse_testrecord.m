@@ -1,7 +1,7 @@
-function record=analyse_testrecord( record)
+function [record,avg] = analyse_testrecord( record)
 %ANALYSE_TESTRECORD
 %
-%   RECORD=ANALYSE_TESTRECORD( RECORD )
+%   [RECORD,AVG] = ANALYSE_TESTRECORD( RECORD )
 %
 % 2005-2014, Alexander Heimel
 

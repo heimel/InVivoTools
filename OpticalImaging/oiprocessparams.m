@@ -65,13 +65,13 @@ params.single_condition_show_ror = true;
 params.single_condition_show_monitor_center = true;
 switch record.stim_type
     case {'orientation','direction'}
-        params.single_condition_clipping = 10;
+        params.single_condition_clipping = 0;
         params.single_condition_differential = true;
         params.single_condition_normalize_response = true;
 end
 switch experiment
     case '13.61'
-        params.single_condition_clipping = 40;
+        params.single_condition_clipping = 0;
 end
 
 % reference image
