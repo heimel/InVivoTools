@@ -32,12 +32,14 @@ for ch=1:params.NumberOfChannels
     channel_modes(ch) = mode(val(:));
 end
 
-
-for i=1:length(celllist)
+% legacy code?
+for i=1:length(celllist) % make intensities for all channels
     intensity_mean = nan(1,params.NumberOfChannels);
     intensity_mean(1:length(celllist(i).intensity_mean)) = celllist(i).intensity_mean;
-    celllist(i).intensity_mean = intensity_mean;
+    celllist(i).intensity_mean = intensity_mean(1:min(end,params.NumberOfChannels));
 end
+
+
 
 % get abs values for absent puncta for channel 1
 intensities_abs = reshape( [celllist.intensity_mean],params.NumberOfChannels,length(celllist))';

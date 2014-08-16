@@ -54,10 +54,10 @@ fileinfo=imagefile_info( fullfile(datapath,...
 
 if fileinfo.n_images==-1 || fileinfo.n_images==0
     if isempty(record.imagefile)
-        disp('Error: datafile not available');
+        errormsg('Datafile not available');
         return;
     else
-        disp('Warning: original datafile not available');
+        logmsg('Original datafile not available');
     end
     frame_duration=1;
 else
@@ -82,7 +82,7 @@ if ~isempty(record.imagefile)
     %  h_imagefile=figure;imagesc(data);axis image off
     if ~isempty(n_x)
         if size(data,2)~=n_x || size(data,1)~=n_y
-            disp('Image dimensions do not fit data dimensions. Reanalyzing');
+            logmsg('Image dimensions do not fit data dimensions. Reanalyzing');
             record.imagefile=[];
         end
     else

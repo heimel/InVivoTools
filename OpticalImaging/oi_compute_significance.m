@@ -99,4 +99,5 @@ close(h)
 fname = fullfile(oidatapath(record),[record.test '_significance.mat']);
 save(fname,'signif_between_groups','signif_response','comp_conds');
 
-figure;imagesc(double(((signif_between_groups<0.01).*comp_conds.*(signif_response<0.01)))',[0 5])
+figure;
+imagesc(double(((signif_between_groups<0.01).*comp_conds.*(signif_response<0.01)))',[0 5])

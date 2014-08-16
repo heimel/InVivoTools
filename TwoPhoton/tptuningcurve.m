@@ -80,7 +80,7 @@ function [record,resp] = tptuningcurve(record, channel, paramname, pixels, ploti
 %       'mean' - use response mean over other stimulus parameters
 %       'max' - use response maximum over other stimulus parameters
 %
-%  200X Steve Vanhooser, 200X-2013 Alexander Heimel
+%  200X Steve Vanhooser, 200X-2014 Alexander Heimel
 
 if nargin<7, thetrials = []; else thetrials = trials; end;
 if nargin<8, timeint= []; else timeint = tint; end;
@@ -95,8 +95,7 @@ else
     theblankid = -1; 
 end
 
-
- params = tpprocessparams( '', record ); % for analysis params
+params = tpprocessparams( '', record ); % for analysis params
  
 
 interval = [];
@@ -127,7 +126,6 @@ if isempty(paramname)
     end
 end
 
-
 if isempty(paramname) && ...
         (~isempty(findstr(lower(record.stim_type),'tile')) ||...
         ~isempty(findstr(lower(record.stim_type),'position')))
@@ -148,8 +146,6 @@ if isempty(paramname) && ...
 else
     variable = paramname;
 end
-
-
 
 s.stimscript = stims.saveScript;
 s.mti = stims.MTI2;
@@ -361,6 +357,13 @@ for p=1:size(data,2) % roi p
         record.measures(p).blankind = blankind;
     end;
     record.measures(p).response_max = {max(curve(2,:))};
+    
+    for trigger = 1:length(record.measures(p).response_max) % selectivity index
+        record.measures(p).selectivity_index{trigger} = ...
+            (max(record.measures(p).response{trigger})-thresholdlinear(min(record.measures(p).response{trigger}))) / ...
+            max(record.measures(p).response{trigger});
+    end % trigger
+    
     switch record.measures(p).variable
         case 'angle'
             newmeasures = compute_angle_measures(record.measures(p));
