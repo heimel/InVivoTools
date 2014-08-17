@@ -15,10 +15,8 @@ function [frames,fileinfo]=read_oi_compressed(fname,start,...
 %                    if n_part==0, returns only fileinfo
 %          SHOW = {0,1}, plot first and last frame if 1
 %
-% 2003, Alexander Heimel
+% 2003-2014, Alexander Heimel
 %
-%
-% 2005-01-02 JFH: Removed optional change of compression
 
 if nargin<7
     fileinfo=imagefile_info(fname);
@@ -48,7 +46,6 @@ end
 
 n_images=min( max_n_images, fileinfo.n_total_images-start+1);
 
-
 if n_part==0
     disp(['Name:      ' fileinfo.name]);
     disp(['Date:      ' fileinfo.date]);
@@ -61,10 +58,6 @@ if n_part==0
     disp([' loading ' num2str(n_images) ' frames']);
     return; % don't do anything, just report
 end
-
-
-
-%disp(['Start: ' num2str(start)]);
 
 n_rows=floor(fileinfo.ysize/compression); % lines in file
 n_cols=floor(fileinfo.xsize/compression); % cols in file
@@ -79,10 +72,6 @@ frames=zeros( n_cols,n_rows,n_images);
 if fid==-1
     error(['Failed to open ' fname]);
 end
-
-%skip header
-%[header, count] = fread(fid,1716,'char');
-
 
 %calculate starting line and starting column
 %  compression=2
@@ -118,14 +107,13 @@ if compression==1
     
     if count<fileinfo.xsize*fileinfo.ysize*n_images
         frames=[];
-        disp(['Error: Read too few frames from ' fileinfo.name]);
-        keyboard
         fclose(fid);
+        errormsg(['Read too few frames from ' fileinfo.name]);
         return
     end
     
     if isempty(frames)
-        disp(['warning: no frames to be read in ' fileinfo.name ]);
+        logmsg(['No frames to be read in ' fileinfo.name ]);
         return
     end
     

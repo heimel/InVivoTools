@@ -91,6 +91,20 @@ switch record.datatype
 end
 
 
+% for oi_compute_response_centers
+params.oi_response_center_offset = 0.001;
+params.oi_response_center_threshold = 0.003;
+
+params.oi_monitor_size_cm = [NaN NaN];
+params.oi_monitor_size_pxl = [NaN NaN];
+switch record.setup
+    case 'jander' % correct on 2014-08-16
+        params.oi_monitor_size_cm = [92 52];
+        params.oi_monitor_size_pxl = [1920 1080];
+end
+
+%%%%
+
 if exist('processparams_local.m','file')
     oldparams = params;
     params = processparams_local( params );
