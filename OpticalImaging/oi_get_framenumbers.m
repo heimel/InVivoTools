@@ -18,7 +18,11 @@ end
 fileinfo = imagefile_info(fullfile(oidatapath(record),d(1).name));
 
 baseline_framenumbers =...
-    (1: ceil((record.stim_onset+ params.extra_baseline_time)/fileinfo.frameduration)  );
+    (1: floor((record.stim_onset+ params.extra_baseline_time)/fileinfo.frameduration)  );
+
+if isempty(baseline_framenumbers)
+    baseline_framenumbers = 1;
+end
 
 if ~isempty(record.stim_offset)
     response_framenumbers = setdiff( (1:ceil( (record.stim_offset+params.extra_time_after_offset) /fileinfo.frameduration)),baseline_framenumbers);
