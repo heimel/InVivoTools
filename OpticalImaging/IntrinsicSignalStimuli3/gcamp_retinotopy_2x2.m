@@ -18,9 +18,9 @@ ShowStimScreen;
  
 StimWindowGlobals
 
-% how many blocks
-n_x = 2;
-n_y = 2;
+% how many blocks 
+n_x = 12;
+n_y = 8;
 
 r = StimWindowRect; % screen size
 width = round( (r(3)-r(1))/n_x);
