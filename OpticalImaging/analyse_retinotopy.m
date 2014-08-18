@@ -13,7 +13,7 @@ function [h,avg,stddev,blocks]=analyse_retinotopy(fname,blocks,early_frames,late
 %      ROI = region of interest from DRAG_ROI function
 %      BLANK_STIM = number of blank stimulus (first stimulus is 1)
 %
-%  2004-2013, Alexander Heimel
+%  2004-2014, Alexander Heimel
 %
 
 if nargin<10; record = []; end
@@ -75,7 +75,7 @@ if isempty(experimentlist)
     logmsg('No blockfiles ready yet.')
     return
 end
-fileinfo = imagefile_info(experimentlist{1}) %#ok<NOPRT>
+fileinfo = imagefile_info(experimentlist{1},true); 
 
 if isempty(dimensions)
     dimensions=[1 fileinfo.n_conditions];
@@ -114,7 +114,7 @@ if isempty(ror)
 end
 
 if 0 %
-    if ~isempty(early_frames)
+    if ~isempty(early_frames) %#ok<UNRCH>
         disp('Early frames:');
         [early_avg,early_stddev]=average_images(experimentlist,[blank_stim stimlist], ...
             early_frames,'avgframes','none',[], ...
@@ -202,7 +202,7 @@ if 0
     doplot=1;
     bv_mask = blood_vessel_mask_std(logstd(:,:,1),thresh,doplot);
 else
-    bv_mask=[];
+    bv_mask=[]; %#ok<NASGU>
 end
 
 if 0 % dccorrection

@@ -141,7 +141,10 @@ else  % compressed
                 fread(fid,floor(fileinfo.xsize/compression),...
                 fileinfo.datatype,(compression-1)* ...
                 fileinfo.n_bytes_per_pixel);
-            
+            if count~=floor(fileinfo.xsize/compression)
+                errormsg(['File ' fname ' too short']);
+                return
+            end
             %skip remainder of line
             status = ...
                 fseek(fid,n_remainder_cols*fileinfo.n_bytes_per_pixel,'cof');

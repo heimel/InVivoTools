@@ -376,7 +376,7 @@ switch record.stim_type
         h = image_intensity(or_angs',or_abs',cmap);
         filename= fullfile(oidatapath(record),[record.test '_B' ...
             mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
-        imwrite(get(get(gca,'children'), 'cdata') ,filename, 'png');
+        imwrite(round(get(get(gca,'children'), 'cdata')) ,filename, 'png');
         logmsg(['Orientation map saved as: ' filename]);
         close(h);
         

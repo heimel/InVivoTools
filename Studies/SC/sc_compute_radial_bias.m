@@ -29,12 +29,43 @@ stimrect{3} = [2*1920/12 2*1080/8 9*1920/12 8*1080/8];
 monitorcenter_rel2nose_cm{3} = [ -14,-5,29.5]; % x cm left, y cm up, viewing distance cm
 orientation_record_crit{3} = 'mouse=13.61.2.13,test=mouse_E5,stim_type=orientation';
 significance_record_crit{3} = 'mouse=13.61.2.13,test=mouse_E5,stim_type=significance';
-significance_threshold{3} = inf;
+significance_threshold{3} = 0.05;
+
+i = 4;
+mouse{i} = '13.61.2.07';
+retinotopy_record_crit{i} = 'mouse=13.61.2.07,test=mouse_E10,stim_type=retinotopy';
+stimrect{i} = [0 0 1440 1080];
+% unknown stimrect and monitorcenter!!!
+monitorcenter_rel2nose_cm{i} = [ -20,-10,29.5]; % 0.10
+ monitorcenter_rel2nose_cm{i} = [ -15,-10,29.5]; % 0.05 
+ monitorcenter_rel2nose_cm{i} = [ -10,-10,29.5]; % 0.19
+% monitorcenter_rel2nose_cm{i} = [ -5,-10,29.5]; % 0.31
+% monitorcenter_rel2nose_cm{i} = [ 0,-10,29.5]; % 0.39
+% monitorcenter_rel2nose_cm{i} = [ 5,-10,29.5]; % 0.36
+% monitorcenter_rel2nose_cm{i} = [ 10,-10,29.5]; % 0.25
+% 
+% monitorcenter_rel2nose_cm{i} = [ 0,-20,29.5]; % 0.39
+% monitorcenter_rel2nose_cm{i} = [ 0,-15,29.5]; % 0.41
+% monitorcenter_rel2nose_cm{i} = [ 0,-10,29.5]; % 0.39
+% monitorcenter_rel2nose_cm{i} = [ 0,-5,29.5]; % 0.31
+% monitorcenter_rel2nose_cm{i} = [ 0,0,29.5]; % 0.13
+% 
+% 
+% monitorcenter_rel2nose_cm{i} = [ 0,-15,29.5]; % 0.13
+
+
+crit = 'mouse=13.61.2.07,test=mouse_E4';
+crit = 'mouse=13.61.2.07,test=mouse_E5';
+orientation_record_crit{i} = [crit ',stim_type=orientation'];
+significance_record_crit{i} =  [crit ',stim_type=significance'];
+significance_threshold{i} = 1; %0.05;
+
+
 
 % other mice?
 errormsg('Still check out 13.61.2.07, 13.61.2.03');
 
-for i=1:length(retinotopy_record_crit)
+for i=4 %1:length(retinotopy_record_crit)
     % retinotopy and radial map
     retinotopy_record = db(find_record(db,retinotopy_record_crit{i}));
     if isempty(retinotopy_record)
@@ -80,19 +111,34 @@ for i=1:length(retinotopy_record_crit)
         load(fname);
     end
     
-    %,'signif_between_groups','signif_response','comp_conds');
+    mask = ~isnan(img_rf_azimuth_deg) ;
+    
+    logmsg('WORKING ON CC. DOES NOT SHOW THE RIGHT ANSWER YET');
+    
+    ccc = circ_corrcc(2* img_rf_radial_angle_deg(logical(mask))/180*pi,2* img_orientation(mask)/180*pi);
+    logmsg(['Mouse ' mouse{i} ' circ. corrcoeff radial and orientation map (all) = ' num2str(ccc)]);
+    
+    mask = ~isnan(img_rf_azimuth_deg) & (signif_between_groups<significance_threshold{i});
+    if ~any(mask(:))
+        mask =  ~isnan(img_rf_azimuth_deg);
+        logmsg('No significant pixels. Setting threshold to inf.');
+        significance_threshold{i} = inf;
+    end
+    ccc = circ_corrcc( 2*img_rf_radial_angle_deg(logical(mask))/180*pi,2*img_orientation(mask)/180*pi);
+    logmsg(['Mouse ' mouse{i} ' circ. corrcoeff radial and orientation map (sign) = ' num2str(ccc)]);
+    
+
     
     
     
-    
+    % making figures
+    figure('Name',mouse{i});
+    colormap hsv
     ylimits = [max(1,find(~isnan(nanmean(img_rf_radial_angle_deg,1)),1,'first')-5) ...
         min(size(img_rf_radial_angle_deg,2),find(~isnan(nanmean(img_rf_radial_angle_deg,1)),1,'last')+5)] ;
     
     xlimits = [max(1,find(~isnan(nanmean(img_rf_radial_angle_deg,2)),1,'first')-5) ...
         min(size(img_rf_radial_angle_deg,1),find(~isnan(nanmean(img_rf_radial_angle_deg,2)),1,'last')+5)];
-    
-    figure('Name',mouse{i});
-    colormap hsv
     
     subplot(2,3,1);
     imagesc(img_rf_azimuth_deg')
@@ -125,7 +171,6 @@ for i=1:length(retinotopy_record_crit)
     h = colorbar;
     set(h,'visible','off');
     
-    mask = ~isnan(img_rf_azimuth_deg') & (signif_between_groups'<significance_threshold{i});
     
     subplot(2,3,4);
     imagesc(img_rf_radial_angle_deg')
@@ -134,7 +179,7 @@ for i=1:length(retinotopy_record_crit)
     ylim(ylimits);
     xlim(xlimits);
     title('Radial angle map');
-    set(get(gca,'children'),'Alphadata',mask)
+    set(get(gca,'children'),'Alphadata',mask')
     h = colorbar;
     set(h,'ytick',[0.5 45 90 135 179.5]);
     set(h,'yticklabel',{'0','45','90','135','180'})
@@ -146,7 +191,7 @@ for i=1:length(retinotopy_record_crit)
     ylim(ylimits);
     xlim(xlimits);
     title('Orientation map');
-    set(get(gca,'children'),'Alphadata',mask)
+    set(get(gca,'children'),'Alphadata',mask')
     h = colorbar;
     set(h,'ytick',[0.5 45 90 135 179.5]);
     set(h,'yticklabel',{'0','45','90','135','180'})
