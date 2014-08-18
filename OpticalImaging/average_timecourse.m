@@ -22,7 +22,6 @@ tc_roi_sem=[];
 tc_ror_sem=[];
 ratio_sem=[];
 
-
 if nargin<8
     show=[];
 end
@@ -51,7 +50,6 @@ end
 if nargin<2
     n_images=[];
 end
-
 
 if isempty(n_images)
     n_images=inf;
@@ -84,9 +82,8 @@ while isempty(experimentlist)
         blocks=blocks-n_file(i);
         blocks=blocks(blocks>=0);
         
-        disp([  fname{i} ': calculating timecourse over blocks:' ]);
+        logmsg([  fname{i} ': calculating timecourse over blocks:' ]);
         disp(  num2str(blocks_file{i}) );
-        
         
         for blk=blocks_file{i}
             experimentlist{end+1}=[ base 'B' num2str(blk) '.BLK' extension ];
@@ -103,11 +100,10 @@ while isempty(experimentlist)
             case 'Yes'
                 [pathname,filename]=fileparts(fname{1});
                 filt=[filename 'B*.BLK'];
-                [filename,newpath]=uigetfile(filt,['Locate BLK files of ' orgfname] )
+                [filename,newpath]=uigetfile(filt,['Locate BLK files of ' orgfname] );
                 if isequal(filename,0) || isequal(newpath,0)
                     return
                 end
-                
                 
                 for i=1:length(fname)
                     [pathname,filename]=fileparts(fname{i});
@@ -123,9 +119,8 @@ if isempty(experimentlist)
     error('Could not open any BLK-files');
 end
 
-
 % check if last file is ready
-fileinfo=imagefile_info(experimentlist{end})
+fileinfo = imagefile_info(experimentlist{end});
 if fileinfo.n_total_images==0
     % not ready yet
     experimentlist={experimentlist{1:end-1}};
@@ -135,25 +130,19 @@ if isempty(experimentlist)
     return
 end
 
-
 % get file info
-fileinfo=imagefile_info(experimentlist{1})
+fileinfo = imagefile_info(experimentlist{1},true);
 if isempty(fileinfo.name)
     return
 end
-
-
-frame_duration=fileinfo.frameduration;
-
 
 if fileinfo.n_images<n_images
     n_images=fileinfo.n_images;
 end
 
-
 conditions=(1:fileinfo.n_conditions);
 
-if isempty(ror) & ~isempty(roi)
+if isempty(ror) && ~isempty(roi)
     % make ROR complement of ROI
     ror=ones( size(roi))-roi;
 end
@@ -168,12 +157,11 @@ if isempty(ror)
         floor(fileinfo.ysize/compression) );
 end
 
-
 if 0 % commented out because it takes too much memory
     % compute principal component
     
     % reading blankframes
-    blank_stim=0;
+    blank_stim=0; %#ok<UNRCH>
     blankframes=zeros( floor(fileinfo.xsize/compression),...
         floor(fileinfo.ysize/compression),...
         length(experimentlist)*fileinfo.n_images);
@@ -192,19 +180,11 @@ if 0 % commented out because it takes too much memory
     
     plot_frame(pc_ror,roi,ror);
     plot_frame(pc_rom,roi,ror);
-    %%%
 end
-
-%tc_roi=zeros(n_images,length(conditions));
-%tc_ror=tc_roi;
-%ratio=tc_roi;
 
 ttc_roi=zeros(n_images,length(conditions),length(experimentlist));
 ttc_ror=ttc_roi;
 tratio=ttc_roi;
-
-
-
 
 for i=1:length(experimentlist)
     disp(['# ' experimentlist{i}]);
@@ -212,15 +192,7 @@ for i=1:length(experimentlist)
     [ttc_roi(:,:,i),ttc_ror(:,:,i),tratio(:,:,i)]=...
         get_timecourse(experimentlist{i},n_images,(1:length(conditions)),...
         roi,ror,compression,0);
-    
-    %  tc_roi=tc_roi+ttc_roi;
-    %  tc_ror=tc_ror+ttc_ror;
-    %  ratio=ratio+tratio;
 end
-%tc_roi=tc_roi/length(experimentlist);
-%tc_ror=tc_ror/length(experimentlist);
-%ratio=ratio/length(experimentlist);
-
 
 tc_roi=mean(ttc_roi,3);
 tc_roi_sem=sem(ttc_roi,3);
@@ -228,27 +200,6 @@ tc_ror=mean(ttc_ror,3);
 tc_ror_sem=sem(ttc_ror,3);
 ratio=mean(tratio,3);
 ratio_sem=sem(tratio,3);
-
-%params = oiprocessparams(record);
-%
-% firstframes=[];
-% 
-% 
-% if ~isempty(stim_onset)
-%     if isempty(frame_duration)
-%         firstframes=(1:stim_onset);
-%     else
-%         firstframes=(1: ceil((stim_onset+ params.extra_baseline_time)/frame_duration)  );
-%     end
-% end
-% 
-% if ~isempty(stim_offset)
-%     dataframes=setdiff( (1:ceil( (stim_offset+params.extra_time_after_offset) /frame_duration)),firstframes);
-% else
-%     dataframes=setdiff( (1:size(ratio,1)),firstframes);
-% end
-% 
-% dataframes = dataframes(dataframes<=fileinfo.n_images);
 
 [dataframes,firstframes] = oi_get_framenumbers(record);
 if isempty(firstframes)
@@ -292,8 +243,7 @@ if size(tresponse,1)>1
         
         good=setdiff( all,[outliers{cond}]);
         response(cond)=mean( tresponse(cond,good));
-        
-        
+                
         tc_roi=mean(ttc_roi(:,:,good),3);
         tc_roi_sem=sem(ttc_roi(:,:,good),3);
         tc_ror=mean(ttc_ror(:,:,good),3);
@@ -307,7 +257,7 @@ if size(tresponse,1)>1
         ratio_sem=100*ratio_sem./repmat(normratio,size(ratio,1),1);
         
         if ~isempty(outliers{cond})
-            disp(['Removed outliers (based on IQR) for condition ' ...
+            logmsg(['Removed outliers (based on IQR) for condition ' ...
                 num2str(cond) ' : ' num2str([outliers{cond}]-1) ]);
         end
         

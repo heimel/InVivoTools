@@ -60,12 +60,22 @@ orientation_record_crit{i} = [crit ',stim_type=orientation'];
 significance_record_crit{i} =  [crit ',stim_type=significance'];
 significance_threshold{i} = 1; %0.05;
 
+i=5
+mouse{i} = '13.61.2.19';
+retinotopy_record_crit{i} = 'mouse=13.61.2.19,test=mouse_E3,stim_type=retinotopy';
+stimrect{i} = [0 0 1080 1080];
+monitorcenter_rel2nose_cm{i} = [ -14,-5,29.5]; % x cm left, y cm up, viewing distance cm
+orientation_record_crit{i} = 'mouse=13.61.2.19,test=mouse_E4,stim_type=orientation';
+significance_record_crit{i} = 'mouse=13.61.2.19,test=mouse_E4,stim_type=significance';
+significance_threshold{i} = 0.05;
+
+
 
 
 % other mice?
 errormsg('Still check out 13.61.2.07, 13.61.2.03');
 
-for i=4 %1:length(retinotopy_record_crit)
+for i=1:length(retinotopy_record_crit)
     % retinotopy and radial map
     retinotopy_record = db(find_record(db,retinotopy_record_crit{i}));
     if isempty(retinotopy_record)
