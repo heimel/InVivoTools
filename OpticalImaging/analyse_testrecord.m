@@ -367,16 +367,16 @@ switch record.stim_type
         or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
         or_angs(roi_edge'==1) = 0;
 
-        figure
-        image(or_angs');
-        axis image off
-        colormap hsv
-        
+%         figure
+%         image(or_angs');
+%         axis image off
+%         colormap hsv
+%         set(gca,'clim',[0 180])
         
         h = image_intensity(or_angs',or_abs',cmap);
         filename= fullfile(oidatapath(record),[record.test '_B' ...
             mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
-        imwrite(round(get(get(gca,'children'), 'cdata')) ,filename, 'png');
+        imwrite(get(get(gca,'children'), 'cdata') ,filename, 'png');
         logmsg(['Orientation map saved as: ' filename]);
         close(h);
         

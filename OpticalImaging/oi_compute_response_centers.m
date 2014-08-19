@@ -7,6 +7,10 @@ function [img_rf_radial_angle_deg,img_rf_azimuth_deg,img_rf_elevation_deg] = oi_
 % 2014, Alexander Heimel
 %
 
+img_rf_radial_angle_deg = [];
+img_rf_azimuth_deg = [];
+img_rf_elevation_deg = [];
+
 logmsg('Calculating response centers');
 
 params = oiprocessparams( record );
@@ -65,6 +69,7 @@ else
 end
 
 
+ 
 if length(monitorpatch_x)<2
     logmsg('Too few responses reaching threshold to compute grid');
     return
@@ -120,16 +125,17 @@ img_monitorpatch_y = reshape(Fmonitorpatch_y([gx(:) gy(:)]),size(gx,1),size(gx,2
 figure
 image(imread(fullfile(oidatapath(record),'analysis',record.imagefile)));
 hold on
-plot(cy,cx,'+r');
-plot(y,x,'+w');
 hold on
-% contour(gx,gy,reshape(Fmx([gx(:) gy(:)]),size(gx,1),size(gx,2))  )
-% contour(gx,gy,reshape(Fmy([gx(:) gy(:)]),size(gx,1),size(gx,2))  )
 
 [c,h] = contour(gy,gx,img_monitorpatch_x,(min(monitorpatch_x)+0.5):(max(monitorpatch_x)-0.5)  );
 set(h,'linecolor',[1 1 1]);
 [c,h] = contour(gy,gx,img_monitorpatch_y,(min(monitorpatch_y)+0.5):(max(monitorpatch_y)-0.5)  );
 set(h,'linecolor',[1 1 1]);
+
+for i=1:length(cx);
+    text(cy(i),cx(i),num2str(i),'color',[1 1 1]);
+end
+
 % [c,h] = contour(gy,gx,img_rf_radial_angle_deg ,[1 90 ]);
 % set(h,'linecolor',[1 1 1]);
 

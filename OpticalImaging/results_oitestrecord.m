@@ -68,10 +68,10 @@ switch record.stim_type
         colorbar 
     case {'orientation','direction'}
         
-        % WTA map
-        figure;
-        image(imgdata)
-        title(['WTA ' tit]);
+%         % WTA map
+%         figure;
+%         image(imgdata)
+%         title(['WTA ' tit]);
 
         % single conditions
         show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
@@ -81,9 +81,31 @@ switch record.stim_type
                 mat2str([min(record.blocks) max(record.blocks)]) ...
                 '_' record.stim_type '.png']);
         if exist(file, 'file')
-            img = imread(file);
+            imgdata = imread(file);
             figure('name',file,'NumberTitle','off');
-            image(img)
+
+            
+            imgpic=double(imgdata);
+            if ~isempty(roi) && params.wta_show_roi % highlight roi outline
+                roioutline=1+10*image_outline(roi);
+                imgpic(:,:,1)=imgpic(:,:,1).*roioutline;
+                imgpic(:,:,2)=imgpic(:,:,2).*roioutline;
+                imgpic(:,:,3)=imgpic(:,:,3).*roioutline;
+            end
+            if  ~isempty(ror) && params.wta_show_ror  % highlight ror outline
+                roroutline=1+10*image_outline(ror);
+                imgpic(:,:,1)=imgpic(:,:,1).*roroutline;
+                imgpic(:,:,2)=imgpic(:,:,2).*roroutline;
+                imgpic(:,:,3)=imgpic(:,:,3).*roroutline;
+            end
+            imgpic = round(imgpic);
+            imgpic(imgpic>255) = 255;
+            imgpic=uint8(imgpic);
+            image(imgpic); % show retinotopy with highlights
+
+            
+            
+            
             axis image off;
             label = subst_ctlchars(['Orientation, mouse=' record.mouse ',date=' record.date ',test=' record.test]);
             title(label);
@@ -234,18 +256,7 @@ switch record.stim_type
         end
         
         subplot(3,4,9); % retinotopy colors
-        cols=retinotopy_colormap(record.stim_parameters(1), ...
-            record.stim_parameters(2));
-        cols=cols(1:record.stim_parameters(1)*record.stim_parameters(2),:);
-        cols=uint8(round(cols*255));
-        image(permute(reshape(cols,record.stim_parameters(1),...
-            record.stim_parameters(2),3),[2 1 3]));
-        
-        axis image;
-        xlabel('nasal <-> temporal');
-        ylabel('inferior <-> superior');
-        set(gca,'Xtick',[]);
-        set(gca,'ytick',[]);
+        show_retinotopy_colors( record);
         
         
         show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);

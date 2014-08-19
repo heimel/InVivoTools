@@ -78,8 +78,6 @@ end
 params.reference_show_lambda = true;
 params.reference_show_roi = true;
 
-
-
 switch record.datatype
     case 'oi'
         params.extra_baseline_time = 0.6; % extra frames to use for baseline

@@ -20,7 +20,7 @@ else
     vis = 'on';
 end
 
-blind_fields = {'date','slice','laser','location','comment'};
+blind_fields = {'date','slice','laser','location','comment','mouse'};
 if isfield(ud,'record_form')
     for i = 1:length(blind_fields)
         objs = findobj(ud.record_form,'Tag',blind_fields{i});
@@ -34,7 +34,7 @@ end
 stacks = {};
 for i = 1:length(db)
     stacks{i} = [db(i).mouse ':' db(i).stack];
-    rev_order(i) = reverse_order(stacks{i});
+    rev_order(i) = reverse_order(stacks{i},db(i));
 end
 stacks = uniq(sort(stacks));
 
@@ -46,12 +46,12 @@ blind_db = db;
         stack = stacks{s}(find(stacks{s}==':')+1 : end);
         ind = find_record(db , ['mouse=' mouse ',stack=' stack]);
 
-        if isfield(db,'slice')
+        if isfield(db,'slice') && ~isempty(ind)
             slices = {db(ind).slice};
             days = cellfun(@(x) str2double(x(4:end)), slices,'UniformOutput',false);
             days = [days{:}];
             
-            if make_blind && reverse_order(stacks{s})
+            if make_blind && reverse_order(stacks{s},db(ind(1)))
                 %disp('reversing order')
                 [days,ind_sort] = sort(days,2,'descend'); %#ok<ASGLU>
             else
@@ -71,12 +71,17 @@ else
     ud = blind_db;
 end
 
-function reverse = reverse_order( stackname )
-reverse = (sin(3*sum(double(stackname)))>0);
+function reverse = reverse_order( stackname, record )
 
-% add exception because of invalid datapoint
-if strcmp(stackname,'10.24.1.27:tuft3')
-   % disp('BLINDING_TPDATA: exception');
-    reverse = true;
+switch record.experiment
+    case '10.24'
+        reverse = (sin(3*sum(double(stackname)))>0);
+        
+        % add exception because of invalid datapoint
+        if strcmp(stackname,'10.24.1.27:tuft3')
+            % disp('BLINDING_TPDATA: exception');
+            reverse = true;
+        end
+    otherwise
+        reverse = false;
 end
-
