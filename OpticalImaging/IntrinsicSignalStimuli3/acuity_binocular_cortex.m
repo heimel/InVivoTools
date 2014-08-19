@@ -49,12 +49,12 @@ pspar.rect=[0 0 960 540];
 total_duration = 3;
 pspar.prestim_time = 3
 angles = [0:pspar.angle:360-pspar.angle];
-
+spatialfrequency = [0.1 0.2 0.3 0.4 0.5 0.6];
 
 for i = 1:6
     iss_script(i) = StimScript(0);
     % spatial frequency
-    pspar.sFrequency = i/10;
+    pspar.sFrequency = spatialfrequency(i);
      
     pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
     angles = angles( randperm(length(angles)) );

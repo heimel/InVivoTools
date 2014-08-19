@@ -38,7 +38,7 @@ pspar.distance = NewStimViewingDistance;
 pspar.imageType = 1;
 pspar.animType = 4;
 pspar.tFrequency = 2;
-% pspar.sFrequency = 0.1;
+pspar.sFrequency = 0.1;
 pspar.nCycles = 1.5;
 pspar.background = 0.5;
 pspar.backdrop = 0.5;
@@ -49,12 +49,12 @@ pspar.rect=[0 0 960 540];
 total_duration = 3;
 pspar.prestim_time = 3
 angles = [0:pspar.angle:360-pspar.angle];
+dispcont = [0.2 0.4 0.6 0.8 0.9];
 
-
-for i = 1:6
+for i = 1:5
     iss_script(i) = StimScript(0);
-    % spatial frequency
-    pspar.sFrequency = i/10;
+    % contrast
+    pspar.contrast = dispcont(i);
      
     pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
     angles = angles( randperm(length(angles)) );
