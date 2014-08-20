@@ -9,11 +9,11 @@ end
 
 if isfield(ud,'db')
     db = ud.db;
-else 
+else
     db = ud;
 end
-    
-    
+
+
 if make_blind
     vis = 'off';
 else
@@ -41,35 +41,59 @@ stacks = uniq(sort(stacks));
 % for all stacks sort slices and reverse if necessary
 blind_db = db;
 
-    for s = 1:length(stacks)
-        mouse = stacks{s}(1:find(stacks{s}==':')-1);
-        stack = stacks{s}(find(stacks{s}==':')+1 : end);
-        ind = find_record(db , ['mouse=' mouse ',stack=' stack]);
-
-        if isfield(db,'slice') && ~isempty(ind)
-            slices = {db(ind).slice};
-            days = cellfun(@(x) str2double(x(4:end)), slices,'UniformOutput',false);
-            days = [days{:}];
-            
-            if make_blind && reverse_order(stacks{s},db(ind(1)))
-                %disp('reversing order')
-                [days,ind_sort] = sort(days,2,'descend'); %#ok<ASGLU>
-            else
-                %disp('normal order')
-                [days,ind_sort] = sort(days,2,'ascend'); %#ok<ASGLU>
-            end
-            blind_db(ind) = db(ind(ind_sort));
-        end
-        
-        
-    end
-
+for s = 1:length(stacks)
+    mouse = stacks{s}(1:find(stacks{s}==':')-1);
+    stack = stacks{s}(find(stacks{s}==':')+1 : end);
+    ind = find_record(db , ['mouse=' mouse ',stack=' stack]);
     
+    if isfield(db,'slice') && ~isempty(ind)
+        slices = {db(ind).slice};
+        days = cellfun(@(x) str2double(x(4:end)), slices,'UniformOutput',false);
+        days = [days{:}];
+        
+        if make_blind && reverse_order(stacks{s},db(ind(1)))
+            %disp('reversing order')
+            [days,ind_sort] = sort(days,2,'descend'); %#ok<ASGLU>
+        else
+            %disp('normal order')
+            [days,ind_sort] = sort(days,2,'ascend'); %#ok<ASGLU>
+        end
+        blind_db(ind) = db(ind(ind_sort));
+    end
+    
+    
+end
+
+
 if isfield(ud,'db')
     ud.db = blind_db;
-else 
+else
     ud = blind_db;
 end
+
+switch db(1,1).experiment
+    case {'14.35','14.35'}
+        
+        DB=[];
+        sb=db;
+        for i=1:length(db)
+            if sum(isletter(db(i).comment))>0
+                error('remove non numerical entries from comment field')
+                return
+            end
+            DB=[DB,str2num(db(i).comment)];
+        end
+        
+        for i=1:length(db)
+            sb(i)=db(DB==i);
+        end
+        
+        ud.db = sb;
+end
+% SB = sort(DB);
+
+% sb = db;
+% db=sb(DB);
 
 function reverse = reverse_order( stackname, record )
 
@@ -82,6 +106,16 @@ switch record.experiment
             % disp('BLINDING_TPDATA: exception');
             reverse = true;
         end
+        %     case '14.35_pv'
+        %         sort (record.comment);
     otherwise
         reverse = false;
 end
+
+% function sort( comment, record )
+% switch record.experiment
+%     case '14.35_pv'
+%         shuffle = sort (comment);
+%     otherwise
+%         sort = false;
+% end
