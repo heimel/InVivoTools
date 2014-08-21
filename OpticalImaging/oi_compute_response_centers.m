@@ -157,13 +157,22 @@ end
 function [rf_radial_angle_deg,rf_azimuth_deg,rf_elevation_deg,rf_r_cm] = compute_angles(monitorpatch_x,monitorpatch_y,record,params,nx,ny)
 
 
+record.monitor_tilt_rad = record.monitor_tilt_deg/180*pi;
+record.monitor_slant_rad = record.monitor_slant_deg/180*pi;
+
 rf_x_rel2monitorleft_pxl = (record.stimrect(1) + (monitorpatch_x-0.5)*(record.stimrect(3)-record.stimrect(1))/nx );
 rf_x_rel2monitorleft_cm = rf_x_rel2monitorleft_pxl * params.oi_monitor_size_cm(1) / params.oi_monitor_size_pxl(1);
-rf_x_rel2nose_cm = rf_x_rel2monitorleft_cm - 0.5*params.oi_monitor_size_cm(1) + record.monitorcenter_rel2nose_cm(1);
+rf_x_rel2nose_cm = rf_x_rel2monitorleft_cm - 0.5*params.oi_monitor_size_cm(1) + ...
+    cos(record.monitor_tilt_rad)*record.monitorcenter_rel2nose_cm(1) - sin(record.monitor_tilt_rad)*record.monitorcenter_rel2nose_cm(2);
 
 rf_y_rel2monitortop_pxl = (record.stimrect(2) + (monitorpatch_y-0.5)*(record.stimrect(4)-record.stimrect(2))/ny );
 rf_y_rel2monitortop_cm = rf_y_rel2monitortop_pxl * params.oi_monitor_size_cm(2) / params.oi_monitor_size_pxl(2);
-rf_y_rel2nose_cm = -rf_y_rel2monitortop_cm + 0.5*params.oi_monitor_size_cm(2) + record.monitorcenter_rel2nose_cm(2);
+rf_y_rel2nose_cm = -rf_y_rel2monitortop_cm + 0.5*params.oi_monitor_size_cm(2) + ...
+    cos(record.monitor_tilt_rad)*record.monitorcenter_rel2nose_cm(2) + sin(record.monitor_tilt_rad)*record.monitorcenter_rel2nose_cm(1);
+
+y = rf_y_rel2nose_cm;
+x = cos(record.monitor_slant_rad)*rf_x_rel2nose_cm ;
+z = record.monitorcenter_rel2nose_cm(3) + sin(record.monitor_slant_rad)*rf_x_rel2nose_cm;
 
 [rf_azimuth_rad,rf_elevation_rad,rf_r_cm] = cart2sph( record.monitorcenter_rel2nose_cm(3),rf_x_rel2nose_cm,rf_y_rel2nose_cm);
 rf_azimuth_deg = rf_azimuth_rad / pi*180;

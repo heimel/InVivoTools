@@ -189,4 +189,4 @@ set(htitle,'HorizontalAlignment','left');
 %bigger_linewidth(3);
 smaller_font(-12);
 
-
+set(gcf,'userdata',h);

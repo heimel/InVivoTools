@@ -29,6 +29,8 @@ dsi = [];
 
 angles = angles(:);
 rates = rates(:);
+logmsg('CHANGED OSI CALCULATION');
+rates = thresholdlinear(rates); 
 
 osi  = sqrt((rates'*sin(2*(angles/360*2*pi)))^2+(rates'*cos(2*(angles/360*2*pi)))^2) / sum(rates);
 dsi  = sqrt((rates'*sin((angles/360*2*pi)))^2+(rates'*cos((angles/360*2*pi)))^2) / sum(rates);

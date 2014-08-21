@@ -87,6 +87,8 @@ end;
 % cols = [prism(numstims); 0.7 0.7 0.7];
 % cols = hsv(numstims);
 
+%cols = prism(numstims);
+
 if nargout==2
     h=figure;
     image(reshape((1:numstims),n,m)');
