@@ -3,6 +3,10 @@ function sc_compute_radial_bias
 %
 % 2014, Alexander Heimel
 
+
+disp('monitor center wrt nose for 2014-08-22 = [-17,-2,30]' );
+disp('monitor tilt = 0, monitor_slant = 20' );
+disp('mouse tilt is 8 deg, left eye lower, (right hemisphere)' );
 %errormsg('Recalculate with tilted monitor');
 
 recalculate = false;
@@ -120,11 +124,36 @@ orientation_record_crit{i} = 'mouse=13.61.2.03,test=mouse_E10,stim_type=orientat
 significance_record_crit{i} = 'mouse=13.61.2.03,test=mouse_E10,stim_type=significance';
 significance_threshold{i} = 1; %0.05;
 
+
+i = 7;
+mouse{i} = '13.61.2.20';
+retinotopy_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E1,stim_type=retinotopy';
+retinotopy_record{i} = db(find_record(db,retinotopy_record_crit{i}));
+filename = fullfile(oidatapath(retinotopy_record{i}),[retinotopy_record{i}.test '_response_centers.mat']);
+load(filename);
+ monitorpatch_x = [ 1 2 1 2  ];
+ monitorpatch_y = [ 1 1 2 2 ];
+x =          [103  107   98  104 ]; 
+y =              [66 65 56 56 ];
+
+x = 4*(x-mean(x))+mean(x);
+y = 4*(y-mean(y))+mean(y);
+% if recalculate
+ override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y )
+% end
+stimrect{i} = [0 0 1920 1080];
+monitorcenter_rel2nose_cm{i} = [ -20,0,15]; % 
+monitor_tilt_deg{i} = 0; % deg
+monitor_slant_deg{i} = 20;% deg
+orientation_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E6,stim_type=orientation';
+
+
+
 radial_angle_all = [];
 orientation_all = [];
 
 
-mice = 1:i;
+mice = 7;%1:i;
 %mice = 1:2;
 n_mice = length(mice);
 
@@ -153,7 +182,7 @@ for i=mice % :length(retinotopy_record_crit)
         oi_compute_response_centers(avg, retinotopy_record{i},recalculate);
     
     % blurring
-    if 1
+    if 0
     img_radial =exp(1i*img_rf_radial_angle_deg{i}/180*pi);
     img_radial(isnan(img_radial)) = 0;
     img_radial = spatialfilter(img_radial,10,'pixel');

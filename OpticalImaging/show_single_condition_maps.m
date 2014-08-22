@@ -11,14 +11,20 @@ end
 if nargin<7
     tit = '';
 end
-if nargin<2
-    fname = '';
+if nargin<6
+    ror = [];
+end
+if nargin<5
+    roi = [];
+end
+if nargin<4
+    fileinfo = [];
 end
 if nargin<3
     condnames = [];
 end
-if nargin<4
-    fileinfo = [];
+if nargin<2
+    fname = '';
 end
 
 params = oiprocessparams(record);
