@@ -35,7 +35,7 @@ height = round( (r(4)-r(2))/n_y);
 ps=periodicstim('default');
 pspar = getparameters(ps);
 pspar.distance = NewStimViewingDistance;
-pspar.imageType = 1;
+pspar.imageType = 2; % 2 for sinusoidal, 1 for squarewave gratings
 pspar.animType = 4;
 pspar.tFrequency = 2;
 % pspar.sFrequency = 0.1;
@@ -68,8 +68,8 @@ end
 
 tic
 % show script as test
-MTI = DisplayTiming(iss_script(i));
-DisplayStimScript(iss_script(i),MTI,0,0);
+MTI = DisplayTiming(iss_script(1));
+DisplayStimScript(iss_script(1),MTI,0,0);
 toc
 
 
