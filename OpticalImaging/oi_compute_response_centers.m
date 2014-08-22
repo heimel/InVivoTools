@@ -1,4 +1,4 @@
-function [img_rf_radial_angle_deg,img_rf_azimuth_deg,img_rf_elevation_deg] = oi_compute_response_centers(avg, record)
+function [img_rf_radial_angle_deg,img_rf_azimuth_deg,img_rf_elevation_deg] = oi_compute_response_centers(avg, record, recalculate)
 %OI_COMPUTE_RESPONSE_CENTERS compute for each stimulus the center of mass
 %
 %   [img_rf_radial_angle_deg,img_rf_azimuth_rad,img_rf_elevation_rad] =
@@ -6,6 +6,13 @@ function [img_rf_radial_angle_deg,img_rf_azimuth_deg,img_rf_elevation_deg] = oi_
 %
 % 2014, Alexander Heimel
 %
+
+if nargin<3
+    recalculate = [];
+end
+if isempty(recalculate)
+    recalculate = false;
+end
 
 img_rf_radial_angle_deg = [];
 img_rf_azimuth_deg = [];
@@ -47,7 +54,7 @@ cxy = NaN(n_stim,1);
 PeakOD = NaN(n_stim,1);
 
 filename = fullfile(oidatapath(record),[record.test '_response_centers.mat']);
-if ~exist(filename,'file')
+if ~exist(filename,'file') || recalculate
     hwait = waitbar(0,'Calculating response centers');
     for i=1:n_stim
         waitbar((i-1)/n_stim,hwait);
@@ -162,19 +169,24 @@ record.monitor_slant_rad = record.monitor_slant_deg/180*pi;
 
 rf_x_rel2monitorleft_pxl = (record.stimrect(1) + (monitorpatch_x-0.5)*(record.stimrect(3)-record.stimrect(1))/nx );
 rf_x_rel2monitorleft_cm = rf_x_rel2monitorleft_pxl * params.oi_monitor_size_cm(1) / params.oi_monitor_size_pxl(1);
-rf_x_rel2nose_cm = rf_x_rel2monitorleft_cm - 0.5*params.oi_monitor_size_cm(1) + ...
-    cos(record.monitor_tilt_rad)*record.monitorcenter_rel2nose_cm(1) - sin(record.monitor_tilt_rad)*record.monitorcenter_rel2nose_cm(2);
+rf_x_rel2monitorcenter_cm = rf_x_rel2monitorleft_cm - 0.5*params.oi_monitor_size_cm(1);
 
 rf_y_rel2monitortop_pxl = (record.stimrect(2) + (monitorpatch_y-0.5)*(record.stimrect(4)-record.stimrect(2))/ny );
 rf_y_rel2monitortop_cm = rf_y_rel2monitortop_pxl * params.oi_monitor_size_cm(2) / params.oi_monitor_size_pxl(2);
-rf_y_rel2nose_cm = -rf_y_rel2monitortop_cm + 0.5*params.oi_monitor_size_cm(2) + ...
-    cos(record.monitor_tilt_rad)*record.monitorcenter_rel2nose_cm(2) + sin(record.monitor_tilt_rad)*record.monitorcenter_rel2nose_cm(1);
+rf_y_rel2monitorcenter_cm = -rf_y_rel2monitortop_cm + 0.5*params.oi_monitor_size_cm(2);
+
+rf_y_rel2nose_cm = record.monitorcenter_rel2nose_cm(2) + ...
+    cos(record.monitor_tilt_rad)*rf_y_rel2monitorcenter_cm +  sin(record.monitor_tilt_rad)*rf_x_rel2monitorcenter_cm;
+
+rf_x_rel2nose_cm = record.monitorcenter_rel2nose_cm(1) + ...
+    -sin(record.monitor_tilt_rad)*rf_y_rel2monitorcenter_cm +  cos(record.monitor_tilt_rad)*rf_x_rel2monitorcenter_cm;
+
 
 y = rf_y_rel2nose_cm;
 x = cos(record.monitor_slant_rad)*rf_x_rel2nose_cm ;
 z = record.monitorcenter_rel2nose_cm(3) + sin(record.monitor_slant_rad)*rf_x_rel2nose_cm;
 
-[rf_azimuth_rad,rf_elevation_rad,rf_r_cm] = cart2sph( record.monitorcenter_rel2nose_cm(3),rf_x_rel2nose_cm,rf_y_rel2nose_cm);
+[rf_azimuth_rad,rf_elevation_rad,rf_r_cm] = cart2sph( z,x,y);
 rf_azimuth_deg = rf_azimuth_rad / pi*180;
 rf_elevation_deg = rf_elevation_rad / pi *180;
 rf_radial_angle_deg = cart2pol(rf_elevation_rad,rf_azimuth_rad)/pi*180;

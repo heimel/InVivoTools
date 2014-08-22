@@ -1,8 +1,19 @@
-function xyline
+function h=xyline( arg)
 %XYLINE plots a x=y line in an axis
 %
-% 2013, Alexander Heimel
+%  H = XYLINE(ARG)
 %
+%    ARG = '-k' by default
+%
+% 2013-2014, Alexander Heimel
+%
+
+if nargin<1
+    arg = '';
+end
+if isempty(arg)
+    arg = 'k-';
+end
 
 yl=ylim;
 xl=xlim;
@@ -10,7 +21,7 @@ low = max(yl(1),xl(1));
 high = min(yl(2),xl(2));
 holdon = ishold;
 hold on
-plot([low high],[low high],'-k');
+h = plot([low high],[low high],arg);
 if ~holdon
     hold off
 end
