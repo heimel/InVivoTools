@@ -1232,7 +1232,7 @@ switch command,
                 method = methods{ methodind };
                 analyze_tppatterns(method, data, t, listofcells, listofcellnames, params(1), process_params, timeint);
             case 'AnalyzeRawBt'
-                tpplotdata( data, t, listofcells, listofcellnames, params(1), process_params, timeint);
+                tpplotdata( data, t, listofcells, listofcellnames, params(1), process_params, timeint,'',ud.record);
             case 'ExportRawBt'
                 tp_export_raw( data, t, ud.record);
             case 'AnalyzeParamBt' % tuning

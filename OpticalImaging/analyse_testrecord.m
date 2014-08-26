@@ -363,6 +363,7 @@ switch record.stim_type
         
         %substract mean bias in ROI
         %polavg = polavg - mean(polavg(roi'==1));
+        %or_abs = abs(polavg);
         
         or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
         or_angs(roi_edge'==1) = 0;

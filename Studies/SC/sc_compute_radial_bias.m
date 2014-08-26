@@ -1,4 +1,4 @@
-function sc_compute_radial_bias
+function [radial_angle_all,orientation_all] = sc_compute_radial_bias
 %SC_COMPUTE_RADIAL_BIAS
 %
 % 2014, Alexander Heimel
@@ -32,13 +32,21 @@ monitorpatch_x = [3 4 5 6 7 1 2 3 4 5 6 7  2 3 4 5 6 7 1 2 3 4 5 6 3 4 5];
 monitorpatch_y = [1 1 1 1 1 2 2 2 2 2 2 2  3 3 3 3 3 3 4 4 4 4 4 4 5 5 5];
 x = [113 119 125 131 134 101 105 109 115 123 130 136  103 106 110 117 125 131 97.4 99.5 103 108 113 117 101 104 110];
 y = [104 103 101 99.9 103 96.5 96.4 96.2 95.4 95.7 94.7 93.8 93.3 92.4 91 91.5 92.1 90 87.7 87.3 87.4 86 87.1 81.5 79.9 77.2 75.1];
-if recalculate
+if recalculate || 1
     override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y )
 end
 hull = [19 6 1 5 12 18 17 16 24 27 19];
 % xv{i} = y(hull);
 % yv{i} = x(hull);
 monitorcenter_rel2nose_cm{i} = [ -5,0,15]; % 
+monitorcenter_rel2nose_cm{i}=[-15,-5,30] % 0.80
+monitorcenter_rel2nose_cm{i}=[-14,-5,30]; % 0.81
+monitorcenter_rel2nose_cm{i}=[-13,-5,30]; % 0.82
+monitorcenter_rel2nose_cm{i}=[-12,-5,30]; % 0.82
+monitorcenter_rel2nose_cm{i}=[-12,-6,30]; % 0.84
+monitorcenter_rel2nose_cm{i}=[-12,-7,30]; % 0.85
+monitorcenter_rel2nose_cm{i}=[-12,-8,30]; % 0.86
+monitorcenter_rel2nose_cm{i}=[-10,0,30]; % 0.86
 monitor_tilt_deg{i} = -30; % deg
 monitor_slant_deg{i} = 20;% deg
 orientation_record_crit{i} = 'mouse=13.61.2.12,test=mouse_E12,stim_type=orientation';
@@ -75,11 +83,12 @@ retinotopy_record_crit{i} = 'mouse=13.61.2.07,test=mouse_E10,stim_type=retinotop
 stimrect{i} = [0 0 1200 800];
 monitorcenter_rel2nose_cm{i} = [ -20,-10,29.5];
 monitorcenter_rel2nose_cm{i} = [ -10,-15,30];
-monitorcenter_rel2nose_cm{i} = [ -10,-15,25]; % 
+monitorcenter_rel2nose_cm{i} = [-17,-15,30]; % 
 monitor_tilt_deg{i} = 0; % deg
 monitor_slant_deg{i} = 20;% deg
+disp('Two tests, we could combine them');
 crit = 'mouse=13.61.2.07,test=mouse_E4';
-crit = 'mouse=13.61.2.07,test=mouse_E5';
+%crit = 'mouse=13.61.2.07,test=mouse_E5';
 orientation_record_crit{i} = [crit ',stim_type=orientation'];
 significance_record_crit{i} =  [crit ',stim_type=significance'];
 significance_threshold{i} =0.01; %0.05;
@@ -93,11 +102,12 @@ monitorpatch_x = [  1  2   3  1  2   3   1  2   3];
 monitorpatch_y = [  1  1   1  2  2   2   3  3   3];
 x =              [nan 90 105 80 90 105 nan 90 105];
 y =              [nan 55  60 40 42  50 nan 35  40];
-if recalculate
+if recalculate || 1
 override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y )
 end
 monitorcenter_rel2nose_cm{i} = [ -20,-8,29.5]; %
 monitorcenter_rel2nose_cm{i} = [ -5,-5,15]; % 
+monitorcenter_rel2nose_cm{i} = [-17,-5,30]; 
 monitor_tilt_deg{i} = 0; % deg
 monitor_slant_deg{i} = 20;% deg
 orientation_record_crit{i} = 'mouse=13.61.2.19,test=mouse_E4,stim_type=orientation';
@@ -112,7 +122,7 @@ monitorpatch_x = [ 5  5  5  4   4];
 monitorpatch_y = [ 3  4  2  3   4];
 x =              [63 55  71 60  54 ];
 y =              [54 48  60 58  53 ];
-if recalculate
+if recalculate|| 1
 override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y )
 end
 stimrect{i} = [0 0 1080 1080];
@@ -124,7 +134,7 @@ orientation_record_crit{i} = 'mouse=13.61.2.03,test=mouse_E10,stim_type=orientat
 significance_record_crit{i} = 'mouse=13.61.2.03,test=mouse_E10,stim_type=significance';
 significance_threshold{i} = 1; %0.05;
 
-
+if 0
 i = 7;
 mouse{i} = '13.61.2.20';
 retinotopy_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E1,stim_type=retinotopy';
@@ -146,14 +156,14 @@ monitorcenter_rel2nose_cm{i} = [ -20,0,15]; %
 monitor_tilt_deg{i} = 0; % deg
 monitor_slant_deg{i} = 20;% deg
 orientation_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E6,stim_type=orientation';
-
+end
 
 
 radial_angle_all = [];
 orientation_all = [];
 
 
-mice = 7;%1:i;
+mice = 1:6;
 %mice = 1:2;
 n_mice = length(mice);
 
@@ -181,16 +191,21 @@ for i=mice % :length(retinotopy_record_crit)
     [img_rf_radial_angle_deg{i},img_rf_azimuth_deg{i},img_rf_elevation_deg{i}] = ...
         oi_compute_response_centers(avg, retinotopy_record{i},recalculate);
     
+    
+    % ipsi hemifield set to 0
+    img_rf_radial_angle_deg{i}(img_rf_radial_angle_deg{i}>0 & img_rf_radial_angle_deg{i}<180) = 0;
+    
     % blurring
-    if 0
-    img_radial =exp(1i*img_rf_radial_angle_deg{i}/180*pi);
+    if 1
+    img_radial =exp(2i*img_rf_radial_angle_deg{i}/180*pi);
     img_radial(isnan(img_radial)) = 0;
-    img_radial = spatialfilter(img_radial,10,'pixel');
-    img_radial = angle(img_radial)/pi*180;
+    img_radial = spatialfilter(img_radial,6,'pixel');
+    img_radial = angle(img_radial)/pi*180/2;
     img_radial(isnan(img_rf_radial_angle_deg{i})) = nan;
     else
         img_radial =img_rf_radial_angle_deg{i};
     end
+    
     
     img_rf_radial_angle_deg{i} = mod(img_radial,180);
 %    img_rf_radial_angle_deg{i} = mod(img_rf_radial_angle_deg{i},180);
@@ -212,6 +227,10 @@ for i=mice % :length(retinotopy_record_crit)
     %     orientation_record.stim_parameters = rand(1,8)*360
     
     multfac = 2; %
+%     avg(:,:,1) = avg(:,:,2)*1.04;
+%     avg(:,:,2) = avg(:,:,2)*0.95;
+%     avg(:,:,3) = avg(:,:,3)*0.93;
+    
     polavg = zeros(size(avg,1),size(avg,2));
     for c=1:size(avg,3)
         polavg = polavg + avg(:,:,c) * exp(multfac*pi*1i*orientation_record.stim_parameters(c)/180);
@@ -289,7 +308,7 @@ for i = mice
     axis image off
     ylim(ylimits);
     xlim(xlimits);
-%    set(get(gca,'children'),'Alphadata',0.5+0.5*double(~isnan(img_rf_azimuth_deg{i}')))
+    set(get(gca,'children'),'Alphadata',0.5+0.5*double(~isnan(img_rf_azimuth_deg{i}')))
     col = col + 1;
     
     subplot(n_rows,n_cols,(row-1)*n_cols+col);
@@ -390,15 +409,28 @@ ylabel('Orientation (deg)');
 box off
 xyline('-r');
 
+ind = find(radial_angle_all~=0 & radial_angle_all~=180);
+
+dor = orientation_all-radial_angle_all;
+logmsg(['Difference of orientation and radial angle = ' num2str(mean(dor)) ' +- ' num2str(std(dor)) ' deg']);
+logmsg(['Difference of orientation and radial angle (pos ang) = ' num2str(mean(dor(ind))) ' +- ' num2str(std(dor(ind))) ' deg']);
+
 [r,p] = circ_corrcc(radial_angle_all/180*pi*2,orientation_all/180*pi*2);
 
 logmsg(['Circ. corrcc = ' num2str(r) ', p = ' num2str(p)]);
-%circ_corrcc(radial_angle_all/180*pi,orientation_all/180*pi)
+
+[r,p] = circ_corrcc(radial_angle_all(ind)/180*pi*2,orientation_all(ind)/180*pi*2);
+logmsg(['Circ. corrcc (positive angles) = ' num2str(r) ', p = ' num2str(p)]);
+
+[r,p] = circ_corrcc(radial_angle_all(ind)/180*pi,orientation_all(ind)/180*pi);
+logmsg(['Circ. corrcc (positive angles) = ' num2str(r) ', p = ' num2str(p)]);
 
 save(fullfile(getdesktopfolder,'orientation_radial.mat'),'radial_angle_all','orientation_all');
 
 angle_diffs = angle(exp(1i*(radial_angle_all-orientation_all)/180*pi));
 angle_diffs(angle_diffs>pi/2) = angle_diffs(angle_diffs>pi/2)-pi;
+angle_diffs(angle_diffs<-pi/2) = angle_diffs(angle_diffs<-pi/2)+pi;
+%angle_diffs(angle_diffs>pi/2) = angle_diffs(angle_diffs>pi/2)-pi;
 subplot(1,2,2)
 hist(angle_diffs/pi*180,30)
 xlabel('Angular difference (deg)');
@@ -407,7 +439,11 @@ axis square
 
 
 
-function override_response_centers( retinotopy_record, monitorpatch_x, monitorpatch_y, x, y )
+function override_response_centers( retinotopy_record, monitorpatch_x, monitorpatch_y, x, y,verbose )
+if nargin<6
+    verbose = true;
+end
+
 filename = fullfile(oidatapath(retinotopy_record),[retinotopy_record.test '_response_centers.mat']);
 cx = x;
 cy = y;
@@ -417,6 +453,8 @@ monitorpatch_y = monitorpatch_y(ind);
 x = x(ind);
 y = y(ind);
 save(filename,'monitorpatch_x','monitorpatch_y','x','y','cx','cy');
+
+if verbose 
 
 figure
 subplot(1,2,1)
@@ -441,4 +479,5 @@ for i=1:length(x)
     axes(h.single_condition( (monitorpatch_y(i)-1)*n_x + monitorpatch_x(i)));
     hold on
     plot(y(i),x(i),'+r');
+end
 end

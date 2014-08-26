@@ -1,4 +1,4 @@
-function tpplotdata( data, t, listofcells, listofcellnames, params,process_params, timeint,figname)
+function tpplotdata( data, t, listofcells, listofcellnames, params,process_params, timeint,figname,record)
 %TPPLOTDATA plot calcium cell data
 %
 %   TPPLOTDATA( DATA, T, LISTOFCELLS, LISTOFCELLNAMES,  )
@@ -10,6 +10,9 @@ function tpplotdata( data, t, listofcells, listofcellnames, params,process_param
 %  2010, Alexander Heimel
 %
 
+if nargin<9
+    record = [];
+end
 if nargin<8
     figname = 'Data';
 end
@@ -61,6 +64,11 @@ switch process_params.method
         ylab = 'F';
         n_panelrows = 1;
 end
+
+if ~isempty(record)
+    n_panelrows = n_panelrows + 1;
+end
+
 subplot(n_panelrows,2,1);
         
 for interval = 1:size(data,1)
@@ -68,15 +76,15 @@ for interval = 1:size(data,1)
         hold on;
         ind=mod(i-1,length(colors))+1;
         plot(t{interval,i}, data{interval,i} + stack_lines * (i-1) * 0.2 ,'line',linestyle,'color',colors{ind},'marker',marker);
-    end;
+    end
 end
-if length(listofcells)<10
-    legend(listofcellnames,'Location','EastOutside');
-end
+% if length(listofcells)<10
+%     legend(listofcellnames,'Location','EastOutside');
+% end
 ylabel(ylab); 
 xlabel('Time (s)');
 mark_intervals( timeint )
-
+xlims = xlim;
 
 
 % show data as color image
@@ -160,9 +168,10 @@ switch process_params.method
     otherwise
 end
 
-
-
-
+if ~isempty(record)
+    subplot(n_panelrows,2,((n_panelrows-1)*2)+1);
+    plot_stimulus_timeline(record,xlims);
+end
 
 return
 
