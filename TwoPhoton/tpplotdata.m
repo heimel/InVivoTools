@@ -69,7 +69,7 @@ if ~isempty(record)
     n_panelrows = n_panelrows + 1;
 end
 
-subplot(n_panelrows,2,1);
+h_traces  = subplot(n_panelrows,2,1);
         
 for interval = 1:size(data,1)
     for i=1:size(data,2)
@@ -169,8 +169,14 @@ switch process_params.method
 end
 
 if ~isempty(record)
-    subplot(n_panelrows,2,((n_panelrows-1)*2)+1);
+    h_timeline = subplot(n_panelrows,2,((n_panelrows-1)*2)+1);
     plot_stimulus_timeline(record,xlims);
+    p_traces = get(h_traces,'position');
+    p_timeline = get(h_timeline,'position');
+    p_timeline(4) = 0.1;
+    p_timeline(2) = p_traces(2)-p_timeline(4);
+    set(h_timeline,'position',p_timeline);
+    set(h_traces,'xtick',[]);
 end
 
 return

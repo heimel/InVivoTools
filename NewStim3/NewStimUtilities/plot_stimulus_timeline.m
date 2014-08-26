@@ -1,4 +1,4 @@
-function plot_stimulus_timeline(record,xlims)
+function h = plot_stimulus_timeline(record,xlims)
 %PLOT_STIMULUS_TIMELINE plots onsets and offset of the stimuli from stimsfile
 %
 % 2014, Alexander Heimel
@@ -88,4 +88,4 @@ end
 %     image(imbarcol);
 %     
     
-    keyboard
+    
