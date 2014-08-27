@@ -159,11 +159,37 @@ orientation_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E6,stim_type=orientati
 end
 
 
+if 1
+i = 8;
+mouse{i} = '13.61.2.21';
+retinotopy_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E5,stim_type=retinotopy';
+retinotopy_record{i} = db(find_record(db,retinotopy_record_crit{i}));
+% filename = fullfile(oidatapath(retinotopy_record{i}),[retinotopy_record{i}.test '_response_centers.mat']);
+% load(filename);
+%  monitorpatch_x = [ 1 2 1 2  ];
+%  monitorpatch_y = [ 1 1 2 2 ];
+% x =          [103  107   98  104 ]; 
+% y =              [66 65 56 56 ];
+% 
+% x = 4*(x-mean(x))+mean(x);
+% y = 4*(y-mean(y))+mean(y);
+% % if recalculate
+%  override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y )
+% % end
+stimrect{i} = [480 270 1280 810];
+monitorcenter_rel2nose_cm{i} = [-17,3,30]; % 
+monitor_tilt_deg{i} = 0; % deg
+monitor_slant_deg{i} = 20;% deg
+orientation_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E6,stim_type=orientation';
+end
+
+
+
 radial_angle_all = [];
 orientation_all = [];
 
 
-mice = 1:6;
+mice = 8;%1:6;
 %mice = 1:2;
 n_mice = length(mice);
 
