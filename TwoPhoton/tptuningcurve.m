@@ -262,12 +262,12 @@ for p=1:size(data,2) % roi p
                 for j=1:length(li)
                     mn = nanmean(data{li(j),p}');
                     ind{myind} = cat(1,ind{myind},(mn-baseline(li(j)))/baseline(li(j))); %#ok<AGROW>
-                    indf{myind} = cat(1,indf{myind},mn); %#ok<AGROW>
+                    indf{myind} = cat(1,indf{myind},mn);
                 end
                 if isempty(paramname)
                     curve(1,myind) = myind; %#ok<AGROW>
                 else
-                    curve(1,myind) = getparameters(get(s.stimscript,i)).(paramname); %#ok<AGROW>
+                    curve(1,myind) = getfield( getparameters(get(s.stimscript,i)),paramname); %#ok<GFLD>
                 end;
                 curve(2,myind) = nanmean(ind{myind}); %#ok<AGROW>
                 curve(3,myind) = nanstd(ind{myind}); %#ok<AGROW>
