@@ -90,33 +90,28 @@ if nargin<11, baselinemethod = 0; else baselinemethod = basemeth; end;
 if nargin<12, projection_method = 'none'; end
 
 if ~isempty(blankstimid)
-    theblankid = blankstimid; 
+    theblankid = blankstimid;
 else
-    theblankid = -1; 
+    theblankid = -1;
 end
 
 params = tpprocessparams( '', record ); % for analysis params
- 
-
-interval = [];
-spinterval = [];
 
 stims = getstimsfile( record );
 if isempty(stims)
     % create stims file
-%     stiminterview(record);
-%     stims = getstimsfile( record );
-  errormsg(['No stimulus file present for ' recordfilter(record) ', Skipping analysis.']);
-  return
+    %     stiminterview(record);
+    %     stims = getstimsfile( record );
+    errormsg(['No stimulus file present for ' recordfilter(record) ', Skipping analysis.']);
+    return
 end
-
 
 % get paramname
 if isempty(paramname)
     paramname = varied_parameters(stims.saveScript);
     if isempty(paramname)
-        disp('TPTUNINGCURVE: No parameter varied');
-        paramname = {''};% {'stim_number'};
+        logmsg('No parameter varied');
+        paramname = {''};
     end
     ind = strmatch(record.stim_type,paramname);  % notice: changed from record.stim_parameters 2013-03-29!
     if isempty(ind)
@@ -130,8 +125,6 @@ if isempty(paramname) && ...
         (~isempty(findstr(lower(record.stim_type),'tile')) ||...
         ~isempty(findstr(lower(record.stim_type),'position')))
     variable = 'position';
-    
-    
     stimparams = cellfun(@getparameters,get(stims.saveScript));
     rects = cat(1,stimparams(:).rect);
     left = uniq(sort(rects(:,1)));
@@ -141,7 +134,7 @@ if isempty(paramname) && ...
     center_x = (left+right)/2;
     center_y = (top+bottom)/2;
     n_x = length(center_x);
-    n_y = length(center_y);    
+    n_y = length(center_y);
     stimrect = [min(left) min(top) max(right) max(bottom)];
 else
     variable = paramname;
@@ -164,6 +157,8 @@ else
     end;
 end;
 
+interval = zeros(length(do_analyze_i),2);
+spinterval = zeros(length(do_analyze_i),2);
 for i=1:length(do_analyze_i),
     stimind = do_analyze_i(i);
     if ~isempty(timeint),
@@ -171,9 +166,7 @@ for i=1:length(do_analyze_i),
     else
         stimtime = s.mti{stimind}.startStopTimes(3)-s.mti{stimind}.startStopTimes(2);
         response_window =[params.response_window(1) min(stimtime,params.response_window(2))];
-       % timeint = [0 response_window];
-     %  interval(i,:) = [ s.mti{stimind}.frameTimes(1) s.mti{stimind}.startStopTimes(3)];
-       interval(i,:) = s.mti{stimind}.startStopTimes(2) + response_window;
+        interval(i,:) = s.mti{stimind}.startStopTimes(2) + response_window;
     end;
     
     dp = struct(getdisplayprefs(get(s.stimscript,do(i))));
@@ -189,7 +182,6 @@ for i=1:length(do_analyze_i),
             BGposttime = 0;
         end
         
-        
         if BGposttime > 0,  % always analyze before time
             spinterval(i,:)=[s.mti{stimind}.startStopTimes(1)-BGposttime+1 s.mti{stimind}.startStopTimes(1)];
             spinterval(i,:)=[s.mti{stimind}.startStopTimes(1)-BGposttime+1 s.mti{stimind}.startStopTimes(1)];
@@ -200,9 +192,9 @@ for i=1:length(do_analyze_i),
                 separation_from_prev_stim_off = 0;
             end
             spinterval(i,:)=[s.mti{stimind}.startStopTimes(1)+separation_from_prev_stim_off s.mti{stimind}.frameTimes(1)];
-        end;
-    end;
-end;
+        end
+    end
+end
 
 meanforbaselines = [];
 
@@ -210,16 +202,17 @@ if iscell(pixels),
     [data,t] = tpreaddata(record, [interval; spinterval]-starttime, pixels,0, channel);
 else
     if baselinemethod==3,
-        for p=1:size(pixels.data,2),
+        meanforbaselines = zeros(1,size(pixels.data,2));
+        for p=1:size(pixels.data,2)
             [pixels.data{p},meanforbaselines(p)] = tpfilter(pixels.data{p},pixels.t{p});
-        end;
-    end;
+        end
+    end
     [data,t] = data2intervals(pixels.data,pixels.t,[interval; spinterval]-starttime);
-
-end;
+end
 
 for p=1:size(data,2) % roi p
-    curve = []; spcurve = []; indspont = []; ind = {}; indf = {}; indspontt = []; indspontm = []; indsponttm = [];
+    curve = []; indspont = []; ind = {}; indf = {}; 
+    indspontt = []; indspontm = []; indsponttm = [];
     blankd = []; blankt = []; blankdm = []; blanktm = [];
     
     for i=(size(interval,1)+1):(size(interval,1)+size(spinterval,1)),
@@ -232,12 +225,12 @@ for p=1:size(data,2) % roi p
     
     if theblankid==-1,
         for i=1:numStims(s.stimscript),
-            if isfield(getparameters(get(s.stimscript,i)),'isblank'),
+            if isfield(getparameters(get(s.stimscript,i)),'isblank')
                 theblankid = i;
-                break;
-            end;
-        end;
-    end;
+                break
+            end
+        end
+    end
     if theblankid>0,
         li = find(do(do_analyze_i)==theblankid);
         for j=1:length(li),
@@ -246,49 +239,39 @@ for p=1:size(data,2) % roi p
             blankt = cat(1,blankt,t{li(j),p});
             blankdm = cat(1,blankdm,nanmean(mn));
             blanktm = cat(1,blanktm,nanmean(t{li(j),p}));
-        end;
-    end;
+        end
+    end
     
     if baselinemethod==3,
         if theblankid>0,
             baseline = repmat(nanmean(blankdm),1,(size(interval,1)+size(spinterval,1)));
         else
             baseline = repmat(meanforbaselines(p),1,(size(interval,1)+size(spinterval,1)));
-        end;
+        end
     else
         baseline = compute_baseline(interval(:,1)-starttime,baselinemethod,indspont,indspontt,indspontm,indsponttm,blankd,blankt,blankdm,blanktm);
-    end;
+    end
     
     myind = 1;
-
- %   figure
- %           hold on;
-%clr='kbrgyc';
-            
     for i=1:numStims(s.stimscript)
         if theblankid~=i,
             li = find(do(do_analyze_i)==i);
-            
-            
-            if ~isempty(li), % make sure the stim was actually shown
-                ind{myind} = []; indf{myind} = [];
-                for j=1:length(li),
-
-%                    plot(data{li(j),3},clr(i));
-                    
+            if ~isempty(li) % make sure the stim was actually shown
+                ind{myind} = [];  %#ok<AGROW>
+                indf{myind} = []; %#ok<AGROW>
+                for j=1:length(li)
                     mn = nanmean(data{li(j),p}');
-                    %ind{myind} = cat(1,ind{myind},(mn-indspont(li(j)))/indspont(li(j)));
-                    ind{myind} = cat(1,ind{myind},(mn-baseline(li(j)))/baseline(li(j)));
-                    indf{myind} = cat(1,indf{myind},mn);
-                end;
-                if isempty(paramname),
-                    curve(1,myind) = myind;
+                    ind{myind} = cat(1,ind{myind},(mn-baseline(li(j)))/baseline(li(j))); %#ok<AGROW>
+                    indf{myind} = cat(1,indf{myind},mn); %#ok<AGROW>
+                end
+                if isempty(paramname)
+                    curve(1,myind) = myind; %#ok<AGROW>
                 else
-                    curve(1,myind) = getfield(getparameters(get(s.stimscript,i)),paramname);
+                    curve(1,myind) = getparameters(get(s.stimscript,i)).(paramname); %#ok<AGROW>
                 end;
-                curve(2,myind) = nanmean(ind{myind});
-                curve(3,myind) = nanstd(ind{myind});
-                curve(4,myind) = nanstderr(ind{myind});
+                curve(2,myind) = nanmean(ind{myind}); %#ok<AGROW>
+                curve(3,myind) = nanstd(ind{myind}); %#ok<AGROW>
+                curve(4,myind) = nanstderr(ind{myind}); %#ok<AGROW>
                 myind = myind + 1;
             end
         else
@@ -296,12 +279,11 @@ for p=1:size(data,2) % roi p
             blankind = [];
             for j=1:length(li),
                 mn = nanmean(data{li(j),p}');
-                %blankind = cat(1,blankind,(mn-indspont(li(j)))/indspont(li(j)));
                 blankind = cat(1,blankind,(mn-baseline(li(j)))/baseline(li(j)));
-            end;
+            end
             blankresp = [nanmean(blankind) nanstd(blankind) nanstderr(blankind)];
-        end;
-    end; % stimulusnumber i
+        end
+    end % stimulusnumber i
     
     switch projection_method
         case 'none'
@@ -336,21 +318,16 @@ for p=1:size(data,2) % roi p
             curve = proj_curve;
     end
     
-    
-
-   
     record.measures(p).triggers = 0;
     record.measures(p).variable = variable;
     record.measures(p).range = {curve(1,:)};
     record.measures(p).response = {curve(2,:)};
     [m,ind] = max(record.measures(p).response{1});
-    record.measures(p).preferred_stimulus = {record.measures(p).range{1}(ind)}; 
+    record.measures(p).preferred_stimulus = {record.measures(p).range{1}(ind)};
     record.measures(p).response_normalized ={curve(2,:) / m};
     record.measures(p).curve = curve;
     record.measures(p).ind = {ind};
     record.measures(p).spont = spont;
-%    record.measures(p).indspont = indspont;
-%    record.measures(p).indf = {indf};
     record.measures(p).channel = channel;
     if exist('blankresp','var')==1,
         record.measures(p).blankresp = blankresp;
@@ -374,45 +351,37 @@ for p=1:size(data,2) % roi p
         case 'size'
             record.measures(p).suppression_index = compute_suppression_index( curve(1,:), curve(2,:) );
         case 'position'
-            record.measures(p).rect = stimrect;                              
+            record.measures(p).rect = stimrect;
             resp_by_pos = reshape(curve(2,:),n_x,n_y)';
-            
-            %resp_by_pos = resp_by_pos-min(resp_by_pos(:));
             resp_by_pos = thresholdlinear(resp_by_pos);
             record.measures(p).rf{1} = resp_by_pos;
             center_of_mass_x = center_x(:)'*  sum(resp_by_pos,1)'/sum(resp_by_pos(:));
             center_of_mass_y = center_y(:)'*sum(resp_by_pos,2)/sum(resp_by_pos(:));
-            record.measures(p).rf_center{1} = round([center_of_mass_x center_of_mass_y]);
-            %disp(['RESULTS_ECTESTRECORD: ' 'Cell ' num2str(measure.index) ' Center of response [x,y] = [ ' num2str(fix(center_x)) ', ' num2str(fix(center_y)) ']']);
-                    
+            record.measures(p).rf_center{1} = round([center_of_mass_x center_of_mass_y]);            
     end
     
     record.measures(p).responsive = any(curve(2,:)-2*curve(4,:)>0);
-        
+    
     if plotit
         figure;
         hold on;
         if isempty(paramname)
             paramname = '';
         end
-        
         switch paramname
             case 'angle'
-                curve(1,end+1) = curve(1,1)+360;
-                curve(2:4,end) = curve(2:4,1);
-                
+                curve(1,end+1) = curve(1,1)+360; %#ok<AGROW>
+                curve(2:4,end) = curve(2:4,1); %#ok<AGROW>
                 plot(curve(1,:),curve(2,:),'ko','linewidth',2);
-                [otcurve,pref,hwhh]=fit_otcurve(curve);
+                otcurve = fit_otcurve(curve);
                 plot(otcurve(1,:),otcurve(2,:),'k');
-                
-                disp(['Cell ' num2str(p) ': OSI = ' num2str(record.measures(p).osi)]);
+                logmsg(['Cell ' num2str(p) ': OSI = ' num2str(record.measures(p).osi)]);
             otherwise
                 plot(curve(1,:),curve(2,:),'k-','linewidth',2);
-                try
-                    disp(['Cell ' num2str(p) ': Suppression index = ' num2str(record.measures(p).suppression_index)]);
+                if isfield(record.measures(p),'suppression_index')
+                    logmsg(['Cell ' num2str(p) ': Suppression index = ' num2str(record.measures(p).suppression_index)]);
                 end
         end
-        
         
         h=myerrorbar(curve(1,:),curve(2,:),curve(4,:),curve(4,:));
         delete(h(2)); set(h(1),'linewidth',2,'color',0*[1 1 1]);
@@ -433,76 +402,59 @@ for p=1:size(data,2) % roi p
             case 'angle'
                 xlim([-5 365]);
                 set(gca,'XTick',(0:45:360));
-            otherwise
-                % nothing special
         end
         smaller_font(-8);
         bigger_linewidth(2);
     end % plotit
-   resp(p) = record.measures(p);
+    resp(p) = record.measures(p); %#ok<AGROW>
 end % roi p
 
-% responses = [];
-% for i=1:numStims(s.stimscript),
-%     li = find(do(do_analyze_i)==i);
-%     responses(end+1:end+length(li),1) =  cellfun(@mean,data(li,p));
-%     responses(end-length(li)+1:end,2 ) = i;
-% end
-
-
 try
-responsedata = cellfun(@mean,data(1:end/2,:)); % mean F over interval
-spontdata = cellfun(@mean,data(end/2+1:end,:)); % mean F over interval
-
-last_spont = cellfun(@(x) x(end),data(end/2+1:end,:)); % last F (for spontaneous data)
-first_response = cellfun(@(x) x(end),data(1:end/2,:)); % first F (for response data)
-betweenF = (last_spont + first_response)/2;
-
-[responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF,params.responsive_alpha,'right');
-catch me
-    disp(me.message);
-    responsive = nan(size(data,2),1);
-    p = nan(size(data,2),1);
-% [responsive,p]=kruskal_wallis_test(responsedata-betweenF,spontdata-betweenF);
-%mdata = mdata(1:end/2,:) - edata(end/2+1:end,:); %subtract spontaneous
-%[responsive,p] = ttest(mdata(1:end/2,:))
-%[responsive,p] = ttest(mdata(1:end/2,:) - mdata(end/2+1:end,:)  )
-end
-
-%responsive = and(responsive,mean(responsedata-spontdata)>0 );
-for c=1:size(data,2)
-    if ~isnan(responsive(c))
-        record.measures(c).responsive = responsive(c);
-    end
-    record.measures(c).responsive_p = p(c);
-    disp(['TPTUNINGCURVE: Cell ' num2str(c,'%3d') ...
-        ' Responsive = ' num2str(record.measures(c).responsive) ...
-        ', p = ' num2str(record.measures(c).responsive_p)]);
-end
-    
-if 0 % alternative responsive calculation
-for c=1:size(data,2)
-    % take maximally responsive stimulus
-    [dummy,ind] = max(record.measures(c).response{1}); %#ok<ASGLU>
     responsedata = cellfun(@mean,data(1:end/2,:)); % mean F over interval
     spontdata = cellfun(@mean,data(end/2+1:end,:)); % mean F over interval
     last_spont = cellfun(@(x) x(end),data(end/2+1:end,:)); % last F (for spontaneous data)
     first_response = cellfun(@(x) x(end),data(1:end/2,:)); % first F (for response data)
     betweenF = (last_spont + first_response)/2;
-    responsedata = responsedata(do==ind,:);
-    spontdata = spontdata(do==ind,:);
-    betweenF = betweenF(do==ind,:);
-    [responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF);
-    
-    % multiple test correction
-    % p = min(1,p*size(curve,2));
-    
-    record.measures(c).responsive = responsive(c);
-    record.measures(c).responsive_p = p(c);
-    disp(['TPTUNINGCURVE: Cell ' num2str(c) ...
-        ' Responsive = ' num2str(record.measures(c).responsive) ...
-        ', p = ' num2str(record.measures(c).responsive_p)]);
+    [responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF,params.responsive_alpha,'right');
+catch me
+    disp(me.message);
+    responsive = nan(size(data,2),1);
+    p = nan(size(data,2),1);
 end
+
+for c=1:size(data,2)
+    if ~isnan(responsive(c))
+        record.measures(c).responsive = responsive(c);
+    end
+    record.measures(c).responsive_p = p(c);
+    %     disp(['TPTUNINGCURVE: Cell ' num2str(c,'%3d') ...
+    %         ' Responsive = ' num2str(record.measures(c).responsive) ...
+    %         ', p = ' num2str(record.measures(c).responsive_p)]);
+end
+
+if 0 % alternative responsive calculation
+    for c=1:size(data,2) %#ok<UNRCH>
+        % take maximally responsive stimulus
+        [dummy,ind] = max(record.measures(c).response{1});
+        responsedata = cellfun(@mean,data(1:end/2,:)); % mean F over interval
+        spontdata = cellfun(@mean,data(end/2+1:end,:)); % mean F over interval
+        last_spont = cellfun(@(x) x(end),data(end/2+1:end,:)); % last F (for spontaneous data)
+        first_response = cellfun(@(x) x(end),data(1:end/2,:)); % first F (for response data)
+        betweenF = (last_spont + first_response)/2;
+        responsedata = responsedata(do==ind,:);
+        spontdata = spontdata(do==ind,:);
+        betweenF = betweenF(do==ind,:);
+        [responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF);
+        
+        % multiple test correction
+        % p = min(1,p*size(curve,2));
+        
+        record.measures(c).responsive = responsive(c);
+        record.measures(c).responsive_p = p(c);
+        disp(['TPTUNINGCURVE: Cell ' num2str(c) ...
+            ' Responsive = ' num2str(record.measures(c).responsive) ...
+            ', p = ' num2str(record.measures(c).responsive_p)]);
+    end
 end
 
 
