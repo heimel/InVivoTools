@@ -47,6 +47,18 @@ if ~isempty(h_ed)
 	pos_ed=get(h_ed,'Position');
 	pos(2)=pos_ed(2)-pos(4)-100;
 end
+% screenrect = get(0,'screensize');
+% edge = 20;
+% if (pos(1)+pos(3))>=screenrect(3)
+%     pos(1) = edge;
+%     pos(3) = screenrect(3)-edge*2;
+% end
+% if (pos(2)+pos(4))>=screenrect(4)
+%     pos(2) = edge;
+%     pos(4) = screenrect(4)-edge*2;
+% end
+
+    
 set(h.figure,'position',pos);
 
 colormap gray

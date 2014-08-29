@@ -368,11 +368,14 @@ switch record.stim_type
         or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
         or_angs(roi_edge'==1) = 0;
 
-%         figure
-%         image(or_angs');
-%         axis image off
-%         colormap hsv
-%         set(gca,'clim',[0 180])
+        
+         or_ang=angle(polavg);or_ang(roi_edge'==1) = 0;figure;imagesc(or_ang');set(gca,'clim',[1.3 3])
+         
+        figure
+        image(or_angs');
+        axis image off
+        colormap hsv
+        set(gca,'clim',[0 180])
         
         h = image_intensity(or_angs',or_abs',cmap);
         filename= fullfile(oidatapath(record),[record.test '_B' ...

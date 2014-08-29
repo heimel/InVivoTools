@@ -54,6 +54,11 @@ switch experiment
     case '13.61'
         params.spatial_filter_width = 3; % pixels use nan to turn off filter
 end
+% switch record.stim_type
+%     case 'orientation'
+%         params.spatial_filter_width = 1;
+% end
+% 
 
 params.single_condition_clipping = 5; 
   % number of standard deviations to clip and scale images to.
