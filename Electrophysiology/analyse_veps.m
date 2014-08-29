@@ -92,6 +92,12 @@ stimulus_start = (stims.MTI2{1}.startStopTimes(2)-stims.start);
 pre_ttl = max_pretime-stimulus_start;
 post_ttl = stimulus_start+max_duration+max_posttime;
 
+if length(record.mouse)>5 && length(find(record.mouse=='.'))>1
+    protocol = record.mouse(1:5);
+else
+    protocol = '';
+end
+
 switch lower(record.setup)
     case 'antigua'
         datapath=ecdatapath(record);
@@ -124,13 +130,23 @@ switch lower(record.setup)
         EVENT.Triallngth =  post_ttl+pre_ttl;
         results.sample_interval=1/EVENT.strms(1,3).sampf;
         
-        
-        if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
-            errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-            EVENT.strons.tril(1)=EVENT.strons.tril(end);
-        elseif isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1
-            errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-            EVENT.strons.tril(1)=EVENT.strons.tril(length(EVENT.strons.tril)-length(EVENT.strons.OpOn));
+        switch protocol
+            case '13.21'
+                if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
+                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+                    EVENT.strons.tril(1)=EVENT.strons.tril(end);
+                elseif isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1
+                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+                    EVENT.strons.tril(1)=EVENT.strons.tril(length(EVENT.strons.tril)-length(EVENT.strons.OpOn));
+                    %             EVENT.strons.tril(1)=EVENT.strons.tril(4); % just occasionally for 13.20.2.05 t-7 !!!
+                    %             EVENT.strons.OpOn=EVENT.strons.OpOn(2:end);
+                    %             EVENT.strons.OpOf=EVENT.strons.OpOf(2:end);
+                end
+            otherwise
+                if length(EVENT.strons.tril)>1
+                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
+                    EVENT.strons.tril(1)=EVENT.strons.tril(end);
+                end
         end
         
         startindTDT=EVENT.strons.tril(1)-pre_ttl;
@@ -481,7 +497,7 @@ end
 
 
 wavefile=fullfile(ecdatapath(record),record.test,['saved_data',num2str(channels2analyze),'.mat']);
-save(wavefile,'waves','waves_time','powerm','channels2analyze');
+save(wavefile,'measures','waves','waves_time','powerm','channels2analyze');
 
 
 

@@ -63,7 +63,7 @@ switch lower(record.setup)
         end
         
         switch protocol
-            case '13.20'
+            case '13.21'
                 if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
                     errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
                     EVENT.strons.tril(1)=EVENT.strons.tril(end);
