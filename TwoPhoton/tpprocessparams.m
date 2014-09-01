@@ -233,6 +233,12 @@ end
 %         params.extra_functions = {'tp_get_distance_from_pia'};
 % end
 
+params.darklevel_determination = 'none';
+switch record.experiment
+    case '13.61'
+        params.darklevel_determination = '5percentile';
+end
+
 if exist('processparams_local.m','file')
     oldparams = params;
     params = processparams_local( params );

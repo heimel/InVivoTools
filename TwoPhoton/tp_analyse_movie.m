@@ -24,6 +24,7 @@ for i=1:length(rois)
     listofcellnames{i}=[rois(i).type ' ' int2str(rois(i).index)];
 end
 
+
 if 1
     
     if ~exist(tpdatapath(record),'dir')

@@ -68,13 +68,15 @@ end
 %disp('TEMPORARY: channel manually set to 1');
 %channel  = 0
 
-[data, t] = tpreaddata_single_record(records(1), intervals, pixelinds, mode, channel, frametimes{1},verbose);
+darklevel = tp_darklevel( records(1));
+
+[data, t] = tpreaddata_single_record(records(1), intervals, pixelinds, mode, channel, frametimes{1},darklevel,verbose);
 if length(records)>1
     disp('TPREADDATA: not all options are implemented correctly when reading multiple epochs');
     disp('TPREADDATA: returning results of multiple epochs as single interval. If multiple intervals are required,');
     disp('   then these should be explicitly requested in the function call.');
     for i = 2:length(records)
-        [single_data, single_t] = tpreaddata_single_record(records(i), intervals, pixelinds, mode, channel, frametimes{i},verbose);
+        [single_data, single_t] = tpreaddata_single_record(records(i), intervals, pixelinds, mode, channel, frametimes{i},darklevel,verbose);
         % concatenate to other data
         for m = 1:size(data,1) % loop over intervals
             for n = 1:size(data,2) % loop over cells
@@ -86,7 +88,7 @@ if length(records)>1
 end
 
 
-function [data,t,params] = tpreaddata_single_record(record, intervals, pixelinds, mode, channel, frametimes, verbose)
+function [data,t,params] = tpreaddata_single_record(record, intervals, pixelinds, mode, channel, frametimes, darklevel,verbose)
 
 params = tpreadconfig(record);
 
@@ -163,6 +165,8 @@ for j=1:size(intervals,1) % loop over requested intervals
     if verbose
         hwaitbar = waitbar(0,'Reading frames...');
     end
+    warning('off','MATLAB:intMathOverflow')
+    
     for f=f0:f1 % loop over frames in interval
         if verbose
             hwaitbar = waitbar(f/(f1-f0));
@@ -174,7 +178,7 @@ for j=1:size(intervals,1) % loop over requested intervals
             imsinmem(inmem(1)) = 0;
         end;
         if ~imsinmem(f),
-            ims{f} = tpreadframe(record,channel,f);
+            ims{f} = tpreadframe(record,channel,f) - darklevel;
             imsinmem(f) = 1;
         end;
         if (currScanline_period__us_ ~= params.scanline_period__us) || ...
@@ -307,6 +311,7 @@ for j=1:size(intervals,1) % loop over requested intervals
             end
         end
     end
+    warning('on','MATLAB:intMathOverflow')
     if verbose
         close(hwaitbar);
     end
