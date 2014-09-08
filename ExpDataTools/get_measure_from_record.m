@@ -382,6 +382,9 @@ if isfield(record,'measures')
                         tempval = time_peak;
                     case 'variance'
                         curve = measures.('curve');
+                        if iscell(curve) % multiple triggers
+                            curve = curve{1}; % then only use first
+                        end
                         [~,ind] = max(curve(2,:)); % for highest response
                         tempval = curve(3,ind)^2;
                 end
