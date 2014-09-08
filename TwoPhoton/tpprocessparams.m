@@ -239,8 +239,11 @@ switch record.experiment
         params.darklevel_determination = '5percentile';
 end
 
+params.movietype = 'twocolor'; % or 'plain';
+
 if exist('processparams_local.m','file')
     oldparams = params;
     params = processparams_local( params );
     changed_process_parameters(params,oldparams);
 end
+

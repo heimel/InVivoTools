@@ -103,6 +103,7 @@ for i = 1:length(triggers)
     for j=ind
         rastcount_max = rastcount_max+rast.counts{j}(1:length(rastcount_max))/rast.N(j);
     end
+      measures.fano{i} = mean(rast.fano(ind));
     rastcount_max = rastcount_max/length(ind);
     
     measures.psth_tbins{i} = binsize*((1:maxbins)-0.5);
@@ -112,6 +113,7 @@ for i = 1:length(triggers)
     rastcount_max = spatialfilter(rastcount_max,filterwidth);
     [ind_max_label,ind_max] = max(rastcount_max);
     measures.time_peak{i} = ind_max*binsize;
+  
 end % trigger i
 
 if length(inps)==1

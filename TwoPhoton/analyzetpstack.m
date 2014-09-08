@@ -1415,7 +1415,10 @@ switch command,
         if ~isempty(stimstr), stimlist = eval(stimstr); else stimlist = []; end;
         dF = get(ft(fig,'moviedFCB'),'value');
         sorted=get(ft(fig,'movieSortCB'),'value');
-        movietype = 'plain';
+        
+        processparams = tpprocessparams('',ud.record);
+        
+        movietype = processparams.movietype; %'plain';
         movfname = [ud.record.date '_' ud.record.epoch '_' get(ft(fig,'movieFileEdit'),'string') '_' movietype];
         movfname = fullfile(tpdatapath(ud.record),movfname);
         fprintf('Preparing movie...will take several seconds...\n');

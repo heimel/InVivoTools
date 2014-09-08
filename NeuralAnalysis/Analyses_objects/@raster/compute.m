@@ -111,6 +111,11 @@ for k=1:K,
     %size(sum(vals{k}(cind,:)));
     ctdev(k) = std(sum(vals{k}(cind{k},:)));
     cvariation{k} = std(vals{k}')';
+
+    %fano(k) =cvariation{k}.^2 / mean(vals{k}')';
+
+    eps=1e-10;
+    fano(k) =mean((cvariation{k}.^2+eps) ./ (mean(vals{k}')' +eps));
     fftmean{k} = mean(fftvals{k}');
     fftstd{k} = std(fftvals{k}');
     fftstderr{k} = fftstd{k}/sqrt(N(k));
@@ -124,13 +129,13 @@ end;
 ra.internals.counts=ccounts;
 ra.internals.variation = cvariation;
 ra.internals.bins = bins;
-
+ra.internals.fano = fano;
 
 ra.computations = struct('rast',{rast},'bins',{ansbins},...
 	'counts',{counts},'variation',{variation},...
         'ncounts',ncounts./((dt.*N)'),'values',{vals},...
 	'ctdev',ctdev./dt','stderr',(ctdev./dt')./sqrt(N'),'N',N',...
         'fftfreq',{fftfreq},'fftmean',{fftmean},'fftstd',{fftstd},...
-        'fftstderr',{fftstderr},'fftvals',{fftvals});
+        'fftstderr',{fftstderr},'fftvals',{fftvals},'fano',fano);
 
 newra = ra;
