@@ -156,6 +156,9 @@ switch lower(record.experiment)
 end
 
 
+params.tp_monitor_threshold_level = 0.01;
+
+
 % alignment parameters
 switch lower(record.experiment)
     otherwise

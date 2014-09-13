@@ -1,6 +1,8 @@
 function [img,mx,mn,gamma] = tp_image(im,channel,mx,mn,gamma,channel2rgb,fighandle)
-
-global tp_monitor_threshold_level
+%TP_IMAGE 
+%
+% 200X-2014 Alexander Heimel
+%
 
 if nargin<7
     fighandle = [];
@@ -51,7 +53,7 @@ for ch = channel
         vals = round(im((1+edge):(end-edge),(1+edge):(end-edge),ch));
         mn(ch) = mode(vals(:));
         if mn(ch) == max(vals(:))
-            disp(['TP_IMAGE: mode of channel ' num2str(ch) ...
+            logmsg(['Mode of channel ' num2str(ch) ...
                 ' is equal to the maximum. Taking minimum intensity instead of mode.']);
             mn(ch) = min(vals(:));
         end
@@ -61,13 +63,15 @@ for ch = channel
     end
 end
 
+params = tpprocessparams; % don't have record info here
+
 for ch = channel
     if gamma(ch) == -1 % special for counting puncta on channel 1, should go elsewhere
         vals = thresholdlinear(im((1+edge):(end-edge),(1+edge):(end-edge),ch) - mn(ch));
         vals = vals/(mx(ch)-mn(ch));
         vals(vals>1) = 1;
         mode_v = mode(vals(:));
-        gamma(ch) = log(tp_monitor_threshold_level)/log(mode_v);
+        gamma(ch) = log(params.tp_monitor_threshold_level)/log(mode_v);
     end
 end
 
