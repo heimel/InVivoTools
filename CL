@@ -1,3 +1,0 @@
-X1=mean(moviefields.Movie_destrects(:,1,1),1)-960;
-Y1=mean(moviefields.Movie_destrects(:,1,2),1)-540;
-repmat(destrect(:),1,length(df.frames))
