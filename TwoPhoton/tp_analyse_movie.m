@@ -13,7 +13,7 @@ if ~exist(tpdatapath(record),'dir')
 end
 [filename,record] = tpfilename(record);
 if ~exist(filename,'file')
-    errordlg([filename ' does not exist.']);
+    errormsg([filename ' does not exist.']);
     return
 end
 

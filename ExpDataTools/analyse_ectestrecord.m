@@ -19,15 +19,12 @@ if strcmp(record.datatype,'ec')~=1
 end
 
 if isempty(record.monitorpos)
-    msg =['Monitor position is missing in record. mouse=' record.mouse ',date=' record.date ',test=' record.test];
-    disp(['ANALYSE_ECTESTRECORD: ' msg]);
-    errordlg(msg,'Analyse ectestrecord');
+    errormsg(['Monitor position is missing in record. mouse=' record.mouse ',date=' record.date ',test=' record.test]);
 end
 
 datapath=ecdatapath(record);
 if ~exist(datapath,'dir')
-    errordlg(['Folder ' datapath ' does not exist.']);
-    disp(['ANALYSE_ECTESTRECORD: Folder ' datapath ' does not exist.'])
+    errormsg(['Folder ' datapath ' does not exist.']);
     return
 end
 
@@ -252,9 +249,6 @@ end
 
 measures=[];
 
-%nr = getallnamerefs(cksds);
-%for r=1:length(nr) % for all refs
-%    g = getcells(cksds,nr(r));
 g = getcells(cksds);
 if isempty(g)
     return
@@ -408,6 +402,7 @@ for i=1:length(g) % for all cells
             for a=1:length(area)
                 if ismember(cellmeasures.channel,area(a).channels)
                     cellmeasures.area = area(a).name;
+                    cellmeasures.relative_channel = cellmeasures.channel - min(area(a).channels) + 1;
                 end
             end
         end
@@ -420,7 +415,7 @@ if exist('fcm','file')
     cluster_spikes = true;
 else
     cluster_spikes = false;
-    disp('ANALYSE_ECTESTRECORD: No fuzzy toolbox present for spike clustering');
+    logmsg('No fuzzy toolbox present for spike clustering');
 end
 
 if cluster_spikes            % compute cluster overlap
