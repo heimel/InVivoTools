@@ -220,19 +220,6 @@ for j=1:length(stimcodes), % different uniq stimuli
 end;
 close(hwait); 
 
-% responsive calculation now done in tptuningcurve
-if 0
-for c=1:n_selected_rois
-    dat = [];
-    for stim=1:length(stimcodes)
-        for rep=1:size(mydata{stim,c},1) % rep
-            dat = [dat; mydata{stim,c}{rep,1}];
-        end
-    end % stim
-    [record.measures(c).responsive,record.measures(c).responsive_p] = ttest(dat);
-    disp(['TPPSTH: Cell ' num2str(c) ' Responsive p = ' num2str(record.measures(c).responsive_p)]);
-end % cell c
-end
 
 for i=1:n_selected_rois
      record.measures(i).psth_tbins{1} = cat(1,bins{:,i});

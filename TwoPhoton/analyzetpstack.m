@@ -1260,8 +1260,6 @@ switch command,
                 % get parameter to group for tuning curve. empty -> stim#
                 paramname = trim(get(ft(fig,'stimparamnameEdit'),'string'));
                 
-                % scratchname = tpscratchfilename(ud.record,[],['analysis_' paramname]);
-                
                 if ~isempty(paramname)
                     ud.record.variable = paramname;
                 end
@@ -1270,72 +1268,6 @@ switch command,
                 ud.record = analyse_tptestrecord(ud.record);
                 ud.celllist = ud.record.ROIs.celllist;
                 
-                %                 switch paramname
-                %                     case 'sg'
-                %                         resps = tpsgsanalysis(records(1),data,t);
-                %                     case 'eyes'
-                %                         [records(1),resps] = tptuningcurve(records(1),channel,paramname,pixelarg,0,listofcellnames,trialslist,timeint,sptimeint,blankID,0,'max');
-                %                         tpodanalysis(resps,data, t, listofcells, listofcellnames, params(1), process_params, timeint)
-                %                     case 'position'
-                %                         [records(1),resps] = tptuningcurve(records(1),channel,'',pixelarg,0,listofcellnames,trialslist,timeint,sptimeint,blankID,0,'max');
-                %
-                %                         disp('ANALYZETPSTACK: Temporary position analysis');
-                %                         prompt = {'Number of columns:','Number of rows:','Overlap (%):'};
-                %                         name = 'Tiling parameters';
-                %                         numlines = 1;
-                %                         defaultanswer = {'6','3','20'};
-                %                         answer=inputdlg(prompt,name,numlines,defaultanswer);
-                %                         n_x = str2double(answer{1});
-                %                         n_y = str2double(answer{2});
-                %                         % overlap = str2double(answer{3})/100;
-                %
-                %                         for i=1:length(resps)
-                %                             resp_by_pos = reshape(resps(i).curve(2,:),n_x,n_y)';
-                %                             resp_by_pos = resp_by_pos-min(resp_by_pos(:));
-                %                             figure('Name',[listofcellnames{i} ' RF'],'NumberTitle','off');
-                %                             imagesc(resp_by_pos);colormap gray;axis off
-                %                             center_col = (1:n_x)*sum(resp_by_pos,1)'/sum(resp_by_pos(:));
-                %                             center_row = (1:n_y)*sum(resp_by_pos,2)/sum(resp_by_pos(:));
-                %
-                %                             stims = getstimsfile( ud.record );
-                %                             parameters = getparameters(stims.saveScript);
-                %                             rect = parameters.rect;
-                %                             center_x = rect(1) + (rect(3)-rect(1))/n_x * (center_col-0.5);
-                %                             center_y = rect(2) + (rect(4)-rect(2))/n_y * (center_row-0.5);
-                %
-                %                             disp(['ANALYZETPSTACK: ' listofcellnames{i} ' Center of response [x,y] = [ ' num2str(fix(center_x)) ', ' num2str(fix(center_y)) ']']);
-                %                         end
-                %
-                %                     otherwise
-                %                         [records(1),resps] = tptuningcurve(records(1),channel,paramname,pixelarg,0,listofcellnames,trialslist,timeint,sptimeint,blankID,0,'max');
-                %                 end
-                %
-                %                 if length(records)==1 % only if single record analyzed store results
-                %                     ud.record = records(1);
-                %                 end
-                %
-                %                 save(scratchname,'resps','records','listofcells','listofcellnames',...
-                %                     'paramname','channel','epochslist','trialslist','timeint','sptimeint','blankID','-mat');
-                %
-                %                 binsize = eval(get(ft(fig,'QuickPSTHEdit'),'string'));
-                %                 plotit = get(ft(fig,'QuickPSTHCB'),'value');
-                %
-                %                 %[mydata, myt, myavg, bins, responsive] = tppsth(ud.record,ud.channel,[],pixelarg,plotit,listofcellnames,binsize,0.1,0,[]);
-                %                 ud.record = tppsth(ud.record,ud.channel,[],pixelarg,plotit,listofcellnames,binsize,0.1,0,[]);
-                %
-                %                 %evalin('base','global psth');
-                %                 %                 psth.data = mydata;
-                %                 %                 psth.t = myt;
-                %                 %                 psth.avg = myavg;
-                %                 %                 psth.bins = bins;
-                %                 %                 for i=1:sum(selected_cells)
-                %                 %                     resps(i).psth_tbins{1} = cat(1,psth.bins{:,i});
-                %                 %                     resps(i).psth_response{1} = cat(1,psth.avg{:,i});
-                %                 %                     resps(i).responsive = responsive(i);
-                %                 %                 end
-                %
-                %                 % add resps to measures
-                %                 %ud = add_resps_to_measures(ud,resps,listofcellnames,selected_cells);
                 set(fig,'userdata',ud);
                 analyzetpstack('ResultsBt',[],fig);
         end

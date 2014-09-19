@@ -1,7 +1,7 @@
-function [record,avg] = analyse_testrecord( record)
-%ANALYSE_TESTRECORD
+function [record,avg] = analyse_oitestrecord( record)
+%ANALYSE_OITESTRECORD
 %
-%   [RECORD,AVG] = ANALYSE_TESTRECORD( RECORD )
+%   [RECORD,AVG] = ANALYSE_OITESTRECORD( RECORD )
 %
 % 2005-2014, Alexander Heimel
 
@@ -223,7 +223,7 @@ if isempty(record.imagefile) ...
 
             if ~isempty(late_frames)
                 if late_frames(end)>fileinfo.n_images
-                    disp(['ANALYSE_TESTRECORD: Number of frames in file not consistent with' ...
+                    logmsg(['Number of frames in file not consistent with' ...
                         ' stim_off.']);
                     errordlg(['Number of frames in file not consistent with' ...
                         ' stim_off.'],'Analyse testrecord');
@@ -269,7 +269,7 @@ if isempty(roifile) ||  ~exist(roifile,'file')
     image(data); axis image;
     set(gca,'XTick',[]);
     set(gca,'YTick',[]);
-    disp('ANALYSE_TESTRECORD: Please select ROI polygon');
+    logmsg('Please select ROI polygon');
     roi=select_polygon;
     
     if ~isfield(fileinfo,'xsize') || size(roi,2)==0
@@ -299,7 +299,7 @@ if isempty(record.rorfile)
     image(data); axis image;
     set(gca,'XTick',[]);
     set(gca,'YTick',[]);
-    disp('ANALYSE_TESTRECORD: Please select ROR polygon');
+    logmsg('Please select ROR polygon');
     ror=select_polygon;
     rorfile= [ record.test '_ror_c' num2str(compression) '.png'];
     rorpath=fullfile(analysispath,rorfile);

@@ -7,11 +7,11 @@ function tptuningcurve_plot(measures)
 %      PARAMNAME,CHANNEL,EPOCHSLIST,TRIALSLIST,TIMEINT,SPTIMEINT,BLANKID)
 %
 %
-% 2011-2013, Alexander Heimel based on code by Steve Vanhooser
+% 2011-2014, Alexander Heimel based on code by Steve Vanhooser
 %
 
 if isempty(measures)
-    disp('TPTUNINGCURVE_PLOT: No measures found.');
+    logmsg('No measures found.');
     return
 end
 
@@ -61,8 +61,7 @@ for roi_nr = 1:length(measures)
         case 'angle'
             xlim([-5 365]);
             set(gca,'XTick',(0:45:360));
-            disp(['TPTUNINGCURVE_PLOT: ' measure.cellname ': osi = ' num2str(measure.osi)]);
-
+            logmsg([ measure.cellname ': osi = ' num2str(measure.osi)]);
         otherwise
             % nothing special
     end

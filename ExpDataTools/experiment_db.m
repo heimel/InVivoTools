@@ -442,32 +442,16 @@ if channels_enabled
     maxleft=max(maxleft,left);
 end
 
-
-
-
-
 ud.h=h;
 set(h_fig,'UserData',ud);
-
-switch computer
-    case {'PCWIN','PCWIN64'}
-        windowvbordersize=26;
-        windowhbordersize=6;
-    otherwise
-        windowvbordersize=20;
-        windowhbordersize=6;
-end
-
 
 set(h.analyse,'Tag','analyse_testrecord_callback');
 
 set(h.results,'Enable','on');
 set(h.results,'Tag',['results_' type 'testrecord_callback']);
-%set(h.new_testrecord,'Tag',['new_' type 'testrecord']);
 set(h.new,'Callback',...
     ['ud=get(gcf,''userdata'');ud=new_' type 'testrecord(ud);' ...
     'set(gcf,''userdata'',ud);control_db_callback(ud.h.current_record);']);
-%set(h.new,'Tag',['new_' type 'testrecord']);
 
 avname = ['available_' type 'tests'];
 if exist(avname,'file')
@@ -481,12 +465,6 @@ end
 pos=get(h_fig,'Position');
 pos(3)=max(maxleft,pos(3));
 set(h_fig,'Position',pos);
-
-% pos_screen = get(0,'ScreenSize');
-% pos_control = get(h_fig,'Position');
-% pos_control(1) = windowhbordersize; 
-% pos_control(2) = pos_screen(4)-pos_control(4)-windowvbordersize;
-% set(h_fig,'Position',pos_control);
 
 % set current record
 control_db_callback( h.current_record );

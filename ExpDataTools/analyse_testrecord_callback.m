@@ -91,7 +91,7 @@ switch record.datatype
     case 'ls'
         %results_lstestrecord( ud.db(ud.current_record) );
     otherwise
-        warning(['Unknown datatype ' record.datatype ]);
+        errormsg(['Unknown datatype ' record.datatype ]);
         return
 end
 
