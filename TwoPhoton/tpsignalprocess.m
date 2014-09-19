@@ -33,7 +33,7 @@ if ~isfield(params,'method')
 end
 
 
-default = tpprocessparams( params.method );
+default = tpprocessparams;
 
 sampletime = (t{1,1}(end) - t{1,1}(1)) / (length(t{1,1})-1);
 

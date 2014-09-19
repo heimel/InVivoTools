@@ -9,16 +9,11 @@ function record = tp_bouton_close(record)
 params = tpreadconfig(record);
 
 if isempty(params)
-    disp('TP_BOUTON_CLOSE: No image information. Cannot link ROIs');
+    logmsg('No image information. Cannot link ROIs');
     return
 end
 
-processparams = tpprocessparams([],record);
-
-
-%disp('TP_BOUTON_CLOSE: Maximum distance bouton to mitochondrion set in tpprocesparams');
-
-
+processparams = tpprocessparams(record);
 
 roilist = record.ROIs.celllist;
 n_rois = length(roilist);

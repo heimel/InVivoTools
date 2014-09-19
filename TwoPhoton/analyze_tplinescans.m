@@ -8,8 +8,6 @@ function results = analyze_tplinescans( reanalyze )
 % 2010, Alexander Heimel
 %
 
-% use new function ttpprocessparams!
-
 if nargin < 1
     reanalyze = false;
 end

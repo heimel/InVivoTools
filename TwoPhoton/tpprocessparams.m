@@ -1,28 +1,28 @@
-function params = tpprocessparams( method, record )
+function params = tpprocessparams(  record )
 %TPPROCESSPARAMS returns default two-photon calcium data processing parameters
 %
-% PARAMS = TPPROCESSPARAMS( METHOD )
+% PARAMS = TPPROCESSPARAMS( RECORD)
 %
 %  Local changes to settings should be made in processparams_local.m
 %  This should be an edited copy of processparams_local_org.m
 %
-% 2009-2013, Alexander Heimel
+% 2009-2014, Alexander Heimel
 %
 
 if nargin<1
-    method = [];
-end
-if isempty(method)
-    method = 'none';
-end
-if nargin<2
     record.setup = 'olympus-0603301';
+    record.datatype = 'tp';
     record.experiment = '10.38'; % fairly arbitrary calcium imaging protocol
 end
 
-params.method = method;      
+switch record.datatype
+    case 'ls' % linescans
+        params.method ='event_detection';
+    otherwise
+        params.method = 'none';
+end
 
-switch method
+switch params.method
     case 'none'
         params.detrend = false;
         params.artefact_removal = false;
@@ -42,8 +42,8 @@ switch method
 end
 
 
-switch host
-    case 'nin158' % friederike
+switch record.datatype
+    case 'ls' % friederike
         params.clip_data = true; %
         params.artefact_removal = true;
     otherwise
@@ -68,14 +68,14 @@ params.peak_removal_width = 0.3; % time (s)
 params.clip_data_max_gap = 5; % maximum time gap in seconds
 
 % event detection
-params.detect_events_threshold = 2;%1 %;2.5; % (std)
-params.detect_events_minpeakdistance = 2;%0.5; % (seconds) minimum distance between two peaks
-params.detect_events_max_time_before_peak = 4;%2; % seconds to include in event before peak
-params.detect_events_max_time_after_peak = 4;%2; % seconds to include in event after peak
-params.detect_events_margin = 0;% 0.2; % (seconds) margin to find minimum and half maximum for peak interval
+params.detect_events_threshold = 2;% (std)
+params.detect_events_minpeakdistance = 2;% (seconds) minimum distance between two peaks
+params.detect_events_max_time_before_peak = 4;% seconds to include in event before peak
+params.detect_events_max_time_after_peak = 4;% seconds to include in event after peak
+params.detect_events_margin = 0;%  (seconds) margin to find minimum and half maximum for peak interval
 params.detect_events_fit_slope = true; % use the derivative of the signal to fit onset time
 params.detect_events_group = true;
-params.detect_events_group_width = 0.4;%0.7;%0.5; %0.4; %2;%4-8-2010: 4;% 1;% (seconds) minimum interval between two global events
+params.detect_events_group_width = 0.4;% (seconds) minimum interval between two global events
 params.detect_events_group_minimum_cell_number = 0.1; % if smaller than 1, then it is interpreted as fraction
 params.detect_events_time = 'peak';
 params.detect_events_fit_slope = false;
@@ -83,7 +83,7 @@ params.findpeaks_fast = false; % use findpeaks fast
 
 switch record.experiment
     case '12.98' % Rogier
-       params.detect_events_threshold = 2.5;%1 %;2.5; % (std) 
+       params.detect_events_threshold = 2.5;% (std) 
 end
 
 % wave detection
@@ -220,12 +220,48 @@ switch lower(record.experiment)
         params.separation_from_prev_stim_off = 0.5;
         params.response_window = [0.5 inf];
 end
+params.psth_windowsize = 1; %s, the size of a sliding window for computing average
+%  responses and the standard deviation and standard error (in seconds).
+params.psth_stepsize = 0.1; %s, the window step size (in seconds).
+params.blankstimid = []; % the stimulus number of the blank stimulus, or [] for automatic detection.
+params.psth_baselinemethod = 0; % the baseline used to identify F in dF/F.
+%  0 means spontaneous interval preceding each stimulus.
+%  3 means filter the data and use the blank stimulus (if there is one)
+%    for baseline.
+params.mti_timeshift = 0.058; % ms for Fluoview scope
+
+switch record.datatype
+    case 'tp'
+        params.response_channel = 1; % assuming OGB, GCaMP on first channel
+    case 'fret'
+        params.response_channel = [1 2];
+    otherwise
+        params.response_channel = 1;
+end
+
+params.response_projection_method = 'max';  
+%  PROJECTION_METHOD determines how to handle when there is more than one
+%       stimulus parameter
+%       'none' - do no project
+%       'mean' - use response mean over other stimulus parameters
+%       'max' - use response maximum over other stimulus parameters
+% Should later be handled as for ec data
+
+params.response_baselinemethod = 0; 
+% BASELINEMETHOD determines how the baseline is calculated:
+%     0  - Use the data collected during the previous ISI
+%     1  - Use the closest blank stimulus
+%     2  - Use a 20s window of ISI and blank values.
+%     3  - Filter data with 240s highpass and use mean
+
+
+
 
 % if datenumber(record.date)<datenumber('2014-07-01') % time when introduced new pixelshift
 %     params.pixelshift_pixel = 14;
 %     logmsg('Pixelshift specified in pixels. Deprecated since 2014-07-01');
 % else
-     params.pixelshift_um = 5; % overrides pixelshift_pixel
+params.pixelshift_um = 5; % overrides pixelshift_pixel
 % end
 
 % extra analysis functions

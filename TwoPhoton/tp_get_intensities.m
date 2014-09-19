@@ -9,7 +9,7 @@ function record = tp_get_intensities(record)
 
 logmsg('Should remove intensity info from cellist');
 
-process_parameters = tpprocessparams('',record);
+process_parameters = tpprocessparams(record);
 celllist = record.ROIs.celllist;
 
 celllist = structconvert(celllist,tp_emptyroirec);

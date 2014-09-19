@@ -32,7 +32,7 @@ switch data_type
             compute_fraction_overlapping_spikes(record)
         end
     case 'tp'
-        params = tpprocessparams;
+        params = tpprocessparams(record);
         tit=[record.epoch ', ' record.mouse ', ' record.date ', ' ...
             record.comment];
         rate_label = '\DeltaF/F';

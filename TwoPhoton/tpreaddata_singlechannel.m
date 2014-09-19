@@ -65,16 +65,12 @@ if ~iscell(frametimes)
     frametimes = {frametimes};
 end
 
-%disp('TEMPORARY: channel manually set to 1');
-%channel  = 0
-
 darklevel = tp_darklevel( records(1));
-
 [data, t] = tpreaddata_single_record(records(1), intervals, pixelinds, mode, channel, frametimes{1},darklevel,verbose);
 if length(records)>1
-    disp('TPREADDATA: not all options are implemented correctly when reading multiple epochs');
-    disp('TPREADDATA: returning results of multiple epochs as single interval. If multiple intervals are required,');
-    disp('   then these should be explicitly requested in the function call.');
+    logmsg('Not all options are implemented correctly when reading multiple epochs');
+    logmsg('Returning results of multiple epochs as single interval. If multiple intervals are required,');
+    logmsg('   then these should be explicitly requested in the function call.');
     for i = 2:length(records)
         [single_data, single_t] = tpreaddata_single_record(records(i), intervals, pixelinds, mode, channel, frametimes{i},darklevel,verbose);
         % concatenate to other data
@@ -89,6 +85,10 @@ end
 
 
 function [data,t,params] = tpreaddata_single_record(record, intervals, pixelinds, mode, channel, frametimes, darklevel,verbose)
+
+if isempty(intervals)
+    intervals = [-Inf +Inf];
+end
 
 params = tpreadconfig(record);
 
@@ -108,7 +108,7 @@ if exist(driftfilename,'file'),
     dr=struct('x',[],'y',[]);
     dr.x = [dr.x; drfile.drift.x];
     dr.y = [dr.y; drfile.drift.y];
-    logmsg(['Drift correction method = ',drfile.method]);
+    logmsg(['Drift correction using ',drfile.method]);
 elseif strcmpi(params.third_axis_name,'t') 
     logmsg(['No driftcorrect file named ' driftfilename]);
 end

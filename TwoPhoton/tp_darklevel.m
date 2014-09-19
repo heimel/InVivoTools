@@ -4,7 +4,7 @@ function darklevel = tp_darklevel(record)
 % 2014, Alexander Heimel
 %
 
-params = tpprocessparams([],record);
+params = tpprocessparams(record);
 
 impar = tpreadconfig(record);
 

@@ -71,7 +71,7 @@ switch command,
         
         tpsetup(record);
         
-        [fig,ud] = draw_analyzetpstack( record, analysis_parameters, tpprocessparams('',record) );
+        [fig,ud] = draw_analyzetpstack( record, analysis_parameters, tpprocessparams(record) );
         if isempty(fig)
             return
         end
@@ -308,7 +308,7 @@ switch command,
         end
         
         %check if need to shift channels
-        processparams = tpprocessparams( [],ud.record );
+        processparams = tpprocessparams( ud.record );
 
         iminf = tpreadconfig(ud.record);
         if isfield(processparams,'pixelshift_um') && ~isempty(processparams.pixelshift_um)
@@ -935,8 +935,8 @@ switch command,
             [x,y,button]=ginput(1);
         end;
     case 'drawNeuriteBt',
-        disp('Click on Enter to stop drawing. Right click removes last point.');
-        disp('ANALYZETPSTACK: Default neurite type can be set in tpprocessparams.');
+        logmsg('Click on Enter to stop drawing. Right click removes last point.');
+        logmsg('Default neurite type can be set in tpprocessparams.');
         
         if ud.zstack && ud.ztproject
             uiwait(warndlg('Note that you are drawing in z-projection.','Z-Projection','modal'));
@@ -1059,7 +1059,7 @@ switch command,
             
         end;
         delete(h_temp_line);
-        processparams = tpprocessparams( [],ud.record );
+        processparams = tpprocessparams( ud.record );
         newneurite.type = processparams.newneuritetype;
         
         labelstr = get(ft(fig,'labelList'),'string');
@@ -1201,29 +1201,20 @@ switch command,
                 [data,t] = tpreaddata(records,[-Inf Inf],listofcells,1,channel);
                 save(rawfilename,'data','t','listofcells','listofcellnames','params','-mat');
             else
-                disp('loading raw data scratch file');
+                logmsg('Loading raw data scratch file');
                 load(rawfilename,'-mat');
             end
-            process_methods  = get(ft(fig,'signalprocessPopup'),'string');
-            process_params = tpprocessparams( process_methods{get(ft(fig,'signalprocessPopup'),'value')} );
+            process_params = tpprocessparams(ud.record);
             process_params.detect_events_time = 'peak';
-            
-            %            filter_parameter = get(ft(fig,'filterEdit'),'string');
-            %            process_params.filter.parameters = eval(filter_parameter);
-            %            process_params.filter.type = 'smooth';
-            %            process_params.filter.unit = '#';
-            
             [data,t] = tpsignalprocess(process_params, data, t);
             save(procfilename,'data','t','listofcells','listofcellnames','params','process_params','-mat');
         end
-        
         
         % use only selected cells
         data = data(:,selected_cells);
         t = t(:,selected_cells);
         listofcells = listofcells(:,selected_cells);
         listofcellnames = listofcellnames(:,selected_cells);
-        
         
         switch command
             case 'AnalyzePatternsBt'
@@ -1348,7 +1339,7 @@ switch command,
         dF = get(ft(fig,'moviedFCB'),'value');
         sorted=get(ft(fig,'movieSortCB'),'value');
         
-        processparams = tpprocessparams('',ud.record);
+        processparams = tpprocessparams(ud.record);
         
         movietype = processparams.movietype; %'plain';
         movfname = [ud.record.date '_' ud.record.epoch '_' get(ft(fig,'movieFileEdit'),'string') '_' movietype];

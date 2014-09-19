@@ -9,15 +9,15 @@ function record = tp_link_rois( record )
 params = tpreadconfig(record);
 
 if isempty(params)
-    disp('TP_LINK_ROIS: No image information. Cannot link ROIs');
+    logmsg('No image information. Cannot link ROIs');
     return
 end
 
-processparams = tpprocessparams([],record);
+processparams = tpprocessparams(record);
 
 maximum_distance_pxl = processparams.max_roi_linking_distance_um / params.x_step ;
 
-disp('TP_LINK_ROIS: Linking parameters are set in tpprocesparams');
+logmsg('Linking parameters are set in tpprocesparams');
 
 roilist = record.ROIs.celllist;
 

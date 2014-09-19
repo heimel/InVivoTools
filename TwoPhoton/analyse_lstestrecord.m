@@ -7,10 +7,10 @@ function record  = analyse_lstestrecord( record )
 % 2010-2011, Alexander Heimel
 %
 
-disp('ANALYSE_LSTESTRECORD: started');
+logmsg('Started');
 
 % use default processparams
-record.process_params = tpprocessparams( 'event_detection' );
+record.process_params = tpprocessparams( record );
 
 % run precommands
 eval( record.precommands);

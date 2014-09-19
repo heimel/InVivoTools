@@ -1,4 +1,4 @@
-function [mti2,starttime] = tpcorrectmti(mti, record,globaltime)
+function [mti2,starttime] = tpcorrectmti(mti, record)
 
 % TPCORRECTMTI - Correct NewStim MTI based on recorded times
 %
@@ -8,20 +8,16 @@ function [mti2,starttime] = tpcorrectmti(mti, record,globaltime)
 % recorded by the Spike2 machine and saved in a file named
 % STIMTIMEFILE.
 %
-% GLOBALTIME is an optional argument.  If it is 1 then time is returned
-% relative to the stimulus computer's clock.
-%
-% From FITZCORRECTMTI by Steve VanHooser
-%
-% ?-2012, Alexander Heimel
+% ?-2014, Alexander Heimel
 
 %disp('TPCORRECTMTI is not (yet) using stimulus triggers or clock multiplier');
+
+params = tpprocessparams( record );
+
 mti2 = mti;
 starttime = mti{1}.startStopTimes(1);
-
-timeshift = 0.058;
-disp(['TPCORRECTMTI: Stimulus presentation started ' num2str(fix(timeshift*1000)) ' ms after TTL.']);
-starttime = starttime - timeshift; 
+%logmsg(['Stimulus presentation started ' num2str(fix(params.mti_timeshift*1000)) ' ms after TTL.']);
+starttime = starttime - params.mti_timeshift; 
 return
 
 if nargin>2, globetime = globaltime; else, globetime = 0; end;

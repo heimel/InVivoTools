@@ -374,8 +374,8 @@ guicreate(txt,'string','Intervals:','left','left','width','auto','move','right',
     guicreate(edit,'string','     ','Tag','sptimeintEdit','tooltipstring','[spont int]','width','auto','move','right','parent',ha);
     guicreate(txt,'string','Blank:','width','auto','move','right','parent',ha);
     guicreate(edit,'string','   ','Tag','BlankIDEdit','tooltipstring','empty for default','width','auto','parent',ha);
-    guicreate(txt,'string','Process:','width','auto','move','right','parent',ha);
-    guicreate(popup, 'String',tpsignalprocess('?'),'Tag','signalprocessPopup','width',100,'callback','genercallback','parent',ha);
+%    guicreate(txt,'string','Process:','width','auto','move','right','parent',ha);
+%    guicreate(popup, 'String',tpsignalprocess('?'),'Tag','signalprocessPopup','width',100,'callback','genercallback','parent',ha);
 %    guicreate(txt,'string','Filter:','left','left','width','auto','move','right','parent',ha);
 %    guicreate(edit,'string',' 0 ','Tag','filterEdit','tooltipstring','number of frames to average, 0 for no filtering','width','auto','move','right','parent',ha);
 %    guicreate(txt,'string','f ','width','auto','move','right','parent',ha);

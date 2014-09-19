@@ -20,7 +20,7 @@ image_height = 0.8;
 
 ti = tpreadconfig(record); % tiffinfo(tpfilename(record));
 
-params = tpprocessparams([],record);
+params = tpprocessparams(record);
 channels = params.align_channel;
 channels = min(channels,ti.NumberOfChannels);
 logmsg(['Aligning on channel ' num2str(channels)]);

@@ -1,9 +1,8 @@
-function [record,resp] = tptuningcurve(record, channel, paramname, pixels, plotit, names, trials, tint,sptint, blst, basemeth, projection_method)
-
+function [record,resp] = tptuningcurve(record, pixels)
 %  TPTUNINGCURVE - Tuning curve for two-photon data
 %
 %  RESPS = TPTUNINGCURVE(RECORD, CHANNEL, PARAMETER, PIXELS_OR_DATA, PLOTIT, NAMES,
-%            [TRIALS], [T0 T1],[SP0 SP1],BLANKSTIMID,BASELINE_METHOD,PROJECTION_METHOD)
+%            [TRIALS], [T0 T1],[SP0 SP1],BLANKSTIMID)
 %
 %    Computes mean responses, standard deviations, standard error, and
 %  individual responses for a directory of two-photon data that
@@ -24,9 +23,6 @@ function [record,resp] = tptuningcurve(record, channel, paramname, pixels, ploti
 %  contain fields 'data' and 't' that are returned from TPREADDATA.
 %
 %  Any interstimulus time is used to compute spontaneous activity.
-%
-%  If PLOTIT is 1 then data are plotted with titles given in cell list NAMES.
-%  There should be one entry in NAMES for each set of pixel indices.
 %
 % RESPS is a structure of length (PIXELS) with the following entries:
 %     2013-06-23 USE OF RESPS IS DEPRECATED, USE RECORD ONLY
@@ -52,80 +48,48 @@ function [record,resp] = tptuningcurve(record, channel, paramname, pixels, ploti
 %       error of responses during a blank trial, if it exists
 %    'blankind' is a list of individual responses to the blank condition
 %
-% TRIALS is an array list of trial numbers to include.  The stimuli are assumed
-%   to have been run in repeating blocks.  If this argument is not present or is
-%   empty then all trials are included.
-%
-% [T0 T1] is the time interval to analyze relative to stimulus onset.  If this
-%   argument is not present or empty then the stimulus duration is analyzed.
-%
-% [SP0 SP1] is the time interval to analyze for computing the resting state
-%   relative to stimulus onset. Default if not specified or if empty is specified
-%   is to analyze the interval 2 seconds after the last stimulus until stimulus
-%   onset.
-%
-%  BLANKSTIMID is the ID of a stim to consider the blank stimulus.  If EMPTY then
-%    stimulus parameters are examined for the presence of an 'isblank' field.
-%    If none is found, then no stimulus is considered blank.
-%
-%  BASELINEMETHOD determines how the baseline is calculated:
-%     0  - Use the data collected during the previous ISI
-%     1  - Use the closest blank stimulus
-%     2  - Use a 20s window of ISI and blank values.
-%     3  - Filter data with 240s highpass and use mean
-%
-%  PROJECTION_METHOD determines how to handle when there is more than one
-%       stimulus parameter
-%       'none' - do no project
-%       'mean' - use response mean over other stimulus parameters
-%       'max' - use response maximum over other stimulus parameters
 %
 %  200X Steve Vanhooser, 200X-2014 Alexander Heimel
 
-if nargin<7, thetrials = []; else thetrials = trials; end;
-if nargin<8, timeint= []; else timeint = tint; end;
-if nargin<9, sponttimeint= []; else sponttimeint= sptint; end;
-if nargin<10, blankstimid = []; else blankstimid = blst; end;
-if nargin<11, baselinemethod = 0; else baselinemethod = basemeth; end;
-if nargin<12, projection_method = 'none'; end
+params = tpprocessparams( record );
+channel = params.response_channel;
+thetrials = [];
+timeint= [];
+sponttimeint= [];
 
-if ~isempty(blankstimid)
-    theblankid = blankstimid;
+
+if ~isempty(params.blankstimid)
+    theblankid = params.blankstimid;
 else
     theblankid = -1;
 end
 
-params = tpprocessparams( '', record ); % for analysis params
 
-stims = getstimsfile( record );
-if isempty(stims)
-    % create stims file
-    %     stiminterview(record);
-    %     stims = getstimsfile( record );
+s = getstimsfile( record );
+if isempty(s)
     errormsg(['No stimulus file present for ' recordfilter(record) ', Skipping analysis.']);
     return
 end
 
 % get paramname
+paramname = varied_parameters(s.saveScript);
 if isempty(paramname)
-    paramname = varied_parameters(stims.saveScript);
-    if isempty(paramname)
-        logmsg('No parameter varied');
-        paramname = {''};
-    end
-    ind = strmatch(record.stim_type,paramname);  % notice: changed from record.stim_parameters 2013-03-29!
-    if isempty(ind)
-        paramname = paramname{1};
-    else
-        paramname = paramname{ind};
-    end
+    logmsg('No parameter varied');
+    paramname = {''};
 end
+ind = strmatch(record.stim_type,paramname);
+if isempty(ind)
+    paramname = paramname{1};
+else
+    paramname = paramname{ind};
+end
+
 
 if isempty(paramname) && ...
         (~isempty(findstr(lower(record.stim_type),'tile')) ||...
         ~isempty(findstr(lower(record.stim_type),'position')))
     variable = 'position';
-    stimparams = cellfun(@getparameters,get(stims.saveScript));
+    stimparams = cellfun(@getparameters,get(s.saveScript));
     rects = cat(1,stimparams(:).rect);
     left = uniq(sort(rects(:,1)));
     right = uniq(sort(rects(:,3)));
@@ -140,12 +104,10 @@ else
     variable = paramname;
 end
 
-s.stimscript = stims.saveScript;
-s.mti = stims.MTI2;
-[s.mti,starttime] = tpcorrectmti(s.mti,record);
-do = getDisplayOrder(s.stimscript);
+[s.MTI2,starttime] = tpcorrectmti(s.MTI2,record);
+do = getDisplayOrder(s.saveScript);
 
-tottrials = length(do)/numStims(s.stimscript);
+tottrials = length(do)/numStims(s.saveScript);
 
 if isempty(thetrials)
     do_analyze_i = 1:length(do);
@@ -162,16 +124,16 @@ spinterval = zeros(length(do_analyze_i),2);
 for i=1:length(do_analyze_i),
     stimind = do_analyze_i(i);
     if ~isempty(timeint),
-        interval(i,:) = s.mti{stimind}.frameTimes(1) + timeint;
+        interval(i,:) = s.MTI2{stimind}.frameTimes(1) + timeint;
     else
-        stimtime = s.mti{stimind}.startStopTimes(3)-s.mti{stimind}.startStopTimes(2);
+        stimtime = s.MTI2{stimind}.startStopTimes(3)-s.MTI2{stimind}.startStopTimes(2);
         response_window =[params.response_window(1) min(stimtime,params.response_window(2))];
-        interval(i,:) = s.mti{stimind}.startStopTimes(2) + response_window;
+        interval(i,:) = s.MTI2{stimind}.startStopTimes(2) + response_window;
     end;
     
-    dp = struct(getdisplayprefs(get(s.stimscript,do(i))));
+    dp = struct(getdisplayprefs(get(s.saveScript,do(i))));
     if ~isempty(sponttimeint),
-        spinterval(i,:) = s.mti{stimind}.frameTimes(1) + sponttimeint;
+        spinterval(i,:) = s.MTI2{stimind}.frameTimes(1) + sponttimeint;
     else
         BGpretime = dp.BGpretime;
         if isnan(BGpretime)
@@ -183,15 +145,15 @@ for i=1:length(do_analyze_i),
         end
         
         if BGposttime > 0,  % always analyze before time
-            spinterval(i,:)=[s.mti{stimind}.startStopTimes(1)-BGposttime+1 s.mti{stimind}.startStopTimes(1)];
-            spinterval(i,:)=[s.mti{stimind}.startStopTimes(1)-BGposttime+1 s.mti{stimind}.startStopTimes(1)];
+            spinterval(i,:)=[s.MTI2{stimind}.startStopTimes(1)-BGposttime+1 s.MTI2{stimind}.startStopTimes(1)];
+            spinterval(i,:)=[s.MTI2{stimind}.startStopTimes(1)-BGposttime+1 s.MTI2{stimind}.startStopTimes(1)];
         elseif BGpretime > 0,
             if BGpretime > params.separation_from_prev_stim_off
                 separation_from_prev_stim_off =  params.separation_from_prev_stim_off; %s
             else
                 separation_from_prev_stim_off = 0;
             end
-            spinterval(i,:)=[s.mti{stimind}.startStopTimes(1)+separation_from_prev_stim_off s.mti{stimind}.frameTimes(1)];
+            spinterval(i,:)=[s.MTI2{stimind}.startStopTimes(1)+separation_from_prev_stim_off s.MTI2{stimind}.frameTimes(1)];
         end
     end
 end
@@ -201,7 +163,7 @@ meanforbaselines = [];
 if iscell(pixels),
     [data,t] = tpreaddata(record, [interval; spinterval]-starttime, pixels,0, channel);
 else
-    if baselinemethod==3,
+    if params.response_baselinemethod==3,
         meanforbaselines = zeros(1,size(pixels.data,2));
         for p=1:size(pixels.data,2)
             [pixels.data{p},meanforbaselines(p)] = tpfilter(pixels.data{p},pixels.t{p});
@@ -224,8 +186,8 @@ for p=1:size(data,2) % roi p
     spont = [ nanmean(indspont) nanstd(indspont) nanstderr(indspont) ];
     
     if theblankid==-1,
-        for i=1:numStims(s.stimscript),
-            if isfield(getparameters(get(s.stimscript,i)),'isblank')
+        for i=1:numStims(s.saveScript),
+            if isfield(getparameters(get(s.saveScript,i)),'isblank')
                 theblankid = i;
                 break
             end
@@ -242,18 +204,18 @@ for p=1:size(data,2) % roi p
         end
     end
     
-    if baselinemethod==3,
+    if params.response_baselinemethod==3,
         if theblankid>0,
             baseline = repmat(nanmean(blankdm),1,(size(interval,1)+size(spinterval,1)));
         else
             baseline = repmat(meanforbaselines(p),1,(size(interval,1)+size(spinterval,1)));
         end
     else
-        baseline = compute_baseline(interval(:,1)-starttime,baselinemethod,indspont,indspontt,indspontm,indsponttm,blankd,blankt,blankdm,blanktm);
+        baseline = compute_baseline(interval(:,1)-starttime,params.response_baselinemethod,indspont,indspontt,indspontm,indsponttm,blankd,blankt,blankdm,blanktm);
     end
     
     myind = 1;
-    for i=1:numStims(s.stimscript)
+    for i=1:numStims(s.saveScript)
         if theblankid~=i,
             li = find(do(do_analyze_i)==i);
             if ~isempty(li) % make sure the stim was actually shown
@@ -267,7 +229,7 @@ for p=1:size(data,2) % roi p
                 if isempty(paramname)
                     curve(1,myind) = myind; %#ok<AGROW>
                 else
-                    curve(1,myind) = getfield( getparameters(get(s.stimscript,i)),paramname); %#ok<GFLD>
+                    curve(1,myind) = getfield( getparameters(get(s.saveScript,i)),paramname); %#ok<GFLD>
                 end;
                 curve(2,myind) = nanmean(ind{myind}); %#ok<AGROW>
                 curve(3,myind) = nanstd(ind{myind}); %#ok<AGROW>
@@ -285,7 +247,7 @@ for p=1:size(data,2) % roi p
         end
     end % stimulusnumber i
     
-    switch projection_method
+    switch params.response_projection_method
         case 'none'
             % do nothing
         case 'mean'
@@ -362,50 +324,6 @@ for p=1:size(data,2) % roi p
     
     record.measures(p).responsive = any(curve(2,:)-2*curve(4,:)>0);
     
-    if plotit
-        figure;
-        hold on;
-        if isempty(paramname)
-            paramname = '';
-        end
-        switch paramname
-            case 'angle'
-                curve(1,end+1) = curve(1,1)+360; %#ok<AGROW>
-                curve(2:4,end) = curve(2:4,1); %#ok<AGROW>
-                plot(curve(1,:),curve(2,:),'ko','linewidth',2);
-                otcurve = fit_otcurve(curve);
-                plot(otcurve(1,:),otcurve(2,:),'k');
-                logmsg(['Cell ' num2str(p) ': OSI = ' num2str(record.measures(p).osi)]);
-            otherwise
-                plot(curve(1,:),curve(2,:),'k-','linewidth',2);
-                if isfield(record.measures(p),'suppression_index')
-                    logmsg(['Cell ' num2str(p) ': Suppression index = ' num2str(record.measures(p).suppression_index)]);
-                end
-        end
-        
-        h=myerrorbar(curve(1,:),curve(2,:),curve(4,:),curve(4,:));
-        delete(h(2)); set(h(1),'linewidth',2,'color',0*[1 1 1]);
-        if exist('blankresp','var')==1, % plot blank response if it exists
-            a = axis;
-            plot([-1000 1000],blankresp(1)*[1 1],'k-','linewidth',1);
-            plot([-1000 1000],[1 1]*(blankresp(1)-blankresp(3)),'k--','linewidth',0.5);
-            plot([-1000 1000],[1 1]*(blankresp(1)+blankresp(3)),'k--','linewidth',0.5);
-            axis(a); % make sure the axis doesn't get changed on us
-        end;
-        xlabel(capitalize(paramname));
-        ylabel('\Delta F/F');
-        title(names{p});
-        switch paramname
-            case 'eyes'
-                set(gca,'Xtick',[0 1 2]);
-                set(gca,'Xticklabel',{'Left','Right','Both'});
-            case 'angle'
-                xlim([-5 365]);
-                set(gca,'XTick',(0:45:360));
-        end
-        smaller_font(-8);
-        bigger_linewidth(2);
-    end % plotit
     resp(p) = record.measures(p); %#ok<AGROW>
 end % roi p
 
@@ -417,7 +335,7 @@ try
     betweenF = (last_spont + first_response)/2;
     [responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF,params.responsive_alpha,'right');
 catch me
-    disp(me.message);
+    logmsg(me.message);
     responsive = nan(size(data,2),1);
     p = nan(size(data,2),1);
 end
@@ -427,34 +345,6 @@ for c=1:size(data,2)
         record.measures(c).responsive = responsive(c);
     end
     record.measures(c).responsive_p = p(c);
-    %     disp(['TPTUNINGCURVE: Cell ' num2str(c,'%3d') ...
-    %         ' Responsive = ' num2str(record.measures(c).responsive) ...
-    %         ', p = ' num2str(record.measures(c).responsive_p)]);
-end
-
-if 0 % alternative responsive calculation
-    for c=1:size(data,2) %#ok<UNRCH>
-        % take maximally responsive stimulus
-        [dummy,ind] = max(record.measures(c).response{1});
-        responsedata = cellfun(@mean,data(1:end/2,:)); % mean F over interval
-        spontdata = cellfun(@mean,data(end/2+1:end,:)); % mean F over interval
-        last_spont = cellfun(@(x) x(end),data(end/2+1:end,:)); % last F (for spontaneous data)
-        first_response = cellfun(@(x) x(end),data(1:end/2,:)); % first F (for response data)
-        betweenF = (last_spont + first_response)/2;
-        responsedata = responsedata(do==ind,:);
-        spontdata = spontdata(do==ind,:);
-        betweenF = betweenF(do==ind,:);
-        [responsive,p]=ttest(responsedata-betweenF,spontdata-betweenF);
-        
-        % multiple test correction
-        % p = min(1,p*size(curve,2));
-        
-        record.measures(c).responsive = responsive(c);
-        record.measures(c).responsive_p = p(c);
-        logmsg(['Cell ' num2str(c) ...
-            ' Responsive = ' num2str(record.measures(c).responsive) ...
-            ', p = ' num2str(record.measures(c).responsive_p)]);
-    end
 end
 
 

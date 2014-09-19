@@ -21,13 +21,9 @@ function [result,process_params] = analyze_tppatterns(method, data, t, listofcel
 % 2009-2011, Alexander Heimel
 %
 
-%data = spike_order(t);
-%data = spike_time(t);
-
 if nargin<8
-    process_params = tpprocessparams('event_detection');
+    process_params = tpprocessparams;
 end
-
 
 switch method
     case '?'

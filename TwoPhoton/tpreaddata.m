@@ -1,8 +1,7 @@
 function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels, verbose)
-
 % TPREADDATA - Reads twophon data
 %
-%  [DATA, T] = TPREADDATA(RECORDS, INTERVALS, PIXELINDS, MODE, CHANNELS)
+%  [DATA, T] = TPREADDATA(RECORDS, INTERVALS, PIXELINDS, MODE, CHANNELS, VERBOSE)
 %
 %  Reads two photon data blocks.  TPREADDATA
 %  allows the user to request data in specific time intervals
@@ -43,7 +42,6 @@ function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels, v
 %  if there is one channel than tpreaddata_singlechannel will 
 %  be called, if there are two channels then tpreaddata_single-
 %  channel will be called twice (for ratiometric calcium imaging).
-%  (added by DVV and AH, November 2010)
 % 
 %  DATA is an MxN cell list, where M is the number of time
 %  intervals and N is the number of pixel regions specified.
@@ -56,13 +54,23 @@ function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels, v
 %
 %  Tested:  only tested for T-series records, not other types
 %
-%  Steve Hooser, Alexander Heimel, Danielle van Versendaal.
+% 200X-200X Steve Hooser, Danielle van Versendaal.
+% 200X-2014 Alexander Heimel
+
+params = tpprocessparams( records(1) ); 
+
 
 if nargin<6
     verbose = [];
 end
 if isempty(verbose)
     verbose = true;
+end
+if nargin<5
+    channels = [];
+end
+if isempty(channels)
+    channels = params.response_channel;
 end
 
 switch length(channels)

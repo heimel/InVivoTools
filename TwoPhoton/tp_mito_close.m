@@ -13,11 +13,11 @@ if nargin<2
 end
 
 if isempty(params)
-    disp('TP_MITO_CLOSE: No image information. Cannot link ROIs');
+    logmsg('No image information. Cannot link ROIs');
     return
 end
 
-processparams = tpprocessparams([],record);
+processparams = tpprocessparams(record);
 
 
 %disp('TP_MITO_CLOSE: Maximum distance bouton to mitochondrion set in tpprocesparams');

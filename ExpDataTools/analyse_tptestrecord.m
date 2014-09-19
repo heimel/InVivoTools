@@ -3,20 +3,11 @@ function record=analyse_tptestrecord( record)
 %
 %   RECORD=ANALYSE_TPTESTRECORD( RECORD)
 %
-% 2013, Alexander Heimel
+% 2013-2014, Alexander Heimel
 
+logmsg(['Analyzing ' recordfilter(record)]);
 
 tpsetup(record);
-% if ~exist(tpdatapath(record),'dir')
-%     errormsg(['There is no directory ' tpdatapath(record) ]);
-%     return
-% end
-% [filename,record] = tpfilename(record);
-% if ~exist(filename,'file')
-%     errordlg([filename ' does not exist.']);
-%     return
-% end
-
 
 params = tpreadconfig(record);
 if isempty(params)
@@ -37,7 +28,7 @@ else
     is_zstack = false;
 end
 
-process_params = tpprocessparams('',record);
+process_params = tpprocessparams(record);
 if isempty(record.ROIs)
     record.ROIs.celllist = [];
     record.ROIs.new_cell_index = 1;
@@ -54,18 +45,15 @@ if isfield(record,'ROIs') && isfield(record.ROIs,'celllist')
     end
 end
 
-
 % linking ROIs to lines / neurites
-if 1
+if is_zstack
     record = tp_link_rois( record );
-else
-    logmsg('Temporarily turned off tp_link_rois') %#ok<UNRCH>
 end
 
 % compute ROI lengths / circumferences
 if is_zstack
     if ~isfield(params,'z_step')
-            errordlg(['Image is not a z-stack. ' recordfilter(record)],'Get neurite length.');
+        errordlg(['Image is not a z-stack. ' recordfilter(record)],'Get neurite length.');
     end
     for i=1:n_rois
         record.measures(i).length  = tp_get_neurite_length( record.ROIs.celllist(i), record );
@@ -73,17 +61,11 @@ if is_zstack
 end
 
 % getting intensities
-if  process_params.get_intensities
+if  process_params.get_intensities  && is_zstack
     record = tp_get_intensities(record);
-  %  record = tp_get_intensities(record); % run twice for proper normalizations
-else
-    disp('ANALYSE_TPTESTRECORD: Temporarily turned off get_intensities')  
 end
 
-
 % create measure fields for labels and types
-%labels = {tpstacklabels(record),uniq(sort({record.ROIs.celllist.type}));
-
 labels = {};
 for i=1:length(record.ROIs.celllist);
     labels = [labels{:},record.ROIs.celllist(i).labels'];
@@ -111,20 +93,15 @@ for label = labels
             record.measures(i).(field) = false;
         end
     end
-    %     if ~any([record.measures(:).(field)])
-    %         record.measures = rmfield(record.measures,field);
-    %     end
 end
 
 % temporary change for 12.81, 2013-05-24
 for i=1:n_rois
     switch record.ROIs.celllist(i).type
-        case {'spine mushroom','spine stubby','spine thin','filopodium'} 
+        case {'spine mushroom','spine stubby','spine thin','filopodium'}
             record.ROIs.celllist(i).type = 'spine';
-    end        
+    end
 end
-
-
 
 for stype = types
     field = subst_specialchars(lower(stype{1}));
@@ -135,11 +112,7 @@ for stype = types
             record.measures(i).(field) = false;
         end
     end
-    %     if ~any([record.measures(:).(field)])
-    %         record.measures = rmfield(record.measures,field);
-    %     end
 end
-
 
 if ~isempty(record.slice)
     timepoint = record.slice;
@@ -152,12 +125,11 @@ if ~isempty(record.slice)
     end
 end
 
-
 % get presence time lapse series
 if isfield(record.measures,'present') && ...
-    (~isempty(findstr(record.slice,'day')) || ...
-    ~isempty(findstr(record.slice,'hour')) || ...
-    ~isempty(findstr(record.slice,'minute')))
+        (~isempty(findstr(record.slice,'day')) || ...
+        ~isempty(findstr(record.slice,'hour')) || ...
+        ~isempty(findstr(record.slice,'minute')))
     series_measures =  process_params.series_measures;
     ref_record = tp_get_refrecord(record,false);
     if ~isempty(ref_record) && isfield(ref_record,'measures') && isfield(ref_record.measures,'present')
@@ -179,8 +151,7 @@ if isfield(record.measures,'present') && ...
             if length(ref_i)>1
                 msg = ['More than one ROIs with index ' num2str(record.measures(i).index) ...
                     ' in ' recordfilter(ref_record) '. Taking first only.'];
-                errordlg(msg,'Analyse tptestrecord');
-                disp(['ANALYSE_TPTESTRECORD: ' msg]);
+                errormsg(msg);
                 ref_i = ref_i(1);
             end
             if ~isempty(ref_i)
@@ -209,7 +180,7 @@ if isfield(record.measures,'present') && ...
                 record.measures = rmfield(record.measures,'mito_was_close');
             end
         end
-
+        
         if isfield(ref_record.measures,'bouton_close')
             for i=1:n_rois
                 record.measures(i).bouton_was_close = NaN;
@@ -222,7 +193,6 @@ if isfield(record.measures,'present') && ...
                 record.measures = rmfield(record.measures,'bouton_was_close');
             end
         end
-
         
         for measure = series_measures
             measure_series = [measure{1} '_series'];
@@ -231,7 +201,7 @@ if isfield(record.measures,'present') && ...
             elseif isfield(ref_record.measures,measure{1})
                 ref_measure = measure{1};
             else
-                disp(['ANALYSE_TPTESTRECORD: ' measure{1} ' is not a measure in reference record. Please analyse or edit tpprocessparams series_measures.']);
+                logmsg([measure{1} ' is not a measure in reference record. Please analyse or edit tpprocessparams series_measures.']);
                 continue
             end
             for i=1:n_rois
@@ -239,16 +209,6 @@ if isfield(record.measures,'present') && ...
                 record.measures(i).(measure_series) = [ref_record.measures(ref_i).(ref_measure) record.measures(i).(measure{1})];
             end
         end
-
-        
-%         if isfield(record.measures,'present_series')
-%             for i=1:n_rois
-%                 present = record.measures(i).present_series;
-%                 n_timepoints = length(present);
-%                 record.measures(i).timepoint_series = 1:n_timepoints;
-%                 record.measures(i).n_timepoints = n_timepoints;
-%             end
-%         end
         
     else
         for i=1:n_rois
@@ -258,9 +218,11 @@ if isfield(record.measures,'present') && ...
     end
 end
 
-switch record.experiment
-    case {'11.21','12.81','Examples'}
-        record = tp_get_distance_from_pia( record );
+if is_zstack
+    switch record.experiment
+        case {'11.21','12.81','Examples'}
+            record = tp_get_distance_from_pia( record );
+    end
 end
 
 if isfield(record,'measures') && isfield(record.measures,'mito') && any([record.measures(:).mito])
@@ -273,24 +235,21 @@ end
 % getting densities
 record = tp_analyse_neurites( record );
 
-
 if is_movie
     record = tp_analyse_movie( record );
     record = add_distance2preferred_stimulus( record );
 end
 
-
 % save measures file
 measuresfile = fullfile(tpdatapath(record),'tp_measures.mat');
 measures = record.measures; %#ok<NASGU>
-try 
+try
     save(measuresfile,'measures');
 catch
     errormsg(['Could not write measures file ' measuresfile ]);
 end
 % remove fields that take too much memory
 record.measures = rmfields(record.measures,{'psth_tbins','psth_response'});
-
 
 function s = rmfields(s,f)
 for i=1:length(f)
