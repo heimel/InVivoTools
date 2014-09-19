@@ -39,7 +39,7 @@ for count=1:length(ud.ind)
         disp(['ANALYSE_ALL_TESTRECORD_CALLBACK: ' msg]);
     switch ud.db(i).datatype
         case 'oi',
-            ud.db(i)=analyse_testrecord( ud.db(i));
+            ud.db(i)=analyse_oitestrecord( ud.db(i));
         case 'ls',
             record = ud.db(i);
             org_precommands = record.precommands;

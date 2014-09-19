@@ -22,6 +22,11 @@ if ~exist(params.ecdatapath_localroot,'dir')
 end
 
 datapath=fullfile(params.ecdatapath_localroot,record.date(1:4),record.date(6:7),record.date(9:10));
+switch record.setup
+    case 'antigua'
+        datapath = fullfile(datapath,'Mouse');
+end
+
 if ~exist(datapath,'dir')
     switch record.setup
         case 'antigua'

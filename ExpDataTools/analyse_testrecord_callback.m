@@ -22,13 +22,13 @@ end
 
 if isfield(record,'experimenter') && isempty(record.experimenter)
     warndlg('Experimenter field is required.','Analyse testrecord callback');
-    disp('ANALYSE_TESTRECORD_CALLBACK: Experimenter field is required.'); 
+    logmsg('Experimenter field is required.'); 
 end
     
 
 switch record.datatype
     case {'oi','fp'} % intrinsic signal or flavoprotein
-        record=analyse_testrecord( record );
+        record=analyse_oitestrecord( record );
     case 'ec'
         record=analyse_ectestrecord( record );
     case 'lfp'

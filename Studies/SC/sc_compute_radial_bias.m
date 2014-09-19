@@ -197,7 +197,7 @@ for i=mice % :length(retinotopy_record_crit)
     if exist(filename,'file')
         load(filename);
     else
-        [retinotopy_record{i},avg] = analyse_testrecord( retinotopy_record{i});
+        [retinotopy_record{i},avg] = analyse_oitestrecord( retinotopy_record{i});
         save(filename,'avg');
     end
     
@@ -237,7 +237,7 @@ for i=mice % :length(retinotopy_record_crit)
     if exist(filename,'file')
         load(filename);
     else
-        [orientation_record,avg] = analyse_testrecord( orientation_record);
+        [orientation_record,avg] = analyse_oitestrecord( orientation_record);
         save(filename,'avg');
     end
     
@@ -268,7 +268,7 @@ for i=mice % :length(retinotopy_record_crit)
         if exist(fname,'file')
             load(fname);
         else
-            [significance_record,avg] = analyse_testrecord( significance_record);
+            [significance_record,avg] = analyse_oitestrecord( significance_record);
             load(fname);
         end
     end
@@ -507,7 +507,7 @@ end
 
 
 function [monitorpatch_x,monitorpatch_y,x,y] = getgridcoordinates(retinotopy_record) %#ok<STOUT,REDEF>
-retinotopy_record = analyse_testrecord( retinotopy_record);
+retinotopy_record = analyse_oitestrecord( retinotopy_record);
 filename = fullfile(oidatapath(retinotopy_record),[retinotopy_record.test '_response_centers.mat']);
 load(filename);
 disp(['monitorpatch_x = ' mat2str(monitorpatch_x) ';']);
