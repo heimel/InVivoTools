@@ -1333,58 +1333,26 @@ switch command,
             pvimg1,pvimg2,dirname1,dirname2,drift1,drift2,3);
     case 'movieBt',
         trialsstr = trim(get(ft(fig,'trialsEdit'),'string'));
-        if ~isempty(trialsstr), trialslist = eval(trialsstr); else trialslist = []; end;
+        if ~isempty(trialsstr)
+            trialslist = eval(trialsstr); 
+        else
+            trialslist = 1; 
+        end;
         stimstr = trim(get(ft(fig,'movieStimsEdit'),'string'));
-        if ~isempty(stimstr), stimlist = eval(stimstr); else stimlist = []; end;
+        if ~isempty(stimstr)
+            stimlist = eval(stimstr); 
+        else
+            stimlist = []; 
+        end
         dF = get(ft(fig,'moviedFCB'),'value');
         sorted=get(ft(fig,'movieSortCB'),'value');
-        
-        processparams = tpprocessparams(ud.record);
-        
-        movietype = processparams.movietype; %'plain';
-        movfname = [ud.record.date '_' ud.record.epoch '_' get(ft(fig,'movieFileEdit'),'string') '_' movietype];
+        movfname = [ud.record.date '_' ud.record.epoch '_' get(ft(fig,'movieFileEdit'),'string') ];
         movfname = fullfile(tpdatapath(ud.record),movfname);
-        fprintf('Preparing movie...will take several seconds...\n');
-        cfg = tpreadconfig( ud.record );
-        movie_sync_factor = 1.02;
-        fps = 1/cfg.frame_period * movie_sync_factor;
-        disp(['ANALYZETPSTACK: Using movie_sync_factor ' num2str(movie_sync_factor) ]);
-        
-        
-        tpmovie(ud.record,ud.channel,trialslist,stimlist,sorted,dF,fps,movfname,movietype);
+        tpmovie(ud.record,ud.channel,trialslist,stimlist,sorted,dF,movfname);
     case 'QuickMapBt'
-        %         paramname = trim(get(ft(fig,'stimparamnameEdit'),'string'));
-        %         scratchname = tpscratchfilename(ud.record,[],['analysis_' paramname]);
-        %         if ~exist(scratchname,'file')
-        %             analyzetpstack('AnalyzeParamBt',[],fig);
-        %         end
-        %         if ~exist(scratchname,'file')
-        %             errordlg('Can''t open analysis file.  Please analyze data first by calculating tuning.');
-        %             return
-        %         end
-        %         g = load(scratchname,'resps','listofcells','listofcellnames','-mat');
         thresh = str2double(get(ft(fig,'mapthreshEdit'),'string'));
         listofcells = getpresentcells(ud,fig);
         tpquickmap(ud.record,ud.channel,ud.record.measures,listofcells,1,'threshold',thresh);
-        %     case 'baselineBt',
-        %         dirname = get(ft(fig,'stimdirnameEdit'),'string');
-        %         %refdirname = getrefdirname(ud,dirname);
-        %         %fulldirname = [fixpath(getpathname(ud.ds)) dirname];
-        %         ancestors = getallparents(ud,dirname);
-        %         [listofcells,listofcellnames] = getcurrentcellschanges(ud,dirname,ancestors);
-        %         %tpfile = load([fulldirname filesep 'twophotontimes.txt'],'-ascii'),
-        %         fprintf('Analyzing...will take a few seconds...\n');
-        %         %[d,t]=tpreaddata(fulldirname,[tpfile(2)+5 tpfile(end)-5],listofcells,1,channel);
-        %         [d,t] = tpreaddata(record,[0 Inf],listofcells,1,ud.channel);
-        %         figure;
-        %         colors=[ 1 0 0;0 1 0;0 0 1;1 1 0;0 1 1;1 1 1;0.5 0 0;0 0.5 0;0 0 0.5;0.5 0.5 0;0.5 0.5 0.5];
-        %         for i=1:length(ud.celllist),
-        %             hold on;
-        %             ind=mod(i,length(colors)); if ind==0,ind=length(colors); end;
-        %             plot(t{i},d{i},'color',colors(ind,:));
-        %         end;
-        %         legend(listofcellnames);
-        %         ylabel('Raw signal'); xlabel('Time (s)');
     case 'correctDriftBt'
         tpdriftcheck(ud.record,ud.channel,ud.ref_record,ud.driftcorrectionmethod,1,1);
     case 'ImageMathBt'
@@ -1477,19 +1445,18 @@ switch command,
             
             
             if isempty(ind)
-                disp('ANALYZETPSTACK: could not find record in twophoton database. Adding record to end of database.');
+                logmsg('Could not find record in twophoton database. Adding record to end of database.');
                 ind = length(db_ud.db)+1;
             elseif length(ind)>1
-                disp('ANALYZETPSTACK: found more than one record in twophoton database. Updating first');
+                logmsg('Found more than one record in twophoton database. Updating first');
                 ind = ind(1);
             end
             db_ud.db(ind) = record;
             db_ud.changed = 1;
             set(h_db,'userdata',db_ud);
             control_db_callback(db_ud.h.filter);
-            
             control_db_callback(db_ud.h.current_record);
-            disp('ANALYZETPSTACK: Stored record in database');
+            logmsg('Stored record in database');
         end
         if ud.verbose
             disp(record);

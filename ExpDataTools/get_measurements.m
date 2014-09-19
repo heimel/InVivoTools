@@ -37,7 +37,7 @@ assign(pos_args{:});
 nvarargin=length(varargin);
 if nvarargin>0
     if rem(nvarargin,2)==1
-        disp('GET_MEASUREMENTS: Odd number of varguments');
+        logmsg('Odd number of varguments');
         return
     end
     for i=1:2:nvarargin

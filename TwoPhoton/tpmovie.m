@@ -1,7 +1,7 @@
-function M = tpmovie(record, channel, trials, thestims, sorted, diffnc, fps, filename, movietype) 
-%  TPMOVIE - Movie of Prairieview two-photon data
+function M = tpmovie(record, channel, trials, thestims, sorted, diffnc, filename) 
+%  TPMOVIE - Movie of two-photon data
 %
-%  MOVIE=TPMOVIE(RECORD, CHANNEL, TRIALS, STIMS, SORT, DIFF, FPS, FILENAME, MOVIETYPE)
+%  MOVIE=TPMOVIE(RECORD, CHANNEL, TRIALS, STIMS, SORT, DIFF, FILENAME, MOVIETYPE)
 %
 %    Computes a movie for two-photon data that is linked to the
 %  stimulus presentation.  DIRNAME is the name of the directory.
@@ -19,38 +19,62 @@ function M = tpmovie(record, channel, trials, thestims, sorted, diffnc, fps, fil
 % DIFF is 0/1; if it is 1, then the difference between the first five frames
 %        and the remaining frames are shown; otherwise, the raw data is shown.
 %
-% FPS is the frames-per-second viewing rate of the movie.
-%
 % FILENAME is the name of the output AVI file.
 %
-% MOVIETYPE is 'plain' or 'twocolor'
+%
+% 200X-200X Steve Van Hooser, 200X-2014 Alexander Heimel
+%
 
-if nargin<9
-    movietype = '';
+if nargin<7
+    filename = '';
 end
-if isempty(movietype)
-    movietype = 'twocolor';
+if nargin<6
+    diffnc = [];
+end
+if isempty(diffnc)
+    diffnc = 0;
+end
+if nargin<5
+    sorted = [];
+end
+if isempty(sorted)
+    sorted = 0;
+end
+if nargin<4
+    thestims = [];
+end
+if nargin<3
+    trials = [];
 end
 
-trials = 1;
-%thestims = 1;
-disp('TPMOVIE: TEMPORARILY ONLY TAKING FIRST TRIAL and first stim');
+logmsg(['Creating movie for ' recordfilter(record)]);
+logmsg(['Set movie_sync_factor or movietype']);
+
+params = tpprocessparams(record);
+cfg = tpreadconfig( record );
+
+movietype = params.movietype; %'plain';
+
+fps = 1/cfg.frame_period * params.movie_sync_factor;
+
+if isempty(filename)
+    fname = [record.date '_' record.epoch '_' movietype];
+     fname = fullfile(tpdatapath(record),fname);
+end
 
 
 pvfilename = tpscratchfilename( record, 1, 'preview');
 load(pvfilename);
-mx=[];
-mn=[];
-gamma=[];
-channels =[];
-h=figure;
+mx = [];
+mn = [];
+gamma = [];
+channels = [];
+h = figure;
 [previewim,mxbg,mnbg,gamma] = tp_image(pvimg,channels,mx,mn,gamma,tp_channel2rgb(record));
-bgim=get(previewim,'cdata');
+bgim = get(previewim,'cdata');
 close(h);
 clear('pvimg');
 
-
-%dirname = tpdatapath( record);
 stims = getstimsfile( record );
 if isempty(stims)
     stiminterview(record);
@@ -62,8 +86,12 @@ do = getDisplayOrder(s.stimscript);
 
 tottrials = length(do)/numStims(s.stimscript);
 
-if isempty(trials), trials = 1:tottrials; end;
-if isempty(thestims), thestims = 1:numStims(s.stimscript); end;
+if isempty(trials)
+    trials = 1:tottrials; 
+end
+if isempty(thestims)
+    thestims = 1:numStims(s.stimscript); 
+end
 do_analyze_i = [];
 
 
@@ -110,7 +138,7 @@ bgim=bgim(1+borderwidth:end-borderwidth,1+borderwidth:end-borderwidth,:);
 
 
 show_stim = false;
-disp('TPMOVIE: Turned off showing stimulus times. Change show_stim to true in code');
+logmsg('Turned off showing stimulus times. Change show_stim to true in code');
 
 if show_stim
     height_stim = 100;
@@ -141,11 +169,9 @@ for i=1:size(interval,1),
 	end;
 end;
  
-%mn =1500
-%mx =1800
-
-if diffnc, mn= 0; end;
-M = struct('cdata',[],'colormap',[]); M = M([]);
+%if diffnc, mn= 0; end;
+M = struct('cdata',[],'colormap',[]); 
+M = M([]);
 
 hh = [];
 
@@ -153,13 +179,10 @@ bgmode = mode(flatten(round(bgim(:,:,2)*mxbg(channel))));
 template = round(bgim(:,:,2)*mxbg(channel))-bgmode;
 template = template/max(template(:));
 
-
 for i=1:size(interval,1),
 	frameshere = reshape(data{i,1},size(im,1),size(im,2),length(data{i,1})/(size(im,1)*size(im,2)));
 	timehere = reshape(t{i,1},size(im,1),size(im,2),length(data{i,1})/(size(im,1)*size(im,2)));
-
 	for k=1:size(frameshere,3),
-        
         if show_stim
             tm = sum(sum(timehere(:,:,k)))/(size(im,1)*size(im,2));
             axes(ax1);
@@ -174,9 +197,6 @@ for i=1:size(interval,1),
             end;
             ch=get(ax1,'children');set(ax1,'children',[ch(2:end);ch(1)]);
         end
-        
-		
-        
         axes(ax2); cla; 
 		myframe = conv2((frameshere(:,:,k)-diffnc*pv),ones(1,1)/(sum(sum(ones(1,1)))),'same');
 		%image(rescale(myframe,[mnbg(channel) mxbg(channel)],[0 256]));
@@ -186,9 +206,6 @@ for i=1:size(interval,1),
         deltafoverf = deltaf ./  (bgim(:,:,2)*mxbg(channel));
         deltafoverf = (template>0).*deltafoverf;
         deltafoverf = spatialfilter( deltafoverf,4,'pixel');
-
-        
-        
         deltafoverf = rescale(deltafoverf,[0 0.2],[0 1]);
 
         switch movietype
@@ -197,7 +214,6 @@ for i=1:size(interval,1),
                 img(:,:,3) = deltafoverf .* (template>0) .* template.^.5;
                 img(:,:,2) = img(:,:,2) + 0.3*img(:,:,3); %deltafoverf;
                 img(:,:,1) = img(:,:,1) + 0.3*img(:,:,3); %deltafoverf;
-                
                 img = rescale(img,[0 1],[0 1]);
             case 'plain'
                 img(:,:,3) = deltafoverf;
@@ -215,5 +231,5 @@ movie2avi(M,filename,'FPS',fps,'compression','none');
 copyfile(filename,fullfile(getdesktopfolder,[filenameonly fileext]));
 
 close(H);
-disp('TPMOVIE: On linux, use avconv to convert and avidemux to cut movie');
+logmsg('On linux, use avconv to convert and avidemux to cut movie');
 

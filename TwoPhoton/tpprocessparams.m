@@ -278,7 +278,10 @@ switch record.experiment
         params.darklevel_determination = '5percentile';
 end
 
+% MOVIETYPE is 'plain' or 'twocolor'
 params.movietype = 'twocolor'; % or 'plain';
+params.movie_sync_factor = 1.02;
+
 
 if exist('processparams_local.m','file')
     oldparams = params;
