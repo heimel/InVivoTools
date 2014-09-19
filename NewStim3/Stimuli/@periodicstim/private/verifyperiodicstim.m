@@ -42,41 +42,43 @@ if proceed,
 	elseif parameters.tFrequency<=0, proceed = 0; errormsg = 'tFrequency must be positive.';
 	elseif parameters.barWidth<=0, proceed = 0; errormsg = 'barWidth must be positive.';
 	elseif parameters.nCycles<=0, proceed = 0; errormsg = 'nCycles must be positive.';
-	elseif (parameters.contrast<0)|(parameters.contrast>1),
+	elseif (parameters.contrast<0)||(parameters.contrast>1),
 		proceed=0; errormsg = 'contrast must be in [0..1]';
-	elseif (parameters.background<0)|(parameters.background>1),
+	elseif (parameters.background<0)||(parameters.background>1),
 		proceed=0; errormsg = 'background must be in [0..1]';
 
 	end;
-	if proceed&size(parameters.backdrop,2)==1,
-		if (parameters.backdrop<0)|(parameters.backdrop>1),
+	if proceed && size(parameters.backdrop,2)==1,
+		if (parameters.backdrop<0)||(parameters.backdrop>1),
 			proceed=0; errormsg = 'if backdrop [1x1] then backdrop must be in [0..1]';
 		end;
 	end;
-	if proceed&size(parameters.backdrop,2)==3,
+	if proceed && size(parameters.backdrop,2)==3,
 		if ~all(parameters.backdrop>=0&parameters.backdrop<256),
 			proceed=0; errormsg = 'If backdrop is [1x3], then entries must be in [0..255].';
 		end;
 	end;
-	if proceed&size(parameters.backdrop,2)~=1&size(parameters.backdrop,2)~=3,
+	if proceed && size(parameters.backdrop,2)~=1 && size(parameters.backdrop,2)~=3,
 		proceed=0; errormsg = 'backdrop must be [1x1] or [1x3]';
 	elseif (parameters.nSmoothPixels<0), proceed=0; errormsg = 'nSmoothPixels must be non-negative.'; 
 	elseif (parameters.fixedDur <0), proceed=0; errormsg = 'fixedDur must be non-negative.'; 
 	elseif sum(parameters.windowShape*[1 1 1 1 1 1 1 1 1 1]==[-1 0 1 2 3 4 5 6 7 8])~=1,
 		proceed=0; errormsg = 'windowShape must be 0, 1, 2 ... 8.'; 
-	elseif ((parameters.rect(3)-parameters.rect(1))*(parameters.rect(4)-parameters.rect(2))<0)| ...
+	elseif ((parameters.rect(3)-parameters.rect(1))*(parameters.rect(4)-parameters.rect(2))<0)|| ...
 		(parameters.rect(3)-parameters.rect(1)<0),
 		proceed=0; errormsg = 'rect must have non-negative area.';
 	elseif parameters.loops<0, proceed=0; errormsg='loops must be >= 0.';
         % add error checking for chromhigh/low here
-	end;
-end;
+    end
+end
 
 if proceed, % check displayprefs for validity
-        try, dummy = displayprefs(parameters.dispprefs);
-        catch, proceed = 0; errormsg = ['dispprefs invalid: ' lasterr];
-        end;
-end;
+        try
+            displayprefs(parameters.dispprefs);
+        catch me
+            proceed = 0; errormsg = ['dispprefs invalid: ' me.message];
+        end
+end
 
 
 good = proceed;

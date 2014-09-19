@@ -11,12 +11,12 @@ function load_invivotools
 %
 
 if isunix
-    updatestr = ['To update from terminal: cd ' fileparts(mfilename('fullpath')) ...
+    updatestr = ['To update InVivoTools from terminal: cd ' fileparts(mfilename('fullpath')) ...
         '; git pull'];
 else
-    updatestr = 'To update: open github and click on Sync.';
+    updatestr = 'To update InVivoTools: open github and click on Sync.';
 end
-disp([ upper(mfilename) ': Adding paths for InVivoTools. ' updatestr]);
+disp([ upper(mfilename) ': ' updatestr]);
 
 majorprefix = fileparts(mfilename('fullpath'));
 addpath(fullfile(majorprefix));
@@ -27,7 +27,7 @@ if ~exist('processparams_local.m','file')
         disp([ upper(mfilename) ': Created ' fullfile(majorprefix,'processparams_local.m')]);
     end
 end
-disp([ upper(mfilename) ': To override InVivoTools processing settings: edit processparams_local']);
+disp([ upper(mfilename) ': To override InVivoTools settings: edit processparams_local']);
 
 
 % defaults, put overrides in processparams_local.m file
@@ -53,22 +53,22 @@ params = processparams_local(params); % load local overrides
 if params.load_general, % general
     % some generally useful tools not associated with any particular package
     path2general=fullfile(majorprefix,'General');
-    addpath(path2general);
-    addpath(fullfile(path2general,'structUtility'));
-    addpath(fullfile(path2general,'graphs'));
-    addpath(fullfile(path2general,'database'));
-    addpath(fullfile(path2general,'filelocking'));
-    addpath(fullfile(path2general,'stats'));
-    addpath(fullfile(path2general,'plot2svg'));
-    addpath(fullfile(path2general,'morph'));
-    addpath(fullfile(path2general,'model3d'));
-    addpath(fullfile(path2general,'filters'));
-    addpath(fullfile(path2general,'icons')); % used for tp gui
-    addpath(fullfile(path2general,'Wavelet','Wavelet Basics')); % used for erp analysis, Timo
-    addpath(fullfile(path2general,'Wavelet','sinefit')); % used for erp analysis, Timo
-    addpath(fullfile(path2general,'uitools'));
-    addpath(fullfile(path2general,'CircStat')); % circular statistics toolbox
-    addpath(fullfile(path2general,'database','matlab_7'));
+    addpath(path2general, ...
+        fullfile(path2general,'structUtility'), ...
+        fullfile(path2general,'graphs'), ...
+        fullfile(path2general,'database'), ...
+        fullfile(path2general,'filelocking'), ...
+        fullfile(path2general,'stats'), ...
+        fullfile(path2general,'plot2svg'), ...
+        fullfile(path2general,'morph'), ...
+        fullfile(path2general,'model3d'), ...
+        fullfile(path2general,'filters'), ...
+        fullfile(path2general,'icons'), ... % used for tp gui
+        fullfile(path2general,'Wavelet','Wavelet Basics'), ... % used for erp analysis, Timo
+        fullfile(path2general,'Wavelet','sinefit'), ... % used for erp analysis, Timo
+        fullfile(path2general,'uitools'), ...
+        fullfile(path2general,'CircStat'), ... % circular statistics toolbox
+        fullfile(path2general,'database','matlab_7'));
 end
 
 
@@ -77,27 +77,34 @@ path2invivotools = majorprefix;
 
 if params.load_expdatatools
     path2expdatatools = fullfile(path2invivotools,'ExpDataTools');
-    addpath(path2expdatatools);
-    
-    % add some lab specific tools
-    labpath = fullfile(path2expdatatools,'Labs',params.lab);
-    if exist(labpath,'dir')
-        addpath(labpath);
-    end
-    
-    % files to use Leveltlab MS Access mouse database
-    addpath(fullfile(path2invivotools,'ExpDataTools','MdbTools'));
+    addpath(path2expdatatools, ...
+        fullfile(path2expdatatools,'MdbTools'),...   % files to use Leveltlab MS Access mouse database
+        fullfile(path2expdatatools,'Labs',params.lab));% add some lab specific tools
 end
 
 % Twophoton package
 if params.load_twophoton
-    twophoton_path=fullfile(path2invivotools,'TwoPhoton');
-    addpath(twophoton_path);
-    addpath(fullfile(twophoton_path, 'Reid_cell_finder' ));
-    addpath(fullfile(twophoton_path, 'Reid_cell_finder' , 'basic_findcell'));
+    twophoton_path = fullfile(path2invivotools,'TwoPhoton');
+
+    switch params.lab
+        case 'Lohmann'
+            twophoton_microscope_type='Lohmann';
+        case 'Levelt'
+            twophoton_microscope_type='FluoView';
+        case 'Fitzpatrick'
+            twophoton_microscope_type='PrairieView';
+    end
+
+    
+    addpath(twophoton_path, ...
+        fullfile(twophoton_path, 'Reid_cell_finder' ),...
+        fullfile(twophoton_path, 'Reid_cell_finder' , 'basic_findcell'),...
+        fullfile(twophoton_path, 'Synchronization' , params.lab) ,...
+        fullfile(twophoton_path, 'Laser' , params.lab),...
+        fullfile(twophoton_path, 'Platforms', twophoton_microscope_type));
+    
     if exist('java','file') && usejava('jvm')
         javaaddpath(fullfile(twophoton_path,'Reid_cell_finder/java'));
-        
         % now check if ij.jar file is already in the javaclasspath
         % ij.jar is the ImageJ javaclass and used in Reid_cell_finder
         jvc=javaclasspath('-all');
@@ -107,29 +114,14 @@ if params.load_twophoton
             javaaddpath(fullfile(twophoton_path,'Reid_cell_finder/ij/ij.jar'));
         end
     end
-    
-    switch params.lab
-        case 'Lohmann'
-            twophoton_microscope_type='Lohmann';
-        case 'Levelt'
-            twophoton_microscope_type='FluoView';
-        case 'Fitzpatrick'
-            twophoton_microscope_type='PrairieView';
-    end
-    addpath(fullfile(twophoton_path, 'Synchronization' , params.lab));
-    addpath(fullfile(twophoton_path, 'Laser' , params.lab));
-    addpath(fullfile(twophoton_path, 'Platforms', twophoton_microscope_type));
 end
 
 % Electrophysiology analyses
 if params.load_electrophys
-    addpath(fullfile(path2invivotools,'Electrophysiology'));
-    %libraries for importing spike2 data
-    addpath(fullfile(path2invivotools,'Electrophysiology','Son'));
-    % for importing tdt data in linux
-    addpath(fullfile(path2invivotools,'Electrophysiology','TDT'));
-    % for MClust spike sorter
-    addpath(genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5')));
+    addpath(fullfile(path2invivotools,'Electrophysiology'),...
+        fullfile(path2invivotools,'Electrophysiology','Son'),...    %libraries for importing spike2 data
+        fullfile(path2invivotools,'Electrophysiology','TDT'),... % for importing tdt data in linux
+        genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5')));    % for MClust spike sorter
 end
 
 % NeuralAnalysis package
@@ -140,42 +132,17 @@ if params.load_neuralanalysis
     cd(tmppath);
 end
 
-% Check if PTB is in path and collect version number
-% (needs to work at MAC OS 9, PTB2)
-% if exist('Screen','file')
-%     ptbver =  PsychtoolboxVersion;
-%     if isnumeric(ptbver) % to use PTB2 format
-%         ptbverstring = num2str( ptbver);
-%     else
-%         if isempty(ptbver)
-%             pause(0.05); % delayed needed for PsychtoolboxVersion
-%             ptbver =  PsychtoolboxVersion;
-%         end
-%         ptbver(end+1)=10;
-%         p = find(ptbver==10,1); % only interested in first line
-%         ptbverstring = ptbver(1:p-1);
-%     end
-%     disp(['STARTUP: Psychophysics toolbox version ' ptbverstring ' included in path']);
-%     if ~isempty(ptbver)
-%         ptbver = str2double(trim(ptbverstring(1)));
-%     end
-% else
-%     ptbver = NaN;
-% end
-
 % NewStim package to show and analyse visual stimuli
 if params.load_newstim
     % for NewStim3 this folder is configuration
     % NewStimConfig file in that folder should be out of version control
     % ideally should get different location, but called like this in
     % NewStim3/NewStimInit, also used for optical imaging
-    addpath(fullfile(majorprefix,'Configuration'));
-    
-    addpath(fullfile(path2invivotools,'NewStim3'));
+    addpath(fullfile(majorprefix,'Configuration'),...
+        fullfile(path2invivotools,'NewStim3'),...
+        fullfile(path2invivotools,'Calibration'),...    % some calibration files for the packages that depend on each computer
+        fullfile(path2invivotools,'Calibration','Monitors'));
     NewStimInit;
-    % some calibration files for the packages that depend on each computer
-    addpath(fullfile(path2invivotools,'Calibration'));
-    addpath(fullfile(path2invivotools,'Calibration','Monitors'));
 end
 
 % Nelsonlab tools, must be after NewStim package
@@ -188,21 +155,20 @@ end
 
 % Intrinsic Signal Optical Imaging package
 if params.load_intrinsicsignal
-    addpath(fullfile(path2invivotools,'OpticalImaging'));
-    addpath(fullfile(path2invivotools,'OpticalImaging','Arduino'));
-    addpath(fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3'));
-    addpath(fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','coherence_dots'));
-    addpath(fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','opticflow_dots'));
-    addpath(fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','rotating_dots'));
-    
-    % next contains camera framerates
-    addpath(fullfile(majorprefix,'Configuration'));
+    addpath(fullfile(path2invivotools,'OpticalImaging'),...
+        fullfile(path2invivotools,'OpticalImaging','Arduino'),...
+        fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3'),...
+        fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','coherence_dots'),...
+        fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','opticflow_dots'),...
+        fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','rotating_dots'),...
+        fullfile(majorprefix,'Configuration'));    % next contains camera framerates
 end
 
 % ERG software
-ergpath=fullfile(path2invivotools,'ERG');
-addpath(ergpath);
-addpath(fullfile(ergpath,'usbActiveWire'));
+if params.load_erg
+    ergpath = fullfile(path2invivotools,'ERG');
+    addpath(ergpath,fullfile(ergpath,'usbActiveWire'));
+end
 
 % Temp folder for work in progress
 addpath(fullfile(path2invivotools,'Temp'));
@@ -213,9 +179,7 @@ if exist('PsychStartup','file')
 end
 
 % load Study specific folders
-for i=1:length(params.load_studies)
-    addpath(genpath(fullfile(majorprefix,'Studies',params.load_studies{i})));
-end
-
+studiespath = cellfun(@(x) fullfile(majorprefix,'Studies',x),params.load_studies,'UniformOutput',false);
+addpath(studiespath{:});
 
 clear
