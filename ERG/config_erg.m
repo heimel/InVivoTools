@@ -25,6 +25,10 @@ function [ output_args ] = config_erg( input_args )
             end
     end
     
+    params.ergdatapath_localroot = ergConfig.datadir;
+    params = processparams_local(params);
+    ergConfig.datadir =  params.ergdatapath_localroot;
+    
     ergConfig.blockdir = fullfile(curpath,'Blocks');
     ergConfig.protocoldir = fullfile(curpath,'Protocols');
     ergConfig.analysisdir = fullfile(curpath,'Analysis');
