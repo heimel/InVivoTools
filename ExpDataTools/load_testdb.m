@@ -70,13 +70,14 @@ switch whichdb
     case {'ectestdb','ectestdb.mat'} % join ec databases
         switch experiment 
             case 'examples'
-                 % matching structure to ectestdb_daneel_empty
-                db_empty = load(fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty'));
-                db_empty = db_empty.db;
-                
                 [db,filename] = load_expdatabase(whichdb,where,[],load_main,verbose);
-                db = structconvert(db,db_empty);
-
+                 % matching structure to ectestdb_daneel_empty
+                 emptydbfilename = fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty');
+                 if exist(emptydbfilename,'file')
+                     db_empty = load(emptydbfilename);
+                     db_empty = db_empty.db;
+                     db = structconvert(db,db_empty);
+                 end
             otherwise
                 if verbose
                     disp('LOAD_TESTDB: Concatenating all experimental databases. Changes will not be saved to original database!');

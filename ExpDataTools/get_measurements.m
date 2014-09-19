@@ -27,7 +27,7 @@ pos_args={...
     };
 
 if nargin<3
-    disp('GET_MEASUREMENTS: Using default arguments:');
+    logmsg('Using default arguments:');
     disp(pos_args)
 end
 
@@ -79,10 +79,10 @@ else
     measuress=measure;
 end
 if isempty(measuress)
-    errordlg(['Could not find measure ' measure ],'GET_MEASUREMENTS');
-    disp(['GET_MEASUREMENTS: Could not find measure ' measure ]);
+    errormsg(['Could not find measure ' measure ]);
     return
 end
+measurelabel=measuress.label;
 
 if ischar(groups)
     groupss=get_groups(groups,groupdb);
@@ -100,8 +100,10 @@ linehead = 'GET_MEASUREMENTS: ';
 switch measuress.datatype
     case {'oi','ec','lfp','tp','ls','fret','fp'}
         reload = false;
+
         if isempty(expdb_cache) || ...
                 ~isfield(expdb_cache,measuress.datatype) || ...
+                ~isfield( expdb_cache.(measuress.datatype),'type') || ...
                 ~strcmp(expdatabases(measuress.datatype), expdb_cache.(measuress.datatype).type)
             reload = true;
         else
@@ -112,14 +114,40 @@ switch measuress.datatype
                 reload = true;
             end
         end
+        
+        if exist('dbname','var') && ischar(dbname) % alternative db specified
+            if ~exist(dbname,'file')
+                if exist(fullfile(expdatabasepath,dbname),'file')
+                    dbname = fullfile(expdatabasepath,dbname);
+                end
+            end
+            if ~exist(dbname,'file')
+                errormsg(['Database ' dbname ' does not exist.']);
+                expdb_cache.(measuress.datatype).db = [];
+                expdb_cache.(measuress.datatype).filename  = dbname;
+                return
+            end
+            if ~reload && ~strcmp(expdb_cache.(measuress.datatype).filename,dbname)
+                reload = true;
+            end
+        end
+        
+        
         if reload
             expdb_cache.(measuress.datatype).type = expdatabases(measuress.datatype) ;
-            [expdb_cache.(measuress.datatype).db,expdb_cache.(measuress.datatype).filename] = ...
-                load_testdb(expdb_cache.(measuress.datatype).type);
+            if exist('dbname','var') && ischar(dbname)
+                temp = load(dbname);
+                expdb_cache.(measuress.datatype).db = temp.db;
+                expdb_cache.(measuress.datatype).filename  = dbname;
+                clear('temp');
+            else
+                [expdb_cache.(measuress.datatype).db,expdb_cache.(measuress.datatype).filename] = ...
+                    load_testdb(expdb_cache.(measuress.datatype).type);
+            end
             d = dir(expdb_cache.(measuress.datatype).filename);
             expdb_cache.(measuress.datatype).date = d.date;
         else
-            disp(['GET_MEASUREMENTS: Using cache of ' expdb_cache.(measuress.datatype).filename '. Type ''clear functions'' to clear cache.']);
+            logmsg(['Using cache of ' expdb_cache.(measuress.datatype).filename '. Type ''clear functions'' to clear cache.']);
         end
         
         testdb = expdb_cache.(measuress.datatype).db;
@@ -137,11 +165,10 @@ end
 for g=1:n_groups
     newlinehead=[linehead groupss(g).name ': '];
     [results{g},dresults{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
-    measurelabel=measuress.label;
     n=sum(~isnan(results{g})) ;
     if n<min_n
         results{g}=nan;
-        disp(['GET_MEASUREMENTS: Fewer than ' num2str(min_n) ' datapoints.']);
+        logmsg(['Fewer than ' num2str(min_n) ' datapoints.']);
     end
     switch value_per
         case 'group'
@@ -154,7 +181,7 @@ for g=1:n_groups
             end
             
         otherwise
-            disp([ 'GET_MEASUREMENTS: measure = ' measuress.measure ', group=' groupss(g).name ...
+            logmsg([ 'measure = ' measuress.measure ', group=' groupss(g).name ...
                 ' : mean = ' num2str(nanmean(double(results{g}(:)))) ...
                 ' , std = ' num2str(nanstd(double(results{g}(:)))) ...
                 ' , sem = ' num2str(sem(double(results{g}(:)))) ...
@@ -174,7 +201,7 @@ if strcmp(trim(group.name),'empty')
 end
 indmice=find_record(mousedb,group.filter);
 
-disp(['GET_MEASUREMENTS: Group ' group.name ' contains ' num2str(length(indmice)) ' mice.']);
+logmsg(['Group ' group.name ' contains ' num2str(length(indmice)) ' mice.']);
 
 if isempty(indmice)
     return
@@ -197,7 +224,7 @@ for i_mouse=indmice
                 disp([newlinehead measure.name '= array']);
             end
         case 'group'
-            disp('GET_MEASUREMENTS: Changed behavior from group on 2013-04-27');
+            logmsg('Changed behavior from group on 2013-04-27');
     end
     
     
@@ -230,6 +257,10 @@ return
 function [results, dresults]=get_measurements_for_mouse( mouse, measure, criteria,value_per, mousedb,testdb,extra_options,linehead)
 results=[];
 dresults=[];
+
+if isempty(testdb)
+    return
+end
 
 isolation='';
 for i=1:2:length(extra_options)
@@ -484,7 +515,7 @@ switch measure.measure
                 try
                     eval(['results = saved_data.' measure.measure(6:end) ';']);
                     dresults = nan(size(results));
-                    disp(['GET_MEASUREMENTS: Retrieved ' ...
+                    logmsg(['Retrieved ' ...
                         measure.measure(6:end) ' from ' saved_data_file ...
                         '. Results is of size ' num2str(size(results)) ]);
                 catch

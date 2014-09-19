@@ -3,28 +3,48 @@
 % 2004-1014, Alexander Heimel
 %
 
-% defaults
-load_general = 1; % necessary for host function
-load_invivotools = 1;
-load_mclust = 1;
-load_nelsonlabtools=1;
-load_newstim=1;
-load_neuralanalysis=1;
-load_son=1;
-load_tdt = 1;
-load_twophoton=1;
-load_intrinsicsignal=1;
-load_erg=1;
-load_electrophys = 1;
+
+if isunix
+    updatestr = ['To update from terminal: cd ' fileparts(mfilename('fullpath')) ...
+        '; git pull'];
+else
+    updatestr = 'To update: open github and click on Sync.';
+end
+disp([ upper(mfilename) ': Adding paths for InVivoTools. ' updatestr]);
+
+
+if ~exist('processparams_local.m','file')
+    success = copyfile(which('processparams_local_org.m'),fullfile(majorprefix,'processparams_local.m'));
+    if success
+        disp([ upper(mfilename) ': Created ' fullfile(majorprefix,'processparams_local.m')]);
+    end
+end
+disp([ upper(mfilename) ': To override InVivoTools processing settings: edit processparams_local']);
+
+
+% defaults, put overrides in processparams_local.m file
+params.load_general = 1; % necessary for host function
+params.load_nelsonlabtools = 1; % needed for analysis, should be phased out
+params.load_newstim = 1; % needed for visual stimulation NewStim package
+params.load_neuralanalysis = 1; % needed for electrophysiology analysis
+params.load_twophoton = 1; % needed for twophoton analysis
+params.load_intrinsicsignal = 1; % needed for optical imaging analysis
+params.load_erg =1; % need for ERG stimulation and analysis
+params.load_electrophys = 1; % needed for electrophysiology recording and analysis
+
+params.load_studies = {}; % folders of Studies to load
 
 % set default lab, can be overruled depending on host:
 % alternatives 'Fitzpatrick','Levelt','Lohmann'
 % is case-sensitive!
-lab='Levelt';
+params.lab='Levelt';
+
+params = processparams_local(params); % load local overrides
+
 
 majorprefix = fileparts(which('startup.m'));
 
-if load_general, % general
+if params.load_general, % general
     % some generally useful tools not associated with any particular package
     path2general=fullfile(majorprefix,'General');
     addpath(path2general);
@@ -41,35 +61,10 @@ if load_general, % general
     addpath(fullfile(path2general,'Wavelet','Wavelet Basics')); % used for erp analysis, Timo
     addpath(fullfile(path2general,'Wavelet','sinefit')); % used for erp analysis, Timo
     addpath(fullfile(path2general,'uitools'));
-    addpath(fullfile(path2general,'CircStat'));
+    addpath(fullfile(path2general,'CircStat')); % circular statistics toolbox
     addpath(fullfile(path2general,'database','matlab_7'));
 end
 
-hostname = host;
-
-hosttype = 'omniscient';
-switch hosttype
-    case 'omniscient'
-        load_nelsonlabtools=1;
-        load_newstim=1;
-        load_neuralanalysis=1;
-        load_son=1;
-        load_tdt = 1;
-        load_twophoton=1;
-        load_intrinsicsignal=1;
-        load_erg=1;
-        load_electrophys = 1;
-    otherwise
-        disp('STARTUP: Unknown hosttype. Check if host environment variable needs to be set.');
-end
-
-if isunix
-    updatestr = ['To update from terminal: cd ' fileparts(mfilename('fullpath')) ...
-        '; git pull'];
-else
-    updatestr = 'To update: open github and click on Sync.';
-end
-disp([ upper(mfilename) ': Adding path to InVivoTools. ' updatestr]);
 
 path2invivotools = majorprefix;
 
@@ -87,7 +82,7 @@ path2expdatatools = fullfile(path2invivotools,'ExpDataTools');
 addpath(path2expdatatools);
 
 % add some lab specific tools
-labpath = fullfile(path2expdatatools,'Labs',lab);
+labpath = fullfile(path2expdatatools,'Labs',params.lab);
 if exist(labpath,'dir')
     addpath(labpath);
 end
@@ -96,7 +91,7 @@ end
 addpath(fullfile(path2invivotools,'ExpDataTools','MdbTools'));
 
 % Twophoton package
-if load_twophoton
+if params.load_twophoton
     twophoton_path=fullfile(path2invivotools,'TwoPhoton');
     addpath(twophoton_path);
     addpath(fullfile(twophoton_path, 'Reid_cell_finder' ));
@@ -112,10 +107,9 @@ if load_twophoton
         if ~found_ij
             javaaddpath(fullfile(twophoton_path,'Reid_cell_finder/ij/ij.jar'));
         end
-        
     end
     
-    switch lab
+    switch params.lab
         case 'Lohmann'
             twophoton_microscope_type='Lohmann';
         case 'Levelt'
@@ -123,45 +117,29 @@ if load_twophoton
         case 'Fitzpatrick'
             twophoton_microscope_type='PrairieView';
     end
-    addpath(fullfile(twophoton_path, 'Synchronization' , lab));
-    addpath(fullfile(twophoton_path, 'Laser' , lab));
+    addpath(fullfile(twophoton_path, 'Synchronization' , params.lab));
+    addpath(fullfile(twophoton_path, 'Laser' , params.lab));
     addpath(fullfile(twophoton_path, 'Platforms', twophoton_microscope_type));
 end
 
 % Electrophysiology analyses
-if load_electrophys
+if params.load_electrophys
     addpath(fullfile(path2invivotools,'Electrophysiology'));
-    if load_son % son libraries for importing spike2 data
-        sonpath=fullfile(path2invivotools,'Electrophysiology','Son');
-        if exist(sonpath,'dir')
-            addpath(sonpath);
-        end
-    end
-    
-    if load_tdt % function for importing tdt data in linux
-        tdtpath=fullfile(path2invivotools,'Electrophysiology','TDT');
-        if exist(tdtpath,'dir')
-            addpath(tdtpath);
-        end
-    end
-    
-    if load_mclust % spike sorter
-        mclustpath=fullfile(path2invivotools,'Electrophysiology','MClust-3.5');  % spike sorter
-        if exist(mclustpath,'dir')
-            addpath(genpath(mclustpath));
-        end
-    end
+    %libraries for importing spike2 data
+    addpath(fullfile(path2invivotools,'Electrophysiology','Son'));
+    % for importing tdt data in linux
+    addpath(fullfile(path2invivotools,'Electrophysiology','TDT'));
+    % for MClust spike sorter
+    addpath(genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5')));
 end
 
-
 % NeuralAnalysis package
-if load_neuralanalysis
+if params.load_neuralanalysis
     tmppath=pwd;
     cd(fullfile(path2invivotools,'NeuralAnalysis'));
     NeuralAnalysisObjectInit;
     cd(tmppath);
 end
-
 
 % Check if PTB is in path and collect version number
 % (needs to work at MAC OS 9, PTB2)
@@ -189,14 +167,14 @@ else
 end
 
 % NewStim package to show and analyse visual stimuli
-if load_newstim
+if params.load_newstim
     addpath(fullfile(path2invivotools,'NewStim3'));
     addpath(fullfile(path2invivotools,'NewStim3','ReceptiveFieldMapper')); % should go to NewStimInit
     NewStimInit;
 end
 
 % Nelsonlab tools, must be after NewStim package
-if load_nelsonlabtools
+if params.load_nelsonlabtools
     tmppath=pwd;
     cd(fullfile(path2invivotools,'NelsonLabTools'));
     NelsonLabToolsInit; % initializing
@@ -204,7 +182,7 @@ if load_nelsonlabtools
 end
 
 % Intrinsic Signal Optical Imaging package
-if load_intrinsicsignal
+if params.load_intrinsicsignal
     addpath(fullfile(path2invivotools,'OpticalImaging'));
     addpath(fullfile(path2invivotools,'OpticalImaging','Arduino'));
     addpath(fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3'));
@@ -218,53 +196,17 @@ ergpath=fullfile(path2invivotools,'ERG');
 addpath(ergpath);
 addpath(fullfile(ergpath,'usbActiveWire'));
 
+% Temp folder for work in progress
+addpath(fullfile(path2invivotools,'Temp'));
 
 % Call Psychtoolbox-3 specific startup function:
 if exist('PsychStartup','file')
     PsychStartup;
 end
 
-
-% Studies, specific analyses for studies
-if 1 % Ahmadlou & Heimel, in prep
-    addpath(fullfile(majorprefix,'Studies','SC'));
-end
-if 1 % Vangeneugden, Self et al. in prep
-    addpath(fullfile(majorprefix,'Studies','Mapmaking'));
-    addpath(fullfile(majorprefix,'Studies','Joris'));
-    addpath(fullfile(majorprefix,'Studies','Joris','TDT2ML'));
-end
-if 1 % Saiepour et al. in prep
-    addpath(fullfile(majorprefix,'Studies','OD_optogenetics'));
-end
-if 1 % Saiepour et al. in prep
-    addpath(fullfile(majorprefix,'Studies','BCat'));
-end
-if 1 % Smit-Rigter et al. in prep
-    addpath(fullfile(majorprefix,'Studies','Mitochondria'));
-end
-if 0 % Camillo, Levelt & Heimel, Frontiers in Neuroanatomy 2014
-    addpath(fullfile(majorprefix,'Studies','Calretinin'));
-end
-if 0 % bxd analysis software (Alexander Heimel)
-    addpath(fullfile(majorprefix,'Studies','bxd'));
-end
-if 0 % gephyrin analysis software (2011-2012, Alexander Heimel & Danielle van Versendaal)
-    addpath(fullfile(majorprefix,'Studies','Gephyrin'));
-end
-if 0 % Heimel et al. 2010
-    addpath(fullfile(majorprefix,'Studies','TrkB'));
-    addpath(fullfile(majorprefix,'Studies','TrkB','Model'));
-    addpath(fullfile(majorprefix,'Studies','TrkB','Model','phenomenology'));
+for i=1:length(params.load_studies)
+    addpath(genpath(fullfile(majorprefix,'Studies',params.load_studies{i})));
 end
 
-
-if ~exist('processparams_local.m','file')
-    success = copyfile(which('processparams_local_org.m'),fullfile(majorprefix,'processparams_local.m'));
-    if success
-        logmsg(['Created ' fullfile(majorprefix,'processparams_local.m')]);
-    end
-end
-logmsg('To override InVivoTools processing settings: edit processparams_local');
 
 clear

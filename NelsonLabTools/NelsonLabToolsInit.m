@@ -9,7 +9,6 @@ addpath([pwd 'ExperimentPanels']);
 addpath([pwd 'ExperimentPanels' filesep 'usefulcalls']);
 addpath([pwd 'data_extraction' filesep 'tempfuncs']);
 addpath([pwd 'data_extraction' filesep 'spike2cell']);
-addpath([pwd 'Utility']);
 addpath([pwd 'Analysis']);
 addpath([pwd 'Analysis' filesep 'lgnanalysis']);
 addpath([pwd 'Analysis' filesep 'lgnctxanalysis']);

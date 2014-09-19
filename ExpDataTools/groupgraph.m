@@ -263,6 +263,10 @@ grouplabels=shorten_bxdnames(grouplabels);
     );
 n_measures=length(r); % r{measures}{groups}[data]
 
+if isempty(flatten(r))
+    logmsg('No data');
+    return
+end
 
 
 % parse colors
@@ -382,7 +386,7 @@ if ~isempty(operator_groups)
                         (r_std{m}{og+1}*r{m}{og}/(r{m}{og+1})^2)^2);
                     diff_r_n{m}{og}=(r_n{m}{og}+r_n{m}{og+1})/2; % for degrees of freedom
                 otherwise
-                    disp(['warning: cannot compute sem for group operator ' group_operator(og)]);
+                    logmsg(['Cannot compute sem for group operator ' group_operator(og)]);
                     diff_r_std{m}{og}=nan;
             end
         end

@@ -7,46 +7,34 @@ function path=tpdatapath( record )
 %
 % check TP_ORGANIZATION for organization of the files
 %
-% 2008-2013, Alexander Heimel
+% 2008-2014, Alexander Heimel
 %
 
-% set default root
-networkroot=fullfile(networkpathbase ,'Twophoton');
+data_name = 'Twophoton';
 
-switch host
-    case 'olympus-0603301' % two-photon computer
-        localroot='D:\Data';
-    case 'wall-e' % two-photon computer
-        localroot='/home/data';
-    case 'nin343' % two-photon computer
-        localroot='C:\Data';
-    case 'nin233' % daan's desktop
-        localroot='E:\2PhotonData';
-     case 'nin192' % Laura's desktop
-         localroot='E:\Data\InVivo\Twophoton';
-    case 'MacBook-Air-van-Rosanne.local' 
-        localroot = '/Users/rrmtuip/Documents/Data/InVivo/TwoPhoton';
-    case 'HuubTerra' % your name btw everything after % percentage is always a comment
-        localroot='C:\Data'; % for example
-    case 'nin266' % mariangela laptop
-        switch record.experiment
-            case '12.81 mariangela'
-                localroot='E:\';
-            otherwise
-                localroot='C:\Data\InVivo\Twophoton';
-        end
-    otherwise
-        switch computer
-            case 'MACI64' % i.e. Daan's home mac
-                localroot = fullfile('/Users/daniellevanversendaal/Data');
-            case 'MACI' % Daan laptop
-                localroot = fullfile('/Users/Dropbox/Data');
-            case {'PCWIN','PCWIN64'}
-                localroot='C:\Data\InVivo\Twophoton';
-            case {'GLNX86','GLNXA64'}
-                localroot = '/home/data/InVivo/Twophoton';
-        end
+% set default root
+networkroot = fullfile(networkpathbase ,data_name);
+
+if ispc
+    localbase = 'C:';
+elseif isunix
+    localbase = '/home';
+elseif ismac
+    localbase = '/Users';
 end
+
+
+localroot = fullfile(localbase,'data','InVivo',data_name);
+if ~exist(localroot,'dir')
+    localroot = fullfile(localbase,'data');
+end
+if ~exist(localroot,'dir')
+    localroot = '.';
+end
+
+% check for local override
+
+
 
 if nargin==1
     if isempty(record.mouse)
@@ -65,8 +53,6 @@ if nargin==1
         if ~exist(path,'dir')
             % fall back to local path
             path=fullfile(localroot,record.experiment,record.mouse,record.date,record.epoch);
-        else
-           % disp(['TPDATAPATH: No local data in ' path '. Taking network data.']);
         end       
     end        
 else
