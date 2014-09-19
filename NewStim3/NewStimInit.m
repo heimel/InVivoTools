@@ -1,6 +1,4 @@
-function NewStimInit;
-
-cpustr = computer;
+function NewStimInit
 
 pwd = which('NewStimInit');
 
@@ -28,6 +26,8 @@ addpath([pwd 'Stimuli']);
 addpath([pwd 'Stimuli' filesep 'Display objs']);
 addpath([pwd 'Stimuli' filesep 'CustomProcs']);
 addpath([pwd 'NewStimTestProcs']);
+addpath([pwd 'ReceptiveFieldMapper']); 
+
 
 eval(['NewStimGlobals;'])
 NewStimStimList = {};
@@ -55,9 +55,12 @@ b = which('PsychtoolboxVersion');
 
 if ~isempty(b),
     b = PsychtoolboxVersion;
-    if isnumeric(b), NS_PTBv = b;
-    else, NS_PTBv = eval(b(1)); end;
-else,
+    if isnumeric(b)
+        NS_PTBv = b;
+    else
+        NS_PTBv = eval(b(1));
+    end;
+else
     NS_PTBv = 0;
 end;
 
@@ -72,6 +75,5 @@ if NS_PTBv,
 	%screen('Preference','Backgrounding',0); % we'll try this
 end;
 
-eval(['NewStimObjectInit']);
+eval('NewStimObjectInit');
 
-clear cpustr;
