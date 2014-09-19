@@ -13,7 +13,7 @@ function path=tpdatapath( record )
 data_name = 'Twophoton';
 
 % set default root
-networkroot = fullfile(networkpathbase ,data_name);
+params.tpdatapath_networkroot = fullfile(networkpathbase ,data_name);
 
 if ispc
     localbase = 'C:';
@@ -23,18 +23,17 @@ elseif ismac
     localbase = '/Users';
 end
 
-
-localroot = fullfile(localbase,'data','InVivo',data_name);
-if ~exist(localroot,'dir')
-    localroot = fullfile(localbase,'data');
-end
-if ~exist(localroot,'dir')
-    localroot = '.';
+params.tpdatapath_localroot = fullfile(localbase,'data','InVivo',data_name);
+if ~exist(params.tpdatapath_localroot,'dir')
+    params.tpdatapath_localroot = fullfile(localbase,'data');
 end
 
-% check for local override
+% check for local overrides
+params = processparams_local(params);
 
-
+if ~exist(params.tpdatapath_localroot,'dir') % fall back on current folder
+    params.tpdatapath_localroot = '.';
+end
 
 if nargin==1
     if isempty(record.mouse)
@@ -47,20 +46,20 @@ if nargin==1
     end
     
     % first try local root
-    path=fullfile(localroot,record.experiment,record.mouse,record.date,record.epoch);
+    path=fullfile(params.tpdatapath_localroot,record.experiment,record.mouse,record.date,record.epoch);
     if ~exist(path,'dir')
-        path=fullfile(networkroot,record.experiment,record.mouse,record.date,record.epoch);
+        path=fullfile(params.tpdatapath_networkroot,record.experiment,record.mouse,record.date,record.epoch);
         if ~exist(path,'dir')
             % fall back to local path
-            path=fullfile(localroot,record.experiment,record.mouse,record.date,record.epoch);
+            path=fullfile(params.tpdatapath_localroot,record.experiment,record.mouse,record.date,record.epoch);
         end       
     end        
 else
-    path=localroot;
+    path=params.tpdatapath_localroot;
     if ~exist(path,'dir')
-        path=networkroot;
+        path=params.tpdatapath_networkroot;
         if ~exist(path,'dir')
-            path=localroot;
+            path=params.tpdatapath_localroot;
         end
     end
 end

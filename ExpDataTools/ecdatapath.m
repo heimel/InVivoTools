@@ -2,7 +2,7 @@ function datapath=ecdatapath( record )
 %ECDATAPATH constructs the datapath for ec-experiments
 %
 %
-% 2007 Alexander Heimel
+% 2007-2014 Alexander Heimel
 %
 
 if nargin<1
@@ -11,18 +11,22 @@ if nargin<1
 end
 
 % first check locally
-base = fullfile(localpathbase,'Electrophys',capitalize(record.setup));
-if ~exist(base,'dir')
-    disp(['LOCALPATHBASE: Folder ' base ' does not exist.']);
-    base=fullfile(networkpathbase,'Electrophys',capitalize(record.setup));
+params.ecdatapath_localroot = fullfile(localpathbase,'Electrophys',capitalize(record.setup));
+
+% check for local overrides
+params = processparams_local(params);
+
+if ~exist(params.ecdatapath_localroot,'dir')
+    logmsg(['Folder ' params.ecdatapath_localroot ' does not exist.']);
+    params.ecdatapath_localroot = fullfile(networkpathbase,'Electrophys',capitalize(record.setup));
 end
 
-switch record.setup
-    case 'antigua'
-%           datapath=fullfile(base,record.date(1:4),record.date(6:7),record.date(9:10),'Mouse');
-datapath=fullfile('Z:\InVivo\Electrophys\Antigua',record.date(1:4),record.date(6:7),record.date(9:10),'Mouse');
+datapath=fullfile(params.ecdatapath_localroot,record.date(1:4),record.date(6:7),record.date(9:10));
+if ~exist(datapath,'dir')
+    switch record.setup
+        case 'antigua'
+            datapath=fullfile('Z:\InVivo\Electrophys\Antigua',record.date(1:4),record.date(6:7),record.date(9:10),'Mouse');
         case 'nin380'
-        datapath=fullfile('V:\InVivo\Electrophys\Nin380',record.date(1:4),record.date(6:7),record.date(9:10)); % temporarily
-    otherwise
-        datapath=fullfile(base,record.date(1:4),record.date(6:7),record.date(9:10));
+            datapath=fullfile('V:\InVivo\Electrophys\Nin380',record.date(1:4),record.date(6:7),record.date(9:10));
+    end
 end

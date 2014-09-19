@@ -1,4 +1,4 @@
-function params = processparams_local(params)
+function params = processparams_local(params) %#ok<FNDEF>
 %PROCESSPARAMS_LOCAL temporarily and locally override analysis parameters
 %
 %  Do not edit processparams_local_org.m but make a copy
@@ -11,6 +11,10 @@ function params = processparams_local(params)
 % Changes here
 %
 % e.g.
+% params.tpdatapath_localroot = ''
+% params.tpdatapath_networkroot = ''
+% params.ecdatapath_localroot = '';  
+%
 % params.pre_window = [-Inf 0];
 %
 
