@@ -1,12 +1,12 @@
-function [measures,meanwaves,waves_time,powers] = analyse_veps(record,smrfile,stimsfile,measures,verbose)
+function [measures,meanwaves,waves_time,powers] = analyse_veps(record,smrfile,verbose)
 %ANALYSE_VEPS analyses lfp record for power spectra
 %
-%  [measures,meanwaves,waves_time,powers] =  analyse_veps(record,smrfile,stimsfile,measures,verbose)
+%  [measures,meanwaves,waves_time,powers] =  analyse_veps(record,smrfile,verbose)
 %
 %      VERBOSE if 0 no graphical output at all, if 1 progress bar, if 2
 %         many figures
 %
-% 2012-2013, Alexander Heimel
+% 2012-2014, Alexander Heimel, Mehran Ahmadlou
 %
 
 if nargin<5
@@ -22,9 +22,10 @@ powers = {};
 waves_time = [];
 powerm = [];
 
-
 bands = oscillation_bands;
 band_names = fields(oscillation_bands);
+
+[stims,stimsfile] = getstimsfile(record);
 
 switch record.electrode
     case 'CSO'
@@ -34,7 +35,7 @@ switch record.electrode
         analyse_wavecoh(record,stimsfile); % contact point distance for SC 50, for VC 100
         return
     case 'wspectrum'
-        Wlfp = analyse_waveletlfp(record,stimsfile) % contact point distance for SC 50, for VC 100
+        Wlfp = analyse_waveletlfp(record,stimsfile); % contact point distance for SC 50, for VC 100
         return
     case  'wtcrosscorr'
         analyse_wavecrosscorr(record,stimsfile,60,90,5,8)
@@ -43,14 +44,12 @@ end
 
 switch record.stim_type
     case 'sg'
-        disp([upper(mfilename) ': LFP analysis of sg is not implemented.']);
+        logmsg('LFP analysis of sg is not implemented.');
         return
 end
 
 process_params = ecprocessparams(record);
-
 [recorded_channels,area] = get_recorded_channels( record );
-
 channels2analyze = get_channels2analyze( record );
 
 if isempty(channels2analyze)
@@ -58,12 +57,9 @@ if isempty(channels2analyze)
 end
 
 if strcmp(record.setup,'antigua')~=1 && ~exist(stimsfile,'file')
-    errordlg(['Cannot find ' stimsfile ],'ANALYSE_VEPS');
+    errormsg(['Cannot find ' stimsfile ]);
     return
 end
-
-stims = load(stimsfile);
-%save('ST.mat','stims')
 
 par = getparameters(stims.saveScript);
 
@@ -163,7 +159,7 @@ end
 % [results.waves,line2data] = remove_line_noise(results.waves,1/results.sample_interval);
 
 if isempty(results) || isempty(results.waves)
-    disp('ANALYSE_VEPS: No data present');
+    logmsg('No data present');
     return
 end
 sample_interval = results.sample_interval; % s

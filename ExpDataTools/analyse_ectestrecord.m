@@ -90,19 +90,18 @@ switch lower(record.setup)
             channels2analyze = 1:EVENT.snips.Snip.channels;
         end
         logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
-        total_length=EVENT.timerange(2)-EVENT.strons.tril(1);
+        total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
         clear('WaveTime_Fpikes');
         if ~isunix
-            for i=1:length(channels2analyze)
-                WaveTime_fpikes.time=[];
-                WaveTime_fpikes.data=[];
-                for kk=1:ceil(total_length/60)
-                    EVENT.Triallngth = min(60,total_length-60*(kk-1));
-                    WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
-                    WaveTime_fpikes.time = [WaveTime_fpikes.time;WaveTime_chspikes(channels2analyze(i),1).time];
-                    WaveTime_fpikes.data = [WaveTime_fpikes.data;WaveTime_chspikes(channels2analyze(i),1).data];
+            % cut in 60s blocks
+            WaveTime_Fpikes = struct('time',cell(1:length(channels2analyze),1),'data',[]); 
+            for kk=1:ceil(total_length/60)
+                EVENT.Triallngth = min(60,total_length-60*(kk-1));
+                WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
+                for i=1:length(channels2analyze)
+                    WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(channels2analyze(i),1).time];
+                    WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(channels2analyze(i),1).data];
                 end
-                WaveTime_Fpikes(i,1) =  WaveTime_fpikes;
             end
         else % linux
             EVENT.CHAN = channels2analyze;

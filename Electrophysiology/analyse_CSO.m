@@ -1,5 +1,7 @@
 function CSO = analyse_CSO(record,stimsfile,contdist,verbose)
 %ANALYSE_CSO, works just if record.setup is antigua
+%
+% 2014 Mehran Ahmadlou
 
 if nargin<5
     verbose = [];
@@ -13,7 +15,7 @@ process_params = ecprocessparams(record);
 % params.post_window = [0 1.5];
 
 if strcmp(record.setup,'antigua')~=1 && ~exist(stimsfile,'file')
-    errordlg(['Cannot find ' stimsfile ],'ANALYSE_VEPS');
+    errormsg(['Cannot find ' stimsfile ]);
     return
 end
 

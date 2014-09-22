@@ -19,6 +19,14 @@ function SIG = signalsTDT(EVENT, Trials)
 %
 %Chris van der Togt, 11/11/2005
 %updated 08/04/2008
+
+if isunix
+    logmsg('Using signalsTDT on linux.');
+    SIG = signalsTDT_linux(EVENT, Trials);
+    return
+end
+
+
 SIG = [];
 
 % matfile = fullfile(EVENT.Mytank,EVENT.Myblock); %name of file used to save lfp structure
