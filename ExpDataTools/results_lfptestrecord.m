@@ -32,6 +32,10 @@ switch record.electrode
             subplot(F,1,i);imagesc(-1:1,8:1,CSO{1,i},[-0.0001 0.0001]);
         end
         return
+    case 'coherence'
+        return
+    case 'wtcrosscorr'
+        return
 end
 % channels = [1,2];
 saved_data = fullfile(ecdatapath(record),record.test,['saved_data',num2str(channels)]);

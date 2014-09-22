@@ -31,10 +31,13 @@ switch record.electrode
         CSO = analyse_CSO(record,stimsfile,50,verbose); % contact point distance for SC 50, for VC 100
         return
     case 'coherence'
-        WCoh = analyse_wavecoh(record,stimsfile); % contact point distance for SC 50, for VC 100
+        analyse_wavecoh(record,stimsfile); % contact point distance for SC 50, for VC 100
         return
     case 'wspectrum'
         Wlfp = analyse_waveletlfp(record,stimsfile) % contact point distance for SC 50, for VC 100
+        return
+    case  'wtcrosscorr'
+        analyse_wavecrosscorr(record,stimsfile,60,90,5,8)
         return
 end
 

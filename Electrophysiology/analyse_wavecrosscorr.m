@@ -1,4 +1,4 @@
-function analyse_wavecoh(record,stimsfile)
+function analyse_wavecrosscorr(record,stimsfile,a1,b1,a2,b2)
 %ANALYSE_CSO, works just if record.setup is antigua
 
 % if nargin<3
@@ -8,6 +8,7 @@ function analyse_wavecoh(record,stimsfile)
 %     verbose = 1;
 % end
 cc=0;
+WTcorr=[];
 for kk = [5 6]
     for ll = [13 14]
         channels_to_read1=kk;
@@ -118,8 +119,8 @@ for kk = [5 6]
         
         parameter_values = parameter_values{1};
         
-%         numLFPchannels1=length(results.waves1);
-%         numLFPchannels2=length(results.waves2);
+        %         numLFPchannels1=length(results.waves1);
+        %         numLFPchannels2=length(results.waves2);
         numLFPchannels1=1;
         numLFPchannels2=1;
         n_conditions = length(parameter_values);
@@ -185,17 +186,22 @@ for kk = [5 6]
                 end
                 WAVE_COH=0;
                 for k=ind
-                    [wave_coh,period] = COHcompute(waves1{k},waves2{k},waves_time);
+                    [wave_coh,period] = WTCORRcompute(waves1{k},waves2{k},a1,b1,a2,b2,waves_time);
                     WAVE_COH = WAVE_COH + wave_coh;
                 end;
                 WAVE_COH = WAVE_COH/length(ind);
                 Wcoh = [Wcoh,WAVE_COH];
                 %     waves_std(i,:) = std(waves(ind,:),1);
             end
-            fname = ['coh_data_trig',num2str(t),',',num2str(channels_to_read1),',',num2str(channels_to_read2),'.mat'];
-            wavefile=fullfile(ecdatapath(record),record.test,fname);
-            save(wavefile,'Wcoh','period','waves_time','channels_to_read1','channels_to_read2');
         end
+        WTcorr=[WTcorr;Wcoh];
+        
         waitbar(cc/4);
     end
 end
+
+fname = ['wtcorr_data,',num2str(a1),',',num2str(b1),',',num2str(a2),',',num2str(b2),'.mat'];
+wavefile=fullfile(ecdatapath(record),record.test,fname);
+save(wavefile,'WTcorr','period','waves_time','a1','b1','a2','b2');
+
+pause(10)
