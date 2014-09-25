@@ -22,7 +22,7 @@ majorprefix = fileparts(mfilename('fullpath'));
 addpath(fullfile(majorprefix));
 
 if ~exist('processparams_local.m','file')
-    success = copyfile(which('processparams_local_org.m'),fullfile(majorprefix,'processparams_local.m'));
+    success = copyfile(fullfile(majorprefix,'ExpDataTools','processparams_local_org.m'),fullfile(majorprefix,'processparams_local.m'));
     if success
         disp([ upper(mfilename) ': Created ' fullfile(majorprefix,'processparams_local.m')]);
     end
@@ -180,6 +180,8 @@ end
 
 % load Study specific folders
 studiespath = cellfun(@(x) fullfile(majorprefix,'Studies',x),params.load_studies,'UniformOutput',false);
-addpath(studiespath{:});
+if ~isempty(studiespath)    
+    addpath(studiespath{:});
+end
 
 clear
