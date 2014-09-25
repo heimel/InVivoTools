@@ -251,11 +251,5 @@ end
 % remove fields that take too much memory
 record.measures = rmfields(record.measures,{'psth_tbins','psth_response'});
 
-function s = rmfields(s,f)
-for i=1:length(f)
-    if isfield(s,f{i})
-        s = rmfield(s,f{i});
-    end
-end
 
 

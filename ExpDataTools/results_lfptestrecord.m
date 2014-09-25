@@ -1,32 +1,22 @@
 function results_lfptestrecord( record )
-%RESULTS_LFPTESTRECORD
+%RESULTS_LFPTESTRECORD shows results for lfp test record
 %
-%  RESULTS_LFPTESTRECORD( record )
+%  RESULTS_LFPTESTRECORD( RECORD )
 %
-%  2009-2012, Alexander Heimel
+%  2009-2014, Alexander Heimel
 %
-global measures analysed_stimulus powerm channels waves_time
+global measures analysed_stimulus powerm waves_time
 
-measures = record.measures;
-
-% channels = get_channels2analyze( record );
-
-NUMLFP = length(measures);
+measures = merge_measures_from_disk(record);
+measures = select_measures_by_channel( measures, record);
 
 datapath = ecdatapath(record);
-stims = getstimsfile(record);
-% stimsfile = fullfile(datapath,record.test,'stims.mat');
-% if exist(stimsfile,'file')
-%     stims = load(stimsfile);
-% else
-%     stims = [];
-% end
 
-switch record.electrode
+switch record.analysis
     case 'CSO'
         MatFile=fullfile(datapath,record.test,'CSO_data.mat'); % contact point distance for SC 0.05, for VC 0.10
         load(MatFile)
-        F=length(CSO);
+        F=length(CSO); %#ok<USENS>
         figure
         for i=1:F
             subplot(F,1,i);imagesc(-1:1,8:1,CSO{1,i},[-0.0001 0.0001]);
@@ -37,26 +27,33 @@ switch record.electrode
     case 'wtcrosscorr'
         return
 end
-% channels = [1,2];
-saved_data = fullfile(ecdatapath(record),record.test,['saved_data',num2str(channels)]);
-if exist([saved_data,'.mat'],'file')
-    load(saved_data);
+
+subheight = 150; % pixel
+subwidth = 200; % pixel
+titleheight = 40; %pixel
+screensize = get(0,'ScreenSize');
+
+if isempty(measures)
+    logmsg('No results in measures');
+    return
 end
 
-for lfpch=1:NUMLFP
-    
-    tit = ['LFP ' ' ' num2str(lfpch) ' ' record.stim_type ' ' record.mouse ' ' record.date ' ' record.test ];
+if iscell(measures(1).range) && length(measures(1).range)==2
+            triggername{1} = ', Light off';
+            triggername{2} = ', Light on';
+elseif iscell(measures(1).range) && length(measures(1).range)>2
+    for t=1:length(powerm)
+        triggername{t} = [', Trigger ' num2str(t)];
+    end
+else
+    triggername{1} = '';
+end
+
+for lfpch=1:length(measures)
+    tit = ['LFP ' record.stim_type ' ' record.mouse ' ' record.date ' ' record.test  ];
+    tit = [tit ' # '  num2str(measures(lfpch).channel) ];
     tit(tit=='_') = '-';
-    
-    
-    subheight=150; % pixel
-    subwidth=200; % pixel
-    titleheight=40; %pixel
-    
-    screensize=get(0,'ScreenSize');
-    
-    
-    
+        
     % open figure
     h.fig=figure;
     height=subheight;
@@ -70,14 +67,12 @@ for lfpch=1:NUMLFP
     subplot('position',[0 reltitlepos 1 1-reltitlepos]);
     axis off
     h.title=text(0.5,0.5,tit,'HorizontalAlignment','center');
-    
     relsubheight=reltitlepos;
     
     % text info
     subplot('position',...
         [ 0 reltitlepos-1*relsubheight 1/4 relsubheight]);
     axis off
-    
     
     switch record.stim_type
         case 'io'
@@ -86,36 +81,36 @@ for lfpch=1:NUMLFP
             y=printtext(subst_ctlchars(['paired pulse ratio: ' num2str(measures.paired_pulse_ratio,2)]),y);
             y=printtext(subst_ctlchars(['last pulse ratio: ' num2str(measures.last_pulse_ratio,2)]),y);
     end
-    
-    
-    if exist('waves','var') && ~isempty(waves)
+      
+    if isfield(measures(lfpch),'waves') && ~isempty(measures(lfpch).waves)
         % raw traces
         subplot('position',...
             [ 1/3+0.01 reltitlepos-(1-0.2)*relsubheight 1/3*0.96 relsubheight*0.8]);
         hold on
         
         % zero at t=0
-        ind_nul=findclosest(waves_time,0);
+        waves_time = measures(lfpch).waves_time;
+        ind_nul = findclosest(waves_time,0);
         
+        waves = measures(lfpch).waves;
         if ~iscell(waves)
             waves = {waves};
         end
         
         clr = 'kbrg';
-        for i = 1:length(waves)
-            wavs=waves{1,i}{lfpch,1}';
-            wavs=wavs-repmat(wavs(ind_nul,:),size(wavs,1),1);
-            mean_wavs=mean(wavs,2);
-            h.mean=plot(waves_time,mean_wavs,clr(i));
+        for t = 1:length(waves) % triggers
+            wavs = waves{t}';
+            wavs = wavs-repmat(wavs(ind_nul,:),size(wavs,1),1);
+            mean_wavs = mean(wavs,2);
+            h.mean = plot(waves_time,mean_wavs,clr(t));
         end
         
         ind_post_stim=findclosest(waves_time,0.005);
         
         ax=axis;
-        ax([1 2])=[waves_time(1),waves_time(end)]; %#ok<COLND>
+        ax([1 2])=[waves_time(1),waves_time(end)];
         ax(3)=min(min(wavs(ind_post_stim:end,:)))-0.1;
         ax(4)=max(max(wavs(ind_post_stim:end,:)))+0.1;
-        
         axis(ax);
         xlabel('Time (s)');
         ylabel('Mean response (mV)');
@@ -125,20 +120,6 @@ for lfpch=1:NUMLFP
     subplot('position',...
         [ 2/3+0.01 reltitlepos-(1-0.2)*relsubheight 1/3*0.96 relsubheight*0.8]);
     hold on;box off
-    
-    switch record.mouse(1:min(5,end))
-        case {'12.28','11.51'}
-            triggername{1} = ', Light off';
-            triggername{2} = ', Light on';
-        otherwise
-            if exist('powerm','var') && length(powerm)>1
-                for t=1:length(powerm)
-                    triggername{t} = [', Trigger ' num2str(t)];
-                end
-            else
-                triggername{1} = '';
-            end
-    end
     
     band_names = fields(oscillation_bands);
     n_bands = length(band_names);
@@ -156,53 +137,45 @@ for lfpch=1:NUMLFP
             axis square
             set(gca,'XTick',(1:size(measures.norm_curve,2)));
         otherwise
-            if exist('waves','var')
-                set(h.fig,'Name',[record.test ' - VEP'],'Numbertitle','off');
-                
+            if isfield(measures,'waves') && ~isempty(measures(lfpch).waves)
+                name = [record.test ' - VEP # ', num2str(measures(lfpch).channel)];
+                set(h.fig,'Name',name,'Numbertitle','off');
                 clr = 'kbrg';
                 % plot again, shorter period, different y-offsets
-                for i = 1:length(waves)
-                    wavs=waves{i}{lfpch,1}';
+                for t = 1:length(waves)
+                    wavs=waves{t}';
                     wavs=wavs-repmat(wavs(ind_nul,:),size(wavs,1),1);
                     wavs = wavs + repmat( (1:size(wavs,2))*0.3,size(wavs,1),1);
-                    plot(waves_time,wavs,clr(i));
+                    plot(waves_time,wavs,clr(t));
                     hold on;
                 end
                 xlim([-0.1 1]);
                 set(gca,'ytick',[]);
-                
             end
-    end
-end;
-
-switch record.stim_type
-    case 'io'
-    case 'pp'
-    otherwise
-        powerms = powerm;
-        if ~iscell(powerms)
-            powerms = {powerms};
-        end
-        for lfpch=1:NUMLFP
+            
+            powerms = measures(lfpch).powerm;
+            if ~iscell(powerms)
+                powerms = {powerms};
+            end
             n_conditions = length(measures(lfpch).range{1,1});
             xlabs = cell(1,n_conditions);
             for t = 1:length(powerms)
-                name = [record.test ' - Power' triggername{t} ,' LFP # ', num2str(lfpch)];
-                powerm = powerms{1,t}{lfpch,1};
+                name = [record.test ' - Power' triggername{t} ,' LFP # ', num2str(measures(lfpch).channel)];
+                powerm = powerms{t};
+                
                 for c=1:n_conditions
                     switch measures(1).variable
                         case 'contrast'
-                            xlabs{c} = [num2str(measures(lfpch).range{1,t}(c)*100) '%'];
+                            xlabs{c} = [num2str(measures(lfpch).range{t}(c)*100) '%'];
                         otherwise
-                            xlabs{c} = [num2str(measures(lfpch).range{1,t}(c)) '%'];
+                            xlabs{c} = [num2str(measures(lfpch).range{t}(c))];
                     end
                 end
                 plotpower(name,powerm,xlabs,measures,t,lfpch)
             end % trigger t
             
-            
             if length(powerms)==1
-                name = [record.test ' - Tuning',' LFP # ',num2str(lfpch)];
+                name = [record.test ' - Tuning',' LFP # ',num2str(measures(lfpch).channel)];
                 plottuning(name,measures,1,lfpch);
             else
                 for t1 = 1:length(powerms)
@@ -215,7 +188,7 @@ switch record.stim_type
             
             if isfield(measures,'gamma_KfdM')
                 for t = 1:length(powerms)
-                    figure('Name',['Complexity, randomness, LFP # ' num2str(lfpch) ' ' triggername{t}],'NumberTitle','off')
+                    figure('Name',['Complexity, randomness, LFP # ' num2str(measures(lfpch).channel) ' ' triggername{t}],'NumberTitle','off')
                     for b=1:n_bands
                         band = band_names{b};
                         subplot(5,3,3*(b-1)+1);plot(measures(lfpch).range{t},measures(lfpch).([band '_KfdM']){t},'b');title('KFD');ylabel(band)
@@ -224,19 +197,10 @@ switch record.stim_type
                     end;
                 end
             end
-
-            
-            % figure;
-            % for f = 1:length(band_names)
-            %     band = band_names{f};
-            %     subplot(length(band_names),1,f);
-            %     plot(measures.range,squeeze(measures.([band '_power_ers']){1,1}));
-            %     title(['ERD/ERS ',band])
-            % end;
             
             if isfield(measures,'evoked_crossfreq_post')
                 for t = 1:length(powerms)
-                    figure('Name',['evoked_crossfreq_post'' LFP # ' num2str(lfpch)],'NumberTitle','off')
+                    figure('Name',['evoked_crossfreq_post'' LFP # ' num2str(measures(lfpch).channel)],'NumberTitle','off')
                     sij=0;
                     numplot=(length(band_names)^2-length(band_names))/2;
                     for i=1:length(band_names)-1
@@ -251,11 +215,9 @@ switch record.stim_type
                 end
             end
             
-            
-            
             if isfield(measures,'evoked_crossfreq_prepost')
                 for t = 1:length(powerms)
-                    figure('Name',['evoked_crossfreq_prepost'' LFP # ' num2str(lfpch)],'NumberTitle','off')
+                    figure('Name',['evoked_crossfreq_prepost'' LFP # ' num2str(measures(lfpch).channel)],'NumberTitle','off')
                     sij=0;
                     numplot=(length(band_names)^2-length(band_names))/2;
                     for i=1:length(band_names)-1
@@ -269,26 +231,13 @@ switch record.stim_type
                     end
                 end
             end
-            
-        end
-end
-% Col=[0,0,1;1,0,0;0,1,0;.5,.2,0;0,0,0];
-% figure;
-% for i=1:length(band_names)
-%     band = band_names{i};
-%     subplot(2,2,i);
-%     for c = 1:n_conditions
-%         plot(measures.([band '_evoked_time']){1,1}(:,c),'Color',Col(c,:));hold on;
-%         title(['event related potential ',band]);
-%     end
-%     legend('C1 (low)','C2','C3','C4','C5 (high');
-% end
-
+    end
+end % channel lfpch
 
 evalin('base','global measures');
 evalin('base','global analysed_stimulus');
 analysed_stimulus = getstimsfile(record);
-disp('RESULTS_LFPESTRECORD: Measures available in workspace as ''measures'', stimulus as ''analysed_stimulus''.');
+logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_stimulus''.');
 
 
 
@@ -432,8 +381,8 @@ for c=1:n_conditions
     % power curves
     h.power = subplot(3,n_conditions,1*n_conditions+c);
     hold on
-    plot(powerm.freqs_pre,powerm.power_pre(:,c),'k')
-    plot(powerm.freqs_post,powerm.power_post(:,c),'r')
+    plot(powerm.freqs,powerm.power_pre(:,c),'k')
+    plot(powerm.freqs,powerm.power_post(:,c),'r')
     xlim([5 90]);
     set(gca,'xscale','log');
     set(gca,'xtick',[ 5 10 20 40 80]);

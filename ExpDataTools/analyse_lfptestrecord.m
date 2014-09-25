@@ -17,16 +17,12 @@ end
 
 datapath = ecdatapath(record);
 smrfile=fullfile(datapath,record.test,'data.smr');
-stimsfile=fullfile(datapath,record.test,'stims.mat');
 
 measures = record.measures;
 
-waves = [];
-waves_time = [];
-powerm = [];
-
 switch record.stim_type
     case 'io'
+        logmsg('io analysis is out of date.');
         pre_ttl=0.02; % s
         post_ttl=0.04; % s
         results = importspike2_lfp(smrfile,record.stim_type,pre_ttl,post_ttl);
@@ -94,7 +90,12 @@ switch record.stim_type
                 save(wavefile,'waves','waves_time','powerm');
             end
         end
+        if ~isempty(measures)
+            record.measures = measures;
+            record.analysed=datestr(now);
+        end
     case 'pp' % paired pulse
+        logmsg('pp analysis is out of date.');
         pre_ttl = 0.03; % in s
         post_ttl = 0.3; % in s
         results = importspike2_lfp(smrfile,record.stim_type,pre_ttl,post_ttl);
@@ -117,7 +118,7 @@ switch record.stim_type
         high_ind=find(results.stim_waves{1}(1,:)>max(results.stim_intensities{1}(1,:))/2);
         dif_seq=high_ind(2:end)-high_ind(1:end-1);
         ind_start_pulses=high_ind([1 find(dif_seq>1)+1]);
-                
+        
         % remove stimulus artefact
         start_pulse_times=waves_time(ind_start_pulses);
         ind_stim=[];
@@ -172,19 +173,17 @@ switch record.stim_type
             wavefile=fullfile(datapath,record.test,'saved_data.mat');
             save(wavefile,'waves','waves_time','powerm');
         end
+        if ~isempty(measures)
+            record.measures = measures;
+            record.analysed=datestr(now);
+        end
     otherwise % visual stimuli
-        [measures,waves,waves_time,powerm] = analyse_veps(record,smrfile,verbose);
+        record = analyse_veps(record,verbose);
 end
 
-% add depth
-for i=1:length(measures)
-    measures(i).depth = record.depth-record.surface;
-end
 
-% admin for record
-if ~isempty(measures)
-    record.measures = measures;
-    logmsg(['Finished analysis mouse=' record.mouse ...
-        ', date=' record.date ', test=' record.test]);
-    record.analysed=datestr(now);
-end
+
+
+
+logmsg(['Analysed mouse=' record.mouse ...
+    ', date=' record.date ', test=' record.test]);

@@ -8,13 +8,12 @@ function record=analyse_ectestrecord(record,verbose)
 if nargin<2
     verbose = [];
 end
-
 if isempty(verbose)
     verbose = true;
 end
 
 if strcmp(record.datatype,'ec')~=1
-    warning('InVivoTools:datatypeNotImplemented',['datatype ' record.datatype ' is not implemented.']);
+    errormsg(['datatype ' record.datatype ' is not implemented.']);
     return
 end
 
@@ -41,12 +40,6 @@ if isempty(channels2analyze)
     channels2analyze = recorded_channels;
 end
 
-if length(record.mouse)>5 && length(find(record.mouse=='.'))>1
-    protocol = record.mouse(1:5);
-else
-    protocol = '';
-end
-
 WaveTime_Spikes = struct([]);
 switch lower(record.setup)
     case 'antigua'
@@ -54,29 +47,13 @@ switch lower(record.setup)
         EVENT.Myblock = record.test;
         EVENT = importtdt(EVENT);
         if ~isfield(EVENT,'strons')
-            logmsg(['No triggers present in ' recordfilter(record)]);
+            errormsg(['No triggers present in ' recordfilter(record)]);
             record.measures = [];
             return
         end
         
-        switch protocol
-            case '13.21'
-                if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
-                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-                    EVENT.strons.tril(1)=EVENT.strons.tril(end);
-                elseif isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1
-                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-                    EVENT.strons.tril(1)=EVENT.strons.tril(length(EVENT.strons.tril)-length(EVENT.strons.OpOn));
-                    %             EVENT.strons.tril(1)=EVENT.strons.tril(4); % just occasionally for 13.20.2.05 t-7 !!!
-                    %             EVENT.strons.OpOn=EVENT.strons.OpOn(2:end);
-                    %             EVENT.strons.OpOf=EVENT.strons.OpOf(2:end);
-                end
-            otherwise
-                if length(EVENT.strons.tril)>1
-                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-                    EVENT.strons.tril(1)=EVENT.strons.tril(end);
-                end
-        end
+        EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
+        
         EVENT.Myevent = 'Snip';
         EVENT.type = 'snips';
         EVENT.Start = 0;
@@ -85,10 +62,11 @@ switch lower(record.setup)
             errormsg(['Did not record more than ' num2str(EVENT.snips.Snip.channels) ' channels.']);
             return
         end
-        
         if isempty(channels2analyze)
             channels2analyze = 1:EVENT.snips.Snip.channels;
         end
+        EVENT.CHAN = channels2analyze;
+ 
         logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
         total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
         clear('WaveTime_Fpikes');
@@ -104,7 +82,6 @@ switch lower(record.setup)
                 end
             end
         else % linux
-            EVENT.CHAN = channels2analyze;
             WaveTime_Fpikes = ExsnipTDT(EVENT);
         end
         
@@ -134,17 +111,18 @@ switch lower(record.setup)
         
         % load stimulus starttime
         stimsfile = getstimsfile( record );
+        
         EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
         
         
         intervals=[stimsfile.start ...
             stimsfile.MTI2{end}.frameTimes(end)+10];
         % shift time to fit with TTL and stimulustimes
-        % disp('IMPORTSPIKE2: Taking first TTL for time synchronization');
+
         timeshift = stimsfile.start-EVENT.strons.tril(1);
         timeshift = timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
         
-        
+       
         cells = struct([]);
         cll.name = '';
         cll.intervals = intervals;
@@ -459,9 +437,6 @@ end % if cluster_spikes
 %end % reference r
 
 
-measuresfile = fullfile(ecdatapath(record),record.test,['_measures',num2str(channels2analyze),'.mat']);
-save(measuresfile,'measures','WaveTime_Spikes');
-
 % insert measures into record.measures
 if (length(channels2analyze)==length(recorded_channels) && all( sort(channels2analyze)==sort(recorded_channels)))...
         || ~isfield(measures,'channel')|| ~isfield(record.measures,'channel')
@@ -473,14 +448,36 @@ else
         [dummy,ind] = sort([record.measures.index]); %#ok<ASGLU>
         record.measures = record.measures(ind);
     catch me % in case measures struct definition has changed
-        logmsg(me.message);
+        switch me.identifier
+            case 'MATLAB:catenate:structFieldBad'
+                logmsg('Measures structure has changed since previous analysis. Removing previous results.');
+            otherwise
+                errormsg(me.message);
+        end
         record.measures = measures;
     end
-    
 end
 
-record = add_distance2preferred_stimulus( record );
 
+% save measures file
+measures = record.measures; %#ok<NASGU>
+measuresfilemehran = fullfile(ecdatapath(record),record.test,['_measures',num2str(channels2analyze),'.mat']);
+logmsg(['Mehran, do you need this file: ' measuresfilemehran])
+save(measuresfilemehran,'WaveTime_Spikes');
+
+% save measures file
+measuresfile = fullfile(ecdatapath(record),record.test,[record.datatype '_measures.mat']);
+measures = record.measures; %#ok<NASGU>
+try
+    save(measuresfile,'measures'); 
+catch me
+    errormsg(['Could not write measures file ' measuresfile '. ' me.message]);
+end
+
+% remove fields that take too much memory
+record.measures = rmfields(record.measures,{});
+
+record = add_distance2preferred_stimulus( record );
 record.analysed = datestr(now);
 
 return
@@ -506,3 +503,39 @@ if isfield(record,'channel_info') && ~isempty(record.channel_info)
         recorded_channels = sort( recorded_channels );
     end
 end
+
+
+
+function  tril = use_right_trigger(record,EVENT)
+usetril=regexp(record.comment,'usetril=(\s*\d+)','tokens');
+if ~isempty(usetril)
+    usetril = str2double(usetril{1}{1});
+else
+    usetril = -1; % i.e. last
+end
+
+if usetril == -1
+    if (isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1) || ...
+            (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1)
+        errormsg(['More than one trigger in ' recordfilter(record) '. Taking last. Set usetril=XX in comment to overrule']);
+    end
+end
+
+if isfield(EVENT.strons,'OpOn')
+    n_optotrigs = length(EVENT.strons.OpOn);
+else
+    n_optotrigs = 0;
+end
+
+if usetril == -1 % use last
+    tril = EVENT.strons.tril(end-n_optotrigs);
+else
+    if usetril > length(EVENT.strons.tril)
+        errormsg('Only 1 trigger available. Check ''tril='' in comment field.');
+        tril = EVENT.strons.tril(end);
+        return
+    end
+    tril = EVENT.strons.tril(usetril);
+end
+
+

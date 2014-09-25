@@ -1,12 +1,12 @@
 function SIG = signalsTDT_linux(EVENT, Trials)
-%SIG = Exd2(EVENT, Trials)
+%SIG = signalsTDT_linux(EVENT, Trials)
 %
 %Called by invivotools to retrieve lfp data (only stream data) after
 %filtering the trigger array.
 %Returns a cell format (SIG) contains N by 1 cells (N is number of the channels)
 %each cell contains samples from onset of a stimulus with the length and
 %prestimulus time determined in analyse_veps
-
+%
 %
 %usage in analyse_veps m-file:
 %define the following variables in EVENT
@@ -25,15 +25,16 @@ if nargin<1
     logmsg('Debugging example')
     EVENT.Mytank = '~/Desktop/TDT_invivotools';
     EVENT.Mytank = '/home/data/InVivo/Electrophys/Antigua/2013/12/18/Mouse';
-    EVENT.Myblock = 't-2';
+    EVENT.Myblock = 't-1';
     EVENT.Myevent = 'LFPs';
     EVENT.Start =  -2; % i.e. 2s befor stim onset
-    EVENT.Triallngth =  2+3; %i.e. 5s total trial length
-    EVENT = importtdt_linux( EVENT );
-    
-    Trials = [10; 10 ;20];
+    EVENT.Triallngth =  2+3; %i.e. 5s total trial length    
+    Trials = [10 ;20];
 end
 
+if ~isfield(EVENT,'strms')
+    EVENT = importtdt_linux( EVENT );
+end    
 
 Rt = strmatch(EVENT.Myevent, {EVENT.strms(:).name} );
 if isempty(Rt)
@@ -56,7 +57,7 @@ if ~exist(EVENT.Mytank,'dir')
     return
 end
 if isempty(EVENT.Myblock)
-    errormsg('Not block specified');
+    errormsg('No block specified');
     return
 end
 
@@ -115,11 +116,11 @@ end % trial j
 function strm = read_tdt_strm( EVENT )
 persistent strm_pers EVENT_pers
 
-if EVENT_PERS == EVENT
+if EVENT_pers == EVENT
+    %    logmsg(['Loading ' EVENT.Myevent ' from tank '  EVENT.Mytank ', ' EVENT.Myblock ' from cache.']);
     strm = strm_pers;
     return
 end
-
 
 strm = [];
 
@@ -168,4 +169,5 @@ for n=1:length(fp_loc)
 end
 fclose(tev);
 
+EVENT_pers = EVENT;
 strm_pers = strm; % to store

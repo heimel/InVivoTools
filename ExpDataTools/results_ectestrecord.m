@@ -3,7 +3,7 @@ function results_ectestrecord( record )
 %
 %  RESULTS_ECTESTRECORD( record )
 %
-%  2007-2013, Alexander Heimel
+%  2007-2014, Alexander Heimel
 %
 
 global measures analysed_script
@@ -15,8 +15,7 @@ if isfield(record,'electrode') % i.e. ecdata
 elseif isfield(record,'laser') % i.e. tpdata
     data_type = 'tp';
 else
-    errordlg('Unknown test record type.','Results_ectestrecord');
-    disp('RESULTS_ECTESTRECORD: Unknown test record type.');
+    errormsg('Unknown test record type.');
     return
 end
 
@@ -38,55 +37,11 @@ switch data_type
         rate_label = '\DeltaF/F';
 end
 
-
-
 tit(tit=='_')='-';
 
-measures_on_disk = [];
- 
-% add measures from measures file
-switch record.datatype
-    case 'tp'
-        measuresfile = fullfile(tpdatapath(record),'tp_measures');
-        if exist([measuresfile '.mat'],'file')
-            load(measuresfile);
-            measures_on_disk = measures;
-        end
-end
-measures = record.measures;
-if ~isempty(measures_on_disk) && length(measures)==length(record.measures)
-    if isstruct(measures)
-        f = fields(measures);
-    else
-        f = {};
-    end
-    if isstruct(measures_on_disk)
-        f_on_disk = fields(measures_on_disk);
-    else
-        f_on_disk = {};
-    end
-    sf = intersect(setdiff(f_on_disk,f),f_on_disk);
-    for i = 1:length(measures)
-        for f = 1:length(sf)
-            measures(i).(sf{f}) = measures_on_disk(i).(sf{f});
-        end
-    end
-end
+measures = merge_measures_from_disk( record );
+measures = select_measures_by_channel( measures, record);
 
-% select on cells on channels of interest
-if isfield(measures,'rate_spont') %ec
-    channels = get_channels2analyze( record );
-    if ~isempty(channels) && isfield(measures,'channel')
-        i = 1;
-        while i<=length(measures)
-            if ~ismember(measures(i).channel,channels)
-                measures(i) = [];
-            else
-                i = i+1;
-            end
-        end
-    end
-end
 n_cells=length(measures);
 
 subheight=150; % pixel

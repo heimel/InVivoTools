@@ -1,24 +1,10 @@
 function results_tptestrecord( record )
 %RESULTS_TPTESTRECORD returns an overview with image data
 %
-%RESULTS_TPTESTRECORD ( RECORD )
+%  RESULTS_TPTESTRECORD ( RECORD )
 %
-% 2008-2013, Alexander Heimel & Danielle van Versendaal
+%  2008-2013, Alexander Heimel & Danielle van Versendaal
 %
-
-% inf = tpreadconfig( record );
-% if isempty(inf)
-%     errordlg('No image information found.','Results');
-%     disp('RESULTS_TPTESTRECORD: No image information found.');
-%     return;
-% end
-%
-% if isfield(inf,'third_axis_name') && ~isempty(inf.third_axis_name) && lower(inf.third_axis_name(1))=='z'
-%     zstack = true;
-% else
-%     zstack = false;
-% end
-% 
 
 global measures
 
@@ -36,7 +22,7 @@ else
         measures = [];
     end
     if isempty(measures)
-        disp('RESULTS_TPTESTRECORD: Measures is empty.');
+        logmsg('Measures is empty.');
         return
     end
     table_measures = measures;
@@ -55,10 +41,8 @@ else
     end
     
     % remove all series fields
-    
-    
     show_table( table_measures );
         
     evalin('base','global measures');
-    disp('RESULTS_TPTESTRECORD: Measures available in workspace as ''measures''.');
+    logmsg('Measures available in workspace as ''measures''.');
 end

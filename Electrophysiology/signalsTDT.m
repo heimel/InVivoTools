@@ -21,11 +21,9 @@ function SIG = signalsTDT(EVENT, Trials)
 %updated 08/04/2008
 
 if isunix
-    logmsg('Using signalsTDT on linux.');
     SIG = signalsTDT_linux(EVENT, Trials);
     return
 end
-
 
 SIG = [];
 

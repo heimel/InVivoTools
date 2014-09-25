@@ -1,7 +1,7 @@
-function [measures,meanwaves,waves_time,powers] = analyse_veps(record,smrfile,verbose)
+function record = analyse_veps(record,verbose)
 %ANALYSE_VEPS analyses lfp record for power spectra
 %
-%  [measures,meanwaves,waves_time,powers] =  analyse_veps(record,smrfile,verbose)
+%  record = analyse_veps(record,verbose)
 %
 %      VERBOSE if 0 no graphical output at all, if 1 progress bar, if 2
 %         many figures
@@ -9,7 +9,7 @@ function [measures,meanwaves,waves_time,powers] = analyse_veps(record,smrfile,ve
 % 2012-2014, Alexander Heimel, Mehran Ahmadlou
 %
 
-if nargin<5
+if nargin<2
     verbose = [];
 end
 if isempty(verbose)
@@ -19,7 +19,6 @@ end
 measures = [];
 meanwaves = {};
 powers = {};
-waves_time = [];
 powerm = [];
 
 bands = oscillation_bands;
@@ -27,44 +26,40 @@ band_names = fields(oscillation_bands);
 
 [stims,stimsfile] = getstimsfile(record);
 
-switch record.electrode
+switch trim(record.analysis)
+    case ''
+        % just run default analysis
     case 'CSO'
-        CSO = analyse_CSO(record,stimsfile,50,verbose); % contact point distance for SC 50, for VC 100
+        analyse_CSO(record,stimsfile,50,verbose); % contact point distance for SC 50, for VC 100
         return
     case 'coherence'
         analyse_wavecoh(record,stimsfile); % contact point distance for SC 50, for VC 100
         return
     case 'wspectrum'
-        Wlfp = analyse_waveletlfp(record,stimsfile); % contact point distance for SC 50, for VC 100
+        analyse_waveletlfp(record,stimsfile); % contact point distance for SC 50, for VC 100
         return
     case  'wtcrosscorr'
         analyse_wavecrosscorr(record,stimsfile,60,90,5,8)
+        return
+    otherwise
+        errormsg(['Analysis ' record.analysis ' is not implemented.']);
         return
 end
 
 switch record.stim_type
     case 'sg'
         logmsg('LFP analysis of sg is not implemented.');
+        record.measures = [];
         return
 end
 
 process_params = ecprocessparams(record);
+
 [recorded_channels,area] = get_recorded_channels( record );
 channels2analyze = get_channels2analyze( record );
-
 if isempty(channels2analyze)
     channels2analyze = recorded_channels;
 end
-
-if strcmp(record.setup,'antigua')~=1 && ~exist(stimsfile,'file')
-    errormsg(['Cannot find ' stimsfile ]);
-    return
-end
-
-par = getparameters(stims.saveScript);
-
-%do = getDisplayOrder(stims.saveScript);
-%save('orders_cont_orient.mat','do')
 
 % note, taking all times from stims.mat because the number of samples
 % should be equal
@@ -91,28 +86,15 @@ stimulus_start = (stims.MTI2{1}.startStopTimes(2)-stims.start);
 pre_ttl = max_pretime-stimulus_start;
 post_ttl = stimulus_start+max_duration+max_posttime;
 
-if length(record.mouse)>5 && length(find(record.mouse=='.'))>1
-    protocol = record.mouse(1:5);
-else
-    protocol = '';
-end
 
+% loading first only to get n_samples and sampletime
 switch lower(record.setup)
     case 'antigua'
-        datapath=ecdatapath(record);
-        %         chnorder = 1:numchannel;
-        %         Tankname = 'Mouse';
-        blocknames = [record.test];
         clear EVENT
-        EVENT.Mytank = datapath;
-        EVENT.Myblock = blocknames;
+        EVENT.Mytank = ecdatapath(record);
+        EVENT.Myblock = record.test;
         EVENT = importtdt(EVENT);
         numchannel = max([EVENT.strms.channels]);
-        %         if isfield(record, 'channels') &&  ~isempty(record.channels)
-        %             channels_to_read = record.channels;
-        %         else
-        %             channels_to_read = 1:numchannel;
-        %         end
         if any(channels2analyze>EVENT.snips.Snip.channels)
             errormsg(['Did not record more than ' num2str(numchannel) ' channels.']);
             return
@@ -122,269 +104,185 @@ switch lower(record.setup)
             channels2analyze = 1:numchannel;
         end
         logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
-        %         disp(['ANALYSE_VEPS: FOR DEBUGGING ONLY CHANNELS # ',num2str(channels_to_read)]);
-        %         numchannel = 2;
+        
         EVENT.Myevent = 'LFPs';
         EVENT.Start =  -max_pretime;
         EVENT.Triallngth =  post_ttl+pre_ttl;
-        results.sample_interval=1/EVENT.strms(1,3).sampf;
-        
-        switch protocol
-            case '13.21'
-                if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
-                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-                    EVENT.strons.tril(1)=EVENT.strons.tril(end);
-                elseif isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1
-                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-                    EVENT.strons.tril(1)=EVENT.strons.tril(length(EVENT.strons.tril)-length(EVENT.strons.OpOn));
-                    %             EVENT.strons.tril(1)=EVENT.strons.tril(4); % just occasionally for 13.20.2.05 t-7 !!!
-                    %             EVENT.strons.OpOn=EVENT.strons.OpOn(2:end);
-                    %             EVENT.strons.OpOf=EVENT.strons.OpOf(2:end);
-                end
-            otherwise
-                if length(EVENT.strons.tril)>1
-                    errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
-                    EVENT.strons.tril(1)=EVENT.strons.tril(end);
-                end
-        end
-        
-        startindTDT=EVENT.strons.tril(1)-pre_ttl;
-        SIG = signalsTDT(EVENT,stimulus_start+startindTDT);
-        for j=1:length(channels2analyze)
-            results.waves{1,j}=SIG{channels2analyze(j),1};
-        end
-    otherwise
-        results = importspike2_lfp(smrfile,record.stim_type,pre_ttl,post_ttl,true,record.amplification,verbose);
-end
-% [results.waves,line2data] = remove_line_noise(results.waves,1/results.sample_interval);
+        EVENT.CHAN = channels2analyze(1);
 
-if isempty(results) || isempty(results.waves)
+        sample_interval = 1/EVENT.strms(1,3).sampf;
+        EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
+        startindTDT = EVENT.strons.tril(1)-pre_ttl;
+        SIG = signalsTDT(EVENT,stimulus_start+startindTDT);
+        n_samples = length(SIG{1,1});
+    otherwise % CED spike2
+        if isempty(channels2analyze)
+            channels2analyze = 1;
+        end
+        smrfile=fullfile(ecdatapath(record),record.test,'data.smr');
+        results = importspike2_lfp(smrfile,record.stim_type,pre_ttl,post_ttl,true,record.amplification,verbose);
+        n_samples = length(results.waves{1,channels2analyze(1)});
+        sample_interval = results.sample_interval;
+end
+
+if isempty(n_samples) || n_samples==0
     logmsg('No data present');
     return
 end
-sample_interval = results.sample_interval; % s
 Fs = 1/sample_interval; % Hz sample frequency
 
-trigger = getTrigger(stims.saveScript);
 
+
+analyse_params = varied_parameters( stims.saveScript);
+if isempty(analyse_params)
+    logmsg('No parameter varied');
+    if isempty(record.stim_type)
+        analyse_params = {'imageType'};
+    else
+        analyse_params = {record.stim_type};
+    end
+end
+
+if isempty(record.stim_type)
+    ind = [];
+else
+    ind = strmatch(record.stim_type,analyse_params);  
+end
+if isempty(ind)
+    measures.variable = analyse_params{1};
+else
+    measures.variable = analyse_params{ind};
+end
+pars = getparameters(stims.saveScript);
+parameter_values = pars.(measures.variable);
+n_conditions = length(parameter_values);
+
+logmsg(['Analyzing ' measures.variable  ', with ' record.stim_parameters ' averaging over other parameters.']);
+
+% split by trigger
+trigger = getTrigger(stims.saveScript);
 if any(diff(trigger)) % i.e. more than one type of trigger
     stimss = split_stimscript_by_trigger( stims );
 else
     stimss= stims;
 end
 
-% Analyze per varied variable
-
-[analyse_params,parameter_salues] = varied_parameters( stims.saveScript );
-if ~isempty(isletter(record.stim_parameters))
-    analyse_parameter = record.stim_parameters;
-    parameter_values = {parameter_salues{strmatch(record.stim_parameters,analyse_params)}};
-else
-    analyse_parameter = 'contrast'; % nothing varied, defaulting to contrast
-    parameter_values = {par.contrast};
+% loading lfp data
+if verbose
+    h_wait = waitbar(0,'Loading LFPs...');
 end
 
-if ~isempty(isletter(record.stim_type)) && ~strcmp(record.stim_type,'ps')  && ~strcmp(record.stim_type,'sg')
-    analyse_second_parameter = record.stim_type;
-    parameter_second_values = {parameter_salues{strmatch(record.stim_type,analyse_params)}};
-else
-    analyse_second_parameter = '';
-end;
-
-% pars2 = getparameters(pars.ps_add);
-
-parameter_values = parameter_values{1};
-
-measures.variable = analyse_parameter;
-
-numLFPchannels=length(results.waves);
-n_conditions = length(parameter_values);
-% measures.LFPnumbers=numLFPchannels;
-
-disp(['ANALYSE_VEPS: Analyzing ' analyse_parameter  ' and averaging over other parameters.']);
-for lfpch=1:numLFPchannels
+for ch = 1:length(channels2analyze)    
+    measures(ch).depth = record.depth-record.surface;
+    measures(ch).channel = channels2analyze(ch);
+    if ~isempty(area)
+        for a=1:length(area)
+            if ismember(measures(ch).channel,area(a).channels)
+                measures(ch).area = area(a).name;
+                measures(ch).relative_channel =  measures(ch).channel - min(area(a).channels) + 1;
+            end
+        end
+    end
+    
     for t = 1:length(stimss) % run over triggers
         stims = stimss(t);
-        measures(lfpch).range{1,t} = parameter_values;
+        n_stims = length(stims.MTI2);
         
-        switch lower(record.setup)
-            case 'antigua'
-                waves = zeros(length(stims.MTI2),length(results.waves{1,lfpch}));
-                waves_time = zeros(length(stims.MTI2),length(results.waves{1,lfpch}));
-            otherwise
-                waves = zeros(length(stims.MTI2),length(results.waves{1,lfpch}));
-                waves_time = zeros(length(stims.MTI2),length(results.waves{1,lfpch}));
-        end
+        measures(ch).range{1,t} = parameter_values;
         
-        %    waves(1,:) = results.waves;
-        %    waves_time(1,:) = results.waves_time - stimulus_start;
+        waves = zeros(n_stims,n_samples);
+        waves_time = zeros(n_stims,n_samples);
         
-        % loading lfp data
-        if verbose
-            h_wait = waitbar(0,'Loading LFPs...');
-        end
         for i=1:length(stims.MTI2)
+            if verbose
+                waitbar( (i-1)/length(stims.MTI2));
+            end
             stimulus_start = (stims.MTI2{i}.startStopTimes(2)-stims.start);
             if all(stims.MTI2{i}.startStopTimes==0)
-                disp('ANALYSE_VEPS: Corrupt stims.mat file or not all stimuli shown?');
+                errormsg('Corrupt stims.mat file or not all stimuli shown?');
                 return
             end
             
             pre_ttl = max_pretime-stimulus_start;
             post_ttl = stimulus_start+max_duration+max_posttime;
-            if pre_ttl>0
-                keyboard
-            end
-            
-            %             clear importspike2_lfp
             
             switch lower(record.setup)
                 case 'antigua'
-                    
-                    EVENT.Start =  -max_pretime;
+                    EVENT.Start = -max_pretime;
                     EVENT.Triallngth =  post_ttl+pre_ttl;
+                    EVENT.CHAN = channels2analyze(ch);
                     SIG = signalsTDT(EVENT,stimulus_start+startindTDT);
-                    for j=channels2analyze
-                        results.waves{1,j}=SIG{j,1};
+                    if size(SIG{1,1},1)<n_samples
+                        SIG{1,1}(end+1:n_samples) = SIG{1,1}(end);
+                    elseif size(SIG{1,1},1)>n_samples
+                        SIG{1,1}(n_samples+1:end) = [];
                     end
-                    waves(i,:) = 2000*results.waves{1,channels2analyze(lfpch)};
-                    waves_time(i,:) = -stimulus_start-pre_ttl+(0:length(waves(i,:))-1)*results.sample_interval;
+                    waves(i,:) = SIG{1,1} * record.amplification;
+                    waves_time(i,:) = -pre_ttl+(0:n_samples-1)*sample_interval  - stimulus_start;
                 otherwise
+                    if ch>1
+                        errormsg('Spike2 import only works for 1 channel');
+                        return
+                    end
                     results = importspike2_lfp(smrfile,record.stim_type,...
                         pre_ttl,post_ttl,true,record.amplification,verbose);
-                    waves(i,:) = results.waves{1,lfpch};
-                    waves_time(i,:) = results.waves_time{1,lfpch} - stimulus_start;
+                    waves(i,:) = results.waves{1,1};
+                    waves_time(i,:) = results.waves_time{1,1} - stimulus_start;
             end
-            % [results.waves,line2data] = remove_line_noise(results.waves,1/results.sample_interval);
-            
-            
-            if verbose
-                waitbar(i/length(stims.MTI2));
-            end
-        end
-        if verbose
-            close(h_wait);
-        end
+        end % stim i
+        %read all stimulus data
+        
         
         % Computing spectra, Pooling repetitions
         do = getDisplayOrder(stims.saveScript);
         stims = get(stims.saveScript);
+        stim_pars = cellfun(@getparameters,stims);
         if verbose
-            h_wait = waitbar(0,['Computing LFP [', num2str(lfpch) ,'] spectra...']);
+            waitbar( 0,'Computing spectra');
         end
-        
-        if 0 % notch 50 Hz
-            w0 = 50/(0.5*Fs);
-            bw = w0/15;
-            [bb,aa] = iirnotch(w0,bw);
-        end
-        IND={};
-        for i = 1:n_conditions % temp only doing high contrasts
-            val = parameter_values(i);
-            ind = [];
-            for j = 1:length(stims)
-                pars = getparameters(stims{j});
-                if ~isempty(analyse_second_parameter)
-                    if pars.(analyse_parameter) == val && pars.(analyse_second_parameter) == parameter_second_values{1}(1) % Mehran
-                        ind = [ind find(do==j)];
-                    end
-                else
-                    if pars.(analyse_parameter) == val
-                        ind = [ind find(do==j)];
-                    end
-                end
-                
+        for i = 1:n_conditions
+            % select stimuli matching condition
+            crit = [measures.variable '=' num2str(parameter_values(i))];
+            if ~isempty(record.stim_parameters)
+                crit = [crit ',' record.stim_parameters]; %#ok<AGROW>
             end
-            %             waves_timeVC=waves_time(ind,:);waves_VC=waves(ind,:);wavefile = ['waves_3',num2str(i),'_',num2str(channels_to_read),'.mat'];
-            %             Wavepath=fullfile(datapath,EVENT.Myblock,wavefile);
-            %             save(Wavepath,'waves_VC','waves_timeVC');
-            %         end
-            IND=[IND,ind];
+            ind_matching = find_record( stim_pars,crit);
+            ind = [];
+            for j=ind_matching
+                ind = [ind find(do==j)];
+            end
+            
+            onsettime = -mean(waves_time(ind,1));
+            if std(waves_time(ind,1))>0.001 % i.e. jitter in onser
+                logmsg('Jitter in onset times larger than 1 ms.');
+            end
             
             waves_mean(i,:) = mean(waves(ind,:),1);
             waves_std(i,:) = std(waves(ind,:),1);
             
             if process_params.entropy_analysis
-                preind = (waves_time(1,:)<0);
-                postind = (waves_time(2,:)>=0);
-                for b = 1:length(band_names)
-                    band = band_names{b};
-                    switch band
-                        case 'delta'
-                            n = 5;
-                        case 'theta'
-                            n = 7;
-                        otherwise
-                            n = 9;
-                    end
-                    
-                    [a_low,b_low] = butter(n,bands.(band)(2)/(.5*Fs),'low'); % lowpass
-                    [a_high,b_high] = butter(n,bands.(band)(1)/(.5*Fs),'high'); % highpass
-                    for f=ind
-                        w = filter(a_low,b_low,waves(f,:));
-                        w = filter(a_high,b_high,w);
-                        Wpre = w(preind);
-                        Wpost = w(postind);
-                        
-                        Kfd{b}(f) = katz(Wpost)-katz(Wpre);
-                        WENT{b}(f) = wentropy(Wpost,'shannon')-wentropy(Wpre,'shannon');
-                        
-                        Dpre = DFA(Wpre);
-                        Dpost = DFA(Wpost);
-                        Dfa{b}(f) = Dpost(1)-Dpre(1); % so only first DFA is used
-                    end
-                    
-                    measures(lfpch).([band '_KfdM']){t}(i) = mean(Kfd{b}(ind));
-                    measures(lfpch).([band '_KfdS']){t}(i) = std(Kfd{b}(ind));
-                    
-                    measures(lfpch).([band '_WENTM']){t}(i) = mean(WENT{b}(ind));
-                    measures(lfpch).([band '_WENTS']){t}(i) = std(WENT{b}(ind));
-                    
-                    measures(lfpch).([band '_DfaM']){t}(i) = mean(Dfa{b}(ind));
-                    measures(lfpch).([band '_DfaS']){t}(i) = std(Dfa{b}(ind));
-                end % band b
+                measures(ch) = entropy_analysis( waves, waves_time, Fs, ind, measures(ch), i);
             end
             
-            onsettime = -mean(waves_time(ind,1));
-            if std(waves_time(ind,1))>0.001 % i.e. jitter in onser
-                disp('ANALYSE_VEPS: Jitter in onset times larger than 1 ms.');
-            end
-            
-            if 0 % work on Daubechies wavelet analysis
-                figure;
-                amax = 8;
-                a = 1:2^amax;
-                coefs=0;
-                for j=1:length(ind)
-                    Coefs = cwt(waves(ind(j),:),a,'db4','scal');
-                    coefs=coefs+Coefs;
-                end
-                coefs=coefs/length(ind);
-                f = scal2frq(a,'db4',1/Fs);
-                ff=f';FF=repmat(ff,[1,size(coefs,2)]);
-                coefs=FF.*coefs;
-                figure; SCimg = wscalogram('image',coefs);
-                figure;surf((1:size(coefs,2)),f,abs(coefs),'EdgeColor','none');axis tight; axis square; view(0,90);ylim([0 100])
-            end
             
             data = reshape(waves(ind,:)',size(waves,2),1,length(ind));
+            
             if strcmp(process_params.vep_remove_line_noise,'temporal_domain')
                 data = remove_line_noise(data,Fs);
             end
             if process_params.vep_remove_vep_mean
                 data = remove_vep_mean( data );
             end
-            %             Fs = 380; % temporarily Mehran
+            
             [powerm.power(:,:,i),powerm.freqs,powerm.time] = ...
                 GetPowerWavelet(data,Fs,onsettime,verbose);
             
             if verbose
                 waitbar(i/length(parameter_values));
             end
-        end
-        if verbose
-            close(h_wait);
-        end
+        end % condition i
+        
+        
         % set pre and postwindows
         pre_ind = (powerm.time>process_params.pre_window(1) & ...
             powerm.time<=process_params.pre_window(2) & ...
@@ -392,71 +290,40 @@ for lfpch=1:numLFPchannels
         post_ind = (powerm.time>process_params.post_window(1) & ...
             powerm.time<process_params.post_window(2));
         
-        onsetP=find(diff(post_ind)~=0);
-        postnum=length(post_ind(post_ind~=0));
-        
-        % Integrate power
-        powerm.freqs_pre = powerm.freqs;
-        powerm.freqs_post = powerm.freqs;
+        % Integrate power        
         powerm.power_post = mean(powerm.power(:,post_ind,:),2); % freqs x channels x conditions
         powerm.power_pre = mean(powerm.power(:,pre_ind,:),2); % freqs x channels x conditions
         powerm.postdivpre = powerm.power_post ./ powerm.power_pre;
-        %     powerm.ers = 100*((powerm.power_pre-powerm.power_post) ./ powerm.power_pre);
         powerm.decpostdivpre = 10*log10(powerm.postdivpre);
         powerm.power_evoked = powerm.postdivpre-1;
         
         for f = 1:length(band_names)
             band = band_names{f};
             ind_band = find(powerm.freqs>bands.(band)(1) & powerm.freqs<bands.(band)(2));
-            measures(lfpch).([band '_power_pre']){1,t} = mean( powerm.power_pre(ind_band,:,:),1);
-            measures(lfpch).([band '_power_post']){1,t} = mean( powerm.power_post(ind_band,:,:),1);
-            
-            
+            measures(ch).([band '_power_pre']){1,t} = mean( powerm.power_pre(ind_band,:,:),1);
+            measures(ch).([band '_power_post']){1,t} = mean( powerm.power_post(ind_band,:,:),1);
             
             for c = 1:n_conditions
-                [measures(lfpch).([band '_peak_freq_pre']){1,t}(c) ...
-                    measures(lfpch).([band '_peak_power_pre']){1,t}(c) ] = ...
+                [measures(ch).([band '_peak_freq_pre']){1,t}(c) ...
+                    measures(ch).([band '_peak_power_pre']){1,t}(c) ] = ...
                     extract_peak(powerm.freqs(ind_band),powerm.power_pre(ind_band,:,c)');
-                [measures(lfpch).([band '_peak_freq_post']){1,t}(c) ...
-                    measures(lfpch).([band '_peak_power_post']){1,t}(c)] = ...
+                [measures(ch).([band '_peak_freq_post']){1,t}(c) ...
+                    measures(ch).([band '_peak_power_post']){1,t}(c)] = ...
                     extract_peak(powerm.freqs(ind_band),powerm.power_post(ind_band,:,c)');
             end
-            %         [m,ind_peak]=findpeaks(powerm.power_pre(ind_band,:,end));
-            %        powerm.freqs(ind_band(ind))
             
-            measures(lfpch).([band '_evoked_power']){1,t} = mean( powerm.power_evoked(ind_band,:,:),1);
+            measures(ch).([band '_evoked_power']){1,t} = mean( powerm.power_evoked(ind_band,:,:),1);
             
-            %         measures.([band '_evoked_time']){t} = squeeze(mean(powerm.power(ind_band,post_ind,:),1))-repmat(squeeze(mean(powerm.power_pre(ind_band,1,:),1))',[postnum,1]);
-            % measures(lfpch).([band '_evoked_pretime']){1,t} = squeeze(mean(powerm.power(ind_band,pre_ind,:),1));
-            %         measures.([band '_power_ers']){t} = 100*((mean(powerm.power_pre(ind_band,:,:),1)-mean(powerm.power_post(ind_band,:,:),1)) ./ ...
-            %             mean(powerm.power_pre(ind_band,:,:),1));
             for c = 1:n_conditions
-                [measures(lfpch).([band '_evoked_peak_power']){1,t}(c),ind_m] = max(powerm.power_evoked(ind_band,1,c));
-                measures(lfpch).([band '_evoked_peak_freq']){1,t}(c) = powerm.freqs(ind_band(ind_m));
+                [measures(ch).([band '_evoked_peak_power']){1,t}(c),ind_m] = max(powerm.power_evoked(ind_band,1,c));
+                measures(ch).([band '_evoked_peak_freq']){1,t}(c) = powerm.freqs(ind_band(ind_m));
             end
         end % bands f
         
-        %     Cr_post=ones(length(band_names),length(band_names),n_conditions);
-        %     Cr_pre=ones(length(band_names),length(band_names),n_conditions);
-        %     for f1 = 1:length(band_names)-1
-        %         for f2 = f1+1:length(band_names)
-        %             banda = band_names{f1};
-        %             bandb = band_names{f2};
-        %             for c = 1:n_conditions
-        %                 cr_post=corrcoef(measures.([banda '_evoked_time']){t}(:,c),measures.([bandb '_evoked_time']){t}(:,c));
-        %                 cr_pre=corrcoef(measures.([banda '_evoked_pretime']){t}(:,c),measures.([bandb '_evoked_pretime']){t}(:,c));
-        %                 Cr_post(f1,f2,c)=cr_post(1,2);Cr_post(f2,f1,c)=Cr_post(f1,f2,c);
-        %                 Cr_pre(f1,f2,c)=cr_pre(1,2);Cr_pre(f2,f1,c)=Cr_pre(f1,f2,c);
-        %             end
-        %         end
-        %     end
-        %     measures.('evoked_crossfreq_post'){t}=Cr_post;
-        %     measures.('evoked_crossfreq_pre'){t}=Cr_pre;
-        %     measures.('evoked_crossfreq_prepost'){t}=abs(Cr_post)-abs(Cr_pre);
         % store mean wave
         waves_time = mean(waves_time,1);
-        meanwaves{t}{lfpch,1} = waves_mean;
-        powers{t}{lfpch,1} = powerm;
+        meanwaves{ch}{t} = waves_mean;
+        powers{ch}{t} = powerm;
     end % t trigger
     
     if length(stimss)>1 % i.e. multiple triggers
@@ -465,42 +332,61 @@ for lfpch=1:numLFPchannels
                 for t2 = (t1+1):length(stimss)
                     for f = 1:length(band_names)
                         band = band_names{f};
-                        measures(lfpch).([band '_evoked_power_trig' num2str(t2) 'to' num2str(t1) ])(:,i) = ...
-                            measures(lfpch).([band '_evoked_power']){1,t2}(:,i) ./ ...
-                            measures(lfpch).([band '_evoked_power']){1,t1}(:,i);
+                        measures(ch).([band '_evoked_power_trig' num2str(t2) 'to' num2str(t1) ])(:,i) = ...
+                            measures(ch).([band '_evoked_power']){1,t2}(:,i) ./ ...
+                            measures(ch).([band '_evoked_power']){1,t1}(:,i);
                         
-                        measures(lfpch).([band '_evoked_peak_power_trig' num2str(t2) 'to' num2str(t1) ])(i) = ...
-                            measures(lfpch).([band '_evoked_peak_power']){1,t2}(:,i) ./ ...
-                            measures(lfpch).([band '_evoked_peak_power']){1,t1}(:,i);
+                        measures(ch).([band '_evoked_peak_power_trig' num2str(t2) 'to' num2str(t1) ])(i) = ...
+                            measures(ch).([band '_evoked_peak_power']){1,t2}(:,i) ./ ...
+                            measures(ch).([band '_evoked_peak_power']){1,t1}(:,i);
                         
-                        measures(lfpch).([band '_evoked_peak_freq_trig' num2str(t2) 'to' num2str(t1)])(i) = ...
-                            measures(lfpch).([band '_evoked_peak_freq']){1,t2}(:,i) ./ ...
-                            measures(lfpch).([band '_evoked_peak_freq']){1,t1}(:,i);
+                        measures(ch).([band '_evoked_peak_freq_trig' num2str(t2) 'to' num2str(t1)])(i) = ...
+                            measures(ch).([band '_evoked_peak_freq']){1,t2}(:,i) ./ ...
+                            measures(ch).([band '_evoked_peak_freq']){1,t1}(:,i);
                     end % band f
                 end % trigger t2
             end % trigger t1
         end % condition i
-    end
-end % stimulusscript i
+    end % if multiple triggers
 
-waves = meanwaves;
-powerm = powers;
-for ch=1:numLFPchannels
-    for t=1:length(powerm) % triggers
-        for i=1:n_conditions
-            val = parameter_values(i);
-            eval(['powerm{t}{ch}.power_' subst_specialchars(num2str(val)) '=powerm{t}{ch}.power(:,:,i);']);
-        end
-    end
+end % channel ch
+
+if verbose
+    close(h_wait);
 end
 
 
-wavefile=fullfile(ecdatapath(record),record.test,['saved_data',num2str(channels2analyze),'.mat']);
-save(wavefile,'measures','waves','waves_time','powerm','channels2analyze');
+% powerm = powers;
+% for ch=1:length(channels2analyze)
+%     for t=1:length(powerm) % triggers
+%         for i=1:n_conditions
+%             val = parameter_values(i);
+%             eval(['powerm{ch}{t}.power_' subst_specialchars(num2str(val)) '=powerm{ch}{t}.power(:,:,i);']);
+%         end
+%     end
+% end
+% 
+%     meanwaves{ch}{t} = waves_mean;
+%         powers{ch}{t} = powerm;
 
+
+logmsg('MEHRAN? DO YOU NEED THE SAVED_DATA FILE?'); % otherwise this can go
+for ch=1:length(channels2analyze)
+    waves = meanwaves{ch}; %#ok<NASGU>
+    powerm = powers{ch}; %#ok<NASGU>
+    wavefile = fullfile(ecdatapath(record),record.test,['saved_data_veps_ch',num2str(channels2analyze(ch)),'.mat']);
+    save(wavefile,'waves','waves_time','powerm');
+end
+
+for ch=1:length(channels2analyze)
+    measures(ch).waves_time = waves_time;
+    measures(ch).waves = meanwaves{ch};
+    measures(ch).powerm = powers{ch};
+end
 
 
 % insert measures into record.measures
+record.measures = merge_measures_from_disk(record); % to include omitted fields
 if (length(channels2analyze)==length(recorded_channels) && all( sort(channels2analyze)==sort(recorded_channels)))...
         || ~isfield(measures,'channel')|| ~isfield(record.measures,'channel')
     record.measures = measures;
@@ -508,18 +394,30 @@ else
     try
         record.measures(ismember([record.measures.channel],channels2analyze)) = []; % remove old
         record.measures = [record.measures measures];
-        [dummy,ind] = sort([record.measures.index]); %#ok<ASGLU>
+        [dummy,ind] = sort([record.measures.channel]); %#ok<ASGLU>
         record.measures = record.measures(ind);
     catch me % in case measures struct definition has changed
         logmsg(me.message);
         record.measures = measures;
     end
-    
 end
+
+% save measures file
+measuresfile = fullfile(ecdatapath(record),record.test,[record.datatype '_measures.mat']);
+measures = record.measures; %#ok<NASGU>
+try
+    save(measuresfile,'measures');
+catch me
+    errormsg(['Could not write measures file ' measuresfile '. ' me.message]);
+end
+
+% remove fields that take too much memory
+record.measures = rmfields(record.measures,{'powerm','waves'});
+
 
 record.analysed = datestr(now);
 
-return
+
 
 
 function [pxx,freqs,time] = get_power(waves,Fs,params,verbose)
@@ -530,7 +428,7 @@ function [pxx,freqs,time] = get_power(waves,Fs,params,verbose)
 % t gives the vector of sample times
 
 if strcmp( params.vep_remove_line_noise,'temporal_domain')
-    disp('ANALYSE_VEPS: Still to implement removal of line noise in temporal domain')
+    logmsg('Still to implement removal of line noise in temporal domain')
 end
 
 switch params.vep_poweranalysis_type
@@ -567,8 +465,6 @@ switch params.vep_poweranalysis_type
                 % pxx=smooth(freqs,pxx,0.02); %round(length(pxx)/50)
                 [pxx,freqs] = slidingwindowfunc(freqs,pxx,1,1,150,150/50,'mean',0);
             end
-            
-            
         end
         
         % show spectrogram
@@ -585,9 +481,9 @@ switch params.vep_poweranalysis_type
 end
 
 % now only take first 150 Hz
-ind=find(freqs<150 );
-freqs=freqs(ind);
-pxx=pxx(ind);
+ind = find(freqs<150 );
+freqs = freqs(ind);
+pxx = pxx(ind);
 
 function  data = remove_vep_mean( data )
 data = data - repmat(mean(data,3),[1 1 size(data,3)]);
@@ -595,11 +491,7 @@ data = data - repmat(mean(data,3),[1 1 size(data,3)]);
 function [px,py] = extract_peak(x,y)
 % subtract slope of y and the get max
 ys = y - (x-x(1))*(y(end)-y(1))/(x(end)-x(1));
-%                 figure;
-%                 plot(x,y);
-%                 hold on
-%                 plot(x,powerm.power_pre(ind_band,:,c),'r');
-[alaki,f_ind] = max(ys);
+[alaki,f_ind] = max(ys); %#ok<ASGLU>
 px = x(f_ind);
 py = y(f_ind);
 
@@ -624,3 +516,134 @@ if isfield(record,'channel_info') && ~isempty(record.channel_info)
         recorded_channels = sort( recorded_channels );
     end
 end
+
+
+
+
+function  tril = use_right_trigger(record,EVENT)
+usetril=regexp(record.comment,'usetril=(\s*\d+)','tokens');
+if ~isempty(usetril)
+    usetril = str2double(usetril{1}{1});
+else
+    usetril = -1; % i.e. last
+end
+
+if usetril == -1
+    if (isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1) || ...
+            (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1)
+        errormsg(['More than one trigger in ' recordfilter(record) '. Taking last. Set usetril=XX in comment to overrule']);
+    end
+end
+
+if isfield(EVENT.strons,'OpOn')
+    n_optotrigs = length(EVENT.strons.OpOn);
+else
+    n_optotrigs = 0;
+end
+
+if usetril == -1 % use last
+    tril = EVENT.strons.tril(end-n_optotrigs);
+else
+    if usetril > length(EVENT.strons.tril)
+        errormsg('Only 1 trigger available. Check ''tril='' in comment field.');
+        tril = EVENT.strons.tril(end);
+        return
+    end
+    tril = EVENT.strons.tril(usetril);
+end
+
+
+function  measures = entropy_analysis( waves, waves_time, Fs, ind, measures,i )
+bands = oscillation_bands;
+band_names = fields(oscillation_bands);
+
+preind = (waves_time(1,:)<0);
+postind = (waves_time(2,:)>=0);
+for b = 1:length(band_names)
+    band = band_names{b};
+    switch band
+        case 'delta'
+            n = 5;
+        case 'theta'
+            n = 7;
+        otherwise
+            n = 9;
+    end
+    
+    [a_low,b_low] = butter(n,bands.(band)(2)/(.5*Fs),'low'); % lowpass
+    [a_high,b_high] = butter(n,bands.(band)(1)/(.5*Fs),'high'); % highpass
+    for f=ind
+        w = filter(a_low,b_low,waves(f,:));
+        w = filter(a_high,b_high,w);
+        Wpre = w(preind);
+        Wpost = w(postind);
+        
+        Kfd{b}(f) = katz(Wpost)-katz(Wpre);
+        WENT{b}(f) = wentropy(Wpost,'shannon')-wentropy(Wpre,'shannon');
+        
+        Dpre = DFA(Wpre);
+        Dpost = DFA(Wpost);
+        Dfa{b}(f) = Dpost(1)-Dpre(1); % so only first DFA is used
+    end
+    
+    measures.([band '_KfdM']){t}(i) = mean(Kfd{b}(ind));
+    measures.([band '_KfdS']){t}(i) = std(Kfd{b}(ind));
+    
+    measures.([band '_WENTM']){t}(i) = mean(WENT{b}(ind));
+    measures.([band '_WENTS']){t}(i) = std(WENT{b}(ind));
+    
+    measures.([band '_DfaM']){t}(i) = mean(Dfa{b}(ind));
+    measures.([band '_DfaS']){t}(i) = std(Dfa{b}(ind));
+end % band b
+
+
+%             waves_timeVC=waves_time(ind,:);waves_VC=waves(ind,:);wavefile = ['waves_3',num2str(i),'_',num2str(channels_to_read),'.mat'];
+%             Wavepath=fullfile(datapath,EVENT.Myblock,wavefile);
+%             save(Wavepath,'waves_VC','waves_timeVC');
+%         end
+
+
+
+%         if 0 % notch 50 Hz
+%             w0 = 50/(0.5*Fs);
+%             bw = w0/15;
+%             [bb,aa] = iirnotch(w0,bw);
+%         end
+
+
+
+%             if 0 % work on Daubechies wavelet analysis
+%                 figure;
+%                 amax = 8;
+%                 a = 1:2^amax;
+%                 coefs=0;
+%                 for j=1:length(ind)
+%                     Coefs = cwt(waves(ind(j),:),a,'db4','scal');
+%                     coefs=coefs+Coefs;
+%                 end
+%                 coefs=coefs/length(ind);
+%                 f = scal2frq(a,'db4',1/Fs);
+%                 ff=f';FF=repmat(ff,[1,size(coefs,2)]);
+%                 coefs=FF.*coefs;
+%                 figure; SCimg = wscalogram('image',coefs);
+%                 figure;surf((1:size(coefs,2)),f,abs(coefs),'EdgeColor','none');axis tight; axis square; view(0,90);ylim([0 100])
+%             end
+
+
+        %     Cr_post=ones(length(band_names),length(band_names),n_conditions);
+        %     Cr_pre=ones(length(band_names),length(band_names),n_conditions);
+        %     for f1 = 1:length(band_names)-1
+        %         for f2 = f1+1:length(band_names)
+        %             banda = band_names{f1};
+        %             bandb = band_names{f2};
+        %             for c = 1:n_conditions
+        %                 cr_post=corrcoef(measures.([banda '_evoked_time']){t}(:,c),measures.([bandb '_evoked_time']){t}(:,c));
+        %                 cr_pre=corrcoef(measures.([banda '_evoked_pretime']){t}(:,c),measures.([bandb '_evoked_pretime']){t}(:,c));
+        %                 Cr_post(f1,f2,c)=cr_post(1,2);Cr_post(f2,f1,c)=Cr_post(f1,f2,c);
+        %                 Cr_pre(f1,f2,c)=cr_pre(1,2);Cr_pre(f2,f1,c)=Cr_pre(f1,f2,c);
+        %             end
+        %         end
+        %     end
+        %     measures.('evoked_crossfreq_post'){t}=Cr_post;
+        %     measures.('evoked_crossfreq_pre'){t}=Cr_pre;
+        %     measures.('evoked_crossfreq_prepost'){t}=abs(Cr_post)-abs(Cr_pre);
