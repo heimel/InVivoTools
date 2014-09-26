@@ -178,7 +178,7 @@ for j=1:size(intervals,1) % loop over requested intervals
             imsinmem(inmem(1)) = 0;
         end;
         if ~imsinmem(f),
-            ims{f} = tpreadframe(record,channel,f) - darklevel;
+            ims{f} = tpreadframe(record,channel,f) - darklevel(channel);
             imsinmem(f) = 1;
         end;
         if (currScanline_period__us_ ~= params.scanline_period__us) || ...
