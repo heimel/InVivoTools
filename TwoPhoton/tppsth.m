@@ -143,8 +143,9 @@ for j=1:length(stimcodes), % different uniq stimuli
         newdatacat = []; 
         newtcat = [];
         for i=1:length(theinds)
-            if params.psth_baselinemethod==0 % mean of spontaneous data for each interval
-                baseline = nanmean(data{length(masterintind)+theindssp(i),k});
+            switch params.psth_baselinemethod
+                case 0 % mean of spontaneous data for each interval
+                    baseline = nanmean(data{length(masterintind)+theindssp(i),k});
             end
             if isnan(baseline)
                 logmsg('Baseline is NaN (perhaps no spontaneous data). Taking mean baseline');
@@ -157,9 +158,10 @@ for j=1:length(stimcodes), % different uniq stimuli
             newtcat = cat(1,newtcat,newt{i,1}(mynewtinds));
         end
         for i=1:length(theindssp) % add spontaneous data
-            if params.psth_baselinemethod==0
-                baseline = nanmean(data{length(masterintind)+theindssp(i),k});
-            end;
+            switch params.psth_baselinemethod
+                case 0 % mean of spontaneous data for each interval
+                    baseline = nanmean(data{length(masterintind)+theindssp(i),k});
+            end
             if isnan(baseline)
                 logmsg('baseline is NaN (perhaps no spontaneous data). Taking mean baseline');
                 baseline = nanmean(data{theinds(i),k});
@@ -177,10 +179,14 @@ for j=1:length(stimcodes), % different uniq stimuli
         [Yn,Xn] = slidingwindowfunc(newtcat,newdatacat,window_start,params.psth_stepsize,window_end,params.psth_windowsize,'mean',0);
         bins{j,k} = Xn';
         myavg{j,k} = Yn';
+        
+        ind0 = find(bins{j,k}<0,1,'last');
+        myavg{j,k} = myavg{j,k} - myavg{j,k}(ind0);  
+        
         warning(warns);
-    end
+    end % roi k
     waitbar(j/length(stimcodes));
-end
+end % stim j
 close(hwait); 
 
 for i=1:n_selected_rois

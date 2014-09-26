@@ -1,7 +1,7 @@
-function record=analyse_tptestrecord( record)
+function [record,measures]=analyse_tptestrecord( record)
 %ANALYSE_TPTESTRECORD
 %
-%   RECORD=ANALYSE_TPTESTRECORD( RECORD)
+%   [RECORD,MEASURES] = ANALYSE_TPTESTRECORD( RECORD)
 %
 % 2013-2014, Alexander Heimel
 

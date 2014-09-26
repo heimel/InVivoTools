@@ -1256,7 +1256,8 @@ switch command,
                 end
                 ud.record.ROIs.celllist = ud.celllist;
                 
-                ud.record = analyse_tptestrecord(ud.record);
+                [ud.record,measures] = analyse_tptestrecord(ud.record);
+                ud.record.measures = measures; % including psth
                 ud.celllist = ud.record.ROIs.celllist;
                 
                 set(fig,'userdata',ud);
@@ -1415,6 +1416,12 @@ switch command,
         slicelist = ud.slicelist; %#ok<NASGU>
         ud.record.ROIs.celllist = ud.celllist;
         record = ud.record;
+        
+        % remove fields that take too much memory
+        if isfield(record,'measures')
+            record.measures = rmfields(record.measures,{'psth_tbins','psth_response'});
+        end
+        
         changes = {}; %#ok<NASGU>
         if isfield(ud.celldrawinfo,'changes')
             changes = ud.celldrawinfo.changes; %#ok<NASGU>
