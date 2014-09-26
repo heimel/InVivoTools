@@ -256,6 +256,7 @@ for c=1:n_cells
             col = 2;
             subplot('position',...
                 [relsubwidth*(col-1) reltitlepos-(row-0.2)*relsubheight relsubwidth*0.8 relsubheight*0.8]);
+            
             plot_tuning_curve(measure,'-',rate_label);
             hold on
             
@@ -624,6 +625,12 @@ for i=1:length(curves) % over triggers
         end
     end
     
+    switch measure.variable
+        case 'contrast'
+            % fit curve, so don't show line
+            linestyle = '.';
+    end
+    
     
     switch measure.variable
         case {'typenumber','position'}
@@ -675,9 +682,17 @@ switch measure.variable
         if isfield(measure,'nk_rm') % naka-rushton fit
             cn=(0:0.01:1);
             for t=1:length(curves) % over triggers
+                ind_blank = find(measure.range{t}==0);
+                if isempty(ind_blank)
+                    response0 = measure.rate_spont{t};
+                else
+                    response0 = mean(measure.rate{t}(ind_blank));
+                end
+                
+                
                 r=measure.nk_rm{t}* (cn.^measure.nk_n{t})./ ...
                     (measure.nk_b{t}^measure.nk_n{t}+cn.^measure.nk_n{t}) + ...
-                    measure.rate_spont{t};
+                    response0;
                 plot(cn,r,'k-');
             end
         end
