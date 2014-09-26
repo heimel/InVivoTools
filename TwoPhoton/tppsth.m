@@ -180,8 +180,10 @@ for j=1:length(stimcodes), % different uniq stimuli
         bins{j,k} = Xn';
         myavg{j,k} = Yn';
         
-        ind0 = find(bins{j,k}<0,1,'last');
-        myavg{j,k} = myavg{j,k} - myavg{j,k}(ind0);  
+        if params.psth_align_stim_onset
+            ind0 = find(bins{j,k}<0,1,'last');
+            myavg{j,k} = myavg{j,k} - myavg{j,k}(ind0);
+        end
         
         warning(warns);
     end % roi k
