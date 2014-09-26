@@ -109,7 +109,12 @@ if params.normalize
     % keep in mind that data kan be MxN cell array
     % (intervals,cells)
     for i=1:numel(data)
-        m = nanmean( unpeaked_data{i} );
+        switch params.normalize_baseline_method
+            case 'mean' 
+                m = nanmean( unpeaked_data{i} );
+            case 'prctile'
+                m = prctile( unpeaked_data{i} ,params.normalize_prctile);
+        end
         data{i} = data{i} / m - 1;
         unpeaked_data{i} = unpeaked_data{i} / m - 1;
     end

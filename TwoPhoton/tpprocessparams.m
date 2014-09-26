@@ -41,6 +41,8 @@ switch params.method
         params.detect_events_group = true;
 end
 
+params.normalize_baseline_method = 'prctile'; % mean 
+params.normalize_prctile = 5; 
 
 switch record.datatype
     case 'ls' % friederike
