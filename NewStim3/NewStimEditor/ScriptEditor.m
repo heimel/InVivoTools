@@ -65,14 +65,12 @@ else % it is a callback
             if isempty(str)
                 return
             end
-            %			try
             evalin('base',[str '=' ty  '(''graphical'');']);
             close(newstr.thisfig);
             z=geteditor('ScriptEditor');
-            if z, ScriptEditor('Update',z); end;
-            %			catch,
-            %   errordlg(['Error in script parameters'],'ScriptEditor');%
-            %			end;
+            if z
+                ScriptEditor('Update',z); 
+            end;
         case 'OpenFile',
             [fname,pathn] = uigetfile('*','Open file...');
             if fname(1)~=0,
@@ -143,7 +141,7 @@ else % it is a callback
                     uiwait(errordlg('Syntax error in name'));
                 elseif ~isvarname(an), % syntax err
                     uiwait(errordlg('Syntax error in name'));
-                else, % okay, make the stim
+                else % okay, make the stim
                     namenotfound = 0;
                     g = lb_getselected(lb); g = char(g);
                     evalin('base',[char(answ) '=' g ';']);
@@ -153,8 +151,6 @@ else % it is a callback
         case 'Replace',
             ud = get(gcbf,'UserData');
             oldscriptname = char(lb_getselected(ud.lb));
-                        
-            
             % should only occur when 1 stimulus is selected
             namenotfound=1;
             prompt={'Name of new script:'}; def = {''};
@@ -162,9 +158,6 @@ else % it is a callback
             while (namenotfound),
                 answ=inputdlg(prompt,dlgTitle,lineNo,def);
                 an = char(answ);
- 
- 
-                
                 if isempty(answ), 
                     namenotfound = 0; %cancelled
                 elseif isempty(an)
@@ -187,7 +180,7 @@ else % it is a callback
             ScriptEditor Update
         case 'Delete',
             strs = lb_getselected(lb);
-            if length(strs)>0,
+            if ~isempty(strs),
                 varnames = catCellStr(strs);
                 evalin('base',['clear ' varnames]);
             end;
@@ -195,7 +188,7 @@ else % it is a callback
             ScriptEditor Update;
         case 'DeleteAll',
             strs=get(lb,'String');
-            if length(strs)>0,
+            if ~isempty(strs),
                 varnames=catCellStr(strs);
                 evalin('base',['clear ' varnames]);
             end;
@@ -215,15 +208,15 @@ else % it is a callback
             end
         case 'EnableDisable'
             strs = get(lb,'String');
-            if length(strs)>0,
+            if ~isempty(strs),
                 set(scriptedstruct.saveall,'enable','on');
                 set(scriptedstruct.deleteall,'enable','on');
-            else,
+            else
                 set(scriptedstruct.saveall,'enable','off');
                 set(scriptedstruct.deleteall,'enable','off');
             end;
             strs = lb_getselected(lb);
-            if length(strs)>0,
+            if ~isempty(strs),
                 set(scriptedstruct.save,'enable','on');
                 set(scriptedstruct.delete,'enable','on');
                 if length(strs)==1,
@@ -232,7 +225,7 @@ else % it is a callback
                     set(scriptedstruct.duplicate,'enable','on');
                     set(scriptedstruct.movie,'enable','on');
                     set(scriptedstruct.show,'enable','on');
-                else,
+                else
                     set(scriptedstruct.edit,'enable','off');
                     set(scriptedstruct.duplicate,'enable','off');
                     set(scriptedstruct.replace,'enable','off');
@@ -243,14 +236,14 @@ else % it is a callback
                     set(scriptedstruct.load,'enable','on');
                     set(scriptedstruct.unload,'enable','on');
                     set(scriptedstruct.strip,'enable','on');
-                else,
+                else
                     set(scriptedstruct.load,'enable','off');
                     set(scriptedstruct.unload,'enable','off');
                     set(scriptedstruct.strip,'enable','off');
                     set(scriptedstruct.movie,'enable','off');
                     set(scriptedstruct.show,'enable','off');
                 end;
-            else,
+            else
                 set(scriptedstruct.save,'enable','off');
                 set(scriptedstruct.delete,'enable','off');
                 set(scriptedstruct.edit,'enable','off');
@@ -520,13 +513,3 @@ if ~isvarname(str)
     str = '';
     return
 end
-%     
-% 
-% try
-%     evalin('base',[str '= [];']);
-% catch %#ok<CTCH>
-%     errordlg(['Invalid script name ''' str '''.'],'ScriptEditor');
-%     str = [];
-%     return
-% end
-
