@@ -8,6 +8,7 @@ if nargin<2
     xlims = [];
 end
 
+
 stimsfile = getstimsfile(record);
 stims=get(stimsfile.saveScript);
 variable = varied_parameters(stimsfile.saveScript);
@@ -47,8 +48,10 @@ for i=1:length(stimsfile.MTI2)
     
     if ~isempty(variable) 
         par = getparameters(stims{do(i)});
+        stimlabel{end+1} = num2str(par.(variable));
+    else
+         stimlabel{end+1} = num2str(i);
     end
-    stimlabel{end+1} = num2str(par.(variable));
     
     imbar( max(1,round((stimsfile.MTI2{i}.startStopTimes(2)-stimsfile.start)/tstep)):min(end,round((stimsfile.MTI2{i}.startStopTimes(3)-stimsfile.start)/tstep))) = ...
         do(i);

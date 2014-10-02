@@ -5,7 +5,7 @@ function record=analyse_lfptestrecord( record, verbose)
 %      if VERBOSE is 0, no graphical output, 1 progress bar, 2 many figures
 %
 %
-% 2007-2013, Alexander Heimel
+% 2007-2014, Alexander Heimel
 %
 
 if nargin<2
@@ -17,16 +17,12 @@ end
 
 datapath = ecdatapath(record);
 smrfile=fullfile(datapath,record.test,'data.smr');
-stimsfile=fullfile(datapath,record.test,'stims.mat');
 
 measures = record.measures;
 
-waves = [];
-waves_time = [];
-powerm = [];
-
 switch record.stim_type
     case 'io'
+        logmsg('io analysis is out of date.');
         pre_ttl=0.02; % s
         post_ttl=0.04; % s
         results = importspike2_lfp(smrfile,record.stim_type,pre_ttl,post_ttl);
@@ -61,9 +57,9 @@ switch record.stim_type
             
             org_stim_intensities=org_stim_intensities(:)';
             if prod(double(org_stim_intensities==round_stim_intensities))~=1
-                disp('ANALYSE_LFPTESTRECORD: Stimulus intensities in data and on record do not match');
-                disp(['ANALYSE_LFPTESTRECORD: data   = ' mat2str(measures.stim_intensities)]);
-                disp(['ANALYSE_LFPTESTRECORD: record = ' mat2str(record.stim_parameters)]);
+                logmsg('Stimulus intensities in data and on record do not match');
+                logmsg(['data   = ' mat2str(measures.stim_intensities)]);
+                logmsg(['record = ' mat2str(record.stim_parameters)]);
                 return
             end
             measures.stim_intensities=round_stim_intensities;
@@ -94,16 +90,18 @@ switch record.stim_type
                 save(wavefile,'waves','waves_time','powerm');
             end
         end
+        if ~isempty(measures)
+            record.measures = measures;
+            record.analysed=datestr(now);
+        end
     case 'pp' % paired pulse
+        logmsg('pp analysis is out of date.');
         pre_ttl = 0.03; % in s
         post_ttl = 0.3; % in s
         results = importspike2_lfp(smrfile,record.stim_type,pre_ttl,post_ttl);
         
         if isempty(results) || isempty(results.waves{1})
-            msg = ['No waves returned for ' recordfilter(record)];
-            errordlg(msg,'Analyse lfptestrecord');
-            disp(['ANALYSE_LFPTESTRECORD: ' msg]);
-            
+            errormsg( ['No waves returned for ' recordfilter(record)]);
             wavefile=fullfile(datapath,record.test,'saved_data.mat');
             delete(wavefile);
             return
@@ -111,7 +109,6 @@ switch record.stim_type
         % all written for no trigger
         
         % to get original signal in millivolt
-
         waves=results.waves{1}/ record.amplification *1000;
         waves_time=results.waves_time{1};
         measures.stim_intensities_measured=results.stim_intensities{1};
@@ -121,7 +118,7 @@ switch record.stim_type
         high_ind=find(results.stim_waves{1}(1,:)>max(results.stim_intensities{1}(1,:))/2);
         dif_seq=high_ind(2:end)-high_ind(1:end-1);
         ind_start_pulses=high_ind([1 find(dif_seq>1)+1]);
-                
+        
         % remove stimulus artefact
         start_pulse_times=waves_time(ind_start_pulses);
         ind_stim=[];
@@ -132,7 +129,6 @@ switch record.stim_type
         for i=1:size(waves,1)
             waves(i,ind_stim)=nan;
         end
-        
         
         measures.interval=mean(dif_seq(dif_seq>1)-1)*results.sample_interval; % in s
         measures.frequency=1/measures.interval; % in Hz
@@ -177,20 +173,17 @@ switch record.stim_type
             wavefile=fullfile(datapath,record.test,'saved_data.mat');
             save(wavefile,'waves','waves_time','powerm');
         end
-        
+        if ~isempty(measures)
+            record.measures = measures;
+            record.analysed=datestr(now);
+        end
     otherwise % visual stimuli
-        [measures,waves,waves_time,powerm] = analyse_veps(record,smrfile,stimsfile,measures,verbose);
+        record = analyse_veps(record,verbose);
 end
 
-% add depth
-for i=1:length(measures)
-    measures(i).depth = record.depth-record.surface;
-end
 
-% admin for record
-if ~isempty(measures)
-    record.measures=measures;
-    disp([upper(mfilename) ': Finished analysis mouse=' record.mouse ...
-        ', date=' record.date ', test=' record.test]);
-    record.analysed=datestr(now);
-end
+
+
+
+logmsg(['Analysed mouse=' record.mouse ...
+    ', date=' record.date ', test=' record.test]);

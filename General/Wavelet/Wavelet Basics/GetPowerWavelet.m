@@ -41,20 +41,25 @@ end
 
 
 if compute_filters
+    params = ecprocessparams;
+    
     sizeData = size(Data);
     
     NSa=size(Data,1);    % number of samples per trial
     %NCh=size(Data,2);    % number of channels
     %NTr=size(Data,3);    % number of trials
     
-    
     %Initiation of parameters, you only have to do this once
-    F1=1; % lowest frequency
+    F1= max(params.vep_wavelet_freq_low,Fs/NSa*3); % lowest frequency, adhoc limit
     W1=round(Fs/F1);%max wavelength
-    FF=150; % highest frequency
-    WF=round(Fs/FF); % min wavelength
-    Fr=150; %frequency resolution
-    [alaki,frq,filter]=gaborspace(rand(NSa, 1), [WF, W1, Fr],1,3); %make filters
+    
+    FF = params.vep_wavelet_freq_high; % Highest frequency
+    WF = round(Fs/FF); % min wavelength
+    Fr = params.vep_wavelet_freq_res; % Frequency resolution
+    
+    %[GS,freqs,filter]=gaborspace(S,scls,alpha,beta,req)
+
+    [alaki,frq,filter]=gaborspace(rand(NSa, 1), [WF, W1, Fr],1,3); %#ok<ASGLU> %make filters
     Ffilter=fourier_embed(filter, NSa); %filters in fourier space
     
     persistent_frq = frq*Fs; %from units in samples to units in Hz

@@ -12,9 +12,7 @@ NOFSW = size(Data, 3);
 Nchan = size(Data,2);
 
 Wtemp = zeros(size(Ffilter,1),size(Ffilter,2),Nchan);
-
 Power = zeros(size(Wtemp));
-pt = zeros(size(Wtemp));
 
 for k = 1:NOFSW
     for j = 1:Nchan

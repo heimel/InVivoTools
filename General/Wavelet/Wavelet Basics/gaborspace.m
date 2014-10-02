@@ -1,3 +1,4 @@
+function [GS,freqs,filter]=gaborspace(S,scls,alpha,beta,req)
 % USAGE: 
 %      [GS,frequencies,filter]=gaborspace(S,[s1 ,s2,ns],alpha,beta,norm);
 %  OR: GS=gaborspace(S,filter);
@@ -23,7 +24,6 @@
 %      Stiliyan,03.12.03
 
 
-function [GS,freqs,filter]=gaborspace(S,scls,alpha,beta,req);
 if nargin<2 display('not enough arguments'); help gaborspace; return; end;
 if nargin<3 alpha=1;end
 if nargin<4 beta=3;end

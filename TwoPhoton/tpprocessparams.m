@@ -41,6 +41,8 @@ switch params.method
         params.detect_events_group = true;
 end
 
+params.normalize_baseline_method = 'prctile'; % mean 
+params.normalize_prctile = 5; 
 
 switch record.datatype
     case 'ls' % friederike
@@ -228,6 +230,8 @@ params.psth_baselinemethod = 0; % the baseline used to identify F in dF/F.
 %  0 means spontaneous interval preceding each stimulus.
 %  3 means filter the data and use the blank stimulus (if there is one)
 %    for baseline.
+
+params.psth_align_stim_onset = false; % to align df/f at t = 0
 params.mti_timeshift = 0.058; % ms for Fluoview scope
 
 switch record.datatype

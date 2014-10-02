@@ -57,6 +57,11 @@ params.vep_remove_vep_mean = true; % removes average VEP response before power a
 
 params.vep_log10_freqs = true;
 
+params.vep_wavelet_freq_high = 100;
+params.vep_wavelet_freq_low = 1;
+params.vep_wavelet_freq_res = params.vep_wavelet_freq_high; % reduce this to increase speed
+
+
 params.cell_colors = repmat('kbgrcmy',1,50);
 
 % spike isolation

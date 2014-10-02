@@ -183,7 +183,7 @@ end
 % check to see if it is open
 h_db = get_fighandle([datatype ' database*']);
 if isempty( h_db ) % not open, load from disk
-    db = load_testdb(expdatabases( database ));
+    db = load_testdb(expdatabases( datatype ));
 else
     ud = get(h_db,'userdata');
     db=ud.db;

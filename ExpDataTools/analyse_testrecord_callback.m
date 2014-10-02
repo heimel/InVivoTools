@@ -33,7 +33,7 @@ switch record.datatype
         record=analyse_ectestrecord( record );
     case 'lfp'
         record=analyse_lfptestrecord( record );
-    case 'tp'
+    case {'tp','fret'}
         record=analyse_tptestrecord( record );
     case 'ls' % linescans
         record=analyse_lstestrecord( record );

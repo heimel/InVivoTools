@@ -92,7 +92,13 @@ for t = 1:n_triggers
     worst = min(measures.response{t}(ind));
     measures.selectivity{t} = (best-worst)/(best+worst);
     
-    response = measures.curve{t}(2,:)-measures.rate_spont{t};
+    
+    ind_blank = find(measures.range{t}==0);
+    if isempty(ind_blank)
+        response = measures.curve{t}(2,:)-measures.rate_spont{t};
+    else
+        response = measures.curve{t}(2,:)-mean(measures.curve{t}(2,ind_blank));
+    end
     [measures.nk_rm{t},measures.nk_b{t},measures.nk_n{t}] = naka_rushton(measures.range{t},response);
     
     % get c50 from fit
