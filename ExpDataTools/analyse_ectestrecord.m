@@ -41,8 +41,8 @@ if isempty(channels2analyze)
     channels2analyze = recorded_channels;
 end
 
-if length(record.mouse)>5 && length(find(record.mouse=='.'))>1
-    protocol = record.mouse(1:5);
+if length(record.mouse)>7 && length(find(record.mouse=='.'))>2
+    protocol = record.mouse(1:7);
 else
     protocol = '';
 end
@@ -60,7 +60,7 @@ switch lower(record.setup)
         end
         
         switch protocol
-            case '13.21'
+            case '13.20.2'
                 if isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1
                     errormsg(['More than one trigger in ' recordfilter(record) '. Taking last']);
                     EVENT.strons.tril(1)=EVENT.strons.tril(end);
