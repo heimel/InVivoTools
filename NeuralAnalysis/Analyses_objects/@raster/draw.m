@@ -88,7 +88,15 @@ if ~isempty(w),
       r=axes('units',w.units,'position',rarect,'tag','analysis_generic');
       if ~isempty(ra.computations.rast{i}),
         A=[ra.computations.rast{i}(1,:); ra.computations.rast{i}(1,:)];
-        B=[ra.computations.rast{i}(2,:)-0.45; ra.computations.rast{i}(2,:)+0.45];
+        
+        b = ra.computations.rast{i}(2,:);
+        trials = uniq(sort(b));
+        for ti = 1:length(trials)
+            b(b==trials(ti)) = ti;
+        end
+        
+        
+        B=[b-0.45; b+0.45];
         %h=plot(ra.computations.rast{i}(1,:),ra.computations.rast{i}(2,:),'k.');
         h=plot(A,B,'k');
         set(h,'uicontextmenu',contextmenu(ra));%,'MarkerSize',1);
@@ -108,7 +116,8 @@ if ~isempty(w),
       if p.fracpsth>0, set(r,'xtick',[]);
       else, xlabel('Time(s)'); end;
       title(I.condnames{i});
-      set(r,'ylim',[0 length(I.triggers{i})+1]);
+    %  set(r,'ylim',[0 length(I.triggers{i})+1]);
+      set(r,'ylim',[0 max(b)+1]);
       set(r,'YDir','reverse','YTick',[0 length(I.triggers{i})]);
       set(r,'xlim',[ra.internals.bins{i}(1) ra.internals.bins{i}(end)]);
       set(r,'YAxisLocation','right');
