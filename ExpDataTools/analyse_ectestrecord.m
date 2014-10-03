@@ -1,4 +1,3 @@
-@@ -1,541 +0,0 @@
 function record=analyse_ectestrecord(record,verbose)
 %ANALYSE_ECTESTRECORD
 %
@@ -78,8 +77,10 @@ switch lower(record.setup)
                 EVENT.Triallngth = min(60,total_length-60*(kk-1));
                 WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
                 for i=1:length(channels2analyze)
-                    WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(channels2analyze(i),1).time];
-                    WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(channels2analyze(i),1).data];
+%                     WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(channels2analyze(i),1).time];
+%                     WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(channels2analyze(i),1).data];
+                    WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(i,1).time];
+                    WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(i,1).data];
                 end
             end
         else % linux
