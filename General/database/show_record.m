@@ -184,15 +184,23 @@ end
 
 
 function figure_resize(src,evt) %#ok<INUSD>
-oldunits = get(gcf,'Units');
-set(gcf,'Units','pixels');
-fpos = get(gcf,'Position');
+fig = src;
+ud = get(fig,'userdata');
+if isfield(ud,'record_form')
+    fig = ud.record_form;
+end
+ud = get(fig,'userdata');
 
-ud = get(gcf,'userdata');
+
+oldunits = get(fig,'Units');
+set(fig,'Units','pixels');
+fpos = get(fig,'Position');
+
+
 for h = ud.h_edit(:)'
     p = get(h,'position');
     p(3) = fpos(3)-p(1);
     set(h,'position',p);
 end
-set(gcf,'Units',oldunits);
+set(fig,'Units',oldunits);
 
