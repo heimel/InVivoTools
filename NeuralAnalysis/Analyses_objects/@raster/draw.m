@@ -116,8 +116,10 @@ if ~isempty(w),
       if p.fracpsth>0, set(r,'xtick',[]);
       else, xlabel('Time(s)'); end;
       title(I.condnames{i});
-    %  set(r,'ylim',[0 length(I.triggers{i})+1]);
-      set(r,'ylim',[0 max(b)+1]);
+      set(r,'ylim',[0 length(I.triggers{i})+1]);
+      if exist('b','var')
+          set(r,'ylim',[0 max(b)+1]);
+      end
       set(r,'YDir','reverse','YTick',[0 length(I.triggers{i})]);
       set(r,'xlim',[ra.internals.bins{i}(1) ra.internals.bins{i}(end)]);
       set(r,'YAxisLocation','right');

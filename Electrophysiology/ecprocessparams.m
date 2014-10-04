@@ -96,6 +96,7 @@ switch lower(record.setup)
                 params.compare_with_klustakwik = true;
         end
 end
+params.sort_always_resort = false;
 
 % time calibration
 switch lower(record.setup)

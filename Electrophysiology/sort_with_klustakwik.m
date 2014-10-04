@@ -6,7 +6,7 @@ function cells = sort_with_klustakwik(orgcells,record)
 % 2013, Alexander Heimel
 %
 
-
+params = ecprocessparams(record);
 
 cells = [];
 
@@ -24,8 +24,9 @@ if status~=1
     return
 end
 
-
-cells = import_klustakwik(record,orgcells);
+if ~params.sort_always_resort
+    cells = import_klustakwik(record,orgcells);
+end
 
 if isempty(cells) %|| 1
     channels = unique([orgcells.channel]);

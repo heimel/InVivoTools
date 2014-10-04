@@ -169,9 +169,16 @@ for ch = channels
         outcells(count).spike_peak_trough_ratio = cells(cl).spike_peak_trough_ratio;
         outcells(count).spike_prepeak_trough_ratio = cells(cl).spike_prepeak_trough_ratio;
         outcells(count).spike_lateslope = cells(cl).spike_lateslope;
+        outcells(count).mean_amplitude = mean(outcells(count).spike_amplitude);
         count = count + 1;
     end
-    
+    % sort by spike amplitude from low to high
+    indices = [ outcells.index];
+    [m,ind] = sort([outcells.mean_amplitude]);
+    outcells = outcells(ind);
+    for i = 1:length(outcells)
+        outcells(i).index = indices(i);
+    end
 end % channel ch
 
 
