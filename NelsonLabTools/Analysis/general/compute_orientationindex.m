@@ -28,6 +28,14 @@ else
     warning('on','COMPUTE_ORIENTATIONINDEX:FEW_ANGLES');
 end
 
+if (max(angles)-min(angles))<180
+    warning('COMPUTE_ORIENTATIONINDEX:HALF_CIRCLE','COMPUTE_ORIENTATIONINDEX: Angles span less than 180 degrees. Using static formula');
+    angles = [angles (angles + 180)];
+    rates = [rates rates];
+end
+
+
+
 [m,ind]=max(rates);
 ang=angles(ind);
 
