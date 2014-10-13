@@ -118,7 +118,7 @@ for c=1:n_cells
     
     switch record.stim_type
         case {'sg','sg_adaptation'}
-            n_graphs=1+length(measure.rf)+1;
+            n_graphs=1+length(measure.rf)+2;
             printtext(subst_ctlchars(['rf_n_on: ' num2str(measure.rf_n_on) ]),y);
             y=printtext(subst_ctlchars(['halfmax: ' num2str(measure.halfmax_deg,2) '^o']),y,0.5);
             y=printtext(subst_ctlchars(['onsize : ' num2str(fix(measure.rf_onsize_sqdeg)) ' deg^2']),y);
@@ -134,12 +134,15 @@ for c=1:n_cells
             y=printtext(subst_ctlchars(['roc auc: ' num2str(measure.roc_auc,2) ]),y,0.5);
             
             % rf graphs
-            for i=1:length(measure.rf)-1
+            for i=1:length(measure.rf)
                 subplot('position',...
                     [ (1+i)/(n_graphs)+0.01 reltitlepos-row*relsubheight 1/(n_graphs)*0.96 relsubheight]);
                 plot_rf( measure,i );
             end
             i=i+1;
+            if isempty(i) % temporary bug fix
+                i=1;
+            end
             subplot('position',...
                 [ (1+i)/(n_graphs)+0.01 reltitlepos-row*relsubheight 1/(n_graphs)*0.96 relsubheight]);
             plot_waveform( measure,record,params.cell_colors(c) )

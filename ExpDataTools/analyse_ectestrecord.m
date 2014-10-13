@@ -541,7 +541,7 @@ if usetril == -1 % use last
     end
 else
     if usetril > length(EVENT.strons.tril)
-        errormsg('Only 1 trigger available. Check ''tril='' in comment field.');
+        errormsg(['Only ' num2str(length(EVENT.strons.tril)) ' triggers available. Check ''tril='' in comment field.']);
         tril = EVENT.strons.tril(end);
         return
     end
