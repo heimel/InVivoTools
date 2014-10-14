@@ -10,13 +10,20 @@ params = ecprocessparams(record);
 
 cells = [];
 
-kkexecutable = which('KlustaKwik.exe');
-
+if isunix
+    kkexecutable = 'KlustaKwik';
+else
+    kkexecutable = which('KlustaKwik.exe');
+end
 
 [status,res] = system(kkexecutable);
 
 if status~=1
-    kkexecutable = which('MaskedKlustaKwik.exe');
+    if isunix
+        kkexecutable = 'MaskedKlustaKwik';
+    else
+        kkexecutable = which('MaskedKlustaKwik.exe');
+    end
     [status,res] = system(kkexecutable);
 end
 
@@ -46,7 +53,7 @@ if isempty(cells) %|| 1
          ' -UseDistributional 0' ... 
          ' -PriorPoint 1'...
          ' -FullStepEvery 20'...
-        ' -UseFeatures 10111'...   %10111 11111
+        ' -UseFeatures 10001'...   %10111 11111
          ' -SplitEvery 40' ...
          ' -RandomSeed 1' ...
          ' -MaxIter 500' ...  % 500  
