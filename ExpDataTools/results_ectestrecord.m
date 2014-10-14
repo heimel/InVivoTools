@@ -403,7 +403,7 @@ switch data_type
             cells = [];
             load(spikesfile);
             plot_spike_features(cells, record);
-            if exist('isi','var')
+            if exist('isi','var') && params.show_isi
                 plot_spike_isi(isi,record);
             end
         end

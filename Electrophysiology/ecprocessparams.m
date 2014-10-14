@@ -68,6 +68,9 @@ params.cell_colors = repmat('kbgrcmy',1,50);
 params.max_spike_clusters = 2;
 params.cluster_overlap_threshold = 0.5;
 
+
+params.show_isi = true;
+
 % entropy analysis
 switch record.mouse(1:min(end,5))
     case '12.28'
