@@ -61,7 +61,12 @@ end
 monitorcenter_rel2nose_cm{i} = [-15,-2,30]; %
 monitor_tilt_deg{i} = -20; % deg
 monitor_slant_deg{i} = 20;% deg
-orientation_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E6,stim_type=orientation';
+%orientation_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E6,stim_type=orientation';
+orientation_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E4,stim_type=orientation';
+
+%orientation_high_sf_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E4,stim_type=orientation';
+orientation_high_sf_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E5,stim_type=orientation';
+
 i = i + 1;
 
 
@@ -199,6 +204,7 @@ disp('Two tests, we could combine them');
 crit = 'mouse=13.61.2.07,test=mouse_E4';
 %crit = 'mouse=13.61.2.07,test=mouse_E5';
 orientation_record_crit{i} = [crit ',stim_type=orientation'];
+orientation_high_sf_record_crit{i} = 'mouse=13.61.2.07,test=mouse_E5,stim_type=orientation';
 significance_record_crit{i} =  [crit ',stim_type=significance'];
 significance_threshold{i} =0.01; %0.05;
 i = i + 1;
@@ -222,6 +228,7 @@ monitorcenter_rel2nose_cm{i} = [-10,-4,30]; %
 monitor_tilt_deg{i} = 0; % deg
 monitor_slant_deg{i} = 20;% deg
 orientation_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E8,stim_type=orientation';
+orientation_high_sf_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E7,stim_type=orientation';
 i = i + 1;
 
 
@@ -231,10 +238,17 @@ n_mice = length(mice);
 
 radial_angle_all = [];
 orientation_all = [];
+pref_diff_high_low_sf_all = [];
+angle_high_low_sf_all = [];
 
+% analyses
 
 azimuth_lim = [-80 20];
 elevation_lim = [-40 40];
+img_orientation = cell(length(mice),1);
+img_rf_radial_angle_deg  = cell(length(mice),1);
+img_rf_azimuth_deg = cell(length(mice),1);
+img_rf_elevation_deg = cell(length(mice),1);
 for i=mice % :length(retinotopy_record_crit)
     % retinotopy and radial map
     retinotopy_record{i} = db(find_record(db,retinotopy_record_crit{i}));
@@ -257,7 +271,6 @@ for i=mice % :length(retinotopy_record_crit)
     [img_rf_radial_angle_deg{i},img_rf_azimuth_deg{i},img_rf_elevation_deg{i}] = ...
         oi_compute_response_centers(avg, retinotopy_record{i},recalculate);
     
-    
     % ipsi hemifield set to 0
     img_rf_radial_angle_deg{i}(img_rf_radial_angle_deg{i}>0 & img_rf_radial_angle_deg{i}<180) = 0;
     
@@ -269,46 +282,10 @@ for i=mice % :length(retinotopy_record_crit)
         img_radial = angle(img_radial)/pi*180/2;
         img_radial(isnan(img_rf_radial_angle_deg{i})) = nan;
     else
-        img_radial =img_rf_radial_angle_deg{i};
+        img_radial = img_rf_radial_angle_deg{i}; %#ok<*UNRCH>
     end
-    
-    
     img_rf_radial_angle_deg{i} = mod(img_radial,180);
-    %    img_rf_radial_angle_deg{i} = mod(img_rf_radial_angle_deg{i},180);
     
-    % orientation map
-    orientation_record = db(find_record(db,orientation_record_crit{i}));
-    if isempty(orientation_record)
-        errormsg(['Could not find record matching ' orientation_record_crit{i}] );
-        return
-    end
-    if length(orientation_record)>1
-        errormsg(['More than one record matching ' orientation_record_crit{i}] );
-        return
-    end        
-    filename = fullfile(oidatapath(orientation_record),[orientation_record.test '_avg.mat']);
-    if exist(filename,'file')
-        load(filename);
-    else
-        [orientation_record,avg] = analyse_oitestrecord( orientation_record);
-        save(filename,'avg');
-    end
-    
-    %     orientation_record.stim_parameters = [45 0 90 135 225 180 270 315];
-    %     orientation_record.stim_parameters = rand(1,8)*360
-    
-    multfac = 2; %
-    %     avg(:,:,1) = avg(:,:,2)*1.04;
-    %     avg(:,:,2) = avg(:,:,2)*0.95;
-    %     avg(:,:,3) = avg(:,:,3)*0.93;
-    
-    polavg = zeros(size(avg,1),size(avg,2));
-    for c=1:size(avg,3)
-        polavg = polavg + avg(:,:,c) * exp(multfac*pi*1i*orientation_record.stim_parameters(c)/180);
-    end
-    img_orientation{i} = angle(polavg);
-    img_orientation{i} = mod(img_orientation{i}/pi*180,360)/2;
-    img_orientation{i}(isnan(img_rf_radial_angle_deg{i})) = nan;
     
     if 0
         % significance map
@@ -327,14 +304,43 @@ for i=mice % :length(retinotopy_record_crit)
     end
     
     mask{i} = ~isnan(img_rf_azimuth_deg{i}) ;
-    %mask = ~isnan(img_rf_azimuth_deg) & (signif_between_groups<significance_threshold{i});
-    
     if ~isempty(xv{i})
         [mx,my]=meshgrid(1:size(mask{i},2),1:size(mask{i},1));
         in=inpolygon(mx,my,yv{i},xv{1});
         mask{i} = mask{i} & in;
     end
     
+    [orientation_record,avg] = load_orientationdata(db, orientation_record_crit{i} );
+    
+    img_orientation{i} = make_orientation_map( orientation_record,avg);
+      img_orientation{i}(isnan(img_rf_radial_angle_deg{i})) = nan;
+    
+    if ~isempty(orientation_high_sf_record_crit{i})
+        [orientation_high_sf_record,avg_high_sf] = load_orientationdata(db, orientation_high_sf_record_crit{i} );
+        img_orientation_high_sf{i} = make_orientation_map( orientation_high_sf_record,avg_high_sf);
+      img_orientation_high_sf{i}(isnan(img_rf_radial_angle_deg{i})) = nan;
+
+        
+        angle_high_low_sf{i} = angle(exp( 1i*(img_orientation_high_sf{i}-img_orientation{i})/180*2*pi))/pi*180 /2 ;
+        
+        [mm,pref{i}]=max(avg,[],3);
+        [mm,pref_high_sf{i}]=max(avg_high_sf,[],3);
+        pref_diff_high_low_sf{i} = angle(exp( 1i*(pref_high_sf{i}-pref{i})/2*pi))/pi*180/2;
+        
+        figure('name',orientation_record.mouse);
+        imagesc(angle_high_low_sf{i}')
+            set(get(gca,'children'),'Alphadata',mask{i}')
+            
+        figure('name',orientation_record.mouse);
+        imagesc(pref_diff_high_low_sf{i}')
+            set(get(gca,'children'),'Alphadata',mask{i}')
+    else
+        angle_high_low_sf{i} = nan(size(img_orientation{i}));
+        pref_diff_high_low_sf{i} = nan(size(img_orientation{i}));
+    end
+    
+  angle_high_low_sf_all = [angle_high_low_sf_all; angle_high_low_sf{i}(mask{i})];
+  pref_diff_high_low_sf_all = [pref_diff_high_low_sf_all; pref_diff_high_low_sf{i}(mask{i})];
     radial_angle_all = [radial_angle_all ; img_rf_radial_angle_deg{i}(mask{i})]; %#ok<AGROW>
     orientation_all = [orientation_all; img_orientation{i}(mask{i})]; %#ok<AGROW>
     
@@ -352,6 +358,9 @@ for i=mice % :length(retinotopy_record_crit)
         logmsg(['Mouse ' mouse{i} ' circ. corrcoeff radial and orientation map (sign) = ' num2str(ccc)]);
     end
 end
+
+
+% figures
 
 
 row = 1;
@@ -391,11 +400,7 @@ for i = mice
     axis image off
     ylim(ylimits);
     xlim(xlimits);
-    %    title('Azimuth map');
     set(get(gca,'children'),'Alphadata',~isnan(img_rf_azimuth_deg{i}'))
-    %     if i==n_mice
-    %         colorbar('SouthOutside');
-    %     end
     col = col + 1;
     
     subplot(n_rows,n_cols,(row-1)*n_cols+col);
@@ -431,8 +436,6 @@ for i = mice
         flatten(img_orientation{i}(mask{i})),'.k')
     axis([0 180 0 180])
     axis square
-    %  xlabel('Radial angle (deg)');
-    %  ylabel('Orientation (deg)');
     box off
     xyline
     
@@ -512,6 +515,20 @@ ylabel('n pixels');
 axis square
 
 
+figure;
+hist(  abs(angle_high_low_sf_all),[0:45:90]) 
+ylabel('Number of pixels');
+xlabel('Vector angle difference (deg)');
+
+
+figure;
+hist(  abs(pref_diff_high_low_sf_all) ,[0:45:90])
+ylabel('Number of pixels');
+xlabel('Preferred angle difference (deg)');
+
+
+
+
 function override_response_centers( retinotopy_record, monitorpatch_x, monitorpatch_y, x, y,verbose )
 if nargin<6
     verbose = true;
@@ -541,7 +558,7 @@ if verbose
     subplot(1,2,2)
     show_retinotopy_colors(retinotopy_record);
     
-   
+    
     show_single_condition_maps(retinotopy_record);
     n_x = retinotopy_record.stim_parameters(1);
     n_y = retinotopy_record.stim_parameters(2);
@@ -555,7 +572,35 @@ if verbose
     
 end
 
+function [orientation_record,avg] = load_orientationdata(db, crit )
+% orientation map
+orientation_record = db(find_record(db,crit));
+if isempty(orientation_record)
+    errormsg(['Could not find record matching ' crit] );
+    return
+end
+if length(orientation_record)>1
+    errormsg(['More than one record matching ' crit] );
+    return
+end
+filename = fullfile(oidatapath(orientation_record),...
+    [orientation_record.test '_avg.mat']);
+if exist(filename,'file')
+    load(filename);
+else
+    [orientation_record,avg] = analyse_oitestrecord( orientation_record);
+    save(filename,'avg');
+end
 
+function    img_orientation = make_orientation_map( orientation_record,avg)
+    
+    multfac = 2; % for orientation
+    polavg = zeros(size(avg,1),size(avg,2));
+    for c=1:size(avg,3)
+        polavg = polavg + avg(:,:,c) * exp(multfac*pi*1i*orientation_record.stim_parameters(c)/180);
+    end
+    img_orientation = angle(polavg);
+    img_orientation = mod(img_orientation/pi*180,360)/2;
 
 
 function [monitorpatch_x,monitorpatch_y,x,y] = getgridcoordinates(retinotopy_record) %#ok<STOUT,REDEF>

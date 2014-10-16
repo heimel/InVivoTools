@@ -26,6 +26,9 @@ if ~exist('processparams_local.m','file')
     if success
         disp([ upper(mfilename) ': Created ' fullfile(majorprefix,'processparams_local.m')]);
     end
+elseif ~isempty(processparams_local([]))
+    disp([ upper(mfilename) ': Local parameter settings in processparams_local:']);
+    disp(processparams_local([]));
 end
 disp([ upper(mfilename) ': To override InVivoTools settings: edit processparams_local']);
 
