@@ -24,13 +24,8 @@ retinotopy_record_crit{i} = 'mouse=13.61.2.03,test=mouse_E11,stim_type=retinotop
 retinotopy_record{i} = db(find_record(db,retinotopy_record_crit{i}));
 monitorpatch_x = [ 5  5  5  4  4];
 monitorpatch_y = [ 3  4  2  3  4];
-% x =              [63 55  71 60  54 ];
-% y =              [54 48  60 58  53 ];
-% x =              [65 59 65 59 50];
-% y =              [52 44 58 61 56];
 x =              [65 59 65 59 50];
 y =              [52 44 58 61 56];
-%override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y, verbose)
 override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y, verbose)
 stimrect{i} = [0 0 1080 1080];
 monitorcenter_rel2nose_cm{i} = [ 00,25,29.5]; %
@@ -66,6 +61,10 @@ orientation_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E4,stim_type=orientati
 
 %orientation_high_sf_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E4,stim_type=orientation';
 orientation_high_sf_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E5,stim_type=orientation';
+
+orientation_phase0_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E6,stim_type=orientation';
+orientation_phasepi_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E7,stim_type=orientation';
+
 
 i = i + 1;
 
@@ -229,6 +228,9 @@ monitor_tilt_deg{i} = 0; % deg
 monitor_slant_deg{i} = 20;% deg
 orientation_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E8,stim_type=orientation';
 orientation_high_sf_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E7,stim_type=orientation';
+orientation_phase0_record_crit{i} = '';
+orientation_phasepi_record_crit{i} = '';
+
 i = i + 1;
 
 
@@ -239,7 +241,9 @@ n_mice = length(mice);
 radial_angle_all = [];
 orientation_all = [];
 pref_diff_high_low_sf_all = [];
+pref_diff_phases_all = [];
 angle_high_low_sf_all = [];
+angle_phases_all = [];
 
 % analyses
 
@@ -343,6 +347,41 @@ for i=mice % :length(retinotopy_record_crit)
   pref_diff_high_low_sf_all = [pref_diff_high_low_sf_all; pref_diff_high_low_sf{i}(mask{i})];
     radial_angle_all = [radial_angle_all ; img_rf_radial_angle_deg{i}(mask{i})]; %#ok<AGROW>
     orientation_all = [orientation_all; img_orientation{i}(mask{i})]; %#ok<AGROW>
+    
+
+    if ~isempty(orientation_phase0_record_crit{i})
+        [orientation_phase0_record,avg_phase0] = load_orientationdata(db, orientation_phase0_record_crit{i} );
+        img_orientation_phase0{i} = make_orientation_map( orientation_phase0_record,avg_phase0);
+        img_orientation_phase0{i}(isnan(img_rf_radial_angle_deg{i})) = nan;
+        
+        [orientation_phasepi_record,avg_phasepi] = load_orientationdata(db, orientation_phasepi_record_crit{i} );
+        img_orientation_phasepi{i} = make_orientation_map( orientation_phasepi_record,avg_phasepi);
+        img_orientation_phasepi{i}(isnan(img_rf_radial_angle_deg{i})) = nan;
+
+        angle_phases{i} = angle(exp( 1i*(img_orientation_phasepi{i}-img_orientation_phase0{i})/180*2*pi))/pi*180 /2 ;
+        
+        [mm,pref_phase0{i}]=max(avg_phase0,[],3);
+        [mm,pref_phasepi{i}]=max(avg_phasepi,[],3);
+        pref_diff_phases{i} = angle(exp( 1i*(pref_phasepi{i}-pref_phase0{i})/2*pi))/pi*180/2;
+        
+        figure('name',['Angle between phases ' orientation_record.mouse]);
+        imagesc(angle_phases{i}')
+        set(get(gca,'children'),'Alphadata',mask{i}')
+        
+        figure('name',['Pref diffs between phases ' orientation_record.mouse]);
+        imagesc(pref_diff_phases{i}')
+        set(get(gca,'children'),'Alphadata',mask{i}')
+    else
+        angle_phases{i} = nan(size(img_orientation{i}));
+        pref_diff_phases{i} = nan(size(img_orientation{i}));
+    end
+    
+    angle_phases_all = [angle_phases_all; angle_phases{i}(mask{i})];
+  pref_diff_phases_all = [pref_diff_phases_all; pref_diff_phases{i}(mask{i})];
+
+    
+    
+    
     
     ccc = circ_corrcc(2* img_rf_radial_angle_deg{i}(mask{i})/180*pi,2* img_orientation{i}(mask{i})/180*pi);
     logmsg(['Mouse ' mouse{i} ' circ. corrcoeff radial and orientation map (all) = ' num2str(ccc)]);
@@ -516,15 +555,30 @@ axis square
 
 
 figure;
-hist(  abs(angle_high_low_sf_all),[0:45:90]) 
+hist(  abs(angle_high_low_sf_all),[0:10:90]) 
 ylabel('Number of pixels');
 xlabel('Vector angle difference (deg)');
+title('Between SFs');
 
 
 figure;
 hist(  abs(pref_diff_high_low_sf_all) ,[0:45:90])
 ylabel('Number of pixels');
 xlabel('Preferred angle difference (deg)');
+title('Between SFs');
+
+figure;
+hist(  abs(angle_phases_all) ,[0:10:90])
+ylabel('Number of pixels');
+xlabel('Vector angle difference (deg)');
+title('Between phases');
+
+
+figure;
+hist(  abs(pref_diff_phases_all) ,[0:45:90])
+ylabel('Number of pixels');
+xlabel('Preferred angle difference (deg)');
+title('Between phases');
 
 
 
