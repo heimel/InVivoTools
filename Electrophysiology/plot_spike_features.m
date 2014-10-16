@@ -57,7 +57,7 @@ for ch=channels
         lims(i,2) = lims(i,2) +0.2*ran;
     end
     
-    max_spikes = 200;
+    max_spikes = 500;
     
     for i=1:n_features
         for j=i+1:n_features

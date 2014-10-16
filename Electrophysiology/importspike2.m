@@ -172,12 +172,18 @@ for cl=1:n_classes
     cll.trial=trial;
     cll.channel = 1;
     spikes = double(data_units.adc(ind,:))/10/amplification; % to get mV
-    
+    if 0 % wavelet smoothening Mehran temporarily
+        spikes1=zeros(size(spikes));
+        for i=1:size(spikes,1)
+            A=wavelet_decompose(spikes(i,:),3,'db4');A=A';
+            spikes1(i,:)=A(1,:);
+        end;
+        spikes=spikes1;
+    end
     cll.wave = mean(spikes,1) ;
     cll.std = std(spikes,1);
     cll.snr = (max(cll.wave)-min(cll.wave))/mean(cll.std);
     cll = get_spike_features(spikes, cll );
-    
     cells(cl) = cll;
     if 0 && ~isempty(ind)
         figure; hold on;
@@ -199,8 +205,61 @@ for cl=1:n_classes
         bigger_linewidth(3);
         smaller_font(-12);
     end
-    
-end
+ end % cl n_classes
+
+
+ if 0 % merging cells 
+     cll = cells(1);
+     for c=2:length(cells)
+        cll.data = [cll.data; cells(c).data];
+        cll.spike_amplitude = [cll.spike_amplitude; cells(c).spike_amplitude];
+        cll.spike_trough2peak_time = [cll.spike_trough2peak_time; cells(c).spike_trough2peak_time];
+        cll.spike_peak_trough_ratio = [cll.spike_peak_trough_ratio; cells(c).spike_peak_trough_ratio];
+        cll.spike_prepeak_trough_ratio = [cll.spike_prepeak_trough_ratio; cells(c).spike_prepeak_trough_ratio];
+        cll.spike_lateslope = [cll.spike_lateslope; cells(c).spike_lateslope];
+     end
+         %    XX=[cll.spike_amplitude,cll.spike_peak_trough_ratio,cll.spike_prepeak_trough_ratio,cll.spike_trough2peak_time,cll.spike_lateslope];
+      XX=[cll.spike_amplitude,cll.spike_peak_trough_ratio/range(cll.spike_peak_trough_ratio),cll.spike_prepeak_trough_ratio/range(cll.spike_prepeak_trough_ratio),cll.spike_trough2peak_time/range(cll.spike_trough2peak_time),cll.spike_lateslope/range(cll.spike_lateslope)]; %spikes(:,2:4:end)
+         
+     if  1 % add replace features by PCs
+         
+         [pc,score,latent,tsquare] = princomp(XX);
+         score = score( randperm(size(score,1)),:);
+         
+         
+         cll.spike_amplitude = score(:,1);
+         cll.spike_trough2peak_time = score(:,2); %ms
+         cll.spike_peak_trough_ratio = score(:,3);
+         cll.spike_prepeak_trough_ratio = score(:,4);
+         cll.spike_lateslope=score(:,5);
+     end
+     cells = cll;
+     
+     if 0 % kmean clustering
+         NumClust  = 10;
+         if exist('score','var')
+             indx = kmeans(score(:,[1:5]),NumClust);
+         else
+             indx =clusterdata(XX(:,[1 2 3 4 5]),'linkage','ward','maxclust',5);
+%             indx = kmeans(XX(:,[ 1 2 3 4 5]),NumClust);
+         end
+         for i=1:max(indx)
+             ind = find(indx==i);
+             cells(i)=cll;
+             cells(i).name =[ 'cell_ctx_Spikes_0001_' num2str(i,'%03d')];
+             cells(i).data = cll.data(ind);
+             
+             cells(i).spike_amplitude =cll.spike_amplitude(ind);
+             cells(i).spike_trough2peak_time = cll.spike_trough2peak_time(ind); %ms
+             cells(i).spike_peak_trough_ratio = cll.spike_peak_trough_ratio(ind);
+             cells(i).spike_prepeak_trough_ratio = cll.spike_prepeak_trough_ratio(ind);
+             cells(i).spike_lateslope=cll.spike_lateslope(ind);
+             
+         end
+     end
+ end
+
+
 
 return
 

@@ -211,7 +211,8 @@ switch lower(record.setup)
         %         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
         isi = [];
     otherwise
-        isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+%         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+        isi = [];
 end
 save(spikesfile,'cells','isi');
 
@@ -410,7 +411,7 @@ if cluster_spikes            % compute cluster overlap
                 spike_features{i} = [ spike_features{i};cells(ind(i)).(field{1})'];
             end
         end
-        max_spikes = 200;
+        max_spikes = 1000;
         cluster_features = [ 1 2 3 ]; % 5 ruins it
         for i=2:n_cells
             if isempty(spike_features{i})
