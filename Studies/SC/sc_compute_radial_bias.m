@@ -341,7 +341,7 @@ for i=mice % :length(retinotopy_record_crit)
         pref_diff_high_low_sf{i} = angle(exp( 1i*(pref_high_sf{i}-pref{i})/2*pi))/pi*180/2;
         
         figure('name',orientation_record.mouse);
-        imagesc(angle_high_low_sf{i}')
+        imagesc(angle_high_low_sf{i}',[-90 90])
             set(get(gca,'children'),'Alphadata',mask{i}')
             
         figure('name',orientation_record.mouse);
@@ -374,7 +374,7 @@ for i=mice % :length(retinotopy_record_crit)
         pref_diff_phases{i} = angle(exp( 1i*(pref_phasepi{i}-pref_phase0{i})/2*pi))/pi*180/2;
         
         figure('name',['Angle between phases ' orientation_record.mouse]);
-        imagesc(angle_phases{i}')
+        imagesc(angle_phases{i}',[-90 90])
         set(get(gca,'children'),'Alphadata',mask{i}')
         
         figure('name',['Pref diffs between phases ' orientation_record.mouse]);
