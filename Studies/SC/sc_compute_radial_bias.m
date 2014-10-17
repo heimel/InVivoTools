@@ -227,7 +227,9 @@ monitorcenter_rel2nose_cm{i} = [-10,-4,30]; %
 monitor_tilt_deg{i} = 0; % deg
 monitor_slant_deg{i} = 20;% deg
 orientation_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E8,stim_type=orientation';
-orientation_high_sf_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E7,stim_type=orientation';
+orientation_record2_crit{i} = 'mouse=13.61.2.21,test=mouse_E6,stim_type=orientation';
+%orientation_high_sf_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E7,stim_type=orientation';
+orientation_high_sf_record_crit{i} = ''; % excluding test because response was below 0.5%
 orientation_phase0_record_crit{i} = '';
 orientation_phasepi_record_crit{i} = '';
 
@@ -315,7 +317,6 @@ for i=mice % :length(retinotopy_record_crit)
     end
     
     [orientation_record,avg] = load_orientationdata(db, orientation_record_crit{i} );
-    
     img_orientation{i} = make_orientation_map( orientation_record,avg);
       img_orientation{i}(isnan(img_rf_radial_angle_deg{i})) = nan;
     
@@ -324,6 +325,14 @@ for i=mice % :length(retinotopy_record_crit)
         img_orientation_high_sf{i} = make_orientation_map( orientation_high_sf_record,avg_high_sf);
       img_orientation_high_sf{i}(isnan(img_rf_radial_angle_deg{i})) = nan;
 
+      if ~isempty(orientation_record2_crit{i})
+          [~,avg2] = load_orientationdata(db, orientation_record2_crit{i} );
+          avg = avg+avg2;
+          img_orientation{i} = make_orientation_map( orientation_record,avg);
+          img_orientation{i}(isnan(img_rf_radial_angle_deg{i})) = nan;
+          
+      end
+      
         
         angle_high_low_sf{i} = angle(exp( 1i*(img_orientation_high_sf{i}-img_orientation{i})/180*2*pi))/pi*180 /2 ;
         
@@ -555,11 +564,10 @@ axis square
 
 
 figure;
-hist(  abs(angle_high_low_sf_all),[0:10:90]) 
+hist(  abs(angle_high_low_sf_all),[-90:45:90]) 
 ylabel('Number of pixels');
 xlabel('Vector angle difference (deg)');
 title('Between SFs');
-
 
 figure;
 hist(  abs(pref_diff_high_low_sf_all) ,[0:45:90])
@@ -568,11 +576,10 @@ xlabel('Preferred angle difference (deg)');
 title('Between SFs');
 
 figure;
-hist(  abs(angle_phases_all) ,[0:10:90])
+hist(  angle_phases_all ,[-90:45:90])
 ylabel('Number of pixels');
 xlabel('Vector angle difference (deg)');
 title('Between phases');
-
 
 figure;
 hist(  abs(pref_diff_phases_all) ,[0:45:90])
