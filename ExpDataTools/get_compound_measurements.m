@@ -1,7 +1,7 @@
 function [results,dresults,measurelabels,wordtypes]=get_compound_measurements(groups,measures,varargin)
 %GET_COMPOUND_MEASUREMENTS
 %
-% 2007-2012, Alexander Heimel
+% 2007-2014, Alexander Heimel
 %
 
 pos_args={...
@@ -204,11 +204,11 @@ while w<=length(measurelabels)
     end
 end
 
-operators='<>';
+operators='<>=!';
 w=1;
 while w<=length(measurelabels)
     if strcmp(wordtypes{w},'operator') && ...
-            (measurelabels{w}==operators(1) ||measurelabels{w}==operators(2))
+            ~isempty(findstr(measurelabels{w},operators))
         [results_list,dresults_list,measurelabels,wordtypes]=...
             apply_operator(measurelabels{w},results_list,dresults_list,measurelabels,wordtypes,w);
         w=w-1;
@@ -217,6 +217,18 @@ while w<=length(measurelabels)
     end
 end
 
+operators='|&';
+w=1;
+while w<=length(measurelabels)
+    if strcmp(wordtypes{w},'operator') && ...
+            ~isempty(findstr(measurelabels{w},operators))
+        [results_list,dresults_list,measurelabels,wordtypes]=...
+            apply_operator(measurelabels{w},results_list,dresults_list,measurelabels,wordtypes,w);
+        w=w-1;
+    else
+        w=w+1;
+    end
+end
 
 
 results=results_list;
@@ -269,6 +281,14 @@ function [results_list,dresults_list,measurelabels,wordtypes]=...
 switch operator
     case {'*','/','^'}
         operator=['.' operator];
+    case '='
+        operator = '==';
+    case '!'
+        operator = '~=';
+    case '|'
+        operator = '||';
+    case '&'
+        operator = '&&';
 end
 
 switch [wordtypes{w-1} ',' wordtypes{w+1}];
@@ -406,7 +426,7 @@ letters='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 r= ~isempty(findstr(letters,x));
 
 function r=is_operator(x)
-operators='^*/+-<>';
+operators='^*/+-<>=!|&';
 r= ~isempty(findstr(operators,x));
 
 function x = given(x)

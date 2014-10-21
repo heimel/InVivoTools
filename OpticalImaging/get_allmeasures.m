@@ -1,5 +1,8 @@
-function mouserecord=get_allmeasures(mouserecord,testdb);
+function mouserecord=get_allmeasures(mouserecord,testdb)
 %GET_ALLMEASURES get alle values for a mouse from database
+%  DEPRECATED
+%
+% Alexander Heimel
 
 if nargin<2
   testdb=load_testdb;

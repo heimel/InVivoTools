@@ -8,3 +8,5 @@ function newud=graphdb_measuredb( ud)
 measure_db;
 
 newud=ud;
+
+get_all_measures;

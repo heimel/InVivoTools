@@ -46,7 +46,7 @@ if exist('limit','var')
         limit(limit==';')=',';
         limit = split(limit,',',true);
     catch
-        disp(['GET_MEASURE_FROM_RECORD: Something wrong with ' limit ]);
+        logmsg(['Something wrong with ' limit ]);
         return
     end
 end
@@ -55,8 +55,7 @@ acc_open = find(measure=='{'); % i.e. trigger prescription
 if ~isempty(acc_open)
     acc_close = find(measure(acc_open:end)=='}');
     if isempty(acc_close)
-        errordlg(['No closing accolade after opening in measure ' measure ]);
-        disp(['GET_MEASURE_FROM_RECORD: No closing accolade after opening in measure ' measure ]);
+        errormsg(['No closing accolade after opening in measure ' measure ]);
         return
     end
     trigger = str2double(measure(acc_open+1:acc_open+acc_close-2));
@@ -65,11 +64,9 @@ else
     trigger = 1;
 end
 
-
 if isfield(record,'measures')
     for c=1:length(record.measures) % over all cells
         measures = record.measures(c);
-        
         
         if verbose && isfield(measures,measure)
             disp([ recordfilter(record) ': ' measure ' present']);
@@ -92,11 +89,11 @@ if isfield(record,'measures')
                 end
             end
             if isfield(measures,'snr') && measures.snr<min_snr % nicer to make a extra_options snr
-                disp('GET_MEASURE_FROM_RECORD: Use of min_snr is deprecated. Use limit instead');
+                logmsg('Use of min_snr is deprecated. Use limit instead');
                 get=0;
             end
             if isfield(measures,'snr') && measures.snr>max_snr
-                disp('GET_MEASURE_FROM_RECORD: Use of max_snr is deprecated. Use limit instead');
+                logmsg('Use of max_snr is deprecated. Use limit instead');
                 get=0;
             end
         else % for instance 'lfp'

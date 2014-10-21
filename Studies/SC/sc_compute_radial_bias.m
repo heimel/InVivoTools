@@ -267,9 +267,13 @@ for i=mice % :length(retinotopy_record_crit)
     retinotopy_record{i}.monitor_tilt_deg = monitor_tilt_deg{i};
     retinotopy_record{i}.monitor_slant_deg = monitor_slant_deg{i};
     filename = fullfile(oidatapath(retinotopy_record{i}),[retinotopy_record{i}.test '_avg.mat']);
-    if exist(filename,'file')
+    if exist(filename,'file') && i~=2
         load(filename);
     else
+        if i==2
+            retinotopy_record{i}.blocks = [2 3];
+        end
+        
         [retinotopy_record{i},avg] = analyse_oitestrecord( retinotopy_record{i});
         save(filename,'avg');
     end

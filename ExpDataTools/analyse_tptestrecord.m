@@ -138,6 +138,8 @@ if isfield(record.measures,'present') && ...
             record.measures(i).gained = NaN;
             record.measures(i).lost = NaN;
             record.measures(i).was_present = NaN;
+            record.measures(i).changed = NaN;
+            record.measures(i).persistent = NaN;
             
             % gained = 1 if present now, not before,
             % gained = 0 if present now and before
@@ -146,6 +148,19 @@ if isfield(record.measures,'present') && ...
             % lost = 1 if present before, not now,
             % lost = 0 if present before and now
             % lost = NaN if not present before, or first record
+            
+            % was_present = 1 if present before
+            % was_present = 0 if not present before
+            % was_present = NaN if first record
+            
+            % changed = 1 if present now, not before
+            % changed = 1 if present before, not now
+            % changed = 0 if present now and before
+            % changed = 0 if not present now and not before
+            % changed = NaN if first record
+            
+            % persistent = 1 if present now and (persistent before, or first record)
+            % persistent = 0 if otherwise 
             
             ref_i = find([ref_record.measures.index]==record.measures(i).index);
             if length(ref_i)>1
@@ -162,9 +177,21 @@ if isfield(record.measures,'present') && ...
                     record.measures(i).lost = ~record.measures(i).present;
                 end
                 record.measures(i).was_present = ref_record.measures(ref_i).present;
+                record.measures(i).changed = (ref_record.measures(ref_i).present ~= record.measures(i).present);
+                if isfield(ref_record.measures(ref_i),'persistent')
+                    if isnan(ref_record.measures(ref_i).persistent)
+                        record.measures(i).persistent = NaN;
+                    else
+                        record.measures(i).persistent = (ref_record.measures(ref_i).persistent & record.measures(i).present);
+                    end
+                else
+                    record.measures(i).persistent = NaN; % analysis should be run twice, the first time
+                end
             else
                 record.measures(i).gained = record.measures(i).present;
                 record.measures(i).was_present = false;
+                record.measures(i).changed = record.measures(i).present;
+                record.measures(i).persistent = NaN;
             end
         end
         
@@ -210,10 +237,16 @@ if isfield(record.measures,'present') && ...
             end
         end
         
-    else
+    else % assume first record in series
         for i=1:n_rois
             record.measures(i).gained = NaN;
             record.measures(i).lost = NaN;
+            record.measures(i).was_present = NaN;
+            if record.measures(i).present 
+                record.measures(i).persistent = true;
+            else
+                record.measures(i).persistent = NaN;
+            end
         end
     end
 end
