@@ -174,7 +174,7 @@ if params.load_erg
 end
 
 % Temp folder for work in progress
-addpath(fullfile(path2invivotools,'Temp'));
+addpath(fullfile(path2invivotools,'Working'));
 
 % Call Psychtoolbox-3 specific startup function:
 if exist('PsychStartup','file')

@@ -46,8 +46,27 @@ if exist('limit','var')
         limit(limit==';')=',';
         limit = split(limit,',',true);
     catch
-        logmsg(['Something wrong with ' limit ]);
+        errormsg(['Something wrong with ' limit ]);
         return
+    end
+    
+    if mod(length(limit),2)==1
+        errormsg('Odd number of arguments to limit. Use like limit,{''rate_max{1}'';[1 inf];''depth'';[300 400]');
+        return
+    end
+    n_limits = length(limit)/2;
+    for l = 1:n_limits  % remove 's
+        if limit{l*2-1}(1)=='''' && limit{l*2-1}(end)==''''
+            limit{l*2-1}=limit{l*2-1}(2:end-1);
+        end
+        limitranges_num{l} =  eval(limit{l*2});
+        limitranges_str{l} = limit{l*2};
+        if ~iscell(limitranges_num{l})
+            limitranges_num{l} = {limitranges_num{l}};
+        end
+        if ~iscell(limitranges_str{l})
+            limitranges_str{l} = {limitranges_str{l}};
+        end
     end
 end
 
@@ -64,12 +83,49 @@ else
     trigger = 1;
 end
 
+
+get = 1;
+if exist('anesthetic','var')
+    if isempty(findstr(lower(anesthetic),lower(record.anesthetic)))
+        get = 0;
+    end
+end
+if exist('depth','var') && ~isempty(depth) && depth~=0
+    if record.depth ~= str2double(depth)
+        get = 0;
+    end
+end
+if ~isempty(layer)
+    if isfield(record,'depth')
+        depth=record.depth-record.surface;
+        switch layer
+            case 'supergranular'
+                if depth>450
+                    get=0;
+                end
+            case 'subgranular'
+                if depth<550
+                    get=0;
+                end
+            case {'4','granular'}
+                if depth>550 || depth<350
+                    get=0;
+                end
+            case 'all'
+        end
+    end
+end
+if ~get 
+    return
+end
+
+
 if isfield(record,'measures')
     for c=1:length(record.measures) % over all cells
         measures = record.measures(c);
         
         if verbose && isfield(measures,measure)
-            disp([ recordfilter(record) ': ' measure ' present']);
+            logmsg([ recordfilter(record) ': ' measure ' present']);
         end
             
         if strcmp(record.datatype,'ec')==1
@@ -91,10 +147,12 @@ if isfield(record,'measures')
             if isfield(measures,'snr') && measures.snr<min_snr % nicer to make a extra_options snr
                 logmsg('Use of min_snr is deprecated. Use limit instead');
                 get=0;
+                continue
             end
             if isfield(measures,'snr') && measures.snr>max_snr
                 logmsg('Use of max_snr is deprecated. Use limit instead');
                 get=0;
+                continue
             end
         else % for instance 'lfp'
             get=1;
@@ -110,6 +168,7 @@ if isfield(record,'measures')
                 end
                 if ~all(evaluated_criteria)
                     get = 0;
+                    continue
                 end
             catch me
                 switch me.identifier
@@ -138,110 +197,74 @@ if isfield(record,'measures')
                 if length(record.reliable)==1
                     if record.reliable == 0
                         get = 0;
+                        continue
                     end
                 elseif isfield(measures,'index')
                     if length(record.reliable)<measures.index+1
-                        str=['Reliable vector too short for ' recordfilter(record) '. Note that the first entry is the multi-unit.' ];
-                        disp(['GET_MEASURE_FROM_RECORD: ' str]);
-                        errordlg(str,'Get measure from record');
+                        errrormsg(['Reliable vector too short for ' recordfilter(record) '. Note that the first entry is the multi-unit.' ]);
                     else
                         if ~record.reliable(measures.index+1)
                             get = 0;
+                        continue
                         end
                     end
-                end
-            end
-        end
-        if exist('anesthetic','var')
-            if isempty(findstr(lower(anesthetic),lower(record.anesthetic)))
-                get = 0;
-            end
-        end
-        if exist('depth','var') && ~isempty(depth) && depth~=0
-            if record.depth ~= str2double(depth)
-                get = 0;
-            end
-        end
-        if ~isempty(layer)
-            if isfield(record,'depth')
-                depth=record.depth-record.surface;
-                switch layer
-                    case 'supergranular'
-                        if depth>450
-                            get=0;
-                        end
-                    case 'subgranular'
-                        if depth<550
-                            get=0;
-                        end
-                    case {'4','granular'}
-                        if depth>550 || depth<350
-                            get=0;
-                        end
-                    case 'all'
                 end
             end
         end
         if exist('rate_max_limit','var') && ~isempty(rate_max_limit)
-            disp('GET_MEASURE_FROM_RECORD: Use of rate_max_limit is deprecated. Use limit instead');
+            logmsg('Use of rate_max_limit is deprecated. Use limit instead');
             if isfield(measures,'rate_max')
                 if iscell(measures.rate_max)
                     if measures.rate_max{1}<rate_max_limit(1) || ...
                             measures.rate_max{1}>rate_max_limit(2)
                         get = 0;
+                        continue
                     end
                 else
                     if measures.rate_max<rate_max_limit(1) || ...
                             measures.rate_max>rate_max_limit(2)
                         get = 0;
+                        continue
                     end
                 end
             end
         end
-        
         if exist('limit','var') && ~isempty(limit)
-            if mod(length(limit),2)==1
-                msg= 'Odd number of arguments to limit. Use like limit,{''rate_max{1}'';[1 inf];''depth'';[300 400]';
-                errordlg(msg,'Get measure from record');
-                disp(['GET_MEASURE_FROM_RECORD: ' msg]);
-                return
-            end
-            n_limits = length(limit)/2;
             for l = 1:n_limits
                 try
-                    if limit{l*2-1}(1)=='''' && limit{l*2-1}(end)==''''
-                        limit{l*2-1}=limit{l*2-1}(2:end-1);
-                    end
-                    v = eval(['measures.' limit{l*2-1}]);
-                    % using try instead of isfield, because of things like
-                    %  rate_max{1} 
+                    v = measures.(limit{l*2-1}); % goes wrong if limit has {}
                 catch
                     try
-                        v = eval(['record.' limit{l*2-1}]);
+                        v = eval(['measures.' limit{l*2-1}]);
+                        % using eval instead of isfield, because of things like
+                        %  rate_max{1}
                     catch
-                        get = 0;
-                        continue
+                        try
+                            v = eval(['record.' limit{l*2-1}]);
+                        catch
+                            get = 0;
+                            break
+                        end
                     end
+                end
+                if ~get
+                    continue
                 end
                 if ~isempty(v)
                     if islogical(v)
                         v = double(v);
                     end
                     if isnumeric(v)
-                        ranges = eval(limit{l*2});
+                        ranges = limitranges_num{l}; 
                     else
-                        ranges = limit{l*2};
+                        ranges = limitranges_str{l};
                     end                        
-                    if ~iscell(ranges)
-                        ranges = {ranges};
+                    if ~iscell(v)
+                        v = {v};
                     end
                     take = false;
                     for i = 1:length(ranges)
-                        if ~iscell(v)
-                            v = {v};
-                        end
                         for j=1:length(v)
-                            
                             if isnumeric(v{j})
                                 if numel(v{j})>1
                                    errormsg([limit{l*2-1} ' has multiple values in ' recordfilter(record)]);
@@ -250,39 +273,46 @@ if isfield(record,'measures')
                                 if length(ranges{i})==2
                                     if v{j}>=ranges{i}(1) &&  v{j}<=ranges{i}(2)
                                         take = true;
+                                        break
                                     end
                                 elseif length(ranges{i})==1
                                     if v{j}==ranges{i}
                                         take = true;
+                                        break
                                     end
                                 end
                             elseif ischar(v{j})
                                 if strcmp(v{j},ranges{i})
                                     take = true;
+                                    break
                                 end
                             end
-                        end
-                    end
+                        end % j
+                    end % i
                     
                     if ~take
                         get = 0;
-                        continue
+                        break
                     end
                    
                 end
+            end % limit l
+            if ~get 
+                continue
             end
-        end
+        end % if limit
         
         
         if exist('variable','var')
             if ~isfield(measures,'variable') || ...
                     strcmp(measures.variable,variable)==0
                 get = 0;
+                continue
             end
         end
-        tempval = NaN;
-        tempval_sem = [];
         if get
+            tempval = NaN;
+            tempval_sem = [];
             if isfield(measures,measure)
                 if ~isempty(measures.(measure))
                     tempval = measures.(measure);
@@ -422,5 +452,5 @@ else % no field measures
 end 
 
 if any(size(val)~=size(val_sem))
-    disp('GET_MEASURE_FROM_RECORD: sizes of VAL and VAL_SEM are not equal');
+    logmsg('Sizes of VAL and VAL_SEM are not equal');
 end
