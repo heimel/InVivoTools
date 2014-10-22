@@ -429,6 +429,6 @@ function r=is_operator(x)
 operators='^*/+-<>=!|&';
 r= ~isempty(findstr(operators,x));
 
-function x = given(x)
+function x = given(x) %#ok<DEFNU>
 x = zero2nan(x);
 x(~isnan(x)) = 1;
