@@ -3,19 +3,19 @@ function h=graph(y,x,varargin)
 %
 %  H = GRAPH(Y,X,VARARG)
 %
-%  Y,X is cell list of cell list of data vectors Y and X 
+%  Y,X is cell list of cell list of data vectors Y and X
 %    Y{measures}{group}[data]
 %
 %  H is structure containing image handles and info
 %
-%  VARARG is a selection of option names and values. List of options is 
+%  VARARG is a selection of option names and values. List of options is
 %  given below ([] denotes default value):
 %     'axishandle',[]
 %     'showpoints',{0,[1],2}
 %     'test',{['ttest'],'kruskal_wallis_test'}
 %     'spaced',{[0],1}    % spacing points in bar plot
 %     'color',0.7*[1 1 1]
-%     'errorbars','sem' 
+%     'errorbars','sem'
 %     'style',{['bar'],'xy','box','hist','cumul','rose'}
 %     'signif_y',[]
 %     'prefax',[]
@@ -161,7 +161,6 @@ else
     smoothing = 0;
 end
 
-
 if exist('markersize','var')
     if ischar(markersize)
         markersize = str2double(markersize);
@@ -175,23 +174,20 @@ if exist('markers','var')
     end
 end
 if exist('linestyles','var')
-    linestyles=trim(linestyles); 
+    linestyles=trim(linestyles);
     if ~isempty(linestyles) && linestyles(1)=='{'
         linestyles=split( linestyles(2:end-1),';');
     end
 end
 
-
 if ~iscell(color)
-    tmpcolor=color;
-    color={};
+    tmpcolor = color;
+    color = cell(length(y),1);
     for g=1:length(y)
-        color{g}=tmpcolor;
+        color{g} = tmpcolor;
     end
     clear('tmpcolor');
 end
-
-
 
 % make graph
 if isempty(axishandle)
@@ -209,12 +205,12 @@ end
 
 % reformat y into cell-structure
 if ~iscell(y)
-    if ndims(y)>2
+    if ~ismatrix(y)
         errormsg('Unable to handle arrays of more than 2 dimensions');
         return
     end
     old_y=y;
-    y={};
+    y=cell(size(old_y,1),1);
     for i=1:size(old_y,1)
         y{i}=old_y(i,:);
     end
@@ -267,7 +263,6 @@ if iscell(y{1})
             end
         end
     end
-    
     orgxticklabels=xticklabels;
     if ~isempty(xticklabels)
         xticklabels={};
@@ -281,49 +276,34 @@ end
 
 switch style
     case 'surf'
-        disp('GRAPH: Surf currently only works for 1 image');
+        logmsg('Surf currently only works for 1 image');
         
         n_x = size(z{1},2);
         n_y = size(z{1},1);
         % n_z = size(z{1},3);
         
         if n_x>length(x{1}) || n_y>length(y{1})
-            disp(['GRAPH: Z has dimension ' mat2str(size(z{1})) ...
+            logmsg(['Z has dimension ' mat2str(size(z{1})) ...
                 ', while x has length ' num2str(length(x{1})) ...
                 ' and y has length ' num2str(length(y{1}))]);
-            %return
         end
         x{1} = x{1}(1:n_x);
         y{1} = y{1}(1:n_y);
-                
-        %         for i=1:size(z{1},3)
-        %             figure;
-        %             surf(x{1},y{1},z{1}(:,:,i),'EdgeColor','none');
-        %             axis xy; axis tight; view(0,90);
-        %             ylim([0 100])
-        %
-        %             %z{1}(:,:,i) = z{1}(:,:,i) / max(max(z{1}(:,:,i)));
-        %         end
-        %         figure
         
         if size(z{1},3)>1
-            disp(['GRAPH: Averaging ' num2str(size(z{1},3) ) ' frames.']);
+            logmsg(['Averaging ' num2str(size(z{1},3) ) ' frames.']);
             z{1} = mean(z{1},3);
         end
         if isnan(z{1})
-            disp('GRAPH: z is not suitable for surface plot.');
-            errordlg('z is not suitable for surface plot.','Graph');
+            errormsg('z is not suitable for surface plot.');
             close(h.fig);
             return
         end
-        
         surf(x{1},y{1},z{1},'EdgeColor','none');
         axis xy; axis tight; view(0,90);
-%        ylim([0 100])
     case 'image'
-        disp('GRAPH: Image currently only works for 1 image');
+        logmsg('Image currently only works for 1 image');
         imagesc( y{1} );
-        
     case 'rose'
         hold off % to clear settings from rectangular graphs
         if exist('bins','var') && ~isempty(bins) && ischar(bins) %#ok<NODEF>
@@ -352,9 +332,9 @@ switch style
                 end
             else
                 for i=1:length(y)
-%                     if max(bins>45) % i.e. probably degrees
-%                         bins = bins/180*pi;
-%                     end
+                    %                     if max(bins>45) % i.e. probably degrees
+                    %                         bins = bins/180*pi;
+                    %                     end
                     
                     [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins);
                     h.polar(i) = polar( rose_theta(i,:)-pi/bins, rose_r(i,:));
@@ -367,11 +347,12 @@ switch style
         if strcmp(test,'chi2') % calculate significance
             for i = 1:length(y)
                 for j=i+1:length(y)
-                    disp(['GRAPH: p of chi2class test of groups ' num2str(i) ' and ' num2str(j) ' = ' num2str(chi2class( [rose_r(i,2:4:end) ;rose_r(j,2:4:end)]))]);
+                    logmsg(['p of chi2class test of groups ' num2str(i) ...
+                        ' and ' num2str(j) ' = ' ...
+                        num2str(chi2class( [rose_r(i,2:4:end) ;rose_r(j,2:4:end)]))]);
                 end
             end
         end
-        
     case {'cumul'}
         if ~isempty(bins) && ischar(bins)
             bins=eval(bins);
@@ -394,30 +375,24 @@ switch style
             hh = findobj(gca,'Type','patch');
             set(hh(1),'FaceColor',color{i});%,'EdgeColor','w')
         end
-    case 'pie' 
-        h.pie = pie([cellfun(@mean,y)]);
-        
-        my = [cellfun(@mean,y)];
+    case 'pie'
+        h.pie = pie(cellfun(@mean,y));
         cm=[color{:}];
         cm = reshape(cm',3,length(cm)/3)';
         colormap(cm);
-        axis off
-        
         axis off square
-    case 'stackedbar' 
+    case 'stackedbar'
         set(gcf,'PaperPositionMode','auto');
         width=0.2;
         left=0.5-width/2;
         subplot('position',[left 0.20 width 0.7]);
         hold on;
-        
-        my = [cellfun(@mean,y)];
+        my = cellfun(@mean,y);
         h.stackedbar = bar([my;my],'stacked');xlim([.5 1.5]);
         cm=[color{:}];
         cm = reshape(cm',3,length(cm)/3)';
         colormap(cm);
         axis off
-        
     case {'bar','box'}
         if isempty(x)
             x=(1:length(y));
@@ -452,7 +427,6 @@ switch style
                     means(i)=nanmedian(y{i});
                 end
         end
-        
         
         if exist('sort_y','var')
             switch sort_y
@@ -497,100 +471,12 @@ switch style
         end
         
         % plot significances
-        if  strcmp(test,'chi2')
-            for i=1:length(y)
-                d(i,1)=sum( y{i}(~isnan(y{i}))==0 );
-                d(i,2)=sum( y{i}(~isnan(y{i}))==1 );
-            end
-            [p_chi2,chi2] = chi2class( d);
-            disp(['GRAPH: p of chi2class test = ' num2str(p_chi2) ...
-                ' over all groups. chi2-statistic = ' num2str(chi2)]);
-        end
-        
-        if strcmp(test,'none')~=1
-            ax=axis;
-            height=(ax(4)-ax(3))/20;
-            w=0.1;
-            
-            if ~( length(signif_y)==1 && signif_y==0)
-                for i=1:length(y)
-                    switch test
-                        case 'ttest'
-                            % check normality
-                            [h_norm,p_norm] = swtest(y{i});
-                            if h_norm
-                                disp(['GRAPH: Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to kruskal_wallis']);
-                            end
-                        case 'paired_ttest'
-                            % check normality
-                            [h_norm,p_norm] = swtest(y{i});
-                            if h_norm
-                                disp(['GRAPH: Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to signrank.']);
-                            end
-                    end
-                end
-                for i=1:length(y)
-                    for j=i+1:length(y)
-                        nsig=(i-1)*length(y)+j;
-                        
-                        ind_y=[];
-                        
-                        if ~isempty(signif_y)
-                            if size(signif_y,2)==1 % single column, specify which to do
-                                if isempty(find(signif_y==nsig,1))
-                                    continue
-                                end
-                            else % double column, specify height or which not to do
-                                ind_y = find(signif_y(:,1)==nsig);
-                                if ~isempty(ind_y) && isnan(signif_y(ind_y,2))
-                                    continue
-                                end
-                            end
-                        end
-                        
-                        
-                        if isempty(ind_y) % no mention in signif_y list
-                            y_star=ax(4)+height*(j-i-1);
-                        else
-                            y_star=signif_y(ind_y(1),2);
-                        end
-                        
-                        % matlab significance test using sample data
-                        if iscell(ystd) && iscell(ny)
-                            [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,testperformed]=...
-                                plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
-                                ystd{i},ny{i},ystd{j},ny{j},tail);
-                        else
-                            [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,testperformed]=...
-                                plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
-                                [],[],[],[],tail);
-                        end
-                        if h.p_sig{i,j}<1
-                            outstat = ['GRAPH: Significance: ' num2str(nsig)...
-                                ' = grp ' num2str(i) ' vs grp ' num2str(j) ...
-                                ', p = ' num2str(h.p_sig{i,j},2) ...
-                                ', ' testperformed ];
-                            if ~isempty(statistic_name) 
-                                if ~isempty(dof) && ~isnan(dof)
-                                    outstat = [outstat ...
-                                        ', ' statistic_name ...
-                                        '[' num2str(dof) '] = ' num2str(statistic) ]; %#ok<AGROW>
-                                else
-                                    outstat = [outstat ...
-                                        ', ' statistic_name ' = ' num2str(statistic) ]; %#ok<AGROW>
-                                end         
-                            end
-                            disp(outstat);
-                        end
-                        
-                    end
-                end
-            end
-        end
+        h = compute_significances( y,x, test, signif_y, ystd, ny, tail, h );
         
         % tighten x-axis
-        ax=axis;
-        ax(1)=min(x)-0.5; ax(2)=max(x)+0.5;
+        ax = axis;
+        ax(1) = min(x)-0.5;
+        ax(2) = max(x)+0.5;
         axis(ax);
         
     case 'xy'
@@ -599,22 +485,19 @@ switch style
                 x{i}=(1:length(y{i}));
             end
         elseif ~iscell(x)
-            oldx=x;
+            oldx = x;
             if numel(x)==length(x) && length(x)==length(y{1})
-                x={};x{length(y)}=[];
+                x = cell(length(y),1);
                 for i=1:length(y)
                     x{i}=oldx;
                 end
             else
-                x={};x{size(oldx,1)}=[];
+                x = cell(size(oldx,1),1);
                 for i=1:size(oldx,1)
                     x{i}=oldx(i,:);
                 end
             end
         end
-        
-        
-        
         if showpoints==0 % replace points by means
             for i=1:length(y)
                 x{i}=nanmean(x{i});
@@ -628,7 +511,7 @@ switch style
                     errordlg(msg,'Graph');
                     disp(['GRAPH: ' msg]);
                     if ishandle(h.fig)
-                                close(h.fig);
+                        close(h.fig);
                     end
                     return
                 end
@@ -641,7 +524,7 @@ switch style
                 uniqx=uniq(x{i});
                 uniqy=zeros(1,length(uniqx));
                 uniqystd=zeros(1,length(uniqx));
-                      
+                
                 if ~isempty(merge_x)
                     dx = diff(uniqx)./uniqx(1:end-1);
                     ind = find(dx<merge_x);
@@ -663,9 +546,6 @@ switch style
                         uniqystd(j) = nan;
                     end
                 end
-                
-                
-                
                 ind = find(~isnan(uniqy));
                 x{i} = uniqx(ind);
                 y{i} = uniqy(ind);
@@ -679,14 +559,14 @@ switch style
                 y{i}=y{i}(:)';
             end
         end
- 
+        
         
         % plot errors
         if ~exist('errorbars_sides','var')
             errorbars_sides='both';
         end
         if strcmp(errorbars,'sem')
-            disp('GRAPH: Errorbars sem are not implemented for xy graph');
+            logmsg('Errorbars sem are not implemented for xy graph');
             errorbars='std';
         end
         if ~isempty(ystd) && strcmp(errorbars,'none')~=1
@@ -703,7 +583,6 @@ switch style
                 end
             end
         end
-        
         
         % plot significances
         % assume points of same x have to be compared across groups
@@ -723,7 +602,7 @@ switch style
                             dof=nan;
                         end
                         if h.h_sig{i,j}==1
-                            disp(['GRAPH: Differences at x=' num2str(x{j}(k),2)...
+                            logmsg(['Differences at x=' num2str(x{j}(k),2)...
                                 ' are significant. p=' num2str(h.p_sig{i,j},2)  ]);
                         end
                     end
@@ -731,16 +610,12 @@ switch style
             end
         end
         
-        
-        
         % line fit (do before plotting points)
         if exist('fit','var') || exist('slidingwindow','var')
             if ~exist('fit','var')
                 fit = '';
             end
-            
-            
-            if ~isempty(findstr(fit,'together'))
+            if ~isempty(strfind(fit,'together'))
                 % make one fit for all groups together
                 rx={[x{:}]};
                 ry={[y{:}]};
@@ -752,7 +627,7 @@ switch style
             % plot points (twice to get the axis right)
             for i=1:length(y)
                 if any(size(x{i})~=size(y{i}))
-                    disp(['GRAPH: X and Y of series ' num2str(i) ' are not of equal size. Not plotting.']);
+                    logmsg(['X and Y of series ' num2str(i) ' are not of equal size. Not plotting.']);
                     h.points(i) = nan;
                     continue
                 end
@@ -844,24 +719,24 @@ switch style
                     set(h.fit(i),'Color',color{i});
                 end
                 axis(ax);
-
+                
             end
-
-            if exist('slidingwindow','var') 
+            
+            if exist('slidingwindow','var')
                 slidingwindow = str2double( slidingwindow );
                 for i=1:length(ry)
                     stepsize = (max(rx{i})-min(rx{i}))/100;
                     [fity,fitx] = slidingwindowfunc( rx{i},ry{i}, ...
                         min(rx{i})-slidingwindow,stepsize,...
-                    max(rx{i})+slidingwindow,...
+                        max(rx{i})+slidingwindow,...
                         slidingwindow,'nanmean',0);
                     
-                     h.fit(i)=plot(fitx,fity,'-');
+                    h.fit(i)=plot(fitx,fity,'-');
                     set(h.fit(i),'Color',color{i});
                 end
                 axis(ax);
             end
-
+            
             
             
         end
@@ -950,7 +825,7 @@ if ~isempty(xticklabels)
     rotate_xticklabels=str2double(rotate_xticklabels);
     ax=axis;
     if ~iscell(xticklabels)
-        xtc={};
+        xtc= cell(size(xticklabels,1),1);
         for i=1:size(xticklabels,1)
             xtc{i}=xticklabels(i,:);
         end
@@ -1003,9 +878,9 @@ if exist('legnd','var') && ~isempty(legnd)
         case 'cumul'
             handle = 'h.cumul,';
         case 'stackedbar'
-            handle = 'h.stackedbar,' ; 
+            handle = 'h.stackedbar,' ;
         case 'pie'
-            handle = 'h.pie,' ; 
+            handle = 'h.pie,' ;
             
     end
     
@@ -1027,8 +902,6 @@ if nargin<8
     tick = [];
 end
 
-
-
 if nargin<7
     sides='away';
 end
@@ -1036,6 +909,7 @@ h={};
 switch errorbars
     case 'none'
     case {'std','sem'}
+        dy = cell(length(y),1);
         switch errorbars
             case 'sem'
                 if length(flatten(y))~=length(y) %isempty(ystd)
@@ -1082,12 +956,124 @@ switch errorbars
 end
 
 if ~isempty(tick)
-   if ~iscell(h) 
-       errorbar_tick(h,1/tick);
-   else
-       for i=1:length(h)
-           errorbar_tick(h{i},1/tick);
-       end
-   end
+    if ~iscell(h)
+        errorbar_tick(h,1/tick);
+    else
+        for i=1:length(h)
+            errorbar_tick(h{i},1/tick);
+        end
+    end
 end
 return
+
+
+
+function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, h)
+if strcmp(test,'none')
+    return
+end
+
+if  strcmp(test,'chi2')
+    d = zeros(length(y),2);
+    for i=1:length(y)
+        d(i,1)=sum( y{i}(~isnan(y{i}))==0 );
+        d(i,2)=sum( y{i}(~isnan(y{i}))==1 );
+    end
+    [p_chi2,chi2] = chi2class( d);
+    logmsg(['p of chi2class test = ' num2str(p_chi2) ...
+        ' over all groups. chi2-statistic = ' num2str(chi2)]);
+end
+
+ax=axis;
+height=(ax(4)-ax(3))/20;
+w=0.1;
+
+
+if length(y)>2 % multigroup comparison
+    v = [];
+    group = [];
+    for i=1:length(y)
+        v = cat(1,v,y{i}(:));
+        group = cat(1,group,i*ones(length(y{i}),1));
+    end
+    [h.p_groupkruskalwallis,anovatab,stats] = kruskalwallis(v,group,'off');
+    logmsg(['Group kruskalwallis: p = ' num2str(h.p_groupkruskalwallis,2) ' df = ' num2str(anovatab{4,3})]);
+    [h.p_groupanova,anovatab,stats] = anova1(v,group,'off');
+    logmsg(['Group anova: p = ' num2str(h.p_groupanova,2) ' s[' num2str(stats.df) '] = ' num2str(stats.s)]);
+end
+
+if ~( length(signif_y)==1 && signif_y==0)
+    for i=1:length(y)
+        switch test
+            case 'ttest'
+                % check normality
+                [h_norm,p_norm] = swtest(y{i});
+                if h_norm
+                    logmsg(['Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to kruskal_wallis']);
+                end
+            case 'paired_ttest'
+                % check normality
+                [h_norm,p_norm] = swtest(y{i});
+                if h_norm
+                    logmsg(['Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to signrank.']);
+                end
+        end
+    end
+    for i=1:length(y)
+        for j=i+1:length(y)
+            nsig=(i-1)*length(y)+j;
+            
+            ind_y=[];
+            
+            if ~isempty(signif_y)
+                if size(signif_y,2)==1 % single column, specify which to do
+                    if isempty(find(signif_y==nsig,1))
+                        continue
+                    end
+                else % double column, specify height or which not to do
+                    ind_y = find(signif_y(:,1)==nsig);
+                    if ~isempty(ind_y) && isnan(signif_y(ind_y,2))
+                        continue
+                    end
+                end
+            end
+            
+            
+            if isempty(ind_y) % no mention in signif_y list
+                y_star=ax(4)+height*(j-i-1);
+            else
+                y_star=signif_y(ind_y(1),2);
+            end
+            
+            % matlab significance test using sample data
+            if iscell(ystd) && iscell(ny)
+                [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,testperformed]=...
+                    plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
+                    ystd{i},ny{i},ystd{j},ny{j},tail);
+            else
+                [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,testperformed]=...
+                    plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
+                    [],[],[],[],tail);
+            end
+            if h.p_sig{i,j}<1
+                outstat = ['Pairwise significance: ' num2str(nsig)...
+                    ' = grp ' num2str(i) ' vs grp ' num2str(j) ...
+                    ', p = ' num2str(h.p_sig{i,j},2) ...
+                    ', ' testperformed ];
+                if ~isempty(statistic_name)
+                    if ~isempty(dof) && ~isnan(dof)
+                        outstat = [outstat ...
+                            ', ' statistic_name ...
+                            '[' num2str(dof) '] = ' num2str(statistic) ]; %#ok<AGROW>
+                    else
+                        outstat = [outstat ...
+                            ', ' statistic_name ' = ' num2str(statistic) ]; %#ok<AGROW>
+                    end
+                end
+                logmsg(outstat);
+            end
+            
+        end
+    end
+end
+
