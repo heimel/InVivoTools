@@ -149,19 +149,30 @@ function savefig(fname, varargin)
 		gsCompr=		sprintf(lossy, comp, '1 1 1 1', '1 1 1 1');
 	else																% Normal lossy
 		gsCompr=		sprintf(lossy, comp, '2 1 1 2', '2 1 1 2');
-	end
+    end
 	
+    if isunix
+        matlablibpath = getenv('LD_LIBRARY_PATH');
+    end
+    
 	% Generate the gs command.
 	switch(computer)													% Get gs command.
-		case {'MAC','MACI'},			gs= '/usr/local/bin/gs';
-		case {'PCWIN','PCWIN64'},		gs= 'gswin32c.exe';
-		otherwise,						gs= 'gs';
+		case {'MAC','MACI'},			
+            gs= '/usr/local/bin/gs';
+		case {'PCWIN','PCWIN64'},		
+            gs= 'gswin32c.exe';
+        case 'GLNX86' 				    
+            gs= 'gs';
+        case 'GLNXA64' 				    
+            gs= 'gs';
+            setenv('LD_LIBRARY_PATH','/usr/lib/x86_64-linux-gnu');
 	end
 	gs=		[gs		' -q -dNOPAUSE -dBATCH -dEPSCrop'];					% Essential.
 	gs=		[gs     ' -dPDFSETTINGS=/prepress -dEmbedAllFonts=' fonts];	% Must be first?
 	gs=		[gs		' -dUseFlateCompression=true'];						% Useful stuff.
 	gs=		[gs		' -dAutoRotatePages=/None'];						% Probably good.
 	gs=		[gs		' -dHaveTrueTypes'];								% Probably good.
+	gs =	[gs ' -I/usr/local/MATLAB/R2014a/sys/extern/glnxa64/ghostscript/fonts'];						% Color conversion.
 	gs=		[gs		' ' res];											% Add resolution to cmd.
 	
 	if(crop && ismember(types, {'eps', 'pdf'}))							% Crop the figure.
@@ -199,6 +210,12 @@ function savefig(fname, varargin)
     if exist([fname '-temp'],'file')
         delete([fname '-temp']);										% Clean up.
     end
+    if isunix
+       setenv('LD_LIBRARY_PATH',matlablibpath);
+    end
+
+    
+    
 end
 
 
