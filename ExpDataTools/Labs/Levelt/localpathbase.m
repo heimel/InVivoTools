@@ -13,7 +13,7 @@ switch computer
             base = '/Volumes/MVP/Common/InVivo';
     case 'MACI' 
         base = '/Users/user/Dropbox/Data';
-    case 'GLNX86'
+    case {'GLNX86','GLNXA64'}
         base = '/home/data/InVivo';
     case {'PCWIN','PCWIN64'}
         base = 'D:\Data\InVivo';

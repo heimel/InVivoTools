@@ -30,7 +30,7 @@ end
 
 
 switch computer % for debugging on Alexander's computer
-    case 'GLNX86'
+    case {'GLNX86','GLNXA64'}
         root = '/home/data/InVivo/Twophoton';
     otherwise
         root = 'D:\Data';

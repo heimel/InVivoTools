@@ -22,7 +22,7 @@ function CSnip = ExsnipTDT(EVENT, Trials)
 
 
 switch computer
-    case 'GLNX86'
+    case {'GLNX86','GLNXA64'}
         [EVENT,CSnip] = importtdt_linux(EVENT); %#ok<ASGLU>
         return
 end

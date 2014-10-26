@@ -27,7 +27,7 @@ end
 
 if isempty(port)
     switch computer
-        case 'GLNX86'
+        case {'GLNX86','GLNXA64'}
             port = '/dev/ttyS100';
         case {'PCWIN','PCWIN64'}
             port = 'COM11';

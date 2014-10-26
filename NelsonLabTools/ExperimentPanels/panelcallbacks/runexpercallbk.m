@@ -30,7 +30,7 @@ switch action
         if ~isempty(runScrp),
             copyfile([remPath filesep runScrp], ...
                 [remPath filesep 'runit.m']);
-            if strcmp(computer,'LNX86') || strcmp(computer,'GLNX86')
+            if strcmp(computer,'LNX86') || strcmp(computer,'GLNX86') || strcmp(computer,'GLNXA64')
                 eval(['! chmod 770 ' remPath filesep 'runit.m']);
             end
         end;

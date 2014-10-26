@@ -9,10 +9,10 @@ function iueinfo = get_iue_info( iue_number )
 
 
 switch computer
-  case {'PCWIN','PCWIN64'}
-    xlsfile = '\\orange\group folders\MuizenlijstLeveltLab\In Utero Electroporatie 2009.xls';
-  case 'GLNX86'
-    xlsfile = '/mnt/orange/group folders/MuizenlijstLeveltLab/In Utero Electroporatie 2009.xls';
+    case {'PCWIN','PCWIN64'}
+        xlsfile = '\\orange\group folders\MuizenlijstLeveltLab\In Utero Electroporatie 2009.xls';
+    case {'GLNX86','GLNXA64'}
+        xlsfile = '/mnt/orange/group folders/MuizenlijstLeveltLab/In Utero Electroporatie 2009.xls';
 end
 
 [numeric,txt,raw]=xlsread(xlsfile);

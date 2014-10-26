@@ -17,11 +17,11 @@ if isempty(disk)
 end
 
 switch computer
- case  {'LNX86','GLNX86'}
-  %
- otherwise
-  disp('DISKUSAGE only works under unix/linux')
-  return
+    case {'GLNX86','GLNXA64'}
+        %
+    otherwise
+        disp('DISKUSAGE only works under unix/linux')
+        return
 end
 
 [s,w]=system(['df -P ' disk ]);

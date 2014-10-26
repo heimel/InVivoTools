@@ -997,9 +997,9 @@ if length(y)>2 % multigroup comparison
         group = cat(1,group,i*ones(length(y{i}),1));
     end
     [h.p_groupkruskalwallis,anovatab,stats] = kruskalwallis(v,group,'off');
-    logmsg(['Group kruskalwallis: p = ' num2str(h.p_groupkruskalwallis,2) ' df = ' num2str(anovatab{4,3})]);
+    logmsg(['Group kruskalwallis: p = ' num2str(h.p_groupkruskalwallis,2) ', df = ' num2str(anovatab{4,3})]);
     [h.p_groupanova,anovatab,stats] = anova1(v,group,'off');
-    logmsg(['Group anova: p = ' num2str(h.p_groupanova,2) ' s[' num2str(stats.df) '] = ' num2str(stats.s)]);
+    logmsg(['Group anova: p = ' num2str(h.p_groupanova,2) ', s[' num2str(stats.df) '] = ' num2str(stats.s)]);
 end
 
 if ~( length(signif_y)==1 && signif_y==0)
