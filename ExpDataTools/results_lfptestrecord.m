@@ -51,7 +51,9 @@ end
 
 for lfpch=1:length(measures)
     tit = ['LFP ' record.stim_type ' ' record.mouse ' ' record.date ' ' record.test  ];
-    tit = [tit ' # '  num2str(measures(lfpch).channel) ];
+    if isfield(measures,'channel')
+        tit = [tit ' # '  num2str(measures(lfpch).channel) ]; %#ok<AGROW>
+    end
     tit(tit=='_') = '-';
         
     % open figure
@@ -168,7 +170,7 @@ for lfpch=1:length(measures)
                         case 'contrast'
                             xlabs{c} = [num2str(measures(lfpch).range{t}(c)*100) '%'];
                         otherwise
-                            xlabs{c} = [num2str(measures(lfpch).range{t}(c))];
+                            xlabs{c} = num2str(measures(lfpch).range{t}(c));
                     end
                 end
                 plotpower(name,powerm,xlabs,measures,t,lfpch)
