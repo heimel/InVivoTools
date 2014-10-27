@@ -189,7 +189,9 @@ end
 
 if isunix % bug workaround for Matlab R2012b and more recent
     % see e.g. http://www.mathworks.com/matlabcentral/answers/114915-why-does-matlab-cause-my-cpu-to-spike-even-when-matlab-is-idle-in-matlab-8-0-r2012b
-    com.mathworks.mlwidgets.html.HtmlComponentFactory.setDefaultType('HTMLRENDERER')
+    try 
+        com.mathworks.mlwidgets.html.HtmlComponentFactory.setDefaultType('HTMLRENDERER')
+    end
 end
 
 clear
