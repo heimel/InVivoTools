@@ -1,8 +1,8 @@
-%RETINOTOPY_11x6
+%RETINOTOPY_2x2
 %
-% RETINOTOPY_11x6, NewStim3 version
+% RETINOTOPY_2x2, NewStim3 version
 % 
-% 2014, Alexander Heimel
+% 2012, Alexander Heimel
 %
 
 % To skip initial tests
@@ -12,35 +12,19 @@
 NewStimInit;
 ReceptiveFieldGlobals;
 NewStimGlobals;
-        
-NewStimTilt = 0;
-logmsg(['NewStimTilt = ' num2str(NewStimTilt)]);
 
 CloseStimScreen;
 ShowStimScreen;
  
 StimWindowGlobals
- 
-% how many blocks
-n_x = 11; 
-n_y = 6;
 
-r = StimWindowRect; % screen size
+% how many blocks 
+n_x = 12;
+n_y = 8; 
 
-
-fullheight = r(4)-r(2);
-fullwidth = fullheight/6*11; 
-
-fullwidth = r(3)-r(1);
-fullheight = fullheight/11*6; 
-
-x_offset = round( (r(3)-r(1)-fullwidth)/2);
-width = round( fullwidth/n_x);
-height = round( fullheight/n_y);
-
-width = 174;
-height = 174;
-x_offset = 3;
+r = StimWindowRect; % s creen size
+width = round( (r(3)-r(1))/n_x);
+height = round( (r(4)-r(2))/n_y);
 
 ps=periodicstim('default');
 pspar = getparameters(ps);
@@ -55,8 +39,8 @@ pspar.backdrop = 0.5;
 pspar.windowShape = 0;
 pspar.dispprefs = {'BGpretime',0,'BGposttime',0};
 pspar.angle = 45;
-total_duration = 6;
-pspar.prestim_time = 3;
+total_duration = 3;
+pspar.prestim_time = 2;
 angles = [0:pspar.angle:360-pspar.angle];
 
 for i = 1:n_x*n_y
@@ -65,7 +49,7 @@ for i = 1:n_x*n_y
     % location
     row=floor( (i-1)/n_x);
     col=i-1-row*n_x;
-    pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+    pspar.rect = [col*width row*height (col+1)*width (row+1)*height];
     
     pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
     angles = angles( randperm(length(angles)) );
@@ -82,6 +66,7 @@ tic
 MTI = DisplayTiming(iss_script(4));
 DisplayStimScript(iss_script(4),MTI,0,0);
 toc
+
 
 try
     % waiting for stimulus signal on parallelport
@@ -113,6 +98,5 @@ try
 catch me
     CloseStimScreen;
     rethrow(me);
-end 
+end
 
- 

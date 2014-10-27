@@ -1,4 +1,4 @@
-% visual_and_current_stimulation
+ % visual_and_current_stimulation
 %
 %   Shows continuous visual stimulation and reads stims bits and instructs
 %   current stimulation arduino with the frequency
@@ -16,7 +16,9 @@ StimWindowGlobals
 
 comPort = '/dev/ttyS101'; % current stimulation arduino
 % if only /dev/ttyyACM3 make a link like
-%   sudo ln -s /dev/ttyACM3 ttyS103
+%   sudo ln -s /dev/ttyACM3 ttyS103 sca
+
+
 % in a terminal
 
 
@@ -54,7 +56,7 @@ wp.sFrequency = 0.05;% to check linearization
 wp.tFrequency = 2;% to check linearization
 wp.rect = StimWindowRect;
 wp.nCycles = 1;
-%wp.contrast = 0;
+%wp.contrast = 0; 
 
 
 for i = 1:length(angles)

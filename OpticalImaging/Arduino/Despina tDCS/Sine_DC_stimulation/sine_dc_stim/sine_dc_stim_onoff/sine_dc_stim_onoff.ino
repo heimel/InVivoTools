@@ -16,7 +16,7 @@ double voltage_out = 1 * stimulation_current;  // depending on current gerenerat
 double output = (( voltage_out * 4095) / 6.6); // normalization!    ((~~Maximum Voltage: 3.3Volts))
 
 const int sample = 120;     //samples in sine[] table
-const int zerolevel = 2062;
+const int zerolevel = 2064;
 const int default_frequency = 1; // Hz
 
 int oneHzSample = 1000000 / sample ; // sample for the 1Hz signal expressed in microseconds
@@ -187,57 +187,120 @@ void loop() {
       
       //DC stimulation
       
-    case 2:  //DC Stimulation
-      if (gostate & trigger_armed) {
-        trigger_tDCS = 1;
-        trigger_armed = 0;
-      }
-      if (!gostate & !trigger_armed) {
-        trigger_armed = 1;
-      }
-      switch (DC) {
-        case 1:  //anodal DC
-          if (trigger_tDCS) {
-            trigger_tDCS = 0;
-            delay(prestim_period * 1000) ;  //Stimulation duration in milliseconds
-            for(int i=0; i<output; i++){    // Slow Slope
-                analogWrite(DAC1, zerolevel+i);
-                delay(25);
-            }           
-            analogWrite(DAC1, output + zerolevel);  //(correcting for the off-set)
-            delay(stimulus_period * 1000);
-            
-             for(int i=output+zerolevel; i>zerolevel; i--){    // Slow Slope
-                analogWrite(DAC1, i);
-                delay(25);
-             }
-            analogWrite(DAC1, zerolevel);
+     case 2:  //DC Stimulation 
+       int On_Off = frequency;
+        if (On_Off == 1 || On_Off == 2) {  //1:off 2:on
+          if (gostate & trigger_armed) {
+            trigger_tDCS = 1;
+            trigger_armed = 0;
           }
-           break;  
-        case 2:  //cathodal DC
-          double minus_output = -output;
-          if (trigger_tDCS) {
-            trigger_tDCS = 0;
-            delay(prestim_period * 1000) ;  //Stimulation duration in milliseconds               
-            for(int i=0; i>minus_output; i--){    // Slow Slope
-                analogWrite(DAC1, zerolevel+i);
-                delay(25);
+          if (!gostate & !trigger_armed) {
+            trigger_armed = 1;
+          }
+   
+          // check frequency
+          Serial.write( On_Off );
+          delay(5);
+          if (Serial.available() > 0) { //if there is data to read
+            On_Off = Serial.read();
+            if (On_Off>3){
+               On_Off = default_frequency; 
             }
-            analogWrite(DAC1, minus_output + zerolevel);  //(correcting for the off-set)
-            delay(stimulus_period * 1000);           
-            for(int i=minus_output+zerolevel; i<zerolevel; i++){    // Slow Slope
-                analogWrite(DAC1, i);
-                delay(25);
-             }             
-            analogWrite(DAC1, zerolevel);
+            Serial.flush();
           }
+
+          switch (DC) {
+            case 1:  //anodal DC
+               if (On_Off == 1 ) {
+                if (trigger_tDCS) {
+                  trigger_tDCS = 0;
+                  delay(prestim_period * 1000) ;  //Stimulation duration in milliseconds
+                  
+                  for(int i=0; i<output; i++){    // Slow Slope
+                     analogWrite(DAC1, zerolevel);
+                     delay(25);
+                  }           
+                  analogWrite(DAC1, zerolevel);  //(correcting for the off-set)
+                  delay(stimulus_period * 1000);
+                  
+                  for(int i=zerolevel; i>zerolevel; i--){    // Slow Slope
+                    analogWrite(DAC1, zerolevel);
+                      delay(25);
+                   }
+                  analogWrite(DAC1, zerolevel);
+                }
+               break; 
+               }
+                
+               
+               else { 
+                if (trigger_tDCS) {
+                  trigger_tDCS = 0;
+                  delay(prestim_period * 1000) ;  //Stimulation duration in milliseconds
+                  for(int i=0; i<output; i++){    // Slow Slope
+                      analogWrite(DAC1, zerolevel+i);
+                      delay(25);
+                  }           
+                  analogWrite(DAC1, output + zerolevel);  //(correcting for the off-set)
+                  delay(stimulus_period * 1000);
+                  
+                   for(int i=output+zerolevel; i>zerolevel; i--){    // Slow Slope
+                      analogWrite(DAC1, i);
+                      delay(25);
+                   }
+                  analogWrite(DAC1, zerolevel);
+                }
+
+               }
+               break;  
+            case 2:  //cathodal DC
+              double minus_output = -output;
+              if (On_Off == 1 ) {
+                if (trigger_tDCS) {
+                  trigger_tDCS = 0;
+                  delay(prestim_period * 1000) ;  //Stimulation duration in milliseconds
+                  
+                  for(int i=0; i<output; i++){    // Slow Slope
+                     analogWrite(DAC1, zerolevel);
+                     delay(25);
+                  }           
+                  analogWrite(DAC1, zerolevel);  //(correcting for the off-set)
+                  delay(stimulus_period * 1000);
+                  
+                  for(int i=zerolevel; i>zerolevel; i--){    // Slow Slope
+                    analogWrite(DAC1, zerolevel);
+                      delay(25);
+                   }
+                  analogWrite(DAC1, zerolevel);
+                }
+               break; 
+               }
+               else {
+                if (trigger_tDCS) {
+                  trigger_tDCS = 0;
+                  delay(prestim_period * 1000) ;  //Stimulation duration in milliseconds               
+                  for(int i=0; i>minus_output; i--){    // Slow Slope
+                      analogWrite(DAC1, zerolevel+i);
+                      delay(25);
+                  }
+                  analogWrite(DAC1, minus_output + zerolevel);  //(correcting for the off-set)
+                  delay(stimulus_period * 1000);           
+                  for(int i=minus_output+zerolevel; i<zerolevel; i++){    // Slow Slope
+                      analogWrite(DAC1, i);
+                      delay(25);
+                   }             
+                  analogWrite(DAC1, zerolevel);
+                }
+               }
+                break;
+          
+          }
+          analogWrite(DAC1, zerolevel);  //2043 --> 0Volts output (correcting for the off-set)
+          Serial.write( frequency );
+          delay(100);
+        
           break;
-      }
-      analogWrite(DAC1, zerolevel);  //2043 --> 0Volts output (correcting for the off-set)
-      Serial.write( frequency );
-      delay(50);
-      break;
+        }
   }    //switch(waveform){}
 }
-
 
