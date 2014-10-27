@@ -290,14 +290,14 @@ switch command,
         
         %check if need to shift channels
         processparams = tpprocessparams( ud.record );
-
+        
         iminf = tpreadconfig(ud.record);
         if isfield(processparams,'pixelshift_um') && ~isempty(processparams.pixelshift_um)
             pixelshift = ceil(processparams.pixelshift_um / iminf.x_step);
         else
             pixelshift = processparams.pixelshift_pixel;
         end
-            
+        
         
         if compute_pixelshift
             logmsg(['Shifting channel(s) ' mat2str(shift_channels(shift_channels>0)) ' up by ' num2str(pixelshift) ' pixels'])
@@ -307,10 +307,10 @@ switch command,
             end
             if any(shift_channels<1)
                 logmsg(['Shifting channel(s) ' mat2str(-shift_channels(shift_channels<1)) ' left by ' num2str(pixelshift) ' pixels'])
-            for ch=intersect(-shift_channels(shift_channels<1),channels)
-                temp = im(:,:,ch)';
-                im(:,:,ch) = reshape(temp([pixelshift+1:end 1:pixelshift]),size(im,2),size(im,1))';
-            end
+                for ch=intersect(-shift_channels(shift_channels<1),channels)
+                    temp = im(:,:,ch)';
+                    im(:,:,ch) = reshape(temp([pixelshift+1:end 1:pixelshift]),size(im,2),size(im,1))';
+                end
             end
         end
         
@@ -531,7 +531,7 @@ switch command,
             errormsg('Only single ROI can be moved at one time.')
             return
         end
-        sv = get(ft(fig,'sliceList'),'value'); 
+        sv = get(ft(fig,'sliceList'),'value');
         currdir = get(ft(fig,'sliceList'),'string'); currdir = trimws(currdir{sv});
         ancestors = {'.'};
         cellisinthisimage = ~isempty(intersect(ud.celllist(v).dirname,ancestors));
@@ -592,7 +592,7 @@ switch command,
         cellisinthisimage = ~isempty(intersect(ud.celllist(v).dirname,ancestors));
         cellisactualcell = strcmp(ud.celllist(v).dirname,currdir);
         if ~cellisinthisimage,
-            errormsg('Cannot redraw cell whose preview image is not being viewed.'); 
+            errormsg('Cannot redraw cell whose preview image is not being viewed.');
             return;
         end;
         % at this point, we are going to redraw so let's have the user redraw
@@ -628,9 +628,9 @@ switch command,
         % take z-frame with maximum intensity as z-component
         % for neurites this is done on a pixel by pixel basis
         % for non-neurites this is done for all pixels together
-         v = get(ft(fig,'celllist'),'value');
-         
-         % get max_of_channel
+        v = get(ft(fig,'celllist'),'value');
+        
+        % get max_of_channel
         str=get(ft(fig,'maxzPopup'),'string');
         max_of_channel = str2num( str{get(ft(fig,'maxzPopup'),'value')} ); %#ok<ST2NM>
         if isempty(max_of_channel)
@@ -638,7 +638,7 @@ switch command,
             return
         end
         proj_mode = 1; % mean data for each frame
-
+        
         verbose = (length(v)==1);
         if ~verbose
             hwaitbar = waitbar(0,'Finding max Z frame...');
@@ -826,7 +826,7 @@ switch command,
         % get snap_to_channel
         str=get(ft(fig,'snaptoPopup'),'string');
         snap_to_channel = str2num( str{get(ft(fig,'snaptoPopup'),'value')} ); %#ok<ST2NM>
-                
+        
         [x,y,button] = ginput(1);
         while ~isempty(x) && button==1 % as long as not empty (enter) and left click
             newcell = tp_emptyroirec;
@@ -1094,112 +1094,14 @@ switch command,
         set(fig,'userdata',ud);
         analyzetpstack('UpdatePreviewImage',[],fig);
         analyzetpstack('UpdateCellImage',[],fig);
-    case {'AnalyzeParamBt','AnalyzeRawBt','ExportRawBt','AnalyzePatternsBt','QuickPSTHBt'}
-        % get epoch to read and analyze
-        epochsstr = get(ft(fig,'epochsEdit'),'string');
-        if ~isempty(trim(epochsstr))
-            epochslist = split(epochsstr);
-        else
-            epochslist = {ud.record.epoch};
-        end
-        
-        for i = 1:length(epochslist) % construct array with record for each epoch
-            records(i) = ud.record; %#ok<*AGROW>
-            records(i).epoch = epochslist{i};
-        end
-        
-        timeintstr = get(ft(fig,'timeintEdit'),'string');
-        if ~isempty(trim(timeintstr))
-            timeint= eval(timeintstr);
-        else
-            timeint = [];
-        end;
-        %         sptimeintstr = get(ft(fig,'sptimeintEdit'),'string');
-        %         if ~isempty(trim(sptimeintstr))
-        %             sptimeint= eval(sptimeintstr);
-        %         else
-        %             sptimeint= [];
-        %         end;
-        [listofcells,listofcellnames,selected_cells] = getpresentcells(ud,fig);
-        if isempty(listofcells)
-            errormsg('No cells are present. Nothing to compute');
-            return
-        end
-        
-        channel = ud.channel;
-        procfilename = tpscratchfilename( records, channel, 'proc');
-        recompute = get(ft(fig,'recomputeCB'),'value');
-        
-        % if processed data file does not exist, we need to recompute
-        if ~exist(procfilename,'file')
-            recompute = true;
-        end
-        
-        if ~recompute
-            % check if current cellnames are identical to stored ones
-            g = load(procfilename,'-mat');
-            recompute = ~(g.listofcellnames==listofcellnames);
-            if ~recompute
-                recompute = ~eqlen(g.listofcells,listofcells);
-            end;
-            process_params = g.process_params;
-        end
-        
-        params = tpreadconfig(records);
-        
-        if ~recompute
-            disp(['loading processed data scratch file: ' procfilename]);
-            load(procfilename,'-mat');
-        else % recompute
-            reread = false;
-            rawfilename = tpscratchfilename( records, channel, 'raw');
-            if ~exist( rawfilename, 'file')
-                reread = true;
-            end
-            if ~reread
-                g = load(rawfilename,'-mat');
-                reread = ~(g.listofcellnames==listofcellnames);
-                if ~reread
-                    reread = ~eqlen(g.listofcells,listofcells);
-                end;
-            end
-            if reread
-                [data,t] = tpreaddata(records,[-Inf Inf],listofcells,1,channel);
-                save(rawfilename,'data','t','listofcells','listofcellnames','params','-mat');
-            else
-                logmsg('Loading raw data scratch file');
-                load(rawfilename,'-mat');
-            end
-            process_params = tpprocessparams(ud.record);
-            process_params.detect_events_time = 'peak';
-            [data,t] = tpsignalprocess(process_params, data, t);
-            save(procfilename,'data','t','listofcells','listofcellnames','params','process_params','-mat');
-        end
-        
-        % use only selected cells
-        data = data(:,selected_cells);
-        t = t(:,selected_cells);
-        listofcells = listofcells(:,selected_cells);
-        listofcellnames = listofcellnames(:,selected_cells);
-        
-        switch command
-            case 'AnalyzePatternsBt'
-                methodind = get(ft(fig,'patternanalysisPopup'),'value');
-                methods = get(ft(fig,'patternanalysisPopup'),'String');
-                method = methods{ methodind };
-                analyze_tppatterns(method, data, t, listofcells, listofcellnames, params(1), process_params, timeint);
-            case 'AnalyzeRawBt'
-                tpplotdata( data, t, listofcells, listofcellnames, params(1), process_params, timeint,'',ud.record);
-            case 'ExportRawBt'
-                tp_export_raw( data, t, ud.record);
-            case 'AnalyzeParamBt' 
-                ud.record.ROIs.celllist = ud.celllist;
-                [ud.record,ud.record.measures] = analyse_tptestrecord(ud.record);
-                ud.celllist = ud.record.ROIs.celllist;
-                set(fig,'userdata',ud);
-                analyzetpstack('ResultsBt',[],fig);
-        end
-        set(ft(fig,'recomputeCB'),'value',0);
+    case 'ExportRawBt'
+        tp_export_raw(ud.record);
+    case 'AnalyzeParamBt'
+        ud.record.ROIs.celllist = ud.celllist;
+        [ud.record,ud.record.measures] = analyse_tptestrecord(ud.record);
+        ud.celllist = ud.record.ROIs.celllist;
+        set(fig,'userdata',ud);
+        analyzetpstack('ResultsBt',[],fig);
     case 'ResultsBt'
         [~,~,selected_cells] = getpresentcells(ud,fig);
         temprecord = ud.record;
@@ -1264,15 +1166,15 @@ switch command,
     case 'movieBt',
         trialsstr = trim(get(ft(fig,'trialsEdit'),'string'));
         if ~isempty(trialsstr)
-            trialslist = eval(trialsstr); 
+            trialslist = eval(trialsstr);
         else
-            trialslist = 1; 
+            trialslist = 1;
         end;
         stimstr = trim(get(ft(fig,'movieStimsEdit'),'string'));
         if ~isempty(stimstr)
-            stimlist = eval(stimstr); 
+            stimlist = eval(stimstr);
         else
-            stimlist = []; 
+            stimlist = [];
         end
         dF = get(ft(fig,'moviedFCB'),'value');
         sorted=get(ft(fig,'movieSortCB'),'value');
@@ -1491,8 +1393,8 @@ switch command,
         else
             pan off
         end
-    case 'signalprocessPopup'
-        set(ft(fig,'recomputeCB'),'value',1); % setup recompute checkbox
+%     case 'signalprocessPopup'
+%         set(ft(fig,'recomputeCB'),'value',1); % setup recompute checkbox
     case 'ZTProjectTB'
         toggled = false;
         switch get(ft(fig,'ZTProjectTB'),'value')
@@ -1981,9 +1883,9 @@ fieldname( fieldname=='.' ) = 'p';
 
 function parse_analysis_parameters( analysis_parameters,fig)
 
-if isfield(analysis_parameters, 'epochs')
-    set(ft(fig,'epochsEdit'),'string',analysis_parameters.epochs);
-end
+% if isfield(analysis_parameters, 'epochs')
+%     set(ft(fig,'epochsEdit'),'string',analysis_parameters.epochs);
+% end
 if isfield(analysis_parameters, 'trials')
     set(ft(fig,'trialsEdit'),'string',analysis_parameters.epochs);
 end

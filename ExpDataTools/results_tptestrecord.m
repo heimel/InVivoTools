@@ -11,7 +11,8 @@ global measures
 inf = tpreadconfig( record );
 if isfield(inf,'third_axis_name') && strcmpi(inf.third_axis_name,'T') ...
         || ( isfield(record,'measures') && isfield(record.measures,'curve')) 
-    results_ectestrecord( record )
+    tpplotraw(record);
+    results_ectestrecord( record );
 else
     try
         tp_show_intensities(record);

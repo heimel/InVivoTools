@@ -17,17 +17,14 @@ if ~exist(filename,'file')
     return
 end
 
-%rois = record.ROIs.celllist([record.ROIs.celllist.present]==1);
-rois = record.ROIs.celllist;
-listofcells = {rois.pixelinds}';
-
-[data,t] = tpreaddata(record,[],listofcells,1);
-
-pixelarg.data = data;
-pixelarg.listofcells = listofcells;
-pixelarg.t = t;
+[pixelarg.data,pixelarg.t] = tpreaddata(record,[],{record.ROIs.celllist.pixelinds}',1);
 
 record = tptuningcurve(record,pixelarg);
 record = tppsth(record,pixelarg);
+
+process_params = tpprocessparams(record);
+[pixelarg.data,pixelarg.t] = tpsignalprocess(process_params, pixelarg.data, pixelarg.t);
+
+record = tpraw(record,pixelarg);
 
 

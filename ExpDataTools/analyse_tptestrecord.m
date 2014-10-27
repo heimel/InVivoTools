@@ -3,6 +3,8 @@ function [record,measures]=analyse_tptestrecord( record)
 %
 %   [RECORD,MEASURES] = ANALYSE_TPTESTRECORD( RECORD)
 %
+%      MEASURES contains full measures (including PSTHs)
+%
 % 2013-2014, Alexander Heimel
 
 logmsg(['Analyzing ' recordfilter(record)]);
@@ -282,7 +284,7 @@ catch
     errormsg(['Could not write measures file ' measuresfile ]);
 end
 % remove fields that take too much memory
-record.measures = rmfields(record.measures,{'psth_tbins','psth_response'});
+record.measures = rmfields(record.measures,{'psth_tbins','psth_response','raw_t','raw_data'});
 
 
 

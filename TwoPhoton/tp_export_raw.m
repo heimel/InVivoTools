@@ -9,6 +9,10 @@ function tp_export_raw( data, t, record)
 % 2011, Alexander Heimel
 %
 
+logmsg('Export raw is currently not implemented.');
+return
+
+
 sfname = tpscratchfilename(record,[],'raw','csv');
 m = [t{1,:} ; data{1,:}];
 m=reshape(m,size(m,1)/2,size(m,2)*2);
