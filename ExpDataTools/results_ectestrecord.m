@@ -520,6 +520,7 @@ end
 % stimulus onset time
 h=line([0 0],[ax(3) ax(4)]);
 set(h,'Color',[1 1 0]);
+
 return
 
 
