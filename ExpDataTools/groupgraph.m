@@ -51,7 +51,7 @@ pos_args={...  %  'reliable',1,...  % 1 to only use reliable records, 0 to use a
     };
 
 if nargin<3
-    disp('GROUPGRAPH is using default arguments:');
+    logmsg('Using default arguments:');
     disp(pos_args)
 end
 
@@ -268,7 +268,6 @@ if isempty(flatten(r))
     return
 end
 
-
 % parse colors
 if ~iscell(color)
     tmpcolor=color;
@@ -292,7 +291,6 @@ end
 clear('tmpcolor');
 
 if exist('set_value','var')
-    
     set_value = eval(set_value); %#ok<NODEF>
     msr=set_value{1};
     if msr==-1
@@ -311,8 +309,6 @@ if exist('set_value','var')
             r{m}{g}=set_value{3};
         end
     end
-    
-    
 end
 
 
@@ -510,9 +506,7 @@ gz = {};
 switch style
     case 'surf'
         if mod(length(r),3)~=0 % i.e. even number of measures
-            errr = 'Number of measures should be multiple of 3 for surface plot.';
-            errordlg(errr,'Groupgraph');
-            disp(['GROUPGRAPH: ' errr]);
+            errormsg('Number of measures should be multiple of 3 for surface plot.');
             return
         end
         seriescount=1;
@@ -550,7 +544,7 @@ switch style
                         gx{seriescount}=r{m}{g};
                         gy{seriescount}=r{m+1}{g};
                         if showpoints==1
-                            disp('GROUPGRAPH: Using measurement errors for error bars');
+                            logmsg('Using measurement errors for error bars');
                             ystd{seriescount}=dr{m+1}{g};
                         end
                         glabel{seriescount}=grouplabels(g,:);
@@ -624,7 +618,7 @@ switch style
                 elseif isempty(trim(grouplabels(g,:))) || n_measures>1
                     xt=xt+inc_xt_group;
                 else
-                    disp(['Less than ' num2str(min_n) ...
+                    logmsg(['Less than ' num2str(min_n) ...
                         ' points in group [' grouplabels(g,:) ']']);
                 end
             end
@@ -672,14 +666,12 @@ if ~isempty(findstr(lower(legnd),'on')) %i.e. 'on' or 'location'
     extra_options{ind+1} = legnd;
 end
 
-
-
 if ~exist('gy','var')
-    disp('GROUPGRAPH: No data. Check if mice are present in mouse_db (or use ''add_missing_mice'' to add them). Or try to remove limits.');
+    logmsg('No data. Check if mice are present in mouse_db (or use ''add_missing_mice'' to add them). Or try to remove limits.');
     return
 end
 
-disp(['GROUPGRAPH: Drawing figure ' name ]);
+logmsg(['Drawing figure ' name ]);
 
 if isempty(add2graph_handle)
     figure;
@@ -687,8 +679,7 @@ if isempty(add2graph_handle)
 elseif ishandle(add2graph_handle)
     axishandle = add2graph_handle;
 else
-    errordlg('Could not add to requested graph.','Group graph');
-    disp('GROUPGRAPH: Could not add to requested graph');
+    errormsg('Could not add to requested graph.');
     return
 end
 
@@ -722,4 +713,5 @@ values_x = gx;
 values_y = gy;
 
 evalin('base','global values_x values_y');
-disp('GROUPGRAPH: Values available in workspace as values_x values_y.');
+logmsg('Values available in workspace as values_x values_y.');
+logmsg('To show data: dispcell(values_y{1})')
