@@ -286,6 +286,10 @@ end
 params.movietype = 'twocolor'; % or 'plain';
 params.movie_sync_factor = 1.02;
 
+% tpquickmap
+params.map_method = 'threshold';
+params.map_param1 = 0.05; % threshold response level
+
 
 if exist('processparams_local.m','file')
     oldparams = params;

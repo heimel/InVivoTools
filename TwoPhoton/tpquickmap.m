@@ -1,7 +1,7 @@
-function [im]  = tpquickmap(record,channel,resps,pixels,plotit,method,param1)
+function [im]  = tpquickmap(record,channel,resps,pixels,plotit)
 
 %  TPQUICKMAP - Produces a colored map of responses
-%  IM=TPQUICKMAP(DIRNAME,CHANNEL,RESPS,PIXELS,PLOTIT,METHOD,PARAM1,PARAM2)
+%  IM=TPQUICKMAP(DIRNAME,CHANNEL,RESPS,PIXELS,PLOTIT)
 %
 %    Generates a color map of neural responses.
 %
@@ -16,10 +16,10 @@ function [im]  = tpquickmap(record,channel,resps,pixels,plotit,method,param1)
 %
 %  If PLOTIT is 1 data are plotted in a new window.
 %
-%  METHOD specifies the mapping method.  Can be
-%  'threshold' Peaks above threshold specified in PARAM1 are good
-%  (more to be added)
+% 200X - 200X Steve Van Hooser
+% 200X - 2014 Alexander Heimel
 
+processparams = tpprocessparams( record );
 
 im1 = tppreview(record,200,1,channel);
 im1 = rescale(im1,[min(min(im1)) max(max(im1))],[0 1]);
@@ -37,14 +37,14 @@ else
 end
 
 for i=1:length(resps),
-    if strcmp(method,'threshold'),
+    if strcmp(processparams.map_method,'threshold'),
         if iscell(resps(i).curve)
             [m,pki] = max(resps(i).curve{1}(2,:));
         else
             [m,pki] = max(resps(i).curve(2,:));
         end
         pki = pki(1); m = m(1);
-        if m>param1,
+        if m>processparams.map_param1
             im1(pixels{i}) = ctab(pki,1);
             im2(pixels{i}) = ctab(pki,2);
             im3(pixels{i}) = ctab(pki,3);

@@ -17,7 +17,8 @@ if ~exist(filename,'file')
     return
 end
 
-rois = record.ROIs.celllist([record.ROIs.celllist.present]==1);
+%rois = record.ROIs.celllist([record.ROIs.celllist.present]==1);
+rois = record.ROIs.celllist;
 listofcells = {rois.pixelinds}';
 
 [data,t] = tpreaddata(record,[],listofcells,1);
