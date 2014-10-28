@@ -12,7 +12,7 @@ function h=graph(y,x,varargin)
 %  given below ([] denotes default value):
 %     'axishandle',[]
 %     'showpoints',{0,[1],2}
-%     'test',{['ttest'],'kruskal_wallis_test'}
+%     'test',{['ttest'],'kruskal_wallis_test','none'}
 %     'spaced',{[0],1}    % spacing points in bar plot
 %     'color',0.7*[1 1 1]
 %     'errorbars','sem'

@@ -59,7 +59,11 @@ if exist('limit','var')
         if limit{l*2-1}(1)=='''' && limit{l*2-1}(end)==''''
             limit{l*2-1}=limit{l*2-1}(2:end-1);
         end
-        limitranges_num{l} =  eval(limit{l*2});
+        try
+            limitranges_num{l} =  eval(limit{l*2});
+        catch me
+            limitranges_num{l} = [];
+        end
         limitranges_str{l} = limit{l*2};
         if ~iscell(limitranges_num{l})
             limitranges_num{l} = {limitranges_num{l}};
