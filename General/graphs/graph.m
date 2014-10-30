@@ -778,13 +778,14 @@ switch style
                     case 'closed_circle'
                         set(h.points(i),'markerfacecolor',color{i});
                     otherwise
-                        disp('WARNING: unknown marker');
+                        logmsg(['Unknown marker ' marker]);
                 end
             end
         end
         
     otherwise
-        error(['graph style ' style ' is not implemented']);
+        errormsg(['graph style ' style ' is not implemented']);
+        return
 end
 
 

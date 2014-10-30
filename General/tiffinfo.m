@@ -55,6 +55,12 @@ if stored
     end
 end
 
+if ~exist(imgname,'file')
+    disp(['TIFFINFO: ' imgname ' does not exist.']);
+    inf = [];
+    return
+end
+
 try
     inf=imfinfo(imgname);
 catch me % some multitiffs cause an error in a mexfile of imfinfo

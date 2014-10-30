@@ -30,6 +30,17 @@ for i = 1:length(records)
 end
 
 function params = tpreadconfig_single( record )
+persistent per_record per_params
+
+if ~isempty(per_record)
+    strip_record = rmfields(record,{'ROIs','measures'});
+    if strip_record==per_record
+        params = per_params;
+        return
+    end
+end
+
+
 fname = tpfilename(record);
 
 if ~exist(fname,'file')
@@ -70,3 +81,7 @@ if ~isfield( inf, 'frame_timestamp')
     params.frame_timestamp = (0:(inf.NumberOfFrames-1))*params.frame_period;
 end
 params.frame_timestamp__us = params.frame_timestamp * 1E6; % list of all frame timestamps in s
+
+per_params = params;
+per_record = rmfields(record,{'ROIs','measures'});
+

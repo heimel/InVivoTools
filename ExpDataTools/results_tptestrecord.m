@@ -8,6 +8,7 @@ function results_tptestrecord( record )
 
 global measures
 
+tpsetup(record);
 inf = tpreadconfig( record );
 if isfield(inf,'third_axis_name') && strcmpi(inf.third_axis_name,'T') ...
         || ( isfield(record,'measures') && isfield(record.measures,'curve')) 

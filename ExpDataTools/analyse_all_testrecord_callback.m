@@ -29,6 +29,7 @@ for count=1:length(ud.ind)
         num2str(length(ud.ind)) '). ' ... 
         'Expected finish: ' datestr(datenum(nu),'HH:MM:SS') ];
     drawnow
+     try
     if ishandle(h_wait) && ~stop_analysis
         waitbar(count/length(ud.ind),h_wait,msg);
         drawnow;
@@ -36,6 +37,10 @@ for count=1:length(ud.ind)
         stop_analysis = true;
         break
     end
+     catch me
+         me.message
+         stop_analysis = false;
+     end
         disp(['ANALYSE_ALL_TESTRECORD_CALLBACK: ' msg]);
     switch ud.db(i).datatype
         case 'oi',

@@ -61,7 +61,7 @@ assign(pos_args{:});
 nvarargin=length(varargin);
 if nvarargin>0
     if rem(nvarargin,2)==1
-        warning('GROUPGRAPH: Odd number of varguments');
+        errormsg('Odd number of varguments');
         return
     end
     for i=1:2:nvarargin
@@ -75,12 +75,11 @@ if nvarargin>0
             end
         end
         if ~found_arg
-            warning(['GROUPGRAPH: Could not parse argument ' varargin{i}]);
+            errormsg(['Could not parse argument ' varargin{i}]);
             return
         end
     end
 end
-
 
 % parse extra options
 if ischar(extra_options) %#ok<NODEF>
@@ -94,20 +93,28 @@ if ischar(extra_options) %#ok<NODEF>
     extra_options=split(extra_options,',',true);
 end
 if mod(length(extra_options),2)==1
-    errordlg('Extra_options has an odd number of arguments. It should contain key, parameter pairs.',...
-        'Invalid extra options');
-    disp('GROUPGRAPH: Extra_options has an odd number of arguments. It should contain key, parameter pairs.');
+    errormsg('Extra_options has an odd number of arguments. It should contain key, parameter pairs.');
     return
 end
-    
+
+if length(unique({extra_options{1:2:end}}))~=length({extra_options{1:2:end}})
+    errormsg('Some extra options appear twice.');
+    return
+end
+
 for i=1:2:length(extra_options)
     assign(trim(extra_options{i}),extra_options{i+1});
 end
 
-disp(['GROUPGRAPH: Collecting data for figure ' name ]);
+logmsg(['Collecting data for figure ' name ]);
 
 if isempty(mousedb) %#ok<NODEF>
     mousedb = load_mousedb;
+end
+
+if isempty(groups)
+    errormsg('No groups specified.');
+    return
 end
 
 % LEVELT LAB SPECIFIC SHOULD GO SOMEWHERE ELSE
@@ -165,7 +172,7 @@ for g=1:length(groups)
         allgroups{end+1}=groups{g};
         group_operator(end+1)=' ';
     elseif length(p)>1
-        disp(['GROUPGRAPH: More than one operator (' groupoperators ') in a single group is not allowed.']);
+        errormsg(['More than one operator (' groupoperators ') in a single group is not allowed.']);
         return
     else
         allgroups{end+1}=trim(groups{g}(1:p-1));
@@ -208,11 +215,9 @@ for g=1:n_groups
 end
 n_groups=length(groups); % it can be that multiple groups match group criteria
 
-
 % parse criteria
 criteria = split(criteria,',',true); %#ok<NODEF>
 n_criteria = length(criteria);
-
 
 if ~isfield(groups,'criteria')
     groups(1).criteria = '';
@@ -250,8 +255,6 @@ elseif ~iscell(grouplabels)
     grouplabels=split(grouplabels,',');
 end
 grouplabels=shorten_bxdnames(grouplabels);
-
-
 
 % collect results from databases
 [r,dr,def_measurelabels]=get_compound_measurements(groups,measures,...
@@ -310,7 +313,6 @@ if exist('set_value','var')
         end
     end
 end
-
 
 % for statistical tests on difference between compound groups:
 % could later be  implemented in get_compound_measurements
