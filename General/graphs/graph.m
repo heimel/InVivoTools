@@ -835,7 +835,7 @@ if ~isempty(xticklabels)
     n_xtlabels=length(xticklabels);
     for s=1:n_xtlabels
         hl=text( x(s),ax(3)-(ax(4)-ax(3))/50, xticklabels{s},'FontName',fontname,'FontSize',fontsize);
-        if rotate_xticklabels>45
+        if rotate_xticklabels>0
             set(hl,'Rotation',rotate_xticklabels);
             set(hl,'HorizontalAlignment','right');
             set(hl,'VerticalAlignment','middle');

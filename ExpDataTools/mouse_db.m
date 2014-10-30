@@ -3,7 +3,7 @@ function fig=mouse_db
 %
 %  FIG=MOUSE_DB
 %
-% 2005, Alexander Heimel
+% 2005-2014, Alexander Heimel
 %
 
 %[mousedb,filename] = load_mousedb;
@@ -11,10 +11,11 @@ function fig=mouse_db
 %[dbpath,dbfilename]=fileparts(filename);
 %dbfile=fullfile(dbpath,dbfilename);
 
-filename = fullfile(expdatabasepath, 'mousedb.mat');
+%filename = fullfile(expdatabasepath, 'mousedb.mat');
+[mousedb,filename]=load_mousedb;
 
 if ~exist(filename,'file')
-    disp(['MOUSE_DB: ' filename ' does not exist.']);
+    logmsg([ filename ' does not exist.']);
     return
 end
 
@@ -24,8 +25,6 @@ if isempty(h_fig)
 end
 
 set(h_fig,'Name',['Mouse database']);
-
-
 
 if nargout==1
   fig=h_fig;
