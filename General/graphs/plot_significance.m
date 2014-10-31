@@ -9,7 +9,7 @@ function [h,p,statistic,statistic_name,dof,testperformed]=plot_significance(r1,x
 %  Y height of horizontal line and stars
 %  HEIGHT height of vertical lines
 %  W extra horizontal width to be added to X1 and X2
-%  TEST contains test name, e.g. 'kruskal-wallis' or 'ttest'
+%  TEST contains test name, e.g. 'kruskal-wallis', 'ttest', 'ranksum'
 %  TAIL can be 'both','right','left'
 %
 % 2007-2014 Alexander Heimel
@@ -35,7 +35,7 @@ if isempty(test)
         if length(r1)==length(r2) % assume paired
             test = 'signrank';
         else
-            test = 'kruskal-wallis';
+            test = 'ranksum';%'kruskalwallis';%'ranksum';
         end
     end
 end
@@ -72,7 +72,7 @@ if length(r1)>1 && length(r2)>1
                 dof=stats.df;
                 testperformed = 'Paired t-test';
             end
-        case {'wilcoxon','signrank'}
+        case {'signrank','wilcoxon'}
             if length(r1)==length(r2)
                 [p,h,stats]=signrank(r1,r2,'alpha',0.05);
                 if isfield(stats,'signedrank')
@@ -90,7 +90,12 @@ if length(r1)>1 && length(r2)>1
             statistic_name = 't';
             dof=stats.df;
             testperformed = 't-test';
-        case {'kruskal-wallis','kruskal_wallis','kruskal wallis'}
+        case {'ranksum','mann-whitney','mannwhitney'}
+            [p,h,stats]=ranksum(r1,r2,'alpha',0.05,'tail',tail); 
+            statistic = stats.zval;
+            statistic_name = 'z';
+            testperformed = 'ranksum (Mann-Whitney U test)';
+        case {'kruskal-wallis','kruskal_wallis','kruskal wallis','kruskalwallis'}
             [p,statistic,dof] = kruskal_wallis_test(r1,r2);
             statistic_name = 'K';
             h = (p<0.05);
