@@ -59,6 +59,8 @@ wp.nCycles = 1;
 %wp.contrast = 0; 
 
 
+gratingscripts = cell(length(angles),1);
+MTIs = cell(length(angles),1);
 for i = 1:length(angles)
     wp.angle = angles(i);
     gratingstim = periodicstim(wp);
@@ -82,7 +84,7 @@ while 1
             t = toc;
             tic
             if t>1/StimWindowRefresh
-                disp(frameNum);
+               % logmsg(frameNum);
                continue
             end
             textures = MTI.MovieParams.Movie_textures{frameNum};
@@ -103,7 +105,7 @@ while 1
                 prevgo = go;
                 prevstim = stim;
                 
-                disp(['stim = ' num2str(stim)]);
+                logmsg(['stim = ' num2str(stim)]);
                 frequency = stim;
                 
                 status = uint8(0);
@@ -111,9 +113,10 @@ while 1
             
             if status~=frequency
                 fwrite(s, frequency, 'uint8', 'sync');
+                
                 readasync(s,1);
                 status = fread(s,1,'uint8');
-                disp(['Req = ' num2str(frequency) ', Set = ' num2str(status)]);
+                logmsg(['Req = ' num2str(frequency) ', Set = ' num2str(status)]);
             end
         end
         if KbCheck
