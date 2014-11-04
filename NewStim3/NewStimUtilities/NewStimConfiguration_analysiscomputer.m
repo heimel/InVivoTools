@@ -93,6 +93,8 @@ NewStimViewingDistance = 15; %cm, necessary for Alexander
 
 NewStimTilt = 0; % degree tilt of screen on monitor
 
+NewStimStimDelay = 6; % delay to give acquisition computers time to start
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  Gamma correction settings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

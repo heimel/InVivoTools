@@ -38,4 +38,8 @@ global NewStimViewingDistance; %#ok<NUSED>
 
 global NewStimTilt % in degrees
 
+global NewStimStimDelay % time to allow acquisition and webcams to start
+if isempty(NewStimStimDelay)
+    NewStimStimDelay = 6; %
+end
 

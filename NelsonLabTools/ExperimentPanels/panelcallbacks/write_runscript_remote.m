@@ -31,7 +31,7 @@ pathname = localpath2remote(pathname);
 fid = fopen(outfile,'wt');
 
 if fid==-1
-    errormsg(['WRITE_RUNSCRIPT_REMOTE: Could not open ' outfile ' for writing.']);
+    errormsg(['Could not open ' outfile ' for writing.']);
     return
 end
 
@@ -51,16 +51,16 @@ if saveWaves,  % calculate the stimulus time for the acquisition computer so it 
 end;
 
 if ~isempty(edc),  % print any extra device code here
-	if strcmp(class(edc),'char'),
+	if ischar(edc)
 		fprintf(fid,edc);
-	elseif strcmp(class(edc),'cell'), % is a cell list
+	elseif iscell(edc) % is a cell list
 		for i=1:length(edc), fprintf(fid,edc{i}); end;
 	end;
 end;
 
 if saveWaves,
-	fprintf(fid,'pause(6)\n');  % necessary in practice to give acquisition computer time to get ready
-end;
+	fprintf(fid,['pause(' num2str(NewStimStimDelay) ')\n']);  % necessary in practice to give acquisition computer time to get ready
+end
 
 % actually show the script
 % IT IS UNLIKELY ONE WOULD WANT TO MODIFY HERE TO THE END

@@ -13,8 +13,7 @@ end
 
 acqparams = loadStructArray(fullfile(datapath,'acqParams_in'));
 
-recording_period = acqparams.reps * 10; % s
+recording_period = (acqparams.reps + 3) * 10; % s + 30s extra
 recording_name = fullfile(datapath,['webcam' num2str(WebcamNumber,'%03d')]);
-
 
 wc_videorecording(recording_name, [], 0, 1, 1, recording_period)
