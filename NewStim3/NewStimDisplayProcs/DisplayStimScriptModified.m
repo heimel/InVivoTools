@@ -1,4 +1,4 @@
-function [MTI,startTrig] = DisplayStimScript(stimScript, MTI, priorit,abtable)
+function [MTI,startTrig] = DisplayStimScriptModified(stimScript, MTI, priorit,abtable)
 %
 %  [MTI,STARTRIG] = DISPLAYSTIMSCRIPT (STIMSCRIPT, MTI, PRIORIT, ABORTABLE)
 %
@@ -66,7 +66,7 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 
 	%  start everything on a waitblanking
 	startTrig = 0;
-	loop = { 		'screen(StimWindow,''WaitBlanking'');' };
+	loop = { 		'Screen(StimWindow,''WaitBlanking'');' };
 	if NSUseInitialSerialTrigger&StimSerialSerialPort,
 		loop = cat(1,loop,{'StimSerial(''dtr'',StimSerialScript,0);'});
 	end;
@@ -100,10 +100,10 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 
 	
 	% now begin main loop, checking each displaystruct to see what type it is and displaying it
-	loop = cat(1,loop, { 'screen(StimWindow,''WaitBlanking'');'});
+	loop = cat(1,loop, { 'Screen(StimWindow,''WaitBlanking'');'});
 	innerloop = {};
 	if ~abortable, innerloop = cat(1,innerloop, {    'for i=1:l,' }); end;
-	innerloop =cat(1,innerloop,{ 	'rect = screen(MTI{i}.ds.offscreen(1),''Rect'');' });
+	innerloop =cat(1,innerloop,{ 	'rect = Screen(MTI{i}.ds.offscreen(1),''Rect'');' });
 	innerloop = cat(1,innerloop, {  % wait for trigger
 		'if NSUsePCIDIO96InputTrigger,'
 			'fprintf(''waiting for gobit>'');'
@@ -123,97 +123,97 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 	innerloop = cat(1,innerloop, {
 		'if strcmp(MTI{i}.ds.displayType,''CLUTanim''),'
 			'if MTI{i}.preBGframes>0,'
-				'screen(StimWindow,''FillRect'',0);'
-				'screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
-				'if (MTI{i}.ds.makeClip), screen(StimWindow,''SetDrawingRegion'',MTI{i}.ds.clipRect,MTI{i}.ds.makeClip-1); end;'
+				'Screen(StimWindow,''FillRect'',0);'
+				'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
+				'if (MTI{i}.ds.makeClip), Screen(StimWindow,''SetDrawingRegion'',MTI{i}.ds.clipRect,MTI{i}.ds.makeClip-1); end;'
 				'MTI{i}.startStopTimes(1) = GetSecs;'
-				'screen(''CopyWindow'',MTI{i}.ds.offscreen,StimWindow,rect, MTI{i}.df.rect,''srcCopy'');'
-				'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.preBGframes);'
+				'Screen(''CopyWindow'',MTI{i}.ds.offscreen,StimWindow,rect, MTI{i}.df.rect,''srcCopy'');'
+				'Screen(StimWindow,''WaitBlanking'',MTI{i}.preBGframes);'
 			'else,'
-				'screen(StimWindow,''FillRect'',0);'
-				'if (MTI{i}.ds.makeClip), screen(StimWindow,''SetDrawingRegion'',MTI{i}.ds.clipRect,MTI{i}.ds.makeClip-1); end;'
+				'Screen(StimWindow,''FillRect'',0);'
+				'if (MTI{i}.ds.makeClip), Screen(StimWindow,''SetDrawingRegion'',MTI{i}.ds.clipRect,MTI{i}.ds.makeClip-1); end;'
 				'MTI{i}.startStopTimes(1) = GetSecs;'
-				'screen(''CopyWindow'',MTI{i}.ds.offscreen,StimWindow,rect, MTI{i}.df.rect,''srcCopy'');'
+				'Screen(''CopyWindow'',MTI{i}.ds.offscreen,StimWindow,rect, MTI{i}.df.rect,''srcCopy'');'
 			'end;'});
 			if NSUsePCIDIO96Trigger, innerloop=cat(1,innerloop,PCIDIO96eachstimafterbg); end;
 	innerloop = cat(1,innerloop, {
 			'MTI{i}.startStopTimes(2) = GetSecs;'
-			'SCREEN(StimWindow,''SetClut'',MTI{i}.ds.clut{MTI{i}.df.frames(1)});' });
+			'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut{MTI{i}.df.frames(1)});' });
 			if NSUsePCIDIO96Trigger, innerloop = cat(1,innerloop,PCIDIO96afterframe); end;
 	innerloop = cat(1,innerloop, {
 			'MTI{i}.frameTimes(1) = GetSecs;'
 			'for frameNum=2:length(MTI{i}.df.frames),'
-				'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.pauseRefresh(frameNum-1));' });
+				'Screen(StimWindow,''WaitBlanking'',MTI{i}.pauseRefresh(frameNum-1));' });
 				if NSUsePCIDIO96Trigger, innerloop = cat(1,innerloop,PCIDIO96beforeframe); end;
 	innerloop = cat(1,innerloop, {
-				'SCREEN(StimWindow,''SetClut'',MTI{i}.ds.clut{MTI{i}.df.frames(frameNum)});'
+				'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut{MTI{i}.df.frames(frameNum)});'
 				'MTI{i}.frameTimes(frameNum) = GetSecs;'});
 				if NSUsePCIDIO96Trigger, innerloop = cat(1,innerloop,PCIDIO96afterframe); end;
 	innerloop = cat(1,innerloop, {
 			'end;'
-			'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.pauseRefresh(end));'});
+			'Screen(StimWindow,''WaitBlanking'',MTI{i}.pauseRefresh(end));'});
 			if NSUsePCIDIO96Trigger, innerloop=cat(1,innerloop,PCIDIO96afterstim); end;
 	innerloop = cat(1,innerloop, {
 			'if (MTI{i}.postBGframes>0)|(i==l),'
-				'screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
+				'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
 				'MTI{i}.startStopTimes(3) = GetSecs;'
-				'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.postBGframes);'
+				'Screen(StimWindow,''WaitBlanking'',MTI{i}.postBGframes);'
 				'MTI{i}.startStopTimes(4) = GetSecs;'
 			'else,'
 				'MTI{i}.startStopTimes(3) = GetSecs;'
 				'MTI{i}.startStopTimes(4) = GetSecs;'
 			'end;'
-			'if (MTI{i}.ds.makeClip), screen(StimWindow,''SetDrawingRegion'',StimWindowRect); end;'
+			'if (MTI{i}.ds.makeClip), Screen(StimWindow,''SetDrawingRegion'',StimWindowRect); end;'
 		'elseif strcmp(MTI{i}.ds.displayType,''Movie''),'
 			'if MTI{i}.preBGframes>0,'
-				'screen(StimWindow,''FillRect'',0);'
-				'screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
+				'Screen(StimWindow,''FillRect'',0);'
+				'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
 				'MTI{i}.startStopTimes(1) = GetSecs;'
-				'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.preBGframes);'			
+				'Screen(StimWindow,''WaitBlanking'',MTI{i}.preBGframes);'			
 			'else,'
-				'screen(StimWindow,''FillRect'',0);'
+				'Screen(StimWindow,''FillRect'',0);'
 				'MTI{i}.startStopTimes(1) = GetSecs;'
 			'end;'});
 			if NSUsePCIDIO96Trigger, innerloop=cat(1,innerloop,PCIDIO96eachstimafterbg); end;
 	innerloop = cat(1,innerloop, {
 			'MTI{i}.startStopTimes(2) = GetSecs;'	
-			'SCREEN(StimWindow,''SetClut'',MTI{i}.ds.clut);'
-			'if (MTI{i}.ds.makeClip), screen(StimWindow,''SetDrawingRegion'',MTI{i}.ds.clipRect,MTI{i}.ds.makeClip-1); end;'
-			'SCREEN(''CopyWindow'',MTI{i}.ds.offscreen(MTI{i}.df.frames(1)),StimWindow,rect, MTI{i}.df.rect,''srcCopyQuickly'');'});
+			'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut);'
+			'if (MTI{i}.ds.makeClip), Screen(StimWindow,''SetDrawingRegion'',MTI{i}.ds.clipRect,MTI{i}.ds.makeClip-1); end;'
+			'Screen(''CopyWindow'',MTI{i}.ds.offscreen(MTI{i}.df.frames(1)),StimWindow,rect, MTI{i}.df.rect,''srcCopyQuickly'');'});
 			if NSUsePCIDIO96Trigger, innerloop = cat(1,innerloop,PCIDIO96afterframe); end;
 	innerloop = cat(1,innerloop, {
 			'MTI{i}.frameTimes(1) = GetSecs;'
 			'for frameNum=2:length(MTI{i}.df.frames);'
-				'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.pauseRefresh(frameNum-1));'});
+				'Screen(StimWindow,''WaitBlanking'',MTI{i}.pauseRefresh(frameNum-1));'});
 				if NSUsePCIDIO96Trigger, innerloop = cat(1,innerloop,PCIDIO96beforeframe); end;
 	innerloop = cat(1,innerloop, {
-				'SCREEN(''CopyWindow'',MTI{i}.ds.offscreen(MTI{i}.df.frames(frameNum)),StimWindow,rect, MTI{i}.df.rect,''srcCopyQuickly'');'});
+				'Screen(''CopyWindow'',MTI{i}.ds.offscreen(MTI{i}.df.frames(frameNum)),StimWindow,rect, MTI{i}.df.rect,''srcCopyQuickly'');'});
 				if NSUsePCIDIO96Trigger, innerloop = cat(1,innerloop,PCIDIO96afterframe); end;
 	innerloop = cat(1,innerloop, {
 				'MTI{i}.frameTimes(frameNum) = GetSecs;'
 			'end;'
-			'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.pauseRefresh(end));'});
+			'Screen(StimWindow,''WaitBlanking'',MTI{i}.pauseRefresh(end));'});
 			if NSUsePCIDIO96Trigger, innerloop=cat(1,innerloop,PCIDIO96afterstim); end;
 	innerloop = cat(1,innerloop, {			
 			'if (MTI{i}.postBGframes>0)|(i==l),'
-				'screen(StimWindow,''FillRect'',0);'
-				'screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
+				'Screen(StimWindow,''FillRect'',0);'
+				'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
 				'MTI{i}.startStopTimes(3) = GetSecs;'
-				'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.postBGframes);'
+				'Screen(StimWindow,''WaitBlanking'',MTI{i}.postBGframes);'
 				'MTI{i}.startStopTimes(4) = GetSecs;'
 			'else,'
-				'screen(StimWindow,''FillRect'',0);'
+				'Screen(StimWindow,''FillRect'',0);'
 				'MTI{i}.startStopTimes(3) = GetSecs;'
 				'MTI{i}.startStopTimes(4) = GetSecs;'
 			'end;'
-			'if (MTI{i}.ds.makeClip), screen(StimWindow,''SetDrawingRegion'',StimWindowRect); end;'
+			'if (MTI{i}.ds.makeClip), Screen(StimWindow,''SetDrawingRegion'',StimWindowRect); end;'
 		'elseif strcmp(MTI{i}.ds.displayType,''Sound''),'
 			'Snd(''Open'');'
 			'if MTI{i}.preBGframes>=0,'
-				'screen(StimWindow,''FillRect'',0);'
-				'screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
+				'Screen(StimWindow,''FillRect'',0);'
+				'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
 				'MTI{i}.startStopTimes(1) = GetSecs;'
-				'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.preBGframes);'			
+				'Screen(StimWindow,''WaitBlanking'',MTI{i}.preBGframes);'			
 			'else,'
 				'MTI{i}.startStopTimes(1) = GetSecs;'
 			'end;'});
@@ -229,9 +229,9 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 			if NSUsePCIDIO96Trigger, innerloop=cat(1,innerloop,PCIDIO96afterstim); end;
 	innerloop = cat(1,innerloop, {			
 			'if (MTI{i}.postBGframes>0)|(i==l),'
-				'screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
+				'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
 				'MTI{i}.startStopTimes(3) = GetSecs;'
-				'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.postBGframes);'
+				'Screen(StimWindow,''WaitBlanking'',MTI{i}.postBGframes);'
 				'MTI{i}.startStopTimes(4) = GetSecs;'
 			'else,'
 				'MTI{i}.startStopTimes(3) = GetSecs;'
@@ -240,10 +240,10 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 			'Snd(''Close'');'
 		'elseif strcmp(MTI{i}.ds.displayType,''custom''),'
 			'if MTI{i}.preBGframes>0,'
-				'screen(StimWindow,''FillRect'',0);'
-				'screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
+				'Screen(StimWindow,''FillRect'',0);'
+				'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
 				'MTI{i}.startStopTimes(1) = GetSecs;'
-				'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.preBGframes);'
+				'Screen(StimWindow,''WaitBlanking'',MTI{i}.preBGframes);'
 			'else,'
 				'MTI{i}.startStopTimes(1) = GetSecs;'
 			'end;'});
@@ -264,9 +264,9 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 			if NSUsePCIDIO96Trigger, innerloop=cat(1,innerloop,PCIDIO96afterstim); end;
 	innerloop = cat(1,innerloop, {
 			'if (MTI{i}.postBGframes>0)|(i==l),'
-				'screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
+				'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
 				'MTI{i}.startStopTimes(3) = GetSecs;'
-				'SCREEN(StimWindow,''WaitBlanking'',MTI{i}.postBGframes);'
+				'Screen(StimWindow,''WaitBlanking'',MTI{i}.postBGframes);'
 				'MTI{i}.startStopTimes(4) = GetSecs;'
 			'else,'
 				'MTI{i}.startStopTimes(3) = GetSecs;'
@@ -278,7 +278,7 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 	'end;'}); % end loop over stims
 	end;
 
-    SCREEN('Screens'); try, Snd('Open'); Snd('Close'); end;
+    Screen('Screens'); try, Snd('Open'); Snd('Close'); end;
 	if ~abortable,
 		loop = cat(1,loop,innerloop);
     	RUSH(loop,prioritylevel);

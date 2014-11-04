@@ -14,10 +14,8 @@ end
 
 frames=length(w); %#ok<NASGU>
 r=Screen(w(1),'Rect');
-%rr=CenterRect(r,screen(window,'Rect'))
 rr=rect; %#ok<NASGU>
 Screen('Screens');	% Make sure all Rushed functions are in memory.
-%Screen(window,'FillRect',gray);
 i=0;				% Allocate all Rushed variables.
 n=round(time*monitorframerate); 
 if waitframes == 1

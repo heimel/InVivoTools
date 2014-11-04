@@ -102,19 +102,19 @@ if strcmp(MTI.ds.displayType,'CLUTanim')&strcmp(MTI.ds.displayProc,'standard'),
     else,
         Screen('DrawTexture',StimWindow,MTI.ds.offscreen(1),rect,MTI.df.rect);
         % mask if necessary
-        %if MTI.ds.makeClip==4, screen('DrawTexture',StimWindow,masktexture); elseif MTI.ds.makeClip==5, screen('DrawTexture',StimWindow,masktexture,[],MTI.df.rect); end;
+        %if MTI.ds.makeClip==4, Screen('DrawTexture',StimWindow,masktexture); elseif MTI.ds.makeClip==5, screen('DrawTexture',StimWindow,masktexture,[],MTI.df.rect); end;
         Screen('LoadNormalizedGammaTable',StimWindow, MTI.ds.clut{MTI.df.frames(1)},1);
         vbl=Screen('Flip',StimWindow,0,2); % waits for waitblanking, does not clear buffer
         frameTimes(1) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,1);
         Screen(StimWindow,'FillRect',0); % paint background color in the 2nd buffer
         Screen('DrawTexture',StimWindow,MTI.ds.offscreen(1),rect,MTI.df.rect); % draw in the 2nd buffer
-        %if MTI.ds.makeClip==4, screen('DrawTexture',StimWindow,masktexture); elseif MTI.ds.makeClip==5, screen('DrawTexture',StimWindow,masktexture,[],MTI.df.rect); end;
+        %if MTI.ds.makeClip==4, Screen('DrawTexture',StimWindow,masktexture); elseif MTI.ds.makeClip==5, screen('DrawTexture',StimWindow,masktexture,[],MTI.df.rect); end;
         StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,1);
         for frameNum=2:length(MTI.df.frames),
             % this should really be measured from each interval for most accurate "local" display
             Screen('LoadNormalizedGammaTable',StimWindow, MTI.ds.clut{MTI.df.frames(frameNum)},1);
             vbl=Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(frameNum-1)+0.5)/StimWindowRefresh,2);
-            %screen('Flip',StimWindow,vbl+(sum(1+MTI.pauseRefresh(1:frameNum-1))-0.5)/StimWindowRefresh,2);
+            %Screen('Flip',StimWindow,vbl+(sum(1+MTI.pauseRefresh(1:frameNum-1))-0.5)/StimWindowRefresh,2);
             frameTimes(frameNum)=StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,frameNum);
             StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,frameNum);
         end;
@@ -140,7 +140,7 @@ elseif strcmp(MTI.ds.displayType,'Movie')&strcmp(MTI.ds.displayProc,'standard'),
         Screen('LoadNormalizedGammaTable',StimWindow,MTI.ds.clut,1); % this seems to be no longer necessary or correct, the textures already have colors
         %StimWindowPreviousCLUT = repmat(linspace(0,1,256)',1,3);
         %StimWindowPreviousCLUT(:,2) = 0;
-        % screen('LoadNormalizedGammaTable',StimWindow,StimWindowPreviousCLUT);
+        % Screen('LoadNormalizedGammaTable',StimWindow,StimWindowPreviousCLUT);
         Screen('FillRect',StimWindow,round(MTI.ds.bg_gammauncorrected));
         frameNum = 1;
         textures = MTI.MovieParams.Movie_textures{frameNum};
@@ -166,7 +166,7 @@ elseif strcmp(MTI.ds.displayType,'Movie')&strcmp(MTI.ds.displayProc,'standard'),
         
 
         if capture_movie; Screen('AddFrameToMovie', StimWindow); end
-        %screen('FillRect',StimWindow,255*MTI.ds.clut(1,:,:)); % fill the other buffer with background -- seems to be unnecessary
+        %Screen('FillRect',StimWindow,255*MTI.ds.clut(1,:,:)); % fill the other buffer with background -- seems to be unnecessary
         StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,1);
         
         for frameNum=2:length(MTI.df.frames);
@@ -264,8 +264,8 @@ if MTI.postBGframes>0,
             vbl = Screen('Flip', StimWindow, 0); % wait for blanking
             Screen(StimWindow,'FillRect',round(255*MTI.ds.clut_bg(1,:,:))); % make sure background is in 2nd buffer
             WaitSecs(0.2);
-            %    screen('LoadNormalizedGammaTable', StimWindow, MTI.ds.clut_bg,1);
-        else,
+            % Screen('LoadNormalizedGammaTable', StimWindow, MTI.ds.clut_bg,1);
+        else
             Screen('FillRect',StimWindow,round(255*MTI.ds.clut_bg(1,:,:))); % make sure background is installed
             vbl = Screen('Flip', StimWindow, 0); % wait for blanking
             Screen('FillRect',StimWindow,round(255*MTI.ds.clut_bg(1,:,:))); % make sure background is installed
@@ -318,16 +318,12 @@ if isempty(dontsync)
 end
 
 %StimWindowPreviousCLUT = repmat(linspace(0,1,256)',1,3);
-%screen('LoadNormalizedGammaTable', StimWindow, StimWindowPreviousCLUT,1);
-
+%Screen('LoadNormalizedGammaTable', StimWindow, StimWindowPreviousCLUT,1);
 %currLut = Screen('ReadNormalizedGammaTable', StimWindow);
-%screen('LoadNormalizedGammaTable',StimWindow,currLut,1);
+%Screen('LoadNormalizedGammaTable',StimWindow,currLut,1);
 
 Screen('LoadNormalizedGammaTable',StimWindow,MTI.ds.clut,1);
-
-
 Screen(StimWindow,'FillRect',round(MTI.ds.bg_gammauncorrected));
-
 vbl = Screen('Flip',StimWindow,when,0,dontsync);
 
 

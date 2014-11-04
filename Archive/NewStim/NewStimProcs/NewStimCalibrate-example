@@ -9,8 +9,8 @@
 if haspsychtbox,
 	% set clock multiplier...see help GetSecsTest for info
 	%GetSecsTest
-	screen('Preference','SecondsMultiplier',1);
-	screen('Preference','Backgrounding',0);
+	Screen('Preference','SecondsMultiplier',1);
+	Screen('Preference','Backgrounding',0);
 else,
 	StimWindowGlobals;
 	StimWindowRect = [ 0 0 1600 1200 ];

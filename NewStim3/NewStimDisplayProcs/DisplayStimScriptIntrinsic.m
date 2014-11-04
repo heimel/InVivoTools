@@ -105,7 +105,7 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 
 	ISstimgo = 0; ISstimnum=1;i=1;
 	% now begin main loop, checking each displaystruct to see what type it is and displaying it
-	loop = cat(1,loop, { 'screen(StimWindow,''WaitBlanking'');'});
+	loop = cat(1,loop, { 'Screen(StimWindow,''WaitBlanking'');'});
 	innerloop = {};
 	innerloop=cat(1,innerloop,{
 	'if ISstimgo==1, stimpos = mod(ISstimnum,length(ISstim)); if stimpos==0,stimpos=length(ISstim);end; stimid=ISstim(stimpos);fprintf(''Running ''''interstimulus stim'''' %4d'', stimid);'
@@ -138,9 +138,9 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 	innerloop = cat(1,innerloop, {
 		'if strcmp(MTI{i}.ds.displayType,''CLUTanim''),'
 			'if MTI{i}.preBGframes>=0,'
-				'screen(StimWindow,''FillRect'',0);'
-				'screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
-				'if (MTI{i}.ds.makeClip), screen(StimWindow,''SetDrawingRegion'',MTI{i}.ds.clipRect,MTI{i}.ds.makeClip-1); end;'
+				'Screen(StimWindow,''FillRect'',0);'
+				'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut_bg);'
+				'if (MTI{i}.ds.makeClip), Screen(StimWindow,''SetDrawingRegion'',MTI{i}.ds.clipRect,MTI{i}.ds.makeClip-1); end;'
 				'MTI{i}.startStopTimes(1) = GetSecs;'
 				'Screen(''CopyWindow'',MTI{i}.ds.offscreen,StimWindow,rect, MTI{i}.df.rect,''srcCopy'');'
 				'Screen(StimWindow,''WaitBlanking'',MTI{i}.preBGframes);'
@@ -191,7 +191,7 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 	innerloop = cat(1,innerloop, {
 			'MTI{i}.startStopTimes(2) = GetSecs;'	
 			'Screen(StimWindow,''SetClut'',MTI{i}.ds.clut);'
-			'if (MTI{i}.ds.makeClip), screen(StimWindow,''SetDrawingRegion'',MTI{i}.ds.clipRect,MTI{i}.ds.makeClip-1); end;'
+			'if (MTI{i}.ds.makeClip), Screen(StimWindow,''SetDrawingRegion'',MTI{i}.ds.clipRect,MTI{i}.ds.makeClip-1); end;'
 			'Screen(''CopyWindow'',MTI{i}.ds.offscreen(MTI{i}.df.frames(1)),StimWindow,rect, MTI{i}.df.rect,''srcCopyQuickly'');'});
 			if NSUsePCIDIO96Trigger, innerloop = cat(1,innerloop,PCIDIO96afterframe); end;
 	innerloop = cat(1,innerloop, {
