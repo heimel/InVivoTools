@@ -18,15 +18,15 @@ if haspsychtbox,
    hasSurround = CSSparams.surrradius>=0;
    bigRad = biggestrad; if bigRad==0,bigRad=1; end;
    if NS_PTBv<3,
-	   offscreen = screen(-1,'OpenOffscreenWindow',255,2*bigRad*[0 0 1 1]);
+	   offscreen = Screen(-1,'OpenOffscreenWindow',255,2*bigRad*[0 0 1 1]);
    else,
-	   offscreen = screen('MakeTexture',StimWindow,0*ones(2*bigRad));
+	   offscreen = Screen('MakeTexture',StimWindow,0*ones(2*bigRad));
    end;
    if hasSurround,
-     screen(offscreen,'FillOval',2,biggestrad+CSSparams.surrradius*[-1 -1 1 1]);
+     Screen(offscreen,'FillOval',2,biggestrad+CSSparams.surrradius*[-1 -1 1 1]);
    end;
    if CSSparams.radius>0,
-     screen(offscreen,'FillOval',1,biggestrad+CSSparams.radius*[-1 -1 1 1]);
+     Screen(offscreen,'FillOval',1,biggestrad+CSSparams.radius*[-1 -1 1 1]);
    end;
    middle=mean([CSSparams.FGc;CSSparams.FGs])/255;
    fgc=round(255*(middle+CSSparams.contrast*(CSSparams.FGc/255-middle)));

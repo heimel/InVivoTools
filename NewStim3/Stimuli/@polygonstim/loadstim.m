@@ -39,10 +39,10 @@ clut = [LBp.backdrop; [ t1; t2; t3;]'*255];
 
 if haspsychtbox,
 	if NS_PTBv<3,
-		offscreen = screen(-1,'OpenOffscreenWindow',255,[0 0 width height]);
-		screen(offscreen,'PutImage',XY,[0 0 width height]);
-	else,
-		offscreen = screen('MakeTexture',StimWindow,XY);
+		offscreen = Screen(-1,'OpenOffscreenWindow',255,[0 0 width height]);
+		Screen(offscreen,'PutImage',XY,[0 0 width height]);
+    else
+		offscreen = Screen('MakeTexture',StimWindow,XY);
 	end;
 	displayType = 'CLUTanim'; % doesn't really matter since only 1 frame
 	displayProc = 'standard';

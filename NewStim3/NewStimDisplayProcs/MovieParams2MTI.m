@@ -64,11 +64,6 @@ if strcmp(ds.displayType,'Movie'),
     if isfield(ds.userfield,'Movie_sourcerects'),
         moviefields.Movie_sourcerects = ds.userfield.Movie_sourcerects;
     else
-        % 		sourcerects = [];
-        % 		for i=1:length(ds.offscreen),
-        % 			sourcerect = Screen(ds.offscreen(1),'Rect');
-        % 			sourcerects = cat(3,sourcerects,repmat(sourcerect(:),1,length(df.frames)));
-        % 		end;
         sourcerects = zeros(4,length(df.frames),length(ds.offscreen));
         for i=1:length(ds.offscreen),
             sourcerect = Screen(ds.offscreen(1),'Rect');
@@ -80,10 +75,6 @@ if strcmp(ds.displayType,'Movie'),
         moviefields.Movie_destrects = ds.userfield.Movie_destrects;
     else
         destrect = df.rect; % make sure it is a column vector
-        % 		destrects = [];
-        % 		for i=1:length(ds.offscreen),
-        % 			destrects = cat(3,destrects,repmat(destrect(:),1,length(df.frames)));
-        % 		end;
         destrects = zeros(4,length(df.frames),length(ds.offscreen));
         for i=1:length(ds.offscreen),
             destrects(:,:,i) = repmat(destrect(:),1,length(df.frames));
@@ -94,7 +85,6 @@ if strcmp(ds.displayType,'Movie'),
     
     if isfield(ds.userfield,'Movie_angles'),
         moviefields.Movie_angles = ds.userfield.Movie_angles;
-%        moviefields.Movie_angles = (1:length(ds.userfield.Movie_angles))*10;
     else
         moviefields.Movie_angles = zeros(1,length(df.frames),length(ds.offscreen));
     end
@@ -115,13 +105,6 @@ if strcmp(ds.displayType,'Movie'),
         moviefields.Movie_auxparameters = zeros(4,length(df.frames),length(ds.offscreen));
     end;
 
-%     % global motion
-%     for t=1:size(moviefields.Movie_destrects,3) % textures
-%         for f=1:size(moviefields.Movie_destrects,1)
-%             moviefields.Movie_destrects(1,f,t) = log(1+f^4);
-%         end
-%     end
-    
     if exist('NewStimTilt','var') && ~isempty(NewStimTilt) && NewStimTilt~=0
         moviefields.Movie_angles = moviefields.Movie_angles + NewStimTilt/2;
 %         moviefields.Movie_angles(1,:) = moviefields.Movie_angles(1,:) + NewStimTilt/2;

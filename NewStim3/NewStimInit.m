@@ -38,7 +38,7 @@ if ~isempty(which('NewStimConfiguration')),
 	eval(['NewStimConfiguration;']);
 end;
 
-if isempty(which('NewStimConfiguration'))|~VerifyNewStimConfiguration, 
+if isempty(which('NewStimConfiguration'))||~VerifyNewStimConfiguration, 
 	vhlabtoolspath = fileparts(fileparts(pwd)), % 2 levels up
 	copyfile([pwd 'NewStimUtilities' filesep 'NewStimConfiguration_analysiscomputer.m'],...
 		[vhlabtoolspath filesep 'Configuration' filesep 'NewStimConfiguration.m']);
@@ -52,29 +52,18 @@ if isempty(which('NewStimConfiguration'))|~VerifyNewStimConfiguration,
 	eval('NewStimConfiguration;');
 end;
 
-b = which('PsychtoolboxVersion');
-
-if ~isempty(b),
-    b = PsychtoolboxVersion;
-    if isnumeric(b)
-        NS_PTBv = b;
-    else
-        NS_PTBv = eval(b(1));
-    end;
-else
-    NS_PTBv = 0;
-end;
-
-
-if NS_PTBv,
-	%eval(['ShowStimScreen']); % commented by Alexander, not really needed, right? 
-	%eval(['CloseStimScreen']); % commented by Alexander, not really needed
-	%eval(['OpenStimSerial']); % not needed anymore, moved elsewhere
-	%eval(['OpenStimPCIDIO96']); % not needed anymore, moved elsewhere
-	%GetSecsTest
-	%screen('Preference','SecondsMultiplier',1.000230644770116);
-	%screen('Preference','Backgrounding',0); % we'll try this
-end;
+% b = which('PsychtoolboxVersion');
+% 
+% if ~isempty(b),
+%     b = PsychtoolboxVersion;
+%     if isnumeric(b)
+%         NS_PTBv = b;
+%     else
+%         NS_PTBv = eval(b(1));
+%     end;
+% else
+%     NS_PTBv = 0;
+% end;
 
 eval('NewStimObjectInit');
 

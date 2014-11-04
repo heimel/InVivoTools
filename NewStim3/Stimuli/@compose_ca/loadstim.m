@@ -44,9 +44,9 @@ if haspsychtbox,
 		firstmembers(end+1) = ind(1); % the first member for each
 	end;
 	if NS_PTBv<3,
-		myoffscreen = screen(-1,'OpenOffscreenWindow',0,[0 0 width height]);
+		myoffscreen = Screen(-1,'OpenOffscreenWindow',0,[0 0 width height]);
 	else,
-		myoffscreen = screen('MakeTexture',StimWindow,zeros(height,width));
+		myoffscreen = Screen('MakeTexture',StimWindow,zeros(height,width));
 		%OpenStimScreenBlender;
 		%StimScreenBlenderGlobals;
 	end;
@@ -55,9 +55,9 @@ if haspsychtbox,
 		ds = struct(getdisplaystruct(cca.stimlist{i}));
 		% get the image and shift it to the proper clut entries
 		if NS_PTBv<3,
-			myimage = double(screen(ds.offscreen,'GetImage'));
+			myimage = double(Screen(ds.offscreen,'GetImage'));
 		else,
-			myimage = double(screen(ds.offscreen,'GetImage',[],[],[],1));
+			myimage = double(Screen(ds.offscreen,'GetImage',[],[],[],1));
 		end;
 		z = find(myimage==0);
 		myctind = find(CIs==cca.clutindex(i));
@@ -66,12 +66,12 @@ if haspsychtbox,
 		% now copy the stimulus window to our offscreen buffer, clipping if necessary
 		if strcmp(ds.displayType,'CLUTanim'),
 			if NS_PTBv<3,
-				if ds.makeClip, screen(myoffscreen,'SetDrawingRegion',ds.clipRect,ds.makeClip-1); end;
-				screen(myoffscreen,'PutImage',mynewimage,df.rect);
-				if ds.makeClip, screen(myoffscreen,'SetDrawingRegion',[0 0 width height]); end;
+				if ds.makeClip, Screen(myoffscreen,'SetDrawingRegion',ds.clipRect,ds.makeClip-1); end;
+				Screen(myoffscreen,'PutImage',mynewimage,df.rect);
+				if ds.makeClip, Screen(myoffscreen,'SetDrawingRegion',[0 0 width height]); end;
 			else,
 				% must blend correctly
-				mycurrentImage = double(screen(myoffscreen,'GetImage',[],[],[],1));
+				mycurrentImage = double(Screen(myoffscreen,'GetImage',[],[],[],1));
 				%myCurrImageBF{i} = mycurrentImage;
 				if ds.makeClip>0&ds.makeClip<4, % must do manual clipping
 					% clipRect is in global screen coords, but in this case that is the composed offscreen
@@ -80,25 +80,25 @@ if haspsychtbox,
 					maskImage = ds.clipRect;
 				end;
 				% now must project image and blend it
-				mytemptexture = screen('MakeTexture',StimWindow,cat(3,mynewimage,maskImage));
+				mytemptexture = Screen('MakeTexture',StimWindow,cat(3,mynewimage,maskImage));
 				%myImageSeq{i} = myimage; myImageMaskSeq{i} = maskImage;
-				%screen('DrawTexture',myoffscreen,mytemptexture,[],df.rect,[],0,[],[],StimScreenBlenderGLSL);
-				screen('DrawTexture',myoffscreen,mytemptexture,[],df.rect,[],0,[],[],[]);
-				screen('Close',mytemptexture);
+				%Screen('DrawTexture',myoffscreen,mytemptexture,[],df.rect,[],0,[],[],StimScreenBlenderGLSL);
+				Screen('DrawTexture',myoffscreen,mytemptexture,[],df.rect,[],0,[],[],[]);
+				Screen('Close',mytemptexture);
 				% now clear the alpha channels so we don't need a blender later
-				myupdatedImage = double(screen(myoffscreen,'GetImage',[],[],[],2));
-				mynewoffscreen = screen('MakeTexture',StimWindow,myupdatedImage(:,:,1));
-				screen('Close',myoffscreen);
+				myupdatedImage = double(Screen(myoffscreen,'GetImage',[],[],[],2));
+				mynewoffscreen = Screen('MakeTexture',StimWindow,myupdatedImage(:,:,1));
+				Screen('Close',myoffscreen);
 				myoffscreen = mynewoffscreen;
-				%mycurrentImage = double(screen(myoffscreen,'GetImage',[],[],[],1));
+				%mycurrentImage = double(Screen(myoffscreen,'GetImage',[],[],[],1));
 				%myCurrImageAF{i} = mycurrentImage;
 			end;
 		end;
 	end;
 	% now clear the alpha channels so we don't need a blender later
-	%myupdatedImage = double(screen(myoffscreen,'GetImage',[],[],[],2));
-	%mynewoffscreen = screen('MakeTexture',StimWindow,myupdatedImage(:,:,1));
-	%screen('Close',myoffscreen);
+	%myupdatedImage = double(Screen(myoffscreen,'GetImage',[],[],[],2));
+	%mynewoffscreen = Screen('MakeTexture',StimWindow,myupdatedImage(:,:,1));
+	%Screen('Close',myoffscreen);
 	%myoffscreen = mynewoffscreen;
 	if numStims(cca)>1, % now build color table
 		df0 = getdisplayprefs(cca.stimlist{1});

@@ -19,7 +19,7 @@ if haspsychtbox,
    fps = StimWindowRefresh;
    [im,map] = imread(ISparams.filename);
    sz = size(im);
-   offscreen = screen(-1,'OpenOffscreenWindow',255,[0 0 x2-x1 y2-y1]);
+   offscreen = Screen(-1,'OpenOffscreenWindow',255,[0 0 x2-x1 y2-y1]);
    
    %Added by jbednar@inf.ed.ac.uk: expand grayscale images to RGB
    [t d]=size(sz);
@@ -38,7 +38,7 @@ if haspsychtbox,
    frames = 1;
 
    plotrect = [(x1 + x2 - sz(2))/2 (y1 + y2 - sz(1))/2 (x1 + x2 + sz(2))/2 (y1 + y2 + sz(1))/2];
-   screen(offscreen,'PutImage',im,plotrect);
+   Screen(offscreen,'PutImage',im,plotrect);
    rect = [ISparams.rect];
    dP = cat(2,{'fps',fps,'rect',dfs.rect,'frames',frames},ISparams.dispprefs);
    dS = { 'displayType', 'CLUTanim', 'displayProc', 'standard', ...

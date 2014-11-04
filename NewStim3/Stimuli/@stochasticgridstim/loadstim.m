@@ -50,13 +50,13 @@ if ((XY<253)&(~dPs.forceMovie))&~use_customdraw, % use one image and array of CL
 			warning(['Rotating images not supported under OS 9 ' ...
 				 'due to programmer laziness']);
 		end;
-		offscreen = screen(-1,'OpenOffscreenWindow',255,[0 0 width height]);
-		screen(offscreen,'PutImage',grid,[0 0 width height]);
+		offscreen = Screen(-1,'OpenOffscreenWindow',255,[0 0 width height]);
+		Screen(offscreen,'PutImage',grid,[0 0 width height]);
     else  % this is out of date, better to use movie feature
 		if rotationangle~=0,
 			grid = imrotate(grid,rotationangle,'nearest','crop');
 		end;
-		offscreen = screen('MakeTexture',StimWindow,grid);
+		offscreen = Screen('MakeTexture',StimWindow,grid);
 	end;
 else % use 'Movie' mode, one CLUT and many images
 	displayType = 'Movie';
@@ -80,15 +80,15 @@ else % use 'Movie' mode, one CLUT and many images
 				warning(['Rotating images not supported under OS 9 ' ...
 					 'due to programmer laziness']);
 			end;
-			offscreen(i) = screen(-1,'OpenOffscreenWindow',255,[0 0 width height]);
-			screen(offscreen(i),'PutImage',image,[0 0 width height]);
+			offscreen(i) = Screen(-1,'OpenOffscreenWindow',255,[0 0 width height]);
+			Screen(offscreen(i),'PutImage',image,[0 0 width height]);
         else
 			if rotationangle~=0&~use_customdraw,
 				image = imrotate(image, rotationangle,'nearest','crop');
 			end;
 			if ~conserve_mem_custom|i==1,
 				rgb = ind2rgb(image,clut);
-				offscreen(i) = screen('MakeTexture',StimWindow,rgb);
+				offscreen(i) = Screen('MakeTexture',StimWindow,rgb);
 			end;
 		end;
 	 end;

@@ -45,7 +45,7 @@ catch, end;
 cd(pwd);
 	
 StimWindowGlobals;
-ShowStimScreen; screen(StimWindow,'FillRect',0);
+ShowStimScreen; Screen(StimWindow,'FillRect',0);
 
 if isempty(RFcurrentrect),RFcurrentrect=[0 0 100 100];
 else,RFcurrentrect=rectofinter(StimWindowRect,RFcurrentrect);end;
@@ -79,7 +79,7 @@ end;
 lastrect = RFcurrentrect;
 screencleared = 1;
 sscript = loadstimscript(append(stimscript(5),RFparams.stims{RFparams.stim}));
-MTI=DisplayTiming(sscript); screen(StimWindow,'SetClut',MTI{1}.ds.clut{1});
+MTI=DisplayTiming(sscript); Screen(StimWindow,'SetClut',MTI{1}.ds.clut{1});
 r = RFcurrentrect;
 c = getparameters(RFparams.stims{1}); c = c.contrast;
 n=0; firsttime = 1;
@@ -155,9 +155,9 @@ nt = 0; nmt = 0; nft = 0; aht = 0;
 				sscript=set(sscript,setdisplayprefs(get(sscript,1),dp),1);
 			end;
 			MTI=DisplayTiming(sscript);
-			screen(StimWindow,'SetClut',MTI{1}.ds.clut{1});
-			%screen(StimWindow,'WaitBlanking');
-			%screen(StimWindow,'FillRect',0,lastrect); lastrect=RFcurrentrect;
+			Screen(StimWindow,'SetClut',MTI{1}.ds.clut{1});
+			%Screen(StimWindow,'WaitBlanking');
+			%Screen(StimWindow,'FillRect',0,lastrect); lastrect=RFcurrentrect;
 		end;
 	elseif RFparams.state==3, % tight loop, hard to follow
 		[b,nmt]=checkmouse(nmt,1);
@@ -203,7 +203,7 @@ nt = 0; nmt = 0; nft = 0; aht = 0;
 						{'rect',RFcurrentrect,'params',1}); % shouldn't fail
 			sscript=loadstimscript(set(sscript,RFparams.stims{RFparams.stim},1));
 			MTI=DisplayTiming(sscript);
-			screen(StimWindow,'SetClut',MTI{1}.ds.clut{1});
+			Screen(StimWindow,'SetClut',MTI{1}.ds.clut{1});
 			delete runit.m; nft=getsecs;
 			HideCursor;
 		end;
@@ -213,10 +213,10 @@ nt = 0; nmt = 0; nft = 0; aht = 0;
 			if (getsecs-aht)>0.5, RFparams.draw = 1-RFparams.draw; aht = getsecs; end;
 		end;
 		if RFparams.draw|firsttime, blastMTI(MTI); firsttime=0;
-		else, screen(StimWindow,'FillRect',0); end;
+		else, Screen(StimWindow,'FillRect',0); end;
 	else,
 		if RFparams.draw, blastMTIlr(MTI,lastrect); %DisplayStimScript(sscript,MTI,0,lastrect);
-		else, screen(StimWindow,'FillRect',0); end;	
+		else, Screen(StimWindow,'FillRect',0); end;	
 		lastrect = RFcurrentrect;
 	n=n+1;
 	end;
@@ -249,50 +249,50 @@ end;
 	
 function blastMTIlr(MTI,lastrect)
 StimWindowGlobals;ReceptiveFieldGlobals;
-screen(StimWindow,'WaitBlanking');
-screen(StimWindow,'FillRect',0,lastrect);
-if MTI{1}.ds.makeClip,screen(StimWindow,'SetDrawingRegion',RFcurrentrect,MTI{1}.ds.makeClip-1); end;
-screen('CopyWindow',MTI{1}.ds.offscreen,StimWindow,...
+Screen(StimWindow,'WaitBlanking');
+Screen(StimWindow,'FillRect',0,lastrect);
+if MTI{1}.ds.makeClip,Screen(StimWindow,'SetDrawingRegion',RFcurrentrect,MTI{1}.ds.makeClip-1); end;
+Screen('CopyWindow',MTI{1}.ds.offscreen,StimWindow,...
 	MTI{1}.df.rect-[MTI{1}.df.rect(1) MTI{1}.df.rect(2) MTI{1}.df.rect(1) MTI{1}.df.rect(2)],...
 	MTI{1}.df.rect,'srcCopy');
-if MTI{1}.ds.makeClip,screen(StimWindow,'SetDrawingRegion',StimWindowRect); end;
+if MTI{1}.ds.makeClip,Screen(StimWindow,'SetDrawingRegion',StimWindowRect); end;
 
 function blastMTI(MTI)
 StimWindowGlobals;ReceptiveFieldGlobals;
-screen(StimWindow,'WaitBlanking');
-if MTI{1}.ds.makeClip,screen(StimWindow,'SetDrawingRegion',RFcurrentrect,MTI{1}.ds.makeClip-1); end;
-screen('CopyWindow',MTI{1}.ds.offscreen,StimWindow,...
+Screen(StimWindow,'WaitBlanking');
+if MTI{1}.ds.makeClip,Screen(StimWindow,'SetDrawingRegion',RFcurrentrect,MTI{1}.ds.makeClip-1); end;
+Screen('CopyWindow',MTI{1}.ds.offscreen,StimWindow,...
 	MTI{1}.df.rect-[MTI{1}.df.rect(1) MTI{1}.df.rect(2) MTI{1}.df.rect(1) MTI{1}.df.rect(2)],...
 	MTI{1}.df.rect,'srcCopy');
-if MTI{1}.ds.makeClip,screen(StimWindow,'SetDrawingRegion',StimWindowRect); end;
+if MTI{1}.ds.makeClip,Screen(StimWindow,'SetDrawingRegion',StimWindowRect); end;
 
 function domenu
 StimWindowGlobals;
 ulx = StimWindowRect(3)-600; uly = StimWindowRect(4)-600;
-screen(StimWindow,'FillRect',0);
-screen(StimWindow,'TextSize',24);
-screen(StimWindow,'DrawText','ReceptiveFieldMapper menu',ulx,uly);
-width = screen(StimWindow,'TextWidth','ReceptiveFieldMapper menu');
-screen(StimWindow,'TextSize',18);
-screen(StimWindow,'DrawText','modes:',ulx+0.5*width-25,uly+25);
-screen(StimWindow,'DrawText','l - adj. location',ulx-50,uly+50);
-screen(StimWindow,'DrawText','z - adj. rect size',ulx-50,uly+75);
-screen(StimWindow,'DrawText','c - adj. contrast',ulx-50,uly+100);
-screen(StimWindow,'DrawText','b - switch to bar',ulx-50,uly+125);
-screen(StimWindow,'DrawText','o - adj. orientation (bar) or rect/oval (field)',ulx+0.5*width-25,uly+50);
-screen(StimWindow,'DrawText','w - adj. width/length of bar',ulx+0.5*width-25,uly+75);
-screen(StimWindow,'DrawText','h - toggle hide',ulx+0.5*width-25,uly+100);
-screen(StimWindow,'DrawText','a - auto-hide at 2Hz (blink)',ulx+0.5*width-25,uly+125);
-screen(StimWindow,'DrawText','m - track with mouse until click',ulx+0.5*width-25,uly+150);
-screen(StimWindow,'DrawText','x - exit',ulx-50,uly+150);
-screen(StimWindow,'DrawText','adjustment keys:',ulx+0.5*width-50,uly+175);
-screen(StimWindow,'DrawText',',/./;/'' - small adjust left/right/up/down',ulx-50,uly+200);
-screen(StimWindow,'DrawText','(arrows) - med. adjust left/right/up/down',ulx-50,uly+225);
-screen(StimWindow,'DrawText','help/home/pageup/pagedown - big adjust left/right/up/down',ulx-50,uly+250);
+Screen(StimWindow,'FillRect',0);
+Screen(StimWindow,'TextSize',24);
+Screen(StimWindow,'DrawText','ReceptiveFieldMapper menu',ulx,uly);
+width = Screen(StimWindow,'TextWidth','ReceptiveFieldMapper menu');
+Screen(StimWindow,'TextSize',18);
+Screen(StimWindow,'DrawText','modes:',ulx+0.5*width-25,uly+25);
+Screen(StimWindow,'DrawText','l - adj. location',ulx-50,uly+50);
+Screen(StimWindow,'DrawText','z - adj. rect size',ulx-50,uly+75);
+Screen(StimWindow,'DrawText','c - adj. contrast',ulx-50,uly+100);
+Screen(StimWindow,'DrawText','b - switch to bar',ulx-50,uly+125);
+Screen(StimWindow,'DrawText','o - adj. orientation (bar) or rect/oval (field)',ulx+0.5*width-25,uly+50);
+Screen(StimWindow,'DrawText','w - adj. width/length of bar',ulx+0.5*width-25,uly+75);
+Screen(StimWindow,'DrawText','h - toggle hide',ulx+0.5*width-25,uly+100);
+Screen(StimWindow,'DrawText','a - auto-hide at 2Hz (blink)',ulx+0.5*width-25,uly+125);
+Screen(StimWindow,'DrawText','m - track with mouse until click',ulx+0.5*width-25,uly+150);
+Screen(StimWindow,'DrawText','x - exit',ulx-50,uly+150);
+Screen(StimWindow,'DrawText','adjustment keys:',ulx+0.5*width-50,uly+175);
+Screen(StimWindow,'DrawText',',/./;/'' - small adjust left/right/up/down',ulx-50,uly+200);
+Screen(StimWindow,'DrawText','(arrows) - med. adjust left/right/up/down',ulx-50,uly+225);
+Screen(StimWindow,'DrawText','help/home/pageup/pagedown - big adjust left/right/up/down',ulx-50,uly+250);
 
 while ~EventAvail(['mouseUp'],['keyDown']), end;
 FlushEvents(['mouseUp'],['keyDown']);
-screen(StimWindow,'FillRect',0);
+Screen(StimWindow,'FillRect',0);
 
 %	c1 = getparameters(RFparams.stims{1}); c1 = c1.contrast;
 %	if c~=c1, c = c1, end;

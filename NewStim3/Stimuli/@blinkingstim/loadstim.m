@@ -41,13 +41,13 @@ NewStimGlobals;
   image1 = repmat(uint8(1),X,Y);
   image2 = repmat(uint8(0),X,Y);
   if NS_PTBv<3,
-	  offscreen(1) = screen(-1,'OpenOffscreenWindow',255,[0 0 X Y]);
-	  screen(offscreen(1),'PutImage',image1,[0 0 X Y]);
-	  offscreen(2) = screen(-1,'OpenOffscreenWindow',255,[0 0 X Y]);
-	  screen(offscreen(2),'PutImage',image2,[0 0 X Y]);
-  else,
- 	  offscreen(1) = screen('MakeTexture',StimWindow,image1);
- 	  offscreen(2) = screen('MakeTexture',StimWindow,image2);
+	  offscreen(1) = Screen(-1,'OpenOffscreenWindow',255,[0 0 X Y]);
+	  Screen(offscreen(1),'PutImage',image1,[0 0 X Y]);
+	  offscreen(2) = Screen(-1,'OpenOffscreenWindow',255,[0 0 X Y]);
+	  Screen(offscreen(2),'PutImage',image2,[0 0 X Y]);
+  else
+ 	  offscreen(1) = Screen('MakeTexture',StimWindow,image1);
+ 	  offscreen(2) = Screen('MakeTexture',StimWindow,image2);
   end;
 
   N = size(rects,1)*BLstim.repeat;

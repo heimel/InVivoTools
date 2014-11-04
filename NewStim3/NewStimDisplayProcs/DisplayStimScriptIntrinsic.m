@@ -297,7 +297,7 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 		'if ~isempty(ISstim)&ISstimgo==0, ISstimgo = 1; elseif ~isempty(ISstim)&ISstimgo==1, ISstimgo=0; end;'
 		'i=i+1;'}); % end loop over stims
 
-    SCREEN('Screens'); try, Snd('Open'); Snd('Close'); end;
+    Screen('Screens'); try, Snd('Open'); Snd('Close'); end;
 	if ~abortable,
 		loop = cat(1,loop,innerloop);
     	RUSH(loop,prioritylevel);

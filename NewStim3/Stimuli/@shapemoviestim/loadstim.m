@@ -15,9 +15,9 @@ width  = p.rect(3) - p.rect(1); height = p.rect(4) - p.rect(2);
 vheight = round(height / p.scale); vwidth = round(width / p.scale);
 
 if NS_PTBv<3,
-	offscreen = screen(-1,'OpenOffscreenWindow',0,[0 0 width height]);
+	offscreen = Screen(-1,'OpenOffscreenWindow',0,[0 0 width height]);
 else,
-	offscreen = screen('MakeTexture',StimWindow,zeros(height,width));
+	offscreen = Screen('MakeTexture',StimWindow,zeros(height,width));
 end;
 clut_bg = repmat(p.BG,256,1);
 depth = 8;
@@ -43,9 +43,9 @@ for i=1:length(nf), % for each set of shapes
   for k=1:p.N, % make each frame
 	k,
 	if NS_PTBv<3,
-		tmpscn=screen(-1,'OpenOffscreenWindow',0,[0 0 vwidth vheight]);
+		tmpscn=Screen(-1,'OpenOffscreenWindow',0,[0 0 vwidth vheight]);
 	else,
-		tmpscn=screen('MakeTexture',StimWindow,zeros(vheight,vwidth));
+		tmpscn=Screen('MakeTexture',StimWindow,zeros(vheight,vwidth));
 	end;
 	shape=nf{i};
 	for j=1:length(shape), % draw the shapes
@@ -65,7 +65,7 @@ for i=1:length(nf), % for each set of shapes
 			switch shape(j).type,
 			case 1, % disk
 				rct = pos([1 2 1 2])+shape(j).size*[-1 -1 1 1];
-				screen(tmpscn,'FillOval',colnum,rct);
+				Screen(tmpscn,'FillOval',colnum,rct);
 			case 2, % gaussian
 			case 3, % oval
 				z = shape(j).size; e=shape(j).eccentricity;
@@ -75,26 +75,26 @@ for i=1:length(nf), % for each set of shapes
 				o=shape(j).orientation*pi/180; c=cos(o); s=sin(o);
 				pts=([c -s;s c]*[xx' yyp'; xx(end:-1:1)' yyn']')' +...
 					repmat(pos,30*2,1);
-				screen(tmpscn,'FillPoly',colnum,pts);
+				Screen(tmpscn,'FillPoly',colnum,pts);
 			case 4, % rect
 				z = shape(j).size; e=shape(j).eccentricity;
 				pts = [-z/2 -e/2 ; z/2 -e/2; z/2 e/2; -z/2 e/2]; 
 				o=shape(j).orientation*pi/180; c=cos(o); s=sin(o);
 				pts=(([c -s;s c])*pts')' + repmat(pos,4,1);
-				screen(tmpscn,'FillPoly',colnum,pts);
+				Screen(tmpscn,'FillPoly',colnum,pts);
 			end;
 		end;
 	end;
 	if NS_PTBv<3,
-		offscreen(end+1)=screen(-1,'OpenOffscreenWindow',...
+		offscreen(end+1)=Screen(-1,'OpenOffscreenWindow',...
 	  				0,[0 0 width height]);
 	else,
-		offscreen(end+1)=screen('MakeTexture',StimWindow,zeros(height,width));
+		offscreen(end+1)=Screen('MakeTexture',StimWindow,zeros(height,width));
 	end;
 	% blow up the image
-	screen('CopyWindow',tmpscn,offscreen(end),[0 0 vwidth vheight],...
+	Screen('CopyWindow',tmpscn,offscreen(end),[0 0 vwidth vheight],...
 	  		[0 0 width height]);
-	screen(tmpscn,'Close');
+	Screen(tmpscn,'Close');
   end;
 
 % must add frames to displayprefs

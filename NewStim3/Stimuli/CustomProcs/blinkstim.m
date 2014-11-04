@@ -24,16 +24,16 @@ StimWindowGlobals;
   if ~isstruct(info)&~isempty(info),
         dispstruct.userfield; % make sure we're in memory
   elseif isempty(info),
-	if NS_PTBv<3, screen(StimScreen,'SetClut',dispstruct.clut);
-	else, screen('LoadNormalizedGammaTable',StimScreen,dispstruct.clut);
+	if NS_PTBv<3, Screen(StimScreen,'SetClut',dispstruct.clut);
+	else, Screen('LoadNormalizedGammaTable',StimScreen,dispstruct.clut);
 	end;
-	screen(StimScreen,'FillRect',0);
+	Screen(StimScreen,'FillRect',0);
 	rectshift = [dispprefs.rect(1) dispprefs.rect(2) ...
 				dispprefs.rect(1) dispprefs.rect(2)];
 	frameLength = dispstruct.userfield.frameLength - 1;
 	if (frameLength<1), frameLength = 1; end;
 	info=struct('frame',0,'bgcount',0,'rectshift',rectshift, ...
-		'frameLength',frameLength,'lastvbl',screen('Flip',StimScreen));
+		'frameLength',frameLength,'lastvbl',Screen('Flip',StimScreen));
 	done=0; stamp=0;
   else, % info has our info
 	% clean up the mess from the last frame
@@ -41,8 +41,8 @@ StimWindowGlobals;
 	% if PTB3, do our drawing, flip the page at waitblanking
 	if info.frame>0&info.frame~=dispstruct.userfield.N,
 		if NS_PTBv<3, % not necessary in PTB3
-			screen(StimScreen,'WaitBlanking',dispstruct.userfield.frameLength);
-			screen('CopyWindow',dispstruct.offscreen(2),StimScreen, ...
+			Screen(StimScreen,'WaitBlanking',dispstruct.userfield.frameLength);
+			Screen('CopyWindow',dispstruct.offscreen(2),StimScreen, ...
        		            dispstruct.userfield.rects(1,:), ...
        		            info.rectshift+dispstruct.userfield.rects( ...
        		                     dispstruct.userfield.blinkList(info.frame),:), ...
@@ -55,25 +55,25 @@ StimWindowGlobals;
 	   if info.bgcount==0|NS_PTBv==3, % draw the frame
 		stamp = 1;
 		if NS_PTBv<3,
-			screen('CopyWindow',dispstruct.offscreen(1),StimScreen, ...
+			Screen('CopyWindow',dispstruct.offscreen(1),StimScreen, ...
 			    dispstruct.userfield.rects(1,:), ...
        		             info.rectshift+dispstruct.userfield.rects( ...
        		                 dispstruct.userfield.blinkList(info.frame+1),:), ...
 							'srcCopyQuickly');
 		else,
 			if dispstruct.userfield.bgpause~=0,
-				info.lastvbl = screen('Flip',StimScreen,info.lastvbl+(dispstruct.userfield.frameLength-0.5)/StimWindowRefresh);
+				info.lastvbl = Screen('Flip',StimScreen,info.lastvbl+(dispstruct.userfield.frameLength-0.5)/StimWindowRefresh);
 			end;
 			if info.frame~=dispstruct.userfield.N, % draw next frame for all but last frame
-                screen('DrawTexture',StimScreen,dispstruct.offscreen(1),dispstruct.userfield.rects(1,:),info.rectshift+dispstruct.userfield.rects(...
+                Screen('DrawTexture',StimScreen,dispstruct.offscreen(1),dispstruct.userfield.rects(1,:),info.rectshift+dispstruct.userfield.rects(...
 				dispstruct.userfield.blinkList(info.frame+1),:));
             else,
                 done = 1; stamp=0;
             end;
-            info.lastvbl = screen('Flip',StimScreen,info.lastvbl+(dispstruct.userfield.frameLength*(1+dispstruct.userfield.bgpause)-0.5)/StimWindowRefresh);
+            info.lastvbl = Screen('Flip',StimScreen,info.lastvbl+(dispstruct.userfield.frameLength*(1+dispstruct.userfield.bgpause)-0.5)/StimWindowRefresh);
             if info.frame==dispstruct.userfield.N-1, 
-                    %info.lastvbl = screen('Flip',StimScreen,info.lastvbl+(dispstruct.userfield.frameLength-0.5)/StimWindowRefresh);
-                    %info.lastvbl = screen('Flip',StimScreen,info.lastvbl+(dispstruct.userfield.frameLength*(1+dispstruct.userfield.bgpause)-0.5)/StimWindowRefresh);
+                    %info.lastvbl = Screen('Flip',StimScreen,info.lastvbl+(dispstruct.userfield.frameLength-0.5)/StimWindowRefresh);
+                    %info.lastvbl = Screen('Flip',StimScreen,info.lastvbl+(dispstruct.userfield.frameLength*(1+dispstruct.userfield.bgpause)-0.5)/StimWindowRefresh);
             end;
 		end;
 		info.bgcount = dispstruct.userfield.bgpause;
