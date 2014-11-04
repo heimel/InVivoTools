@@ -91,11 +91,11 @@ switch action
                 eval(['! chmod 770 ' datapath ';']);
                 eval(['! chgrp dataman ' datapath ';']);
             end
-            write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
             aqDat = get(h.list_aq,'UserData');
             if ~isempty(aqDat)
                 writeAcqStruct([remPath filesep 'acqParams_in'],aqDat);
             end
+            write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
             %if strcmp(computer,'LNX86'), eval(['! chmod 770 ' remPath filesep 'acqParams_in;']); end;
         end;
         bbb=evalin('base',['exist(''' scriptName ''')']);
