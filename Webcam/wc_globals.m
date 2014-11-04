@@ -1,0 +1,1 @@
+global Webcam_Serialport_name

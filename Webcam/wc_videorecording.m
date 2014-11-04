@@ -37,6 +37,8 @@ function wc_videorecording(moviename, codec, withsound, showit, windowed, period
 %  Based on PsychToolbox VideoRecordingDemo, see that file for more info 
 %  2014, From PsychToolbox, Edited by Alexander Heimel 
 %
+Screen('Preference', 'SuppressAllWarnings', 1)
+
 wc_globals;
 
 stimtrigserial = instrfind({'Port','Status'},{Webcam_Serialport_name,'open'});
@@ -181,6 +183,7 @@ end
 
 pinstat = get(stimtrigserial,'pinstatus');
 statcheck_prev = pinstat.DataSetReady;
+stimstart = NaN;
 
 try
     if windowed > 0
@@ -255,18 +258,19 @@ try
             % but faster). oldtex contains the handle of previously fetched
             % textures - recycling is not only good for the environment, but also for speed ;)
             
-              pinstat = get(stimtrigserial,'pinstatus');
-              statcheck = pinstat.DataSetReady;
-              if ~strcmp(statcheck,statcheck_prev)
-                  stimstart = pts;
-                  logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
-                  statcheck_prev = statcheck;
-              end
+
             if waitforimage~=4
                 % Live preview: Wait blocking for new frame, return texture
                 % handle and capture timestamp:
                 [tex pts nrdropped]=Screen('GetCapturedImage', win, grabber, waitforimage, oldtex);
-                
+
+                pinstat = get(stimtrigserial,'pinstatus');
+                statcheck = pinstat.DataSetReady;
+                if ~strcmp(statcheck,statcheck_prev)
+                    stimstart = pts;
+                    logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
+                    statcheck_prev = statcheck;
+                end
                 % Some output to the console:
                 % fprintf('tex = %i  pts = %f nrdropped = %i\n', tex, pts, nrdropped);
                 
