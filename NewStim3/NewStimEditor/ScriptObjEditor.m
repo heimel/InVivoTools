@@ -233,8 +233,8 @@ else, % it is a callback command
 			dpln=editdisplayprefs(dpl);
 			if ~isempty(dpln),
 				for i=1:length(vals),
-					stim=get(script,vals(i));
-					stim=setdisplayprefs(stim,dpln(i));
+					stim = get(script,vals(i));
+					stim = setdisplayprefs(stim,dpln(i));
 					script=set(script,stim,vals(i));
 				end;
 			end;

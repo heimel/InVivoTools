@@ -51,7 +51,7 @@ if haspsychtbox,
 		'clut_usage',ones(1,256),'clut',{clut},...
 		'clut_bg',repmat(LBp.backdrop,256,1)};
 	outstim = LBs;
-	outstim.stimulus = setDisplayStruct(outstim.stimulus,displayStruct(dS));
+	outstim.stimulus = setdisplaystruct(outstim.stimulus,displaystruct(dS));
 	outstim.stimulus = loadstim(outstim.stimulus);
 else,
 	outstim = LBs;

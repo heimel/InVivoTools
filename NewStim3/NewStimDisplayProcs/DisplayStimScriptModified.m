@@ -256,7 +256,7 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 				'if stamp==1, '});
 					if NSUsePCIDIO96Trigger,innerloop=cat(1,innerloop,PCIDIO96afterframe);end;
 	innerloop = cat(1,innerloop, {
-					'MTI{i}.frameTimes(stampNum)=GetSecs; stampNum=stampNum+1;waitsecs(1/10000);'
+					'MTI{i}.frameTimes(stampNum)=GetSecs; stampNum=stampNum+1;WaitSecs(1/10000);'
 					'end;'});
 					if NSUsePCIDIO96Trigger,innerloop=cat(1,innerloop,PCIDIO96beforeframe);end;
 	innerloop = cat(1,innerloop, {					

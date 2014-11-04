@@ -267,7 +267,7 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 				'if stamp==1, '});
 					if NSUsePCIDIO96Trigger,innerloop=cat(1,innerloop,PCIDIO96afterframe);end;
 	innerloop = cat(1,innerloop, {
-					'MTI{i}.frameTimes(stampNum)=GetSecs; stampNum=stampNum+1;waitsecs(1/10000);'
+					'MTI{i}.frameTimes(stampNum)=GetSecs; stampNum=stampNum+1;WaitSecs(1/10000);'
 					'end;'});
 					if NSUsePCIDIO96Trigger,innerloop=cat(1,innerloop,PCIDIO96beforeframe);end;
 	innerloop = cat(1,innerloop, {					
@@ -289,7 +289,7 @@ if ~isloaded(stimScript), error('Cannot display unloaded stimulus'); end;
 								'[VdaqUserBByteIn,error]=DIG_In_Port(NSPCIDIO96.deviceNumber,NSPCIDIO96.VdaqUserOutBPort);'
 								'VDAQ_Response = bitget(VdaqUserBByteIn,7);'  % 7 is go bit
 							'end;'
-							'fprintf(''Go bit low>'');waitsecs(0.01);' %waitsecs is for debouncing
+							'fprintf(''Go bit low>'');WaitSecs(0.01);' %WaitSecs is for debouncing
 							'[VdaqStimByteIn, error] = DIG_In_Port(NSPCIDIO96.deviceNumber,NSPCIDIO96.VdaqStimOutPort);'
 			'stimid = bitget(VdaqStimByteIn,7)*1+bitget(VdaqStimByteIn,6)*2+bitget(VdaqStimByteIn,5)*4+bitget(VdaqStimByteIn,4)*8+bitget(VdaqStimByteIn,3)*16;'
 			'fprintf(''ending stimid is %4d, elapsed time %.5f\n'',stimid,toc);'
