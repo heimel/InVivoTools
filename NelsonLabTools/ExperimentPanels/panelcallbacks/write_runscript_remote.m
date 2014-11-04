@@ -31,8 +31,8 @@ pathname = localpath2remote(pathname);
 fid = fopen(outfile,'wt');
 
 if fid==-1
-    error('WRITE_RUNSCRIPT_REMOTE:NO_FILE',...
-        ['WRITE_RUNSCRIPT_REMOTE: Could not open ' outfile ' for writing.']);
+    errormsg(['WRITE_RUNSCRIPT_REMOTE: Could not open ' outfile ' for writing.']);
+    return
 end
 
  % if we're running the ReceptiveFieldMapper or if the stimscript isn't

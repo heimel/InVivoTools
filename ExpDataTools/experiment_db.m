@@ -5,10 +5,10 @@ function fig=experiment_db( type, hostname )
 %   FIG=EXPERIMENT_DB( TYPE )
 %   FIG=EXPERIMENT_DB( TYPE, HOSTNAME )
 %
-%     TYPE can be 'oi','ec','tp'
+%     TYPE can be 'oi','ec','tp','wc'
 %     FIG returns handle to the database control figure
 %
-% 2005-2013, Alexander Heimel
+% 2005-2014, Alexander Heimel
 %
 
 if nargout==1
@@ -48,33 +48,21 @@ analyse_all_enabled = 0;
 reverse_data_enabled = 0;
 open_data_enable = 0;
 channels_enabled = 0;
+average_tests_enabled=0;
+export_tests_enabled=0;
 
 switch type
-    case 'oi'
-        average_tests_enabled=0;
-        export_tests_enabled=0;
     case 'ec'
-        average_tests_enabled=0;
-        export_tests_enabled=0;
         channels_enabled = 1;
-    case 'tp' % twophoton
+    case 'tp' 
         color = [0.4 0.5 1];
-        average_tests_enabled=0;
-        export_tests_enabled=0;
-        %        select_all_of_name_enabled=1;
         analyse_all_enabled = 0;
         open_data_enable = 1;
         blind_data_enabled = 1;
         reverse_data_enabled = 1; % for reversing database
     case 'ls' % linescans
         color = [0.8 0.6 0];
-        average_tests_enabled=0;
-        export_tests_enabled=0;
-    otherwise
-        warning('EXPERIMENT_DB:UNKNOWN_TYPE',['Unknown type ''' type '''']);
-        return
 end
-
 
 % get which database
 [testdb, experimental_pc] = expdatabases( type, hostname );
@@ -201,7 +189,6 @@ else
     set(h.sort,'Enable','off');
 end
 
-
 if haspsychtbox || experimental_pc
     runexperiment_enabled = 1;
 else
@@ -212,8 +199,7 @@ if experimental_pc
     % check diskusage
     df=diskusage(eval([type 'datapath']));
     if df.available < 11000000
-        disp(['EXPERIMENT_DB: less than 11 Gb available on /home/data. Clean up' ...
-            ' disk!']);
+        errormsg('Less than 11 Gb available on /home/data. Clean up disk!');
     end
 end
 
@@ -231,7 +217,6 @@ if strcmp(host,'wall-e')
     left=left+buttonwidth+colsep;
     maxleft=max(maxleft,left);
 end
-
 
 if runexperiment_enabled
     h.runexperiment = ...
@@ -282,17 +267,6 @@ h.results = ...
 left=left+buttonwidth+colsep;
 maxleft=max(maxleft,left);
 
-% h.rois = ...
-%     uicontrol('Parent',h_fig, ...
-%     'Units','pixels', ...
-%     'BackgroundColor',0.8*[1 1 1],...
-%     'Callback','genercallback', ...
-%     'ListboxTop',0, ...
-%     'Position',[left top buttonwidth buttonheight], ...
-%     'String','ROIs','Tag','tptestdb_roidb');
-% left=left+buttonwidth+colsep;
-% maxleft=max(maxleft,left);
-
 h.which_test = ...
     uicontrol('Parent',h_fig, ...
     'Style','popupmenu',...
@@ -305,17 +279,6 @@ h.which_test = ...
     'Tag','');
 left=left+buttonwidth+colsep;
 maxleft=max(maxleft,left);
-
-% h.new_testrecord = ...
-%     uicontrol('Parent',h_fig, ...
-%     'Units','pixels', ...
-%     'BackgroundColor',0.8*[1 1 1],...
-%     'Callback','genercallback', ...
-%     'ListboxTop',0, ...
-%     'Position',[left top buttonwidth buttonheight], ...
-%     'String','New test');
-% left=left+buttonwidth+colsep;
-% maxleft=max(maxleft,left);
 
 if analyse_all_enabled
     h.analyse_all = ...

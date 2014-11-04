@@ -34,9 +34,9 @@ graph(y{2},x{2},'prefax',[-0.3 0.7 -0.3 0.7],'color',[0 0.4 0],'xlab','ODI excit
 graph((x{2}-y{2})/sqrt(2),[],'style','hist','bins',-0.4:0.05:0.4,'xlab','\DeltaODI','ylab','Number','save_as','whit_odi_md_hist.png');
 
 % http://www.fon.hum.uva.nl/Service/Statistics/Two_Correlations.html
-disp('WHIT_TAO_DATA: Control vs MD correlations are significantly different: p = 0.00186');
+disp('WHIT_TAO_DATA: Control vs MD correlations are significantly different: p = 0.0249 (from http://www.fon.hum.uva.nl/Service/Statistics/Two_Correlations.html,  Fisher r-to-z transformation) ');
 
 disp('WHIT_TAO_DATA: Absolute ODI differences');
 absdiff{1} = abs( y{1}-x{1});
 absdiff{2} = abs( y{2}-x{2});
-graph(absdiff,[],'xticklabels',{'Ctl','MD'},'showpoints',0,'color',{[0 1 0],[0 0.4 0]},'ylab','Absolute ODI difference','save_as','whit_odi_abs_diff.png','test','kruskal-wallis');
+graph(absdiff,[],'xticklabels',{'Ctl','MD'},'showpoints',0,'color',{[0 1 0],[0 0.4 0]},'ylab','Absolute ODI difference','save_as','whit_odi_abs_diff.png','test','ranksum');

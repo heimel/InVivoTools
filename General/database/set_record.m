@@ -14,7 +14,7 @@ function record=set_record(record,settings)
     setting=settings{i};
     indis=find(setting=='=');
     if length(indis)~=1
-      display(['SET_RECORD: cannot handle setting ' setting ]);
+      logmsg(['Cannot handle setting ' setting ]);
       return
     end
     fieldname=trim(setting(1:indis-1));

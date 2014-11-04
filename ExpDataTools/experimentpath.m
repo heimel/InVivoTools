@@ -11,9 +11,14 @@ if isfield(record,'datatype')
         case {'ec','lfp'}
             datapath = ecdatapath(record);
         case {'oi','fp'} 
-            
+          datapath = oidatapath(record);
+        case 'wc' 
+          datapath = wcdatapath(record);
     end
     return
 else 
     errormsg('Unknown record format');
 end
+
+
+

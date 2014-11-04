@@ -43,6 +43,7 @@ params.load_intrinsicsignal = 1; % needed for optical imaging analysis
 params.load_erg =1; % need for ERG stimulation and analysis
 params.load_electrophys = 1; % needed for electrophysiology recording and analysis
 params.load_expdatatools = 1; % needed for InVivoTools analysis
+params.load_webcam = 1; % needed for InVivoTools analysis
 params.load_studies = {}; % folders of Studies to load
 
 % set default lab, can be overruled depending on host:
@@ -77,12 +78,15 @@ end
 
 path2invivotools = majorprefix;
 
-
 if params.load_expdatatools
     path2expdatatools = fullfile(path2invivotools,'ExpDataTools');
     addpath(path2expdatatools, ...
         fullfile(path2expdatatools,'MdbTools'),...   % files to use Leveltlab MS Access mouse database
         fullfile(path2expdatatools,'Labs',params.lab));% add some lab specific tools
+end
+
+if params.load_webcam
+    addpath(fullfile(path2invivotools,'Webcam'));
 end
 
 % Twophoton package

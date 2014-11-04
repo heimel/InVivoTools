@@ -122,8 +122,9 @@ end
 fclose(f);  % just to get proper error
 acqinfo=loadStructArray(ff);
 
+% creating acqParams_out
 ffout=[ff(1:end-2) 'out'];
-if exist(ffout,'file')~=2
+if ~exist(ffout,'file')
     copyfile(ff,ffout);
 end
 
