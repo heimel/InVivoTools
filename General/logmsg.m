@@ -3,7 +3,7 @@ function logmsg( msg, caller )
 %
 %  LOGMSG( MSG, [CALLER])
 %
-% 2013, Alexander Heimel
+% 2013-2014, Alexander Heimel
 %
 
 if nargin<1
@@ -18,4 +18,9 @@ if nargin<2
     end
 end
 
-disp([upper(caller) ': ' msg ]);
+if ~iscell(msg)
+    msg = {msg};
+end
+for i=1:length(msg)
+    disp([upper(caller) ': ' msg{i} ]);
+end

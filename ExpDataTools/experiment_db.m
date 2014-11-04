@@ -131,23 +131,6 @@ switch type
         end
 end
 
-
-% temporarily adding measurement field % 2013-03-22
-%  switch type
-%      case {'tp'}
-%          if ~isfield(db,'measures')
-%              for i=1:length(db)
-%                  db(i).measures = '';
-%              end
-%              stat = checklock(filename);
-%              if stat~=1
-%                  filename = save_db(db,filename,'');
-%                  rmlock(filename);
-%              end
-%          end
-%  end
-
-
 % start control database
 switch testdb
     case {'testdb','ectestdb'}
