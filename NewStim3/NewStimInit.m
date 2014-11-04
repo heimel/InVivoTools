@@ -52,18 +52,18 @@ if isempty(which('NewStimConfiguration'))||~VerifyNewStimConfiguration,
 	eval('NewStimConfiguration;');
 end;
 
-% b = which('PsychtoolboxVersion');
-% 
-% if ~isempty(b),
-%     b = PsychtoolboxVersion;
-%     if isnumeric(b)
-%         NS_PTBv = b;
-%     else
-%         NS_PTBv = eval(b(1));
-%     end;
-% else
-%     NS_PTBv = 0;
-% end;
+b = which('PsychtoolboxVersion');
+
+if ~isempty(b),
+    b = PsychtoolboxVersion;
+    if isnumeric(b)
+        NS_PTBv = b;
+    else
+        NS_PTBv = eval(b(1));
+    end;
+else
+    NS_PTBv = 0;
+end;
 
 eval('NewStimObjectInit');
 
