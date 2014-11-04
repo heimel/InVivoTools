@@ -1,4 +1,4 @@
-function wc_videorecording(moviename, codec, withsound, showit, windowed, period)
+function wc_videorecording(moviename, codec, withsound, showit, windowed, period, camid)
 % VideoRecordingDemo(moviename [, codec=0] [, withsound=0] [, showit=1] [, windowed=1], [period=inf])
 %
 % 'moviename' name of output movie file. The file must not exist at start
@@ -37,10 +37,16 @@ function wc_videorecording(moviename, codec, withsound, showit, windowed, period
 %  Based on PsychToolbox VideoRecordingDemo, see that file for more info 
 %  2014, From PsychToolbox, Edited by Alexander Heimel 
 %
+wc_globals;
 
+stimtrigserial = instrfind({'Port','Status'},{Webcam_Serialport_name,'open'});
+if isempty(stimtrigserial)
+    stimtrigserial = serial(Webcam_Serialport_name);
+    fopen(stimtrigserial);
+end
 
-% Test if we're running on PTB-3, abort otherwise:
-AssertOpenGL;
+AssertOpenGL; % Test if we're running on PTB-3, abort otherwise:
+
 
 % Only report ESCape key press via KbCheck:
 KbName('UnifyKeyNames');
@@ -169,6 +175,12 @@ end
 if isempty(period)
     period = Inf;
 end
+if nargin<7
+    camid = [];
+end
+
+pinstat = get(stimtrigserial,'pinstatus');
+statcheck_prev = pinstat.DataSetReady;
 
 try
     if windowed > 0
@@ -200,10 +212,10 @@ try
         % Windows often has unreliable camera video resolution detection.
         % Therefore we hard-code the resolution to 640x480, the most common
         % case, to make it work "most of the time(tm)":
-        grabber = Screen('OpenVideoCapture', win, [], [0 0 640 480], [], [], [], codec, withsound);
+        grabber = Screen('OpenVideoCapture', win, camid, [0 0 640 480], [], [], [], codec, withsound);
     else
         % No need for Windows-style workarounds:
-        grabber = Screen('OpenVideoCapture', win, [], [], [], [], [], codec, withsound, [], 8);
+        grabber = Screen('OpenVideoCapture', win, camid, [], [], [], [], codec, withsound, [], 8);
     end
 
     % Wait a bit between 'OpenVideoCapture' and start of capture below.
@@ -242,6 +254,14 @@ try
             % as texture, if waitforimage == 4, do not return it (no preview,
             % but faster). oldtex contains the handle of previously fetched
             % textures - recycling is not only good for the environment, but also for speed ;)
+            
+              pinstat = get(stimtrigserial,'pinstatus');
+              statcheck = pinstat.DataSetReady;
+              if ~strcmp(statcheck,statcheck_prev)
+                  stimstart = pts;
+                  logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
+                  statcheck_prev = statcheck;
+              end
             if waitforimage~=4
                 % Live preview: Wait blocking for new frame, return texture
                 % handle and capture timestamp:
@@ -291,23 +311,28 @@ try
         % Done. Shut us down.
         telapsed = GetSecs - t
         
-        % Stop capture engine and recording:
         Screen('StopVideoCapture', grabber);
     end
     
     % Close engine and recorded movie file:
     Screen('CloseVideoCapture', grabber);
     
-    % Close display, release all remaining ressources:
     Screen('CloseAll');
     
     avgfps = count / telapsed;
-catch
+catch me
     % In case of error, the 'CloseAll' call will perform proper shutdown
     % and cleanup:
+    logmsg(['Problem: ' me.message]);
     RestrictKeysForKbCheck([]);
     Screen('CloseAll');
 end;
+
+fclose(stimtrigserial);
+
+fid = fopen([moviename '_stimstart'],'w');
+fprintf(fid,'%f',stimstart);
+fclose(fid);
 
 % Allow KbCheck et al. to query all keys:
 RestrictKeysForKbCheck([]);
