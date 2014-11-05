@@ -1,6 +1,10 @@
 function control_db_callback( cbo )
+%CONTROL_DB_CALLBACK
 %
-% 2005-2011, Alexander Heimel
+%  CONTROL_DB_CALLBACK( CBO )
+%    handles callbacks for CONTROL_DB
+%
+% 2005-2014, Alexander Heimel
 %
 
 try
@@ -29,7 +33,7 @@ switch windowname
                 if isempty(current_record)
                     current_record=0;
                 end
-                if current_record ~= round(current_record) | current_record<1
+                if current_record ~= round(current_record) || current_record<1
                     current_record=1;
                 end
                 if current_record > length(ud.db)
@@ -68,9 +72,7 @@ switch windowname
                 set(ud.record_form,'Tag','control_db_callback');
                 if ~ud.changed
                     set(ud.h.save,'Enable','off');
-                    %set(ud.h.save_as,'Enable','off');
                 else
-                    %set(ud.h.save_as,'Enable','on');
                     % disable save button if perm = 'ro'
                     if strcmp(ud.perm,'ro')==0
                         set(ud.h.save,'Enable','on');
@@ -80,7 +82,7 @@ switch windowname
                     end
                 end
                 set(h_fig,'Userdata',ud);
-               % drawnow
+                % drawnow
             case 'next'
                 i=findclosest( ud.ind,ud.current_record);
                 if ud.current_record<ud.ind(i)
@@ -88,7 +90,7 @@ switch windowname
                 elseif i<length(ud.ind)
                     ud.current_record=ud.ind(i+1);
                 end
-
+                
                 set(ud.h.current_record,'String',num2str(ud.current_record));
                 control_db_callback(ud.h.current_record);
             case 'previous'
@@ -169,9 +171,9 @@ switch windowname
                     crit=trim(get(ud.h.crit,'String'));
                     if isempty(crit)
                         disp('CONTROL_DB_CALLBACK: Empty filter criteria');
-                       set(ud.h.filter,'Value',0);
-                       control_db_callback(ud.h.current_record);
-                       return
+                        set(ud.h.filter,'Value',0);
+                        control_db_callback(ud.h.current_record);
+                        return
                     end
                     ind=find_record(ud.db,crit);
                     if ~isempty(ind)
@@ -239,7 +241,7 @@ switch windowname
                     control_db_callback(ud.h.current_record);
                 end
             case 'load'
-                if ~isempty(ud.db) && ~isempty(ud.filename) && ~isempty(find(ud.perm=='w'))
+                if ~isempty(ud.db) && ~isempty(ud.filename) && ~isempty(find(ud.perm=='w',1))
                     rmlock(ud.filename);
                 end
                 [ud.db,ud.filename,ud.perm,ud.lockfile]=open_db( '',fileparts(ud.filename));
@@ -305,29 +307,28 @@ switch windowname
                     case 'Cancel'
                         return
                 end
-                [filename,lockfile]=save_db(db,'', ud.filename,ud.lockfile );
-
+                filename = save_db(db,'', ud.filename,ud.lockfile );
+                
                 if ~isnumeric(filename) %i.e. successful
                     rmlock(filename);
-                    %ud.changed=0;
-                    %set(h_fig,'Userdata',ud);
-                    %control_db_callback(ud.h.current_record);
                 end
             case 'help'
                 help_url = 'https://sites.google.com/site/alexanderheimel/protocols/invivotools';
-                help_local = fullfile(fileparts(which('startup')),'Manual','ManualInVivoTools.html'); 
+                help_local = fullfile(fileparts(which('startup')),'Manual','ManualInVivoTools.html');
                 switch computer
                     case {'PCWIN','PCWIN64'}
                         msgbox('Database and record available by ''global global_db global_record''');
                         dos(['start ' help_url]);
                     otherwise
                         web(help_local)
-                        disp(['ANALYZETPSTACK: Load ' help_url ' in your favorite browser. Database and record available by ''global global_db global_record''']);
+                        logmsg(['Load ' help_url ' in your favorite browser. Database and record available by ''global global_db global_record''']);
                 end
+                
                 global global_db global_record
                 global_db = ud.db;
                 global_record = ud.db(ud.current_record);
-                disp('CONTROL_DB_CALLBACK: Database and record available by ''global global_db global_record''');
+                evalin('base','global global_db global_record');
+                logmsg('Database and record available as global_db and global_record');
             case 'close'
                 if ud.changed==1 % changes to be saved
                     answer=questdlg('Do you want to save changes?',...
@@ -343,7 +344,6 @@ switch windowname
                 end
                 if ~isempty(ud.record_form)
                     try
-%                        close(ud.record_form);
                         delete(ud.record_form);
                         ud.record_form=[];
                         set(h_fig,'Userdata',ud);
@@ -367,7 +367,6 @@ switch windowname
                     control_db_callback(ud.h.current_record);
                 end
         end
-        
 end
 
 

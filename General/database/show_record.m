@@ -1,7 +1,7 @@
 function handle = show_record( record, h_fig, h_control_fig )
 %SHOW_RECORD used in database tools to show record figure
 %
-% 2004-2013, Alexander Heimel
+% 2004-2014, Alexander Heimel
 
 if nargin<2
     h_fig=[];
@@ -37,11 +37,7 @@ if isempty(h_fig)
     height=(length(fields)+...
         (comment_lines-1)*length(strmatch('comment',fields)))*lineheight;
     
-    
-    
     top=height-editheight-linesep;
-    
-    
     
     h_fig = figure('Name','Record',...
         'Color',bc,...
@@ -53,9 +49,7 @@ if isempty(h_fig)
         'ToolBar','none');
     set(h_fig,'MenuBar','none');
     set(h_fig,'NumberTitle','off');
-    
-    set(h_fig,'CloseRequestFcn',['ud=get(' num2str(h_control_fig) ',''UserData'');control_db_callback(ud.h.close)']);
-
+    set(h_fig,'CloseRequestFcn','udl=get(gcf,''userdata'');ud=get(udl.db_form,''UserData'');control_db_callback(ud.h.close)');
     
     for i=1:length(fields)
         left=labelleft;
