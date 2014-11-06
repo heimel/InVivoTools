@@ -150,8 +150,16 @@ for i=1:length(dispOrder)
 		pauseRefresh = [];
 	end;
 	startStopTimes = [ 0 0 0 0];
-	preBGframes = fix(df.BGpretime * StimWindowRefresh);
-	postBGframes = fix(df.BGposttime * StimWindowRefresh);
+    if isfield(df,'BGpretime')
+        preBGframes = fix(df.BGpretime * StimWindowRefresh);
+    else
+        preBGframes = [];
+    end
+    if isfield(df,'BGposttime')
+        postBGframes = fix(df.BGposttime * StimWindowRefresh);
+    else
+        postBGframes = [];
+    end
 	MTI{i} = struct('preBGframes', preBGframes, 'postBGframes', postBGframes, ...
 	                'pauseRefresh', pauseRefresh, 'frameTimes', frameTimes, ...
 					'startStopTimes', startStopTimes, 'ds', ds, 'df', df,'stimid',dispOrder(i),'GammaCorrectionTable',GammaCorrectionTable);
