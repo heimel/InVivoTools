@@ -1,9 +1,13 @@
 function stimout = loadstim(stim)
+StimWindowGlobals
+NewStimGlobals
 
+params = getparameters(stim);
 
-
-StimWindowGlobals;
-tex = Screen('MakeTexture',StimWindow,0.6);
+% making texture should be in loadstim
+[my_image, ~, alpha] = imread(params.filename);  
+my_image(:,:,4) = alpha(:,:);
+tex = Screen('MakeTexture', StimWindow, my_image, [], [], [], [], []);
 
 colors = pscolors(periodicstim('default'));
 clut_bg = ones(256,1)*colors.backdropRGB;

@@ -1,6 +1,9 @@
 function st = azadehloom( params )
-if nargin<1
+if nargin<1 || ischar(params)
     params = [];
+    params.filename = '1cm_cross.png';
+    params.starting_position_relscreen = [0 0.5]; %
+    params.velocity = [1 2]; % deg/s x and y
 end
 
 NewStimListAdd('azadehloom');

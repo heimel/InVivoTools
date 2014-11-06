@@ -1,26 +1,19 @@
 function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI)
 StimWindowGlobals
 
-
-filename = '1cm_cross.png'; % should be in stimulus definition (azadehloom)
+% should be in azadehloom
 n_frames = 900;  % should be in s and should be in stimulus definition (azadehloom)
 x_vel = 3; %in pixel per frame, should be in deg/s or cm/s and should be in stim def
+% in loadstim (or here) translation to pixels/per/frame
 y_vel = 3; %in pixel per frame, should be in deg/s or cm/s and should be in stim def
 image_max_height = 1000; % should be in deg, 
 image_scale_vel = 1.01; % should be in deg/s or cm/s approach velocity
 
 
+dp = struct(getdisplaystruct(stim));
 
-% making texture should be in loadstim
-[my_image, ~, alpha] = imread(filename);  
-my_image(:,:,4) = alpha(:,:);
-my_texture = Screen('MakeTexture', StimWindow, my_image, [], [], [], [], []);
-
-
-image_size_y = size(my_image,1);
-image_size_x = size(my_image,2);
-
-image_rect = [0, 0, image_size_x, image_size_y];
+my_texture = dp.offscreen(1);
+image_rect = Screen('Rect',my_texture);
 
 window_rect = StimWindowRect;
 x_min = window_rect(1);
@@ -33,13 +26,16 @@ y_pos = mean([y_min y_max]);
 
 Screen('BlendFunction', StimWindow, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 stamp = Screen('Flip', StimWindow);
-
-
+prevstamp = stamp;
 
 for current_frame = 1:n_frames
     image_rect = CenterRectOnPoint(image_rect, x_pos, y_pos);
     Screen('DrawTexture', StimWindow, my_texture, [], image_rect);
-    stamp = Screen('Flip', StimWindow, stamp+1/StimWindowRefresh);
+    stamp = Screen('Flip', StimWindow, stamp+0.5/StimWindowRefresh);
+  % stamp = Screen('Flip', StimWindow);
+   
+   % disp(1/(stamp-prevstamp))
+   prevstamp = stamp;
     
     x_pos = x_pos + x_vel;
     y_pos = y_pos + y_vel;
