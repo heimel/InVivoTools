@@ -10,12 +10,16 @@ end
 
 stimsfile = getstimsfile(record);
 stims=get(stimsfile.saveScript);
-variable = varied_parameters(stimsfile.saveScript);
-if length(variable)>1
-    logmsg(['Multiple parameters varied. Only showing first: ' variable{1}]);
-end
-if ~isempty(variable)
-    variable = variable{1};
+
+variable = record.measures(1).variable;
+if isempty(variable)
+    variable = varied_parameters(stimsfile.saveScript);
+    if length(variable)>1
+        logmsg(['Multiple parameters varied. Only showing first: ' variable{1}]);
+    end
+    if ~isempty(variable)
+        variable = variable{1};
+    end
 end
 
 vx = [0];
@@ -50,11 +54,11 @@ for i=1:length(stimsfile.MTI2)
     tx(end+1) = mean([stimsfile.MTI2{i}.startStopTimes(2) stimsfile.MTI2{i}.startStopTimes(3)])-stimsfile.start;
     ty(end+1) = low+ 0.25*(high-low)*(mod(i,3)/4+0.25);
     
-    if ~isempty(variable) 
+    if ~isempty(variable) && ~strcmp(variable,'position')
         par = getparameters(stims{do(i)});
         stimlabel{end+1} = num2str(par.(variable));
     else
-         stimlabel{end+1} = num2str(i);
+         stimlabel{end+1} = num2str(do(i));
     end
     
     imbar( max(1,round((stimsfile.MTI2{i}.startStopTimes(2)-stimsfile.start)/tstep)):min(end,round((stimsfile.MTI2{i}.startStopTimes(3)-stimsfile.start)/tstep))) = ...

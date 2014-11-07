@@ -8,8 +8,6 @@ function results_ectestrecord( record )
 
 global measures analysed_script
 
-%
-
 if isfield(record,'electrode') % i.e. ecdata
     data_type = 'ec';
 elseif isfield(record,'laser') % i.e. tpdata
@@ -40,7 +38,11 @@ end
 tit(tit=='_')='-';
 
 measures = merge_measures_from_disk( record );
-measures = select_measures_by_channel( measures, record);
+
+switch record.datatype
+    case {'ec','lfp'}
+        measures = select_measures_by_channel( measures, record);
+end
 
 n_cells=length(measures);
 
@@ -57,9 +59,6 @@ n_cols = 5;
 width = n_cols*subwidth;
 figleft = fix((screensize(3)-width)/2);
 relsubwidth = 1 / n_cols;
-
-
-
 
 row = 1;
 for c=1:n_cells
@@ -165,7 +164,7 @@ for c=1:n_cells
                 curves = {curves};
                 psths = {psths};
             elseif length(curves)>1
-                disp('RESULTS_ECTESTRECORD: Darker lines are without trigger.');
+                logmsg('Darker lines are without trigger.');
             end
             
             for i = 1:length(curves)
@@ -222,7 +221,7 @@ for c=1:n_cells
         otherwise
             if ~isfield(measure,'variable')
                 errordlg('Analysis should be run first');
-                disp('RESULTS_ECTESTRECORD: Unknown field ''variable''');
+                logmsg('Unknown field ''variable''');
                 return
             end
             
@@ -408,9 +407,6 @@ switch data_type
             end
         end
 end
-% end
-
-
 
 evalin('base','global measures');
 evalin('base','global analysed_script');
@@ -418,9 +414,9 @@ analysed_stimulus = getstimsfile(record);
 if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
     analysed_script = analysed_stimulus.saveScript; 
 else
-    disp('RESULTS_ECTESTRECORD: No savedscript');
+    logmsg('No savedscript');
 end
-disp('RESULTS_ECTESTRECORD: Measures available in workspace as ''measures'', stimulus as ''analysed_script''.');
+logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_script''.');
 
 return
 
@@ -451,11 +447,9 @@ set(hline,'Color',color);
 return
 
 
-%
 function plot_psth(measure,record)
 clr = 'kbry';
 hold on;
-
 
 last_timepoint = 2;
 first_timepoint = -0.1;
@@ -590,8 +584,6 @@ for i=1:length(curves) % over triggers
     
     plot(x,y,[ linestyle clr(i)]);
     hold on
-    
-    ax=axis;
     ylabel('ODI');
     ylim([-1.1 1.1]);
 end
