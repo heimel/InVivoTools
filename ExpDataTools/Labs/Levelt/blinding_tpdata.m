@@ -98,8 +98,7 @@ switch db(1).experiment % done for Rajeev by Mehran, sorting by comment
         for i=1:length(db)
             sb(i)=db(DB==i);
         end
-        
-        ud.db = sb;
+        ud.db(ud.ind) = sb;
 end
 
 function reverse = reverse_order( stackname, record )
