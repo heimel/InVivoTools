@@ -8,7 +8,10 @@ if nargin<2
 end
 
 if isfield(ud,'db')
-    db = ud.db;
+    db = ud.db(ud.ind); % only take selected records
+    if length(ud.ind) == length(ud.db)
+        logmsg('Blinding entire database. Perhaps you need to make a selection first.');
+    end
 else
     db = ud;
 end
@@ -74,7 +77,7 @@ else
 end
 
 if isfield(ud,'db')
-    ud.db = blind_db;
+    ud.db(ud.ind) = blind_db;
 else
     ud = blind_db;
 end
