@@ -293,7 +293,7 @@ params.map_param1 = 0.05; % threshold response level
 % blinding
 params.blind_fields = {'date','slice','laser','location','comment','mouse','ref_transform'};
 params.blind_shuffle = true;
-switch record.experiment
+switch lower(record.experiment)
     case '10.24' 
         params.blind_shuffle = false;
     case {'11.12','11.21','12.81'}    
