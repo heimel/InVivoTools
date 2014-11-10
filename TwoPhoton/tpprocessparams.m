@@ -290,10 +290,28 @@ params.movie_sync_factor = 1.02;
 params.map_method = 'threshold';
 params.map_param1 = 0.05; % threshold response level
 
+% blinding
+params.blind_fields = {'date','slice','laser','location','comment','mouse','ref_transform'};
+params.blind_shuffle = true;
+switch record.experiment
+    case '10.24' 
+        params.blind_shuffle = false;
+    case {'11.12','11.21','12.81'}    
+        params.blind_shuffle = false;
+    case '14.35' 
+        params.blind_shuffle = false;
+end
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% keep at bottom
 
 if exist('processparams_local.m','file')
     oldparams = params;
     params = processparams_local( params );
     changed_process_parameters(params,oldparams);
 end
+
+
 
