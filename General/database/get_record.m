@@ -3,7 +3,7 @@ function record=get_record( h_fig )
 %
 %   RECORD=GET_RECORD( H_FIG )
 %
-%   2005, Alexander Heimel
+%   2005-2014, Alexander Heimel
 %
   
   ud=get(h_fig,'UserData');
@@ -15,11 +15,11 @@ function record=get_record( h_fig )
     switch get(h_edit(i),'Enable')
       case 'on'
         content=get(h_edit(i),'String');
-        if isnumeric( getfield(ud.orgrecord,field) )
-          content=str2num(content);
+        if isnumeric( ud.orgrecord.(field) )
+          content = str2num(content); %#ok<ST2NM>
         end
       case 'off'
         content=get(h_edit(i),'UserData');
     end
-    record=setfield(record,field,content);
+    record.(field) = content;
   end

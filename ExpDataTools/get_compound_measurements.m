@@ -39,8 +39,7 @@ if nvarargin>0
             end
         end
         if ~found_arg
-            msgbox(['Could not parse argument ' varargin{i}],'Get_compound_measurements');
-            disp(['GET_COMPOUND_MEASUREMENTS: Could not parse argument ' varargin{i}]);
+            errormsg(['Could not parse argument ' varargin{i}]);
             return
         end
     end

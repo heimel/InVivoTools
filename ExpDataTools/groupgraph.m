@@ -143,15 +143,14 @@ if ~iscell(groups);
             ',D2 MD 7d from p28' op 'D2 control 1 month ' postop];
         grouplabels='B6,D2';
         for i=1:length(ind_md)
-            if exist('exclude','var') && ~isempty(findstr(groupdb(ind_md(i)).name,'02'))
+            if exist('exclude','var') && ~isempty(strfind(groupdb(ind_md(i)).name,'02'))
                 continue
             end
-            groups=[groups ',' groupdb(ind_md(i)).name op groupdb(ind_ctl(i)).name postop];
-            grouplabels=[grouplabels ',' groupdb(ind_md(i)).name(4:5)];
+            groups=[groups ',' groupdb(ind_md(i)).name op groupdb(ind_ctl(i)).name postop]; %#ok<AGROW>
+            grouplabels=[grouplabels ',' groupdb(ind_md(i)).name(4:5)]; %#ok<AGROW>
         end
     end
 end
-%
 
 % parse groups
 if ~iscell(groups);

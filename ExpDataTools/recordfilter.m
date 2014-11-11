@@ -10,12 +10,16 @@ if nargin<2
     db=[];
 end
 
-
 if isempty(db) % very leveltlab specific
-    if isfield(record,'epoch'); % i.e. tp
-        s = ['mouse=' record.mouse ',date=' record.date ',epoch=' record.epoch ',stack=' record.stack];
+    s = '';
+    s = addfield( s, record, 'mouse');
+    s = addfield( s, record, 'date');
+    [s,tp] = addfield( s, record, 'epoch');
+    if tp
+        s = addfield( s, record, 'stack');
     else
-        s = ['mouse=' record.mouse ',date=' record.date ',test=' record.test ',datatype=' record.datatype];
+        s = addfield( s, record, 'test');
+        s = addfield( s, record, 'datatype');
     end
     return
 end
@@ -40,4 +44,19 @@ while ~unique_record && f<=length(flds)
     unique_record = (length(ind)==1);
     f = f + 1;
 end
+
+function [str,pres]=addfield( str, record, field)
+pres = false;
+if ~isfield(record,field)
+    return
+end
+pres = true;
+if isempty( record.(field))
+    return
+end
+if ~isempty(str)
+    str(end+1)=',';
+end
+
+str = [str field '=' record.(field)];
 

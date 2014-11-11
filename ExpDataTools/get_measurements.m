@@ -157,7 +157,7 @@ end
 
 % exclude groups for which we have too few points
 if exist('min_n','var')
-    min_n=str2double(min_n);
+    min_n=str2double(min_n); %#ok<NODEF>
 else
     min_n=1;
 end

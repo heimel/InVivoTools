@@ -1,41 +1,43 @@
-function st = azadehloom( params )
-if nargin<1 || ischar(params)
-    params = [];
-    params.filename = '1cm_cross.png';
-    params.center_r2n_cm = [0 0 1000]; % position of object center in cm relative to nose%
-    params.velocity_cmps = [0 0 -100]; % vx,vy,vz in cm/s, right and up and away are positive
-    params.duration = 10; % duration of movement in s
-    params.extent_cm = [10 10 0]; % extent in real world in cm
+function st = azadehloom( params, oldstim )
+%AZADEHLOOM stimulus to show bitmaps moving in real world
+%
+% 2014, Azadeh Tafreshiha, Alexander Heimel
+
+if nargin<2
+    oldstim = [];
 end
 
-NewStimListAdd('azadehloom');
+default.filename = '1cm_circle.png';
+default.center_r2n_cm = [0 0 100]; % position of object center in cm relative to nose%
+default.velocity_cmps = [0 0 -10]; % vx,vy,vz in cm/s, right and up and away are positive
+default.duration = 10; % duration of movement in s
+default.extent_cm = [10 10 0]; % extent in real world in cm
 
+if isempty(oldstim)
+    oldstimpar = default;
+else
+    oldstimpar = getparameters(oldstim);
+end
+
+if nargin<1
+    params = default;
+elseif ischar(params)
+    switch lower(params)
+        case 'graphical'
+            params = structgui( oldstimpar ,capitalize(mfilename));
+        case 'default'
+            params = default;
+        otherwise
+            errormsg(['Unknown argument ' params]);
+            st = [];
+            return
+    end
+end
+
+NewStimListAdd(mfilename);
 s = stimulus(5);
 data = struct('params', params);
-st = class(data,'azadehloom',s);
+st = class(data,mfilename,s);
 st.stimulus = setdisplayprefs(st.stimulus,displayprefs);
 
 
-
-
-% 
-% StimWindowGlobals;
-% tex = Screen('MakeTexture',StimWindow,0.6);
-% 
-% colors = pscolors(periodicstim('default'));
-% clut_bg = ones(256,1)*colors.backdropRGB;
-% clut = repmat(linspace(0,1,256)'*255,1,3); 
-% 
-% 
-% dS_stim = { 'displayType', 'ALEXANDER', 'displayProc', 'customdraw', ...
-%          'offscreen', tex, 'frames', [], 'clut_usage', [], 'depth', 8, ...
-% 'clut_bg', clut_bg, 'clut',clut, 'clipRect', [] , 'makeClip', 0,'userfield',[] };
-% 
-% DS_stim = displaystruct(dS_stim);
-% 
-% stim = setdisplaystruct(st,DS_stim);
-% 
-% df = displayprefs;
-% stim = setdisplayprefs(stim,df);
-
-%stim = loadstim( stim );

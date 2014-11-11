@@ -132,10 +132,7 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
         Screen(StimWindow,'WaitBlanking',MTI.pauseRefresh(end));
     else
         Screen('LoadNormalizedGammaTable',StimWindow,MTI.ds.clut,1); % this seems to be no longer necessary or correct, the textures already have colors
-        %StimWindowPreviousCLUT = repmat(linspace(0,1,256)',1,3);
-        %StimWindowPreviousCLUT(:,2) = 0;
-        % Screen('LoadNormalizedGammaTable',StimWindow,StimWindowPreviousCLUT);
-        Screen('FillRect',StimWindow,round(MTI.ds.bg_gammauncorrected));
+         Screen('FillRect',StimWindow,round(MTI.ds.bg_gammauncorrected));
         frameNum = 1;
         textures = MTI.MovieParams.Movie_textures{frameNum};
         Screen('DrawTextures',StimWindow,MTI.ds.offscreen(textures),...
@@ -148,7 +145,6 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
              
         if StimWindowUseCLUTMapping, Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1); end;
         
-        
         vbl = Screen('Flip',StimWindow,0);
         frameTimes(1) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,1);
 
@@ -158,9 +154,7 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
             imwrite(imageArray,fullfile(getdesktopfolder,'stimulus_frame.png'),'png')
         end
         
-
         if capture_movie; Screen('AddFrameToMovie', StimWindow); end
-        %Screen('FillRect',StimWindow,255*MTI.ds.clut(1,:,:)); % fill the other buffer with background -- seems to be unnecessary
         StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,1);
         
         for frameNum=2:length(MTI.df.frames);
@@ -172,8 +166,7 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
             squeeze(MTI.MovieParams.Movie_globalalphas(:,frameNum,textures)),... % globalAlpha
             [],[],[], ... % modulateColor,textureShader,specialFlags
             squeeze(MTI.MovieParams.Movie_auxparameters(:,frameNum,textures))); % auxParameters
-
-            
+         
             if StimWindowUseCLUTMapping, Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1); end;
             vbl=Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(frameNum-1)-0.5)/StimWindowRefresh);
             if capture_movie; Screen('AddFrameToMovie', StimWindow); end
@@ -184,9 +177,7 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
         if StimWindowUseCLUTMapping, Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1); end;
         Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(end)-0.5)/StimWindowRefresh);
         if capture_movie; Screen('AddFrameToMovie', StimWindow); end
-
-        
-    end;
+    end
     
 elseif strcmp(MTI.ds.displayType,'custom'),
     done=0; stamp=0; info=[]; stampNum=1; %#ok<NASGU>
@@ -260,7 +251,6 @@ if MTI.postBGframes>0,
             vbl = Screen('Flip', StimWindow, 0); % wait for blanking
             Screen(StimWindow,'FillRect',round(255*MTI.ds.clut_bg(1,:,:))); % make sure background is in 2nd buffer
             WaitSecs(0.2);
-            % Screen('LoadNormalizedGammaTable', StimWindow, MTI.ds.clut_bg,1);
         else
             Screen('FillRect',StimWindow,round(255*MTI.ds.clut_bg(1,:,:))); % make sure background is installed
             vbl = Screen('Flip', StimWindow, 0); % wait for blanking
@@ -277,13 +267,9 @@ else
     startStopTimes(3) = StimTriggerAct('Stim_OFFSET_trigger',MTI.stimid);
 end
 
-
 % hardcoded optogenetics trigger off
 StimSerialGlobals
 StimSerial('rts',StimSerialStim,0);
-
-%show_background(StimWindow,MTI,[],1)
-%show_background(StimWindow,MTI,[],1)
 
 startStopTimes(4) = StimTriggerAct('Stim_BGpost_trigger',MTI.stimid);
 
@@ -312,11 +298,6 @@ end
 if isempty(dontsync)
     dontsync = 0;
 end
-
-%StimWindowPreviousCLUT = repmat(linspace(0,1,256)',1,3);
-%Screen('LoadNormalizedGammaTable', StimWindow, StimWindowPreviousCLUT,1);
-%currLut = Screen('ReadNormalizedGammaTable', StimWindow);
-%Screen('LoadNormalizedGammaTable',StimWindow,currLut,1);
 
 Screen('LoadNormalizedGammaTable',StimWindow,MTI.ds.clut,1);
 Screen(StimWindow,'FillRect',round(MTI.ds.bg_gammauncorrected));
