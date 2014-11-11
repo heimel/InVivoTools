@@ -30,16 +30,18 @@ fullfile(pwd, 'NewStimTestProcs'),...
 fullfile(pwd, 'ReceptiveFieldMapper')); 
 
 
-eval(['NewStimGlobals;'])
+%eval(['NewStimGlobals;'])
+NewStimGlobals;
 NewStimStimList = {};
 NewStimStimScriptList = {};
 
-if ~isempty(which('NewStimConfiguration')),
-	eval(['NewStimConfiguration;']);
+if exist('NewStimConfiguration','file')
+    NewStimConfiguration;
+	%eval(['NewStimConfiguration;']);
 end;
 
-if isempty(which('NewStimConfiguration'))||~VerifyNewStimConfiguration, 
-	vhlabtoolspath = fileparts(fileparts(pwd)), % 2 levels up
+if isempty(which('NewStimConfiguration')) || ~VerifyNewStimConfiguration 
+	vhlabtoolspath = fileparts(fileparts(pwd)); % 2 levels up
 	copyfile([pwd 'NewStimUtilities' filesep 'NewStimConfiguration_analysiscomputer.m'],...
 		[vhlabtoolspath filesep 'Configuration' filesep 'NewStimConfiguration.m']);
 	warning(['No NewStimConfiguration.m file was detected;' ...

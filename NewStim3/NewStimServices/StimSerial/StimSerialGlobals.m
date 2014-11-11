@@ -51,3 +51,20 @@ global StimSerialScriptInPin StimSerialScriptOutPin;
 global StimSerialStimIn StimSerialStimOut;
 global StimSerialStimInPin StimSerialStimOutPin;
 global StimSerialScript StimSerialStim;
+
+
+global gNewStim % to replace other globals in the future
+gNewStim.StimSerial.port = StimSerialSerialPort;
+gNewStim.StimSerial.scriptin = StimSerialScriptIn;
+gNewStim.StimSerial.scriptout = StimSerialScriptOut;
+gNewStim.StimSerial.scriptinpin = StimSerialScriptInPin;
+gNewStim.StimSerial.scriptoutpin = StimSerialScriptOutPin;
+gNewStim.StimSerial.stimin = StimSerialStimIn;
+gNewStim.StimSerial.stimout = StimSerialStimOut;
+gNewStim.StimSerial.stiminpin = StimSerialStimInPin;
+gNewStim.StimSerial.stimoutpin = StimSerialStimOutPin;
+gNewStim.StimSerial.script = StimSerialScript;
+gNewStim.StimSerial.stim = StimSerialStim;
+
+
+

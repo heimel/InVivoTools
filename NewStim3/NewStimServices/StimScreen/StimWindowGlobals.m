@@ -27,8 +27,25 @@
 %  See also:  SHOWSTIMSCREEN, CLOSESTIMSCREEN
 %
 
-global StimWindow StimWindowMonitor StimWindowDepth StimWindowRefresh StimWindowRect StimComputer StimScreenBG StimWindowPreviousCLUT StimWindowUseCLUTMapping
-global StimDebug % Alexander
+global StimWindow StimWindowMonitor StimWindowDepth StimWindowRefresh StimWindowRect StimComputer StimScreenBG StimWindowPreviousCLUT StimWindowUseCLUTMapping StimDebug 
 if isempty(StimDebug); %Alexander
     StimDebug = false; %Alexander
 end %Alexander
+
+global gNewStim % to replace other globals in the future
+gNewStim.StimWindow.window = StimWindow; 
+gNewStim.StimWindow.monitor = StimWindowMonitor; 
+gNewStim.StimWindow.depth = StimWindowDepth;
+gNewStim.StimWindow.refresh = StimWindowRefresh;
+gNewStim.StimWindow.rect = StimWindowRect;
+gNewStim.StimWindow.computer = StimComputer;
+gNewStim.StimWindow.bg = StimScreenBG;
+gNewStim.StimWindow.previousclut = StimWindowPreviousCLUT;
+gNewStim.StimWindow.useclutmapping = StimWindowUseCLUTMapping;
+gNewStim.StimWindow.debug = StimDebug;
+
+
+
+
+
+

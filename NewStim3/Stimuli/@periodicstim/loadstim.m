@@ -16,7 +16,7 @@ StimWindowGlobals;
 
  % if we have the capability of using DrawTextures, let's do it
 
-if NS_PTBv>=3&(NewStimPeriodicStimUseDrawTexture|isfield(PSstim.PSparams,'maskps')),
+if NS_PTBv>=3  %&(NewStimPeriodicStimUseDrawTexture|isfield(PSstim.PSparams,'maskps')),
 	outstim = loadstimPTB3(PSstim);
 	return;
 end;
@@ -231,14 +231,14 @@ end;
   
 	switch PSparams.imageType
 		
-		%Field¦¦Single luminance across field
+		%Fieldï¿½ï¿½Single luminance across field
 		case 0
 			ourClut = light*ones(1,255);
 	
 		%%% Simple Periodic Stimuli
 		%  'spaceCycles' variable determines number of periods repeated in field
 	
-		% Square¦¦Field split into light and dark halves
+		% Squareï¿½ï¿½Field split into light and dark halves
 		case 1
 			amp = .5*(light-dark);
 			center = .5*(light+dark);
@@ -252,19 +252,19 @@ end;
 			ourClut = ourClut(1:255)/max(ourClut(1:255));
 			ourClut = (ourClut*2-1)*amp+center;
 		
-		% Sine¦¦Smoothly varying shades
+		% Sineï¿½ï¿½Smoothly varying shades
 		case 2
 			amp = .5*(light-dark);
 			center = .5*(light+dark);
 			ourClut = round( center + amp*sin( 2*pi*(0:254)/255 ) ); 
 		
-		% Triangle¦¦Linear light->dark->light transition
+		% Triangleï¿½ï¿½Linear light->dark->light transition
 		case 3
 			ourClut = 2*linspace(dark,light,255) -2*255*floor(linspace(dark,light,255)/255);
 			ourClut = ourClut-2*(ourClut-255).*floor(ourClut./(255)); % will make the triangle shape
 			ourClut = 1+ourClut/max(ourClut)*254; % normalize for a1 extra-good full delicious spectrum
 		
-		% Lightsaw¦¦Linear light->dark transition
+		% Lightsawï¿½ï¿½Linear light->dark transition
 		case 4
 			ourClut = linspace(light/255,dark/255,255);
 			filtVec = ones(1,PSparams.nSmoothPixels+1);	% simple box filter
@@ -272,7 +272,7 @@ end;
 			ourClut = ourClut(1:255)/max(ourClut(1:255));
 			ourClut = ourClut*255;
 		
-		% Darksaw¦¦Linear dark->light transition
+		% Darksawï¿½ï¿½Linear dark->light transition
 		case 5
 			ourClut = linspace(dark/255,light/255,255);
 			filtVec = ones(1,PSparams.nSmoothPixels+1);	% simple box filter
@@ -283,7 +283,7 @@ end;
 
 	%%% Bar-oriented stimuli
 
-		% Bar¦¦Bars of <barwidth> width and <barColor> luminance
+		% Barï¿½ï¿½Bars of <barwidth> width and <barColor> luminance
 		case 6
 			% Make basic bars clut
  			barwidth = round(barwidth*255);
@@ -299,7 +299,7 @@ end;
 			ourClut = ourClut(theInds)/max(ourClut(theInds));
 			ourClut = ourClut*255;
 		
-		% Edge¦¦Like Lightsaw but with bars determining width of saw
+		% Edgeï¿½ï¿½Like Lightsaw but with bars determining width of saw
 		case 7
 			barwidth = round(barwidth*255);
 			ourClut = background*ones(1,255);
@@ -308,7 +308,7 @@ end;
 			ourClut(1:barwidth) = linspace(barColor,background,barwidth);
 
 			
-		% Bump¦¦Bars with internal smooth dark->light->dark transitions
+		% Bumpï¿½ï¿½Bars with internal smooth dark->light->dark transitions
 		case 8
 			barwidth = round(barwidth*255);
 			%ourClut = backdrop*ones(1,255);
@@ -467,8 +467,8 @@ outstim.stimulus = loadstim(outstim.stimulus);
 %-----------------------------------
 % makeClip
 function cRect = makeClip(rect, angl,windowShape)
-% Preconditions: óxPixels & yPixels are widths and xCenter & yCenter are coords
-%				 óangle is orientation (in radians) w/ 0 == up and increasing
+% Preconditions: ï¿½xPixels & yPixels are widths and xCenter & yCenter are coords
+%				 ï¿½angle is orientation (in radians) w/ 0 == up and increasing
 %				   values rotate clockwise
 % Postcondition: Returns a set of four coords tracing a rect with the proper
 %				  height & width, oriented at angle and centered over [x,y]Center
