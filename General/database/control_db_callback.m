@@ -170,7 +170,7 @@ switch windowname
                 else
                     crit=trim(get(ud.h.crit,'String'));
                     if isempty(crit)
-                        disp('CONTROL_DB_CALLBACK: Empty filter criteria');
+                        logmsg('Empty filter criteria');
                         set(ud.h.filter,'Value',0);
                         control_db_callback(ud.h.current_record);
                         return
@@ -181,7 +181,7 @@ switch windowname
                         i=findclosest( ud.ind,ud.current_record);
                         set(ud.h.current_record,'String',num2str(ud.ind(i)));
                     else
-                        msgbox('No records found matching filter','Filter database');
+                        errormsg('No records found matching filter');
                         set(ud.h.filter,'Value',0);
                         ud.ind=(1:length(ud.db));
                     end
@@ -196,7 +196,6 @@ switch windowname
                 
                 set(h_fig,'UserData',ud);
                 control_db_callback(ud.h.current_record);
-                
             case 'crit'
                 filtering = get(ud.h.filter,'value');
                 if ~filtering
@@ -224,14 +223,11 @@ switch windowname
                 end
             case 'reverse'
                 if get(ud.h.filter,'Value')==0
-                    msgbox('Turn on filter to reverse.');
-                    disp('CONTROL_DB_CALLBACK: not reversing without filter');
+                    errormsg('Turn on a filter to reverse.');
                     return
                 end
                 btn=questdlg('Do you want to reverse the selection?','Reverse database','Ok','Cancel','Ok');
                 if strcmp(btn,'Ok')
-                    
-                    
                     ud.db(ud.ind)=ud.db(ud.ind(end:-1:1));
                     ud.change = 1;
                     set(h_fig,'UserData',ud);

@@ -1,6 +1,6 @@
-%RETINOTOPY_2x2
+%RETINOTOPY_4x3
 %
-% RETINOTOPY_2x2, NewStim3 version
+% RETINOTOPY_4x3, NewStim3 version
 % 
 % 2012, Alexander Heimel
 %
@@ -8,54 +8,56 @@
 % To skip initial tests
 % Screen('Preference', 'SkipSyncTests', 2)
 
-display (['IMP: If stimuli is tilted change NewStimTilt in'])
-display (['NewStimConfiguration to 0 (normal), 10 (left) or -10 (right)'])
-display (['Press space to proceed ..........'])
-
-pause
-
 
 NewStimInit;
 ReceptiveFieldGlobals;
 NewStimGlobals;
-
+        
 CloseStimScreen;
 ShowStimScreen;
  
 StimWindowGlobals
 
 % how many blocks
-n_x = 1;
-n_y = 1;
+n_x = 4;
+n_y = 3;
 
 r = StimWindowRect; % screen size
-width = round( (r(3)-r(1))/n_x);
-height = round( (r(4)-r(2))/n_y);
+%r = [0 0 1440 900];
+
+
+fullheight = r(4)-r(2);
+fullwidth = fullheight/3*4; % to match 4:3 dimensions of old CRT
+
+x_offset = round( (r(3)-r(1)-fullwidth)/2);
+width = round( fullwidth/n_x);
+height = round( fullheight/n_y);
 
 ps=periodicstim('default');
 pspar = getparameters(ps);
 pspar.distance = NewStimViewingDistance;
-pspar.imageType = 2; % 2 for sinusoidal, 1 for squarewave gratings
+pspar.imageType = 1;
 pspar.animType = 4;
 pspar.tFrequency = 2;
-% pspar.sFrequency = 0.1;
+pspar.sFrequency = 0.05;
 pspar.nCycles = 1.5;
 pspar.background = 0.5;
 pspar.backdrop = 0.5;
 pspar.windowShape = 0;
 pspar.dispprefs = {'BGpretime',0,'BGposttime',0};
 pspar.angle = 45;
-pspar.rect=[0 0 960 540];
-total_duration = 3;
-pspar.prestim_time = 3
+total_duration = 6;
+pspar.prestim_time = 3;
 angles = [0:pspar.angle:360-pspar.angle];
-spatialfrequency = [0.1 0.2 0.3 0.4 0.5 0.6];
 
-for i = 1:6
+for i = 1:n_x*n_y
     iss_script(i) = StimScript(0);
-    % spatial frequency
-    pspar.sFrequency = spatialfrequency(i);
-     
+   
+    % location
+    row=floor( (i-1)/n_x);
+    col=i-1-row*n_x;
+    pspar.rect = [x_offset+col*width row*height x_offset+(col+1)*width (row+1)*height];
+    
     pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
     angles = angles( randperm(length(angles)) );
     for angle = angles
@@ -68,10 +70,9 @@ end
 
 tic
 % show script as test
-MTI = DisplayTiming(iss_script(3));
-DisplayStimScript(iss_script(3),MTI,0,0);
+MTI = DisplayTiming(iss_script(4));
+DisplayStimScript(iss_script(4),MTI,0,0);
 toc
-
 
 try
     % waiting for stimulus signal on parallelport
@@ -103,6 +104,5 @@ try
 catch me
     CloseStimScreen;
     rethrow(me);
-    close_parallelport(lpt);
 end
 

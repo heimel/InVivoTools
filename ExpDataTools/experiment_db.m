@@ -26,19 +26,9 @@ end
 
 if nargin<2
     hostname = host;
-    if isempty(hostname)
-        % disp(['EXPERIMENT_DB: No hostname set' ]);
-    else        
-        disp(['EXPERIMENT_DB: Working on host ' hostname ]);
+    if ~isempty(hostname)
+        logmsg(['Working on host ' hostname ]);
     end
-end
-
-switch(user)
-    case 'heimel'
-        poweruser = true;
-    otherwise
-        %disp('EXPERIMENT_DB: Temporarily making everybody power user to make test cycling possible');
-        poweruser = true;
 end
 
 %defaults
@@ -136,9 +126,7 @@ switch testdb
     case {'testdb','ectestdb'}
         h_fig=control_db(db,color);
     otherwise
-        %h_fig=control_db(db,color);
        h_fig=control_db(filename,color); 
-        
 end
 if isempty(h_fig)
     return
@@ -165,12 +153,7 @@ h=ud.h;
 
 % set customize sort to sort button
 set(h.sort,'Tag','sort_testrecords');
-if poweruser
-    set(h.sort,'Enable','on'); % enable sort button
-else
-    % to avoid people messing up the database by accident
-    set(h.sort,'Enable','off');
-end
+set(h.sort,'Enable','on'); % enable sort button
 
 if haspsychtbox || experimental_pc
     runexperiment_enabled = 1;

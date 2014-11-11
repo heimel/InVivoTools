@@ -14,15 +14,7 @@ figname = [record.mouse ', ' record.date ', ' record.epoch ' - raw'];
 
 figure('Name',figname,'NumberTitle','off');
 
-% figure positioning and size
-% set(gcf,'PaperPositionMode','auto');
-% p=get(gcf,'position');
-% p(3)=p(3)*2;
-% set(gcf,'position',p);
-
-
 colors={[1 0 0],[0 1 0],[0 0 1],[1 1 0],[0 1 1],[1 0 1],[0.5 0 0],[0 0.5 0],[0 0 0.5],[0.5 0.5 0],[0.5 0.5 0.5]};
-
 
 % curves
 switch process_params.method
