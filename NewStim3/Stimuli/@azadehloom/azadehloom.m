@@ -2,8 +2,10 @@ function st = azadehloom( params )
 if nargin<1 || ischar(params)
     params = [];
     params.filename = '1cm_cross.png';
-    params.starting_position_relscreen = [0 0.5]; %
-    params.velocity = [1 2]; % deg/s x and y
+    params.center_r2n_cm = [0 0 1000]; % position of object center in cm relative to nose%
+    params.velocity_cmps = [0 0 -100]; % vx,vy,vz in cm/s, right and up and away are positive
+    params.duration = 10; % duration of movement in s
+    params.extent_cm = [10 10 0]; % extent in real world in cm
 end
 
 NewStimListAdd('azadehloom');
