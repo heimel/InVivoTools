@@ -18,11 +18,10 @@
 % NSUsePCIDIO96Trigger          : 0/1 use a Nat. Instruments PCI DIO 96 card for stim reporting
 
 
-   % do not set values here
    
-global pixels_per_cm;
+global pixels_per_cm % pixels per cm of stimulus monitor
 
-global NSUseInitialSerialTrigger NSUseStimSerialTrigger NSUsePCIDIO96Trigger NSUsePCIDIO96InputTrigger % these are old
+global NSUseInitialSerialTrigger  NSUseStimSerialTrigger NSUsePCIDIO96Trigger NSUsePCIDIO96InputTrigger % these are old
 
 global NewStimStimList
 global NewStimStimScriptList

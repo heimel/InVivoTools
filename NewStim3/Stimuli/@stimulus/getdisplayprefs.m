@@ -1,3 +1,3 @@
-function [val] = getdisplayprefs(stimulus);
+function [val] = getdisplayprefs(stimulus)
 
 val = stimulus.displayprefs;

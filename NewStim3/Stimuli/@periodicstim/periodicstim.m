@@ -67,6 +67,8 @@ function [pso] = periodicstim(PSparams,OLDSTIM)
 %                        full rect is used.
 %
 %  See also:  STIMULUS, STOCHASTICGRIDSTIM, PERIODICSCRIPT
+%
+%  Steve Van Hooser
 
 NewStimListAdd('periodicstim');
 
@@ -85,44 +87,39 @@ if ischar(PSparams),
     if strcmp(PSparams,'graphical'),
         % load parameters graphically
         p = get_graphical_input(oldstim);
-        if isempty(p), finish = 0; else, PSparams = p; end;
+        if isempty(p)
+            finish = 0; 
+        else
+            PSparams = p; 
+        end;
     elseif strcmp(PSparams,'default'),
         PSparams = default_p;
-    else,
+    else
         error('Unknown string input into periodicstim.');
     end;
-else,   % they are just parameters
+else   % they are just parameters
     [good, err] = verifyperiodicstim(PSparams);
     if ~good, error(['Could not create periodicstim: ' err]); end;
 end;
 
-if finish,
-    
-    cpustr = computer;
-    if (strcmp(cpustr,'MAC2')),  % if we have a Mac
-        
-        StimWindowGlobals;
+if finish
+    StimWindowGlobals;
+    if StimComputer 
         tRes = round( (1/PSparams.tFrequency) * StimWindowRefresh);
-        % screen frames / cycle
-        
-        %compute displayprefs info
-        
         fps = StimWindowRefresh;
-    else,  % we're just initializing
+    else  % we're just initializing
         tRes = 5;
         fps = -1;
-        
-    end;
+    end
     
-    if isfield(PSparams,'loops'), loops = PSparams.loops; else, loops = 0; end;
-    
+    if isfield(PSparams,'loops'), loops = PSparams.loops; else loops = 0; end;
     if isfield(PSparams,'aperature'), PSparams.aperture = PSparams.aperature; % correct steve's bad bad spelling
     elseif isfield(PSparams,'aperture'), PSparams.aperature = PSparams.aperture;  % correct for steve's bad bad spelling
     end;
     
     frames = (1:tRes*PSparams.nCycles);
     loopdir = 1;
-    while loops>0,
+    while loops>0
         loopdir = loopdir * -1;
         if loopdir>0,
             frames = [frames 1:tRes*PSparams.nCycles];
@@ -131,17 +128,7 @@ if finish,
         end;
         loops = loops - 1;
     end;
-    
-    % Special case: animType == 1  %% actually let's just forget this as a special case even though it wastes some time
-    %if (PSparams.animType == 1) % if a square wave, only 2 frames:  ON and OFF
-    %	fps = 0.5 * PSparams.tFrequency;
-    %	disp(['here']);
-    %f = PSparams.tFrequency;
-    %t = 0.00001 + (0:1/StimWindowRefresh:PSparams.nCycles/f);
-    %x = zeros(size(t)); x(find(sin(f*2*pi*t)<0)) = 1; x(find(sin(f*2*pi*t)>=0)) = 2;
-    %	frames = repmat(1:2,1,PSparams.nCycles);  % x
-    %end;
-    
+        
     oldRect = PSparams.rect;
     width = oldRect(3) - oldRect(1); height = oldRect(4)-oldRect(2);
     dims = max(width,height);
@@ -159,19 +146,14 @@ if finish,
         ID = max(dimnew);
         newrect = ([-ID -ID ID ID]/2+repmat(ctr,1,2));
     end;
-    
-    dp={'fps',fps, ...
-        'rect',newrect, ...
-        'frames',frames,PSparams.dispprefs{:} };
+    dp=[{'fps',fps,'rect',newrect,'frames',frames}, PSparams.dispprefs{:} ];
     s = stimulus(5);
     data = struct('PSparams', PSparams);
     pso = class(data,'periodicstim',s);
     pso.stimulus = setdisplayprefs(pso.stimulus,displayprefs(dp));
-    
 else
     pso = [];
 end;
-
 
 
 
@@ -205,7 +187,8 @@ if isempty(oldstim),
     loops_str = mat2str(default_p.loops);
     size_str = mat2str(default_p.size);
 else
-    oldS = struct(oldstim); PSparams = oldS.PSparams;
+    oldS = struct(oldstim); 
+    PSparams = oldS.PSparams;
     rect_str = mat2str(PSparams.rect);
     image_val = (PSparams.imageType+1);
     anim_val = (PSparams.animType+1);
@@ -856,7 +839,7 @@ while ~error_free,
     if get(cancel_ctl,'userdata')==1,
         error_free = 1;
         
-    else, % it was OK
+    else % it was OK
         dp_str = get(dp_ctl,'String');
         rect_str = get(rect_ctl,'String');
         image_val = get(image_ctl,'value');

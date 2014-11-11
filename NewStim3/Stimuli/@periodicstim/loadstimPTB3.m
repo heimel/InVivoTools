@@ -1,26 +1,15 @@
 function [outstim] = loadstimPTB3(PSstim)
-
-
+%PERIODICSTIM/LOADSTIMPTB3
+%
 
 PSstim = unloadstim(PSstim);
 
 StimWindowGlobals;
 
-  % create a clipping region
-
- % SPATIAL PARAMETERS %%%%%%%%%
-[spatialphase, pixelIncrement, wLeng, destination_rect, width_offscreen, height_offscreen] = spatial_phase(PSstim);
- % END OF SPATIAL PARAMETERS %%%%%%%%%%
-
- %%%%%%%% animation parameters
+[spatialphase, pixelIncrement, wLeng, destination_rect, ...
+    width_offscreen, height_offscreen] = spatial_phase(PSstim);
 
 [img, frames, ds_userfield] = animate(PSstim);
-
-
-
-
-
- % contrast/color parameters
 
 colors = pscolors(PSstim);
 
@@ -36,33 +25,18 @@ img_colorized = cat(3,rescale(img,[-1 1],[colors.low_rgb(1) colors.high_rgb(1)])
 
 gratingtex = Screen('MakeTexture',StimWindow,img_colorized);
 
- % make color tables
-
-offClut = ones(256,1)*colors.backdropRGB;
-clut_bg = offClut;
+clut_bg = ones(256,1)*colors.backdropRGB;
 clut_usage = ones(size(clut_bg)); % we'll claim we'll use all slots
-clut = StimWindowPreviousCLUT; % we no longer need anything special here
-clut=repmat(linspace(0,1,256)'*255,1,3);  % alexander
-% clut(1,:) = colors.backdropRGB; % commented by alexander
+clut = repmat(linspace(0,1,256)'*255,1,3);  
 
-% moving image mehran
-% if 1
-%     
-%     destrect = df.rect; % make sure it is a column vector
-%     destrects = zeros(4,length(df.frames),length(ds.offscreen));
-%     for i=1:length(ds.offscreen),
-%         destrects(:,:,i) = repmat(destrect(:),1,length(df.frames));
-%     end;
-%     ds.userfield.Movie_destrects = destrects;
-% end
+%DP_stim = displayprefs({'fps',StimWindowRefresh,'rect',destination_rect,'frames',frames,PSstim.PSparams.dispprefs{:}});
+DP_stim = getdisplayprefs(PSstim);
+DP_stim = setvalues(DP_stim,{'fps',StimWindowRefresh,'rect',destination_rect,'frames',frames});
 
-dp_stim = {'fps',StimWindowRefresh,'rect',destination_rect,'frames',frames,PSstim.PSparams.dispprefs{:} };
-DP_stim = displayprefs(dp_stim);
 dS_stim = { 'displayType', 'Movie', 'displayProc', 'standard', ...
          'offscreen', gratingtex, 'frames', frames, 'clut_usage', clut_usage, 'depth', 8, ...
 		 'clut_bg', clut_bg, 'clut', clut, 'clipRect', [] , 'makeClip', 0,'userfield',ds_userfield };
 DS_stim = displaystruct(dS_stim);
-
 
 ds_userfield = MovieParams2MTI(DS_stim,DP_stim);
 
@@ -76,7 +50,7 @@ if isfield(PSstim.PSparams,'ps_add') && ~isempty(PSstim.PSparams.ps_add)
 		'offscreen',ps_add_tex,'frames',frames,'clut_usage',clut_usage,'depth',8,...
 		'clut_bg',clut_bg,'clut',clut,'clipRect',[],'makeClip',0,'userfield',ds_adduserfield};
 	DS_add = displaystruct(dS_add);
-	dp_add = {'fps',StimWindowRefresh,'rect',ps_add_destrect,'frames',frames,PSstim.PSparams.dispprefs{:}};
+	dp_add = [{'fps',StimWindowRefresh,'rect',ps_add_destrect,'frames',frames} PSstim.PSparams.dispprefs];
 	DP_add = displayprefs(dp_add);
 	moviefields_add = MovieParams2MTI(DS_add,DP_add);
 	ds_userfield = MovieParamsCat(ds_userfield,moviefields_add);
@@ -100,7 +74,7 @@ if PSstim.PSparams.windowShape>-1 && ~fullscreen
 	         'offscreen', clip_tex, 'frames', frames, 'clut_usage', clut_usage, 'depth', 8, ...
 			 'clut_bg', clut_bg, 'clut', clut, 'clipRect', [] , 'makeClip', 0,'userfield',ds_clipuserfield };
 	DS_clip = displaystruct(dS_clip);
-	dp_clip = {'fps',StimWindowRefresh,'rect',clip_dest_rect,'frames',frames,PSstim.PSparams.dispprefs{:} };
+	dp_clip = [{'fps',StimWindowRefresh,'rect',clip_dest_rect,'frames',frames},PSstim.PSparams.dispprefs];
 	DP_clip = displayprefs(dp_clip);
 	moviefields_clip = MovieParams2MTI(DS_clip,DP_clip);
 	ds_userfield = MovieParamsCat(ds_userfield,moviefields_clip);
@@ -115,7 +89,7 @@ if isfield(PSstim.PSparams,'ps_mask'),
 		'offscreen',ps_mask_tex,'frames',frames,'clut_usage',clut_usage,'depth',8,...
 		'clut_bg',clut_bg,'clut',clut,'clipRect',[],'makeClip',0,'userfield',ds_maskuserfield};
 	DS_mask = displaystruct(dS_mask);
-	dp_mask = {'fps',StimWindowRefresh,'rect',ps_mask_destrect,'frames',frames,PSstim.PSparams.dispprefs{:}};
+	dp_mask = [{'fps',StimWindowRefresh,'rect',ps_mask_destrect,'frames',frames},PSstim.PSparams.dispprefs];
 	DP_mask = displayprefs(dp_mask);
 	moviefields_mask = MovieParams2MTI(DS_mask,DP_mask);
 	ds_userfield = MovieParamsCat(ds_userfield,moviefields_mask);

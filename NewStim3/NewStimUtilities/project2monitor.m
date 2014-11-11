@@ -1,7 +1,7 @@
 function r2s_pxl = project2monitor(r_rw_cm, screen_center_r2n_cm,screen_pxl,screen_cm) 
 %PROJECT2MONITOR takes the real world coordinates of a stimulus and returns coordinates as projected on the screen
 %
-%  r2s_pxl = project2monitor(r_rw_cm, screen_topleft_r2n_cm) 
+%  r2s_pxl = project2monitor(r_rw_cm, screen_center_r2n_cm) 
 %
 %
 % 10-11-2014 Azadeh
