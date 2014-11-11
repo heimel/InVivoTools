@@ -11,7 +11,8 @@ velocity_cmpf = params.velocity_cmps / StimWindowRefresh;
 
 dp = struct(getdisplaystruct(stim));
 my_texture = dp.offscreen(1);
-
+   
+stamp = Screen('Flip', StimWindow);
 for current_frame = 1:n_frames
     % real world motion
     center_r2n_cm = center_r2n_cm + velocity_cmpf;
