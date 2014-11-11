@@ -12,6 +12,7 @@ default.center_r2n_cm = [0 0 100]; % position of object center in cm relative to
 default.velocity_cmps = [0 0 -10]; % vx,vy,vz in cm/s, right and up and away are positive
 default.duration = 10; % duration of movement in s
 default.extent_cm = [10 10 0]; % extent in real world in cm
+default.backdrop = [0.5 0.5 0.5];
 
 if isempty(oldstim)
     oldstimpar = default;

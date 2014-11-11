@@ -8,8 +8,11 @@ params = getparameters(stim);
 my_image(:,:,4) = alpha(:,:);
 tex = Screen('MakeTexture', StimWindow, my_image, [], [], [], [], []);
 
-colors = pscolors(periodicstim('default'));
-clut_bg = ones(256,1)*colors.backdropRGB;
+if length(params.backdrop)==3
+    clut_bg = params.backdrop*255;
+else
+    clut_bg = ones(1,3) * params.backdrop*255;
+end
 clut = repmat(linspace(0,1,256)'*255,1,3); 
 
 
@@ -20,10 +23,5 @@ dS_stim = { 'displayType', '', 'displayProc', 'customdraw', ...
 DS_stim = displaystruct(dS_stim);
 
 stimout = setdisplaystruct(stim,DS_stim);
-
-% df = displayprefs;
-% stim = setdisplayprefs(stim,df);
-
-
 stimout.stimulus = loadstim(stimout.stimulus);
 

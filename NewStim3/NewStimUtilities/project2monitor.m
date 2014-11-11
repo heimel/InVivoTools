@@ -16,10 +16,14 @@ x_rw = r_rw_cm(1);
 y_rw = r_rw_cm(2);
 z_rw = r_rw_cm(3);
 
-
-x_r2n_cm = (x_rw*screen_topleft_r2n_cm(3))/z_rw;
-y_r2n_cm = (y_rw*screen_topleft_r2n_cm(3))/z_rw;
-
+if abs(z_rw) > 0.1 % i.e. not within a mm
+    x_r2n_cm = (x_rw*screen_topleft_r2n_cm(3))/z_rw;
+    y_r2n_cm = (y_rw*screen_topleft_r2n_cm(3))/z_rw;
+else
+    x_r2n_cm = sign(x_rw)*1e4;
+    y_r2n_cm = sign(y_rw)*1e4;
+end
+    
 % x (right is positive) 
 % y (up is positive)
 % z (in front of the mouse is positive)

@@ -25,6 +25,9 @@ guicreate(button,'String','Ok','left','left','top','top_nomargin','width',60,'he
 hcancel = guicreate(button,'String','Cancel','width',60,'height',24,'parent',hrec,'move','right','callback','set(gcbo,''userdata'',[1]);uiresume;');
 
 uiwait(hrec);
+if ~ishandle(hrec) % i.e. closed
+    return
+end
 if ~isempty(get(hcancel,'userdata')) % i.e. cancelled
     delete(hrec);
     return
