@@ -2,7 +2,9 @@ function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI)
 NewStimGlobals % for pixels_per_cm and NewStimViewingDistance
 StimWindowGlobals % for StimWindowRefresh
 
-screen_topleft_r2n_cm = [-33.5/2 13.5 NewStimViewingDistance]; 
+screen_center_r2n_cm = [0 0 NewStimViewingDistance]; 
+screen_pxl = [StimWindowRect(3) StimWindowRect(4)];
+screen_cm = screen_pxl / pixels_per_cm;
 
 params = getparameters(stim);
 n_frames = params.duration * StimWindowRefresh + 1;  % should be in s and should be in stimulus definition (azadehloom)
@@ -22,8 +24,8 @@ for current_frame = 1:n_frames
         topleft_cm = center_r2n_cm - [1 -1 1].*params.extent_cm/2;
         bottomright_cm = center_r2n_cm + [1 -1 1].*params.extent_cm/2;
         
-        topleft_pxl = project2monitor(topleft_cm,screen_topleft_r2n_cm,pixels_per_cm);
-        bottomright_pxl = project2monitor(bottomright_cm,screen_topleft_r2n_cm,pixels_per_cm);
+        topleft_pxl = project2monitor(topleft_cm, screen_center_r2n_cm,screen_pxl,screen_cm);
+        bottomright_pxl = project2monitor(bottomright_cm, screen_center_r2n_cm,screen_pxl,screen_cm);
         
         image_rect =[ topleft_pxl bottomright_pxl];
         Screen('DrawTexture', StimWindow, my_texture, [], image_rect);
