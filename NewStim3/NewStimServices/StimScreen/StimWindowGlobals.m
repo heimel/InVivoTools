@@ -42,7 +42,7 @@ gNewStim.StimWindow.computer = StimComputer;
 gNewStim.StimWindow.bg = StimScreenBG;
 gNewStim.StimWindow.previousclut = StimWindowPreviousCLUT;
 gNewStim.StimWindow.useclutmapping = StimWindowUseCLUTMapping;
-gNewStim.StimWindow.debug = StimDebug;
+gNewStim.StimWindow.debug = StimDebug;   % replaced in InVivoTools
 
 
 

@@ -4,12 +4,12 @@ StimWindowGlobals
 if ~isempty(StimWindow),
 	temp = StimWindow;
 	StimWindow = [];
-	try,
+	try
 		Screen(temp,'close');
 	end;
-else,
+else
 	StimWindow = [];
-end;
+end
 
 if ~isempty(StimWindowPreviousCLUT),
 	Screen('LoadNormalizedGammaTable',StimWindowMonitor,StimWindowPreviousCLUT);
@@ -19,6 +19,6 @@ CloseStimScreenBlender
 
 ShowCursor;
 
-if StimDebug
+if gNewStim.StimWindow.debug
     NewStimConfiguration; % to reset StimWindow settings
 end

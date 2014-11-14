@@ -7,8 +7,11 @@ function res = isnormal( y )
 %
 % 2014, Alexander Heimel
 
+y = y(~isnan(y));
+
 if all(diff(y)==0)
     res = 0;
+    return
 end
 
 res = ~swtest( y );
