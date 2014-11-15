@@ -4,7 +4,7 @@ function [r,p,filename,h]=groupgraph(groups,measures,varargin)
 %  [R,P,FILENAME,H]=GROUPGRAPH(GROUPS,MEASURES,VARARGIN);
 %
 %
-% 2007-2014, Alexander Heimel, based on POPGRAPH
+% 2007-2014, Alexander Heimel
 
 global values_x values_y
 

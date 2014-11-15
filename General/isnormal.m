@@ -13,6 +13,11 @@ if all(diff(y)==0)
     res = 0;
     return
 end
+if length(y)<3
+    logmsg('Cannot compute normality with less than 3 points.');
+    res = 0;
+    return
+end
 
 res = ~swtest( y );
 

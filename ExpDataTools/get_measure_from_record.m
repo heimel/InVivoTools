@@ -55,6 +55,8 @@ if exist('limit','var')
         return
     end
     n_limits = length(limit)/2;
+    limitranges_num = cell(1,n_limits);
+    limitranges_str = cell(1,n_limits);
     for l = 1:n_limits  % remove 's
         if limit{l*2-1}(1)=='''' && limit{l*2-1}(end)==''''
             limit{l*2-1}=limit{l*2-1}(2:end-1);
@@ -78,8 +80,7 @@ acc_open = find(measure=='{'); % i.e. trigger prescription
 if ~isempty(acc_open)
     acc_close = find(measure(acc_open:end)=='}');
     if isempty(acc_close)
-        errormsg(['No closing accolade after opening in measure ' measure ]);
-        return
+        errormsg(['No closing accolade after opening in measure ' measure ],true);
     end
     trigger = str2double(measure(acc_open+1:acc_open+acc_close-2));
     measure = measure(1:acc_open-1);
@@ -90,11 +91,11 @@ end
 
 get = 1;
 if exist('anesthetic','var')
-    if isempty(findstr(lower(anesthetic),lower(record.anesthetic)))
+    if isempty(strfind(lower(record.anesthetic),lower(anesthetic)))
         get = 0;
     end
 end
-if exist('depth','var') && ~isempty(depth) && depth~=0
+if exist('depth','var') && ~isempty(depth) && depth~=0 %#ok<NODEF>
     if record.depth ~= str2double(depth)
         get = 0;
     end
@@ -322,7 +323,7 @@ if isfield(record,'measures')
                     tempval = measures.(measure);
                 else
                     flds = fields(record);
-                    disp(['GET_MEASURE_FROM_RECORD: ' ...
+                    logmsg([ ...
                         flds{1} '=' record.(flds{1}) ', ' ...
                         flds{2} '=' record.(flds{2}) ', ' ...
                         flds{3} '=' record.(flds{3}) ', ' ...
@@ -346,7 +347,12 @@ if isfield(record,'measures')
             else % no field with measure name
                 switch measure
                     case 'linked2neurite'
-                        tempval = record.ROIs.celllist(c).neurite(1);
+                        if length(record.ROIs.celllist)<c
+                            logmsg(['ROIs in record is shorter than measures for ' recordfilter(record)]);
+                            tempval = NaN;
+                        else
+                            tempval = record.ROIs.celllist(c).neurite(1);
+                        end
                     case 'psth.tbins' %deprecated, analysis should put measure in measures and use routines above
                         if isfield(measures,'psth') && isfield(measures.psth,'tbins')
                             tempval = measures.psth.tbins;
@@ -359,7 +365,7 @@ if isfield(record,'measures')
                         tempval = record.depth-record.surface;
                     case {'range','parameter'} % parameter is deprecated
                         if isfield(measures,'curve')
-                            disp('GET_MEASURE_FROM_RECORD: Range should be measure already. Reanalyze test records.');
+                            logmsg('Range should be measure already. Reanalyze test records.');
                             curve = measures.('curve');
                             if iscell(curve) % then only use first
                                 curve = curve{1};
@@ -368,7 +374,7 @@ if isfield(record,'measures')
                         end
                     case 'response' % subtract spontaneous rate
                         if isfield(measures,'curve')
-                            disp('GET_MEASURE_FROM_RECORD: Response should be measure already. Reanalyze test records.');
+                            logmsg('Response should be measure already. Reanalyze test records.');
                             curve = measures.('curve');
                             if iscell(curve) % multiple triggers
                                 curve = curve{1}; % then only use first
@@ -400,12 +406,11 @@ if isfield(record,'measures')
                             tempval_sem = curve(4,:)/curve(4,1);
                         end
                     case 'stim'
-                        disp('GET_MEASURE_FROM_RECORD: Use of stim as measure is deprecated. Use range instead');
+                        logmsg('Use of stim as measure is deprecated. Use range instead');
                         curve = measures.('curve');
                         tempval = curve(1,:);
                     case 'time_peak_highcontrast'
-                        disp('GET_MEASURE_FROM_RECORD: TIME_PEAK_HIGHCONTRAST IS DEPRECATED AND RETURNS PREFERRED STIMULUS');
-                        curve = measures.('curve');
+                        logmsg('TIME_PEAK_HIGHCONTRAST IS DEPRECATED AND RETURNS PREFERRED STIMULUS');
                         time_peak = measures.time_peak; 
                         if iscell(time_peak);
                             time_peak = time_peak{1};

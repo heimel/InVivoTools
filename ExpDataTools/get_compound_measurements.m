@@ -5,18 +5,13 @@ function [results,dresults,measurelabels,wordtypes]=get_compound_measurements(gr
 %
 
 pos_args={...
-    'value_per','measurement',... % 'group','mouse','test','stack','measurement'  %    'reliable',1,...  % 1 to only use reliable records, 0 to use all
+    'value_per','measurement',... % 'group','mouse','test','stack','measurement' 
     'testdb',[],...
     'mousedb',[],...
     'groupdb',[],...
     'measuredb',[],...
     'extra_options','',...
     };
-
-if nargin<3
-    disp('GET_COMPOUND_MEASUREMENTS is using default arguments:');
-    disp(pos_args)
-end
 
 assign(pos_args{:});
 
@@ -64,15 +59,16 @@ end
 
 % measures still contains multiple measures
 if ischar(measures) && ~isempty(find(measures==',',1))
-    measures=split(measures,',');
-    results={};
-    measurelabels={};
+    measures = split(measures,',',true);
+    results = cell(1,length(measures));
+    dresults = cell(1,length(measures));
+    measurelabels = cell(1,length(measures));
     for m=1:length(measures)
         [result,dresult,measurelabel]=get_compound_measurements(groups,measures{m},...
             'testdb',testdb,...
             'mousedb',mousedb,...
             'groupdb',groupdb,...
-            'measuredb',measuredb,... %            'reliable',reliable,...
+            'measuredb',measuredb,... 
             'value_per',value_per,...
             'extra_options',extra_options ...
             );
@@ -98,17 +94,17 @@ wordtypes={};
 results_list={};
 dresults_list={};
 while ~isempty(measuresstring)
-    [words{end+1},wordtypes{end+1},measuresstring]=get_next_word(measuresstring);
+    [words{end+1},wordtypes{end+1},measuresstring]=get_next_word(measuresstring); %#ok<AGROW>
     switch wordtypes{end}
         case 'measure'
             [results_list{end+1},dresults_list{end+1},measurelabels{end+1}]=get_measurements(groups,words{end},...
                 'testdb',testdb,...
                 'mousedb',mousedb,...
                 'groupdb',groupdb,...
-                'measuredb',measuredb,...  %                'reliable',reliable,...
+                'measuredb',measuredb,...  
                 'value_per',value_per,...
                 'extra_options',extra_options ...
-                );
+                ); %#ok<AGROW>
         case 'compound'
             [results,dresults,measurelabel,wordtype]=get_compound_measurements(groups,words{end}(2:end-1),...
                 'testdb',testdb,...
@@ -122,25 +118,25 @@ while ~isempty(measuresstring)
                 results_list{end}{1} = results_list{end}{1}(logical(results{1}{1}));
                 dresults_list{end}{1} = dresults_list{end}{1}(logical(results{1}{1}));
             else
-                results_list{end+1}=results{1};
-                dresults_list{end+1}=dresults{1}; %
-                measurelabels{end+1}=measurelabel{1};
+                results_list{end+1}=results{1}; %#ok<AGROW>
+                dresults_list{end+1}=dresults{1}; %#ok<AGROW>
+                measurelabels{end+1}=measurelabel{1};%#ok<AGROW>
                 wordtypes{end}=wordtype{1};
             end
         case 'function'
-            results_list{end+1}=[];
-            dresults_list{end+1}=[];
-            measurelabels{end+1}=words{end};
+            results_list{end+1}=[]; %#ok<AGROW>
+            dresults_list{end+1}=[];%#ok<AGROW>
+            measurelabels{end+1}=words{end};%#ok<AGROW>
         case 'scalar'
-            results_list{end+1}=str2double(words{end});
-            dresults_list{end+1}=str2double(words{end});
-            measurelabels{end+1}=words{end};
+            results_list{end+1}=str2double(words{end}); %#ok<AGROW>
+            dresults_list{end+1}=str2double(words{end}); %#ok<AGROW>
+            measurelabels{end+1}=words{end}; %#ok<AGROW>
         case 'operator'
-            results_list{end+1}=[];
-            dresults_list{end+1}=[];
-            measurelabels{end+1}=words{end};
+            results_list{end+1}=[]; %#ok<AGROW>
+            dresults_list{end+1}=[]; %#ok<AGROW>
+            measurelabels{end+1}=words{end}; %#ok<AGROW>
         otherwise
-            error(['Unknown word type ' wordtypes{end}]);
+            errormsg(['Unknown word type ' wordtypes{end}],true);
     end
     
     
@@ -151,15 +147,15 @@ if isempty(wordtypes)
 end
 
 if strcmp(wordtypes{1},'operator')
-    disp(['Measure ' measures ' starting with an operator.']);
+    logmsg(['Measure ' measures ' starting with an operator.']);
     return
 end
 if strcmp(wordtypes{end},'operator')
-    disp(['Measure ' measures ' ending with an operator.']);
+    logmsg(['Measure ' measures ' ending with an operator.']);
     return
 end
 if strcmp(wordtypes{end},'function')
-    disp(['Measure ' measures ' ending with a function.']);
+    logmsg(['Measure ' measures ' ending with a function.']);
     return
 end
 
@@ -207,7 +203,7 @@ operators='<>=!';
 w=1;
 while w<=length(measurelabels)
     if strcmp(wordtypes{w},'operator') && ...
-            ~isempty(findstr(measurelabels{w},operators))
+            ~isempty(strfind(operators,measurelabels{w}))
         [results_list,dresults_list,measurelabels,wordtypes]=...
             apply_operator(measurelabels{w},results_list,dresults_list,measurelabels,wordtypes,w);
         w=w-1;
@@ -220,7 +216,7 @@ operators='|&';
 w=1;
 while w<=length(measurelabels)
     if strcmp(wordtypes{w},'operator') && ...
-            ~isempty(findstr(measurelabels{w},operators))
+            ~isempty(strfind(operators,measurelabels{w}))
         [results_list,dresults_list,measurelabels,wordtypes]=...
             apply_operator(measurelabels{w},results_list,dresults_list,measurelabels,wordtypes,w);
         w=w-1;
@@ -249,21 +245,20 @@ new_results={};
 new_dresults={};
 switch wordtypes{w+1}
     case 'measure'
+        new_results = cell(1,length(results_list{w+1}));
+        new_dresults = cell(1,length(results_list{w+1}));
         for r=1:length(results_list{w+1})
-            new_results{r}=feval(func,results_list{w+1}{r});
-            warning('GET_COMPOUND_MEASUREMENTS:UNRELIABLE_DRESULTS',...
-                'GET_COMPOUND_MEASUREMENTS: Operator evaluation not implemented for dresults');
-            warning('off','GET_COMPOUND_MEASUREMENTS:UNRELIABLE_DRESULTS');
-            new_dresults{r}=nan*new_results{r};
+            new_results{r} = feval(func,results_list{w+1}{r});
+            new_dresults{r} = nan*new_results{r};
         end
         new_measurelabel=[measurelabels{w} ' ' measurelabels{w+1}];
         new_wordtype='measure';
     case 'scalar'
-        new_results=feval(func,results_list{w+1});
-        warning('GET_COMPOUND_MEASUREMENTS:UNRELIABLE_DRESULTS',...
-            'GET_COMPOUND_MEASUREMENTS: Operator evaluation not implemented for dresults');
-        warning('off','GET_COMPOUND_MEASUREMENTS:UNRELIABLE_DRESULTS');
-        new_dresults{r}=nan*new_results{r};
+        new_results = feval(func,results_list{w+1});
+        new_dresults = cell(size(new_results)); % corrected 2014-11-15
+        for r=1:length(new_results)
+            new_dresults{r} = nan*new_results{r};
+        end
         new_measurelabel=[measurelabels{w} ' ' measurelabels{w+1}];
         new_wordtype='scalar';
 end
@@ -300,11 +295,10 @@ switch [wordtypes{w-1} ',' wordtypes{w+1}];
         new_measurelabel=[measurelabels{w-1} ' ' measurelabels{w} ' ' measurelabels{w+1}];
         new_wordtype='scalar';
     case 'scalar,measure'
-        new_results={};
+        new_results=cell(1,length(results_list{w+1}));
+        new_dresults=cell(1,length(results_list{w+1}));
         for r=1:length(results_list{w+1})
             eval(['new_results{r}=results_list{w-1}' operator 'results_list{w+1}{r};']);
-            %      eval(['new_dresults{r}=results_list{w-1}' operator 'dresults_list{w+1}{r};']);
-            
             new_dresults{r}=nan*new_results{r};
         end
         new_measurelabel=[measurelabels{w-1} ' ' measurelabels{w} ' ' measurelabels{w+1}];
@@ -313,11 +307,7 @@ switch [wordtypes{w-1} ',' wordtypes{w+1}];
         new_results={};
         for r=1:length(results_list{w-1})
             eval(['new_results{r}=results_list{w-1}{r}' operator 'results_list{w+1};']);
-            %      if length(dresults_list)>=w-1
             eval(['new_dresults{r}=dresults_list{w-1}{r}' operator 'results_list{w+1};']);
-            %      else
-            %         new_dresults{r} = nan * results_list{w+1};
-            %      end
             warning('GET_COMPOUND_MEASUREMENTS:UNRELIABLE_DRESULTS',...
                 'GET_COMPOUND_MEASUREMENTS: Operator evaluation not implemented for dresults');
             warning('off','GET_COMPOUND_MEASUREMENTS:UNRELIABLE_DRESULTS');
@@ -325,17 +315,15 @@ switch [wordtypes{w-1} ',' wordtypes{w+1}];
         new_measurelabel=[measurelabels{w-1} ' ' measurelabels{w} ' ' measurelabels{w+1}];
         new_wordtype='measure';
     case 'measure,measure'
-        new_results={};
         if length(results_list{w-1})~=length(results_list{w+1})
-            disp(['results lists of ' measurelabels{w-1} ' and ' ...
+            logmsg(['results lists of ' measurelabels{w-1} ' and ' ...
                 measurelabels{w+1} 'incongruent in length.'])
             return
         end
+        new_results = cell(length(results_list{w-1}),1);
+        new_dresults = cell(length(results_list{w-1}),1);
         for r=1:length(results_list{w-1})
             eval(['new_results{r}=results_list{w-1}{r}' operator 'results_list{w+1}{r};']);
-            warning('GET_COMPOUND_MEASUREMENTS:UNRELIABLE_DRESULTS',...
-                'GET_COMPOUND_MEASUREMENTS: Operator evaluation not implemented for dresults');
-            warning('off','GET_COMPOUND_MEASUREMENTS:UNRELIABLE_DRESULTS');
             new_dresults{r}=nan*new_results{r};
         end
         new_measurelabel=[measurelabels{w-1} ' ' measurelabels{w} ' ' measurelabels{w+1}];
@@ -351,15 +339,15 @@ return
 
 function [word,wordtype,rest]=get_next_word(sentence)
 
-rest=trim(sentence);
-word='';
+rest = trim(sentence);
+word = '';
 if isempty(rest)
     return
 end
 if is_digit(rest(1))
     wordtype='scalar';
     while is_digit(rest(1))
-        word(end+1)=rest(1);
+        word(end+1)=rest(1); %#ok<AGROW>
         rest=rest(2:end);
         if isempty(rest)
             break
@@ -369,15 +357,24 @@ if is_digit(rest(1))
         wordtype='operator';
     end
 elseif is_letter(rest(1))
-    while ~is_operator(rest(1)) && rest(1)~='('
-        word(end+1)=rest(1);
+    open_square_bracket = 0;
+    while (~is_operator(rest(1)) && rest(1)~='(') || open_square_bracket
+        if rest(1)=='['
+            open_square_bracket = open_square_bracket+1;
+        elseif rest(1)==']'
+            open_square_bracket = open_square_bracket-1;
+            if open_square_bracket<0
+                errormsg('Too many closing brackets',true);
+            end
+        end
+        word(end+1)=rest(1); %#ok<AGROW>
         rest=rest(2:end);
         if isempty(rest)
             break
         end
     end
     word=trim(word);
-    switch exist(word)
+    switch exist(word) %#ok<EXIST>
         case {2,5}
             wordtype='function';
         otherwise
@@ -393,7 +390,7 @@ elseif rest(1)=='('
     word='(';
     rest=rest(2:end);
     while ~isempty(rest) && depth>0
-        word(end+1)=rest(1);
+        word(end+1)=rest(1); %#ok<AGROW>
         rest=rest(2:end);
         switch word(end)
             case '('
@@ -404,30 +401,27 @@ elseif rest(1)=='('
     end
     if depth>0 % unclosed bracket
         wordtype='unknown';
-        disp(['Unclosed bracket in ' sentence ]);
+        errormsg(['Unclosed bracket in ' sentence ],true);
         word=rest;
         rest='';
     end
 else
     wordtype='unknown';
-    disp(['Cannot parse measures ' sentence ]);
+    errormsg(['Cannot parse measures ' sentence ],true);
     word=rest;
     rest='';
 end
 return
 
-function r=is_digit( x )
+function r=is_digit( ch )
 digits='-.0123456789';
-r= ~isempty(findstr(digits,x));
+r= ~isempty(strfind(digits,ch));
 
-function r=is_letter(x)
+function r=is_letter(ch)
 letters='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-r= ~isempty(findstr(letters,x));
+r= ~isempty(strfind(letters,ch));
 
-function r=is_operator(x)
+function r=is_operator(ch)
 operators='^*/+-<>=!|&';
-r= ~isempty(findstr(operators,x));
+r= ~isempty(strfind(operators,ch));
 
-function x = given(x) %#ok<DEFNU>
-x = zero2nan(x);
-x(~isnan(x)) = 1;

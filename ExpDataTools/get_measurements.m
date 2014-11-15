@@ -26,11 +26,6 @@ pos_args={...
     'extra_options','',...
     };
 
-if nargin<3
-    logmsg('Using default arguments:');
-    disp(pos_args)
-end
-
 assign(pos_args{:});
 
 %parse varargins
@@ -96,11 +91,10 @@ for g=1:n_groups
     groupss(g).filter=group2filter(groupss(g),groupdb);
 end % g
 
-linehead = 'GET_MEASUREMENTS: ';
+linehead = '';
 switch measuress.datatype
     case {'oi','ec','lfp','tp','ls','fret','fp'}
         reload = false;
-
         if isempty(expdb_cache) || ...
                 ~isfield(expdb_cache,measuress.datatype) || ...
                 ~isfield( expdb_cache.(measuress.datatype),'type') || ...
@@ -115,7 +109,7 @@ switch measuress.datatype
             end
         end
         
-        if exist('dbname','var') && ischar(dbname) % alternative db specified
+        if exist('dbname','var') && ischar(dbname) %#ok<NODEF> % alternative db specified
             if ~exist(dbname,'file')
                 if exist(fullfile(expdatabasepath,dbname),'file')
                     dbname = fullfile(expdatabasepath,dbname);
@@ -131,7 +125,6 @@ switch measuress.datatype
                 reload = true;
             end
         end
-        
         
         if reload
             expdb_cache.(measuress.datatype).type = expdatabases(measuress.datatype) ;
@@ -162,6 +155,9 @@ else
     min_n=1;
 end
 
+results = cell(1,n_groups);
+dresults = cell(1,n_groups);
+
 for g=1:n_groups
     newlinehead=[linehead groupss(g).name ': '];
     [results{g},dresults{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
@@ -175,9 +171,9 @@ for g=1:n_groups
             results{g}=nanmean(results{g},ndims(results{g}));
             dresults{g}=norm(dresults{g}(~isnan(dresults{g})));
             if numel(results{g})==length(results{g})
-                disp([newlinehead num2str(results{g},3)]);
+                logmsg([newlinehead num2str(results{g},3)]);
             else
-                disp([newlinehead ' array']);
+                logmsg([newlinehead ' array']);
             end
             
         otherwise
@@ -209,19 +205,19 @@ end
 
 for i_mouse=indmice
     mouse=mousedb(i_mouse);
-    %newlinehead=[linehead 'mouse=' mouse.mouse ','];
     newlinehead = linehead;
-    [res,dres]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,mousedb,testdb,extra_options,newlinehead);
+    [res,dres]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,testdb,extra_options,newlinehead);
     
     switch value_per
         case 'mouse' %{'mouse','group'}
+            newlinehead = [newlinehead 'mouse=' mouse.mouse ',']; %#ok<AGROW>
             res=nanmean(res,ndims(res));
             dres=norm(dres(~isnan(dres)));
             
             if numel(res)==length(res)
-                disp([newlinehead measure.name '=' num2str(res,3)]);
+                logmsg([newlinehead measure.name '=' num2str(res,3)]);
             else
-                disp([newlinehead measure.name '= array']);
+                logmsg([newlinehead measure.name '= array']);
             end
         case 'group'
             logmsg('Changed behavior from group on 2013-04-27');
@@ -241,20 +237,14 @@ for i_mouse=indmice
         xl = min(size(results,1),size(res,1));
         yl = min(size(results,2),size(res,2));
         zl = size(res,3);
-        %         if ndims(results)==3 && ndims(res)==3 && any(sr(1:end-1)~=size(res))
-        %             disp('GET_MEASUREMENTS: Result arrays are not all the same size');
-        %         end
         results(1:xl,1:yl,end+1:(end+zl)) = res(1:xl,1:yl,1:zl);
         dresults(1:xl,1:yl,end+1:(end+zl)) = dres(1:xl,1:yl,1:zl);
     end
-    
-    %results=[results res];
-    %dresults=[dresults dres];
 end % i_mouse (mice)
 return
 
 
-function [results, dresults]=get_measurements_for_mouse( mouse, measure, criteria,value_per, mousedb,testdb,extra_options,linehead)
+function [results, dresults]=get_measurements_for_mouse( mouse, measure, criteria,value_per, testdb,extra_options,linehead)
 results=[];
 dresults=[];
 
@@ -305,7 +295,7 @@ end
 if isfield(testdb,'stim_type') && exist('stim_type','var')
     cond=[cond ', (stim_type=' stim_type ')' ];
 end
- 
+
 
 if isfield(testdb,'experimenter') && exist('experimenter','var')
     cond=[cond ', (experimenter=' experimenter ')' ];
@@ -314,25 +304,25 @@ if isfield(testdb,'stim_onset') && exist('stim_onset','var')
     cond=[cond ', (stim_onset=' stim_onset ')' ];
 end
 if isfield(testdb,'comment') &&  exist('comment','var')
-    comment=trim(comment);
+    comment=trim(comment); %#ok<NODEF>
     if comment(1)=='{'
         comment = split( comment(2:end-1));
     else
         comment = {comment};
     end
     for i=1:length(comment)
-        cond=[cond ', comment=*' comment{i} '*'];
+        cond=[cond ', comment=*' comment{i} '*']; %#ok<AGROW>
     end
 end
 if isfield(testdb,'comment') &&  exist('nocomment','var')
-    nocomment=trim(nocomment);
+    nocomment=trim(nocomment); %#ok<NODEF>
     if nocomment(1)=='{'
         nocomment = split( nocomment(2:end-1));
     else
         nocomment = {nocomment};
     end
     for i=1:length(nocomment)
-        cond=[cond ', comment!*' nocomment{i} '*'];
+        cond=[cond ', comment!*' nocomment{i} '*']; %#ok<AGROW>
     end
 end
 if exist('test','var')
@@ -353,8 +343,8 @@ end
 if exist('eyes','var') % eye is already used for matlab function
     cond=[cond ', eye=*' eyes '*'];
 end
-if exist('hemisphere','var') 
-    if strcmp(hemisphere,'notleft') 
+if exist('hemisphere','var')
+    if strcmp(hemisphere,'notleft')
         % to make both right, ugly 2013-12-12
         cond=[cond ', hemisphere!*left*'];
     else
@@ -363,48 +353,16 @@ if exist('hemisphere','var')
 end
 
 indtests=find_record(testdb,cond);
-%    disp(['found ' num2str(length(indtests)) ' records']);
 for i_test=indtests
-
     testrecord=testdb(i_test);
-    if 0
-        if isfield(testrecord,'setup')
-            setup = testrecord.setup;
-        else
-            setup = '';
-        end
-        newlinehead = linehead;
-        if isfield(testrecord,'date')
-            newlinehead = [newlinehead 'date=' testrecord.date ','];
-        end
-        if ~isempty(setup)
-            newlinehead=[newlinehead 'setup=' setup ','];
-        end
-        if isfield(testrecord,'test') && ~isempty(testrecord.test)
-            newlinehead = [newlinehead 'test=' testrecord.test ',']; %#ok<AGROW>
-        end
-        if isfield(testrecord,'epoch') && ~isempty(testrecord.epoch)
-            newlinehead = [newlinehead 'epoch=' testrecord.epoch ',']; %#ok<AGROW>
-        end
-        if isfield(testrecord,'stack') && ~isempty(testrecord.stack)
-            newlinehead = [newlinehead 'stack=' testrecord.stack  ',']; %#ok<AGROW>
-        end
-        if isfield(testrecord,'slice') && ~isempty(testrecord.slice)
-            newlinehead = [newlinehead  'slice=' testrecord.slice ',']; %#ok<AGROW>
-        end
-    else
-        newlinehead = [linehead recordfilter(testrecord) ':'];
-    end
-    [res dres]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
-
-    
-    
+    newlinehead = [linehead recordfilter(testrecord) ':'];
+    [res,dres]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
     switch value_per
         case {'test','stack'}
             if ~isempty(res)
                 res=nanmean(res);
                 dres=norm(dres(~isnan(dres)));
-                disp([newlinehead measure.name '='  num2str(res,3)]);
+                logmsg([newlinehead measure.name '='  num2str(res,3)]);
             end
     end
     
@@ -421,19 +379,19 @@ for i_test=indtests
         sr = size(results);
         try
             if any(sr(1:end-1)~=size(res))
-                disp('GET_MEASUREMENTS: Result arrays are not all the same size');
+                logmsg('Result arrays are not all the same size');
             end
         catch
-                disp('GET_MEASUREMENTS: Result arrays are not all the same size');
-        end            
+            logmsg('Result arrays are not all the same size');
+        end
         xl = min(size(results,1),size(res,1));
         yl = min(size(results,2),size(res,2));
         
-        results(1:xl,1:yl,end+1) = res(1:xl,1:yl);
-        dresults(1:xl,1:yl,end+1) = dres(1:xl,1:yl);
+        results(1:xl,1:yl,end+1) = res(1:xl,1:yl); %#ok<AGROW>
+        dresults(1:xl,1:yl,end+1) = dres(1:xl,1:yl); %#ok<AGROW>
     end
     if any(size(results)~=size(dresults))
-        disp('GET_MEASUREMENTS: sizes of RESULTS and DRESULTS are not equal');
+        logmsg('Sizes of RESULTS and DRESULTS are not equal');
     end
 end % test records
 
@@ -446,7 +404,7 @@ for i=1:2:length(extra_options)
     assign(trim(extra_options{i}),extra_options{i+1});
 end
 
-if exist('reliable','var') && eval(reliable)==1 && length(testrecord.reliable)==1 
+if exist('reliable','var') && eval(reliable)==1 && length(testrecord.reliable)==1
     if isnumeric(testrecord.reliable)
         if testrecord.reliable==0
             return % no need to check individual cells
@@ -473,7 +431,7 @@ if exist('min_blocks','var')
         min_blocks=eval(min_blocks);
     end
     if size(testrecord.response_all,1)<min_blocks
-        disp(['Fewer than ' num2str(min_blocks) ' blocks.']);
+        logmsg(['Fewer than ' num2str(min_blocks) ' blocks.']);
         results=nan;
         return
     end
@@ -501,7 +459,6 @@ switch measure.measure
         dresults = NaN;
     case 'expdate'  % day number since 1-1-0000
         results=datenum(testrecord.date,'yyyy-mm-dd') ;
-        
     otherwise
         if strcmp(measure.measure(1:min(end,4)),'file')
             switch measure.datatype
@@ -518,19 +475,16 @@ switch measure.measure
                     logmsg(['Retrieved ' ...
                         measure.measure(6:end) ' from ' saved_data_file ...
                         '. Results is of size ' num2str(size(results)) ]);
-                catch
-                    %                    disp(['GET_MEASUREMENTS: Could not retrieve ' measure.measure(6:end) ' from ' saved_data_file ]);
-                    
+                catch me
+                    logmsg(['Caught error ' me.identifier ]);
                 end
-                %             else
-                %                 disp(['GET_MEASUREMENTS: ' saved_data_file ' does not exist.']);
             end
         else
-            [results dresults]=get_measure_from_record(testrecord,measure.measure,criteria,extra_options);            
+            [results,dresults] = get_compound_measure_from_record(testrecord,measure.measure,criteria,extra_options);
             results = double(results);
             dresults = double(dresults);
             if strcmpi(value_per,'neurite')
-                linked2neurite = get_measure_from_record(testrecord,'linked2neurite',extra_options);
+                linked2neurite = get_compound_measure_from_record(testrecord,'linked2neurite',criteria,extra_options);
                 if length(linked2neurite)~=length(results)
                     errormsg('Not an equal number of values and neurite numbers.');
                     return
@@ -539,21 +493,20 @@ switch measure.measure
                 res = [];
                 dres = [];
                 for neurite = uniqneurites(:)'
-                    res = [res nanmean(results(linked2neurite==neurite))];
-                    dres = [dres nanstd(results(linked2neurite==neurite))];
-
+                    res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
+                    dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
                 end
                 results = res;
                 dresults = dres;
             end
             if isempty(results) && ~strcmp(measure.measure,'depth')
-                [results dresults]=get_valrecord(testrecord,measure.measure,mouse);
+                [results,dresults]=get_valrecord(testrecord,measure.measure,mouse);
             end
         end
         if ~isempty(results)
             switch value_per
                 case 'measurement'
-                    if ndims(results)<3 && numel(results)<200
+                    if ismatrix(results) && numel(results)<200
                         textres=mat2str(results',3);
                         if ~isempty(textres) && textres(1)=='['
                             textres=textres(2:end-1);
@@ -561,7 +514,7 @@ switch measure.measure
                     else
                         textres = [num2str(ndims(results)) 'd array'];
                     end
-                    disp([linehead measure.name '=' textres]);
+                    logmsg([linehead measure.name '=' textres]);
             end
         end
 end
