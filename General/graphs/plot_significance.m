@@ -92,8 +92,10 @@ if length(r1)>1 && length(r2)>1
             testperformed = 't-test';
         case {'ranksum','mann-whitney','mannwhitney'}
             [p,h,stats]=ranksum(r1,r2,'alpha',0.05,'tail',tail); 
-            statistic = stats.zval;
-            statistic_name = 'z';
+            if isfield(stats,'zval') % for too few numbers it is missing
+                statistic = stats.zval;
+                statistic_name = 'z';
+            end
             testperformed = 'ranksum (Mann-Whitney U test)';
         case {'kruskal-wallis','kruskal_wallis','kruskal wallis','kruskalwallis'}
             [p,statistic,dof] = kruskal_wallis_test(r1,r2);
