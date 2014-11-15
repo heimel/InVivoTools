@@ -22,7 +22,7 @@ end
 ops = find(is_operator(measure),1);
 ob = find(measure=='(',1);
 
-if isempty(ops) || (~isempty(ob) && ob<ops)% i.e. no compound
+if isempty(ops) || (~isempty(ob) && ob<ops && measure(end)==')')% i.e. no compound
     if isempty(ob) % no '(' 
         [val,val_sem] = get_measure_from_record(record,measure,criteria,extra_options);
         return

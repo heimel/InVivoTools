@@ -54,18 +54,16 @@ if isempty(which('NewStimConfiguration')) || ~VerifyNewStimConfiguration
 	eval('NewStimConfiguration;');
 end;
 
-b = which('PsychtoolboxVersion');
-
-if ~isempty(b),
+if exist('PsychtoolboxVersion','file')
     b = PsychtoolboxVersion;
     if isnumeric(b)
         NS_PTBv = b;
     else
         NS_PTBv = eval(b(1));
-    end;
+    end
 else
     NS_PTBv = 0;
-end;
+end
 
 eval('NewStimObjectInit');
 

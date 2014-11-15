@@ -10,9 +10,10 @@ function load_invivotools
 % 2014, Alexander Heimel
 %
 
+disp([ upper(mfilename) ': Manual available at https://sites.google.com/site/alexanderheimel/protocols/invivotools']);
+
 if isunix
-    updatestr = ['To update InVivoTools from terminal: cd ' fileparts(mfilename('fullpath')) ...
-        '; git pull'];
+    updatestr = ['To update InVivoTools: update_invivotools'];
 else
     updatestr = 'To update InVivoTools: open github and click on Sync.';
 end
