@@ -20,7 +20,9 @@ else
     caller = 'Error';
 end
 
-errordlg(msg,userize(caller));
+if usejava('awt')
+    errordlg(msg,userize(caller));
+end
 logmsg(msg,caller);
 
 if halt
