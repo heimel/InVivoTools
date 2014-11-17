@@ -3,7 +3,7 @@ function runexperiment(figureNum, record)
 %
 %  RunExperiment takes over the figure FIGURENUM, and sets up a panel to
 %  control our experimental setup.  The panel should be self-explanatory,
-%  but maybe we'll actually write more documentation someday.  Note that
+%  but maybe we'll actually write more documentatioshn someday.  Note that
 %  the
 %  figure is totally cleared by this routine.
 %

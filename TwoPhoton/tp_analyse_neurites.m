@@ -35,14 +35,14 @@ for i=1:length(roilist)
     end
 end
 
-for i = ind
+for i = ind % neurites
     roi = roilist(i);
     
     % get length
     neuritelength = tp_get_neurite_length( roi, record );
     record.measures(i).length = neuritelength;
-    roi.neurite = [NaN neuritelength ]; % deprecated
-    roi.extra.length = neuritelength; % deprecated
+    roi.neurite = [roi.index neuritelength ]; % use of length here is deprecated
+    roi.extra.length = neuritelength; % use of length here is deprecated
     
     % get puncta density
     neurites = reshape([roilist.neurite],2,length(roilist));

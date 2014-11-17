@@ -15,7 +15,7 @@ end
 tpsetup(record);
 params = tpreadconfig(record);
 if isempty(params)
-    disp(['TP_GET_NEURITE_LENGTH: Cannot read image information and can thus not compute lengths. ' recordfilter(record)] );
+    logmsg(['Cannot read image information and can thus not compute lengths. ' recordfilter(record)] );
     l = 0;
     return
 end
@@ -33,7 +33,7 @@ end
 
 if ~isfield(params,'z_step')
     params.z_step = 0;
-    disp(['TP_GET_NEURITE_LENGTH: Image is not a z-stack. ' recordfilter(record)]);
+    logmsg(['Image is not a z-stack. ' recordfilter(record)]);
 end
 
 l = sum(sqrt( ...

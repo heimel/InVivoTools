@@ -9,7 +9,7 @@ if ~StimComputer
 end
 
 % check for an undefined window or a broken window and (re)open it in either case
-A = isempty(StimWindow);
+A = isempty(StimWindow); %#ok<NODEF>
 if ~A
     try
         r = Screen(StimWindow,'rect');
@@ -46,7 +46,8 @@ if A
             StimWindow = PsychImaging('OpenWindow', StimWindowMonitor, 128);
         else
             if gNewStim.StimWindow.debug
-                Screen('Preference', 'SkipSyncTests', 1)
+                Screen('Preference', 'SkipSyncTests', 1);
+                Screen('Preference',  'SuppressAllWarnings', 1);
                 StimWindow = Screen(StimWindowMonitor,'OpenWindow',128,[0 0 640 480]);% Alexander
             else
                 StimWindow = Screen(StimWindowMonitor,'OpenWindow',128);
@@ -54,7 +55,7 @@ if A
         end;
     end;
     StimWindowDepth = Screen(StimWindow,'PixelSize');
-    StimWindowRect = Screen(StimWindow,'Rect');
+    StimWindowRect = Screen(StimWindow,'Rect'); %#ok<*NASGU>
     StimWindowRefresh = Screen(StimWindow,'FrameRate',[]);
     if StimWindowRefresh==0
         StimWindowRefresh = 60;

@@ -4,7 +4,7 @@
 %   set screen res
 %   mount any other necessary computers
 
-close all;
+close all
 NewStimGlobals
 NewStimInit;
 remotecommglobals;

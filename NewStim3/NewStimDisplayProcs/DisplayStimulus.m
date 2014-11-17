@@ -71,7 +71,7 @@ if MTI.preBGframes>0,
     else
         vbl = show_background(StimWindow,MTI);
         startStopTimes(1) = StimTriggerAct('Stim_BGpre_trigger',MTI.stimid);
-        show_background(StimWindow,MTI,vbl + (MTI.preBGframes-1)/StimWindowRefresh)
+        show_background(StimWindow,MTI,vbl + (MTI.preBGframes-1)/StimWindowRefresh);
         if capture_movie; Screen('AddFrameToMovie', StimWindow,[],[],[],MTI.preBGframes); end
     end;
 else
