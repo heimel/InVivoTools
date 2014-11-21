@@ -20,7 +20,7 @@ end
 
 acqparams = loadStructArray(acqparams_in);
 
-recording_period = (acqparams.reps + 3) * 10; % s + 30s extra
+recording_period = (acqparams.reps + 1) * 10; % s + 10s extra
 recording_name = fullfile(datapath,['webcam' num2str(WebcamNumber,'%03d')]);
 
 camid = []; %wc_getcamera;

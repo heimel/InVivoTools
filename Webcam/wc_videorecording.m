@@ -195,7 +195,7 @@ try
         
         % Open 800x600 pixels window at top-left corner of 'screen'
         % with black background color:
-        win=Screen('OpenWindow', screen, 0, [0 0 800 600]);
+        win=Screen('OpenWindow', screen, 0, [0 0 640 480]);
     else
         % Open fullscreen window on 'screen', with black background color:
         oldsynclevel = Screen('Preference', 'SkipSyncTests');
@@ -266,7 +266,7 @@ try
 
                 pinstat = get(stimtrigserial,'pinstatus');
                 statcheck = pinstat.DataSetReady;
-                if ~strcmp(statcheck,statcheck_prev)
+                if isnan(stimstart) && ~strcmp(statcheck,statcheck_prev)
                     stimstart = pts;
                     logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
                     statcheck_prev = statcheck;
@@ -278,15 +278,15 @@ try
                 if tex > 0
                     % Print capture timestamp in seconds since start of capture:
                     Screen('DrawText', win, sprintf('Capture time (secs): %.4f', pts), 0, 0, 255);
-                    if count>0
-                        % Compute delta between consecutive frames:
-                        delta = (pts - oldpts) * 1000;
-                        oldpts = pts;
-                        Screen('DrawText', win, sprintf('Interframe delta (msecs): %.4f', delta), 0, 20, 255);
-                        
-                    else 
-                        disp('Started!');
-                    end
+%                     if count>0
+%                         % Compute delta between consecutive frames:
+%                         delta = (pts - oldpts) * 1000;
+%                         oldpts = pts;
+%                         Screen('DrawText', win, sprintf('Interframe delta (msecs): %.4f', delta), 0, 20, 255);
+%                         
+%                     else 
+%                         disp('Started!');
+%                     end
                     
                     % Draw new texture from framegrabber.
                     Screen('DrawTexture', win, tex);
