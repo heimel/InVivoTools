@@ -61,12 +61,12 @@ switch Remote_Comm_method
         try 
             while 1  % needs control-C to exit
                 pause(2);
-                if KbCheck && ~StimDisplayOrderRemote
+                if KbCheck && ~StimDisplayOrderRemote && ~gNewStim.StimWindow.debug
                     CloseStimScreen
                     return
                 end
                 cd(theDir); % refresh file directory
-                disp('INITSTIMS: Waiting for remote commands...press Ctrl-C to interrupt.');
+                logmsg('Waiting for remote commands...press Ctrl-C to interrupt.');
                 
                 errorflag = 0;
                 txt = checkscript('runit.m');
@@ -80,11 +80,11 @@ switch Remote_Comm_method
                         inds = find(errorstr==sprintf(Remote_Comm_eol)); errorstr(inds) = ':';
                         save scripterror errorstr -mat
                         CloseStimScreen;
-                        disp(['Error in script: ' errorstr '.']);
+                        logmsg(['Error in script: ' errorstr '.']);
                         keyboard
                     end;
                     cd(theDir);
-                    disp('INITSTIMS: Ran file, deleting...');
+                    logmsg('Ran file, deleting...');
                     delete runit.m;
                     if exist('toremote','file')
                         delete('toremote');
