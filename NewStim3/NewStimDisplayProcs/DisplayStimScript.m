@@ -93,13 +93,15 @@ Screen(StimWindow,'WaitBlanking');
 if NSUseInitialSerialTrigger
     disp('DISPLAYSTIMSCRIPT: Temporarily hard coded StimSerial trigger for LeveltLab');
     OpenStimSerial
-    %  stimserial(StimSerialScriptOutPin,StimSerialScript,1);
-    %  stimserial(StimSerialStimOutPin,StimSerialStim,1);
     StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
-    WaitSecs(0.001);
-    StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
-    % StimSerial(StimSerialStimOutPin,StimSerialStim,0);
-    % StimSerial(StimSerialStimOutPin,StimSerialStim,1);
+
+    if ~exist('NSUseInitialSerialContinuous','var') || ~NSUseInitialSerialContinuous
+        StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+        WaitSecs(0.001);
+        StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+    else
+        StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+    end
 end
 
 l = length(MTI);
@@ -144,6 +146,8 @@ else
         end
     end
 end
+
+StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
 
 % clean up
 if capture_movie
