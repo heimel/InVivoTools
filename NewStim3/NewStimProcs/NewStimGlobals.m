@@ -38,6 +38,8 @@ end
 
 global gNewStim % to replace other globals in the future
 
+global NSUseInitialSerialContinuous
+
 gNewStim.NewStim.pixels_per_cm = pixels_per_cm;
 gNewStim.NewStim.UseInitialSerialTrigger = NSUseInitialSerialTrigger;
 gNewStim.NewStim.UseStimSerialTrigger = NSUseStimSerialTrigger;
@@ -48,5 +50,6 @@ gNewStim.NewStim.DisplayOrderRemote = StimDisplayOrderRemote;
 gNewStim.NewStim.ViewingDistance = NewStimViewingDistance;
 gNewStim.NewStim.Tilt = NewStimTilt;
 gNewStim.NewStim.StimDelay = NewStimStimDelay;
+gNewStim.NSUseInitialSerialContinuous = NSUseInitialSerialContinuous;
 
 
