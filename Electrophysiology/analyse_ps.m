@@ -153,6 +153,8 @@ switch measures.variable
         measures = compute_angle_measures(measures); % also shifts range around preferred
     case 'gnddirection'
         measures = compute_angle_measures(measures);
+    case 'size'
+        measures = compute_size_measures(measures);
 end
 
 
