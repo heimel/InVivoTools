@@ -239,6 +239,8 @@ switch func
         func='nanmean';
     case 'std'
         func='nanstd';
+    case 'not'
+        func = 'nannot';
 end
 
 new_results={};
