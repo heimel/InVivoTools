@@ -147,9 +147,10 @@ else
     end
 end
 
-StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+if NSUseInitialSerialTrigger
+    StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+end
 
-% clean up
 if capture_movie
     Screen('FinalizeMovie',moviePtr);
 end
