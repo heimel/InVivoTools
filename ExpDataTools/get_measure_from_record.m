@@ -14,26 +14,24 @@ val = [];
 val_sem = [];
 
 layer='';
-max_snr='inf';
-min_snr='0';
+%max_snr='inf';
+%min_snr='0';
 for i=1:2:length(extra_options)
     assign(trim(extra_options{i}),extra_options{i+1});
 end
-min_snr=eval(min_snr);
-max_snr=eval(max_snr);
 if exist('range_limit','var')
     range_limit = eval(range_limit); %#ok<NODEF>
-else 
+else
     range_limit = [];
 end
 if exist('rate_max_limit','var')
     rate_max_limit = eval(rate_max_limit); %#ok<NODEF>
-else 
+else
     rate_max_limit = [];
 end
 if exist('verbose','var')
     verbose = eval(verbose); %#ok<NODEF>
-else 
+else
     verbose = 0;
 end
 
@@ -74,6 +72,9 @@ if exist('limit','var')
             limitranges_str{l} = {limitranges_str{l}};
         end
     end
+else
+    limit = '';
+    n_limits = 0;
 end
 
 acc_open = find(measure=='{'); % i.e. trigger prescription
@@ -84,7 +85,7 @@ if ~isempty(acc_open)
     end
     trigger = str2double(measure(acc_open+1:acc_open+acc_close-2));
     measure = measure(1:acc_open-1);
-else 
+else
     trigger = 1;
 end
 
@@ -120,47 +121,48 @@ if ~isempty(layer)
         end
     end
 end
-if ~get 
+if ~get
     return
 end
 
 
 if isfield(record,'measures')
+    if verbose && isfield(record.measures,measure)
+        logmsg([ recordfilter(record) ': ' measure ' present']);
+    end
+    if strcmp(record.datatype,'ec')==1
+        ephysunits = true;
+    else
+        ephysunits = false;
+    end
+    if exist('rate_max_limit','var') && ~isempty(rate_max_limit)
+        errormsg('rate_max_limit is deprecated and is ignored. Use limit instead.',true);
+    end
+    if exist('min_snr','var')
+        errormsg('min_snr is deprecated and is ignored. Use limit instead.',true);
+    end
+    if exist('max_snr','var')
+        errormsg('min_snr is deprecated and is ignored. Use limit instead.',true);
+    end
+    
+    
     for c=1:length(record.measures) % over all cells
+        get = 1;
         measures = record.measures(c);
-        
-        if verbose && isfield(measures,measure)
-            logmsg([ recordfilter(record) ': ' measure ' present']);
-        end
-            
-        if strcmp(record.datatype,'ec')==1
-            get=0;
+        if ephysunits
             if isfield(measures,'usable') && measures.('usable')==1
                 switch celltype
-                    case 'all'
-                        get=1;
                     case 'mu'
-                        if strcmp(measures.('type'),'mu')==1
-                            get=1;
+                        if ~strcmp(measures.('type'),'mu')
+                            continue % next c
                         end
                     case 'su'
-                        if strcmp(measures.('type'),'su')==1
-                            get=1;
+                        if ~strcmp(measures.('type'),'su')
+                            continue % next c
                         end
                 end
             end
-            if isfield(measures,'snr') && measures.snr<min_snr % nicer to make a extra_options snr
-                logmsg('Use of min_snr is deprecated. Use limit instead');
-                get=0;
-                continue
-            end
-            if isfield(measures,'snr') && measures.snr>max_snr
-                logmsg('Use of max_snr is deprecated. Use limit instead');
-                get=0;
-                continue
-            end
-        else % for instance 'lfp'
-            get=1;
+            
         end
         
         if ~isempty(criteria)
@@ -172,13 +174,12 @@ if isfield(record,'measures')
                     % included
                 end
                 if ~all(evaluated_criteria)
-                    get = 0;
-                    continue
+                    continue % next c
                 end
             catch me
                 switch me.identifier
                     case 'MATLAB:nonExistentField'
-                        get = 0;
+                        continue % next c
                     case 'MATLAB:undefinedVariable'
                         errormsg(['Problem with criteria: ' criteria '. Perhaps forgotten to append ''measures.''?']);
                         rethrow(me);
@@ -194,260 +195,220 @@ if isfield(record,'measures')
         end
         
         % only take reliable
-        if reliable==1 && ~isempty(record.reliable) 
+        if reliable==1 && ~isempty(record.reliable)
             if ischar(record.reliable)
                 warning('GET_MEASURE_FROM_RECORD:RELIABLE_TEXT','GET_MEASURE_FROM_RECORD: Reliable is text. Ignoring');
                 warning('off','GET_MEASURE_FROM_RECORD:RELIABLE_TEXT');
             else
                 if length(record.reliable)==1
                     if record.reliable == 0
-                        get = 0;
-                        continue
+                        continue % next c
                     end
                 elseif isfield(measures,'index')
                     if length(record.reliable)<measures.index+1
                         errrormsg(['Reliable vector too short for ' recordfilter(record) '. Note that the first entry is the multi-unit.' ]);
                     else
                         if ~record.reliable(measures.index+1)
-                            get = 0;
-                        continue
+                            continue % next c
                         end
                     end
                 end
             end
         end
-        if exist('rate_max_limit','var') && ~isempty(rate_max_limit)
-            logmsg('Use of rate_max_limit is deprecated. Use limit instead');
-            if isfield(measures,'rate_max')
-                if iscell(measures.rate_max)
-                    if measures.rate_max{1}<rate_max_limit(1) || ...
-                            measures.rate_max{1}>rate_max_limit(2)
-                        get = 0;
-                        continue
-                    end
-                else
-                    if measures.rate_max<rate_max_limit(1) || ...
-                            measures.rate_max>rate_max_limit(2)
-                        get = 0;
-                        continue
-                    end
-                end
-            end
-        end
-        if exist('limit','var') && ~isempty(limit)
-            for l = 1:n_limits
+        for l = 1:n_limits
+            try
+                v = measures.(limit{l*2-1}); % goes wrong if limit has {}
+            catch
                 try
-                    v = measures.(limit{l*2-1}); % goes wrong if limit has {}
+                    v = eval(['measures.' limit{l*2-1}]);
+                    % using eval instead of isfield, because of things like
+                    %  rate_max{1}
                 catch
                     try
-                        v = eval(['measures.' limit{l*2-1}]);
-                        % using eval instead of isfield, because of things like
-                        %  rate_max{1}
+                        v = eval(['record.' limit{l*2-1}]);
                     catch
-                        try
-                            v = eval(['record.' limit{l*2-1}]);
-                        catch
-                            get = 0;
-                            break
-                        end
-                    end
-                end
-                if ~get
-                    continue
-                end
-                if ~isempty(v)
-                    if islogical(v)
-                        v = double(v);
-                    end
-                    if isnumeric(v)
-                        ranges = limitranges_num{l}; 
-                    else
-                        ranges = limitranges_str{l};
-                    end                        
-                    if ~iscell(v)
-                        v = {v};
-                    end
-                    take = false;
-                    for i = 1:length(ranges)
-                        for j=1:length(v)
-                            if isnumeric(v{j})
-                                if numel(v{j})>1
-                                   errormsg([limit{l*2-1} ' has multiple values in ' recordfilter(record)]);
-                                   return
-                                end
-                                if length(ranges{i})==2
-                                    if v{j}>=ranges{i}(1) &&  v{j}<=ranges{i}(2)
-                                        take = true;
-                                        break
-                                    end
-                                elseif length(ranges{i})==1
-                                    if v{j}==ranges{i}
-                                        take = true;
-                                        break
-                                    end
-                                end
-                            elseif ischar(v{j})
-                                if strcmp(v{j},ranges{i})
-                                    take = true;
-                                    break
-                                end
-                            end
-                        end % j
-                    end % i
-                    
-                    if ~take
                         get = 0;
                         break
                     end
-                   
                 end
-            end % limit l
-            if ~get 
-                continue
             end
-        end % if limit
-        
+            if ~isempty(v)
+                if islogical(v)
+                    v = double(v);
+                end
+                if isnumeric(v)
+                    ranges = limitranges_num{l};
+                else
+                    ranges = limitranges_str{l};
+                end
+                if ~iscell(v)
+                    v = {v};
+                end
+                take = false;
+                for i = 1:length(ranges) % when do you get multiple ranges? this code looks incorrect for multiple ranges
+                    for j=1:length(v)
+                        if isnumeric(v{j})
+                            if numel(v{j})>1
+                                errormsg([limit{l*2-1} ' has multiple values in ' recordfilter(record)]);
+                                return
+                            end
+                            if length(ranges{i})==2
+                                if v{j}>=ranges{i}(1) &&  v{j}<=ranges{i}(2)
+                                    take = true;
+                                    break % from j, but not from i?
+                                end
+                            elseif length(ranges{i})==1
+                                if v{j}==ranges{i}
+                                    take = true;
+                                    break % from j, but not from i?
+                                end
+                            end
+                        elseif ischar(v{j})
+                            if strcmp(v{j},ranges{i})
+                                take = true;
+                                break
+                            end
+                        end
+                    end % j
+                end % i
+                
+                if ~take
+                    get = 0;
+                    break
+                end
+                
+            end
+        end % limit l
+        if ~get
+            continue % next c
+        end
         
         if exist('variable','var')
             if ~isfield(measures,'variable') || ...
                     strcmp(measures.variable,variable)==0
-                get = 0;
-                continue
+                continue % next c
             end
         end
-        if get
-            tempval = NaN;
-            tempval_sem = [];
-            if isfield(measures,measure)
-                if ~isempty(measures.(measure))
-                    tempval = measures.(measure);
+        
+        tempval = NaN;
+        tempval_sem = [];
+        
+        if isfield(measures,measure)
+            if ~isempty(measures.(measure))
+                tempval = measures.(measure);
+            else
+                logmsg([recordfilter(record) ', measure = ' measure ' is empty.']);
+                tempval = NaN;
+            end
+            if iscell(tempval)
+                if trigger>length(tempval)
+                    tempval = NaN;
                 else
-                    flds = fields(record);
-                    logmsg([ ...
-                        flds{1} '=' record.(flds{1}) ', ' ...
-                        flds{2} '=' record.(flds{2}) ', ' ...
-                        flds{3} '=' record.(flds{3}) ', ' ...
-                        flds{4} '=' record.(flds{4}) ', ' ...
-                        ', measure = ' measure ' is empty.']);
+                    tempval = squeeze(tempval{trigger});
                 end
-                switch measure  % ugly here, should be more general
-                    case 'halfmax_deg'
-                        if measures.halfmax_deg>80
-                            disp([record. mouse ' ' record.test ' has a very large rf halfmax. Discarding']);
-                            tempval = nan ;
-                        end
-                end
-                if iscell(tempval)
-                    if trigger>length(tempval)
-                        tempval = nan;
+            end
+        else % no field with measure name
+            switch measure
+                case 'linked2neurite'
+                    if length(record.ROIs.celllist)<c
+                        logmsg(['ROIs in record is shorter than measures for ' recordfilter(record)]);
+                        tempval = NaN;
                     else
-                        tempval = squeeze(tempval{trigger});
+                        tempval = record.ROIs.celllist(c).neurite(1);
                     end
-                end
-            else % no field with measure name
-                switch measure
-                    case 'linked2neurite'
-                        if length(record.ROIs.celllist)<c
-                            logmsg(['ROIs in record is shorter than measures for ' recordfilter(record)]);
-                            tempval = NaN;
-                        else
-                            tempval = record.ROIs.celllist(c).neurite(1);
-                        end
-                    case 'psth.tbins' %deprecated, analysis should put measure in measures and use routines above
-                        if isfield(measures,'psth') && isfield(measures.psth,'tbins')
-                            tempval = measures.psth.tbins;
-                        end
-                    case 'psth.data' %deprecated, analysis should put measure in measures and use routines above
-                        if isfield(measures,'psth') && isfield(measures.psth,'data')
-                            tempval = measures.psth.data;
-                        end
-                    case 'depth'
-                        tempval = record.depth-record.surface;
-                    case {'range','parameter'} % parameter is deprecated
-                        if isfield(measures,'curve')
-                            logmsg('Range should be measure already. Reanalyze test records.');
-                            curve = measures.('curve');
-                            if iscell(curve) % then only use first
-                                curve = curve{1};
-                            end
-                            tempval = curve(1,:) ;
-                        end
-                    case 'response' % subtract spontaneous rate
-                        if isfield(measures,'curve')
-                            logmsg('Response should be measure already. Reanalyze test records.');
-                            curve = measures.('curve');
-                            if iscell(curve) % multiple triggers
-                                curve = curve{1}; % then only use first
-                            end
-                            if isfield(measures,'rate_spont')==1
-                                % subtract spontaneous
-                                rate_spont = measures.('rate_spont');
-                                curve(2,:)=curve(2,:)-rate_spont(1);
-                            end
-                            tempval=curve(2,:);
-                            tempval_sem=curve(4,:);
-                        end
-                    case 'rate' % no subtraction of spontaneous rate
-                        if isfield(measures,'curve')
-                            curve = measures.('curve');
-                            if iscell(curve)
-                                curve = curve{trigger};
-                                tempval = curve(2,:);
-                                tempval_sem = curve(4,:);
-                            end
-                        end
-                    case 'rate_normalized_by_stim1' % no subtraction of spontaneous rate
-                        if isfield(measures,'curve')
-                            curve=measures.('curve');
-                            if curve(2,1)==0
-                                curve(2,1)=NaN;
-                            end
-                            tempval = curve(2,:)/curve(2,1);
-                            tempval_sem = curve(4,:)/curve(4,1);
-                        end
-                    case 'stim'
-                        logmsg('Use of stim as measure is deprecated. Use range instead');
+                case 'psth.tbins' %deprecated, analysis should put measure in measures and use routines above
+                    if isfield(measures,'psth') && isfield(measures.psth,'tbins')
+                        tempval = measures.psth.tbins;
+                    end
+                case 'psth.data' %deprecated, analysis should put measure in measures and use routines above
+                    if isfield(measures,'psth') && isfield(measures.psth,'data')
+                        tempval = measures.psth.data;
+                    end
+                case 'depth'
+                    tempval = record.depth-record.surface;
+                case {'range','parameter'} % parameter is deprecated
+                    if isfield(measures,'curve')
+                        logmsg('Range should be measure already. Reanalyze test records.');
                         curve = measures.('curve');
-                        tempval = curve(1,:);
-                    case 'time_peak_highcontrast'
-                        logmsg('TIME_PEAK_HIGHCONTRAST IS DEPRECATED AND RETURNS PREFERRED STIMULUS');
-                        time_peak = measures.time_peak; 
-                        if iscell(time_peak);
-                            time_peak = time_peak{1};
+                        if iscell(curve) % then only use first
+                            curve = curve{1};
                         end
-                        tempval = time_peak;
-                    case 'variance'
+                        tempval = curve(1,:) ;
+                    end
+                case 'response' % subtract spontaneous rate
+                    if isfield(measures,'curve')
+                        logmsg('Response should be measure already. Reanalyze test records.');
                         curve = measures.('curve');
                         if iscell(curve) % multiple triggers
                             curve = curve{1}; % then only use first
                         end
-                        [~,ind] = max(curve(2,:)); % for highest response
-                        tempval = curve(3,ind)^2;
-                end
-            end % no field with name
-            
-            if ~isempty(range_limit)
-                if isfield(measures,'range')
-                    if ~iscell(measures.range)
-                        measures.range = {measures.range};
+                        if isfield(measures,'rate_spont')==1
+                            % subtract spontaneous
+                            rate_spont = measures.('rate_spont');
+                            curve(2,:)=curve(2,:)-rate_spont(1);
+                        end
+                        tempval=curve(2,:);
+                        tempval_sem=curve(4,:);
                     end
-                    ind = find(measures.range{1}>=range_limit(1) & measures.range{1}<=range_limit(end));
-                    if numel(tempval) == numel(measures.range{1})
-                        tempval = nanmean( tempval(ind));
-                    elseif isempty(ind) % if none fit the range, do not produce an output
-                        tempval = nan;
+                case 'rate' % no subtraction of spontaneous rate
+                    if isfield(measures,'curve')
+                        curve = measures.('curve');
+                        if iscell(curve)
+                            curve = curve{trigger};
+                            tempval = curve(2,:);
+                            tempval_sem = curve(4,:);
+                        end
                     end
-                end
-            end     
-
-            % next lines used to be out of if get
-            if isempty(tempval_sem)
-                tempval_sem = NaN(size(tempval));
+                case 'rate_normalized_by_stim1' % no subtraction of spontaneous rate
+                    if isfield(measures,'curve')
+                        curve=measures.('curve');
+                        if curve(2,1)==0
+                            curve(2,1)=NaN;
+                        end
+                        tempval = curve(2,:)/curve(2,1);
+                        tempval_sem = curve(4,:)/curve(4,1);
+                    end
+                case 'stim'
+                    logmsg('Use of stim as measure is deprecated. Use range instead');
+                    curve = measures.('curve');
+                    tempval = curve(1,:);
+                case 'time_peak_highcontrast'
+                    logmsg('TIME_PEAK_HIGHCONTRAST IS DEPRECATED AND RETURNS PREFERRED STIMULUS');
+                    time_peak = measures.time_peak;
+                    if iscell(time_peak);
+                        time_peak = time_peak{1};
+                    end
+                    tempval = time_peak;
+                case 'variance'
+                    curve = measures.('curve');
+                    if iscell(curve) % multiple triggers
+                        curve = curve{1}; % then only use first
+                    end
+                    [~,ind] = max(curve(2,:)); % for highest response
+                    tempval = curve(3,ind)^2;
             end
-            val = [val tempval(:)']; %#ok<AGROW>
-            val_sem = [val_sem tempval_sem(:)'  ]; %#ok<AGROW> % no sems
-            
-        end % if get
+        end % no field with name
+        
+        if ~isempty(range_limit)
+            if isfield(measures,'range')
+                if ~iscell(measures.range)
+                    measures.range = {measures.range};
+                end
+                ind = find(measures.range{1}>=range_limit(1) & measures.range{1}<=range_limit(end));
+                if numel(tempval) == numel(measures.range{1})
+                    tempval = nanmean( tempval(ind));
+                elseif isempty(ind) % if none fit the range, do not produce an output
+                    tempval = nan;
+                end
+            end
+        end
+        
+        % next lines used to be out of if get
+        if isempty(tempval_sem)
+            tempval_sem = NaN(size(tempval));
+        end
+        val = [val tempval(:)']; %#ok<AGROW>
+        val_sem = [val_sem tempval_sem(:)'  ]; %#ok<AGROW> % no sems
     end % next cell c
     
 else % no field measures
@@ -458,7 +419,7 @@ else % no field measures
         end
         val_sem = NaN(size(val));
     end
-end 
+end
 
 if any(size(val)~=size(val_sem))
     logmsg('Sizes of VAL and VAL_SEM are not equal');
