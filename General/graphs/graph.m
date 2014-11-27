@@ -917,9 +917,13 @@ switch errorbars
                     for i=1:length(y)
                         dy{i}=sem(y{i});
                     end
-                else
+                elseif ~isempty(ystd)
                     for i=1:length(y)
                         dy{i}=ystd{i}/sqrt(ny{i});
+                    end
+                else
+                    for i=1:length(y)
+                        dy{i}=sem(y{i});
                     end
                 end
             case 'std'
