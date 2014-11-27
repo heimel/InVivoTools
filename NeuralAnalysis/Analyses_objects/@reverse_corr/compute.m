@@ -236,7 +236,8 @@ if centchanged && (p.crcpixel>0),
     in.crcproj = p.crcproj;
     in.crctimeint = p.crctimeint;
     in.datatoview = p.datatoview(1); in.crcpixel=p.crcpixel;
-elseif p.crcpixel<=0, crc = [];
+elseif p.crcpixel<=0
+    crc = [];
 else
     crc = rc.computations.crc;
 end

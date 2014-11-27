@@ -133,9 +133,14 @@ f=getstimfeatures(v,inp.stimtime.stim,p,x,y,rect);
 onframes=find(f(rfy,rfx,:,1)>0);
 measures.rate_early=sum(bins(1,onframes))/length(onframes)/para_rc.timeres;
 measures.rate_late=sum(bins(end,onframes))/length(onframes)/para_rc.timeres;
-measures.rate_intervals=...
-  {[para_rc.interval(1) para_rc.interval(1)+para_rc.timeres], ...
-   [para_rc.interval(2)-para_rc.timeres para_rc.interval(2) ]};
+% measures.rate_intervals=...
+%   {[para_rc.interval(1) para_rc.interval(1)+para_rc.timeres], ...
+%    [para_rc.interval(2)-para_rc.timeres para_rc.interval(2) ]};
+
+intervals = para_rc.interval(1):para_rc.timeres:para_rc.interval(2);
+
+
+measures.rate_intervals = mat2cell( [intervals(1:end-1);intervals(2:end)],2,ones(1,length(intervals)-1));
 
 
 % compute peristimulus histograms of ON-responses
