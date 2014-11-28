@@ -38,12 +38,13 @@ switch protocol
         % params.separation_from_prev_stim_off = 5;
 end
 
-% sg parameters
+% reverse correlation (sg) parameters
 % after 0.4 s there is generally little response
 % I realize that 0.4 s already includes 2 frames if run at 5 Hz
 % 20ms taken as lead time for first responses to appear
-params.rc_interval=[0.0205 0.4205];
-params.rc_timeres=0.2;
+params.rc_interval = [0.0205 0.4205];
+params.rc_timeres = 0.2; % time resolution
+% params.rc_peak_interval_number = 1; % which interval to use for peak computation
 switch protocol
     case '13.20' 
         params.rc_interval=[0.0205 0.2205];
@@ -70,6 +71,8 @@ params.cluster_overlap_threshold = 0.5;
 
 
 params.show_isi = true;
+
+params.plot_spike_features = true;
 
 % entropy analysis
 switch record.mouse(1:min(end,5))

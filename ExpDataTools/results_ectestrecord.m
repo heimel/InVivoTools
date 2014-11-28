@@ -117,7 +117,14 @@ for c=1:n_cells
     
     switch record.stim_type
         case {'sg','sg_adaptation'}
-            n_graphs=1+length(measure.rf)+2;
+            if iscell(measure.rf) % deprecated on 2014-11-26
+                n_intervals = length(measure.rf);
+            elseif ismatrix(measure.rf)
+                n_intervals = 1;
+            else
+                n_intervals = size(measure.rf,1);
+            end
+            n_graphs = 3+n_intervals;
             printtext(subst_ctlchars(['rf_n_on: ' num2str(measure.rf_n_on) ]),y);
             y=printtext(subst_ctlchars(['halfmax: ' num2str(measure.halfmax_deg,2) '^o']),y,0.5);
             y=printtext(subst_ctlchars(['onsize : ' num2str(fix(measure.rf_onsize_sqdeg)) ' deg^2']),y);
@@ -133,7 +140,7 @@ for c=1:n_cells
             y=printtext(subst_ctlchars(['roc auc: ' num2str(measure.roc_auc,2) ]),y,0.5);
             
             % rf graphs
-            for i=1:length(measure.rf)
+            for i=1:n_intervals
                 subplot('position',...
                     [ (1+i)/(n_graphs)+0.01 reltitlepos-row*relsubheight 1/(n_graphs)*0.96 relsubheight]);
                 plot_rf( measure,i );
@@ -397,13 +404,15 @@ end
 % if 0
 switch data_type
     case 'ec'
-        spikesfile = fullfile(ecdatapath(record),record.test,'_spikes.mat');
-        if exist(spikesfile,'file')
-            cells = [];
-            load(spikesfile);
-            plot_spike_features(cells, record);
-            if exist('isi','var') && params.show_isi
-                plot_spike_isi(isi,record);
+        if params.plot_spike_features
+            spikesfile = fullfile(ecdatapath(record),record.test,'_spikes.mat');
+            if exist(spikesfile,'file')
+                cells = [];
+                load(spikesfile);
+                plot_spike_features(cells, record);
+                if exist('isi','var') && params.show_isi
+                    plot_spike_isi(isi,record);
+                end
             end
         end
 end
@@ -519,14 +528,21 @@ return
 
 
 function plot_rf( measure , i)
-rf=measure.rf{i};
+if iscell(measure.rf)
+    rf=measure.rf{i}; % deprecated on 2014-11-26
+else
+    if ismatrix(measure.rf)
+        rf = measure.rf;
+    else
+        rf = squeeze(measure.rf(i,:,:));
+    end
+end
 imagesc(rf); axis image
 hold on
 set(gca,'XTick',[]);
 set(gca,'YTick',[]);
-%colormap gray
-%set(gca,'CLim',[256/35 max(20,max(measure.rf{1}(:)) )])
-if max(measure.rf{1})>2 % i.e. luminance and not df/f
+
+if max(rf)>2 % i.e. luminance and not df/f
     colormap hot
     set(gca,'CLim',[256/35 40 ])
 else % df/d 
@@ -542,7 +558,7 @@ if isfield(measure,'rect')
     rf_center(1) = (rf_center(1) - measure.rect(1))/(measure.rect(3)-measure.rect(1)) * size(rf,2)+0.5;
     rf_center(2) = (rf_center(2) - measure.rect(2))/(measure.rect(4)-measure.rect(2)) * size(rf,1)+0.5;
 end
-if max(measure.rf{1})>2 % i.e. luminance and not df/f
+if max(rf)>2 % i.e. luminance and not df/f
 bordersquare(rf_center,[0 1 0]);
 else
     plot(rf_center(1),rf_center(2),'r*');
@@ -574,10 +590,6 @@ for i=1:length(curves) % over triggers
         range = measure.range{i};
     end
     odi = measure.odi{i};
-%     if strcmp(measure.variable,'angle') && length(range)>1
-%         odi(end+1) = odi(1);
-%         range(end+1) = range(1)+360; % complete circle
-%     end
     
     [x,ind] = sort(range);
     y = odi(ind);
@@ -626,13 +638,11 @@ for i=1:length(curves) % over triggers
             % fit curve, so don't show line
             linestyle = '.';
     end
-    
-    
+
     switch measure.variable
         case {'typenumber','position'}
             x = 1:size(curve,2);
             bar(x,curve(2,:));
-%            bar(x,curve(2,:),'barcolor',clr(i));
             box off
             set(gca,'XTick',1:size(curve,2));
             set(gca,'XTickLabel',curve(1,:));
@@ -651,9 +661,6 @@ for i=1:length(curves) % over triggers
     errorbar(x,curve(2,:),curve(4,:),[clr(i) '.']);
     
     ylabel(rate_label);
-    
-    
-    
     
 end
 
