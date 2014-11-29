@@ -22,9 +22,8 @@ x{4} = [-0.250980392156862 -0.252941176470588 -0.0666666666666666 -0.11764705882
 y{4} = [0.0260387811634351 0.269806094182826 0.278670360110803 0.08808864265928 0.167867036011081 0.190027700831025 0.216620498614959 0.338504155124654 0.294182825484765 0.136842105263158 0.0969529085872577 0.0925207756232688 0.0304709141274239 0.0481994459833796 -0.0182825484764542 -0.0670360110803321 -0.160110803324099];
 
 disp('WHIT_TAO_DATA: Control');
+
 graph(y{1},x{1},'prefax',[-0.3 0.7 -0.3 0.7],'color',[0 1 0],'xlab','ODI excitation','ylab','ODI inhibition','save_as','whit_odi_ctl.png','extra_options','fit,linear','extra_code','xyline;axis square');
-
-
 graph((x{1}-y{1})/sqrt(2),[],'style','hist','bins',-0.4:0.05:0.4,'xlab','\DeltaODI','ylab','Number','save_as','whit_odi_ctl_hist.png');
 
 
@@ -40,3 +39,5 @@ disp('WHIT_TAO_DATA: Absolute ODI differences');
 absdiff{1} = abs( y{1}-x{1});
 absdiff{2} = abs( y{2}-x{2});
 graph(absdiff,[],'xticklabels',{'Ctl','MD'},'showpoints',0,'color',{[0 1 0],[0 0.4 0]},'ylab','Absolute ODI difference','save_as','whit_odi_abs_diff.png','test','ranksum');
+disp(['Ctl abs delta ODI = ' num2str(mean(absdiff{1})) ' +- ' num2str(sem(absdiff{1})) ' (Mean +/- SEM)']);
+disp(['MD abs delta ODI  = ' num2str(mean(absdiff{2})) ' +- ' num2str(sem(absdiff{2})) ' (Mean +/- SEM)']);

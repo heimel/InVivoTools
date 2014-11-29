@@ -15,7 +15,7 @@ function h=graph(y,x,varargin)
 %     'test',{['ttest'],'kruskal_wallis_test','none'}
 %     'spaced',{[0],1}    % spacing points in bar plot
 %     'color',0.7*[1 1 1]
-%     'errorbars','sem'
+%     'errorbars',''
 %     'style',{['bar'],'xy','box','hist','cumul','rose'}
 %     'signif_y',[]
 %     'prefax',[]
@@ -74,7 +74,7 @@ pos_args={...
     'test','',... %'ttest',...
     'spaced',1,...
     'color',0.7*[1 1 1],...
-    'errorbars','sem',...
+    'errorbars','',...
     'style',trim(char(double(length(x)==length(y))*'xy '+ ...
     double(length(x)~=length(y))*'bar')),... % def. bar, unless as n_x==n_y
     'signif_y',[],...
@@ -127,7 +127,6 @@ if nvarargin>0
         end
     end
 end
-
 
 
 % parse extra options
@@ -566,8 +565,8 @@ switch style
             errorbars_sides='both';
         end
         if strcmp(errorbars,'sem')
-            logmsg('Errorbars sem are not implemented for xy graph');
-            errorbars='std';
+            logmsg('Errorbars sem are not implemented for xy graph.');
+            errorbars='none';
         end
         if ~isempty(ystd) && strcmp(errorbars,'none')~=1
             for i=1:length(y)
@@ -902,10 +901,16 @@ function	h=plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick)
 if nargin<8
     tick = [];
 end
-
 if nargin<7
     sides='away';
 end
+if nargin<6
+    errorbars = '';
+end
+if isempty(errorbars)
+    errorbars = 'std';
+end
+
 h={};
 switch errorbars
     case 'none'
