@@ -92,6 +92,9 @@ function [p, iter_used, corr, failed, settings, xpixelposition, ypixelposition] 
 %David says: that he retains all commercial rights etc 
 %Jason says: he looks forward to seeing what it winds up being used for, if
 %you send us your email we will send you updates and future modifications.........
+%
+% copyright David Greenberg, david.greenberg@caesar.de
+%
 %==========================================================================
 
 sD = size(data); sD(end+1:3) = 1; nlines = sD(1); linewidth = sD(2); nframes = sD(3);
