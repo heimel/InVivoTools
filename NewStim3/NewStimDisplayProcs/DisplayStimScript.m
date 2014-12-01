@@ -95,7 +95,7 @@ if NSUseInitialSerialTrigger
     OpenStimSerial
     StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
 
-    if exist('NSUseInitialSerialContinuous','var') && NSUseInitialSerialContinuous
+    if exist('NSUseInitialSerialContinuous','var') && ~isempty(NSUseInitialSerialContinuous) && NSUseInitialSerialContinuous
         StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
     else
         WaitSecs(0.001);
