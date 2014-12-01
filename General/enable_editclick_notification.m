@@ -1,6 +1,10 @@
 function enable_editclick_notification(figh)
 %enable_editclick_notification(figure_handle)
 %modifies a figure so that clicking its edit fields will update its currentobject property
+%
+% Copyright (c) 2011, David Greenberg, david.greenberg@caesar.de
+% All rights reserved.
+
 edith = findobj(figh,'style','edit');
 invistext = uicontrol('style','text','string','','visible','on','parent',figh,'units','pixels','position',[0 0 1 1]);
 for u = 1:numel(edith)
