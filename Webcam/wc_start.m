@@ -8,11 +8,14 @@ function wc_start(datapath)
 global gNewStim
 
 remotecommglobals
+%acqparams_in = fullfile(Remote_Comm_dir,'acqParams_in');
+acqparams_in = fullfile(datapath,'acqParams_in');
 
-acqparams_in = fullfile(Remote_Comm_dir,'acqParams_in');
-if ~exist(acqparams_in,'file')
-    logmsg(['File ' acqparams_in ' does not exist.']);
-    return
+
+while ~exist(acqparams_in,'file')
+    %logmsg(['File ' acqparams_in ' does not exist.']);
+    %return
+    pause(0.1);
 end
 
 acqparams = loadStructArray(acqparams_in);
