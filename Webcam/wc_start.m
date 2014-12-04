@@ -5,12 +5,9 @@ function wc_start(datapath)
 % 2014, Alexander Heimel
 %
 
-global WebcamNumber 
-remotecommglobals
+global gNewStim
 
-if isempty(WebcamNumber)
-    WebcamNumber = 1;
-end
+remotecommglobals
 
 acqparams_in = fullfile(Remote_Comm_dir,'acqParams_in');
 if ~exist(acqparams_in,'file')
@@ -21,8 +18,8 @@ end
 acqparams = loadStructArray(acqparams_in);
 
 recording_period = (acqparams.reps + 1) * 10; % s + 10s extra
-recording_name = fullfile(datapath,['webcam' num2str(WebcamNumber,'%03d')]);
+recording_name = fullfile(datapath,['webcam' num2str(gNewStim.Webcam.WebcamNumber,'%03d')]);
 
-camid = []; %wc_getcamera;
 
-wc_videorecording(recording_name, [], 0, 1, 1, recording_period, camid)
+
+wc_videorecording(recording_name, [], 0, 1, 1, recording_period)

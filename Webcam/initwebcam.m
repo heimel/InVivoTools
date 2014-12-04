@@ -5,6 +5,34 @@ function initwebcam
 % 2014, Alexander Heimel
 %
 
+global gNewStim
+
+AssertOpenGL; % Test if we're running on PTB-3, abort otherwise:
+Screen('Preference', 'SuppressAllWarnings', 1);
+Screen('Preference', 'SkipSyncTests', 1);
+
+% Open Screen
+screen = max(Screen('Screens'));
+gNewStim.Webcam.Window = Screen('OpenWindow', screen, 0, [0 0 640 480]);
+win = gNewStim.Webcam.Window;
+% Initial flip to a blank screen:
+Screen('Flip',win);
+Screen('TextSize', win, 24);
+
+% Open Video grabber
+gNewStim.Webcam.WebcamNumber = 1;
+gNewStim.Webcam.Camid = [];
+gNewStim.Webcam.Rect = [];%[0 0 640 480];
+gNewStim.Webcam.Codec = ':CodecType=DEFAULTencoder';
+gNewStim.Webcam.WithSound = 0;
+gNewStim.Webcam.Grabber = Screen('OpenVideoCapture',...
+    gNewStim.Webcam.Window, ...
+    gNewStim.Webcam.Camid, gNewStim.Webcam.Rect , [], [], [],...
+    gNewStim.Webcam.Codec, gNewStim.Webcam.WithSound);
+WaitSecs('YieldSecs', 2);
+
+
+
 
 remotecommglobals;
 
@@ -52,9 +80,21 @@ while 1
         datapath = fgetl(fid);
         fclose(fid);
         wc_start(datapath);
+        
+        
+        Screen('CloseVideoCapture', gNewStim.Webcam.Grabber);
+        gNewStim.Webcam.Grabber = Screen('OpenVideoCapture',...
+            gNewStim.Webcam.Window, ...
+            gNewStim.Webcam.Camid, gNewStim.Webcam.Rect , [], [], [],...
+            gNewStim.Webcam.Codec, gNewStim.Webcam.WithSound);
         logmsg('Checking for acqReady change');
+
+    
+    else
+        pause(0.3);
     end
-    pause(0.3);
+
+    
 end
 
 

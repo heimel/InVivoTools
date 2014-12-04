@@ -34,35 +34,31 @@ function wc_videorecording(moviename, codec, withsound, showit, windowed, period
 % the top-left corner of the screen, instead of fullscreen. Windowed
 % display is the default.
 %
-%  Based on PsychToolbox VideoRecordingDemo, see that file for more info 
-%  2014, From PsychToolbox, Edited by Alexander Heimel 
+%  Based on PsychToolbox VideoRecordingDemo, see that file for more info
+%  2014, From PsychToolbox, Edited by Alexander Heimel
 %
-Screen('Preference', 'SuppressAllWarnings', 1)
 
-wc_globals;
+global gNewStim
 
-stimtrigserial = instrfind({'Port','Status'},{Webcam_Serialport_name,'open'});
+stimtrigserial = instrfind({'Port','Status'},{gNewStim.Webcam_Serialport_name,'open'});
 if isempty(stimtrigserial)
-    stimtrigserial = serial(Webcam_Serialport_name);
+    stimtrigserial = serial(gNewStim.Webcam_Serialport_name);
     fopen(stimtrigserial);
 end
 
-AssertOpenGL; % Test if we're running on PTB-3, abort otherwise:
 
 
 % Only report ESCape key press via KbCheck:
 KbName('UnifyKeyNames');
 RestrictKeysForKbCheck(KbName('ESCAPE'));
 
-% Open window on secondary display, if any:
-screen=max(Screen('Screens'));
 
 if nargin < 1
     errormsg('You must provide a output movie name as first argument!');
 end
 
 while exist(moviename, 'file')
-    logmsg([ moviename ' existed already.']); 
+    logmsg([ moviename ' existed already.']);
     moviename = [moviename 'n'];
 end
 logmsg(['Recording to movie file ' moviename]);
@@ -73,7 +69,7 @@ if nargin < 2
 end
 
 if nargin < 3 || isempty(withsound)
-    withsound = 0;  
+    withsound = 0;
 end
 
 if withsound > 0
@@ -132,10 +128,8 @@ if isempty(codec)
         end
     end
 else
-    % Assign specific user-selected codec:
     codec = [':CodecType=' codec];
 end
-
 fprintf('Using codec: %s\n', codec);
 
 if nargin < 4
@@ -144,7 +138,7 @@ end
 
 if showit > 0
     % We perform blocking waits for new images:
-    waitforimage = 1;
+    waitforimage = 1; %1
 else
     % We only grant processing time to the capture engine, but don't expect
     % any data to be returned and don't wait for frames:
@@ -185,152 +179,85 @@ pinstat = get(stimtrigserial,'pinstatus');
 statcheck_prev = pinstat.DataSetReady;
 stimstart = NaN;
 
-try
+if ~isempty(gNewStim.Webcam.Window)
+    win = gNewStim.Webcam.Window;
+else
+    screen=max(Screen('Screens'));
+    Screen('Preference', 'SkipSyncTests', 1);
     if windowed > 0
-        % Open window in top left corner of screen. We ask PTB to continue
-        % even in case of video sync trouble, as this is sometimes the case
-        % on OS/X in windowed mode - and we don't need accurate visual
-        % onsets in this demo anyway:
-        oldsynclevel = Screen('Preference', 'SkipSyncTests', 1);
-        
-        % Open 800x600 pixels window at top-left corner of 'screen'
-        % with black background color:
-        win=Screen('OpenWindow', screen, 0, [0 0 640 480]);
+        win = Screen('OpenWindow', screen, 0, [0 0 640 480]);
     else
-        % Open fullscreen window on 'screen', with black background color:
-        oldsynclevel = Screen('Preference', 'SkipSyncTests');
         win=Screen('OpenWindow', screen, 0);
     end
-    
-    % Initial flip to a blank screen:
     Screen('Flip',win);
-    
-    % Set text size for info text. 24 pixels is also good for Linux.
-    Screen('TextSize', win, 24);
-    
-    % Capture and record video + audio to disk:
-    % Specify the special flags in 'withsound', the codec settings for
-    % recording in 'codec'. Leave everything else at auto-detected defaults:
-    if IsWin
-        % Windows often has unreliable camera video resolution detection.
-        % Therefore we hard-code the resolution to 640x480, the most common
-        % case, to make it work "most of the time(tm)":
-        grabber = Screen('OpenVideoCapture', win, camid, [0 0 640 480], [], [], [], codec, withsound);
-    else
-        % No need for Windows-style workarounds:
-        grabber = Screen('OpenVideoCapture', win, camid, [], [], [], [], codec, withsound, [], 8);
-    end
+end
 
-    % Wait a bit between 'OpenVideoCapture' and start of capture below.
-    % This gives the engine a bit time to spin up and helps avoid jerky
-    % recording at the first iteration after startup of Octave/Matlab.
-    % Successive recording iterations won't need this anymore:
+if ~isempty(gNewStim.Webcam.Grabber)
+    grabber = gNewStim.Webcam.Grabber;
+else
+    grabber = Screen('OpenVideoCapture', win, camid, [0 0 640 480], [], [], [], codec, withsound);
     WaitSecs('YieldSecs', 2);
+end
+
+KbReleaseWait;
+
+mname = sprintf('SetNewMoviename=%s.mov', moviename);
+Screen('SetVideoCaptureParameter', grabber, mname);
+
+
+try
+    Screen('StartVideoCapture', grabber, realmax, 1)
     
-    for nreps = 1:1
-        KbReleaseWait;
-        
-        % Select a moviename for the recorded movie file:
-        mname = sprintf('SetNewMoviename=%s_%i.mov', moviename, nreps);
-        Screen('SetVideoCaptureParameter', grabber, mname);
-        
-        % Start capture, request 30 fps. Capture hardware will fall back to
-        % fastest supported framerate if it is not supported (i think).
-        % Some hardware disregards the framerate parameter. Especially the
-        % built-in iSight camera of the newer Intel Macintosh computers
-        % seems to completely ignore any framerate setting. It chooses the
-        % framerate by itself, based on lighting conditions. With bright scenes
-        % it can run at 30 fps, at lower light conditions it reduces the
-        % framerate to 15 fps, then to 7.5 fps.
-        
-        Screen('StartVideoCapture', grabber, realmax, 1)
-        
-        oldtex = 0;
-        tex = 0;
-        oldpts = 0;
-        pts = 0;
-        count = 0;
-        t=GetSecs;
-        % Run until keypress:
-        while ~KbCheck && pts < period
-            % Wait blocking for next image. If waitforimage == 1 then return it
-            % as texture, if waitforimage == 4, do not return it (no preview,
-            % but faster). oldtex contains the handle of previously fetched
-            % textures - recycling is not only good for the environment, but also for speed ;)
+    oldtex = 0;
+    count = 0;
+    t=GetSecs;
+    telapsed = 0;
+    firstframe = [];
+    while ~KbCheck && telapsed < period
+        if waitforimage~=4
+            [tex pts nrdropped]=Screen('GetCapturedImage', win, grabber, waitforimage, oldtex);
             
-
-            if waitforimage~=4
-                % Live preview: Wait blocking for new frame, return texture
-                % handle and capture timestamp:
-                [tex pts nrdropped]=Screen('GetCapturedImage', win, grabber, waitforimage, oldtex);
-
-                pinstat = get(stimtrigserial,'pinstatus');
-                statcheck = pinstat.DataSetReady;
-                if isnan(stimstart) && ~strcmp(statcheck,statcheck_prev)
-                    stimstart = pts;
-                    logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
-                    statcheck_prev = statcheck;
-                end
-                % Some output to the console:
-                % fprintf('tex = %i  pts = %f nrdropped = %i\n', tex, pts, nrdropped);
-                
-                % If a texture is available, draw and show it.
-                if tex > 0
-                    % Print capture timestamp in seconds since start of capture:
-                    Screen('DrawText', win, sprintf('Capture time (secs): %.4f', pts), 0, 0, 255);
-%                     if count>0
-%                         % Compute delta between consecutive frames:
-%                         delta = (pts - oldpts) * 1000;
-%                         oldpts = pts;
-%                         Screen('DrawText', win, sprintf('Interframe delta (msecs): %.4f', delta), 0, 20, 255);
-%                         
-%                     else 
-%                         disp('Started!');
-%                     end
-                    
-                    % Draw new texture from framegrabber.
-                    Screen('DrawTexture', win, tex);
-                    
-                    % Recycle this texture - faster:
-                    oldtex = tex;
-                    
-                    % Show it:
-                    Screen('Flip', win);
-                    count = count + 1;
-                else
-                    WaitSecs('YieldSecs', 0.005);
-                end
-            else
-                % Recording only: We have nothing to do here, as thread offloading
-                % is enabled above via flag 16 so all processing is done automatically
-                % in the background.
-                
-                % Well, we do one thing. We sleep for 0.1 secs to avoid taxing the cpu
-                % for no good reason:
-                WaitSecs('YieldSecs', 0.1);
+            pinstat = get(stimtrigserial,'pinstatus');
+            statcheck = pinstat.DataSetReady;
+            if isnan(stimstart) && ~strcmp(statcheck,statcheck_prev)
+                stimstart = pts-firstframe;
+                logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
+                statcheck_prev = statcheck;
             end
-            % Ready for next frame:
+            if tex > 0
+                if isempty(firstframe)
+                    firstframe = pts;
+                end
+                Screen('DrawText', win, sprintf('Time (s): %.2f', pts-firstframe), 0, 0, 255);
+                Screen('DrawTexture', win, tex);
+                oldtex = tex;
+                Screen('Flip', win);
+                count = count + 1;
+            else
+                WaitSecs('YieldSecs', 0.005);
+            end
+        else
+            WaitSecs('YieldSecs', 0.1);
         end
-        
-        % Done. Shut us down.
-        telapsed = GetSecs - t
-        
-        Screen('StopVideoCapture', grabber);
+        telapsed = GetSecs - t;
     end
+    Screen('StopVideoCapture', grabber);
     
-    % Close engine and recorded movie file:
-    Screen('CloseVideoCapture', grabber);
-    
-    Screen('CloseAll');
+    if isempty(gNewStim.Webcam.Grabber)
+        Screen('CloseVideoCapture', grabber);
+    end
     
     avgfps = count / telapsed;
 catch me
-    % In case of error, the 'CloseAll' call will perform proper shutdown
-    % and cleanup:
     logmsg(['Problem: ' me.message]);
     RestrictKeysForKbCheck([]);
     Screen('CloseAll');
-end;
+end
+
+logmsg(['Frame rate: ' num2str(avgfps)]);
+if isempty(gNewStim.Webcam.Window)
+    Screen('CloseAll');
+end
 
 fclose(stimtrigserial);
 
@@ -338,10 +265,6 @@ fid = fopen([moviename '_stimstart'],'w');
 fprintf(fid,'%f',stimstart);
 fclose(fid);
 
-% Allow KbCheck et al. to query all keys:
 RestrictKeysForKbCheck([]);
-
-% Restore old vbl sync test mode:
-Screen('Preference', 'SkipSyncTests', oldsynclevel);
 
 fprintf('Done. Bye!\n');
