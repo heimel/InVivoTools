@@ -542,7 +542,7 @@ else
 end
 
 if usetril == -1 % use last
-    tril = EVENT.strons.tril(end-n_optotrigs);
+    tril = EVENT.strons.tril(max(1,end-n_optotrigs));
 else
     if usetril > length(EVENT.strons.tril)
         errormsg('Only 1 trigger available. Check ''tril='' in comment field.');

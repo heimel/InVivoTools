@@ -37,7 +37,23 @@ disp('WHIT_TAO_DATA: Control vs MD correlations are significantly different: p =
 
 disp('WHIT_TAO_DATA: Absolute ODI differences');
 absdiff{1} = abs( y{1}-x{1});
+
+
 absdiff{2} = abs( y{2}-x{2});
 graph(absdiff,[],'xticklabels',{'Ctl','MD'},'showpoints',0,'color',{[0 1 0],[0 0.4 0]},'ylab','Absolute ODI difference','save_as','whit_odi_abs_diff.png','test','ranksum');
 disp(['Ctl abs delta ODI = ' num2str(mean(absdiff{1})) ' +- ' num2str(sem(absdiff{1})) ' (Mean +/- SEM)']);
 disp(['MD abs delta ODI  = ' num2str(mean(absdiff{2})) ' +- ' num2str(sem(absdiff{2})) ' (Mean +/- SEM)']);
+
+logmsg('Sqrt transform of abs data');
+[h,p]=swtest(sqrt(absdiff{1}));
+logmsg(['swtest control p = ' num2str(p)]);
+[h,p]=swtest(sqrt(absdiff{2}));
+logmsg(['swtest control p = ' num2str(p)]);
+[h,p]=ttest2(sqrt(absdiff{1}),sqrt(absdiff{2}));
+logmsg(['ttest of sqrt transformed data p = ' num2str(p)]);
+
+x = [absdiff{1}';absdiff{2}'];
+g = [ones(length(absdiff{1}),1);2*ones(length(absdiff{2}),1)];
+p =vartestn(x,g);
+disp(['Groups have equal variances: ' num2str(p,2)]);
+welchanova([x g])

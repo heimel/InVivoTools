@@ -38,6 +38,11 @@ if isempty(measures)
     return
 end
 
+if ~isfield(measures,'range')
+    logmsg('No range in measures. Reanalyze first');
+    return
+end
+
 if iscell(measures(1).range) && length(measures(1).range)==2
             triggername{1} = ', Light off';
             triggername{2} = ', Light on';
