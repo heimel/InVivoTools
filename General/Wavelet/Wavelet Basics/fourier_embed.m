@@ -14,10 +14,13 @@ function F = fourier_embed(filter,ns)
 F = zeros(length(filter),ns);
 for k=1:length(filter)
     fil = filter{k};
-    %  L = length(fil);  % changed on 2014-12-08 by AH
-    L = min(length(fil),ns);  
-    l = floor(L/2);
+    L = length(fil);  
+    l = floor((L-1)/2);
     F(k,1:l+1) = fil(l+1:L);
-    F(k,ns-l+1:ns) = fil(1:l);
+    if ns >= l % normal situation
+        F(k,ns-l+1:ns) = fil(1:l);
+    else % added case 2014-12-09 by AH
+        F(k,1:l) = fil(1:l);
+    end
 end
 F = fft(F,[],2)/ns;

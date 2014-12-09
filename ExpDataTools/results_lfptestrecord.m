@@ -160,6 +160,11 @@ for lfpch=1:length(measures)
                 set(gca,'ytick',[]);
             end
             
+            if ~isfield(measures,'powerm')
+                errormsg('No field ''powerm''. Reanalyze lfp data');
+                return
+            end
+            
             powerms = measures(lfpch).powerm;
             if ~iscell(powerms)
                 powerms = {powerms};

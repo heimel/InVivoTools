@@ -114,7 +114,7 @@ if length(inps)==1
     measures.curve = measures.curve{1};
 else
     % ugly code to compute friedman test
-    count = zeros(length(measures.curve),length(rast.values));
+    count = zeros(length(measures.curve),length(rast.values),size(rast.values{1},2)); % triggers x range x repetitions
     for i=1:length(measures.curve)
         rast = getoutput(out(i).rast);
         for j=1:length(rast.values)
