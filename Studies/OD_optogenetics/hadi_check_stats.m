@@ -1,5 +1,7 @@
 function data=hadi_check_stats
-% 
+%
+% DEPRECATED: See hadi_check_stats_absodi and hadi_check_stats_odi instead
+%
 % tests for statistics, 2014-12-02
 % Alexander Heimel
 

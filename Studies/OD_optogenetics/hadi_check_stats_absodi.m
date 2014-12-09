@@ -8,7 +8,7 @@ groups={'pv ctl','pv gfp','pv 1 md','pv sh','pv 7 md'};
 
 x = [];
 g = [];
-fun = @id; %@sqrt; %id;%@sqrt; %id;% @sqrt; %@log;
+fun = @sqrt; %id;%@sqrt; %id;% @sqrt; %@log;
 
 data = cellfun(fun,data,'UniformOutput',false);
 

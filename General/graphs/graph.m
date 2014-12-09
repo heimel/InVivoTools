@@ -1006,10 +1006,40 @@ if length(y)>2 % multigroup comparison
         v = cat(1,v,y{i}(:));
         group = cat(1,group,i*ones(length(y{i}),1));
     end
+    
+    notnormal = false;
+    for i=1:length(y)
+        [hsw,p]=swtest(y{i});
+        if p<0.05
+            notnormal = true;
+        end
+        logmsg(['Group ' num2str(i) ':  ' num2str(mean(y{i}),2) ' +/- ' num2str(std(y{i}),2) ...
+            ' (mean +/- std), n = ' num2str(length(y{i})) ...
+            ', Shapiro-Wilk normality p = ' num2str(p,2)]);
+    end
+    if notnormal
+        logmsg('Not normal group detected. Do a transform or use Kruskal-Wallis, unless n is high (>30)');
+    end
+    
+    
     [h.p_groupkruskalwallis,anovatab,stats] = kruskalwallis(v,group,'off');
-    logmsg(['Group kruskalwallis: p = ' num2str(h.p_groupkruskalwallis,2) ', df = ' num2str(anovatab{4,3})]);
+    logmsg(['Group Kruskal-Wallis: p = ' num2str(h.p_groupkruskalwallis,2) ', df = ' num2str(anovatab{4,3})]);
     [h.p_groupanova,anovatab,stats] = anova1(v,group,'off');
-    logmsg(['Group anova: p = ' num2str(h.p_groupanova,2) ', s[' num2str(stats.df) '] = ' num2str(stats.s)]);
+    logmsg(['Group ANOVA: p = ' num2str(h.p_groupanova,2) ', s[' num2str(stats.df) '] = ' num2str(stats.s)]);
+    h.p_grouplevene = vartestn(v,group,'display','off');
+    logmsg(['Levene test for equality of variances p = ' num2str(h.p_grouplevene,2)]);
+    if h.p_grouplevene<0.05
+        [h.p_groupwelchanova,f,df] = welchanova([v group],[],'off');
+        logmsg(['Welch unequal variance ANOVA p = ' num2str(h.p_groupwelchanova,2) ...
+            ', F[' num2str(df) ']=' num2str(f)]);
+    end
+    if h.p_groupanova<0.05 || (isfield(h,'p_groupwelchanova') && h.p_groupwelchanova<0.05)
+        p = dunnett(stats);
+        logmsg(['Post-hoc Dunnett p = ' num2str(p,2)]);
+    end
+
+    
+
 end
 
 if ~( length(signif_y)==1 && signif_y==0)
