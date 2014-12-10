@@ -67,7 +67,7 @@ if length(y)>2 % multigroup comparison
     if h.p_groupanova<0.05 || (isfield(h,'p_groupwelchanova') && h.p_groupwelchanova<0.05)
         p = dunnett(stats);
         for i=2:length(p)
-            logmsg(['Post-hoc Dunnett (first group is common control) p = ' num2str(p(i),2)]);
+            logmsg(['Post-hoc Dunnett (first group is common control) group ' num2str(i) ': p = ' num2str(p(i),2)]);
         end
         comparison = multcompare(stats,'ctype','tukey-kramer','display','off');
         for i=1:size(comparison,1) % over all tests
