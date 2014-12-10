@@ -9,47 +9,16 @@ groups={'pv ctl','pv gfp','pv 1 md','pv sh','pv 7 md'};
 x = [];
 g = [];
 fun = @sqrt; %id;%@sqrt; %id;% @sqrt; %@log;
+logmsg(['Using transform: ' func2str(fun)]);
 
 data = cellfun(fun,data,'UniformOutput',false);
 
 
-data = {data{1},data{3},data{4},data{5}}
-groups = {groups{1},groups{3},groups{4},groups{5}}
-for i=1:length(data)
-    x = [x;data{i}];
-    g = [g;i*ones(size(data{i}))];
-end
-[p,anovatab,stats] = anova1(x,g);
-disp(['ANOVA ' num2str(p)]);
+data = {data{1},data{3},data{4},data{5}};
+groups = {groups{1},groups{3},groups{4},groups{5}};
 
-[p,h,comp] = myanova(x,g)
-disp(['ANOVA ' num2str(p)]);
-[p,h,comp] = kruskalwallis(x,g)
-disp(['Kruskal-Wallis' num2str(p)]);
+graph(data,[],'xticklabels',groups);
 
-for i=1:length(data)
-
-   [h,p]=swtest(data{i});
-   pbs=[];
-   for j=1:100
-       [hbs,pbs(j)]=swtest(bootstrp(100,@mean,data{i}));
-   end
-   disp(['Group ' groups{i} ': swtest p = ' num2str(p,2)...
-       ', bootstrap mean swtest p=' ...
-       num2str(mean(pbs),2)]);
-end
-for i=1:length(data)
-
-   disp(['Group ' groups{i} ':  ' num2str(mean(data{i}),2) ' +/- ' num2str(std(data{i}),2) ' mean +/- std']);
-end
-
-p =vartestn(x,g);
-disp(['Groups have equal variances: ' num2str(p,2)]);
-
-
-welchanova([x g])
-
-function x = id(x)
 
 
 function x = getdata

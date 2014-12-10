@@ -12,7 +12,7 @@ logmsg(['Using transform: ' func2str(fun)]);
 
 data = cellfun(fun,data,'UniformOutput',false);
 
-graph(data);
+graph(data,[],'xticklabels',groups);
 
 
 
