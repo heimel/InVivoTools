@@ -1,47 +1,48 @@
-function [data,x,g]=hadi_check_pv_odi_onoff
-% DEPRECATED
+function [data,x,g]=hadi_check_odi_onoff
 % 
 % tests for statistics, 2014-12-02
 % Alexander Heimel
 
-data = getpvdata; % odi
-groups={'pv gfp','pv ctl','pv 1 md','pv sh','pv 7 md'};
-for i=1:length(data)
-    data{i}=data{i}(:,2)-data{i}(:,1);
+pvdata = getpvdata; % odi
+pvgroups={'pv gfp','pv ctl','pv 1 md','pv sh','pv 7 md'};
+for i=1:length(pvdata)
+    pvdata{i}=pvdata{i}(:,2)-pvdata{i}(:,1);
 end
 logmsg('PV on-off')
-graph(data,[],'xticklabels',groups);
+graph(pvdata,[],'xticklabels',pvgroups);
 
 
-data = getvipdata; % odi
-groups={'vip ctl','vp md'};
-for i=1:length(data)
-    data{i}=data{i}(:,2)-data{i}(:,1);
-end
-logmsg('VIP on-off')
-graph(data,[],'xticklabels',groups);
-
-logmsg('VIP abs on-off')
-for i=1:length(data)
-    data{i} = abs(data{i});
-end
-graph(data,[],'xticklabels',groups,'transform','sqrt');
-
-
-data = getsstdata; % odi
-groups={'sst ctl','vp md'};
-for i=1:length(data)
-    data{i}=data{i}(:,2)-data{i}(:,1);
+sstdata = getsstdata; % odi
+sstgroups={'sst ctl','vp md'};
+for i=1:length(sstdata)
+    sstdata{i}=sstdata{i}(:,2)-sstdata{i}(:,1);
 end
 logmsg('SST on-off')
-graph(data,[],'xticklabels',groups);
+graph({pvdata{1},sstdata{:}},[],'xticklabels',{'pv gfp',sstgroups{:}});
+
+
+vipdata = getvipdata; % odi
+vipgroups={'vip ctl','vp md'};
+for i=1:length(vipdata)
+    vipdata{i}=vipdata{i}(:,2)-vipdata{i}(:,1);
+end
+logmsg('VIP on-off')
+graph({pvdata{1},vipdata{:}},[],'xticklabels',{'pv gfp',vipgroups{:}});
+
+
+
 
 logmsg('SST abs on-off')
-for i=1:length(data)
-    data{i} = abs(data{i});
+for i=1:length(sstdata)
+    sstdata{i} = abs(sstdata{i});
 end
-graph(data,[],'xticklabels',groups,'transform','sqrt');
+graph(sstdata,[],'xticklabels',sstgroups,'transform','sqrt');
 
+logmsg('VIP abs on-off')
+for i=1:length(vipdata)
+    vipdata{i} = abs(vipdata{i});
+end
+graph(vipdata,[],'xticklabels',vipgroups,'transform','sqrt');
 
 
 
