@@ -1,14 +1,31 @@
-function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, h)
+function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transform, h)
 %COMPUTE_SIGNIFICANCES performs standard set of tests on data, and plots stars
 %
-% H = COMPUTE_SIGNIFICANCES(X,Y,TEST,SIGNIF_Y,YSTD,NY,TAIL,H)
+% H = COMPUTE_SIGNIFICANCES(X,Y,TEST,SIGNIF_Y,YSTD,NY,TAIL,TRANSFORM,H)
 %
+%    H is result struct
 %
 % 2014, Alexander Heimel
 
 if nargin<3
     test = '';
 end
+if nargin<4
+    signif_y = [];
+end
+if nargin<5
+    ystd = {};
+end
+if nargin<6
+    ny = {};
+end
+if nargin<7
+    tail = '';
+end
+if nargin<8
+    transform = '';
+end
+
 
 if strcmp(test,'none')
     return
@@ -30,6 +47,39 @@ height=(ax(4)-ax(3))/20;
 w=0.1;
 
 
+for i=1:length(y)
+    ind = ~isnan(y{i});
+    
+    logmsg(['Group ' num2str(i) ':  ' num2str(mean(y{i}(ind)),2) ...
+        ' +/- ' num2str(std(y{i}(ind)),2) ...
+        ' [' num2str(sem(y{i}(ind)),2) ']' ...
+        ' (mean +/- std [sem]), n = ' num2str(length(y{i}(ind))) ]);
+end
+
+
+notnormal = false;
+
+% transform
+if ~isempty(transform)
+    y = cellfun(str2func(transform),y,'UniformOutput',false);
+    logmsg(['Applying ' transform ' transform']);
+end
+
+
+for i=1:length(y)
+    [hsw,p] = swtest(y{i}); %#ok<ASGLU>
+    if p<0.05
+        notnormal = true;
+    end
+    
+    logmsg(['Group ' num2str(i) ':  '  ...
+        'Shapiro-Wilk normality p = ' num2str(p,2)]);
+end
+if notnormal
+    logmsg('Detected a not normal group. Do a transform or use Kruskal-Wallis, unless n is high (>30)');
+end
+
+
 if length(y)>2 % multigroup comparison
     v = [];
     group = [];
@@ -38,19 +88,6 @@ if length(y)>2 % multigroup comparison
         group = cat(1,group,i*ones(length(y{i}),1));
     end
     
-    notnormal = false;
-    for i=1:length(y)
-        [hsw,p]=swtest(y{i});
-        if p<0.05
-            notnormal = true;
-        end
-        logmsg(['Group ' num2str(i) ':  ' num2str(mean(y{i}),2) ' +/- ' num2str(std(y{i}),2) ...
-            ' (mean +/- std), n = ' num2str(length(y{i})) ...
-            ', Shapiro-Wilk normality p = ' num2str(p,2)]);
-    end
-    if notnormal
-        logmsg('Not normal group detected. Do a transform or use Kruskal-Wallis, unless n is high (>30)');
-    end
     
     
     [h.p_groupkruskalwallis,anovatab,stats] = kruskalwallis(v,group,'off');
@@ -76,9 +113,8 @@ if length(y)>2 % multigroup comparison
         end
     end
     
-    
-    
-end
+end % multigroup comparison
+
 
 if ~( length(signif_y)==1 && signif_y==0)
     for i=1:length(y)
@@ -116,7 +152,6 @@ if ~( length(signif_y)==1 && signif_y==0)
                 end
             end
             
-            
             if isempty(ind_y) % no mention in signif_y list
                 y_star=ax(4)+height*(j-i-1);
             else
@@ -126,17 +161,24 @@ if ~( length(signif_y)==1 && signif_y==0)
             % matlab significance test using sample data
             if iscell(ystd) && iscell(ny)
                 [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,testperformed]=...
-                    plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
+                    compute_pairwise_significance(y{i},y{j},test,...
                     ystd{i},ny{i},ystd{j},ny{j},tail);
             else
                 [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,testperformed]=...
-                    plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
+                    compute_pairwise_significance(y{i},y{j},test,...
                     [],[],[],[],tail);
+                
             end
+            plot_significance(x(i),x(j),y_star,h.p_sig{i,j},height,w)
             if h.p_sig{i,j}<1
-                outstat = ['Uncorrected ' testperformed ', ' num2str(nsig)...
+                if length(y)>2
+                    outstat = 'Uncorrected ';
+                else
+                    outstat = '';
+                end
+                outstat = [outstat testperformed ', ' num2str(nsig)...
                     ' = grp ' num2str(i) ' vs grp ' num2str(j) ...
-                    ', p = ' num2str(h.p_sig{i,j},2)  ];
+                    ', p = ' num2str(h.p_sig{i,j},2)  ]; %#ok<AGROW>
                 if ~isempty(statistic_name)
                     if ~isempty(dof) && ~isnan(dof)
                         outstat = [outstat ...

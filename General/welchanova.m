@@ -1,7 +1,12 @@
 function [P,FW,v1] = welchanova(x,alpha,dispopt)
 %WELCHANOVA Welch ANOVA Test for Unequal Variances.
 %
-%  [P,F,df] = WELCHANOVA( X, ALPHA )
+%  [P,F,df] = WELCHANOVA( X, ALPHA, DISPOPT )
+%
+%  X data
+%  ALPHA is alpha-level (default 0.05)
+%  if DISPOPT is 'on' (default) some information graphs are shown, 'off' 
+%  is the alternative
 %
 % The ANOVA F-test to compare the means of k normally distributed
 %  populations is not applicable when the variances are unknown, and not

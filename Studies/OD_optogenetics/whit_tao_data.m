@@ -1,3 +1,4 @@
+clear 
 %control
 x{1} = [0.36372 0.1777 -0.02021 0.24472 0.32469 0.01156 0.32203 0.12924 0.16442 0.29202 0.08873 0.46616 0.09137 0.10049 0.20739 0.10849 0.16215 0.30739 0.1224 0.0851];
 y{1} = [0.58197 -0.07322 0.05188 0.10717 0.2688 0.03906 0.24282 0.04464 0.06655 0.26579 -0.0354 0.45212 -0.01694 0.01151 0.26038 0.13396 0.17771 0.32353 0.12842 0.05911];
@@ -56,4 +57,11 @@ x = [absdiff{1}';absdiff{2}'];
 g = [ones(length(absdiff{1}),1);2*ones(length(absdiff{2}),1)];
 p =vartestn(x,g);
 disp(['Groups have equal variances: ' num2str(p,2)]);
-welchanova([x g])
+p = welchanova([x g],[],'off');
+logmsg(['Welchanova p = ' num2str(p,2)]);
+
+fun = @sqrt; %id;%@sqrt; %id;% @sqrt; %@log;
+logmsg(['Using transform: ' func2str(fun)]);
+absdiff = cellfun(fun,absdiff,'UniformOutput',false);
+%graph(absdiff,[],'xticklabels',{'Ctl','MD'},'showpoints',0,'color',{[0 1 0],[0 0.4 0]},'ylab','Absolute ODI difference','save_as','whit_odi_abs_diff.png','test','ranksum');
+graph(absdiff,[],'xticklabels',{'Ctl','MD'},'showpoints',0,'color',{[0 1 0],[0 0.4 0]},'ylab','Absolute ODI difference','save_as','whit_odi_abs_diff.png');

@@ -447,9 +447,9 @@ for m=1:n_measures
         if isempty(grouplabel)
             grouplabel=['group ' num2str(g)];
         end
-        disp([measurelabels{m} ' ' grouplabel ...
-            ' mean = ' num2str(nanmean(r{m}{g}(:)),3) ...
-            ', sem = ' num2str(r_std{m}{g}/sqrt(r_n{m}{g}-1),3) ]);
+%         disp([measurelabels{m} ' ' grouplabel ...
+%             ' mean = ' num2str(nanmean(r{m}{g}(:)),3) ...
+%             ', sem = ' num2str(r_std{m}{g}/sqrt(r_n{m}{g}-1),3) ]);
     end
 end
 
@@ -461,12 +461,12 @@ switch style
         if size(grouplabels,1)>n_groups*n_measures/2
             errormsg(['Wrong number of grouplabels. ' ...
                 num2str(size(grouplabels,1)) ' given, ' num2str(n_groups*n_measures/2) ' expected.' ]);
-            disp(grouplabels)
+            logmsg(grouplabels)
             return
         elseif size(grouplabels,1)<n_groups*n_measures/2
             logmsg(['Wrong number of grouplabels. ' ...
                 num2str(size(grouplabels,1)) ' given, ' num2str(n_groups*n_measures/2) ' expected.' ]);
-            disp(grouplabels)
+            logmsg(grouplabels)
             for i=size(grouplabels,1)+1:n_groups*n_measures/2
                % grouplabels{i} = '';
                 grouplabels(i,:) = ' ';
@@ -476,7 +476,7 @@ switch style
         if size(grouplabels,1)~=n_groups
             errormsg(['Wrong number of grouplabels. ' ...
                 num2str(size(grouplabels,1)) ' given, ' num2str(n_groups) ' expected.' ]);
-            disp(grouplabels)
+            logmsg(grouplabels)
             return
         end
 end
@@ -713,6 +713,13 @@ end
 values_x = gx;
 values_y = gy;
 
+if length(values_y)==1 && iscell(values_y{1})
+    values_y = values_y{1};
+end
+if length(values_x)==1 && iscell(values_x{1})
+    values_x = values_x{1};
+end
+
 evalin('base','global values_x values_y');
 logmsg('Values available in workspace as values_x values_y.');
-logmsg('To show data: dispcell(values_y{1})')
+logmsg('To show data: dispcell(values_y)')

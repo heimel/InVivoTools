@@ -8,17 +8,19 @@ groups={'pv ctl','pv gfp','pv 1 md','pv sh','pv 7 md'};
 
 x = [];
 g = [];
-fun = @sqrt; %id;%@sqrt; %id;% @sqrt; %@log;
-logmsg(['Using transform: ' func2str(fun)]);
-
-data = cellfun(fun,data,'UniformOutput',false);
-
+% fun = @sqrt; %id;%@sqrt; %id;% @sqrt; %@log;
+% logmsg(['Using transform: ' func2str(fun)]);
+%data = cellfun(fun,data,'UniformOutput',false);
 
 data = {data{1},data{3},data{4},data{5}};
 groups = {groups{1},groups{3},groups{4},groups{5}};
 
-graph(data,[],'xticklabels',groups);
+graph(data,[],'xticklabels',groups,'transform','sqrt');
+%graph(data,[],'xticklabels',groups);
 
+logmsg('***  sqrt transformed absolute delta ODI GFP vs  PV control ***');
+
+graph({data{1},data{2}},[],'transform','sqrt')
 
 
 function x = getdata

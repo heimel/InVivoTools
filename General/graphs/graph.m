@@ -100,6 +100,7 @@ pos_args={...
     'z',{},...
     'smoothing',0,...
     'merge_x',[],...
+    'transform','',... % for statistics, not implemented yet
     };
 
 assign(pos_args{:});
@@ -279,7 +280,6 @@ switch style
         
         n_x = size(z{1},2);
         n_y = size(z{1},1);
-        % n_z = size(z{1},3);
         
         if n_x>length(x{1}) || n_y>length(y{1})
             logmsg(['Z has dimension ' mat2str(size(z{1})) ...
@@ -305,7 +305,7 @@ switch style
         imagesc( y{1} );
     case 'rose'
         hold off % to clear settings from rectangular graphs
-        if exist('bins','var') && ~isempty(bins) && ischar(bins) %#ok<NODEF>
+        if exist('bins','var') && ~isempty(bins) && ischar(bins) 
             bins=eval(bins);
         else
             bins = 16;
@@ -331,10 +331,6 @@ switch style
                 end
             else
                 for i=1:length(y)
-                    %                     if max(bins>45) % i.e. probably degrees
-                    %                         bins = bins/180*pi;
-                    %                     end
-                    
                     [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins);
                     h.polar(i) = polar( rose_theta(i,:)-pi/bins, rose_r(i,:));
                     hold on
@@ -372,7 +368,7 @@ switch style
             end
             hist( y{i},histbin_centers);
             hh = findobj(gca,'Type','patch');
-            set(hh(1),'FaceColor',color{i});%,'EdgeColor','w')
+            set(hh(1),'FaceColor',color{i});
         end
     case 'pie'
         h.pie = pie(cellfun(@mean,y));
@@ -438,11 +434,10 @@ switch style
                     disp(['sory_y by ' sort_y ' is not implemented yet']);
                     ind=(1:length(means));
             end
-            y={y{ind}};
-            color={color{ind}};
-            xticklabels={xticklabels{ind}};
+            y = y(ind);
+            color = color(ind);
+            xticklabels = {xticklabels{ind}};
         end
-        
         
         % plot errors
         if ~exist('errorbars_sides','var')
@@ -469,8 +464,8 @@ switch style
             end
         end
         
-        % plot significances
-        h = compute_significances( y,x, test, signif_y, ystd, ny, tail, h );
+        % compute and plot significances
+        h = compute_significances( y,x, test, signif_y, ystd, ny, tail,transform, h );
         
         % tighten x-axis
         ax = axis;
@@ -506,9 +501,7 @@ switch style
         if showpoints==2 % replace y by means
             for i=1:length(y)
                 if length(x{i})~=length(y{i})
-                    msg = ['Unequal number of x and y values for set ' num2str(i)];
-                    errordlg(msg,'Graph');
-                    disp(['GRAPH: ' msg]);
+                    errormsg(['Unequal number of x and y values for set ' num2str(i)]);
                     if ishandle(h.fig)
                         close(h.fig);
                     end
@@ -591,14 +584,18 @@ switch style
                     for j=i+1:length(pointsy)
                         try
                             [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,test]=...
-                                plot_significance(pointsy{i}{k},x{i}(k),...
-                                pointsy{j}{k},x{j}(k),max([y{i}(k)+ystd{i}(k) y{j}(k)+ystd{j}(k)]),0,0,test);
+                                compute_significance(pointsy{i}{k},...
+                                pointsy{j}{k},test,[],[],[],[],tail,transform);
+                            
+                            
+                            plot_significance(  x{i}(k),...
+                                x{j}(k),max([y{i}(k)+ystd{i}(k) y{j}(k)+ystd{j}(k)]),p,0,0);
                         catch
                             h.h_sig{i,j}=nan;
                             h.p_sig{i,j}=nan;
                             statistic = nan;
                             statistic_name = '';
-                            dof=nan;
+                            dof = nan;
                         end
                         if h.h_sig{i,j}==1
                             logmsg(['Differences at x=' num2str(x{j}(k),2)...
@@ -798,9 +795,6 @@ if ~isempty(ylab)
     xlabel(xlab,'FontSize',fontsize,'FontName',fontname);
 end
 
-% set yticklabel
-%set(gca,'yticklabel',get(gca,'yticklabel'),'fontsize',fontsize,'fontname',fontname)
-
 % adapt axis to prefax
 if ~isempty(prefax)
     if length(prefax)==4
@@ -857,15 +851,10 @@ if ~isempty(extra_code)
         eval(extra_code); % do evaluation here to allow access to local variables
     catch me
         errormsg(['Problem in extra code: ' extra_code]);
+        logmsg(me.message)
         %rethrow(me);
     end
 end
-
-
-% increase linewidth and fontsize for presentation
-% has to stay after all changes are made to the figure
-%bigger_linewidth(4);
-%smaller_font(-14);
 
 if exist('legnd','var') && ~isempty(legnd)
     legnd = trim(legnd);
@@ -881,7 +870,6 @@ if exist('legnd','var') && ~isempty(legnd)
             handle = 'h.stackedbar,' ;
         case 'pie'
             handle = 'h.pie,' ;
-            
     end
     
     eval(['legend(' handle legnd(2:end-1) ')']);
@@ -889,7 +877,7 @@ if exist('legnd','var') && ~isempty(legnd)
 end
 
 if ~isempty(save_as)
-    filename=save_figure(save_as);
+    h.filename = save_figure(save_as);
 end
 
 return
@@ -897,7 +885,7 @@ return
 
 
 
-function	h=plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick)
+function h=plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick)
 if nargin<8
     tick = [];
 end
@@ -943,7 +931,7 @@ switch errorbars
         dyeb=[dy{:}];
         
         if any(size(x)~=size(means))
-            disp('GRAPH: X and MEANS are of unequal sizes. Cannot draw errorbars.');
+            logmsg('GRAPH: X and MEANS are of unequal sizes. Cannot draw errorbars.');
             h = nan;
             return
         end
