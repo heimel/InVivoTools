@@ -13,7 +13,7 @@ graph(pvdata,[],'xticklabels',pvgroups);
 
 
 sstdata = getsstdata; % odi
-sstgroups={'sst ctl','vp md'};
+sstgroups={'sst ctl','sst md'};
 for i=1:length(sstdata)
     sstdata{i}=sstdata{i}(:,2)-sstdata{i}(:,1);
 end
