@@ -206,7 +206,7 @@ if isfield(record,'measures')
                     end
                 elseif isfield(measures,'index')
                     if length(record.reliable)<measures.index+1
-                        errormsg(['Reliable vector too short for ' recordfilter(record) '. Note that the first entry is the multi-unit.' ]);
+                        errrormsg(['Reliable vector too short for ' recordfilter(record) '. Note that the first entry is the multi-unit.' ]);
                     else
                         if ~record.reliable(measures.index+1)
                             continue % next c
