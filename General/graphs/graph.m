@@ -205,7 +205,7 @@ end
 
 % reformat y into cell-structure
 if ~iscell(y)
-    if ~ismatrix(y)
+    if ndims(y)>2
         errormsg('Unable to handle arrays of more than 2 dimensions');
         return
     end

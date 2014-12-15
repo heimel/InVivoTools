@@ -119,7 +119,7 @@ for c=1:n_cells
         case {'sg','sg_adaptation'}
             if iscell(measure.rf) % deprecated on 2014-11-26
                 n_intervals = length(measure.rf);
-            elseif ismatrix(measure.rf)
+            elseif ndims(measure.rf)==2
                 n_intervals = 1;
             else
                 n_intervals = size(measure.rf,1);
@@ -531,7 +531,7 @@ function plot_rf( measure , i)
 if iscell(measure.rf)
     rf=measure.rf{i}; % deprecated on 2014-11-26
 else
-    if ismatrix(measure.rf)
+    if ndims(measure.rf)==2
         rf = measure.rf;
     else
         rf = squeeze(measure.rf(i,:,:));

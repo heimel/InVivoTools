@@ -506,7 +506,7 @@ switch measure.measure
         if ~isempty(results)
             switch value_per
                 case 'measurement'
-                    if ismatrix(results) && numel(results)<200
+                    if ndims(results)<3 && numel(results)<200
                         textres=mat2str(results',3);
                         if ~isempty(textres) && textres(1)=='['
                             textres=textres(2:end-1);
