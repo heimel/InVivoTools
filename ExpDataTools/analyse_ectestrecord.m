@@ -70,10 +70,11 @@ switch lower(record.setup)
         logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
         total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
         clear('WaveTime_Fpikes');
+        WaveTime_Fpikes = struct('time',[],'data',[]);
         if ~isunix
             % cut in 60s blocks
             for i=1:length(channels2analyze)
-                WaveTime_Fpikes(i,1) = struct('time',cell(1:length(channels2analyze),1),'data',[]); 
+                WaveTime_Fpikes(i,1) = struct('time',[],'data',[]); 
             end
             for kk=1:ceil(total_length/60)
                 EVENT.Triallngth = min(60,total_length-60*(kk-1));
