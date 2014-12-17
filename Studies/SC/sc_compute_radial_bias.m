@@ -6,7 +6,11 @@ function [radial_angle_all,orientation_all] = sc_compute_radial_bias
 disp('monitor center wrt nose for 2014-08-22 = [-17,-2,30]' );
 disp('monitor tilt = 0, monitor_slant = 20' );
 disp('mouse tilt is 8 deg, left eye lower, (right hemisphere)' );
-%errormsg('Recalculate with tilted monitor');
+
+% the overrides in monitor patches settings are from the calculation with
+% Matlab R2009b. The newer version of Matlab gives slightly different results.
+% occasionally an outlier point was removed to improve the layout of the
+% map
 
 disp('Recalculate retinotopies first');
 
@@ -28,7 +32,6 @@ x =              [65 59 65 59 50];
 y =              [52 44 58 61 56];
 override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y, verbose)
 stimrect{i} = [0 0 1080 1080];
-monitorcenter_rel2nose_cm{i} = [ 00,25,29.5]; %
 monitorcenter_rel2nose_cm{i} = [ 8.5,-30,30]; %
 monitor_tilt_deg{i} = 12; % deg
 monitor_slant_deg{i} = 20;% deg
@@ -37,13 +40,10 @@ significance_record_crit{i} = 'mouse=13.61.2.03,test=mouse_E10,stim_type=signifi
 significance_threshold{i} = 1; %0.05;
 i = i + 1;
 
-
 mouse{i} = '13.61.2.20';
 disp('Check which test to use');
 retinotopy_record_crit{i} = 'mouse=13.61.2.20,test=mouse_E12,stim_type=retinotopy';
 retinotopy_record{i} = db(find_record(db,retinotopy_record_crit{i}));
-% filename = fullfile(oidatapath(retinotopy_record{i}),[retinotopy_record{i}.test '_response_centers.mat']);
-% load(filename);
 stimrect{i} = [4*1920/12 2*1080/8 8*1920/12 6*1080/8];
 monitorpatch_x = [1 2 1 2];
 monitorpatch_y = [2 2 3 3];
@@ -81,17 +81,6 @@ y = [104 103 101 99.9 103 96.5 96.4 96.2 95.4 95.7 94.7 93.8 93.3 92.4 91 91.5 9
 if recalculate || 1
     override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y, verbose )
 end
-% hull = [19 6 1 5 12 18 17 16 24 27 19];
-% xv{i} = y(hull);
-% yv{i} = x(hull);
-monitorcenter_rel2nose_cm{i} = [ -5,0,15]; %
-monitorcenter_rel2nose_cm{i}=[-15,-5,30]; % 0.80
-monitorcenter_rel2nose_cm{i}=[-14,-5,30]; % 0.81
-monitorcenter_rel2nose_cm{i}=[-13,-5,30]; % 0.82
-monitorcenter_rel2nose_cm{i}=[-12,-5,30]; % 0.82
-monitorcenter_rel2nose_cm{i}=[-12,-6,30]; % 0.84
-monitorcenter_rel2nose_cm{i}=[-12,-7,30]; % 0.85
-monitorcenter_rel2nose_cm{i}=[-12,-8,30]; % 0.86
 monitorcenter_rel2nose_cm{i}=[-10,0,30]; % 0.86
 monitor_tilt_deg{i} = -30; % deg  % best estimate to fit data. Forgot to measure for mouse
 monitor_slant_deg{i} = 20;% deg
@@ -106,12 +95,6 @@ retinotopy_record_crit{i} = 'mouse=13.61.2.13,test=mouse_E7,stim_type=retinotopy
 stimrect{i} = [2*1920/12 2*1080/8 9*1920/12 8*1080/8];
 
 retinotopy_record{i} = db(find_record(db,retinotopy_record_crit{i}));
-
-% monitorpatch_x = [5 6 5 4 3 2 3 4 5 6 2 3 4 5 2 3];
-% monitorpatch_y = [1 2 2 2 2 3 3 3 3 3 4 4 4 4 5 5];
-% y =              [104 92 96 98 99 94 93 90 86 84 86 82 80 77 81 77];
-% x =              [91 91 87 84 79 67 74 78 83 87 87 74 80 86 67 71];
-
 monitorpatch_x = [5 6 6 5 4 3 3 4 5 6 3 4 5 3];
 monitorpatch_y = [1 1 2 2 2 2 3 3 3 3 4 4 4 5];
 y =              [104 101 92 96 98 99 93 90 86 84 82 80 77 77];
@@ -122,7 +105,6 @@ if recalculate || 1
 end
 
 monitorcenter_rel2nose_cm{i} = [ -18,-14,30]; % x cm left, y cm up, viewing distance cm
-% monitorcenter_rel2nose_cm{i} = [ -5,-5,15]; %
 monitor_tilt_deg{i} = 0; % deg
 monitor_slant_deg{i} = 20;% deg
 orientation_record_crit{i} = 'mouse=13.61.2.13,test=mouse_E5,stim_type=orientation';
@@ -148,7 +130,6 @@ end
 
 monitor_tilt_deg{i} = -10; % deg
 monitor_slant_deg{i} = 20;% deg
-monitorcenter_rel2nose_cm{i} = [ -14,-5,30]; % x cm left, y cm up, viewing distance cm
 monitorcenter_rel2nose_cm{i} = [ -15,-10,30]; %
 orientation_record_crit{i} = 'mouse=13.61.2.14,test=mouse_E5,stim_type=orientation';
 significance_record_crit{i} = 'mouse=13.61.2.14,test=mouse_E5,stim_type=significance';
@@ -161,15 +142,11 @@ stimrect{i} = [0 0 1000 800];
 retinotopy_record{i} = db(find_record(db,retinotopy_record_crit{i}));
 monitorpatch_x = [  1  2   3  1  2   3   1  2   3];
 monitorpatch_y = [  1  1   1  2  2   2   3  3   3];
-% x =              [nan 90 105 80 90 105 nan 90 105];
-% y =              [nan 55  60 40 42 50 nan 35  40];
 x =              [nan nan 110 80 90 105 nan 90 105];
 y =              [nan nan  50 40 42  50 nan 35  40];
 if recalculate || 1
     override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y , verbose)
 end
-monitorcenter_rel2nose_cm{i} = [ -20,-8,29.5]; %
-monitorcenter_rel2nose_cm{i} = [ -5,-5,15]; %
 monitorcenter_rel2nose_cm{i} = [-17,-5,30];
 monitor_tilt_deg{i} = 0; % deg
 monitor_slant_deg{i} = 20;% deg
@@ -191,12 +168,7 @@ x = [34.8 42.1 51.2 57.8 61.3 32.4 37.4 44.1 56.5 61.6 28.3 31.2 38.7 48.7 54.9 
 y = [68.7 71.8 74.5 74.6 74.6 62.8 64 64.4 66.8 68 56 52.7 49 44.6 42.1 48.8 46.1 42.6 39.3 ];
 override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y, verbose)
 stimrect{i} = [0 0 1200 800];
-monitorcenter_rel2nose_cm{i} = [ -20,-10,29.5];
-monitorcenter_rel2nose_cm{i} = [ -10,-15,30];
 monitorcenter_rel2nose_cm{i} = [-22,-3,30]; %
-% monitorcenter_rel2nose_cm{i} = [ -20,-10,29.5];
-% monitorcenter_rel2nose_cm{i} = [ -10,-15,30];
-% monitorcenter_rel2nose_cm{i} = [-17,-15,30];
 monitor_tilt_deg{i} = 5; % deg 0
 monitor_slant_deg{i} = 20;% deg 20
 disp('Two tests, we could combine them');
@@ -668,7 +640,7 @@ function    img_orientation = make_orientation_map( orientation_record,avg)
     img_orientation = mod(img_orientation/pi*180,360)/2;
 
 
-function [monitorpatch_x,monitorpatch_y,x,y] = getgridcoordinates(retinotopy_record) %#ok<STOUT,REDEF>
+function [monitorpatch_x,monitorpatch_y,x,y] = getgridcoordinates(retinotopy_record) %#ok<STOUT>
 retinotopy_record = analyse_oitestrecord( retinotopy_record);
 filename = fullfile(oidatapath(retinotopy_record),[retinotopy_record.test '_response_centers.mat']);
 load(filename);
