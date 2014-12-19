@@ -28,6 +28,8 @@ switch lower(record.setup)
 end
 
 % first specify local root
+
+
 switch host
     case {'daneel','andrew'}
         if isunix
@@ -51,7 +53,15 @@ switch host
         base = fullfile(base,'InVivo','Imaging',capitalize(record.setup));
 end
 
-datapath=fullfile(base,pathend);
+
+% first check locally
+params.oidatapath_localroot = base;
+
+% check for local overrides
+params = processparams_local(params);
+
+
+datapath=fullfile(params.oidatapath_localroot,pathend);
 
 switch host
     case {'eto','giskard'}
