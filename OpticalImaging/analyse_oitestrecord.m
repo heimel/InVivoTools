@@ -361,15 +361,14 @@ switch record.stim_type
             polavg = polavg + avg(:,:,c) * exp(multfac*pi*1i*record.stim_parameters(c)/180);
         end
         
-        %substract mean bias in ROI
-        %polavg = polavg - mean(polavg(roi'==1));
-        %or_abs = abs(polavg);
-        
         or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
         or_angs(roi_edge'==1) = 0;
-
+        or_ang = angle(polavg);
+        or_ang(roi_edge'==1) = 0;
         
-         or_ang=angle(polavg);or_ang(roi_edge'==1) = 0;figure;imagesc(or_ang');set(gca,'clim',[1.3 3])
+%         figure;
+%         imagesc(or_ang');
+%         set(gca,'clim',[1.3 3])
          
         figure
         image(or_angs');
@@ -383,8 +382,6 @@ switch record.stim_type
         imwrite(get(get(gca,'children'), 'cdata') ,filename, 'png');
         logmsg(['Orientation map saved as: ' filename]);
         close(h);
-        
-        %    oi_correlation_map( record )
         
         switch record.stim_type
             case 'orientation'

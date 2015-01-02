@@ -8,17 +8,18 @@ function [concentric_angle_all,orientation_all] = sc_compute_radial_bias
 % pitch is rotation around ears
 
 calc_phase_map = false;
-
-disp('monitor center wrt nose for 2014-08-22 = [-17,-2,30]' );
-disp('monitor tilt = 0, monitor_slant = 20' );
-disp('mouse tilt is 8 deg, left eye lower, (right hemisphere)' );
+if calc_phase_map
+    warning('Using phase map test');
+else 
+    warning('Not computing phase map test');
+end
 
 % the overrides in monitor patches settings are from the calculation with
 % Matlab R2009b. The newer version of Matlab gives slightly different results.
 % occasionally an outlier point was removed to improve the layout of the
 % map
 
-disp('Recalculate retinotopies first');
+logmsg('Recalculate retinotopies first');
 
 recalculate = false;
 verbose = false;
@@ -204,10 +205,12 @@ if recalculate || 1
     override_response_centers( retinotopy_record{i}, monitorpatch_x, monitorpatch_y, x, y , verbose)
 end
 
+orientation_record2_crit{i} = '';
+
 monitorcenter_rel2nose_cm{i} = [-10,-4,30]; %
 monitor_tilt_deg{i} = 0; % deg
 monitor_slant_deg{i} = 20;% deg
-orientation_record2_crit{i} = 'mouse=13.61.2.21,test=mouse_E6,stim_type=orientation';
+%orientation_record2_crit{i} = 'mouse=13.61.2.21,test=mouse_E6,stim_type=orientation';
 orientation_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E8,stim_type=orientation';
 %orientation_high_sf_record_crit{i} = 'mouse=13.61.2.21,test=mouse_E7,stim_type=orientation';
 orientation_high_sf_record_crit{i} = ''; % excluding test because response was below 0.5%
@@ -289,10 +292,12 @@ for i=mice % :length(retinotopy_record_crit)
     img_rf_concentric_angle_deg{i}(img_rf_concentric_angle_deg{i}>0 & img_rf_concentric_angle_deg{i}<180) = 0;
     
     % blurring
+    %filtersize = 6; % was 6 at Nature Neuroscience and Nature submission
+    filtersize = 1.5; % new setting 2014-12-20
     if 1
         img_concentric =exp(2i*img_rf_concentric_angle_deg{i}/180*pi);
         img_concentric(isnan(img_concentric)) = 0;
-        img_concentric = spatialfilter(img_concentric,6,'pixel');
+        img_concentric = spatialfilter(img_concentric,filtersize,'pixel'); 
         img_concentric = angle(img_concentric)/pi*180/2;
         img_concentric(isnan(img_rf_concentric_angle_deg{i})) = nan;
     else
@@ -398,10 +403,11 @@ for i=mice % :length(retinotopy_record_crit)
 
     
     
-    
-    
-    ccc = circ_corrcc(2* img_rf_concentric_angle_deg{i}(mask{i})/180*pi,2* img_orientation{i}(mask{i})/180*pi);
-    logmsg(['Mouse ' mouse{i} ' circ. corrcoeff concentric and orientation map (all) = ' num2str(ccc)]);
+    [ccc,pval] = circ_corrcc(2* img_rf_concentric_angle_deg{i}(mask{i})/180*pi,2* img_orientation{i}(mask{i})/180*pi);
+    logmsg(['Mouse ' mouse{i} ' circ. corrcoeff concentric and orientation map (all) = ' num2str(ccc) ', p=' num2str(pval) ]);
+
+    [cc,pval] = corrcoef(2* img_rf_concentric_angle_deg{i}(mask{i})/180*pi,2* img_orientation{i}(mask{i})/180*pi);
+    logmsg(['Mouse ' mouse{i} ' norm. corrcoeff concentric and orientation map (all) = ' num2str(cc(2,1)) ', p=' num2str(pval(2,1)) ]);
     
     if 0
         mask{i} = ~isnan(img_rf_azimuth_deg{i}) & (signif_between_groups<significance_threshold{i});
@@ -554,7 +560,7 @@ logmsg(['Circ. corrcc = ' num2str(r) ', p = ' num2str(p)]);
 logmsg(['Circ. corrcc (positive angles) = ' num2str(r) ', p = ' num2str(p)]);
 
 [r,p] = circ_corrcc(concentric_angle_all(ind)/180*pi,orientation_all(ind)/180*pi);
-logmsg(['Circ. corrcc (positive angles) = ' num2str(r) ', p = ' num2str(p)]);
+logmsg(['Circ. corrcc (positive angles) directions = ' num2str(r) ', p = ' num2str(p)]);
 
 save(fullfile(getdesktopfolder,'orientation_concentric.mat'),'concentric_angle_all','orientation_all');
 
@@ -570,7 +576,7 @@ axis square
 
 
 figure;
-hist(  abs(angle_high_low_sf_all),[-90:45:90]) 
+hist(  angle_high_low_sf_all,[-90:45:90]) 
 ylabel('Number of pixels');
 xlabel('Vector angle difference (deg)');
 title('Between SFs');
@@ -592,7 +598,6 @@ hist(  abs(pref_diff_phases_all) ,[0:45:90])
 ylabel('Number of pixels');
 xlabel('Preferred angle difference (deg)');
 title('Between phases');
-
 
 
 function override_response_centers( retinotopy_record, monitorpatch_x, monitorpatch_y, x, y,verbose )
@@ -651,7 +656,7 @@ if length(orientation_record)>1
 end
 filename = fullfile(oidatapath(orientation_record),...
     [orientation_record.test '_avg.mat']);
-if exist(filename,'file')
+if 0 && exist(filename,'file')
     load(filename);
 else
     [orientation_record,avg] = analyse_oitestrecord( orientation_record);
