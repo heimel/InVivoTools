@@ -264,6 +264,9 @@ switch windowname
                 end
                 filename=fullfile(pathname,filename);
                 imported = load(filename);
+                if ~isempty(ud.db)
+                    imported.db = structconvert(imported.db,ud.db);
+                end
                 try
                     if ud.h.current_record<length(ud.db)
                         ud.db = [ud.db(1:ud.current_record) imported.db ud.db(ud.current_record+1:end)];
