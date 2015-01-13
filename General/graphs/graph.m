@@ -431,7 +431,7 @@ switch style
                     [means,ind]=sort(-means);
                     means=-means;
                 otherwise
-                    disp(['sory_y by ' sort_y ' is not implemented yet']);
+                    logmsg(['sort_y by ' sort_y ' is not implemented yet']);
                     ind=(1:length(means));
             end
             y = y(ind);
@@ -525,12 +525,17 @@ switch style
                     end
                 end
                 
-                logmsg('Next routine throws away values. Not ideal!');
+                %logmsg('Next routine throws away values. Not ideal!');
                 
                 for j=1:length(uniqx)
                     if sum(x{i}==uniqx(j))> length(y{i})/length(uniqx)*0;%*0.5;%0.5
                         uniqy(j) = nanmean(y{i}(x{i}==uniqx(j)));
-                        uniqystd(j) = nansem(y{i}(x{i}==uniqx(j))); % notice SEM!
+                        switch errorbars
+                            case 'sem'
+                                uniqystd(j) = nansem(y{i}(x{i}==uniqx(j))); 
+                            otherwise
+                                uniqystd(j) = nanstd(y{i}(x{i}==uniqx(j))); 
+                        end
                         pointsy{i}{j} = (y{i}(x{i}==uniqx(j)));   % for significance calculations
                     else
                         
@@ -543,6 +548,9 @@ switch style
                 y{i} = uniqy(ind);
                 ystd{i} = uniqystd(ind);
             end
+            if strcmp(errorbars,'sem')
+                errorbars = 'std'; % to avoid trouble later when plotting
+            end    
         end
         
         if exist('smoothing','var') && smoothing>0
