@@ -505,8 +505,8 @@ switch measure.measure
         end
         if ~isempty(results)
             switch value_per
-                case 'measurement'
-                    if ndims(results)<3 && numel(results)<200
+                case {'measurement','neurite'}
+                    if ndims(results)<3 && numel(results)<200 %#ok<ISMAT>
                         textres=mat2str(results',3);
                         if ~isempty(textres) && textres(1)=='['
                             textres=textres(2:end-1);
