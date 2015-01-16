@@ -18,10 +18,8 @@ end
 
 if nargin<2
     hostname = host;
-    if isempty(hostname)
-        % disp(['EXPERIMENT_DB: No hostname set' ]);
-    else        
-        disp(['EXPERIMENT_DB: Working on host ' hostname ]);
+    if ~isempty(hostname)
+        logmsg(['Working on host ' hostname ]);
     end
 end
 
@@ -36,20 +34,20 @@ mice = uniq(sort({db.mouse}));
 filename = fullfile(expdatabasepath, 'mousedb.mat');
 [db,filename,perm,lockfile]=open_db( filename);
 if strcmp(perm,'rw')==0
-    disp('ADD_MISSING_MICE: Could not get lock for mouse_db. Quitting.');
+    logmsg('Could not get lock for mouse_db. Quitting.');
     return
 end
 
 for i = 1:length(mice)
     ind = find_record(db,['mouse=' mice{i}]);
     if isempty(ind)
-        disp(['Mouse ' mice{i} ' is not in mouse_db.']);
+        logmsg(['Mouse ' mice{i} ' is not already in mouse_db.']);
         db(end+1) = empty_record(db);
         
         db(end).mouse = mice{i};
         db(end).alive = 0;
     else
-        disp(['Mouse ' mice{i} ' is already in mouse_db.']);
+        logmsg(['Mouse ' mice{i} ' is already in mouse_db.']);
     end
 end
 

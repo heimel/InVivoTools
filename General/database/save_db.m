@@ -83,7 +83,7 @@ if v(1)=='5'
     end
     save(filename,'db','-mat')
     if debug
-        disp('SAVE_DB: Saved in v5 format');
+        logmsg('Saved in v5 format');
         toc
     end
 else
@@ -94,7 +94,7 @@ else
         save(filename,'db','-mat','-v7');
         if debug
             tc = toc;
-            disp(['SAVE_DB: Saved ' filename ' in v6 format in ' num2str(round(tc)) ' s.']);
+            logmsg(['Saved ' filename ' in v7 format in ' num2str(round(tc)) ' s.']);
         end
     catch
         [p,fname,ext]=fileparts(filename);
@@ -103,7 +103,7 @@ else
         movefile(tempfile,filename,'f')
         if debug
             tc = toc;
-            disp(['SAVE_DB: Saved ' filename ' in format of ' version ' in ' num2str(round(tc)) ' s.']);
+            logmsg(['Saved ' filename ' in format of ' version ' in ' num2str(round(tc)) ' s.']);
         end
     end
 end

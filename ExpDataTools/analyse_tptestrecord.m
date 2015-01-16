@@ -58,7 +58,7 @@ if is_zstack
         errordlg(['Image is not a z-stack. ' recordfilter(record)],'Get neurite length.');
     end
     for i=1:n_rois
-        record.measures(i).length  = tp_get_neurite_length( record.ROIs.celllist(i), record );
+        record.measures(i).length  = tp_get_neurite_length( record.ROIs.celllist(i), record, params );
     end
 end
 

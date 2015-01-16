@@ -1265,14 +1265,11 @@ switch command,
             errormsg('TP database is not open. Not exporting');
         else
             db_ud = get(h_db,'userdata');
-            
-            commentfilt = record.comment;
-            commentfilt(commentfilt==',') = '*';
             ind = find_record( db_ud.db, ['mouse=' record.mouse ',date=' record.date ...
-                ',stack=' record.stack ',epoch=' record.epoch ',comment=' commentfilt]);
+                ',stack=' record.stack ',epoch=' record.epoch ',comment="' record.comment '"']);
             if isempty(ind)
                 ind = find_record( db_ud.db, ['mouse=' record.mouse ',date=' record.date ...
-                    ',epoch=' record.epoch ',comment=' commentfilt]);
+                    ',epoch=' record.epoch ',comment="' record.comment '"']);
                 if length(ind)==1 && isempty(db_ud.db(ind).stack)
                     % ok, probably just defaulted to Live_0000
                 else

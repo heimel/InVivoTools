@@ -43,23 +43,20 @@ else
         ind_cur = find_record(db,crit_current);
     end    
     if length(ind_cur)>1
-        if any(record.comment==',')
-            errormsg('Comma in comment field can lead to surprising things. Better remove' );
-        end
-        crit_current = [crit_current ',comment=' record.comment];
+        crit_current = [crit_current ',comment="' record.comment '"'];
         ind_cur = find_record(db,crit_current);
     end    
     if length(ind_cur)>1
-        logmsg(['Can not single out current record ' crit_current '. Not returning a reference.']);
+        logmsg(['Cannot single out current record ' crit_current '. Not returning a reference.']);
         if ~isempty(record.slice)
-            errormsg('Can not single out current record. Not returning a reference.');
+            errormsg(['Can not single out current record ' crit_current '. Not returning a reference.']);
             return
         end
     end
     if length(ind_cur)<1
-        logmsg('Can not find current record. Should not happen. Not returning a reference.');
+        logmsg(['Cannot find current record ' crit_current '. Should not happen. Not returning a reference.']);
         if ~isempty(record.slice)
-            errormsg('Can not single out current record. Not returning a reference.');
+            errormsg(['Can not single out current record ' crit_current '. Not returning a reference.']);
             return
         end
     end
@@ -83,7 +80,7 @@ if isempty(ind_ref)
 end
 
 if length(ind_ref)>1
-    logmsg('More than one reference record. Returning last one');
+    logmsg(['More than one reference record. Returning last one. ' crit]);
 end
 
 % select last record of selection

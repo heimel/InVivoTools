@@ -7,6 +7,8 @@ function s = tpsetup( inp )
 % 2008-2011, Alexander Heimel
 %
 
+persistent cursetup
+
 fp = fileparts(which('tpreadframe.m'));
 s = fp( (find(fp==filesep,1,'last')+1):end);
 if nargin<1
@@ -33,6 +35,12 @@ switch lower(setup)
         setup = 'ImageJ';
     otherwise
         setup = 'FluoView';
+end
+
+if strcmp(cursetup,setup)
+    return
+else
+    cursetup = setup;
 end
 
 % set path
