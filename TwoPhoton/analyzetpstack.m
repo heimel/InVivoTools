@@ -2138,6 +2138,9 @@ elseif isfield(event,'VerticalScrollCount')
         end
     else
         ax = axis;
+        if isempty(control_state)
+            control_state = false;
+        end
         switch control_state % scroll vertically or horizontally
             case false % vertical
                 axis([ax(1) ax(2) ax(3)+event.VerticalScrollCount*0.1*(ax(4)-ax(3)) ax(4)+event.VerticalScrollCount*0.1*(ax(4)-ax(3))]);
