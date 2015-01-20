@@ -1,10 +1,14 @@
-function record = tp_analyse_neurites( record )
+function record = tp_analyse_neurites( record,params )
 %TP_ANALYSE_NEURITES analyses the neurite ROIs in a tptestrecord
 %
 %  RECORD = TP_ANALYSE_NEURITES( record )
 %
-% 2012-2013, Alexander Heimel
+% 2012-2015, Alexander Heimel
 %
+
+if nargin<2 
+    params = [];
+end
 
 roilist = record.ROIs.celllist;
 
@@ -39,7 +43,7 @@ for i = ind % neurites
     roi = roilist(i);
     
     % get length
-    neuritelength = tp_get_neurite_length( roi, record );
+    neuritelength = tp_get_neurite_length( roi, record,params );
     record.measures(i).length = neuritelength;
     roi.neurite = [roi.index neuritelength ]; % use of length here is deprecated
     roi.extra.length = neuritelength; % use of length here is deprecated

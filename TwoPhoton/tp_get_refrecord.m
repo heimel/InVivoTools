@@ -79,12 +79,11 @@ if isempty(ind_ref)
     return
 end
 
+refrecord = db(ind_ref(end));
 if length(ind_ref)>1
-    logmsg(['More than one reference record. Returning last one. ' crit]);
+    ind_ref = ind_ref(end);
+    logmsg(['More than one reference record. Returning last one: '  tpfilename(refrecord)]);
+else
+    logmsg(['Returning record associated with ' tpfilename(refrecord)]);
 end
 
-% select last record of selection
-ind_ref = ind_ref(end);
-refrecord = db(ind_ref);
-
-logmsg(['Returning record associated with ' tpfilename(refrecord)]);

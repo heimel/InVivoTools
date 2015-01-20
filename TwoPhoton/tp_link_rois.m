@@ -17,7 +17,7 @@ processparams = tpprocessparams(record);
 
 maximum_distance_pxl = processparams.max_roi_linking_distance_um / params.x_step ;
 
-logmsg('Linking parameters are set in tpprocesparams');
+%logmsg('Linking parameters are set in tpprocesparams');
 
 roilist = record.ROIs.celllist;
 

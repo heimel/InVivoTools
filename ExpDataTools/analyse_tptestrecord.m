@@ -54,11 +54,15 @@ end
 
 % compute ROI lengths / circumferences
 if is_zstack
-    if ~isfield(params,'z_step')
-        errordlg(['Image is not a z-stack. ' recordfilter(record)],'Get neurite length.');
-    end
-    for i=1:n_rois
-        record.measures(i).length  = tp_get_neurite_length( record.ROIs.celllist(i), record, params );
+    if isempty(params)
+        errormsg(['Cannot read image information and can thus not compute lengths. ' recordfilter(record)] );
+    else
+        if ~isfield(params,'z_step')
+            errordlg(['Image is not a z-stack. ' recordfilter(record)],'Get neurite length.');
+        end
+        for i=1:n_rois
+            record.measures(i).length  = tp_get_neurite_length( record.ROIs.celllist(i), record, params );
+        end
     end
 end
 
@@ -230,7 +234,8 @@ if isfield(record.measures,'present') && ...
             elseif isfield(ref_record.measures,measure{1})
                 ref_measure = measure{1};
             else
-                logmsg([measure{1} ' is not a measure in reference record. Please analyse or edit tpprocessparams series_measures.']);
+                warning(['ANALYSE_TPTESTRECORD:NO_' measure{1}], [measure{1} ' is not a measure in reference record. Please analyse or edit tpprocessparams series_measures.']);
+                warning('off',['ANALYSE_TPTESTRECORD:NO_' measure{1}]);
                 continue
             end
             for i=1:n_rois
@@ -268,7 +273,11 @@ if isfield(record,'measures') && isfield(record.measures,'bouton') && any([recor
 end
 
 % getting densities
-record = tp_analyse_neurites( record );
+if isempty(params)
+    errormsg(['Cannot read image information and can thus not compute analyse neurites. ' recordfilter(record)] );
+else
+    record = tp_analyse_neurites( record,params );
+end
 
 if is_movie
     record = tp_analyse_movie( record );

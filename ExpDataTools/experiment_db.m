@@ -121,6 +121,25 @@ switch type
         end
 end
 
+if isfield(db,'comment')
+    % Temp removal for multiline comments
+    multiline = false;
+    for i=1:length(db)
+        if size(db(i).comment,1)>1 && ischar(db(i).comment)% i.e. multiline
+            db(i).comment = flatten(db(i).comment')';
+            multiline = true;
+        end
+    end
+    if multiline
+        logmsg('Flattened multiline comments');
+        stat = checklock(filename);
+        if stat~=1
+            filename = save_db(db,filename,'');
+            rmlock(filename);
+        end
+    end
+end
+
 % start control database
 switch testdb
     case {'testdb','ectestdb'}

@@ -22,7 +22,7 @@ if isempty(params)
 end
 
 if isempty(params)
-    logmsg(['Cannot read image information and can thus not compute lengths. ' recordfilter(record)] );
+    errormsg(['Cannot read image information and can thus not compute lengths. ' recordfilter(record)] );
     l = 0;
     return
 end

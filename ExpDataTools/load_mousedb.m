@@ -6,7 +6,7 @@ function [mousedb,filename]=load_mousedb
 
 [mousedb,filename] = load_expdatabase('mousedb');
 
-disp('FIND_RECORD: Temp removal for multiline comments');
+logmsg('Temp removal for multiline comments');
 for i=1:length(mousedb)
     if size(mousedb(i).comment,1)>1 && ischar(mousedb(i).comment)% i.e. multiline
         mousedb(i).comment = flatten(mousedb(i).comment')';
