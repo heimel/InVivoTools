@@ -1471,7 +1471,7 @@ switch command,
                 current_new_cell_index = ud.record.ROIs.new_cell_index;
             end
             if strcmp(button,'Delete all')
-                logsmg('All current ROIs are removed.');
+                logmsg('All current ROIs are removed.');
                 current_celllist = [];
                 current_new_cell_index = 1;
             end
