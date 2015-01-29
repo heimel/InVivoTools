@@ -2152,6 +2152,7 @@ elseif isfield(event,'VerticalScrollCount')
 end
 
 set(src,'WindowKeyPressFcn',@figure_keypress);
+set(src,'WindowScrollWheelFcn',@figure_keypress);
 
 
 
