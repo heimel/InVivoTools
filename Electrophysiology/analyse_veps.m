@@ -25,6 +25,15 @@ bands = oscillation_bands;
 band_names = fields(oscillation_bands);
 
 [stims,stimsfile] = getstimsfile(record);
+if isempty(stims)
+    if ~exist(stimsfile,'file')
+        errormsg(['Cannot find stims file ' stimsfile]);
+    else
+        errormsg(['Empty stims file ' stimsfile]);
+    end
+    return
+end
+
 
 switch trim(record.analysis)
     case ''
