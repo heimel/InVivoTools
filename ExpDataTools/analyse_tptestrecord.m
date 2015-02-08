@@ -75,7 +75,7 @@ end
 
 % getting intensities
 if  process_params.get_intensities  && is_zstack
-    record = tp_get_intensities(record);
+    record = tp_get_intensities(record,verbose);
 end
 
 % create measure fields for labels and types
@@ -140,9 +140,9 @@ end
 
 % get presence time lapse series
 if isfield(record.measures,'present') && ...
-        (~isempty(findstr(record.slice,'day')) || ...
-        ~isempty(findstr(record.slice,'hour')) || ...
-        ~isempty(findstr(record.slice,'minute')))
+        (~isempty(strfind(record.slice,'day')) || ...
+        ~isempty(strfind(record.slice,'hour')) || ...
+        ~isempty(strfind(record.slice,'minute')))
     series_measures =  process_params.series_measures;
     ref_record = tp_get_refrecord(record,false);
     if ~isempty(ref_record) && isfield(ref_record,'measures') && isfield(ref_record.measures,'present')
@@ -293,7 +293,7 @@ end
 
 % save measures file
 measuresfile = fullfile(tpdatapath(record),'tp_measures.mat');
-measures = record.measures; %#ok<NASGU>
+measures = record.measures; 
 try
     save(measuresfile,'measures');
 catch

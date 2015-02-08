@@ -42,7 +42,7 @@ end
 
 n_channels = size(im,ndims(im));
 if n_channels ~= 2
-    disp('TP_UNMIXCHANNELS: Channel unmixing is only implemented for 2 channels');
+    logmsg('Channel unmixing is only implemented for 2 channels');
     unmix = im;
     frac_ch1_in_ch2 = 0;
     frac_ch2_in_ch1 = 0;
@@ -51,12 +51,12 @@ end
 
 store_gcf = gcf;
 
+if show
 hbar = waitbar(0,'Unmixing channels');
-
-
+end
 
 % remove saturated pixels, because correct ratio will be lpst
-disp('TP_UNMIXCHANNELS: Only using unsaturated pixels');
+logmsg('Only using unsaturated pixels');
 sat = 2^12 -1 ; % should be editable, now assuming 12 bit images
 imsmooth = double(im);
 imsmooth( imsmooth(:)>=sat) = NaN;
@@ -67,7 +67,7 @@ imsmooth = tp_spatial_filter( double(imsmooth), 'smoothen','1');
 sim = size(im);
 edge = 5;
 if min(sim(1:end-1))<=(2*edge)
-    disp('TP_UNMIXCHANNELS: Image size smaller than safety age size used for filtering. Not using edge. Filtered data unreliable');
+    logmsg('Image size smaller than safety age size used for filtering. Not using edge. Filtered data unreliable');
     edge = 0;
 end
 
@@ -84,7 +84,9 @@ else % single image
 end
 clear('imsmooth');
 
+if show
 waitbar(0.1,hbar);
+end
 
 imvals = double(imvals);
 
@@ -97,10 +99,10 @@ compression = ceil(numel(imvals)/2/10000);
 black = zeros(1,n_channels);
 for ch = 1:n_channels
     black(ch) = mode(round(imvals(1:compression:end,ch)));
-    disp(['TP_UNMIXCHANNELS: Mode channel ' num2str(ch) ' is ' num2str(black(ch))]);
+    logmsg(['Mode channel ' num2str(ch) ' is ' num2str(black(ch))]);
 end
 
-disp('TP_UNMIXCHANNELS: Removing modes from channels. only using still positive pixels');
+logmsg('Removing modes from channels. only using still positive pixels');
 % negative pixels after removing mode are assumed to be background (as will be still positive pixels)  
 for ch = 1:n_channels
     imvals(:,ch) = imvals(:,ch) - black(ch);
@@ -109,7 +111,9 @@ end
 
 imvals = reshape(imvals(:,:),size(im,1)-2*edge,size(im,2)-2*edge,size(im,3)-2*edge,n_channels);
 
+if show
 waitbar(0.3,hbar);
+end
 
 params = tpprocessparams;
 
@@ -169,10 +173,10 @@ vals2 = vals2(ind);
 
 switch params.which_frac_ch2_in_ch1
     case 'prctile1'
-        disp('TP_UNMIXCHANNELS: taking percentile 1 as minimum ratio');
+        logmsg('Taking percentile 1 as minimum ratio');
         frac_ch2_in_ch1 = prctile(vals,1);
     case 'prctile5'
-        disp('TP_UNMIXCHANNELS: taking percentile 5 as minimum ratio');
+        logmsg('Taking percentile 5 as minimum ratio');
         frac_ch2_in_ch1 =prctile(vals,5);
     case 'mode' % runs into problems with autofluorescence of debris, e.g. 10.24.1.28,tuft4-mono,day24
         vals = vals(vals>0);
@@ -189,20 +193,20 @@ switch params.which_frac_ch2_in_ch1
         frac_ch2_in_ch1 = v1*max(vals1)/(v2*max(vals2));
 end
 
+if show
 waitbar(0.5,hbar);
+end
 
-disp(['TP_UNMIXCHANNELS: Fraction of Ch2 in Ch1: ' num2str(frac_ch2_in_ch1,2)]);
+logmsg(['Fraction of Ch2 in Ch1: ' num2str(frac_ch2_in_ch1,2)]);
 
 % no unmixing of channel 2
 frac_ch1_in_ch2 = 0;
-%if frac_ch1_in_ch2 * frac_ch2_in_ch1 >1
-%    frac_ch2_in_ch1  = max(min(im(edge:end-edge,edge:end-edge,1)./im(edge:end-edge,edge:end-edge,2)));
-%    frac_ch1_in_ch2 = max(min(im(edge:end-edge,edge:end-edge,2)./im(edge:end-edge,edge:end-edge,1)));
-%end
 
 unmix = zeros(size(im),'double');
 
+if show
 waitbar(0.7,hbar);
+end
 
 if ndims(im)<4
     im_nomode(:,:,1) = thresholdlinear( im(:,:,1) - black(1));
@@ -230,9 +234,11 @@ else
     unmix = uint16( unmix );
 end
 
+if show
 close(hbar);
+end
 
-if  1 || show
+if show
     figure('name','Unmixing results','NumberTitle','off');
     
     subplot(2,3,1);

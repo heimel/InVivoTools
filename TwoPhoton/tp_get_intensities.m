@@ -1,4 +1,4 @@
-function record = tp_get_intensities(record)
+function record = tp_get_intensities(record,verbose)
 %TP_GET_INTENSITIES
 %
 %  RECORD = TP_GET_INTENSITIES( RECORD )
@@ -6,6 +6,13 @@ function record = tp_get_intensities(record)
 % 
 % 2011-2014, Alexander Heimel
 %
+
+if nargin<2
+    verbose = [];
+end
+if isempty(verbose)
+    verbose = true;
+end
 
 logmsg('Should remove intensity info from cellist');
 
@@ -23,9 +30,11 @@ if isempty(params)
     return
 end
 
-hbar = waitbar(0,'Calculating ROI intensities' );
+if verbose
+    hbar = waitbar(0,'Calculating ROI intensities' );
+end
 
-pvimg = tppreview(record,40,1,1:params.NumberOfChannels,process_parameters);
+pvimg = tppreview(record,40,1,1:params.NumberOfChannels,process_parameters,[],verbose);
 channel_modes = zeros(1,params.NumberOfChannels);
 for ch=1:params.NumberOfChannels
     val = pvimg(:,:,ch);
@@ -71,7 +80,7 @@ for i = ind_dendrite(:)'
             
             for frame = (max(1,round(roi_dendrite.zi(j))-1):...
                     min(params.NumberOfFrames,round(roi_dendrite.zi(j))+1))
-                im = tpreadframe(record,ch,frame,process_parameters);
+                im = tpreadframe(record,ch,frame,process_parameters,verbose);
                 im = double(squeeze(im));
                 x = round(roi_dendrite.xi(j));
                 y = round(roi_dendrite.yi(j));
@@ -114,8 +123,9 @@ for i = ind_dendrite(:)'
     end % ch
     celllist(i).intensity_median = roi_dendrite.intensity_median;
     
-    waitbar(0.5*find(ind_dendrite==i,1)/length(ind_dendrite),hbar);
-    
+    if verbose
+        waitbar(0.5*find(ind_dendrite==i,1)/length(ind_dendrite),hbar);
+    end
 end
 
 [blankprev_x,blankprev_y] = meshgrid(1:params.pixels_per_line,1:params.lines_per_frame);
@@ -187,7 +197,7 @@ for j = 1:length(celllist)
     end
     
     for ch = 1:params.NumberOfChannels
-        im = tpreadframe(record,ch,frame,process_parameters);
+        im = tpreadframe(record,ch,frame,process_parameters,verbose);
         im = double(squeeze(im));
         roi.intensity_mean(ch) = nanmean(im(roi.pixelinds));
         roi.intensity_median(ch) = nanmedian(im(roi.pixelinds));
@@ -207,7 +217,9 @@ for j = 1:length(celllist)
         record.measures(j).(['intensity_rel2dendrite_ch' num2str(ch)]) = roi.intensity_rel2dendrite(ch);
         record.measures(j).(['intensity_rel2synapse_ch' num2str(ch)]) = roi.intensity_rel2synapse(ch);
     end
-    waitbar(0.5+ 0.5*j/length(celllist),hbar);
+    if verbose
+        waitbar(0.5+ 0.5*j/length(celllist),hbar);
+    end
 end
 
 % set ranks
@@ -221,8 +233,9 @@ for i=1:length(celllist)
     end
 end
 
-close(hbar);
-
+if verbose
+    close(hbar);
+end
 
 function poly_fine = interpolate_poly( poly )
 % doubles number of interpolation points of poly

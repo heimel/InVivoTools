@@ -99,23 +99,12 @@ if 0 || plotall
     saveas(fig.corr_unmixed,fullfile(figpath,[figname '.png']),'png');
 end
 
-
-
-
-
-
 im = tppreview(record, 1:params.NumberOfFrames, 1, [1 2],unprocessed, 2);
-
-
 im = im( left:end-right,top:end-bottom,:);
 
 mx = [-0.1 -0.5];
 mn = [-1 -1 ];
 gamma = [1 1];
-
-
-
-
 
 if 0 || plotall
     fig.im1_before = figure;
