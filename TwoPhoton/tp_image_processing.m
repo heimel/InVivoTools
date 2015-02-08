@@ -21,7 +21,7 @@ if isfield(opt,'unmixing') && ~isempty(opt.unmixing) && opt.unmixing
 end
 
 if isfield(opt,'spatial_filter') && ~isempty(opt.spatial_filter) && opt.spatial_filter
-    im = tp_spatial_filter( im, 'medfilt2','');
+    im = tp_spatial_filter( im, 'medfilt2','',verbose);
 end
 
 
