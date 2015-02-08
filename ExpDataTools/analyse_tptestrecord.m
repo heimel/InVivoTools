@@ -241,8 +241,8 @@ if isfield(record.measures,'present') && ...
             elseif isfield(ref_record.measures,measure{1})
                 ref_measure = measure{1};
             else
-                warning(['ANALYSE_TPTESTRECORD:NO_' measure{1}], [measure{1} ' is not a measure in reference record. Please analyse or edit tpprocessparams series_measures.']);
-                warning('off',['ANALYSE_TPTESTRECORD:NO_' measure{1}]);
+                warning(['ANALYSE_TPTESTRECORD:NO_' subst_specialchars(measure{1})], [measure{1} ' is not a measure in reference record. Please analyse or edit tpprocessparams series_measures.']);
+                warning('off',['ANALYSE_TPTESTRECORD:NO_' subst_specialchars(measure{1})]);
                 continue
             end
             for i=1:n_rois
