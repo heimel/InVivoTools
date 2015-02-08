@@ -39,8 +39,6 @@ for i=1:length(celllist) % make intensities for all channels
     celllist(i).intensity_mean = intensity_mean(1:min(end,params.NumberOfChannels));
 end
 
-
-
 % get abs values for absent puncta for channel 1
 intensities_abs = reshape( [celllist.intensity_mean],params.NumberOfChannels,length(celllist))';
 spine = strcmp({celllist.type},'spine');
@@ -55,12 +53,9 @@ for ch=1:params.NumberOfChannels
     intensity_synapse(ch) = nanmedian( intensities_abs(present & synapse,ch));
 end
 
-
 % first calculate linear_rois (dendrites), necessary for normalization
 
 ind_dendrite = find(cellfun(@is_linearroi,{celllist.type}));
-
-% ind_dendrite = [strmatch('dendrite',{celllist.type}) strmatch('line',{celllist.type})];
 
 for i = ind_dendrite(:)'
     roi_dendrite = celllist(i);
@@ -119,16 +114,9 @@ for i = ind_dendrite(:)'
     end % ch
     celllist(i).intensity_median = roi_dendrite.intensity_median;
     
-    %record.measures(i).intensity_mean = roi_dendrite.intensity_mean;
-    %record.measures(i).intensity_max = roi_dendrite.intensity_max;
-    
     waitbar(0.5*find(ind_dendrite==i,1)/length(ind_dendrite),hbar);
     
 end
-
-
-%warning('TP_GET_INTENSITIES:MEDIAN','TP_GET_INTENSITIES: taking median instead of mean dendrites');
-%warning('OFF','TP_GET_INTENSITIES:MEDIAN');
 
 [blankprev_x,blankprev_y] = meshgrid(1:params.pixels_per_line,1:params.lines_per_frame);
 
@@ -152,7 +140,6 @@ for j = 1:length(celllist)
         logmsg(['ROI ' num2str(celllist(j).index) ' has no valid z-coordinate.']);
         continue
     end
-    
     
     if any(roi.xi<1) ...
             || any(round(roi.xi)>params.pixels_per_line) ...
@@ -195,13 +182,9 @@ for j = 1:length(celllist)
         intensity_dendrite = celllist(ind_dendrite ).intensity_mean;
     end
     
-    
     if frame~=round(frame)
-        %disp(['TP_GET_INTENSITIES: Frame of ROI ' num2str(roi.index) ' is not integer']);
         frame = round(frame);
     end
-    
-  
     
     for ch = 1:params.NumberOfChannels
         im = tpreadframe(record,ch,frame,process_parameters);
@@ -211,13 +194,12 @@ for j = 1:length(celllist)
         roi.intensity_max(ch) = max(im(roi.pixelinds));
         roi.intensity_rel2dendrite(ch) = (roi.intensity_mean(ch)-channel_modes(ch)) / (intensity_dendrite(ch)-channel_modes(ch));
         if roi.intensity_rel2dendrite(ch)<0 && roi.present
-            disp(['TP_GET_INTENSITIES: ROI ' num2str(roi.index) ' intensity_rel2dendrite below zero for channel ' num2str(ch) '. Setting to zero.']);
+            logmsg(['ROI ' num2str(roi.index) ' intensity_rel2dendrite below zero for channel ' num2str(ch) '. Setting to zero.']);
             roi.intensity_rel2dendrite(ch) = 0;
         end
             
         roi.intensity_rel2synapse(ch) =  ...
             (roi.intensity_mean(ch)-intensity_no_synapse(ch)) / (intensity_synapse(ch)-intensity_no_synapse(ch));
-        %        roi.intensity_median(ch) = median(im(roi.pixelinds));
 
         record.measures(j).(['intensity_mean_ch' num2str(ch)]) = roi.intensity_mean(ch);
         record.measures(j).(['intensity_median_ch' num2str(ch)]) = roi.intensity_median(ch);
@@ -225,12 +207,8 @@ for j = 1:length(celllist)
         record.measures(j).(['intensity_rel2dendrite_ch' num2str(ch)]) = roi.intensity_rel2dendrite(ch);
         record.measures(j).(['intensity_rel2synapse_ch' num2str(ch)]) = roi.intensity_rel2synapse(ch);
     end
-    
-    %celllist(j) = roi;
-    
     waitbar(0.5+ 0.5*j/length(celllist),hbar);
 end
-
 
 % set ranks
 intensity_rank = zeros(length(celllist),params.NumberOfChannels);
@@ -238,15 +216,12 @@ for ch=1:params.NumberOfChannels
     intensity_rank(present & synapse,ch) = ranks(intensities_abs(present & synapse,ch));
 end
 for i=1:length(celllist)
-    %celllist(i).intensity_rank = intensity_rank(i,:);
     for ch=1:params.NumberOfChannels
          record.measures(i).(['intensity_rank_ch' num2str(ch)]) = intensity_rank(i,ch);
     end
 end
 
-
 close(hbar);
-
 
 
 function poly_fine = interpolate_poly( poly )

@@ -7,7 +7,8 @@
 
 
 
-exp = experiment('11.12_alexander');
+%exp = experiment('11.12_alexander');
+exp = experiment('11.12');
 
 logmsg(['Setting unanalyzed stack of ' exp ' to unreliable']);
 
@@ -31,22 +32,23 @@ for i=1:length(db)
     end
 end
 
-crit = ['(mouse=11.12.32,stack=xyz4)|' ...
-    '(mouse=11.12.32,stack=xyz2)|' ...  % looks analyzed but excluded by Laura (see email 2015-01-15)
-    '(mouse=11.12.32,stack=xyz5)|' ...
-    '(mouse=11.12.33,stack=xyz1)|' ...
-    '(mouse=11.12.33,stack=xyz2)|' ...
-    '(mouse=11.12.33,stack=xyz3)|' ...
-    '(mouse=11.12.33,stack=xyz4)|' ...
-    '(mouse=11.12.47,stack=xyz1)|' ...
-    '(mouse=11.12.49,stack=xyz2)|' ... % looks analyzed but excluded by Laura (see email 2015-01-15)
-    '(mouse=11.12.59,stack=xyz1)|' ...
-    '(mouse=11.12.61,stack=xyz1)|' ...
-    '(mouse=11.12.65,stack=xyz1)|' ...% looks analyzed but excluded by Laura (see email 2015-01-15)
-    '(mouse=11.12.65,stack=xyz4)|' ...% looks analyzed but excluded by Laura (see email 2015-01-15)
-    '(mouse=11.12.28,stack=xyz1)|' ...% looks analyzed but excluded by Laura (see email 2015-01-15)
-    '(mouse=11.12.31,stack=xyz4)|' ...% looks analyzed but excluded by Laura (see email 2015-01-15)
-    '(mouse=11.12.72,stack=xyz3)' ...% looks analyzed but excluded by Laura (see email 2015-01-15)
+% see email Laura to Alexander on 2015-01-15
+crit = ['(mouse=11.12.32,stack=xyz4)|' ... % out off lesion projection zone 
+    '(mouse=11.12.32,stack=xyz2)|' ...  % % out off lesion projection zone
+    '(mouse=11.12.32,stack=xyz5)|' ...% out off lesion projection zone
+    '(mouse=11.12.33,stack=xyz1)|' ...% out off lesion projection zone
+    '(mouse=11.12.33,stack=xyz2)|' ...% out off lesion projection zone
+    '(mouse=11.12.33,stack=xyz3)|' ...% out off lesion projection zone
+    '(mouse=11.12.33,stack=xyz4)|' ...% out off lesion projection zone
+    '(mouse=11.12.47,stack=xyz1)|' ...% out off lesion projection zone
+    '(mouse=11.12.49,stack=xyz2)|' ...% out off lesion projection zone
+    '(mouse=11.12.59,stack=xyz1)|' ...% out off lesion projection zone
+    '(mouse=11.12.61,stack=xyz1)|' ...% out off lesion projection zone
+    '(mouse=11.12.65,stack=xyz1)|' ...% done by Philippe
+    '(mouse=11.12.65,stack=xyz4)|' ...% done by Philippe
+    '(mouse=11.12.28,stack=xyz1)|' ...% done by Philippe
+    '(mouse=11.12.31,stack=xyz4)|' ...% done by Philippe
+    '(mouse=11.12.72,stack=xyz3)' ...% done by Philippe
     ];
 %[db,filename,perm,lockfile]=open_db( filename, loadpath, filter)
 

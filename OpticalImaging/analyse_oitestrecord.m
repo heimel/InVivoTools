@@ -362,10 +362,16 @@ switch record.stim_type
         end
         
         or_angs = round(rescale(mod(angle(polavg),2*pi),[0 2*pi],[1 size(cmap,1)]));
-        or_angs(roi_edge'==1) = 0;
-        or_ang = angle(polavg);
-        or_ang(roi_edge'==1) = 0;
         
+        processparams = oiprocessparams(record);
+        if processparams.wta_show_roi
+            or_angs(roi_edge'==1) = 0;
+        end
+        
+        or_ang = angle(polavg);
+        if processparams.wta_show_roi
+            or_ang(roi_edge'==1) = 0;
+        end
 %         figure;
 %         imagesc(or_ang');
 %         set(gca,'clim',[1.3 3])

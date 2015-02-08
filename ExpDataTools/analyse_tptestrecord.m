@@ -1,11 +1,18 @@
-function [record,measures]=analyse_tptestrecord( record)
+function [record,measures]=analyse_tptestrecord( record, verbose)
 %ANALYSE_TPTESTRECORD
 %
-%   [RECORD,MEASURES] = ANALYSE_TPTESTRECORD( RECORD)
+%   [RECORD,MEASURES] = ANALYSE_TPTESTRECORD( RECORD, VERBOSE)
 %
 %      MEASURES contains full measures (including PSTHs)
 %
 % 2013-2014, Alexander Heimel
+
+if nargin<2
+    verbose = [];
+end
+if isempty(verbose)
+    verbose = true;
+end
 
 logmsg(['Analyzing ' recordfilter(record)]);
 
