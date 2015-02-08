@@ -49,10 +49,9 @@ if n_channels ~= 2
     return;
 end
 
-store_gcf = gcf;
-
 if show
-hbar = waitbar(0,'Unmixing channels');
+    store_gcf = gcf;
+    hbar = waitbar(0,'Unmixing channels');
 end
 
 % remove saturated pixels, because correct ratio will be lpst
@@ -325,15 +324,16 @@ if show
     title('Unmixed channel 1 (min)');
     
     colormap default
+    
+    if ischar(im_or_filename) % then store result
+        [pathstr,name,ext] = fileparts(im_or_filename);
+        unmix_filename = fullfile(pathstr,[name '_unmixed' ext]);
+        imwrite(unmix,unmix_filename,'tif')
+    end
+    
+    
+    figure(store_gcf);
 end
-
-if ischar(im_or_filename) % then store result
-    [pathstr,name,ext] = fileparts(im_or_filename);
-    unmix_filename = fullfile(pathstr,[name '_unmixed' ext]);
-    imwrite(unmix,unmix_filename,'tif')
-end
-
-figure(store_gcf);
 
 % additional explanation
 % The goal of the procedure is to remove the fluorescence of the red

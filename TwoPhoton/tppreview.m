@@ -95,9 +95,9 @@ switch mode
             hwait = waitbar(0,'Loading preview');
         end
         for c=channel
-            im(:,:,c) = double( tpreadframe(record,c,frame_selection(1),opt) );
+            im(:,:,c) = double( tpreadframe(record,c,frame_selection(1),opt,verbose) );
             for f=frame_selection(2:end)
-                im(:,:,c) = im(:,:,c) + double(tpreadframe(record,c,f,opt));
+                im(:,:,c) = im(:,:,c) + double(tpreadframe(record,c,f,opt,verbose));
                 if verbose
                     waitbar(((c-1)*length(frame_selection)+f)/length(channel)/length(frame_selection));
                 end
@@ -113,9 +113,9 @@ switch mode
             hwait = waitbar(0,'Loading preview');
         end
         for c=channel
-            im(:,:,c) = double( tpreadframe(record,c,frame_selection(1),opt) );
+            im(:,:,c) = double( tpreadframe(record,c,frame_selection(1),opt,verbose) );
             for f=frame_selection(2:end)
-                im(:,:,c) = max(im(:,:,c), double(tpreadframe(record,c,f,opt)));
+                im(:,:,c) = max(im(:,:,c), double(tpreadframe(record,c,f,opt,verbose)));
                 if verbose
                     waitbar(((c-1)*length(frame_selection)+f)/length(channel)/length(frame_selection));
                 end
@@ -129,7 +129,7 @@ switch mode
         im4d = zeros( inf.Height,inf.Width,total_nFrames,inf.NumberOfChannels);
         for c=channel
             for f = 1:total_nFrames
-                im4d(:,:,f,c) = double( tpreadframe(record,c,f,opt) );
+                im4d(:,:,f,c) = double( tpreadframe(record,c,f,opt,verbose) );
             end
         end
         im(:,:,c) = max(im4d(:,:,:,c),[],mode-2);
