@@ -21,7 +21,7 @@ end
 types = tpstacktypes(record);
 density_types = {};
 for t = types(:)'
-   if any( [record.measures.(t{1})])
+   if isfield(record.measures,t{1}) && any( [record.measures.(t{1})])
       density_types{end+1} = t{1};
    end
 end
