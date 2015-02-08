@@ -60,7 +60,7 @@ sat = 2^12 -1 ; % should be editable, now assuming 12 bit images
 imsmooth = double(im);
 imsmooth( imsmooth(:)>=sat) = NaN;
 % smooth image with gaussian filter to reduce noise
-imsmooth = tp_spatial_filter( double(imsmooth), 'smoothen','1');
+imsmooth = tp_spatial_filter( double(imsmooth), 'smoothen','1',show);
 
 % crop edges to avoid filtering artefacts
 sim = size(im);
