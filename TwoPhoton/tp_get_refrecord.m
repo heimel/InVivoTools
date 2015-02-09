@@ -47,17 +47,19 @@ else
         ind_cur = find_record(db,crit_current);
     end    
     if length(ind_cur)>1
-        logmsg(['Cannot single out current record ' crit_current '. Not returning a reference.']);
         if ~isempty(record.slice)
-            errormsg(['Can not single out current record ' crit_current '. Not returning a reference.']);
+            errormsg(['Cannot single out current record ' crit_current '. Not returning a reference.']);
             return
+        else
+            logmsg(['Cannot single out current record ' crit_current '. Not returning a reference.']);
         end
     end
     if length(ind_cur)<1
-        logmsg(['Cannot find current record ' crit_current '. Should not happen. Not returning a reference.']);
         if ~isempty(record.slice)
-            errormsg(['Can not single out current record ' crit_current '. Not returning a reference.']);
+            errormsg(['Cannot single out current record ' crit_current '. Not returning a reference.']);
             return
+        else
+            logmsg(['Cannot find current record ' crit_current '. Should not happen. Not returning a reference.']);
         end
     end
     ind_prev = sort(ind_ref(ind_ref<min(ind_cur)));

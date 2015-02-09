@@ -14,8 +14,6 @@ if isempty(verbose)
     verbose = true;
 end
 
-logmsg('Should remove intensity info from cellist');
-
 process_parameters = tpprocessparams(record);
 celllist = record.ROIs.celllist;
 

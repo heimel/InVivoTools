@@ -34,7 +34,6 @@ end
 %defaults
 select_all_of_name_enabled=0;
 blind_data_enabled = 0;
-analyse_all_enabled = 0;
 reverse_data_enabled = 0;
 open_data_enable = 0;
 channels_enabled = 0;
@@ -46,7 +45,6 @@ switch type
         channels_enabled = 1;
     case 'tp' 
         color = [0.4 0.5 1];
-        analyse_all_enabled = 0;
         open_data_enable = 1;
         blind_data_enabled = 1;
         reverse_data_enabled = 1; % for reversing database
@@ -264,25 +262,6 @@ h.which_test = ...
     'Tag','');
 left=left+buttonwidth+colsep;
 maxleft=max(maxleft,left);
-
-if analyse_all_enabled
-    h.analyse_all = ...
-        uicontrol('Parent',h_fig, ...
-        'Units','pixels', ...
-        'BackgroundColor',0.8*[1 1 1],...
-        'Callback','genercallback', ...
-        'ListboxTop',0, ...
-        'Position',[left top buttonwidth buttonheight], ...
-        'Tag','analyse_all_testrecord_callback',...
-        'String','Analyze all');
-    left=left+buttonwidth+colsep;
-    maxleft=max(maxleft,left);
-    if strcmp(user,'heimel') 
-        set(h.analyse_all,'Enable','on');
-    else
-        set(h.analyse_all,'Enable','off');
-    end
-end
 
 if average_tests_enabled
     h.average_tests = ...
