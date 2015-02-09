@@ -300,6 +300,9 @@ switch lower(record.experiment)
         params.blind_shuffle = false;
     case '14.35' 
         params.blind_shuffle = false;
+    case '11.12_rr'
+        params.blind_fields = {'date','slice','laser','location','comment','mouse'};
+        params.blind_shuffle = true;
 end
 
 
