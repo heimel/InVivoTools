@@ -364,6 +364,14 @@ for i_test=indtests
                 dres=norm(dres(~isnan(dres)));
                 logmsg([newlinehead measure.name '='  num2str(res,3)]);
             end
+        case {'testsum','stacksum'} % take the sum over cells/ROIs in test or stack-record
+            if ~isempty(res)
+                dres=norm(dres(~isnan(dres))) .* sum(~isnan(res));
+                res=nansum(res);
+                logmsg([newlinehead measure.name '='  num2str(res,3)]);
+            end
+            
+            
     end
     
     if ~isempty(res) && numel(res)==length(res) % i.e. 1D results
