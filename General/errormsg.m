@@ -1,9 +1,10 @@
 function errormsg( msg, halt )
 %ERRORMSG displays error dialog and logs a copy to the command line
 %
-%  ERRORMSG( MSG )
+%  ERRORMSG( MSG, HALT=false )
+%     if HALT is true, then also break with real error
 %
-% 2013, Alexander Heimel
+% 2013-2015, Alexander Heimel
 %
 
 if nargin<2

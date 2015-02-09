@@ -463,21 +463,24 @@ switch measure.measure
         if strcmp(measure.measure(1:min(end,4)),'file')
             switch measure.datatype
                 case 'tp'
-                    saved_data_file = fullfile(tpdatapath(testrecord),'saved_data.mat');
+                    saved_data_file = fullfile(tpdatapath(testrecord),[measure.datatype '_measures.mat']);
                 case {'ec','lfp'}
-                    saved_data_file = fullfile(ecdatapath(testrecord),testrecord.test,'saved_data.mat');
+                    saved_data_file = fullfile(ecdatapath(testrecord),testrecord.test,[measure.datatype '_measures.mat']);
             end
             if exist(saved_data_file,'file')
-                saved_data = load(saved_data_file); %#ok<NASGU>
+                saved_data = load(saved_data_file); 
+                results = [];
                 try
-                    eval(['results = saved_data.' measure.measure(6:end) ';']);
-                    dresults = nan(size(results));
-                    logmsg(['Retrieved ' ...
-                        measure.measure(6:end) ' from ' saved_data_file ...
-                        '. Results is of size ' num2str(size(results)) ]);
+                    for c = 1:length(saved_data.measures) % channel or cell
+                        eval(['results = [results saved_data.measures(' num2str(c) ').' measure.measure(6:end) '];']);
+                    end
                 catch me
-                    logmsg(['Caught error ' me.identifier ]);
+                    errormsg(['Error in retrieving ' measure.measure(6:end) ' from ' saved_data_file '. ' me.identifier ],true);
                 end
+                logmsg(['Retrieved ' ...
+                    measure.measure(6:end) ' from ' saved_data_file ...
+                    '. Results is of size ' num2str(size(results)) ]);
+                dresults = nan(size(results));
             end
         else
             [results,dresults] = get_compound_measure_from_record(testrecord,measure.measure,criteria,extra_options);
