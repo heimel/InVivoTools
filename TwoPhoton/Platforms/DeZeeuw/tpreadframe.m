@@ -1,4 +1,4 @@
-function [im,fname] = tpreadframe(record,channel,frame,opt)
+function [im,fname] = tpreadframe(record,channel,frame,opt,verbose)
 %DEZEEUW/TPREADFRAME read frame from multitiff
 %
 %  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT )
