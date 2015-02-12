@@ -37,7 +37,6 @@ end
 %     end
 % end
 
-
 db_empty = load(fullfile(fileparts(which('graph_db')), 'graphdb_empty'));
 db_empty = db_empty.db;
 [db,changed] = structconvert(db,db_empty);

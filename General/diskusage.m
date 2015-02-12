@@ -27,7 +27,11 @@ end
 [s,w]=system(['df -P ' disk ]);
 
 if s~=0 
-  disp(['DISKUSAGE: Error in performing diskusage of disk ' disk ]);
+    if ~exist(disk,'dir')
+        logmsg(['Folder ' disk ' does not exist']);
+    else
+        logmsg(['Error in performing diskusage of disk ' disk ]);
+    end
   return
 end
 

@@ -597,7 +597,7 @@ switch command,
         end;
         % at this point, we are going to redraw so let's have the user redraw
         logmsg('Draw new ROI for cell.');
-        axes(ft(fig,'tpaxes')); %#ok<MAXES> necessary for following roipoly
+        axes(ft(fig,'tpaxes')); % necessary for following roipoly
         zoom off;
         [bw,xi,yi]=roipoly();
         % now what happens is different
@@ -755,7 +755,7 @@ switch command,
         dirname = trimws(ud.slicelist(v).dirname);
         dr = getcurrentdirdrift(ud, NUMPREVIEWFRAMES);
         figure(fig);
-        axes(ft(fig,'tpaxes')); %#ok<MAXES> necessary for following roipoly
+        axes(ft(fig,'tpaxes')); % necessary for following roipoly
         zoom off;
         [bw,xi,yi] = roipoly();
         newcell = tp_emptyroirec;
@@ -820,7 +820,7 @@ switch command,
         yi_p = sqrt(rad^2-xi_.^2);
         yi_m = - sqrt(rad^2-xi_.^2);
         figure(fig);
-        axes(ft(fig,'tpaxes')); %#ok<MAXES> % necessary for ginput
+        axes(ft(fig,'tpaxes')); % % necessary for ginput
         zoom off;
         
         % get snap_to_channel
@@ -933,7 +933,7 @@ switch command,
         yi_p = sqrt(rad^2-xi_.^2);
         yi_m = - sqrt(rad^2-xi_.^2);
         figure(fig);
-        axes(ft(fig,'tpaxes')); %#ok<MAXES> necessary for ginput
+        axes(ft(fig,'tpaxes')); % necessary for ginput
         zoom off;
         
         [x,y,button] = ginput(1);
@@ -1266,10 +1266,10 @@ switch command,
         else
             db_ud = get(h_db,'userdata');
             ind = find_record( db_ud.db, ['mouse=' record.mouse ',date=' record.date ...
-                ',stack=' record.stack ',epoch=' record.epoch ',comment="' record.comment '"']);
+                ',stack=' record.stack ',epoch=' record.epoch ',slice=' record.slice ',comment="' record.comment '"']);
             if isempty(ind)
                 ind = find_record( db_ud.db, ['mouse=' record.mouse ',date=' record.date ...
-                    ',epoch=' record.epoch ',comment="' record.comment '"']);
+                    ',epoch=' record.epoch  ',slice=' record.slice ',comment="' record.comment '"']);
                 if length(ind)==1 && isempty(db_ud.db(ind).stack)
                     % ok, probably just defaulted to Live_0000
                 else
@@ -1390,15 +1390,12 @@ switch command,
         else
             pan off
         end
-%     case 'signalprocessPopup'
-%         set(ft(fig,'recomputeCB'),'value',1); % setup recompute checkbox
     case 'ZTProjectTB'
         toggled = false;
         switch get(ft(fig,'ZTProjectTB'),'value')
             case 0
                 set(ft(fig,'FrameSlid'),'visible','on')
                 set(ft(fig,'frameTxt'),'visible','on')
-                
                 set(ft(fig,'FirstFrameEdit'),'visible','off');
                 set(ft(fig,'LastFrameEdit'),'visible','off');
                 set(ft(fig,'FirstFrameTxt'),'visible','off');
@@ -2205,10 +2202,10 @@ if ~isnan(frame)
         max_frame = get(ft(fig,'FrameSlid'),'max');
         if frame < min_frame
             frame = min_frame;
-            disp('ANALYZETPSTACK: roi.zi is below first frame');
+            logmsg('roi.zi is below first frame');
         elseif frame > max_frame
             frame = max_frame;
-            disp('ANALYZETPSTACK: roi.zi exceeds last frame');
+            logmsg('roi.zi exceeds last frame');
         end
         set(ft(fig,'FrameSlid'),'value',frame);
         analyzetpstack('UpdatePreviewImage',[],fig);
@@ -2241,9 +2238,6 @@ function center_mouse( h ) %#ok<DEFNU>
 % not finished
 panelh=get(h, 'Parent');
 figh=gcf;
-%unit_root=get(0, 'Unit');
-%unit_fig=get(figh, 'Unit');
-%unit_obj=get(h, 'Unit');
 set(0, 'Units', 'pixels');
 set(figh, 'Units', 'pixels');
 set(panelh, 'Units', 'pixels');
@@ -2262,9 +2256,6 @@ act_pos(2)=act_pos(2)+(obj_pos(4)-obj_pos(2))/2-7;
 % (I did this for listboxes, to highlight the first entry)
 
 set(0, 'PointerLocation', act_pos);
-
-%axis([p(1,1)-(ax(2)-ax(1))/2 p(1,1)+(ax(2)-ax(1))/2 p(1,2)-(ax(4)-ax(3))/2 p(1,2)+(ax(4)-ax(3))/2]);
-
 
 
 function d = get_ROI_distance( celllist,ri,step)
@@ -2322,37 +2313,10 @@ zoom_callback(gcf, ft(gcf,'tpaxes') );
 
 
 function r = roi_center( rois )
+r = zeros(length(rois),3);
 for i=1:length(rois)
     r(i,1) = median(rois(i).xi);
     r(i,2) = median(rois(i).yi);
     r(i,3) = median(rois(i).zi);
 end
 
-
-function ud = add_resps_to_measures(ud,resps,listofcellnames,selected_cells)
-
-global measures
-measures = ud.record.measures;
-if ~isempty(resps)
-    flds = fields(resps);
-    ind = find(selected_cells);
-    for i = 1:length(ind)
-        measures(ind(i)).cellname = listofcellnames{i};
-        measures(ind(i)).index = ud.celllist(ind(i)).index;
-        measures(ind(i)).labels = ud.celllist(ind(i)).labels;
-        measures(ind(i)).type = ud.celllist(ind(i)).type;
-        measures(ind(i)).contains_data = true;
-        measures(ind(i)).usable = true;
-        for field = flds'
-            measures(ind(i)).(field{1}) = resps(i).(field{1});
-        end
-    end
-end
-ud.record.measures = measures;
-
-temprecord = ud.record;
-temprecord.measures = measures(ind);
-results_tptestrecord(temprecord);
-
-evalin('base','global measures');
-disp('ANALYZETPSTACK: Data available as measures');

@@ -466,9 +466,9 @@ end
 
 % save measures file
 measures = record.measures; %#ok<NASGU>
-measuresfilemehran = fullfile(ecdatapath(record),record.test,['_measures',num2str(channels2analyze),'.mat']);
-logmsg(['Mehran, do you need this file: ' measuresfilemehran])
-save(measuresfilemehran,'WaveTime_Spikes');
+%measuresfilemehran = fullfile(ecdatapath(record),record.test,['_measures',num2str(channels2analyze),'.mat']);
+%logmsg(['Mehran, do you need this file: ' measuresfilemehran])
+%save(measuresfilemehran,'WaveTime_Spikes');
 
 % save measures file
 measuresfile = fullfile(ecdatapath(record),record.test,[record.datatype '_measures.mat']);

@@ -54,7 +54,8 @@ synapse = spine | shaft;
 present = [celllist.present];
 absent = ~present;
 
-
+intensity_no_synapse = zeros(params.NumberOfChannels,1);
+intensity_synapse = zeros(params.NumberOfChannels,1);
 for ch=1:params.NumberOfChannels
     intensity_no_synapse(ch) = nanmedian( intensities_abs(absent & synapse,ch));
     intensity_synapse(ch) = nanmedian( intensities_abs(present & synapse,ch));
@@ -72,10 +73,9 @@ for i = ind_dendrite(:)'
     end
     
     for ch = 1:params.NumberOfChannels
-        intensity = [];
+        intensity = zeros(length(roi_dendrite.xi),1);
         for j = 1:length(roi_dendrite.xi)
             local_intensity = [];
-            
             for frame = (max(1,round(roi_dendrite.zi(j))-1):...
                     min(params.NumberOfFrames,round(roi_dendrite.zi(j))+1))
                 im = tpreadframe(record,ch,frame,process_parameters,verbose);
@@ -84,25 +84,25 @@ for i = ind_dendrite(:)'
                 y = round(roi_dendrite.yi(j));
                 
                 if y>0 && y<=params.lines_per_frame && x>0 && x<=params.pixels_per_line
-                    local_intensity(end+1) = im(y,x); 
+                    local_intensity(end+1) = im(y,x);  %#ok<AGROW>
                 end
                 if y>1 && (y-1)<=params.lines_per_frame && x>0 && x<=params.pixels_per_line
-                    local_intensity(end+1) = im(y-1,x); 
+                    local_intensity(end+1) = im(y-1,x);  %#ok<AGROW>
                 end
                 if y<params.lines_per_frame && (y+1)>0 && x>0 && x<=params.pixels_per_line
-                    local_intensity(end+1) = im(y+1,x);
+                    local_intensity(end+1) = im(y+1,x);  %#ok<AGROW>
                 end
                 if x>1 && (x-1)<=params.pixels_per_line && y>0 && y<=params.lines_per_frame
-                    local_intensity(end+1) = im(y,x-1);
+                    local_intensity(end+1) = im(y,x-1);  %#ok<AGROW>
                 end
                 if x<params.pixels_per_line && (x+1)>0 && y>0 && y<=params.lines_per_frame
-                    local_intensity(end+1) = im(y,x+1);
+                    local_intensity(end+1) = im(y,x+1);  %#ok<AGROW>
                 end
             end
             if isempty(local_intensity)
                 local_intensity = NaN;
             end
-            intensity(end+1) = max(local_intensity);
+            intensity(j) = max(local_intensity);
         end
         roi_dendrite.intensity_mean(ch) = mean(intensity);
         roi_dendrite.intensity_median(ch) = median(intensity);
@@ -111,7 +111,6 @@ for i = ind_dendrite(:)'
         record.measures(i).(['intensity_mean_ch' num2str(ch)]) = mean(intensity);
         record.measures(i).(['intensity_median_ch' num2str(ch)]) = median(intensity);
         record.measures(i).(['intensity_max_ch' num2str(ch)]) = max(intensity);
-        
         
         if mean(intensity)<1
             logmsg(['Mean intensity of dendrite ' num2str(roi_dendrite.index) ...
