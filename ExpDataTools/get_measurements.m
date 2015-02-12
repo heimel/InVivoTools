@@ -483,7 +483,7 @@ switch measure.measure
                         eval(['results = [results saved_data.measures(' num2str(c) ').' measure.measure(6:end) '];']);
                     end
                 catch me
-                    errormsg(['Error in retrieving ' measure.measure(6:end) ' from ' saved_data_file '. ' me.identifier ],true);
+                    logmsg(['Error in retrieving ' measure.measure(6:end) ' from ' saved_data_file '. ' me.identifier ]);
                 end
                 logmsg(['Retrieved ' ...
                     measure.measure(6:end) ' from ' saved_data_file ...
