@@ -117,8 +117,8 @@ n_conditions = length(parameter_values);
 
 disp(['ANALYSE_VEPS: Analyzing ' analyse_parameter  ' and averaging over other parameters.']);
 
-% for t = 1:length(stimss) % run over triggers
-stims = stimss(1);
+for t = 1:length(stimss) % run over triggers
+stims = stimss(t);
 for i=1:length(stims.MTI2)
     stimulus_start = (stims.MTI2{i}.startStopTimes(2)-stims.start);
     if all(stims.MTI2{i}.startStopTimes==0)
@@ -142,6 +142,9 @@ for i=1:length(stims.MTI2)
     %             waves_time(i,:) = -stimulus_start-pre_ttl+(0:length(waves(i,:))-1)*results.sample_interval;
 end
 
+[a_low,b_low] = butter(7,100/(.5*Fs),'low'); % lowpass
+[a_high,b_high] = butter(3,1/(.5*Fs),'high'); % highpass
+
 % Computing cso, Pooling repetitions
 do = getDisplayOrder(stims.saveScript);
 stims = get(stims.saveScript);
@@ -162,15 +165,26 @@ for i = 1:n_conditions
         end
         
     end
-    WAVE_CSO=0;
+%     WAVE_CSO=0;
+%     for k=ind
+%         wave_cso = CSOcompute(waves{k},contdist);
+%         WAVE_CSO = WAVE_CSO + wave_cso;
+%     end;
+%     WAVE_CSO = WAVE_CSO/length(ind);
+%     CSO = [CSO,WAVE_CSO];
+    wave_cso=0;
     for k=ind
-        wave_cso = CSOcompute(waves{k},contdist);
-        WAVE_CSO = WAVE_CSO + wave_cso;
+            w = filter(a_low,b_low,waves{k});
+        w = filter(a_high,b_high,w);
+        wave_cso = wave_cso + w;
     end;
-    WAVE_CSO = WAVE_CSO/length(ind);
+    wave_cso = wave_cso/length(ind);
+    WAVE_CSO = CSOcompute(wave_cso,contdist);
+    
     CSO = [CSO,WAVE_CSO];
 %     waves_std(i,:) = std(waves(ind,:),1);
 end
-wavefile=fullfile(ecdatapath(record),record.test,'CSO_data.mat');
+wavefile=fullfile(ecdatapath(record),record.test,['CSO_data',num2str(t),'.mat']);
 save(wavefile,'CSO');
-% end
+end
+display('finished!')
