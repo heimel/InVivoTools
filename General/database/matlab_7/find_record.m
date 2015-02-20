@@ -63,7 +63,7 @@ end
 
 
 % at this point crit is certainly a non-empty string
-crit=trim(crit);
+crit=strtrim(crit);
 
 ind=[];
 if crit(1)=='('
@@ -88,7 +88,7 @@ if crit(1)=='('
     else
         head=crit(2:p-1);
         tail=crit(p+1:end);
-        tail=trim(tail);
+        tail=strtrim(tail);
         switch tail(1)
             case ',' % AND
                 ind=find_record(db,{head,tail(2:end)});
@@ -143,8 +143,8 @@ if isempty(pos)
 end
 if ~isempty(pos)
     comp=crit( pos ); % get which comparison
-    field=trim( crit(1:pos-1) );
-    expr=trim( crit(pos+1:end) );
+    field=strtrim( crit(1:pos-1) );
+    expr=strtrim( crit(pos+1:end) );
     
     pbracket = find(field=='(',1);
     if ~isempty(pbracket) && pbracket>1
@@ -225,7 +225,7 @@ if ~isempty(pos)
                     if numel(entries{i})~=length(entries{i})
                         ent = '';
                         for j=1:size(entries{i},1)
-                            ent = [ ent ' ' trim(entries{i}(j,:))];
+                            ent = [ ent ' ' strtrim(entries{i}(j,:))];
                         end
                         entries{i} = ent;
                     end

@@ -156,9 +156,9 @@ for i=1:n_maps
 		set(gca,'ycolor',[1 0 0]);
 	else
 		if strcmp(record.stim_type,'sf')==0
-		%	xlabel(trim(condnames(i,:)));
+		%	xlabel(strtrim(condnames(i,:)));
 		else
-			xlabel([trim(condnames(i,:)) ' cpd']);
+			xlabel([strtrim(condnames(i,:)) ' cpd']);
 		end			
 	end
 	set(gca,'Xtick',[]);

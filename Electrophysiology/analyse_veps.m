@@ -35,7 +35,7 @@ if isempty(stims)
 end
 
 
-switch trim(record.analysis)
+switch strtrim(record.analysis)
     case ''
         % just run default analysis
     case 'CSO'

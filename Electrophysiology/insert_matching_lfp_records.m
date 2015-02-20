@@ -27,7 +27,7 @@ end
 if nargin<2
     crit = '';
 end
-crit = trim(crit);
+crit = strtrim(crit);
 if isempty(crit)
     crit ='';% 'experimenter=hs,';
 elseif crit(end)~=','

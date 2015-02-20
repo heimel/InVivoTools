@@ -10,6 +10,6 @@ function record = unblind_tprecord( blind_record )
 
 
 %record = blind_record;
-%s = trim(char(CryptAES('decode',base64decode(blind_record.date),'secret key')'));
+%s = strtrim(char(CryptAES('decode',base64decode(blind_record.date),'secret key')'));
 %record.date = s(1:find(s==':')-1);
 %record.slice = s(find(s==':')+1:end);

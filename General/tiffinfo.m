@@ -116,11 +116,11 @@ elseif isfield(inf(1).ParsedImageDescription,'FLUOVIEW_Version')
     inf = tiffinfo_parse_fluoview(inf);    % fluoview
 elseif isfield(inf(1).ParsedImageDescription,'scan')
     inf = tiffinfo_parse_lohmann(inf);    % lohmann tiff
-elseif isfield(inf(1),'Make') && strcmpi(trim(inf(1).Make),'imspector')
+elseif isfield(inf(1),'Make') && strcmpi(strtrim(inf(1).Make),'imspector')
     inf = tiffinfo_parse_imspector(inf);    % imspector tiff 
 elseif isfield(inf(1).ParsedImageDescription,'state_configName')
     inf = tiffinfo_parse_scanimage(inf);  % scanimage tiff
-elseif strcmp(trim(inf(1).ImageDescription),'Andor SOLIS')
+elseif strcmp(strtrim(inf(1).ImageDescription),'Andor SOLIS')
     inf = tiffinfo_parse_andorsolis(inf);
 end
 
@@ -148,7 +148,7 @@ if isempty(id)
     return
 end
 
-start = trim(id(1:10));
+start = strtrim(id(1:10));
 if strcmp(start(1:5),'<?xml') % xml file
     pid.domnode = xmlparse( id );
     return
@@ -160,11 +160,11 @@ id(end+1)=10;
 p=find(id==10,1);
 pid=[];
 while ~isempty(p)
-    idline=trim(id(1:p-1));
+    idline=strtrim(id(1:p-1));
     p_is=find(idline=='=',1);
     if ~isempty(p_is)
-        field=subst_specialchars(trim(idline(1:p_is-1)));
-        arg=trim(idline(p_is+1:end));
+        field=subst_specialchars(strtrim(idline(1:p_is-1)));
+        arg=strtrim(idline(p_is+1:end));
         if ~isempty(arg)
             if arg(1)=='"' && arg(end)=='"' % assume string
                 arg=arg(2:end-1);

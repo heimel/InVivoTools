@@ -93,7 +93,7 @@ end
 
 % get already defined ROI
 roi=[];
-roifile=trim(lower(record.roifile));
+roifile=strtrim(lower(record.roifile));
 if isempty(roifile)
     roifile = '';
     record.roifile = '';
@@ -152,7 +152,7 @@ end
 
 % get already defined ROR
 ror=[];
-rorfile=trim(lower(record.rorfile));
+rorfile=strtrim(lower(record.rorfile));
 if isempty(rorfile)
     rorfile = '';
     record.rorfile = '';

@@ -168,7 +168,7 @@ switch windowname
                 if val==0
                     ud.ind=(1:length(ud.db));
                 else
-                    crit=trim(get(ud.h.crit,'String'));
+                    crit = strtrim(get(ud.h.crit,'String'));
                     if isempty(crit)
                         logmsg('Empty filter criteria');
                         set(ud.h.filter,'Value',0);

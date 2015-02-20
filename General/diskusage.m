@@ -40,12 +40,12 @@ header=w{1};
 content=w{2};
 
 p=[];
-p(end+1)=findstr(header,'Filesystem');
+p(end+1)=strfind(header,'Filesystem');
 p(end+1)=20;
-p(end+1)=findstr(header,'1024-blocks')+length('1024-blocks');
-p(end+1)=findstr(header,'Used')+length('Used');
-p(end+1)=findstr(header,'Available')+length('Available');
-p(end+1)=findstr(header,' Mounted on');
+p(end+1)=strfind(header,'1024-blocks')+length('1024-blocks');
+p(end+1)=strfind(header,'Used')+length('Used');
+p(end+1)=strfind(header,'Available')+length('Available');
+p(end+1)=strfind(header,' Mounted on');
 p(end+1)=256;
 
 fields={'filesystem','blocks','used','available','capacity','mounted_on'};
@@ -53,9 +53,9 @@ fields={'filesystem','blocks','used','available','capacity','mounted_on'};
 for i=1:length(p)-1
   switch fields{i}
    case 'capacity'
-    field=trim(content(p(i):min(end,p(i+1)-2))) ;
+    field=strtrim(content(p(i):min(end,p(i+1)-2))) ;
    otherwise
-    field=trim(content(p(i):min(end,p(i+1)-1))) ;
+    field=strtrim(content(p(i):min(end,p(i+1)-1))) ;
   end
   
   if ~isempty(str2num(field))

@@ -9,7 +9,7 @@ function fig = analyzetpstack(command, record, thefig, analysis_parameters)
 %   check HELP TP_ORGANIZATION for organization of data
 %
 % 2007 - 2008, Steve Van Hooser
-% 2008 - 2014, Alexander Heimel
+% 2008 - 2015, Alexander Heimel
 %
 
 global shift_state control_state % for short-cut key detection
@@ -122,7 +122,7 @@ switch command,
         v_ = get(ft(fig,'sliceList'),'value');
         currstr_ = get(ft(fig,'sliceList'),'string');
         if iscell(currstr_) && ~isempty(currstr_)
-            selDir = trimws(currstr_{v_});  % currently selected
+            selDir = strtrim(currstr_{v_});  % currently selected
         else
             selDir = {};
         end;
@@ -148,7 +148,7 @@ switch command,
             end;
         end;
         littlelist = {};
-        for i=1:length(newlist), littlelist{i} = trimws(newlist{i}); end;
+        for i=1:length(newlist), littlelist{i} = strtrim(newlist{i}); end;
         [c,ia]=intersect(littlelist,selDir);
         if ~isempty(c), v = ia(1); else v = 1; end;
         % now to reshuffle the slicelists
@@ -163,7 +163,7 @@ switch command,
             set(ft(fig,'DrawROINosCB'),'value',ud.slicelist(v).drawroinos);
             set(ft(fig,'sliceOffsetEdit'),'string',['[' num2str(ud.slicelist(v).xyoffset) ']']);
             parentdir = '.';
-            if ~strcmp(parentdir,trimws(ud.slicelist(v).dirname)),
+            if ~strcmp(parentdir,strtrim(ud.slicelist(v).dirname)),
                 set(ft(fig,'sliceOffsetEdit'),'visible','off');
                 set(ft(fig,'sliceOffsetText'),'visible','off');
             else
@@ -532,7 +532,7 @@ switch command,
             return
         end
         sv = get(ft(fig,'sliceList'),'value');
-        currdir = get(ft(fig,'sliceList'),'string'); currdir = trimws(currdir{sv});
+        currdir = get(ft(fig,'sliceList'),'string'); currdir = strtrim(currdir{sv});
         ancestors = {'.'};
         cellisinthisimage = ~isempty(intersect(ud.celllist(v).dirname,ancestors));
         cellisactualcell = strcmp(ud.celllist(v).dirname,currdir);
@@ -587,7 +587,7 @@ switch command,
         end
         sv = get(ft(fig,'sliceList'),'value');
         currdir = get(ft(fig,'sliceList'),'string');
-        currdir = trimws(currdir{sv});
+        currdir = strtrim(currdir{sv});
         ancestors={'.'};%getallparents(ud,currdir);
         cellisinthisimage = ~isempty(intersect(ud.celllist(v).dirname,ancestors));
         cellisactualcell = strcmp(ud.celllist(v).dirname,currdir);
@@ -713,7 +713,7 @@ switch command,
         end
         
         v = get(ft(fig,'sliceList'),'value');
-        dirname = trimws(ud.slicelist(v).dirname);
+        dirname = strtrim(ud.slicelist(v).dirname);
         switch method
             case 'MM'
                 [dummy,params] = find_cellsMM; %#ok<ASGLU>
@@ -752,7 +752,7 @@ switch command,
             uiwait(warndlg('Note that you are drawing ROIs in z-projection.','Z-Projection','modal'));
         end
         v = get(ft(fig,'sliceList'),'value');
-        dirname = trimws(ud.slicelist(v).dirname);
+        dirname = strtrim(ud.slicelist(v).dirname);
         dr = getcurrentdirdrift(ud, NUMPREVIEWFRAMES);
         figure(fig);
         axes(ft(fig,'tpaxes')); % necessary for following roipoly
@@ -801,13 +801,13 @@ switch command,
         end
         
         v = get(ft(fig,'sliceList'),'value');
-        dirname = trimws(ud.slicelist(v).dirname);
+        dirname = strtrim(ud.slicelist(v).dirname);
         dr = getcurrentdirdrift(ud, NUMPREVIEWFRAMES);
         sz = size(get(ud.previewim,'CData'));
         [blankprev_x,blankprev_y] = meshgrid(1:sz(2),1:sz(1));
         newballdiastr = get(ft(fig,'newballdiameterEdit'),'string');
         if ~isempty(newballdiastr),
-            newballdia = str2double(trim(newballdiastr));
+            newballdia = str2double(newballdiastr);
             if isnan(newballdia)
                 newballdia = 12;
             end;
@@ -909,7 +909,7 @@ switch command,
         end
         
         v = get(ft(fig,'sliceList'),'value');
-        dirname = trimws(ud.slicelist(v).dirname);
+        dirname = strtrim(ud.slicelist(v).dirname);
         dr = getcurrentdirdrift(ud, NUMPREVIEWFRAMES);
         sz = size(get(ud.previewim,'CData'));
         
@@ -917,7 +917,7 @@ switch command,
         
         newballdiastr = get(ft(fig,'newballdiameterEdit'),'string'); % used for snapping to local max
         if ~isempty(newballdiastr),
-            newballdia = str2double(trim(newballdiastr));
+            newballdia = str2double(newballdiastr);
             if isnan(newballdia)
                 newballdia = 6;
             end;
@@ -1129,7 +1129,7 @@ switch command,
         sliceind1 = get(ft(fig,'sliceList'),'value');
         currstr_ = get(ft(fig,'sliceList'),'string');
         if iscell(currstr_) && ~isempty(currstr_)
-            dirname1 = trimws(currstr_{sliceind1});  % currently selected
+            dirname1 = strtrim(currstr_{sliceind1});  % currently selected
         else
             logmsg('No directories in list to examine.');
             return;
@@ -1138,7 +1138,7 @@ switch command,
         if isempty(sliceind2)
             return;
         else
-            dirname2 = trimws(currstr_{sliceind2});
+            dirname2 = strtrim(currstr_{sliceind2});
         end;
         ancestors2 = {'.'};%getallparents(ud,dirname2);
         ancestors1 = {'.'};%getallparents(ud,dirname1);
@@ -1164,13 +1164,13 @@ switch command,
         plottpcellalignment(listofcellnames1(thelistinds1),listofcellnames2(thelistinds2),changes1(thelistinds1),changes2(thelistinds2),...
             pvimg1,pvimg2,dirname1,dirname2,drift1,drift2,3);
     case 'movieBt',
-        trialsstr = trim(get(ft(fig,'trialsEdit'),'string'));
+        trialsstr = strtrim(get(ft(fig,'trialsEdit'),'string'));
         if ~isempty(trialsstr)
             trialslist = eval(trialsstr);
         else
             trialslist = 1;
         end;
-        stimstr = trim(get(ft(fig,'movieStimsEdit'),'string'));
+        stimstr = strtrim(get(ft(fig,'movieStimsEdit'),'string'));
         if ~isempty(stimstr)
             stimlist = eval(stimstr);
         else
@@ -1207,11 +1207,11 @@ switch command,
         imagedisplay(im1,'Title',int2str(stim1)); axis image
         imagedisplay(im2,'Title',int2str(stim2)); axis image
     case 'singleCondBt'
-        trialsstr = trim(get(ft(fig,'trialsEdit'),'string'));
+        trialsstr = strtrim(get(ft(fig,'trialsEdit'),'string'));
         if ~isempty(trialsstr), trialslist = eval(trialsstr); else trialslist = []; end;
-        timeintstr = trim(get(ft(fig,'timeintEdit'),'string'));
+        timeintstr = strtrim(get(ft(fig,'timeintEdit'),'string'));
         if ~isempty(timeintstr), timeint= eval(timeintstr); else timeint= []; end;
-        sptimeintstr = trim(get(ft(fig,'sptimeintEdit'),'string'));
+        sptimeintstr = strtrim(get(ft(fig,'sptimeintEdit'),'string'));
         if ~isempty(sptimeintstr), sptimeint= eval(sptimeintstr); else sptimeint= []; end;
         fprintf('Analyzing...will take a few seconds...\n');
         [r,indimages] = tpsinglecondition(ud.record,ud.channel,trialslist,timeint,sptimeint,1);  %#ok<NASGU>
@@ -1769,12 +1769,6 @@ else
 end;
 set(fig,'userdata',ud);
 
-function str = trimws(mystring)
-str=mystring;
-inds=find(str~=' ');
-if ~isempty(inds)
-    str=str(inds(1):end);
-end
 
 
 
@@ -1800,86 +1794,17 @@ function xyoffset = getxyoffset(ud)
 myparent = '.';% getrefdirname(ud,dirname);
 xyoffset = [0 0];
 for j=1:length(ud.slicelist),
-    if strcmp(myparent,trimws(ud.slicelist(j).dirname)),
+    if strcmp(myparent,strtrim(ud.slicelist(j).dirname)),
         xyoffset = ud.slicelist(j).xyoffset;
     end;
 end;
 
-
-% function [slicestructupdate] = updatecelldraw(ud,i,slicestruct,currdir,numpreviewframes)
-% % make a lookup table for slicelist, drift, and ancestors, if it doesn't
-% % already exist
-% if isempty(slicestruct)
-%     slicestruct.slicelistlookup.test = [];
-%     slicestruct.slicedriftlookup.test = [];
-%     slicestruct.sliceancestorlookup.test = [];
-%     for j=1:length(ud.slicelist),
-%         slicestruct.slicelistlookup.(dir2fieldname(ud.slicelist(j).dirname)) = j;
-%         slicestruct.slicedriftlookup.(dir2fieldname(ud.slicelist(j).dirname)) = getcurrentdirdrift(ud,trimws(ud.slicelist(j).dirname),numpreviewframes);
-%         slicestruct.sliceancestorlookup.(dir2fieldname(ud.slicelist(j).dirname)) = getallparents(ud,trimws(ud.slicelist(j).dirname));
-%     end;
-% end;
-% slicestructupdate = slicestruct;
-%
-% % must draw cell if it exists in current image or if
-% %   its parent 'drawcells' field is checked.
-% ancestors = slicestructupdate.sliceancestorlookup.(dir2fieldname( currdir ));
-% cellisinthisimage = ~isempty(intersect(ud.celllist(i).dirname,ancestors));
-%
-% drawcellsinthisimage = ud.slicelist(slicestructupdate.slicelistlookup.(dir2fieldname(currdir))).('drawcells');
-% if ~isfield(ud.slicelist(slicestructupdate.slicelistlookup.(dir2fieldname(currdir))),'drawroinos')
-%     ud.slicelist(slicestructupdate.slicelistlookup.(dir2fieldname(currdir))).('drawroinos') = 0;
-% end
-% drawroinosinthisimage = ud.slicelist(slicestructupdate.slicelistlookup.(dir2fieldname(currdir))).('drawroinos');
-% thiscellsparentdrawcells = ud.slicelist(slicestructupdate.slicelistlookup.(dir2fieldname(ud.celllist(i).dirname))).('drawcells');
-% thiscellsparentdrawroinos = ud.slicelist(slicestructupdate.slicelistlookup.(dir2fieldname(ud.celllist(i).dirname))).('drawroinos');
-% if (cellisinthisimage && drawcellsinthisimage) || (~cellisinthisimage && thiscellsparentdrawcells),
-%     % show cell
-%     set(ud.celldrawinfo.h(i),'visible','on');
-% else % hide it
-%     set(ud.celldrawinfo.h(i),'visible','off');
-% end;
-% if (cellisinthisimage && drawroinosinthisimage) || (~cellisinthisimage && thiscellsparentdrawroinos)
-%     % show roino
-%     set(ud.celldrawinfo.t(i),'visible','on');
-% else % hide it
-%     set(ud.celldrawinfo.t(i),'visible','off');
-% end;
-% % now draw cell with appropriate position and color
-% if cellisinthisimage,
-%     drift = slicestructupdate.slicedriftlookup.(dir2fieldname(currdir));
-%     changes = getChanges(ud,i,currdir,ancestors);
-% else
-%     drift = slicestructupdate.slicedriftlookup.(dir2fieldname(ud.celllist(i).dirname));
-%     changes = getChanges(ud,i,ud.celllist(i).dirname,[]);
-% end;
-%
-% v = get(ft(gcf,'celllist'),'value');
-% clr = roi_color( ud.celllist(i),v==i,str2double(get(ud.celldrawinfo.t(i),'tag')));
-% set(ud.celldrawinfo.h(i),'color',clr);
-% set(ud.celldrawinfo.t(i),'color',clr);
-% xi = changes.xi;
-% yi = changes.yi;
-% if ~isfield(ud.celllist(i),'dimensions') || ud.celllist(i).dimensions>1
-%     % close ROI
-%     xi(end+1) = xi(1);
-%     yi(end+1) = yi(1);
-% end
-% set(ud.celldrawinfo.h(i),'xdata',xi-drift(1),'ydata',yi-drift(2));
-% set(ud.celldrawinfo.t(i),'position',[mean(xi)-drift(1) mean(yi)-drift(2) 0]);
-
-
 function fieldname = dir2fieldname(dirname)
-fieldname = trimws(dirname);
+fieldname = strtrim(dirname);
 fieldname =['f' fieldname(fieldname~=' ')];
 fieldname( fieldname=='.' ) = 'p';
 
-
 function parse_analysis_parameters( analysis_parameters,fig)
-
-% if isfield(analysis_parameters, 'epochs')
-%     set(ft(fig,'epochsEdit'),'string',analysis_parameters.epochs);
-% end
 if isfield(analysis_parameters, 'trials')
     set(ft(fig,'trialsEdit'),'string',analysis_parameters.epochs);
 end

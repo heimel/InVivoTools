@@ -11,7 +11,7 @@ function available = dec_group_numbers( protocol, show )
 %
 
 db = []; % to mask matlab db function
-protocol=trim(protocol);
+protocol = strtrim(protocol);
 
 load(fullfile(expdatabasepath,'decdb'));
 

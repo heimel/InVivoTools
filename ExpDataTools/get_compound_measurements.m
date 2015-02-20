@@ -54,7 +54,7 @@ if ischar(extra_options) %#ok<NODEF>
 end
 
 if ischar(measures)
-    measures = trim(measures);
+    measures = strtrim(measures);
 end
 
 % measures still contains multiple measures
@@ -341,7 +341,7 @@ return
 
 function [word,wordtype,rest]=get_next_word(sentence)
 
-rest = trim(sentence);
+rest = strtrim(sentence);
 word = '';
 if isempty(rest)
     return
@@ -375,7 +375,7 @@ elseif is_letter(rest(1))
             break
         end
     end
-    word=trim(word);
+    word = strtrim(word);
     switch exist(word) %#ok<EXIST>
         case {2,5}
             wordtype='function';

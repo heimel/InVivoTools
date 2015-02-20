@@ -7,9 +7,9 @@ function ud = new_tptestrecord(ud)
 % 2010-2012, Alexander Heimel
 %
   
-tests=get(ud.h.which_test,'String');
-test=tests(get(ud.h.which_test,'Value'),:);
-test=trim(lower(test));
+tests = get(ud.h.which_test,'String');
+test = tests(get(ud.h.which_test,'Value'),:);
+test = strtrim(lower(test));
 
 % call general new record
 control_db_callback(ud.h.new);

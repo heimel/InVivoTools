@@ -74,7 +74,7 @@ while(isempty(findstr(NewObject.Type,'EOF')))
             end
         case '3DFACE'
             Code = fscanf(fid,'%d');
-            GroupName = trim(fgets(fid)); %fscanf(fid,'%d',1);
+            GroupName = strtrim(fgets(fid)); %fscanf(fid,'%d',1);
             Unknown = fscanf(fid,'%d');
             NewObject.Name = fgetl(fid);
             [x y z c] = Read3DFace(fid,const);
@@ -178,10 +178,8 @@ for i=1:2
 end
 
 function [x,y,z,Color] = Read3DFace(fid,const)
-Code = str2double(trim(fgets(fid))) %fscanf(fid,'%d',1);
-Color = str2double(trim(fgets(fid))) %fscanf(fid,'%d',1);
-%Code = fscanf(fid,'%d',1);
-%Color = fscanf(fid,'%d',1);
+Code = str2double(fgets(fid)) %fscanf(fid,'%d',1);
+Color = str2double(fgets(fid)) %fscanf(fid,'%d',1);
 x= [];
 y = [];
 z=[];

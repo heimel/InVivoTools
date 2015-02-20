@@ -65,7 +65,7 @@ if ischar(extra_options) %#ok<NODEF>
     extra_options=split(extra_options,',');
 end
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
 if ischar(measure)
@@ -192,7 +192,7 @@ function [results, dresults]=get_measurements_for_group( group, measure, value_p
 results=[];
 dresults=[];
 
-if strcmp(trim(group.name),'empty')
+if strcmp(strtrim(group.name),'empty')
     return
 end
 indmice=find_record(mousedb,group.filter);
@@ -254,7 +254,7 @@ end
 
 isolation='';
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
 if strcmpi(measure.datatype,'genenetwork')
@@ -304,7 +304,7 @@ if isfield(testdb,'stim_onset') && exist('stim_onset','var')
     cond=[cond ', (stim_onset=' stim_onset ')' ];
 end
 if isfield(testdb,'comment') &&  exist('comment','var')
-    comment=trim(comment); %#ok<NODEF>
+    comment = strtrim(comment); %#ok<NODEF>
     if comment(1)=='{'
         comment = split( comment(2:end-1));
     else
@@ -315,7 +315,7 @@ if isfield(testdb,'comment') &&  exist('comment','var')
     end
 end
 if isfield(testdb,'comment') &&  exist('nocomment','var')
-    nocomment=trim(nocomment); %#ok<NODEF>
+    nocomment = strtrim(nocomment); %#ok<NODEF>
     if nocomment(1)=='{'
         nocomment = split( nocomment(2:end-1));
     else
@@ -409,7 +409,7 @@ results = [];
 dresults = [];
 
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
 if exist('reliable','var') && eval(reliable)==1 && length(testrecord.reliable)==1
