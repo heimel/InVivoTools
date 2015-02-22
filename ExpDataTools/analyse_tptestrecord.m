@@ -44,7 +44,8 @@ if isempty(record.ROIs)
 end
 record.ROIs.celllist = structconvert(record.ROIs.celllist,tp_emptyroirec);
 
-% clean all measures
+% clean all measures, but save some in case we don't have the tiffs locally
+storedmeasures = record.measures;
 record.measures = [];
 
 if isfield(record,'ROIs') && isfield(record.ROIs,'celllist')
@@ -62,7 +63,12 @@ end
 % compute ROI lengths / circumferences
 if is_zstack
     if isempty(params)
-        errormsg(['Cannot read image information and can thus not compute lengths. ' recordfilter(record)] );
+        logmsg(['Cannot read image information and can thus not compute lengths. ' recordfilter(record)] );
+        if n_rois == length(storedmeasures) && isfield(storedmeasures,'length')
+            for i=1:n_rois
+                record.measures(i).length  = storedmeasures(i).length;
+            end
+        end
     else
         if ~isfield(params,'z_step')
             errordlg(['Image is not a z-stack. ' recordfilter(record)],'Get neurite length.');
@@ -145,8 +151,19 @@ if isfield(record.measures,'present') && ...
         ~isempty(strfind(record.slice,'minute')))
     series_measures =  process_params.series_measures;
     ref_record = tp_get_refrecord(record,false);
-    if ~isempty(ref_record) && isfield(ref_record,'measures') && isfield(ref_record.measures,'present')
-        
+    if ~isempty(ref_record) && ischar(ref_record.reliable)
+        ref_record.reliable = str2num(ref_record.reliable);
+    end
+    if ~isempty(ref_record) && ~isempty(ref_record.reliable) && ~ref_record.reliable
+        logmsg(['Reference record unreliable thus cannot compute gained and lost: ' recordfilter(ref_record)]);
+        for i=1:n_rois
+            record.measures(i).gained = NaN;
+            record.measures(i).lost = NaN;
+            record.measures(i).was_present = NaN;
+            record.measures(i).persistent = NaN;
+        end
+    elseif ~isempty(ref_record) && (isempty(ref_record.reliable) || ref_record.reliable)  && ...
+            isfield(ref_record,'measures') && isfield(ref_record.measures,'present')
         for i=1:n_rois
             record.measures(i).gained = NaN;
             record.measures(i).lost = NaN;
@@ -281,7 +298,11 @@ end
 
 % getting densities
 if isempty(params)
-    errormsg(['Cannot read image information and can thus not compute analyse neurites. ' recordfilter(record)] );
+    if ~process_params.tp_mumble_not_present
+        errormsg(['Cannot read image information and can thus not compute analyse neurites. ' recordfilter(record)] );
+    else
+        logmsg(['Cannot read image information and can thus not compute analyse neurites. ' recordfilter(record)] );
+    end
 else
     record = tp_analyse_neurites( record,params );
 end
@@ -292,13 +313,17 @@ if is_movie
 end
 
 % save measures file
-measuresfile = fullfile(tpdatapath(record),'tp_measures.mat');
-measures = record.measures; 
-try
-    save(measuresfile,'measures');
-catch
-    errormsg(['Could not write measures file ' measuresfile ]);
+if exist(tpdatapath(record),'dir')
+    measuresfile = fullfile(tpdatapath(record),'tp_measures.mat');
+    measures = record.measures;
+    try
+        save(measuresfile,'measures');
+    catch
+        errormsg(['Could not write measures file ' measuresfile ]);
+    end
 end
+
+
 % remove fields that take too much memory
 record.measures = rmfields(record.measures,{'psth_tbins','psth_response','raw_t','raw_data'});
 
