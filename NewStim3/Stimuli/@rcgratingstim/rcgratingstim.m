@@ -61,7 +61,7 @@ if ischar(RC),
 			[rcg,cancelled] = edit_graphical(oldstim); % incomplete
 			if cancelled, rcg = oldstim; end;
 		end;
-	elseif strcmp(RC,'default')|strcmp(RC,''),
+	elseif strcmp(RC,'default')||strcmp(RC,''),
 		RC = [];
 	else,
 		error('Unknown string input to compose_ca.');
