@@ -899,7 +899,7 @@ switch command,
             [x,y,button]=ginput(1);
         end;
     case 'drawNeuriteBt',
-        logmsg('Click on Enter to stop drawing. Right click removes last point.');
+        logmsg('Click on Enter to stop drawing. Right click removes last point. Middle click doesn''t snap.');
         logmsg('Default neurite type can be set in tpprocessparams.');
         
         if ud.zstack && ud.ztproject
@@ -941,13 +941,13 @@ switch command,
         str=get(ft(fig,'snaptoPopup'),'string');
         snap_to_channel = str2num( str{get(ft(fig,'snaptoPopup'),'value')} ); %#ok<ST2NM>
         
-        if button~=1 % not left click
+        if button~=1 &&  button~=2 % not left or middle click
             x = []; % i.e. do not enter next loop
         end
         
         while ~isempty(x),
             switch button
-                case 1
+                case {1,2}
                     xi = [xi_ xi_(end:-1:1)]+x+dr(1);
                     yi = [yi_p yi_m(end:-1:1)]+y+dr(2);
                     bw = inpolygon(blankprev_x,blankprev_y,xi,yi);
@@ -956,7 +956,7 @@ switch command,
                     if ud.ztproject % i.e. no z specified
                         frame = NaN;
                     else
-                        if isempty(snap_to_channel)
+                        if isempty(snap_to_channel) || button==2
                             % set current frame as z
                             frame = round(get(ft(fig,'FrameSlid'),'value'));
                         else
@@ -970,13 +970,13 @@ switch command,
                     end
                     
                     if isempty(snap_to_channel)
-                        channel = 1; % only used for siez of image
+                        channel = 1; % only used for size of image
                     else
                         channel = snap_to_channel;
                     end
                     
                     im = ud.previewimage{1}(:,:,channel);
-                    if ~isempty(snap_to_channel)
+                    if ~isempty(snap_to_channel) && button~=2
                         % find maximum intensity pixel
                         [tempmax,m_ind] = max(im(pixelinds)); %#ok<ASGLU>
                         [y,x] = ind2sub(size(im),pixelinds(m_ind));
@@ -1018,9 +1018,6 @@ switch command,
             end
             figure(fig);
             [x,y,button] = ginput(1);
-            
-            
-            
         end;
         delete(h_temp_line);
         processparams = tpprocessparams( ud.record );
