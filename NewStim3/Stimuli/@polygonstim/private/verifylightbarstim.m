@@ -27,7 +27,7 @@ if proceed,
 	if f,proceed=0; errormsg='R,G,B in background must be in [0..255]';end;
 	f=find(parameters.foreground<0|parameters.foreground>255);
 	if f,proceed=0; errormsg='R,G,B in foreground must be in [0..255]';end;
-	if (diff(parameters.rect([1 3])))<0|(diff(parameters.rect([2 4]))<0),
+	if (diff(parameters.rect([1 3])))<0||(diff(parameters.rect([2 4]))<0),
 		proceed = 0; errormsg='rect must have positive area.';
 	end;
 	if parameters.distance<=0,
@@ -36,24 +36,24 @@ if proceed,
 	if parameters.howlong<=0,
 		proceed=0;errormsg='howlong must be positive.';
 	end;
-	if parameters.contrast<0|parameters.contrast>1,
+	if parameters.contrast<0||parameters.contrast>1,
 		proceed=0; errormsg='contrast must be in [0..1].';
 	end;
-	if ~(parameters.shape==0|parameters.shape==1),
+	if ~(parameters.shape==0||parameters.shape==1),
 		proceed=0; errormsg='shape must be 0 or 1.';
 	end;
 	if parameters.shape==0,
 		if size(parameters.points)~=[1 2],
 			proceed=0;errormsg='points must be 1x2.';
 		else,
-			if parameters.points(1)<0|parameters.points(2)<0,
+			if parameters.points(1)<0||parameters.points(2)<0,
 				proceed=0;errormsg='Width,height must be >=0.';
 			end;
 		end;
 		if size(parameters.remove)~=[1 2],
 			proceed=0;errormsg='remove must be 1x2.';
 		else,
-			if parameters.remove(1)<0|parameters.remove(2)<0,
+			if parameters.remove(1)<0||parameters.remove(2)<0,
 				proceed=0;errormsg='remove must be >=0.';
 			end;
 		end;

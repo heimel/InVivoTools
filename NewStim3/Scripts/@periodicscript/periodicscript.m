@@ -1,4 +1,4 @@
-function S = periodicscript2(PSparams,OLDSCRIPT)
+function S = periodicscript(PSparams,OLDSCRIPT)
 
 % NewStim package: PERIODICSCRIPT
 %

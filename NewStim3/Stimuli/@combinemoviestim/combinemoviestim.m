@@ -52,7 +52,7 @@ if ischar(CM),
 			[cms,cancelled] = edit_graphical(oldstim); % incomplete
 			if cancelled, cms = oldstim; end;
 		end;
-	elseif strcmp(CM,'default')|strcmp(CM,''),
+	elseif strcmp(CM,'default')||strcmp(CM,''),
 		CM = [];
 	else,
 		error('Unknown string input to compose_ca.');
