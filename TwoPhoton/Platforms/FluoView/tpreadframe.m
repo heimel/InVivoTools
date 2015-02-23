@@ -1,7 +1,7 @@
 function [im,fname] = tpreadframe(record,channel,frame,opt,verbose)
 %TPREADFRAME read frame from multitiff
 %
-%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME )
+%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE )
 %
 %
 % 2008-2015, Alexander Heimel
@@ -51,7 +51,7 @@ if strcmp(readfname,fname)==0 % not read in yet
             rethrow me
         end
     end
-    logmsg('First time loading this stack. reading all frames');
+    logmsg(['Loading ' fname]);
     if exist(fname,'file') && ~strcmp(org_fname,fname)
         % i.e. (processed) image file already exists
         for ch = 1:iminf.NumberOfChannels
