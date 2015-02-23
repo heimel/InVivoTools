@@ -1,9 +1,9 @@
-function [data, t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channel,verbose)
+function [data, t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channel,options,verbose)
 % TPREADDATA_SINGLECHANNEL - Reads twophon data
 %
-%  [DATA, T] = TPREADDATA(RECORDS, INTERVALS, PIXELINDS, MODE)
+%  [DATA, T] = TPREADDATA(RECORDS, INTERVALS, PIXELINDS, MODE, CHANNEL, OPTIONS, VERBOSE)
 %
-%  Reads two photon data blocks.  TPREADDATA
+%  Reads two photon data blocks and
 %  allows the user to request data in specific time intervals
 %  and at specific locations in the image.
 %
@@ -51,12 +51,16 @@ function [data, t] = tpreaddata_singlechannel(records, intervals, pixelinds, mod
 %
 %  Tested:  only tested for T-series records, not other types
 
-if nargin<6
+if nargin<7
     verbose = [];
 end
 if isempty(verbose)
     verbose = true;
 end
+if nargin<6
+    options = [];
+end
+
 
 % tpcorrecttptimes should still be change for levelt and fitzpatrick labs
 frametimes = tpcorrecttptimes(records);
@@ -66,13 +70,13 @@ if ~iscell(frametimes)
 end
 
 darklevel = tp_darklevel( records(1));
-[data, t] = tpreaddata_single_record(records(1), intervals, pixelinds, mode, channel, frametimes{1},darklevel,verbose);
+[data, t] = tpreaddata_single_record(records(1), intervals, pixelinds, mode, channel, frametimes{1},darklevel,options,verbose);
 if length(records)>1
     logmsg('Not all options are implemented correctly when reading multiple epochs');
     logmsg('Returning results of multiple epochs as single interval. If multiple intervals are required,');
     logmsg('   then these should be explicitly requested in the function call.');
     for i = 2:length(records)
-        [single_data, single_t] = tpreaddata_single_record(records(i), intervals, pixelinds, mode, channel, frametimes{i},darklevel,verbose);
+        [single_data, single_t] = tpreaddata_single_record(records(i), intervals, pixelinds, mode, channel, frametimes{i},darklevel,options,verbose);
         % concatenate to other data
         for m = 1:size(data,1) % loop over intervals
             for n = 1:size(data,2) % loop over cells
@@ -84,7 +88,7 @@ if length(records)>1
 end
 
 
-function [data,t,params] = tpreaddata_single_record(record, intervals, pixelinds, mode, channel, frametimes, darklevel,verbose)
+function [data,t,params] = tpreaddata_single_record(record, intervals, pixelinds, mode, channel, frametimes, darklevel,options,verbose)
 
 if isempty(intervals)
     intervals = [-Inf +Inf];
@@ -178,7 +182,10 @@ for j=1:size(intervals,1) % loop over requested intervals
             imsinmem(inmem(1)) = 0;
         end;
         if ~imsinmem(f),
-            ims{f} = tpreadframe(record,channel,f) - darklevel(channel);
+            % ugly to read it into cell. takes a lot of time to allocate.
+            % should be changed
+%            ims{f} = zeros(params.lines_per_frame,params.pixels_per_line);
+            ims{f} = tpreadframe(record,channel,f,options,verbose) - darklevel(channel);
             imsinmem(f) = 1;
         end;
         if (currScanline_period__us_ ~= params.scanline_period__us) || ...
@@ -204,16 +211,12 @@ for j=1:size(intervals,1) % loop over requested intervals
             else
                 pixeltimes = 0;
             end
-            
-            %pixeltimes = pixeltimes - params.frame_period;  % if trigger is end-of-frame marker
-            
             currScanline_period__us_ = params.scanline_period__us;
             currLines_per_frame = params.lines_per_frame;
             currDwell_time__us_=params.dwell_time__us;
             currPixels_per_line=params.pixels_per_line;
         end;
         t_ = frametimes(f)+pixeltimes;
-        
         
         for i=1:length(pixelinds)
             if ~isempty(dr) % driftcorrection

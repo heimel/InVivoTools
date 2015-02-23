@@ -651,7 +651,7 @@ switch command,
                 % do per pixel
                 logmsg('Neurite mapping to max z-projection is not implemented yet.');
             else
-                data = tpreaddata(ud.record, [-inf inf], {ud.celllist(v(i)).pixelinds},proj_mode,max_of_channel,verbose);
+                data = tpreaddata(ud.record, [-inf inf], {ud.celllist(v(i)).pixelinds},proj_mode,max_of_channel,ud.image_processing,verbose);
                 [tempmax,frame] = max( data{1} ); %#ok<ASGLU>
                 ud.celllist(v(i)).zi = frame*ones(size(ud.celllist(v(i)).xi));
             end
@@ -844,9 +844,7 @@ switch command,
                 if ~isempty(snap_to_channel)
                     % find maximum z-projection
                     proj_mode = 1; % mean data for each frame
-                    
-                    % NOTE: tpreaddata does not use image processing
-                    data = tpreaddata(ud.record, [max(1,frame-2) frame+2], {pixelinds},proj_mode,snap_to_channel);
+                    data = tpreaddata(ud.record, [max(1,frame-2) frame+2], {pixelinds},proj_mode,snap_to_channel,ud.image_processing);
                     [tempmax,maxframe] = max( data{1} ); %#ok<ASGLU>
                     frame = maxframe + max(1,frame-2);
                     goto_frame( frame,fig );
@@ -964,7 +962,7 @@ switch command,
                         else
                             % find maximum z-projection
                             proj_mode = 1; % mean data for each frame
-                            data = tpreaddata(ud.record, [-inf inf], {pixelinds},proj_mode,snap_to_channel);
+                            data = tpreaddata(ud.record, [-inf inf], {pixelinds},proj_mode,snap_to_channel,ud.image_processing,false);
                             [tempmax,frame] = max( data{1} ); %#ok<ASGLU>
                             goto_frame( frame,fig );
                             ud=get(fig,'userdata');
