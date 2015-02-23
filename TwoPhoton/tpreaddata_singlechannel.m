@@ -178,13 +178,10 @@ for j=1:size(intervals,1) % loop over requested intervals
         %dirid = frame2dirnum(f);  % find the directory where frame number f resides
         if sum(imsinmem)>299,  % limit 300 frames in memory at any one time
             inmem = find(imsinmem);
-            ims{inmem(1)} = [];
+          %  ims{inmem(1)} = [];
             imsinmem(inmem(1)) = 0;
         end;
         if ~imsinmem(f),
-            % ugly to read it into cell. takes a lot of time to allocate.
-            % should be changed
-%            ims{f} = zeros(params.lines_per_frame,params.pixels_per_line);
             ims{f} = tpreadframe(record,channel,f,options,verbose) - darklevel(channel);
             imsinmem(f) = 1;
         end;
