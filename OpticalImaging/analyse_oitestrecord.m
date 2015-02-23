@@ -201,7 +201,7 @@ if isempty(record.imagefile) ...
     switch record.stim_type
         case 'ks'
             if isempty(record.stim_tf)
-                disp('Error: no frequency given (stim_tf)');
+                logmsg('Error: no frequency given (stim_tf)');
                 return
             end
             [img,ks_data]=ks_analysis(...
@@ -215,19 +215,12 @@ if isempty(record.imagefile) ...
             save(imagepath,'ks_data','data','-mat');
             record.imagefile=imagefile;
         otherwise
-            %             early_frames=(1: ceil(record.stim_onset/frame_duration)  );
-            %             late_frames=setdiff( (1:ceil(record.stim_offset/frame_duration)),...
-            %                 early_frames);
-            
             [late_frames,early_frames] = oi_get_framenumbers(record);
 
             if ~isempty(late_frames)
                 if late_frames(end)>fileinfo.n_images
-                    logmsg(['Number of frames in file not consistent with' ...
-                        ' stim_off.']);
-                    errordlg(['Number of frames in file not consistent with' ...
-                        ' stim_off.'],'Analyse testrecord');
-                    return
+                    logmsg('Number of frames in file fewer than stim_off plus extra time.');
+                    late_frames = intersect(late_frames,1:fileinfo.n_images);
                 end
             end
             if strcmp(record.datatype,'fp')==1
