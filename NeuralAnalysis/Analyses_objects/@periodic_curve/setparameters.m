@@ -22,8 +22,9 @@ gP = [gP1 gP2 gP3 gP4];
 default_p=struct('title','','res',0.010,'lag',0,'paramnames',{{}},...
                  'paramvalues',{{}},'graphParams',gP);
 
-if isempty(parameters)|(ischar(parameters)&strcmp(parameters,'default')),
-        parameters = default_p; end;
+if isempty(parameters)||(ischar(parameters)&&strcmp(parameters,'default')),
+        parameters = default_p; 
+end;
 
 %[good,er]=verifyparameters(parameters,getinputs(tc));
 %if ~good,error(['PARAMETERS: ' er]);end;

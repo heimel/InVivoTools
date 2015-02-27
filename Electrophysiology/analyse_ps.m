@@ -15,6 +15,8 @@ if isempty(verbose)
     verbose = true;
 end
 
+processparams = ecprocessparams(record);
+
 measures.usable=1;
 
 paramname = varied_parameters(inp.st.stimscript);
@@ -31,6 +33,7 @@ else
 end
 
 inp.paramname = paramname; % for tuning_curve
+inp.paramnames = {paramname}; % for periodic_curve
 inp.selection = record.stim_parameters; % selection like, 'contrast=0.4,angle=180'
 
 [sts,triggers] = split_stimscript_by_trigger( inp.st );
@@ -75,6 +78,14 @@ for i = 1:length(triggers)
         measures.preferred_stimulus{i} = NaN;
     end
     measures.range{i} = curve(1,:);
+    
+    if processparams.compute_f1f0
+        pc = periodic_curve(inp,'default');
+        pc_out = getoutput(pc);
+        mf0 = max(pc_out.f0curve{1}(2,:));
+        mf1 = max(pc_out.f1curve{1}(2,:));
+        measures.f1f0{i} = mf1/mf0 ;
+    end
     
     % RESPONSE is RATE MINUS SPONTANEOUS
     % normalization by max for trigger 1 only

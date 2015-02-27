@@ -9,11 +9,12 @@ function pcn = compute(pc)
 %
 %  See also:  ANALYSIS_GENERIC/compute, PERIODIC_CURVE
 
-p = getparameters(pc); I = getinputs(pc);
+p = getparameters(pc); 
+I = getinputs(pc);
 
 if ~isempty(pc.internals.oldparams), 
-   if eqlen(pc.internals.oldparams.paramnames,p.paramnames)&...
-      pc.internals.oldparams.res==p.res&...
+   if eqlen(pc.internals.oldparams.paramnames,p.paramnames)&&...
+      pc.internals.oldparams.res==p.res&&...
       pc.internals.oldparams.lag==p.lag,
      pcn=pc; return;
    end;
@@ -28,19 +29,22 @@ end;
  [stims,mti,disporder] = mergestimscripttimestruct(I.st);
  for i=1:length(stims),
    if ~isempty(p.paramnames),
-     use = 1; par = getparameters(stims{i});
+     use = 1; 
+     par = getparameters(stims{i});
      for j=1:length(p.paramnames),
        b = isfield(par,I.paramnames{1});
        if length(I.paramnames)>1,b=b&isfield(par,I.paramnames{2});end;
-       if isfield(par,p.paramnames{j})&b,
+       if isfield(par,p.paramnames{j})&&b,
           for k=1:length(p.values{j}),
-             if getfield(par,p.paramnames{j})~=p.values{j}{k},use=0;end;
+             if par.(p.paramnames{j})~=p.values{j}{k},use=0;end;
           end;
-       else, use=0;
+       else
+           use=0;
        end;
      end;
      if use==1,inc = cat(2,inc,i); end;
-   else, inc = cat(2,inc,i);
+   else
+       inc = cat(2,inc,i);
    end;
  end;
 
@@ -49,27 +53,33 @@ end;
    par = getparameters(stims{inc(i)});
    if length(I.paramnames)==1,
       vals{1} = cat(2,vals{1},i);
-   else,
+   else
      used=0;
      for j=1:length(vars),
-       if eqlen(vars{j},getfield(par,I.paramnames{2})),
+       if eqlen(vars{j},par.(I.paramnames{2})),
           vals{j} = cat(2,vals{j},i); used=1;
        end;
      end;
-     if ~used, vars{length(vars)+1}=getfield(par,I.paramnames{2}); vals{length(vals)+1}=[i];
+     if ~used,
+         vars{length(vars)+1}=par.(I.paramnames{2}); 
+         vals{length(vals)+1}=[i];
      end;
    end;
  end;
- if length(vars)==0, vars={[]}; end;
+ if isempty(vars)
+     vars={[]}; 
+ end;
 
   % compute spontaneous activity rate on first pass through
 
   for z=1:length(vars), % looping over second parameter
-    s=1; interval{z}=zeros(length(vals{z}),2); cinterval{z}=zeros(length(vals{z}),2);
+    s=1; 
+    interval{z}=zeros(length(vals{z}),2); 
+    cinterval{z}=zeros(length(vals{z}),2);
     for j=1:length(vals{z}), % looping over first parameter
        ps = getparameters(stims{vals{z}(j)});
-       curve_x{z}(s) = getfield(ps,I.paramnames{1});
-       condnames{z}{s}=[I.paramnames{1} '=' num2str(curve_x{z}(s))];
+       curve_x{z}(s) = ps.(I.paramnames{1});
+       condnames{z}{s} = [I.paramnames{1} '=' num2str(curve_x{z}(s))];
        stimlist = find(disporder==vals{z}(j));
        dp = struct(getdisplayprefs(stims{vals{z}(j)}));
        df = mean(diff(mti{stimlist(1)}.frameTimes));
@@ -83,20 +93,23 @@ end;
            interval{z}(j,:) = [cinterval{z}(j,1) cinterval{z}(j,2)+dp.BGposttime];
          elseif dp.BGpretime>0, pre=pre+1;
            interval{z}(j,:) = [cinterval{z}(j,1)-dp.BGpretime cinterval{z}(j,2)];
-         else, interval{z}(j,:) = cinterval{z}(j,:);
+         else 
+             interval{z}(j,:) = cinterval{z}(j,:);
          end;
-       else, spontlabel='raw activity'; interval{z}(j,:) = interval{z}(j,:);
+       else 
+           spontlabel='raw activity'; 
+           interval{z}(j,:) = interval{z}(j,:);
        end;
     end;
   end;
   sint = [ min(interval{1}(:,1)) max(interval{1}(:,2)) ];
-  if pre==0&pst>0,  %BGposttime used
+  if pre==0&&pst>0,  %BGposttime used
      spontlabel='stimulus / spontaneous';
      scint = [ max(cinterval{1}(:,2)) max(interval{1}(:,2))];
-  elseif pst==0&pre>0,  % BGpretime used
+  elseif pst==0&&pre>0,  % BGpretime used
      spontlabel='spontaneous / stimulus';
      scint = [ min(interval{1}(:,1)) min(cinterval{1}(:,1)) ];
-  else,
+  else
      spontlabel='trials';
      scint = sint;
   end;
@@ -116,8 +129,6 @@ end;
 
   clear trigs condnames RAparams curve_x cinterval interval
 
-  who,
-
  % general parameters for rasters
   RAparams.res = p.res; % RAparams.interval=interval; RAparams.cinterval=cinterval; % need specifics below
   RAparams.showcbars=1; RAparams.fracpsth=0.5; RAparams.normpsth=1; RAparams.showvar=0; RAparams.axessameheight = 1;
@@ -126,10 +137,12 @@ end;
   % now make computations on second pass
   for z=1:length(vars),  % looping over second parameter
     % make plots/analysis for each condition
-    s=1; interval{z}=zeros(length(vals{z}),2); cinterval{z}=zeros(length(vals{z}),2);
+    s=1; 
+    interval{z}=zeros(length(vals{z}),2); 
+    cinterval{z}=zeros(length(vals{z}),2);
     for j=1:length(vals{z}), % looping over first parameter
        ps = getparameters(stims{vals{z}(j)});
-       curve_x{z}(s) = getfield(ps,I.paramnames{1});
+       curve_x{z}(s) = ps.(I.paramnames{1});
        condnames{z}{s}=[I.paramnames{1} '=' num2str(curve_x{z}(s))];
        stimlist = find(disporder==vals{z}(j));
        dp = struct(getdisplayprefs(stims{vals{z}(j)}));
@@ -141,7 +154,9 @@ end;
        cyci_curve_x{z}{s} = 1:nCyc;
        cyci_cinterval{z}{s} = p.lag+[0 estper];
        cyci_interval{z}{s}  = p.lag+[0 estper];
-       for nn=1:nCyc, cyci_condnames{z}{s}{nn}=num2str(nn); end;
+       for nn=1:nCyc, 
+           cyci_condnames{z}{s}{nn}=num2str(nn); 
+       end;
        for k=1:length(stimlist),
          trigs{z}{s}(k)=mti{stimlist(k)}.frameTimes(1);
          spon{1}(stimlist(k))=trigs{z}{s}(k);
@@ -155,9 +170,12 @@ end;
            interval{z}(j,:) = [cinterval{z}(j,1) cinterval{z}(j,2)+dp.BGposttime] + p.lag;
          elseif dp.BGpretime>0, pre=pre+1;
            interval{z}(j,:) = [cinterval{z}(j,1)-dp.BGpretime cinterval{z}(j,2)] + p.lag;
-         else, interval{z}(j,:) = cinterval{z}(j,:) + p.lag;
+         else
+             interval{z}(j,:) = cinterval{z}(j,:) + p.lag;
          end;
-       else, spontlabel='raw activity'; interval{z}(j,:) = interval{z}(j,:) + p.lag;
+       else
+           spontlabel='raw activity'; 
+           interval{z}(j,:) = interval{z}(j,:) + p.lag;
        end;
        cinterval{z}(j,:) = cinterval{z}(j,:)+p.lag;
        % at this point, ready to compute individual cycle average
@@ -174,9 +192,11 @@ end;
        cf1f0mean=[]; cf1f0stddev=[]; cf1f0stderr=[];
        cf2f1mean=[]; cf2f1stddev=[]; cf2f0stderr=[];
        for nn=1:nCyc,
-          cf1mean(nn)=abs(mean((c.fftvals{nn}(loc1,:)))); cf1stddev(nn)=std((c.fftvals{nn}(loc1,:)));
+          cf1mean(nn)=abs(mean((c.fftvals{nn}(loc1,:)))); 
+          cf1stddev(nn)=std((c.fftvals{nn}(loc1,:)));
           cf1stderr(nn)=cf1stddev(nn)/sqrt(length(stimlist));
-          cf2mean(nn)=abs(mean((c.fftvals{nn}(loc2,:)))); cf2stddev(nn)=std((c.fftvals{nn}(loc2,:)));
+          cf2mean(nn)=abs(mean((c.fftvals{nn}(loc2,:)))); 
+          cf2stddev(nn)=std((c.fftvals{nn}(loc2,:)));
           cf2stderr(nn)=cf2stddev(nn)/sqrt(length(stimlist));
           cf1f0mean(nn)=abs(abs(mean(divide_nozero((c.fftvals{nn}(loc1,:)),(c.fftvals{nn}(1,:))-avg_rate))));
           cf1f0stddev(nn)=std(divide_nozero((c.fftvals{nn}(loc1,:)),(c.fftvals{nn}(1,:))-avg_rate));
@@ -196,11 +216,17 @@ end;
     end;
     RAcp=RAparams; RAcp.interval=cycg_interval{z}; RAcp.cinterval=cycg_cinterval{z};
     RAci=RAinp; RAci.condnames = condnames{z}; RAci.triggers=cycg_trigs{z};
-    cycg_rast{z} = raster(RAci,RAcp,[]); c = getoutput(cycg_rast{z}); c1 = c;
+    cycg_rast{z} = raster(RAci,RAcp,[]); 
+    c = getoutput(cycg_rast{z}); c1 = c;
     cycg_curve{z} = [curve_x{z}; c.ncounts'; c.ctdev'; c.stderr'];
-    RAp=RAparams; RAp.interval=interval{z}; RAp.cinterval=cinterval{z}; RAp.interval, RAp.cinterval,
-    RAi=RAinp; RAi.condnames = condnames{z}; RAi.triggers=trigs{z};
-    rast{z} = raster(RAi,RAp,[]); c = getoutput(rast{z});
+    RAp = RAparams; 
+    RAp.interval = interval{z}; 
+    RAp.cinterval = cinterval{z}; 
+    RAi = RAinp; 
+    RAi.condnames = condnames{z}; 
+    RAi.triggers=trigs{z};
+    rast{z} = raster(RAi,RAp,[]); 
+    c = getoutput(rast{z});
     curve{z} = [curve_x{z}; c.ncounts'; c.ctdev'; c.stderr'];
     cf1meanc=[]; cf1stddevc=[]; cf1stderrc=[]; cf2meanc=[]; cf2stddevc=[]; cf2stderrc=[];
     cf1f0meanc=[]; cf1f0stddevc=[]; cf1f0stderrc=[]; cf2f1meanc=[]; cf2f1stddevc=[]; cf2f0stderrc=[];
@@ -214,9 +240,11 @@ end;
     for nn=1:length(stims),
           [loc1c,thz1]=findclosest(c1.fftfreq{nn},1/estpers(nn));
           [loc2c,thz2]=findclosest(c1.fftfreq{nn},2/estpers(nn));
-          cf1meanc(nn)=(abs(mean((c1.fftvals{nn}(loc1c,:)))));cf1stddevc(nn)=std((c1.fftvals{nn}(loc1c,:)));
+          cf1meanc(nn)=(abs(mean((c1.fftvals{nn}(loc1c,:)))));
+          cf1stddevc(nn)=std((c1.fftvals{nn}(loc1c,:)));
           cf1stderrc(nn)=cf1stddevc(nn)/sqrt(length(stims));
-          cf2meanc(nn)=(abs(mean((c1.fftvals{nn}(loc2c,:))))); cf2stddevc(nn)=std((c1.fftvals{nn}(loc2c,:)));
+          cf2meanc(nn)=(abs(mean((c1.fftvals{nn}(loc2c,:))))); 
+          cf2stddevc(nn)=std((c1.fftvals{nn}(loc2c,:)));
           cf2stderrc(nn)=cf2stddevc(nn)/sqrt(length(stims));
           cf1f0meanc(nn)=abs(real(mean(divide_nozero((c1.fftvals{nn}(loc1c,:)),(c1.fftvals{nn}(1,:))-avg_rate))));
           cf1f0stddevc(nn)=std(divide_nozero((c1.fftvals{nn}(loc1c,:)),(c1.fftvals{nn}(1,:))-avg_rate));
@@ -231,11 +259,14 @@ end;
           cf2vals(:,nn) = (c.fftvals{nn}(loc2,:))';
           cf1f0vals(:,nn) = (divide_nozero(c.fftvals{nn}(loc1,:),c.fftvals{nn}(1,:)-avg_rate))';
           cf2f1vals(:,nn) = (divide_nozero(c.fftvals{nn}(loc2,:),c.fftvals{nn}(loc1,:)-avg_rate))';
-          cf1mean(nn)=(abs(mean((c.fftvals{nn}(loc1,:)))));cf1stddev(nn)=std((c.fftvals{nn}(loc1,:)));
+          cf1mean(nn)=(abs(mean((c.fftvals{nn}(loc1,:)))));
+          cf1stddev(nn)=std((c.fftvals{nn}(loc1,:)));
           cf1stderr(nn)=cf1stddev(nn)/sqrt(length(stims));
-          cf0mean(nn)=(abs(mean((c.fftvals{nn}(1,:)))));cf0stddev(nn)=std((c.fftvals{nn}(1,:)));
+          cf0mean(nn)=(abs(mean((c.fftvals{nn}(1,:)))));
+          cf0stddev(nn)=std((c.fftvals{nn}(1,:)));
           cf0stderr(nn)=cf0stddev(nn)/sqrt(length(stims));
-          cf2mean(nn)=(abs(mean((c.fftvals{nn}(loc2,:))))); cf2stddev(nn)=std((c.fftvals{nn}(loc2,:)));
+          cf2mean(nn)=(abs(mean((c.fftvals{nn}(loc2,:))))); 
+          cf2stddev(nn)=std((c.fftvals{nn}(loc2,:)));
           cf2stderr(nn)=cf2stddev(nn)/sqrt(size(c.fftvals,2));
           cf1f0mean(nn)=abs(abs(mean(divide_nozero((c.fftvals{nn}(loc1,:)),(c.fftvals{nn}(1,:))-avg_rate))));
           cf1f0stddev(nn)=std(divide_nozero((c.fftvals{nn}(loc1,:)),(c.fftvals{nn}(1,:))-avg_rate));
@@ -253,12 +284,12 @@ end;
     f2curve{z}=[curve_x{z}; cf2mean; cf2stddev; cf2stderr;];
     f1f0curve{z}=[curve_x{z}; cf1f0mean; cf1f0stddev; cf1f0stderr;];
     f2f1curve{z}=[curve_x{z}; cf2f1mean; cf2f1stddev; cf2f1stderr;];
-    f0vals{z}=cf0vals;f1vals{z}=cf1vals;f2vals{z}=cf2vals;f1f0vals{z}=cf1f0vals;f2f1vals{z}=cf2f1vals;
+    f0vals{z}=cf0vals;
+    f1vals{z}=cf1vals;
+    f2vals{z}=cf2vals;
+    f1f0vals{z}=cf1f0vals;
+    f2f1vals{z}=cf2f1vals;
   end;
-
-
-%[curve_x,inds]=sort(curve_x); trigs={trigs{inds}}; condname={condnames{inds}};
-
 
 % find maxes and mins later
 

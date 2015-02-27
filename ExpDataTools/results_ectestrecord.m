@@ -237,8 +237,8 @@ for c=1:n_cells
             printfield(measure,'rate_max',y);
             y = printfield(measure,'rate_spont',y,0.5);
             y = printfield(measure,'time_peak',y);
-            y = printfield(measure,'selectivity',y);
-            y = printfield(measure,'selectivity_index',y);
+            %y = printfield(measure,'selectivity',y);
+            %y = printfield(measure,'selectivity_index',y);
             if isfield(measure,'rate_change')
                 y = printtext(subst_ctlchars(['Drate  : ' num2str(measure.rate_change*100,'%2.0f') '%' ]),y);
             end
@@ -260,6 +260,7 @@ for c=1:n_cells
                 case 'position'
                     y = printfield(measure,'rf_center',y);
             end
+            y = printfield(measure,'f1f0',y);
             
             % tuning curve
             col = 2;
