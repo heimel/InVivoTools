@@ -51,7 +51,7 @@ pspar.prestim_time = 3
 angles = [0:pspar.angle:360-pspar.angle];
 
 
-for i = 1:6
+for i = 1:8
     iss_script(i) = StimScript(0);
     % spatial frequency
     pspar.sFrequency = i/10;
