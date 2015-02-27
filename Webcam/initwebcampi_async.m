@@ -85,12 +85,14 @@ end
 [recstart,filename] = start_recording(recdatapath);
  acqparams_in = fullfile(datapath,'acqParams_in');
 
+pin = 'datasetready';
+
 try
   s = serial('/dev/ttyUSB0');
   fopen(s);
-  prev_cts = get(s,'cleartosend');
+  prev_cts = get(s,pin);
   while 1
-    cts = get(s,'cleartosend');
+    cts = get(s,pin);
     if cts(2)~=prev_cts(2)  % i.e. on and not off
 	stimstart =  time - recstart;
         logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
