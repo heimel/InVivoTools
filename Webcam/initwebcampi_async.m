@@ -9,10 +9,10 @@ pkg load instrument-control
 NewStimConfiguration
 
 if nargin<1
-  ready=[];
+    ready=[];
 end
 if isempty(ready)
-  ready=0;
+    ready=0;
 end
 
 
@@ -66,24 +66,24 @@ while 1 && ~ready
     if ~isempty(acqready_props) && acqready_props.datenum > acqready_props_prev.datenum
         logmsg('acqReady changed');
         acqready_props_prev = acqready_props;
-	ready  = 1;	
+        ready  = 1;
     else
         pause(0.1);
     end
 end
 
-        fid = fopen(acqready,'r');
-        fgetl(fid); % pathSpec line
-        datapath = fgetl(fid);
-        fclose(fid);
+fid = fopen(acqready,'r');
+fgetl(fid); % pathSpec line
+datapath = fgetl(fid);
+fclose(fid);
 
-	if ~isempty(datapath) && any(datapath==filesep)
-	   recdatapath = datapath(1:find(datapath==filesep,1,'last'));
-        end
+if ~isempty(datapath) && any(datapath==filesep)
+    recdatapath = datapath(1:find(datapath==filesep,1,'last'));
+end
 
 
 [recstart,filename] = start_recording(recdatapath);
- acqparams_in = fullfile(datapath,'acqParams_in');
+acqparams_in = fullfile(datapath,'acqParams_in');
 
 pin = 'datasetready';
 
@@ -98,15 +98,16 @@ try
         logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
         acqparams = loadStructArray(acqparams_in);
 	recording_name = fullfile(datapath,['webcam' num2str(gNewStim.Webcam.WebcamNumber,'%03d_info.mat')]);
+	mkdir(datapath);
 	save(recording_name,'filename','stimstart');
 	logmsg(['Saved timing info in ' recording_name]);
     end	
     pause(0.05);
   end
 catch
-  stop_recording;
-  fclose(s);
-  rethrow(lasterror)
+    stop_recording;
+    fclose(s);
+    rethrow(lasterror)
 end
 
 
@@ -117,10 +118,11 @@ function [starttime,filename] = start_recording(datapath)
 
 % system('raspivid -t 0 --keypress -o test.h264 -w 640 -h 480 -p 100,100,300,300',false,'async' );
 starttime = time;
+mkdir(datapath);
 filename = fullfile(datapath,['video_' subst_filechars(datestr(now,31)) '.h264'] );
 cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480 -p 100,100,300,300 '];
 system(cmd,false,'async' );
-logmsg(['Started recording ' filename ' at ' datestr(now)]); 
+logmsg(['Started recording ' filename ' at ' datestr(now)]);
 logmsg('Use Ctrl-C to stop recording');
 
 function stop_recording
