@@ -91,21 +91,29 @@ try
   s = serial('/dev/ttyUSB0');
   fopen(s);
   prev_cts = get(s,pin);
+  org_cts = prev_cts; 
   while 1
     cts = get(s,pin);
-    if cts(2)~=prev_cts(2)  % i.e. on and not off
+    if cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)  % i.e. changed and not same as original
+	cts
 	stimstart =  time - recstart;
         logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
-        acqparams = loadStructArray(acqparams_in);
+
+        fid = fopen(acqready,'r');
+        fgetl(fid); % pathSpec line
+        datapath = fgetl(fid);
+        fclose(fid);
+
 	recording_name = fullfile(datapath,['webcam' num2str(gNewStim.Webcam.WebcamNumber,'%03d_info.mat')]);
 	mkdir(datapath);
 	save(recording_name,'filename','stimstart');
 	logmsg(['Saved timing info in ' recording_name]);
     end	
+    prev_cts = cts;
     pause(0.05);
   end
 catch
-    stop_recording;
+    stop_recording(filename);
     fclose(s);
     rethrow(lasterror)
 end
@@ -125,7 +133,15 @@ system(cmd,false,'async' );
 logmsg(['Started recording ' filename ' at ' datestr(now)]);
 logmsg('Use Ctrl-C to stop recording');
 
-function stop_recording
+function stop_recording(filename)
 system('pkill raspivid',false,'async');
+
+% possibly need to wrap to mp4
+% sudo apt-get install gpac
+system(['MP4Box -fps30 -add ' filename ' ' filename ' .mp4'],false,'async');
+%or
+% avconv -i ...h264 -vcodec copy ...mp4
+% play video with omxplayer
+
 
 
