@@ -51,8 +51,10 @@ rcs=rcs.reverse_corr;
 
 measures.rf(:,:,:) = max(rcs.rc_avg(1,:,:,:,end),[],5);  % rcs.rc_avg(1 cell,n_intervals,n_y,n_x, 3 colors    )
 
-if ~ismatrix(measures.rf) % i.e. multiple intervals
+if ndims(measures.rf)>2  %~ismatrix(measures.rf) % i.e. multiple intervals
     rf(:,:) = max(measures.rf,[],1); % take max over all intervals
+else
+    rf = measures.rf;
 end
 
 % calc feature mean

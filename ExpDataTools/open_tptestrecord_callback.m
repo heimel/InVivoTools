@@ -7,6 +7,8 @@ function newud=open_tptestrecord_callback( ud)
 
 newud=ud;
 
+check_duplicates(ud.db(ud.current_record),ud.db,ud.current_record);
+
 open_tptestrecord(ud.db(ud.current_record));
 
 

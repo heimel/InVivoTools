@@ -17,7 +17,7 @@ layer='';
 %max_snr='inf';
 %min_snr='0';
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 if exist('range_limit','var')
     range_limit = eval(range_limit); %#ok<NODEF>
@@ -37,7 +37,7 @@ end
 
 if exist('limit','var')
     try
-        limit = trim(limit); %#ok<NODEF>
+        limit = strtrim(limit); %#ok<NODEF>
         if limit(1)=='{' && limit(end)=='}'
             limit = limit(2:end-1);
         end

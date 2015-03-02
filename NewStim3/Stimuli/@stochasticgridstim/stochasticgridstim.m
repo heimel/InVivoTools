@@ -364,7 +364,7 @@ while ~error_free,
 	catch, errordlg('Syntax error in fps'); so=0; end;
    try, angle=eval(angle_str);
 	catch, errordlg('Syntax error in angle'); so=0; end;
-   if strcmp(rs_str,'<copied from previous stim>')&~isempty(oldstim),
+   if strcmp(rs_str,'<copied from previous stim>')&&~isempty(oldstim),
 	randState = SGSparams.randState;
    else,
 	   try, randState=eval(rs_str); 

@@ -38,11 +38,11 @@ switch record.stim_type
   case {'od','od_bin','od_mon'}
     delimiter = ',';
     eyes = [delimiter record.eye delimiter];
-    pos = findstr(eyes,delimiter);
+    pos = strfind(eyes,delimiter);
     conditions=[];
     for i=1:length(pos)-1
       eye = eyes(pos(i)+1:pos(i+1)-1);
-      eye=trim(eye);
+      eye = strtrim(eye);
       switch eye
         case 'none',
           conditions(end+1)=-2;

@@ -7,8 +7,10 @@ function newstr=trim( str )
 %
 %  See also STRPAD
 %
-%   2005-2011, Alexander Heimel
+%   2005-2015, Alexander Heimel
 %
-  
-  newstr = deblank( str); % remove trailing spaces
-  newstr = fliplr( deblank( fliplr(newstr) ) );  
+
+logmsg( 'DEPRECATED: USE MATLAB FUNCTION STRTRIM INSTEAD');
+
+newstr = deblank( str); % remove trailing spaces
+newstr = fliplr( deblank( fliplr(newstr) ) );

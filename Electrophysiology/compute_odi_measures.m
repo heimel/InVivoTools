@@ -3,18 +3,9 @@ function record = compute_odi_measures( record, db)
 %
 %  RECORD = COMPUTE_ODI_MEASURES( RECORD, DB)
 %
-% 2012-2013, Alexander Heimel
+% 2012-2015, Alexander Heimel
 
-% comment = split(record.comment);
-% if ~isempty(comment)
-%     comment = comment{1};
-% else
-%     comment = '';
-% end
 comment = record.comment;
-
-%comment(comment==',') = '*';
-
 
 switch record.datatype
     case {'ec','lfp'}
@@ -39,31 +30,27 @@ end
 [ipsi_measures,ipsi_tests] = average_measures( db, [ filter_base ',eye=*ipsi*'] );
 
 if strcmpi(record.eye,'ipsi')
-    disp(['COMPUTE_ODI_MEASURES: Filter is ' filter_base]);
+    logmsg(['Filter is ' filter_base]);
 end
 
 if isempty(ipsi_measures) 
     if strcmpi(record.eye,'ipsi')
-        disp('COMPUTE_ODI_MEASURES: No *reliable* ipsi eye records. Check whether hemisphere,surface,depth,stim_type and reliable are set. Only taking records with identical comments.');
+        logmsg('No *reliable* ipsi eye records. Check whether hemisphere,surface,depth,stim_type and reliable are set. Only taking records with identical comments.');
     end
     return
 end
 
 [contra_measures,contra_tests] = average_measures( db, [ filter_base ',eye=*contra*'] );
 if isempty(contra_measures)  && strcmpi(record.eye,'ipsi')
-    disp(['COMPUTE_ODI_MEASURES: Filter is ' filter_base]);
-    disp('COMPUTE_ODI_MEASURES: No *reliable* contra eye records. Check whether hemisphere,surface,depth,stim_type and reliable are set. Only taking records with identical comments up to first comma.');
+    logmsg(['Filter is ' filter_base]);
+    logmsg('No *reliable* contra eye records. Check whether hemisphere,surface,depth,stim_type and reliable are set. Only taking records with identical comments up to first comma.');
     return
 end
 
 if length(contra_measures)~=length(ipsi_measures)
-    disp('COMPUTE_ODI_MEASURES: Not recorded an equal number of cells for ipsi and contra records.');
-    errordlg(['Not recorded an equal number of cells for ipsi and contra records. Filter is ' filter_base],...
-        'Compute odi measures');
+    errormsg(['COMPUTE_ODI_MEASURES: Not recorded an equal number of cells for ipsi and contra records. Filter is ' filter_base]);
     return
 end
-
-
 
 % ODI = (contra - ipsi)/(contra + ipsi)
 %odi = get_odi_measures( contra_measures, ipsi_measures );
@@ -72,18 +59,12 @@ if isfield(record.measures,'response')
     for i=1:length(record.measures)
         record.measures(i).odi_tests = sort([contra_tests ipsi_tests]);
         if ~isfield(contra_measures,'response')
-            errordlg('No response field for contra test. Please re-evaluate contra test.');
-            disp('COMPUTE_ODI_MEASURES: No response field for contra test. Please re-evaluate contra test.');
+            errormsg('No response field for contra test. Please re-evaluate contra test.');
             return
         end
-%         if ~isfield(contra_measures,'rate')
-%             errordlg('No rate field for contra test. Please re-evaluate contra test.');
-%             disp('COMPUTE_ODI_MEASURES: No rate field for contra test. Please re-evaluate contra test.');
-%             return
-%         end
+
          if ~isfield(ipsi_measures,'response')
-            errordlg('No response field for ipsi test. Please re-evaluate ipsi test.');
-            disp('COMPUTE_ODI_MEASURES: No response field for ipsi test. Please re-evaluate contra test.');
+            errormsg('No response field for ipsi test. Please re-evaluate ipsi test.');
             return
          end
        
@@ -137,7 +118,6 @@ try
         co = thresholdlinear(contra{t});
         ip = thresholdlinear(ipsi{t});
         odi{t} = (co-ip)./(co+ip);
-       % odi{t}(isnan(odi{t})) = 0;
     end
 catch
     odi = [];
@@ -162,6 +142,12 @@ if isempty(ind)
 end
 
 meanmeasures = db(ind(1)).measures;
+if isempty(meanmeasures)
+    logmsg(['Record  ' recordfilter(db(ind(1))) ' should be analysed first.']);
+    return
+end
+
+
 flds = fields(meanmeasures);
 for c=1:length(meanmeasures) % cell
     for f=1:length(flds) % field
@@ -173,12 +159,9 @@ for c=1:length(meanmeasures) % cell
             if isnumeric(meanmeasures(c).(field))
                 count = 1;
                 for t=2:length(ind)
-                    
-                    
                     measures = db(ind(t)).measures;
                     if length(measures)~=length(meanmeasures)
-                        errordlg(['Not an equal number of cells in all records. Filter is ' filtercrit],'Compute ODI measures');
-                        disp('COMPUTE_ODI_MEASURES: Not an equal number of cells in all records.');
+                        errormsg(['Not an equal number of cells in all records. Filter is ' filtercrit]);
                         meanmeasures = [];
                         return
                     end
@@ -192,12 +175,9 @@ for c=1:length(meanmeasures) % cell
                 for trig = 1:length(meanmeasures(c).(field))
                     count = 1;
                     for t=2:length(ind)
-
-
                         measures = db(ind(t)).measures;
                         if length(measures)~=length(meanmeasures)
-                            errordlg(['Not an equal number of cells in all records. Filter is ' filtercrit],'Compute ODI measures');
-                            disp('COMPUTE_ODI_MEASURES: Not an equal number of cells in all records.');
+                            errormsg(['Not an equal number of cells in all records. Filter is ' filtercrit]);
                             meanmeasures = [];
                             return
                         end

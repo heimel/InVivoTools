@@ -204,7 +204,7 @@ function savefig(fname, varargin)
             disp(res);
         end
         if (op_dbg || status),
-            disp(['SAVEFIG: Problem with execution of: ' cmd]);
+            logmsg(['Problem with execution of: ' cmd]);
         end
     end
     if exist([fname '-temp'],'file')

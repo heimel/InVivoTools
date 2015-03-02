@@ -6,7 +6,7 @@ function params = tpprocessparams(  record )
 %  Local changes to settings should be made in processparams_local.m
 %  This should be an edited copy of processparams_local_org.m
 %
-% 2009-2014, Alexander Heimel
+% 2009-2015, Alexander Heimel
 %
 
 if nargin<1
@@ -210,7 +210,8 @@ switch record.experiment
         end
 end
 
-
+% loudly complain about absent data
+params.tp_mumble_not_present = false;
 
 % stimulus analysis
 params.psth_posttime = 3; % for psth viewing only
@@ -300,6 +301,9 @@ switch lower(record.experiment)
         params.blind_shuffle = false;
     case '14.35' 
         params.blind_shuffle = false;
+    case '11.12_rr'
+        params.blind_fields = {'date','slice','laser','location','comment','mouse'};
+        params.blind_shuffle = true;
 end
 
 
@@ -310,7 +314,7 @@ end
 if exist('processparams_local.m','file')
     oldparams = params;
     params = processparams_local( params );
-    changed_process_parameters(params,oldparams);
+    %     changed_process_parameters(params,oldparams);
 end
 
 

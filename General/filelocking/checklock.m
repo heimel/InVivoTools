@@ -19,7 +19,7 @@ end
 res=1;
 
 while ~feof(fid)
-  l=trim(fgets(fid));
+  l=strtrim(fgets(fid));
   if l(1)~='#'
     p=find(l=='=');
     if isempty(p)

@@ -28,10 +28,12 @@ function ind=find_record(db,crit)
 %   first for maximum speed
 %
 %   to find case-insensitive use '~' or wild cards *
+%   to have comma's or pipes in the expression, use quotes ", like
+%   comment="black,white" or comment="black,wh*"
 %
 %   FIND_RECORD returns a one-row columnar vector like FIND
 %
-%   2005, Alexander Heimel
+%   2005-2015, Alexander Heimel
 %
 
 if isempty(db)
@@ -61,7 +63,7 @@ end
 
 
 % at this point crit is certainly a non-empty string
-crit=trim(crit);
+crit=strtrim(crit);
 
 ind=[];
 if crit(1)=='('
@@ -77,7 +79,7 @@ if crit(1)=='('
         end
     end
     if br_open>0
-        disp(['Unclosed bracket in criterium: ' crit]);
+        logmsg(['Unclosed bracket in criterium: ' crit]);
         return
     end
     
@@ -86,7 +88,7 @@ if crit(1)=='('
     else
         head=crit(2:p-1);
         tail=crit(p+1:end);
-        tail=trim(tail);
+        tail=strtrim(tail);
         switch tail(1)
             case ',' % AND
                 ind=find_record(db,{head,tail(2:end)});
@@ -94,14 +96,24 @@ if crit(1)=='('
                 ind=uniq(sort([find_record(db,head)...
                     find_record(db,tail(2:end))]));
             otherwise
-                disp(['Unexpected character after ) in criterium: ' crit]);
+                logmsg(['Unexpected character after ) in criterium: ' crit]);
         end
     end
     return
 end
 
-p=find(crit==','|crit=='|');
-if ~isempty(p)
+quoted = false;
+for p=1:length(crit)
+    if crit(p)=='"'
+        quoted = not(quoted);
+    elseif ~quoted && crit(p)==','
+        break
+    elseif ~quoted && crit(p)=='|'
+        break
+    end
+end
+
+if p<length(crit)
     head=crit(1:p(1)-1);
     tail=crit(p(1)+1:end);
     switch crit(p(1))
@@ -120,7 +132,7 @@ ind=[];
 pos=sort([findstr(crit,'=') findstr(crit,'!') ...
     findstr(crit,'>') findstr(crit,'<') findstr(crit,'~')]);
 if length(pos)>1
-    disp(['FIND_RECORD: Only uses first comparison in ' crit ]);
+    logmsg(['Only uses first comparison in ' crit ]);
     pos=pos(1);
 end
 if isempty(pos)
@@ -131,11 +143,8 @@ if isempty(pos)
 end
 if ~isempty(pos)
     comp=crit( pos ); % get which comparison
-    field=trim( crit(1:pos-1) );
-    
-   
-    
-    expr=trim( crit(pos+1:end) );
+    field=strtrim( crit(1:pos-1) );
+    expr=strtrim( crit(pos+1:end) );
     
     pbracket = find(field=='(',1);
     if ~isempty(pbracket) && pbracket>1
@@ -151,14 +160,11 @@ if ~isempty(pos)
     else
         try
             content=db(1).(field);
-        catch %exception
-            
+        catch
             if ~isfield(db,field)
-                disp(['FIND_RECORD: ' field ' is not a valid field']);
+                logmsg([ field ' is not a valid field']);
                 ind=[];
                 return
-                %else
-                %  throw(exception)
             end
         end
         if ~isempty(fieldindex)
@@ -170,7 +176,7 @@ if ~isempty(pos)
             entries={db(:).(field)};
         end
     end
-    if isnumeric(content) % && ~isempty(content)
+    if isnumeric(content)
         expn=str2double(expr);
         switch comp
             case '=',
@@ -200,7 +206,7 @@ if ~isempty(pos)
                     end
                 end
             otherwise
-                disp(['comparison type ' comp ...
+                logmsg(['comparison type ' comp ...
                     ' is not implemented for numbers.'])
         end
     else
@@ -212,11 +218,14 @@ if ~isempty(pos)
         end
         switch comp
             case '~', % with wildcard
+                if length(expr)>1 &&  expr(1)=='"' && expr(end)=='"'
+                    expr = expr(2:end-1);
+                end
                 for i=1:length(db)
                     if numel(entries{i})~=length(entries{i})
                         ent = '';
                         for j=1:size(entries{i},1)
-                            ent = [ ent ' ' trim(entries{i}(j,:))];
+                            ent = [ ent ' ' strtrim(entries{i}(j,:))];
                         end
                         entries{i} = ent;
                     end
@@ -225,17 +234,15 @@ if ~isempty(pos)
                         ind(end+1)=i;
                     end
                 end
-            case '=',
-                ind=strmatch(expr,entries,'exact');
-                %      for i=1:length(db)
-                %       if strcmp( entries{i}, expr)==1
-                %        ind(end+1)=i;
-                %    end
-                %   end
+            case '='
+                if length(expr)>1 && expr(1)=='"' && expr(end)=='"'
+                    expr = expr(2:end-1);
+                end
+                ind = strmatch(expr,entries,'exact');
             case '!',
                 for i=1:length(db)
                     content = entries{i};
-                    if iscell(content) 
+                    if iscell(content)
                         content = flatten(content);
                     end
                     if ischar(content) && size(content,1)>1

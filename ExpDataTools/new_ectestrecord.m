@@ -7,9 +7,9 @@ function ud=new_ectestrecord(ud)
 % 2007, Alexander Heimel
 %
   
-tests=get(ud.h.which_test,'String');
-test=tests(get(ud.h.which_test,'Value'),:);
-test=trim(lower(test));
+tests = get(ud.h.which_test,'String');
+test = tests(get(ud.h.which_test,'Value'),:);
+test = strtrim(lower(test));
 
 % call general new record
 control_db_callback(ud.h.new);

@@ -16,7 +16,7 @@ function [AChn,frq,t] = GetPowerWavelet(Data, Fs, onsettime, verbose)
 % 2012-2013, modified by Alexander Heimel
 %
 
-persistent persistent_Fs sizeData Ffilter persistent_frq
+persistent persistent_Fs persistent_nsamples Ffilter persistent_frq
 
 if nargin<3
     onsettime = [];
@@ -33,7 +33,7 @@ if isempty(verbose)
 end
 
 
-if ~isempty(persistent_Fs) && persistent_Fs==Fs && all(sizeData==size(Data))
+if ~isempty(persistent_Fs) && persistent_Fs==Fs && all(persistent_nsamples==size(Data,1))
     compute_filters = false;
 else
     compute_filters = true;
@@ -43,7 +43,7 @@ end
 if compute_filters
     params = ecprocessparams;
     
-    sizeData = size(Data);
+    persistent_nsamples = size(Data,1);
     
     NSa=size(Data,1);    % number of samples per trial
     %NCh=size(Data,2);    % number of channels

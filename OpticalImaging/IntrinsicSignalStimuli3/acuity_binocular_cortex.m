@@ -1,4 +1,4 @@
-%RETINOTOPY_2x2
+ %RETINOTOPY_2x2
 %
 % RETINOTOPY_2x2, NewStim3 version
 % 
@@ -51,7 +51,7 @@ pspar.prestim_time = 3
 angles = [0:pspar.angle:360-pspar.angle];
 spatialfrequency = [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8];
 
-for i = 1:6
+for i = 1:length(spatialfrequency)
     iss_script(i) = StimScript(0);
     % spatial frequency
     pspar.sFrequency = spatialfrequency(i);

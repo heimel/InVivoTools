@@ -3,13 +3,13 @@ function newud = analyse_all_testrecord_callback( ud)
 %
 %   NEWUD=ANALYSE_ALL_TESTRECORD( UD)
 %
-% 2007-2013, Alexander Heimel
+% 2007-2015, Alexander Heimel
 global stop_analysis
 stop_analysis = false;
 
 newud = ud;
 
-disp('ANALYSE_ALL_TESTRECORD_CALLBACK: started');
+logmsg('Started');
 
 tic
 h_wait = waitbar(0,['Analysing ' num2str(length(ud.ind)) ' records...'],...
@@ -41,7 +41,7 @@ for count=1:length(ud.ind)
          me.message
          stop_analysis = false;
      end
-        disp(['ANALYSE_ALL_TESTRECORD_CALLBACK: ' msg]);
+        logmsg( msg);
     switch ud.db(i).datatype
         case 'oi',
             ud.db(i)=analyse_oitestrecord( ud.db(i));
@@ -63,7 +63,7 @@ for count=1:length(ud.ind)
                 ud.db(i) = compute_odi_measures( ud.db(i),ud.db);
             end
         case 'tp'
-            ud.db(i)=analyse_tptestrecord( ud.db(i));
+            ud.db(i)=analyse_tptestrecord( ud.db(i), false);
     end
     elapsed=toc;
     ud.changed=1;
@@ -74,7 +74,7 @@ if ishandle(h_wait)
 end
 if stop_analysis
     msg = ['Analyzed record ' num2str(i) ' ( ' num2str(count) ' of ' num2str(length(ud.ind)) ')' ];
-    disp(['ANALYSE_ALL_TESTRECORD_CALLBACK: ' msg]);
+    logmsg(msg);
 end
 
 % update control_db figure userdate
@@ -89,7 +89,7 @@ end
 
 newud=ud;
 
-disp('ANALYSE_ALL_TESTRECORD_CALLBACK: Finished');
+logmsg('Finished');
 
 
 

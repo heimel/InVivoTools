@@ -9,7 +9,7 @@ function coded_url = make_sec_amc_url( url )
 chars = '0123456789.abcdefghijklmnopqrstuvwxyz';
 shifts = [ -6   -11    -8     1     5     3    -3     4     3     0    -3     2    -2    -3     1    -3     0   -10 ]
 
-url = trim(url);
+url = strtrim(url);
 p = find(url=='/',1);
 if isempty(p)
     site = url;

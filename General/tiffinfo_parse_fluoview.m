@@ -80,7 +80,7 @@ if isfield(tinf,'UnknownTags') % for Fluoview
 end
 
 if isfield(tinf(1).ParsedImageDescription,'ScanMode') && ...
-    strcmpi(trim(tinf(1).ParsedImageDescription.ScanMode),'bidirectional scan')
+    strcmpi(strtrim(tinf(1).ParsedImageDescription.ScanMode),'bidirectional scan')
     tinf(1).bidirectional = true;
 else
     tinf(1).bidirectional = false;
@@ -96,19 +96,19 @@ if isempty(p)
     return
 end
 pagename = pagename(p+length(caption):end);
-xy = eval([ '[' trim(pagename( 1:find(pagename==13 | pagename ==10))) ']' ]);
+xy = eval([ '[' strtrim(pagename( 1:find(pagename==13 | pagename ==10))) ']' ]);
 x_step = xy(1);
 y_step = xy(2);
 
 caption = 'Units';
 p = findstr( pagename, caption);
-pagename = trim(pagename(p+length(caption):end));
-x_unit = trim(pagename(1:find(pagename==13|pagename==10|pagename==9,1)-1));
+pagename = strtrim(pagename(p+length(caption):end));
+x_unit = strtrim(pagename(1:find(pagename==13|pagename==10|pagename==9,1)-1));
 if x_unit(1) == 65461
     x_unit(1) = 'u';
 end
 pagename = pagename(find(pagename==9)+1:end);
-y_unit = trim(pagename(1:find(pagename==13|pagename==10|pagename==9,1)-1));
+y_unit = strtrim(pagename(1:find(pagename==13|pagename==10|pagename==9,1)-1));
 if y_unit(1) == 65461
     y_unit(1) = 'u';
 end
@@ -122,18 +122,18 @@ if length(inf)<=inf(1).NumberOfChannels
 end
 pagename = inf(1).PageName;
 caption = '[Higher Dimensions]'; % go to third dimension
-p = findstr( pagename, caption);
+p = strfind( pagename, caption);
 pagename = pagename(p+length(caption):end);
 caption = 'Name';
-p = findstr( pagename, caption);
+p = strfind( pagename, caption);
 pagename = pagename(p+length(caption):end);
-name = trim(pagename(1:find(pagename==13|pagename==10,1)-1));
+name = strtrim(pagename(1:find(pagename==13|pagename==10,1)-1));
 name = name(1); % only take first character, i.e. T or Z
 
 caption = 'Units';
-p = findstr( pagename, caption);
+p = strfind( pagename, caption);
 pagename = pagename(p+length(caption):end);
-unit = trim(pagename(1:find(pagename==13|pagename==10,1)-1));
+unit = strtrim(pagename(1:find(pagename==13|pagename==10,1)-1));
 if unit(1) == 65461
     unit(1) = 'u';
 end
@@ -150,7 +150,7 @@ if isempty(p)
     return
 end
 pagename = pagename(p+length(caption):end);
-time = eval([ '[' trim(pagename( 1:find(pagename==13 | pagename ==10))) ']' ]);
+time = eval([ '[' strtrim(pagename( 1:find(pagename==13 | pagename ==10))) ']' ]);
 %if length(time)==2  %two-channels
 time=time(1);
 %end
@@ -166,7 +166,7 @@ if isempty(p)
     return
 end
 pagename = pagename(p+length(caption):end);
-z = eval([ '[' trim(pagename( 1:find(pagename==13 | pagename ==10))) ']' ]);
+z = eval([ '[' strtrim(pagename( 1:find(pagename==13 | pagename ==10))) ']' ]);
 if length(z)==2  %probably z-stack
     % second is time, first is slice
     z=z(1);

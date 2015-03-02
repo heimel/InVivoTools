@@ -76,6 +76,9 @@ function pc = periodic_curve(inputs, parameters, where)
 %                   :       whichdata==[1 1], which will plot the lowest value
 %                   :       of paramnames{2} and paramnames{1}
 
+if nargin<3
+    where = [];
+end
 
 computations=struct('spont',[],'vals2',[],'vals1',[],'curve',[],'rast',[],...
                     'cycg_curve',[],'cycg_rast',[],'cyci_curve',[],...
@@ -90,6 +93,7 @@ nag=analysis_generic([],[],where); delete(nag); ag=analysis_generic([],[],[]);
 pc = class(struct('inputs',inputs,'PCparams',[],'internals',internals,...
         'computations',computations),'periodic_curve',ag);
 pc = setparameters(pc,parameters); % must be immediately after above
-delete(contextmenu(pc)); pc = newcontextmenu(pc);  % install new contextmenu
+delete(contextmenu(pc)); 
+pc = newcontextmenu(pc);  % install new contextmenu
 % pc = compute(pc); % not necessary b/c called from setparameters
 pc = setlocation(pc,where);

@@ -59,12 +59,12 @@ if ischar(SMSp), % if it is an instruction
 	if strcmp(SMSp,'graphical'),
 		finish = 0;
 		sms = edit_graphical(shapemoviestim('default'));
-	elseif strcmp(SMSp,'default')|strcmp(SMSp,''),
+	elseif strcmp(SMSp,'default')||strcmp(SMSp,''),
 		SMSp = [];
-	else,
+    else
 		error('Unknown string input to shapemoviestim.');
 	end;
-else,  % they are parameters
+else  % they are parameters
 end;
 
 if finish,

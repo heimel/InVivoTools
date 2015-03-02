@@ -1,8 +1,12 @@
-function l = tp_get_neurite_length( roi, record )
+function l = tp_get_neurite_length( roi, record, params )
 %TP_GET_NEURITE_LENGTH returns length of rois
 %
-% 2012, Alexander Heimel
+% 2012-2015, Alexander Heimel
 %
+if nargin<3
+    params = [];
+end
+
 if isempty(roi)
     l = NaN;
     return
@@ -12,10 +16,13 @@ if length(roi.xi)==1
     return
 end
 
-tpsetup(record);
-params = tpreadconfig(record);
 if isempty(params)
-    logmsg(['Cannot read image information and can thus not compute lengths. ' recordfilter(record)] );
+    tpsetup(record);
+    params = tpreadconfig(record);
+end
+
+if isempty(params)
+    errormsg(['Cannot read image information and can thus not compute lengths. ' recordfilter(record)] );
     l = 0;
     return
 end

@@ -1,4 +1,4 @@
-function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI)
+function [done,stamp,stiminfo] = customdraw( stim, stminfo, MTI)
 NewStimGlobals % for pixels_per_cm and NewStimViewingDistance
 StimWindowGlobals % for StimWindowRefresh
 
@@ -38,6 +38,9 @@ end
 Screen(StimWindow,'FillRect',dp.clut_bg(1,:));
 Screen('Flip', StimWindow);
 stimduration =toc;
+Screen(StimWindow,'FillRect',dp.clut_bg(1,:)); % Change screen back to default background
+stamp = Screen('Flip', StimWindow);
+
 if abs(stimduration-params.duration)+0.01
     logmsg(['Stimulus took ' num2str(stimduration) ' s.']);
 end

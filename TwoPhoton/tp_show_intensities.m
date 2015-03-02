@@ -3,7 +3,7 @@ function tp_show_intensities( record )
 %
 %  TP_SHOW_INTENSITIES( RECORD )
 %
-%  2011-2013, Alexander Heimel
+%  2011-2015, Alexander Heimel
 %
 
 roilist =record.ROIs.celllist;
@@ -15,10 +15,6 @@ for i=find(ln==1)
     roilist(i).intensity_mean(2) = NaN;
 end
 
-%spine = logical(strcmp({roilist.type},'spine'));
-%roilist = roilist(spine);
-
-
 intensities_abs = reshape([roilist.intensity_mean],params.NumberOfChannels,length(roilist))';
 intensities_rel = reshape([roilist.intensity_rel2dendrite],numel([roilist.intensity_rel2dendrite])/length(roilist),length(roilist))';
 intensities_rank = reshape([roilist.intensity_rank],numel([roilist.intensity_rank])/length(roilist),length(roilist))';
@@ -26,19 +22,12 @@ intensities_rel2synapse = reshape([roilist.intensity_rel2synapse],numel([roilist
 intensities(:,1) = intensities_rel2synapse(:,1); % take abs for GFP
 intensities(:,2) = intensities_rel(:,2); % take rel to dendrite for RFP
 
-
-%intensities(:,1) = ranks(intensities(:,1)); % take rank
-%intensities(:,2) = ranks(intensities(:,2)); % take rank
-
 present = logical([roilist.present]);
 dendrite = logical(strcmp({roilist.type},'dendrite'));
 liness = logical(strcmp({roilist.type},'line'));
 puncta = ~dendrite & ~isnan(intensities(:,1))';
 aggregate = logical(strcmp({roilist.type},'aggregate'));
 spine = logical(strcmp({roilist.type},'spine'));
-
-
-
 
 figure('numbertitle','off','name',...
     ['Intensities: ' record.mouse ' ' record.stack ' ' record.slice]);
@@ -86,16 +75,7 @@ if ~all(present(puncta))
     rocdata.AUC;
     ax=axis;
     plot( [optimal_cutoff1,optimal_cutoff1],[ax(3) ax(4)],'y');
-%    plot( [ax(1) ax(2)],[optimal_cutoff2,optimal_cutoff2],'y');
 end
-
-% if all(intensities(:,1)>0) || 1
-%     set(gca,'xscale','log');
-% end
-% if all(intensities(:,2)>0) || 1
-%     set(gca,'yscale','log');
-% end
-
 set(gca,'ButtonDownFcn',@buttondownfcn)
 
 subplot(1,2,2)
@@ -123,7 +103,7 @@ d = sum( ((ud.intensities-repmat(r,size(ud.intensities,1),1))./ ...
      repmat(range(ud.intensities),size(ud.intensities,1),1 ) ).^2,2);
 [~,ind] = min(d);
 
-disp(['TP_SHOW_INTENSITIES: ROI ' num2str(ud.roilist(ind).index) ': intensities = ' mat2str(ud.intensities(ind,:),2)]);
+logmsg(['ROI ' num2str(ud.roilist(ind).index) ': intensities = ' mat2str(ud.intensities(ind,:),2)]);
 sync2otherslices(ud.record,ud.roilist(ind).index);
 
 

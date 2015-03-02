@@ -61,8 +61,8 @@ elseif strcmp(outmeth,'indframes'),
     stddev=avg;
 end;
 
-for i=1:length(filenames),
-    disp(['AVERAGE_IMAGES: Working on '  filenames{i} '.']);
+for i=1:length(filenames)
+    %logmsg(['Working on '  filenames{i} '.']);
     if strcmp(normmeth,'subtract')||strcmp(normmeth,'divide'),
         nrm = read_oi_compressed(filenames{i},1+(normflag-1)*info.n_images,...
             info.n_images,1,compression,0);
@@ -100,6 +100,7 @@ for i=1:length(filenames),
         end;
     end;
 end
+logmsg(['Processed until '  filenames{end} '.']);
 
 if strcmp(outmeth,'avgframes'),
     N = length(frames)*length(filenames);

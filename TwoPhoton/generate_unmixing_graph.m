@@ -99,23 +99,12 @@ if 0 || plotall
     saveas(fig.corr_unmixed,fullfile(figpath,[figname '.png']),'png');
 end
 
-
-
-
-
-
 im = tppreview(record, 1:params.NumberOfFrames, 1, [1 2],unprocessed, 2);
-
-
 im = im( left:end-right,top:end-bottom,:);
 
 mx = [-0.1 -0.5];
 mn = [-1 -1 ];
 gamma = [1 1];
-
-
-
-
 
 if 0 || plotall
     fig.im1_before = figure;
@@ -199,7 +188,7 @@ if 1 || plotall
     
     mx = max(flatten(im(:,:,1)));
     
-    mn = min(flatten(im(:,:,1)))
+    mn = min(flatten(im(:,:,1)));
     c = zeros(mx-mn,3);
     c(:,2) = (0:(mx-mn-1))/(mx-mn);
     c(1,:) = [0 0 1];
@@ -215,12 +204,4 @@ if 1 || plotall
     saveas(fig.im1_unmixed_extra_green,fullfile(figpath,[figname '.png']),'png');
 end
 
-
-
-function local_savefig(name,fig)
-figpath = '~/Desktop/Figures';
-save_figure([name '.png'],figpath,fig);
-%saveas(fig,fullfile(figpath,[name '.png']),'png');
-saveas(fig,fullfile(figpath,[name '.ai']),'ai');
-warning('off','MATLAB:print:Illustrator:DeprecatedDevice');
 

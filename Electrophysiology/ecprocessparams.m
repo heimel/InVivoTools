@@ -38,6 +38,8 @@ switch protocol
         % params.separation_from_prev_stim_off = 5;
 end
 
+params.compute_f1f0 = false;
+
 % reverse correlation (sg) parameters
 % after 0.4 s there is generally little response
 % I realize that 0.4 s already includes 2 frames if run at 5 Hz

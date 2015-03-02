@@ -168,7 +168,7 @@ switch windowname
                 if val==0
                     ud.ind=(1:length(ud.db));
                 else
-                    crit=trim(get(ud.h.crit,'String'));
+                    crit = strtrim(get(ud.h.crit,'String'));
                     if isempty(crit)
                         logmsg('Empty filter criteria');
                         set(ud.h.filter,'Value',0);
@@ -264,10 +264,22 @@ switch windowname
                 end
                 filename=fullfile(pathname,filename);
                 imported = load(filename);
-                if ud.h.current_record<length(ud.db)
-                    ud.db = [ud.db(1:ud.current_record) imported.db ud.db(ud.current_record+1:end)];
-                else
-                    ud.db = [ud.db imported.db];
+                if ~isempty(ud.db)
+                    imported.db = structconvert(imported.db,ud.db);
+                end
+                try
+                    if ud.h.current_record<length(ud.db)
+                        ud.db = [ud.db(1:ud.current_record) imported.db ud.db(ud.current_record+1:end)];
+                    else
+                        ud.db = [ud.db imported.db];
+                    end
+                catch me
+                    switch me.identifier
+                        case 'MATLAB:catenate:structFieldBad'
+                            errormsg('Unable to import database saved in different formats. Try loading and resaving the to-be-imported database before importing.');
+                        otherwise
+                            rethrow(me)
+                    end
                 end
                 cd(curpath); % change back to working directory
                 ud.changed=1;

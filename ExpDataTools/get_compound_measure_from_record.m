@@ -4,7 +4,7 @@ function [val,val_sem]=get_compound_measure_from_record(record,measure,criteria,
 % 2014, Alexander Heimel
 %
 
-measure = trim(measure);
+measure = strtrim(measure);
 
 if measure(1)=='['
     if ~measure(end)==']'         

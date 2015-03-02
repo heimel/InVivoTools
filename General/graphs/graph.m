@@ -75,7 +75,7 @@ pos_args={...
     'spaced',1,...
     'color',0.7*[1 1 1],...
     'errorbars','',...
-    'style',trim(char(double(length(x)==length(y))*'xy '+ ...
+    'style',strtrim(char(double(length(x)==length(y))*'xy '+ ...
     double(length(x)~=length(y))*'bar')),... % def. bar, unless as n_x==n_y
     'signif_y',[],...
     'prefax',[],...
@@ -135,11 +135,11 @@ if ischar(extra_options)
     extra_options=split(extra_options,',');
 end
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
 if exist('errorbars_sides','var')
-    errorbars_sides=trim(errorbars_sides);
+    errorbars_sides=strtrim(errorbars_sides);
     if errorbars_sides(1)=='{'
         errorbars_sides=split( errorbars_sides(2:end-1),';');
     end
@@ -168,13 +168,13 @@ if exist('markersize','var')
 end
 
 if exist('markers','var')
-    markers=trim(markers);
+    markers=strtrim(markers);
     if markers(1)=='{'
         markers=split( markers(2:end-1),';');
     end
 end
 if exist('linestyles','var')
-    linestyles=trim(linestyles);
+    linestyles=strtrim(linestyles);
     if ~isempty(linestyles) && linestyles(1)=='{'
         linestyles=split( linestyles(2:end-1),';');
     end
@@ -205,7 +205,7 @@ end
 
 % reformat y into cell-structure
 if ~iscell(y)
-    if ~ismatrix(y)
+    if ndims(y)>2
         errormsg('Unable to handle arrays of more than 2 dimensions');
         return
     end
@@ -431,7 +431,7 @@ switch style
                     [means,ind]=sort(-means);
                     means=-means;
                 otherwise
-                    disp(['sory_y by ' sort_y ' is not implemented yet']);
+                    logmsg(['sort_y by ' sort_y ' is not implemented yet']);
                     ind=(1:length(means));
             end
             y = y(ind);
@@ -525,12 +525,17 @@ switch style
                     end
                 end
                 
-                logmsg('Next routine throws away values. Not ideal!');
+                %logmsg('Next routine throws away values. Not ideal!');
                 
                 for j=1:length(uniqx)
                     if sum(x{i}==uniqx(j))> length(y{i})/length(uniqx)*0;%*0.5;%0.5
                         uniqy(j) = nanmean(y{i}(x{i}==uniqx(j)));
-                        uniqystd(j) = nansem(y{i}(x{i}==uniqx(j))); % notice SEM!
+                        switch errorbars
+                            case 'sem'
+                                uniqystd(j) = nansem(y{i}(x{i}==uniqx(j))); 
+                            otherwise
+                                uniqystd(j) = nanstd(y{i}(x{i}==uniqx(j))); 
+                        end
                         pointsy{i}{j} = (y{i}(x{i}==uniqx(j)));   % for significance calculations
                     else
                         
@@ -543,6 +548,9 @@ switch style
                 y{i} = uniqy(ind);
                 ystd{i} = uniqystd(ind);
             end
+            if strcmp(errorbars,'sem')
+                errorbars = 'std'; % to avoid trouble later when plotting
+            end    
         end
         
         if exist('smoothing','var') && smoothing>0
@@ -857,7 +865,7 @@ if ~isempty(extra_code)
 end
 
 if exist('legnd','var') && ~isempty(legnd)
-    legnd = trim(legnd);
+    legnd = strtrim(legnd);
     legnd(legnd==';')=',';
     switch style
         case 'xy'
