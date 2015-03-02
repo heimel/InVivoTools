@@ -1,4 +1,4 @@
-function [camid,device] = webcam_getcamera
+function [camid,device] = wc_getcamera
 %WEBCAM_GETCAMERA
 %
 % [CAMID,DEVICE] = WEBCAM_GETCAMERA
@@ -8,7 +8,7 @@ function [camid,device] = webcam_getcamera
 devices = Screen('VideoCaptureDevices');
 camera_found = false;
 for d=1:length(devices)
-    if strcmp(devices(d).Device,'Trust Webcam') && strcmp(devices(d).ClassName,'DirectShow')
+    if strcmp(devices(d).Device, '/dev/video0') && strcmp(devices(d).ClassName,'Video4Linux2')
         camera_found = true;
         break
     end

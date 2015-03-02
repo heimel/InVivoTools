@@ -1,4 +1,4 @@
-function [done,stamp,stiminfo] = customdraw( stim, stminfo, MTI)
+function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI)
 NewStimGlobals % for pixels_per_cm and NewStimViewingDistance
 StimWindowGlobals % for StimWindowRefresh
 
@@ -10,7 +10,11 @@ params = getparameters(stim);
 n_frames = params.duration * StimWindowRefresh + 1;  % should be in s and should be in stimulus definition (azadehloom)
 center_r2n_cm =  params.center_r2n_cm; % position of object center in cm relative to nose%
 velocity_cmpf = params.velocity_cmps / StimWindowRefresh;
-
+if strcmp(params.start_position, 'left')
+    center_r2n_cm(1) = -screen_cm(1)/2 - params.extent_cm(1);
+else
+    center_r2n_cm(1) = screen_cm(1)/2 + params.extent_cm(1);
+end
 dp = struct(getdisplaystruct(stim));
 my_texture = dp.offscreen(1);
 
@@ -36,9 +40,6 @@ for current_frame = 1:n_frames
     center_r2n_cm = center_r2n_cm + velocity_cmpf;
 end
 stimduration =toc;
-Screen(StimWindow,'FillRect',dp.clut_bg(1,:)); % Change screen back to default background
-stamp = Screen('Flip', StimWindow);
-
 if abs(stimduration-params.duration)+0.01
     logmsg(['Stimulus took ' num2str(stimduration) ' s.']);
 end

@@ -21,7 +21,7 @@ elseif ismac
     localbase = '/Users';
 end
 
-params.wcdatapath_localroot = fullfile(localbase,'data','InVivo',data_name);
+params.wcdatapath_localroot = fullfile(localbase,'data','InVivo');
 if ~exist(params.wcdatapath_localroot,'dir')
     params.wcdatapath_localroot = fullfile(localbase,'data');
 end
