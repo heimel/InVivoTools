@@ -38,7 +38,7 @@ try
 switch command
     case 'READ:PCTWARMEDUP?' 
         fprintf(s,'READ:PCTWARMEDUP?');
-        out = trim(fscanf(s));
+        out = strtrim(fscanf(s));
         if out(end)~='%'
             disp(['CONTROL_MAITAI: Unexpected response from laser to warmup status enquiry: ' out]);
             out = '?';
@@ -47,7 +47,7 @@ switch command
         end
     case 'ON'
         fprintf(s,'READ:PCTWARMEDUP?');
-        out = trim(fscanf(s));
+        out = strtrim(fscanf(s));
         if strcmp(out,'0.00%')
             disp('CONTROL_MAITAI: Stabilizing diode temperature. Takes approx. 2 minutes.');
             fprintf(s,'ON');
@@ -66,12 +66,12 @@ switch command
         fprintf(s,'OFF');
     case 'SHUTTER?'
         fprintf(s,'SHUTTER?');
-        out = str2double(trim(fscanf(s)));
+        out = str2double(fscanf(s));
     case 'SHUTTER'
         if isnumeric(parameter)
             parameter = num2str(parameter);
         end
-        parameter = trim(parameter);
+        parameter = strtrim(parameter);
         if strcmp(parameter,'0')==0 && strcmp(parameter,'1')==0
             disp('CONTROL_MAITAI: Invalid shutter command');
             fclose(s);
@@ -96,17 +96,17 @@ switch command
     case 'READ:WAVELENGTH?' 
         fprintf(s,'READ:WAVELENGTH?');
         pause(0.1);
-        out = trim(fscanf(s));
+        out = strtrim(fscanf(s));
         out = out(1:end-2);
         out = str2double(out);
     case 'READ:POWER?'
         fprintf(s,'READ:POWER?');
-        out = trim(fscanf(s));
+        out = strtrim(fscanf(s));
         out = out(1:end-1); % to remove 'W'
         out = str2double(out);
     case '*STB?'
         fprintf(s,'*STB?');
-        out = str2double(trim(fscanf(s)));
+        out = str2double(fscanf(s));
     otherwise
         disp(['CONTROL_MAITAI: Unknown/unimplemented command ' command]); 
 end

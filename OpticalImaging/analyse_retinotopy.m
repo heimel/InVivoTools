@@ -220,8 +220,11 @@ if ~isempty(record) && strcmp(record.stim_type,'orientation')
     stim_parameters = uniq(sort(mod(record.stim_parameters,180)));
     new_avg = zeros( size(avg,1),size(avg,2),length(stim_parameters));
     for i = 1:length(stim_parameters)
-%       new_avg(:,:,i) = mean( avg(:,:,mod(record.stim_parameters,180)==stim_parameters(i)),3);
-       new_avg(:,:,i) = max( avg(:,:,mod(record.stim_parameters,180)==stim_parameters(i)),[],3);
+        if 0 % take mean
+            new_avg(:,:,i) = mean( avg(:,:,mod(record.stim_parameters,180)==stim_parameters(i)),3);
+        else % take max, used for Nature Neuroscience submission
+            new_avg(:,:,i) = max( avg(:,:,mod(record.stim_parameters,180)==stim_parameters(i)),[],3);
+        end
     end
     avg = new_avg;
     stimlist = 1:size(avg,3);
@@ -231,7 +234,7 @@ end
 fp = params.spatial_filter_width;
 if ~isnan(fp)
     filter=[];
-    logmsg(['Filter width set to ' num2str(fp) ' pixels.']);
+    logmsg(['Filter width set to ' num2str(fp) ' unbinned camera pixels.']);
     filter.width = max(1,fp/fileinfo.xbin/compression);
     filter.unit = 'pixel';
     avg = spatialfilter(avg,filter.width,filter.unit);

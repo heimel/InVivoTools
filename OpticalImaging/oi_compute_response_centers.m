@@ -1,7 +1,7 @@
-function [img_rf_radial_angle_deg,img_rf_azimuth_deg,img_rf_elevation_deg] = oi_compute_response_centers(avg, record, recalculate)
+function [img_rf_concentric_angle_deg,img_rf_azimuth_deg,img_rf_elevation_deg] = oi_compute_response_centers(avg, record, recalculate)
 %OI_COMPUTE_RESPONSE_CENTERS compute for each stimulus the center of mass
 %
-%   [img_rf_radial_angle_deg,img_rf_azimuth_rad,img_rf_elevation_rad] =
+%   [img_rf_concentric_angle_deg,img_rf_azimuth_rad,img_rf_elevation_rad] =
 %         oi_compute_response_centers(avg, record)
 %
 % 2014, Alexander Heimel
@@ -14,7 +14,7 @@ if isempty(recalculate)
     recalculate = false;
 end
 
-img_rf_radial_angle_deg = [];
+img_rf_concentric_angle_deg = [];
 img_rf_azimuth_deg = [];
 img_rf_elevation_deg = [];
 
@@ -91,14 +91,14 @@ Fmonitorpatch_y = TriScatteredInterp([x(:) y(:)],monitorpatch_y(:)); % interpola
 
 img_monitorpatch_x = reshape(Fmonitorpatch_x([gx(:) gy(:)]),size(gx,1),size(gx,2));
 img_monitorpatch_y = reshape(Fmonitorpatch_y([gx(:) gy(:)]),size(gx,1),size(gx,2));
-[img_rf_radial_angle_deg,img_rf_azimuth_deg,img_rf_elevation_deg] = ...
+[img_rf_concentric_angle_deg,img_rf_azimuth_deg,img_rf_elevation_deg] = ...
     compute_angles(img_monitorpatch_x,img_monitorpatch_y,record,params,nx,ny);
 
-% ylimits = [max(1,find(~isnan(nanmean(img_rf_radial_angle_deg,1)),1,'first')-5) ...
-%     min(size(img_rf_radial_angle_deg,2),find(~isnan(nanmean(img_rf_radial_angle_deg,1)),1,'last')+5)] ;
+% ylimits = [max(1,find(~isnan(nanmean(img_rf_concentric_angle_deg,1)),1,'first')-5) ...
+%     min(size(img_rf_concentric_angle_deg,2),find(~isnan(nanmean(img_rf_concentric_angle_deg,1)),1,'last')+5)] ;
 % 
-% xlimits = [max(1,find(~isnan(nanmean(img_rf_radial_angle_deg,2)),1,'first')-5) ...
-%     min(size(img_rf_radial_angle_deg,1),find(~isnan(nanmean(img_rf_radial_angle_deg,2)),1,'last')+5)];
+% xlimits = [max(1,find(~isnan(nanmean(img_rf_concentric_angle_deg,2)),1,'first')-5) ...
+%     min(size(img_rf_concentric_angle_deg,1),find(~isnan(nanmean(img_rf_concentric_angle_deg,2)),1,'last')+5)];
 % 
 % figure
 % subplot(1,3,1)
@@ -120,7 +120,7 @@ img_monitorpatch_y = reshape(Fmonitorpatch_y([gx(:) gy(:)]),size(gx,1),size(gx,2
 % plot(y,x,'+g');
 % 
 % subplot(1,3,3)
-% imagesc(img_rf_radial_angle_deg')
+% imagesc(img_rf_concentric_angle_deg')
 % axis image off
 % ylim(ylimits);
 % xlim(xlimits);
@@ -143,7 +143,7 @@ for i=1:length(cx);
     text(cy(i),cx(i),num2str(i),'color',[1 1 1]);
 end
 
-% [c,h] = contour(gy,gx,img_rf_radial_angle_deg ,[1 90 ]);
+% [c,h] = contour(gy,gx,img_rf_concentric_angle_deg ,[1 90 ]);
 % set(h,'linecolor',[1 1 1]);
 
 % figure
@@ -161,7 +161,7 @@ end
 
 
 
-function [rf_radial_angle_deg,rf_azimuth_deg,rf_elevation_deg,rf_r_cm] = compute_angles(monitorpatch_x,monitorpatch_y,record,params,nx,ny)
+function [rf_concentric_angle_deg,rf_azimuth_deg,rf_elevation_deg,rf_r_cm] = compute_angles(monitorpatch_x,monitorpatch_y,record,params,nx,ny)
 
 
 record.monitor_tilt_rad = record.monitor_tilt_deg/180*pi;
@@ -186,8 +186,15 @@ y = rf_y_rel2nose_cm;
 x = cos(record.monitor_slant_rad)*rf_x_rel2nose_cm ;
 z = record.monitorcenter_rel2nose_cm(3) + sin(record.monitor_slant_rad)*rf_x_rel2nose_cm;
 
-[rf_azimuth_rad,rf_elevation_rad,rf_r_cm] = cart2sph( z,x,y);
-rf_azimuth_deg = rf_azimuth_rad / pi*180;
-rf_elevation_deg = rf_elevation_rad / pi *180;
-rf_radial_angle_deg = cart2pol(rf_elevation_rad,rf_azimuth_rad)/pi*180;
-
+ [rf_azimuth_rad,rf_elevation_rad,rf_r_cm] = cart2sph( z,x,y);
+ rf_azimuth_deg = rf_azimuth_rad / pi*180;
+ rf_elevation_deg = rf_elevation_rad / pi *180;
+ 
+ if 0 % use original submission
+     % this was used for the nature neuroscience and first nature submission
+     rf_concentric_angle_deg = cart2pol(rf_elevation_rad,rf_azimuth_rad)/pi*180;
+ else % use cylindrical trafo
+     % slight change made at 2014-12-20. but only affects correlation in 3rd
+     % digit
+     rf_concentric_angle_deg = (pi/2 - cart2pol(x,y))/pi*180;
+ end

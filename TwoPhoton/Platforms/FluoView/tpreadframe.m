@@ -1,12 +1,18 @@
-function [im,fname] = tpreadframe(record,channel,frame,opt)
+function [im,fname] = tpreadframe(record,channel,frame,opt,verbose)
 %TPREADFRAME read frame from multitiff
 %
-%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME )
+%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE )
 %
 %
-% 2008-2011, Alexander Heimel
+% 2008-2015, Alexander Heimel
 %
 
+if nargin<5
+    verbose = [];
+end
+if isempty(verbose)
+    verbose = true;
+end
 
 if length(channel)>1
     warning('TPREADFRAME:MULTIPLE_CHANNELS','TPREADFRAME:TPREADFRAME WILL IN FUTURE ONLY ACCEPT SINGLE CHANNEL');
@@ -45,7 +51,7 @@ if strcmp(readfname,fname)==0 % not read in yet
             rethrow me
         end
     end
-    disp('TPREADFRAME: First time loading this stack. reading all frames');
+    logmsg(['Loading ' fname]);
     if exist(fname,'file') && ~strcmp(org_fname,fname)
         % i.e. (processed) image file already exists
         for ch = 1:iminf.NumberOfChannels
@@ -56,18 +62,7 @@ if strcmp(readfname,fname)==0 % not read in yet
     else % i.e. no right processed file exist
         for ch = 1:iminf.NumberOfChannels
             for fr = 1:iminf.NumberOfFrames
-                
-                %                 if isfield(iminf,'bidirectional') && iminf.bidirectional
-                %                     ims = imread(org_fname,(ch-1)*iminf.NumberOfFrames+fr);
-                %                     shift = 5; %6;  % 6
-                %                     oddshift = floor( shift/2);
-                %                     evenshift = ceil(shift/2);
-                %                     images(1:2:end,1+oddshift:end,fr,ch) = ims(1:2:end, 1:end-oddshift);
-                %                     images(2:2:end,1:end-evenshift,fr,ch) = ims(2:2:end, 1+evenshift:end);
-                %                 else
                 images(:,:,fr,ch)=imread(org_fname,(ch-1)*iminf.NumberOfFrames+fr);
-                
-                %                 end
             end
         end
         
@@ -104,15 +99,14 @@ if strcmp(readfname,fname)==0 % not read in yet
                     images(2:2:end,1:end-evenshift,fr,ch) = images(2:2:end, 1+evenshift:end,fr,ch);
                 end
             end
-            disp(['TPREADFRAME: Optimal line shift for bidirectional ' num2str(shift)]);
+            logmsg(['Optimal line shift for bidirectional ' num2str(shift)]);
         end
         
-        
         % now do image processing
-        images = tp_image_processing( images, opt );
+        images = tp_image_processing( images, opt,verbose );
         if ~strcmp(fname,org_fname)
             % save processed file for later use
-            disp(['TPREADFRAME: writing processed image stack as ' fname]);
+            logmsg(['Writing processed image stack as ' fname]);
             writepath = fileparts(fname);
             if ~exist(writepath,'dir')
                 mkdir(writepath);
@@ -120,10 +114,8 @@ if strcmp(readfname,fname)==0 % not read in yet
             fluoviewtiffwrite(images,fname,iminf)
         end
     end
-    disp('TPREADFRAME: finished reading')
+    logmsg('Finished reading')
     readfname=fname; % when completely loaded set readfname
-else
-    % disp(['reading frame ' num2str(frame)]);
 end
 
 % return selected images

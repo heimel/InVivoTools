@@ -1,4 +1,4 @@
-function [wdc] = suginocluster(parameters,arg2)
+function [wdc] = wdcluster(parameters,arg2)
 
 % WDC = WDCCLUSTER(PARAMETERS)
 %

@@ -55,15 +55,12 @@ function [r,p,filename,hgraph] = call_groupgraph(record,db,hgraph)
 
 if ~isempty(record.add2graph)
     if strcmp(record.add2graph,record.name)
-        msg = 'Record name and add2graph are identical. This would lead to endless loop';
-        disp(['GRAPHDB_COMPUTE: ' msg]);
-        errordlg(msg,'Compute graph');
+        errormsg('Record name and add2graph are identical. This would lead to endless loop');
     else
-        
         ind_add2 = find_record(db,record.add2graph);
         if ~isempty(ind_add2)
             if length(ind_add2)>1
-                disp('GRAPH_COMPUTE: Multiple records fit add2graph name. Taking first');
+                logmsg('Multiple records fit add2graph name. Taking first');
                 ind_add2 = ind_add2(1);
             end
             

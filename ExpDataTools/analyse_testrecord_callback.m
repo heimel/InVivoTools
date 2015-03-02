@@ -25,6 +25,7 @@ if isfield(record,'experimenter') && isempty(record.experimenter)
     logmsg('Experimenter field is required.'); 
 end
     
+check_duplicates(record,ud.db,ud.current_record);
 
 switch record.datatype
     case {'oi','fp'} % intrinsic signal or flavoprotein

@@ -58,11 +58,20 @@ for i=1:length(ind1)
     tag2 = '</DimensionDescription';
     inds2 = findstr(txts,tag2)-2;
     for j=1:length(inds1) % setting dimensions structs
-        m='m'; % for unit
+%        m='m'; % for unit
         Pixel = 'Pixel' ; 
-        code = [strrep(txts(inds1(j):inds2(j)),' ',['; dd(' num2str(i) ',' num2str(j) ').'] ) ';'];
+        code = txts(inds1(j):inds2(j));
+        code = strrep(code,'"m"','''m''');
+        code = strrep(code,'""','''''');
+        code = [strrep(code,' ',['; dd(' num2str(i) ',' num2str(j) ').'] ) ';'];
         code(code=='"') = '';
-        eval(code);
+        try
+            eval(code);
+        catch me
+            logmsg(['Error evaluating: ' code]);
+            rethrow(me);
+        end
+            
     end
 end
 
@@ -84,6 +93,11 @@ r = loci.formats.ChannelSeparator(r);
 r.setMetadataStore(loci.formats.MetadataTools.createOMEXMLMetadata());
 r.setId(id);
 numSeries = r.getSeriesCount();
+if numSeries>size(dd,1)
+   logmsg(['Reported numSeries = ' num2str(numSeries) ', but only read header info for ' num2str(size(dd,1)) ' series']);
+   numSeries = size(dd,1);
+end
+
 result = cell(numSeries,1);
 for s = 1:numSeries
     inf = [];

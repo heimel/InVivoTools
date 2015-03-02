@@ -1,4 +1,4 @@
-function record = tp_get_intensities(record)
+function record = tp_get_intensities(record,verbose)
 %TP_GET_INTENSITIES
 %
 %  RECORD = TP_GET_INTENSITIES( RECORD )
@@ -7,7 +7,12 @@ function record = tp_get_intensities(record)
 % 2011-2014, Alexander Heimel
 %
 
-logmsg('Should remove intensity info from cellist');
+if nargin<2
+    verbose = [];
+end
+if isempty(verbose)
+    verbose = true;
+end
 
 process_parameters = tpprocessparams(record);
 celllist = record.ROIs.celllist;
@@ -23,9 +28,11 @@ if isempty(params)
     return
 end
 
-hbar = waitbar(0,'Calculating ROI intensities' );
+if verbose
+    hbar = waitbar(0,'Calculating ROI intensities' );
+end
 
-pvimg = tppreview(record,40,1,1:params.NumberOfChannels,process_parameters);
+pvimg = tppreview(record,40,1,1:params.NumberOfChannels,process_parameters,[],verbose);
 channel_modes = zeros(1,params.NumberOfChannels);
 for ch=1:params.NumberOfChannels
     val = pvimg(:,:,ch);
@@ -39,8 +46,6 @@ for i=1:length(celllist) % make intensities for all channels
     celllist(i).intensity_mean = intensity_mean(1:min(end,params.NumberOfChannels));
 end
 
-
-
 % get abs values for absent puncta for channel 1
 intensities_abs = reshape( [celllist.intensity_mean],params.NumberOfChannels,length(celllist))';
 spine = strcmp({celllist.type},'spine');
@@ -49,18 +54,16 @@ synapse = spine | shaft;
 present = [celllist.present];
 absent = ~present;
 
-
+intensity_no_synapse = zeros(params.NumberOfChannels,1);
+intensity_synapse = zeros(params.NumberOfChannels,1);
 for ch=1:params.NumberOfChannels
     intensity_no_synapse(ch) = nanmedian( intensities_abs(absent & synapse,ch));
     intensity_synapse(ch) = nanmedian( intensities_abs(present & synapse,ch));
 end
 
-
 % first calculate linear_rois (dendrites), necessary for normalization
 
 ind_dendrite = find(cellfun(@is_linearroi,{celllist.type}));
-
-% ind_dendrite = [strmatch('dendrite',{celllist.type}) strmatch('line',{celllist.type})];
 
 for i = ind_dendrite(:)'
     roi_dendrite = celllist(i);
@@ -70,37 +73,36 @@ for i = ind_dendrite(:)'
     end
     
     for ch = 1:params.NumberOfChannels
-        intensity = [];
+        intensity = zeros(length(roi_dendrite.xi),1);
         for j = 1:length(roi_dendrite.xi)
             local_intensity = [];
-            
             for frame = (max(1,round(roi_dendrite.zi(j))-1):...
                     min(params.NumberOfFrames,round(roi_dendrite.zi(j))+1))
-                im = tpreadframe(record,ch,frame,process_parameters);
+                im = tpreadframe(record,ch,frame,process_parameters,verbose);
                 im = double(squeeze(im));
                 x = round(roi_dendrite.xi(j));
                 y = round(roi_dendrite.yi(j));
                 
                 if y>0 && y<=params.lines_per_frame && x>0 && x<=params.pixels_per_line
-                    local_intensity(end+1) = im(y,x); 
+                    local_intensity(end+1) = im(y,x);  %#ok<AGROW>
                 end
                 if y>1 && (y-1)<=params.lines_per_frame && x>0 && x<=params.pixels_per_line
-                    local_intensity(end+1) = im(y-1,x); 
+                    local_intensity(end+1) = im(y-1,x);  %#ok<AGROW>
                 end
                 if y<params.lines_per_frame && (y+1)>0 && x>0 && x<=params.pixels_per_line
-                    local_intensity(end+1) = im(y+1,x);
+                    local_intensity(end+1) = im(y+1,x);  %#ok<AGROW>
                 end
                 if x>1 && (x-1)<=params.pixels_per_line && y>0 && y<=params.lines_per_frame
-                    local_intensity(end+1) = im(y,x-1);
+                    local_intensity(end+1) = im(y,x-1);  %#ok<AGROW>
                 end
                 if x<params.pixels_per_line && (x+1)>0 && y>0 && y<=params.lines_per_frame
-                    local_intensity(end+1) = im(y,x+1);
+                    local_intensity(end+1) = im(y,x+1);  %#ok<AGROW>
                 end
             end
             if isempty(local_intensity)
                 local_intensity = NaN;
             end
-            intensity(end+1) = max(local_intensity);
+            intensity(j) = max(local_intensity);
         end
         roi_dendrite.intensity_mean(ch) = mean(intensity);
         roi_dendrite.intensity_median(ch) = median(intensity);
@@ -110,7 +112,6 @@ for i = ind_dendrite(:)'
         record.measures(i).(['intensity_median_ch' num2str(ch)]) = median(intensity);
         record.measures(i).(['intensity_max_ch' num2str(ch)]) = max(intensity);
         
-        
         if mean(intensity)<1
             logmsg(['Mean intensity of dendrite ' num2str(roi_dendrite.index) ...
                 ' channel ' num2str(ch) ' is less than 1.']);
@@ -119,16 +120,10 @@ for i = ind_dendrite(:)'
     end % ch
     celllist(i).intensity_median = roi_dendrite.intensity_median;
     
-    %record.measures(i).intensity_mean = roi_dendrite.intensity_mean;
-    %record.measures(i).intensity_max = roi_dendrite.intensity_max;
-    
-    waitbar(0.5*find(ind_dendrite==i,1)/length(ind_dendrite),hbar);
-    
+    if verbose
+        waitbar(0.5*find(ind_dendrite==i,1)/length(ind_dendrite),hbar);
+    end
 end
-
-
-%warning('TP_GET_INTENSITIES:MEDIAN','TP_GET_INTENSITIES: taking median instead of mean dendrites');
-%warning('OFF','TP_GET_INTENSITIES:MEDIAN');
 
 [blankprev_x,blankprev_y] = meshgrid(1:params.pixels_per_line,1:params.lines_per_frame);
 
@@ -152,7 +147,6 @@ for j = 1:length(celllist)
         logmsg(['ROI ' num2str(celllist(j).index) ' has no valid z-coordinate.']);
         continue
     end
-    
     
     if any(roi.xi<1) ...
             || any(round(roi.xi)>params.pixels_per_line) ...
@@ -195,29 +189,24 @@ for j = 1:length(celllist)
         intensity_dendrite = celllist(ind_dendrite ).intensity_mean;
     end
     
-    
     if frame~=round(frame)
-        %disp(['TP_GET_INTENSITIES: Frame of ROI ' num2str(roi.index) ' is not integer']);
         frame = round(frame);
     end
     
-  
-    
     for ch = 1:params.NumberOfChannels
-        im = tpreadframe(record,ch,frame,process_parameters);
+        im = tpreadframe(record,ch,frame,process_parameters,verbose);
         im = double(squeeze(im));
         roi.intensity_mean(ch) = nanmean(im(roi.pixelinds));
         roi.intensity_median(ch) = nanmedian(im(roi.pixelinds));
         roi.intensity_max(ch) = max(im(roi.pixelinds));
         roi.intensity_rel2dendrite(ch) = (roi.intensity_mean(ch)-channel_modes(ch)) / (intensity_dendrite(ch)-channel_modes(ch));
         if roi.intensity_rel2dendrite(ch)<0 && roi.present
-            disp(['TP_GET_INTENSITIES: ROI ' num2str(roi.index) ' intensity_rel2dendrite below zero for channel ' num2str(ch) '. Setting to zero.']);
+            logmsg(['ROI ' num2str(roi.index) ' intensity_rel2dendrite below zero for channel ' num2str(ch) '. Setting to zero.']);
             roi.intensity_rel2dendrite(ch) = 0;
         end
             
         roi.intensity_rel2synapse(ch) =  ...
             (roi.intensity_mean(ch)-intensity_no_synapse(ch)) / (intensity_synapse(ch)-intensity_no_synapse(ch));
-        %        roi.intensity_median(ch) = median(im(roi.pixelinds));
 
         record.measures(j).(['intensity_mean_ch' num2str(ch)]) = roi.intensity_mean(ch);
         record.measures(j).(['intensity_median_ch' num2str(ch)]) = roi.intensity_median(ch);
@@ -225,12 +214,10 @@ for j = 1:length(celllist)
         record.measures(j).(['intensity_rel2dendrite_ch' num2str(ch)]) = roi.intensity_rel2dendrite(ch);
         record.measures(j).(['intensity_rel2synapse_ch' num2str(ch)]) = roi.intensity_rel2synapse(ch);
     end
-    
-    %celllist(j) = roi;
-    
-    waitbar(0.5+ 0.5*j/length(celllist),hbar);
+    if verbose
+        waitbar(0.5+ 0.5*j/length(celllist),hbar);
+    end
 end
-
 
 % set ranks
 intensity_rank = zeros(length(celllist),params.NumberOfChannels);
@@ -238,16 +225,14 @@ for ch=1:params.NumberOfChannels
     intensity_rank(present & synapse,ch) = ranks(intensities_abs(present & synapse,ch));
 end
 for i=1:length(celllist)
-    %celllist(i).intensity_rank = intensity_rank(i,:);
     for ch=1:params.NumberOfChannels
          record.measures(i).(['intensity_rank_ch' num2str(ch)]) = intensity_rank(i,ch);
     end
 end
 
-
-close(hbar);
-
-
+if verbose
+    close(hbar);
+end
 
 function poly_fine = interpolate_poly( poly )
 % doubles number of interpolation points of poly

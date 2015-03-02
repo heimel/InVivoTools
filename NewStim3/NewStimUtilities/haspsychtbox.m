@@ -23,5 +23,5 @@ return;
 
 b = 0;
 cpustr = computer;
-if strcmp(cpustr,'MAC2')&exist('screen')&exist('serial'), b = 1; end;
+if strcmp(cpustr,'MAC2')&&exist('Screen')&&exist('Serial'), b = 1; end;
 

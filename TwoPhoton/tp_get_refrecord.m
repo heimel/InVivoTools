@@ -17,7 +17,6 @@ if isempty(cycling)
     cycling = true;
 end
 
-
 % check to see if it is open
  h_db = get_fighandle('TP database*');
 if isempty( h_db ) % not open, load from disk
@@ -44,58 +43,49 @@ else
         ind_cur = find_record(db,crit_current);
     end    
     if length(ind_cur)>1
-        if any(record.comment==',')
-            errormsg('Comma in comment field can lead to surprising things. Better remove' );
-        end
-        crit_current = [crit_current ',comment=' record.comment];
+        crit_current = [crit_current ',comment="' record.comment '"'];
         ind_cur = find_record(db,crit_current);
     end    
     if length(ind_cur)>1
-        disp(['TP_GET_REFRECORD. Can not single out current record ' crit_current '. Not returning a reference.']);
         if ~isempty(record.slice)
-            errordlg('Can not single out current record. Not returning a reference.','TP_get_refrecord');
+            errormsg(['Cannot single out current record ' crit_current '. Not returning a reference.']);
             return
+        else
+            logmsg(['Cannot single out current record ' crit_current '. Not returning a reference.']);
         end
     end
     if length(ind_cur)<1
-        disp('TP_GET_REFRECORD. Can not find current record. Should not happen. Not returning a reference.');
         if ~isempty(record.slice)
-            errordlg('Can not single out current record. Not returning a reference.','TP_get_refrecord');
+            errormsg(['Cannot single out current record ' crit_current '. Not returning a reference.']);
             return
+        else
+            logmsg(['Cannot find current record ' crit_current '. Should not happen. Not returning a reference.']);
         end
     end
     ind_prev = sort(ind_ref(ind_ref<min(ind_cur)));
     if ~isempty(ind_prev)
         ind_ref = ind_prev;
     elseif cycling
-        disp('TP_GET_REFRECORD. No record before current one. Assuming cycle and taking last record instead.');
+        logmsg('No record before current one. Assuming cycle and taking last record instead.');
         ind_next = sort(ind_ref(ind_ref>max(ind_cur)));
         if ~isempty(ind_next)
             ind_ref = ind_next(end);
-%         else
-%             disp('TP_GET_REFRECORD. Also no record after current one. Taking current record.');
-%             ind_ref = ind_cur;
         end
         else
        ind_ref = [];
     end
 end
-
-
-
-
     
 if isempty(ind_ref)
-    disp(['TP_GET_REFRECORD: No reference record. ' crit]);
+    logmsg(['No reference record. ' crit]);
     return
 end
 
+refrecord = db(ind_ref(end));
 if length(ind_ref)>1
-    disp('TP_GET_REFRECORD: More than one reference record. Returning last one');
+    ind_ref = ind_ref(end);
+    logmsg(['More than one reference record. Returning last one: '  tpfilename(refrecord)]);
+else
+    logmsg(['Returning record associated with ' tpfilename(refrecord)]);
 end
 
-% select last record of selection
-ind_ref = ind_ref(end);
-refrecord = db(ind_ref);
-
-disp(['TP_GET_REFRECORD: returning record associated with ' tpfilename(refrecord)]);

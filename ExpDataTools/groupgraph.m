@@ -103,7 +103,7 @@ if length(unique({extra_options{1:2:end}}))~=length({extra_options{1:2:end}})
 end
 
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
 logmsg(['Collecting data for figure ' name ]);
@@ -120,9 +120,9 @@ end
 % LEVELT LAB SPECIFIC SHOULD GO SOMEWHERE ELSE
 if ~iscell(groups);
     bxdshift=0;
-    if strcmp(trim(groups),'BXD* shift')==1
+    if strcmp(strtrim(groups),'BXD* shift')==1
         bxdshift=1;
-    elseif strcmp(trim(groups),'BXD* relative shift')==1
+    elseif strcmp(strtrim(groups),'BXD* relative shift')==1
         bxdshift=2;
     end
     if bxdshift>0
@@ -162,7 +162,7 @@ operator_groups=[];
 group_operator=[];
 allgroups={};
 for g=1:length(groups)
-    groups{g}=trim(groups{g});
+    groups{g}=strtrim(groups{g});
     p=[];
     for go=groupoperators
         p=[p find(groups{g}==go)];
@@ -174,8 +174,8 @@ for g=1:length(groups)
         errormsg(['More than one operator (' groupoperators ') in a single group is not allowed.']);
         return
     else
-        allgroups{end+1}=trim(groups{g}(1:p-1));
-        allgroups{end+1}=trim(groups{g}(p+1:end));
+        allgroups{end+1}=strtrim(groups{g}(1:p-1));
+        allgroups{end+1}=strtrim(groups{g}(p+1:end));
         operator_groups(end+1)=length(allgroups)-1;
         group_operator(end+1)=groups{g}(p);
         group_operator(end+1)=' ';
@@ -616,7 +616,7 @@ switch style
                     end
                     barcount=barcount+1;
                     xt=xt+inc_xt_group;
-                elseif isempty(trim(grouplabels(g,:))) || n_measures>1
+                elseif isempty(strtrim(grouplabels(g,:))) || n_measures>1
                     xt=xt+inc_xt_group;
                 else
                     logmsg(['Less than ' num2str(min_n) ...
@@ -653,14 +653,14 @@ end
 
 % legend
 if ~isempty(findstr(lower(legnd),'on')) %i.e. 'on' or 'location'
-    if strcmpi(trim(legnd),'on')
+    if strcmpi(strtrim(legnd),'on')
         legnd = {};
     else
         legnd = eval(legnd);
         legnd = {legnd{:}};
     end
     for g=1:size(grouplabels,1)
-        legnd{end+1} = trim(grouplabels(g,:));
+        legnd{end+1} = strtrim(grouplabels(g,:));
     end
     legnd = cell2str(legnd);
     ind = strmatch('legnd',extra_options);
@@ -675,7 +675,7 @@ end
 logmsg(['Drawing figure ' name ]);
 
 if isempty(add2graph_handle)
-    figure;
+    figure('color',[1 1 1]);
     axishandle = gca;
 elseif ishandle(add2graph_handle)
     axishandle = add2graph_handle;
@@ -687,7 +687,7 @@ end
 h = graph(gy,gx,...
     'ylab',ylab,...
     'xlab',xlab,...
-    'axishandle',gca,...
+    'axishandle',gca,... % seems it should be axishandle
     'style',style,...
     'xticklabels',xticklabels,...
     'prefax',prefax,'errorbars',errorbars,...

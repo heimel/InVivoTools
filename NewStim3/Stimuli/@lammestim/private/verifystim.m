@@ -21,9 +21,9 @@ for i = 1:length(paramlist)
             break;
         end
     elseif ~prod(double(size(param) == paramlist(i).size)) 
-        if isnan(paramlist(i).size(1)) & (size( param,2) == paramlist(i).size(2) | isempty(param))  %#ok<OR2,AND2>
+        if isnan(paramlist(i).size(1)) && (size( param,2) == paramlist(i).size(2) || isempty(param))  %#ok<OR2,AND2>
             %
-        elseif isnan(paramlist(i).size(2)) &  (size( param,1) == paramlist(i).size(1) | isempty(param)) %#ok<OR2,AND2>
+        elseif isnan(paramlist(i).size(2)) &&  (size( param,1) == paramlist(i).size(1) || isempty(param)) %#ok<OR2,AND2>
             %
         else
             errormsg = ['Parameter ' field ' is not of size ' mat2str( paramlist(i).size)];

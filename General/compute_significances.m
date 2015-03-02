@@ -67,13 +67,17 @@ end
 
 
 for i=1:length(y)
-    [hsw,p] = swtest(y{i}); %#ok<ASGLU>
-    if p<0.05
-        notnormal = true;
+    if sum(~isnan(y{i}))>2
+        [hsw,p] = swtest(y{i}); %#ok<ASGLU>
+        if p<0.05
+            notnormal = true;
+        end
+        
+        logmsg(['Group ' num2str(i) ':  '  ...
+            'Shapiro-Wilk normality p = ' num2str(p,2)]);
+    else
+        logmsg(['Group ' num2str(i) ' has less than 3 NaN entries. Cannot compute normality']);
     end
-    
-    logmsg(['Group ' num2str(i) ':  '  ...
-        'Shapiro-Wilk normality p = ' num2str(p,2)]);
 end
 if notnormal
     logmsg('Detected a not normal group. Do a transform or use Kruskal-Wallis, unless n is high (>30)');

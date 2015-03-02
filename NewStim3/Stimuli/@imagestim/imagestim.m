@@ -48,7 +48,7 @@ if ischar(ISp), % if it is an instruction
 	if strcmp(ISp,'graphical'),
 		finish = 0;
 		sms = edit_graphical(imagestim('default'));
-	elseif strcmp(ISp,'default')|strcmp(ISp,''),
+	elseif strcmp(ISp,'default')||strcmp(ISp,''),
 		ISp = [];
 	else,
 		error('Unknown string input to imagestim.');

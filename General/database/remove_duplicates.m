@@ -4,6 +4,7 @@ function db = remove_duplicates(db,flds,keep,keep_criterium)
 % DB = REMOVE_DUPLICATES(DB,FLDS,KEEP,KEEP_CRITERIUM)
 %     FLDS is cell list of field names to use. Empty uses all
 %     KEEP is 'first','last' (default),'keep_criterium'
+%       for KEEP is 'all', no duplicates are removed only shown
 %     KEEP_CRITERIUM is selectium criterium used if KEEP is
 %     'keep_criterium'. If none fits the keep criterium, it will keep the
 %     last
@@ -21,7 +22,7 @@ if nargin<3
     keep = '';
 end
 if isempty(keep)
-    keep = 'default';
+    keep = 'all';
 end
 
 
@@ -33,11 +34,10 @@ for i=1:length(db)
         if iscell(val) || isstruct(val) || isnumeric(val)
             continue
         end
-        val(val==',')='*'; % a little dangerous
         if ~isempty(crit)
             crit = [crit ','];
         end
-        crit = [crit flds{f} '=' val];
+        crit = [crit flds{f} '="' val '"'];
     end
     ind = find_record(db,crit);
     if isempty(ind)
@@ -46,6 +46,9 @@ for i=1:length(db)
     end
     if length(ind)>1
         switch lower(keep)
+            case 'all'
+                % do nothing
+                logmsg(['Duplicate record fitting ' crit]);
             case 'first' 
                 remove(ind) = 1;
                 remove(ind(1)) = 0;

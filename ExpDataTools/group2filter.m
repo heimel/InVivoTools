@@ -35,7 +35,7 @@ end
 combine=split(group.combine);
 
 while ~isempty(combine)
-  addfilt=group2filter(trim(combine{1}),groupdb);
+  addfilt=group2filter(strtrim(combine{1}),groupdb);
   if isempty(filt)
     filt=addfilt;
   elseif ~isempty(addfilt)

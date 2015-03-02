@@ -65,7 +65,7 @@ if ischar(extra_options) %#ok<NODEF>
     extra_options=split(extra_options,',');
 end
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
 if ischar(measure)
@@ -192,7 +192,7 @@ function [results, dresults]=get_measurements_for_group( group, measure, value_p
 results=[];
 dresults=[];
 
-if strcmp(trim(group.name),'empty')
+if strcmp(strtrim(group.name),'empty')
     return
 end
 indmice=find_record(mousedb,group.filter);
@@ -254,7 +254,7 @@ end
 
 isolation='';
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
 if strcmpi(measure.datatype,'genenetwork')
@@ -304,7 +304,7 @@ if isfield(testdb,'stim_onset') && exist('stim_onset','var')
     cond=[cond ', (stim_onset=' stim_onset ')' ];
 end
 if isfield(testdb,'comment') &&  exist('comment','var')
-    comment=trim(comment); %#ok<NODEF>
+    comment = strtrim(comment); %#ok<NODEF>
     if comment(1)=='{'
         comment = split( comment(2:end-1));
     else
@@ -315,7 +315,7 @@ if isfield(testdb,'comment') &&  exist('comment','var')
     end
 end
 if isfield(testdb,'comment') &&  exist('nocomment','var')
-    nocomment=trim(nocomment); %#ok<NODEF>
+    nocomment = strtrim(nocomment); %#ok<NODEF>
     if nocomment(1)=='{'
         nocomment = split( nocomment(2:end-1));
     else
@@ -364,6 +364,14 @@ for i_test=indtests
                 dres=norm(dres(~isnan(dres)));
                 logmsg([newlinehead measure.name '='  num2str(res,3)]);
             end
+        case {'testsum','stacksum'} % take the sum over cells/ROIs in test or stack-record
+            if ~isempty(res)
+                dres=norm(dres(~isnan(dres))) .* sum(~isnan(res));
+                res=nansum(res);
+                logmsg([newlinehead measure.name '='  num2str(res,3)]);
+            end
+            
+            
     end
     
     if ~isempty(res) && numel(res)==length(res) % i.e. 1D results
@@ -401,7 +409,7 @@ results = [];
 dresults = [];
 
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
 if exist('reliable','var') && eval(reliable)==1 && length(testrecord.reliable)==1
@@ -463,21 +471,24 @@ switch measure.measure
         if strcmp(measure.measure(1:min(end,4)),'file')
             switch measure.datatype
                 case 'tp'
-                    saved_data_file = fullfile(tpdatapath(testrecord),'saved_data.mat');
+                    saved_data_file = fullfile(tpdatapath(testrecord),[measure.datatype '_measures.mat']);
                 case {'ec','lfp'}
-                    saved_data_file = fullfile(ecdatapath(testrecord),testrecord.test,'saved_data.mat');
+                    saved_data_file = fullfile(ecdatapath(testrecord),testrecord.test,[measure.datatype '_measures.mat']);
             end
             if exist(saved_data_file,'file')
-                saved_data = load(saved_data_file); %#ok<NASGU>
+                saved_data = load(saved_data_file); 
+                results = [];
                 try
-                    eval(['results = saved_data.' measure.measure(6:end) ';']);
-                    dresults = nan(size(results));
-                    logmsg(['Retrieved ' ...
-                        measure.measure(6:end) ' from ' saved_data_file ...
-                        '. Results is of size ' num2str(size(results)) ]);
+                    for c = 1:length(saved_data.measures) % channel or cell
+                        eval(['results = [results saved_data.measures(' num2str(c) ').' measure.measure(6:end) '];']);
+                    end
                 catch me
-                    logmsg(['Caught error ' me.identifier ]);
+                    logmsg(['Error in retrieving ' measure.measure(6:end) ' from ' saved_data_file '. ' me.identifier ]);
                 end
+                logmsg(['Retrieved ' ...
+                    measure.measure(6:end) ' from ' saved_data_file ...
+                    '. Results is of size ' num2str(size(results)) ]);
+                dresults = nan(size(results));
             end
         else
             [results,dresults] = get_compound_measure_from_record(testrecord,measure.measure,criteria,extra_options);
@@ -505,8 +516,8 @@ switch measure.measure
         end
         if ~isempty(results)
             switch value_per
-                case 'measurement'
-                    if ismatrix(results) && numel(results)<200
+                case {'measurement','neurite'}
+                    if ndims(results)<3 && numel(results)<200 %#ok<ISMAT>
                         textres=mat2str(results',3);
                         if ~isempty(textres) && textres(1)=='['
                             textres=textres(2:end-1);

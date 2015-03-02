@@ -119,7 +119,7 @@ for c=1:n_cells
         case {'sg','sg_adaptation'}
             if iscell(measure.rf) % deprecated on 2014-11-26
                 n_intervals = length(measure.rf);
-            elseif ismatrix(measure.rf)
+            elseif ndims(measure.rf)==2
                 n_intervals = 1;
             else
                 n_intervals = size(measure.rf,1);
@@ -237,8 +237,8 @@ for c=1:n_cells
             printfield(measure,'rate_max',y);
             y = printfield(measure,'rate_spont',y,0.5);
             y = printfield(measure,'time_peak',y);
-            y = printfield(measure,'selectivity',y);
-            y = printfield(measure,'selectivity_index',y);
+            %y = printfield(measure,'selectivity',y);
+            %y = printfield(measure,'selectivity_index',y);
             if isfield(measure,'rate_change')
                 y = printtext(subst_ctlchars(['Drate  : ' num2str(measure.rate_change*100,'%2.0f') '%' ]),y);
             end
@@ -260,6 +260,7 @@ for c=1:n_cells
                 case 'position'
                     y = printfield(measure,'rf_center',y);
             end
+            y = printfield(measure,'f1f0',y);
             
             % tuning curve
             col = 2;
@@ -531,7 +532,7 @@ function plot_rf( measure , i)
 if iscell(measure.rf)
     rf=measure.rf{i}; % deprecated on 2014-11-26
 else
-    if ismatrix(measure.rf)
+    if ndims(measure.rf)==2
         rf = measure.rf;
     else
         rf = squeeze(measure.rf(i,:,:));
@@ -732,7 +733,8 @@ for i=1:length(measure.response)
 %     polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:)
 %     curve(2,1)]),[ linestyle clr(i)]);
 %        polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
-        polar([measure.range{i}+measure.preferred_stimulus{i} measure.range{i}(1)+measure.preferred_stimulus{i}]/180*pi,...
+        polar([measure.range{i}+measure.preferred_stimulus{1} ...
+            measure.range{i}(1)+measure.preferred_stimulus{1}]/180*pi,...
             thresholdlinear([measure.response{i} measure.response{i}(1)]),...
             [ linestyle clr(i)]);
     set(gca,'view',[-90 90]);
