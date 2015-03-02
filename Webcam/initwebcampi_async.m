@@ -31,6 +31,7 @@ remotecommglobals;
 acqready = fullfile(Remote_Comm_dir,'acqReady');
 
 theDir = Remote_Comm_dir;
+logmsg(['Communicating via ' theDir]);
 if ~exist(theDir,'dir')
     msg={['Remote communication folder ' theDir ' does not exist. ']};
     try
@@ -60,7 +61,7 @@ if isempty(acqready_props_prev)
     acqready_props_prev.datenum = datenum('2001-01-01');
 end
 
-logmsg('Checking for acqReady change');
+logmsg(['Checking for change in ' acqready]);
 while 1 && ~ready
     acqready_props = dir(acqready);
     if ~isempty(acqready_props) && acqready_props.datenum > acqready_props_prev.datenum
@@ -91,11 +92,10 @@ try
   s = serial('/dev/ttyUSB0');
   fopen(s);
   prev_cts = get(s,pin);
-  org_cts = prev_cts; 
+  org_cts = 'on'; %prev_cts; 
   while 1
     cts = get(s,pin);
     if cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)  % i.e. changed and not same as original
-	cts
 	stimstart =  time - recstart;
         logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
 
@@ -104,7 +104,7 @@ try
         datapath = fgetl(fid);
         fclose(fid);
 
-	recording_name = fullfile(datapath,['webcam' num2str(gNewStim.Webcam.WebcamNumber,'%03d_info.mat')]);
+	recording_name = fullfile(datapath,['webcam_' host '_info.mat']);
 	mkdir(datapath);
 	save(recording_name,'filename','stimstart');
 	logmsg(['Saved timing info in ' recording_name]);
@@ -113,11 +113,13 @@ try
     pause(0.05);
   end
 catch
+    logmsg('HIER');
     stop_recording(filename);
     fclose(s);
-    rethrow(lasterror)
+   % rethrow(lasterror)
 end
 
+logmsg('DAAR');
 
 
 
@@ -127,18 +129,21 @@ function [starttime,filename] = start_recording(datapath)
 % system('raspivid -t 0 --keypress -o test.h264 -w 640 -h 480 -p 100,100,300,300',false,'async' );
 starttime = time;
 mkdir(datapath);
-filename = fullfile(datapath,['video_' subst_filechars(datestr(now,31)) '.h264'] );
-cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480 -p 100,100,300,300 '];
+filename = fullfile(datapath,['webcam_' host '_' subst_filechars(datestr(now,31)) '.h264'] );
+%cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480 -p 100,100,300,300 '];
+cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480  '];
 system(cmd,false,'async' );
 logmsg(['Started recording ' filename ' at ' datestr(now)]);
 logmsg('Use Ctrl-C to stop recording');
 
 function stop_recording(filename)
+logmsg('Stopping raspivid');
 system('pkill raspivid',false,'async');
 
 % possibly need to wrap to mp4
 % sudo apt-get install gpac
-system(['MP4Box -fps30 -add ' filename ' ' filename ' .mp4'],false,'async');
+
+[stat,output ] = system(['MP4Box -fps 30 -add ' filename ' ' filename ' .mp4'],false,'async')
 %or
 % avconv -i ...h264 -vcodec copy ...mp4
 % play video with omxplayer
