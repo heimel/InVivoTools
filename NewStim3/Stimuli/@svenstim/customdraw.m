@@ -1,4 +1,5 @@
-function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI)
+function [done,stamp,stiminfo] = customdraw(stim, stiminfo, MTI)
+
 NewStimGlobals % for pixels_per_cm and NewStimViewingDistance
 StimWindowGlobals % for StimWindowRefresh
 
@@ -11,15 +12,22 @@ n_frames = params.duration * StimWindowRefresh + 1;  % should be in s and should
 center_r2n_cm =  params.center_r2n_cm; % position of object center in cm relative to nose%
 velocity_cmpf = params.velocity_cmps / StimWindowRefresh;
 
+if strcmp(params.start_position, 'left')
+    center_r2n_cm(1) = (-screen_cm(1)/2 - params.extent_cm(1)) * center_r2n_cm(3)/ screen_center_r2n_cm(3);
+else
+    center_r2n_cm(1) = (screen_cm(1)/2 + params.extent_cm(1)) * center_r2n_cm(3)/ screen_center_r2n_cm(3);
+end
+
 dp = struct(getdisplaystruct(stim));
 my_texture = dp.offscreen(1);
 
 tic
 Screen(StimWindow,'FillRect',dp.clut_bg(1,:));
 stamp = Screen('Flip', StimWindow);
+
 for current_frame = 1:n_frames
     % real world motion
-    if center_r2n_cm(3)>0 % i.e. in front of the viewer
+    if center_r2n_cm(3) > 0 % i.e. in front of the viewer
         
         topleft_cm = center_r2n_cm - [1 -1 1].*params.extent_cm/2;
         bottomright_cm = center_r2n_cm + [1 -1 1].*params.extent_cm/2;
@@ -27,7 +35,7 @@ for current_frame = 1:n_frames
         topleft_pxl = project2monitor(topleft_cm, screen_center_r2n_cm,screen_pxl,screen_cm);
         bottomright_pxl = project2monitor(bottomright_cm, screen_center_r2n_cm,screen_pxl,screen_cm);
         
-        image_rect =[ topleft_pxl bottomright_pxl];
+        image_rect = [topleft_pxl bottomright_pxl];
         Screen('DrawTexture', StimWindow, my_texture, [], image_rect);
     else
         Screen(StimWindow,'FillRect',dp.clut_bg(1,:));
@@ -35,12 +43,13 @@ for current_frame = 1:n_frames
     stamp = Screen('Flip', StimWindow, stamp+0.5/StimWindowRefresh);
     center_r2n_cm = center_r2n_cm + velocity_cmpf;
 end
+stimduration = toc;
 Screen(StimWindow,'FillRect',dp.clut_bg(1,:));
 Screen('Flip', StimWindow);
-stimduration =toc;
 if abs(stimduration-params.duration)+0.01
     logmsg(['Stimulus took ' num2str(stimduration) ' s.']);
 end
+
 done = 1;
 stamp = [];
 

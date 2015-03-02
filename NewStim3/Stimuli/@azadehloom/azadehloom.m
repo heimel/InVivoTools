@@ -1,9 +1,9 @@
-function st = azadehloom( params, oldstim )
+ function st = azadehloom( params, oldstim )
 %AZADEHLOOM stimulus to show bitmaps moving in real world
 %
 % 2014, Azadeh Tafreshiha, Alexander Heimel
 
-if nargin<2
+if nargin < 2
     oldstim = [];
 end
 
@@ -21,7 +21,7 @@ else
     oldstimpar = getparameters(oldstim);
 end
 
-if nargin<1
+if nargin < 1
     params = default;
 elseif ischar(params)
     switch lower(params)
