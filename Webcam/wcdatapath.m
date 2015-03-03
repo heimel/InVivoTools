@@ -22,6 +22,7 @@ end
 
 if isempty(record)
     errormsg('Cannot return path for empty record');
+    dbstack
     return
 end
 

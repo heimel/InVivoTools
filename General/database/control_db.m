@@ -38,7 +38,7 @@ elseif ~isstruct(db)
         [db,ud.filename,ud.perm,ud.lockfile]=open_db(db);
     else
         fig = [];
-        disp(['CONTROL_DB: Database ' db ' does not exist.']);
+        logmsg(['Database ' db ' does not exist.']);
         return;
     end
 else
