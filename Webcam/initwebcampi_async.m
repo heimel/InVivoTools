@@ -106,7 +106,7 @@ try
 
 	recording_name = fullfile(datapath,['webcam_' host '_info.mat']);
 	mkdir(datapath);
-	save(recording_name,'filename','stimstart');
+	save('-v7',recording_name,'filename','stimstart');
 	logmsg(['Saved timing info in ' recording_name]);
     end	
     prev_cts = cts;
