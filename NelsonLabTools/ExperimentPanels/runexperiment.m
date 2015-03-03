@@ -36,7 +36,7 @@ if nargin<2
     record.date = datestr(now,'yyyy-mm-dd');
     record.setup = host;
 end
-InVivoDataPathRem =  experimentpath(record);
+InVivoDataPathRem =  experimentpath(record,true);
 
 InVivoRemoteDirPath = Remote_Comm_dir;
 

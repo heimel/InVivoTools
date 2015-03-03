@@ -8,6 +8,7 @@ function wcinfo = wc_getmovieinfo( record)
 d = dir(fullfile(experimentpath(record),'webcam*info.mat'));
 logmsg(['Found ' num2str(length(d)) ' webcam records in ' experimentpath(record)]);
 if isempty(d)
+    wcinfo = [];
     return
 end
 
@@ -23,7 +24,7 @@ parpath = fullfile(experimentpath(record),'..');
 for i=1:length(d)
     wcinfo(i).path = parpath;
     wcinfo(i).mp4name = [ wcinfo(i).filename '.mp4'];
-    if  ~exist(fullfile(parpath,wcinfo(i).mp4name),'file')
+    if  1 || ~exist(fullfile(parpath,wcinfo(i).mp4name),'file')
         if isunix
             cmd = ['MP4Box -fps 30 -add "' fullfile(parpath,wcinfo(i).filename) '" "' fullfile(parpath,wcinfo(i).mp4name) '"'];
             [stat,output ] = system(cmd);

@@ -33,9 +33,7 @@ params.wcdatapath_localroot = fullfile(localpathbase,'Experiments');
 % check for local overrides
 params = processparams_local(params);
 
-if ~exist(params.wcdatapath_localroot,'dir') % fall back on current folder
-    params.wcdatapath_localroot = '.';
-end
+
 
 branch = fullfile(record.experiment,record.mouse,record.date,record.setup,record.epoch);
 
@@ -49,6 +47,10 @@ if ~exist(path,'dir')
     end
 end
 
-if ~exist(path,'dir') && create
-    mkdir(path);
+if ~exist(path,'dir') 
+    if create
+        mkdir(path);
+    else 
+        path = '.';
+    end
 end
