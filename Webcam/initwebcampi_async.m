@@ -143,7 +143,7 @@ system('pkill raspivid',false,'async');
 % possibly need to wrap to mp4
 % sudo apt-get install gpac
 
-[stat,output ] = system(['MP4Box -fps 30 -add ' filename ' ' filename ' .mp4'],false,'async')
+[stat,output ] = system(['MP4Box -fps 30 -add ' filename ' ' filename '.mp4'],false,'async')
 %or
 % avconv -i ...h264 -vcodec copy ...mp4
 % play video with omxplayer

@@ -39,6 +39,7 @@ open_data_enable = 0;
 channels_enabled = 0;
 average_tests_enabled=0;
 export_tests_enabled=0;
+play_data_enable = 0;
 
 switch type
     case 'ec'
@@ -48,8 +49,9 @@ switch type
         open_data_enable = 1;
         blind_data_enabled = 1;
         reverse_data_enabled = 1; % for reversing database
-    case 'ls' % linescans
+    case 'wc' 
         color = [0.8 0.6 0];
+        play_data_enable = 1;
 end
 
 % get which database
@@ -180,9 +182,10 @@ end
 
 if experimental_pc
     % check diskusage
-    df=diskusage(eval([type 'datapath']));
+    pth = eval([type 'datapath(db(1))']);
+    df=diskusage(pth);
     if df.available < 11000000
-        errormsg('Less than 11 Gb available on /home/data. Clean up disk!');
+        errormsg(['Less than 11 Gb available on ' pth '. Clean up disk!']);
     end
 end
 
@@ -227,6 +230,20 @@ if open_data_enable
     left=left+buttonwidth+colsep;
     maxleft=max(maxleft,left);
 end
+
+if play_data_enable
+    h.play = ...
+        uicontrol('Parent',h_fig, ...
+        'Units','pixels', ...
+        'BackgroundColor',0.8*[1 1 1],...
+        'Callback','genercallback', ...
+        'ListboxTop',0, ...
+        'Position',[left top buttonwidth buttonheight], ...
+        'String','Play','Tag','play_wctestrecord_callback');
+    left=left+buttonwidth+colsep;
+    maxleft=max(maxleft,left);
+end
+
 
 h.analyse = ...
     uicontrol('Parent',h_fig, ...

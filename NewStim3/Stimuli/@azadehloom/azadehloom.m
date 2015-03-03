@@ -1,13 +1,13 @@
-function st = azadehloom( params, oldstim )
+ function st = azadehloom( params, oldstim )
 %AZADEHLOOM stimulus to show bitmaps moving in real world
 %
 % 2014, Azadeh Tafreshiha, Alexander Heimel
 
-if nargin<2
+if nargin < 2
     oldstim = [];
 end
 
-default.filename = '1cm_circle.png';
+default.filename = 'large_circle.png';
 default.center_r2n_cm = [0 0 100]; % position of object center in cm relative to nose%
 default.velocity_cmps = [0 0 -20]; % vx,vy,vz in cm/s, right and up and away are positive
 default.duration = 5; % duration of movement in s
@@ -21,7 +21,7 @@ else
     oldstimpar = getparameters(oldstim);
 end
 
-if nargin<1
+if nargin < 1
     params = default;
 elseif ischar(params)
     switch lower(params)
