@@ -7,7 +7,7 @@
             DAC    1,0
 STIM4:      WAIT   [.......0]      ;        >Awaiting stim start
             DIGOUT [......11]      ;        >Light on (4s)
-	    DAC    0, 2.7         ;        >Analog out on
+	    DAC    0, 0.9         ;        >Analog out on
             DELAY  s(4)-1          ;       
             DIGOUT [......00]      ;        >Light off
 	    DAC    0,0   ;
@@ -73,7 +73,7 @@ RESETR:	    MOVI   V1,VDAC32(0)
 
 STIMR:      WAIT   [.......0]      ;        >Awaiting HADI stim start
             DIGOUT [......11]      ;        >Light on (4s)
-	    ADDI   V1,VDAC32(0.3)  ;
+	    ADDI   V1,VDAC32(0.1)  ;
             DAC    0,V1   ;                >HADIAnalog out on
             DELAY  s(4)-1          ;       
             DIGOUT [......00]      ;        >Light off
