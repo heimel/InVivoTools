@@ -4,7 +4,18 @@ function data = oi_read_all_data( record,conditions,frames)
 %  DATA = OI_READ_ALL_DATA( RECORD, CONDITIONS, FRAMES)
 %     DATA  = [X,Y,FRAMES,BLOCK,CONDITIONS]
 %
-% 2014, Alexander Heimel
+%     RECORD is a struct with at least the following fields
+%         blocks = a vector of block file numbers to read. If empty, then 
+%                all blocks are read.
+%         test = start of block file names, e.g. 'mouse_E1'
+%         setup = one of {'andrew','daneel','jander'}
+%         date = imaging data, e.g. '2015-01-22'
+%
+%     CONDITIONS is a vector with the requested condition (stimulus)
+%         numbers
+%     FRAMES is a vector with requested frame numbers
+%
+% 2014-2015, Alexander Heimel
 
 if nargin<2
     conditions = [];
@@ -19,16 +30,6 @@ else
 end
 
 filenames = fullfilelist(oidatapath(record),convert_cst2cell(record.test));
-
-% if ~iscell(filenames)
-%     d = dir(filenames);
-%     if isempty(d)
-%         logmsg(['No files ' filenames]);
-%         data = [];
-%         return
-%     end
-%     filenames = {d.name};
-% end
 
 experimentlist={};
 extension='';
@@ -45,7 +46,7 @@ for i=1:length(filenames)
     for blk=blocks
         experimentlist{end+1}=[ base 'B' num2str(blk) '.BLK' extension ]; %#ok<AGROW>
         if exist(experimentlist{end},'file')==0
-            experimentlist={experimentlist{1:end-1}};
+            experimentlist = experimentlist(1:end-1);
             break
         end
     end
