@@ -12,7 +12,7 @@ end
 
 tpsetup(record);
 if ~exist(tpdatapath(record),'dir')
-    errordlg(['There is no directory ' tpdatapath(record) ]);
+    errormsg(['There is no directory ' tpdatapath(record) ]);
     return
 end
 [filename,record] = tpfilename(record);

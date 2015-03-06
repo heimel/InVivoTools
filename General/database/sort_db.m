@@ -90,6 +90,8 @@ while ~list_is_sorted
             
             list_is_sorted=0;
             %swaps = swaps +1;
+        elseif ~later_record(db(i+1),db(i),order)
+           logmsg([ 'More than one record like ' recordfilter(db(i)) ]);
         end
     end
     pass=pass+1;

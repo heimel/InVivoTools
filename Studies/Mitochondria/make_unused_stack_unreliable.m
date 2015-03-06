@@ -49,6 +49,7 @@ crit = ['(mouse=11.12.32,stack=xyz4)|' ... % out off lesion projection zone
     '(mouse=11.12.28,stack=xyz1)|' ...% done by Philippe
     '(mouse=11.12.31,stack=xyz4)|' ...% done by Philippe
     '(mouse=11.12.72,stack=xyz3)' ...% done by Philippe
+    '(mouse=11.12.72,stack=xyz4)' ...% done by Philippe?
     ];
 %[db,filename,perm,lockfile]=open_db( filename, loadpath, filter)
 
