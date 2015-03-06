@@ -15,7 +15,7 @@ function h=graph(y,x,varargin)
 %     'test',{['ttest'],'kruskal_wallis_test','none'}
 %     'spaced',{[0],1}    % spacing points in bar plot
 %     'color',0.7*[1 1 1]
-%     'errorbars','sem'
+%     'errorbars',''
 %     'style',{['bar'],'xy','box','hist','cumul','rose'}
 %     'signif_y',[]
 %     'prefax',[]
@@ -74,8 +74,8 @@ pos_args={...
     'test','',... %'ttest',...
     'spaced',1,...
     'color',0.7*[1 1 1],...
-    'errorbars','sem',...
-    'style',trim(char(double(length(x)==length(y))*'xy '+ ...
+    'errorbars','',...
+    'style',strtrim(char(double(length(x)==length(y))*'xy '+ ...
     double(length(x)~=length(y))*'bar')),... % def. bar, unless as n_x==n_y
     'signif_y',[],...
     'prefax',[],...
@@ -100,6 +100,7 @@ pos_args={...
     'z',{},...
     'smoothing',0,...
     'merge_x',[],...
+    'transform','',... % for statistics, not implemented yet
     };
 
 assign(pos_args{:});
@@ -129,17 +130,16 @@ if nvarargin>0
 end
 
 
-
 % parse extra options
 if ischar(extra_options)
     extra_options=split(extra_options,',');
 end
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
 if exist('errorbars_sides','var')
-    errorbars_sides=trim(errorbars_sides);
+    errorbars_sides=strtrim(errorbars_sides);
     if errorbars_sides(1)=='{'
         errorbars_sides=split( errorbars_sides(2:end-1),';');
     end
@@ -168,13 +168,13 @@ if exist('markersize','var')
 end
 
 if exist('markers','var')
-    markers=trim(markers);
+    markers=strtrim(markers);
     if markers(1)=='{'
         markers=split( markers(2:end-1),';');
     end
 end
 if exist('linestyles','var')
-    linestyles=trim(linestyles);
+    linestyles=strtrim(linestyles);
     if ~isempty(linestyles) && linestyles(1)=='{'
         linestyles=split( linestyles(2:end-1),';');
     end
@@ -205,7 +205,7 @@ end
 
 % reformat y into cell-structure
 if ~iscell(y)
-    if ~ismatrix(y)
+    if ndims(y)>2
         errormsg('Unable to handle arrays of more than 2 dimensions');
         return
     end
@@ -280,7 +280,6 @@ switch style
         
         n_x = size(z{1},2);
         n_y = size(z{1},1);
-        % n_z = size(z{1},3);
         
         if n_x>length(x{1}) || n_y>length(y{1})
             logmsg(['Z has dimension ' mat2str(size(z{1})) ...
@@ -306,7 +305,7 @@ switch style
         imagesc( y{1} );
     case 'rose'
         hold off % to clear settings from rectangular graphs
-        if exist('bins','var') && ~isempty(bins) && ischar(bins) %#ok<NODEF>
+        if exist('bins','var') && ~isempty(bins) && ischar(bins) 
             bins=eval(bins);
         else
             bins = 16;
@@ -332,10 +331,6 @@ switch style
                 end
             else
                 for i=1:length(y)
-                    %                     if max(bins>45) % i.e. probably degrees
-                    %                         bins = bins/180*pi;
-                    %                     end
-                    
                     [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins);
                     h.polar(i) = polar( rose_theta(i,:)-pi/bins, rose_r(i,:));
                     hold on
@@ -373,7 +368,7 @@ switch style
             end
             hist( y{i},histbin_centers);
             hh = findobj(gca,'Type','patch');
-            set(hh(1),'FaceColor',color{i});%,'EdgeColor','w')
+            set(hh(1),'FaceColor',color{i});
         end
     case 'pie'
         h.pie = pie(cellfun(@mean,y));
@@ -436,14 +431,13 @@ switch style
                     [means,ind]=sort(-means);
                     means=-means;
                 otherwise
-                    disp(['sory_y by ' sort_y ' is not implemented yet']);
+                    logmsg(['sort_y by ' sort_y ' is not implemented yet']);
                     ind=(1:length(means));
             end
-            y={y{ind}};
-            color={color{ind}};
-            xticklabels={xticklabels{ind}};
+            y = y(ind);
+            color = color(ind);
+            xticklabels = {xticklabels{ind}};
         end
-        
         
         % plot errors
         if ~exist('errorbars_sides','var')
@@ -470,8 +464,8 @@ switch style
             end
         end
         
-        % plot significances
-        h = compute_significances( y,x, test, signif_y, ystd, ny, tail, h );
+        % compute and plot significances
+        h = compute_significances( y,x, test, signif_y, ystd, ny, tail,transform, h );
         
         % tighten x-axis
         ax = axis;
@@ -507,9 +501,7 @@ switch style
         if showpoints==2 % replace y by means
             for i=1:length(y)
                 if length(x{i})~=length(y{i})
-                    msg = ['Unequal number of x and y values for set ' num2str(i)];
-                    errordlg(msg,'Graph');
-                    disp(['GRAPH: ' msg]);
+                    errormsg(['Unequal number of x and y values for set ' num2str(i)]);
                     if ishandle(h.fig)
                         close(h.fig);
                     end
@@ -533,12 +525,17 @@ switch style
                     end
                 end
                 
-                logmsg('Next routine throws away values. Not ideal!');
+                %logmsg('Next routine throws away values. Not ideal!');
                 
                 for j=1:length(uniqx)
                     if sum(x{i}==uniqx(j))> length(y{i})/length(uniqx)*0;%*0.5;%0.5
                         uniqy(j) = nanmean(y{i}(x{i}==uniqx(j)));
-                        uniqystd(j) = nansem(y{i}(x{i}==uniqx(j))); % notice SEM!
+                        switch errorbars
+                            case 'sem'
+                                uniqystd(j) = nansem(y{i}(x{i}==uniqx(j))); 
+                            otherwise
+                                uniqystd(j) = nanstd(y{i}(x{i}==uniqx(j))); 
+                        end
                         pointsy{i}{j} = (y{i}(x{i}==uniqx(j)));   % for significance calculations
                     else
                         
@@ -551,6 +548,9 @@ switch style
                 y{i} = uniqy(ind);
                 ystd{i} = uniqystd(ind);
             end
+            if strcmp(errorbars,'sem')
+                errorbars = 'std'; % to avoid trouble later when plotting
+            end    
         end
         
         if exist('smoothing','var') && smoothing>0
@@ -566,8 +566,8 @@ switch style
             errorbars_sides='both';
         end
         if strcmp(errorbars,'sem')
-            logmsg('Errorbars sem are not implemented for xy graph');
-            errorbars='std';
+            logmsg('Errorbars sem are not implemented for xy graph.');
+            errorbars='none';
         end
         if ~isempty(ystd) && strcmp(errorbars,'none')~=1
             for i=1:length(y)
@@ -592,14 +592,18 @@ switch style
                     for j=i+1:length(pointsy)
                         try
                             [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,test]=...
-                                plot_significance(pointsy{i}{k},x{i}(k),...
-                                pointsy{j}{k},x{j}(k),max([y{i}(k)+ystd{i}(k) y{j}(k)+ystd{j}(k)]),0,0,test);
+                                compute_significance(pointsy{i}{k},...
+                                pointsy{j}{k},test,[],[],[],[],tail,transform);
+                            
+                            
+                            plot_significance(  x{i}(k),...
+                                x{j}(k),max([y{i}(k)+ystd{i}(k) y{j}(k)+ystd{j}(k)]),p,0,0);
                         catch
                             h.h_sig{i,j}=nan;
                             h.p_sig{i,j}=nan;
                             statistic = nan;
                             statistic_name = '';
-                            dof=nan;
+                            dof = nan;
                         end
                         if h.h_sig{i,j}==1
                             logmsg(['Differences at x=' num2str(x{j}(k),2)...
@@ -646,11 +650,11 @@ switch style
                     for i=1:length(ry)
                         rc=nanmean(ry{i})/nanmean(rx{i});
                         fity{i}=rc*fitx;
-                        disp(['GRAPH: Proportionality: rc = ' num2str(rc)  ]);
+                        logmsg([' Proportionality: rc = ' num2str(rc)  ]);
                         [rcoef,n,p,t,df]=nancorrcoef(rx{i},ry{i});
-                        disp(['GRAPH:   correlation coeff = ' num2str(rcoef) ...
+                        logmsg(['   correlation coeff = ' num2str(rcoef) ...
                             ' , p = ' num2str(p) ' , df = ' num2str(df) ...
-                            ' , t = ' num2str(t) ]);
+                            ' , t = ' num2str(t) ' (chi-squared test)']);
                     end
                 case {'linear','linear_together'}
                     for i=1:length(ry)
@@ -658,23 +662,23 @@ switch style
                         rc=rc(1,2);
                         offset=nanmean(ry{i})-rc*nanmean(rx{i});
                         fity{i}=rc*fitx+offset;
-                        disp(['GRAPH: fit: rc = ' num2str(rc) ', offset = ' num2str(offset) ]);
+                        logmsg(['fit: rc = ' num2str(rc) ', offset = ' num2str(offset) ]);
                         [rcoef,n,p,t,df]=nancorrcoef(rx{i},ry{i});
-                        disp(['GRAPH:   correlation coeff = ' num2str(rcoef) ...
+                        logmsg(['   correlation coeff = ' num2str(rcoef) ...
                             ' , p = ' num2str(p) ' , df = ' num2str(df) ...
-                            ' , t = ' num2str(t) ]);
+                            ' , t = ' num2str(t) ' (chi-squared test)']);
                     end
                 case 'exponential'
                     for i=1:length(ry)
                         [tau,r]=fit_exponential(rx{i},ry{i});
                         fity{i}=r*exp(fitx/tau);
-                        disp(['GRAPH: fit: exponential r = ' num2str(r) ', tau = ' num2str(tau) ]);
+                        logmsg([' fit: exponential r = ' num2str(r) ', tau = ' num2str(tau) ]);
                     end
                 case 'powerlaw'
                     for i=1:length(ry)
                         [exponent,r]=fit_powerlaw(rx{i},ry{i});
                         fity{i}=r*fitx.^exponent;
-                        disp(['GRAPH: fit: powerlaw r = ' num2str(r) ', exponent = ' num2str(exponent) ]);
+                        logmsg([' fit: powerlaw r = ' num2str(r) ', exponent = ' num2str(exponent) ]);
                     end
                 case 'spline'
                     for i=1:length(ry)
@@ -684,7 +688,7 @@ switch style
                     for i=1:length(ry)
                         [rc, offset]=fit_thresholdlinear(rx{i},ry{i});
                         fity{i}=thresholdlinear(rc*fitx+offset);
-                        disp(['GRAPH: fit: thresholdlinear rc = ' num2str(rc) ', offset = ' num2str(offset) ]);
+                        logmsg([' fit: thresholdlinear rc = ' num2str(rc) ', offset = ' num2str(offset) ]);
                     end
                 case {'nakarushton','naka_rushton'}
                     fitx=fitx(fitx>0);
@@ -710,7 +714,7 @@ switch style
                         fitx = fitx*100;
                     end
                 otherwise
-                    disp(['GRAPH: Fit type ' fit ' is not implemented.']);
+                    logmsg([' Fit type ' fit ' is not implemented.']);
                     fit='';
             end
             if ~isempty(fit)
@@ -799,9 +803,6 @@ if ~isempty(ylab)
     xlabel(xlab,'FontSize',fontsize,'FontName',fontname);
 end
 
-% set yticklabel
-%set(gca,'yticklabel',get(gca,'yticklabel'),'fontsize',fontsize,'fontname',fontname)
-
 % adapt axis to prefax
 if ~isempty(prefax)
     if length(prefax)==4
@@ -858,18 +859,13 @@ if ~isempty(extra_code)
         eval(extra_code); % do evaluation here to allow access to local variables
     catch me
         errormsg(['Problem in extra code: ' extra_code]);
+        logmsg(me.message)
         %rethrow(me);
     end
 end
 
-
-% increase linewidth and fontsize for presentation
-% has to stay after all changes are made to the figure
-%bigger_linewidth(4);
-%smaller_font(-14);
-
 if exist('legnd','var') && ~isempty(legnd)
-    legnd = trim(legnd);
+    legnd = strtrim(legnd);
     legnd(legnd==';')=',';
     switch style
         case 'xy'
@@ -882,7 +878,6 @@ if exist('legnd','var') && ~isempty(legnd)
             handle = 'h.stackedbar,' ;
         case 'pie'
             handle = 'h.pie,' ;
-            
     end
     
     eval(['legend(' handle legnd(2:end-1) ')']);
@@ -890,7 +885,7 @@ if exist('legnd','var') && ~isempty(legnd)
 end
 
 if ~isempty(save_as)
-    filename=save_figure(save_as);
+    h.filename = save_figure(save_as);
 end
 
 return
@@ -898,14 +893,20 @@ return
 
 
 
-function	h=plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick)
+function h=plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick)
 if nargin<8
     tick = [];
 end
-
 if nargin<7
     sides='away';
 end
+if nargin<6
+    errorbars = '';
+end
+if isempty(errorbars)
+    errorbars = 'std';
+end
+
 h={};
 switch errorbars
     case 'none'
@@ -917,9 +918,13 @@ switch errorbars
                     for i=1:length(y)
                         dy{i}=sem(y{i});
                     end
-                else
+                elseif ~isempty(ystd)
                     for i=1:length(y)
                         dy{i}=ystd{i}/sqrt(ny{i});
+                    end
+                else
+                    for i=1:length(y)
+                        dy{i}=sem(y{i});
                     end
                 end
             case 'std'
@@ -934,7 +939,7 @@ switch errorbars
         dyeb=[dy{:}];
         
         if any(size(x)~=size(means))
-            disp('GRAPH: X and MEANS are of unequal sizes. Cannot draw errorbars.');
+            logmsg('GRAPH: X and MEANS are of unequal sizes. Cannot draw errorbars.');
             h = nan;
             return
         end
@@ -968,113 +973,4 @@ end
 return
 
 
-
-function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, h)
-if strcmp(test,'none')
-    return
-end
-
-if  strcmp(test,'chi2')
-    d = zeros(length(y),2);
-    for i=1:length(y)
-        d(i,1)=sum( y{i}(~isnan(y{i}))==0 );
-        d(i,2)=sum( y{i}(~isnan(y{i}))==1 );
-    end
-    [p_chi2,chi2] = chi2class( d);
-    logmsg(['p of chi2class test = ' num2str(p_chi2) ...
-        ' over all groups. chi2-statistic = ' num2str(chi2)]);
-end
-
-ax=axis;
-height=(ax(4)-ax(3))/20;
-w=0.1;
-
-
-if length(y)>2 % multigroup comparison
-    v = [];
-    group = [];
-    for i=1:length(y)
-        v = cat(1,v,y{i}(:));
-        group = cat(1,group,i*ones(length(y{i}),1));
-    end
-    [h.p_groupkruskalwallis,anovatab,stats] = kruskalwallis(v,group,'off');
-    logmsg(['Group kruskalwallis: p = ' num2str(h.p_groupkruskalwallis,2) ', df = ' num2str(anovatab{4,3})]);
-    [h.p_groupanova,anovatab,stats] = anova1(v,group,'off');
-    logmsg(['Group anova: p = ' num2str(h.p_groupanova,2) ', s[' num2str(stats.df) '] = ' num2str(stats.s)]);
-end
-
-if ~( length(signif_y)==1 && signif_y==0)
-    for i=1:length(y)
-        switch test
-            case 'ttest'
-                % check normality
-                [h_norm,p_norm] = swtest(y{i});
-                if h_norm
-                    logmsg(['Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to kruskal_wallis']);
-                end
-            case 'paired_ttest'
-                % check normality
-                [h_norm,p_norm] = swtest(y{i});
-                if h_norm
-                    logmsg(['Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to signrank.']);
-                end
-        end
-    end
-    for i=1:length(y)
-        for j=i+1:length(y)
-            nsig=(i-1)*length(y)+j;
-            
-            ind_y=[];
-            
-            if ~isempty(signif_y)
-                if size(signif_y,2)==1 % single column, specify which to do
-                    if isempty(find(signif_y==nsig,1))
-                        continue
-                    end
-                else % double column, specify height or which not to do
-                    ind_y = find(signif_y(:,1)==nsig);
-                    if ~isempty(ind_y) && isnan(signif_y(ind_y,2))
-                        continue
-                    end
-                end
-            end
-            
-            
-            if isempty(ind_y) % no mention in signif_y list
-                y_star=ax(4)+height*(j-i-1);
-            else
-                y_star=signif_y(ind_y(1),2);
-            end
-            
-            % matlab significance test using sample data
-            if iscell(ystd) && iscell(ny)
-                [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,testperformed]=...
-                    plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
-                    ystd{i},ny{i},ystd{j},ny{j},tail);
-            else
-                [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,testperformed]=...
-                    plot_significance(y{i},x(i),y{j},x(j),y_star,height,w,test,...
-                    [],[],[],[],tail);
-            end
-            if h.p_sig{i,j}<1
-                outstat = ['Pairwise significance: ' num2str(nsig)...
-                    ' = grp ' num2str(i) ' vs grp ' num2str(j) ...
-                    ', p = ' num2str(h.p_sig{i,j},2) ...
-                    ', ' testperformed ];
-                if ~isempty(statistic_name)
-                    if ~isempty(dof) && ~isnan(dof)
-                        outstat = [outstat ...
-                            ', ' statistic_name ...
-                            '[' num2str(dof) '] = ' num2str(statistic) ]; %#ok<AGROW>
-                    else
-                        outstat = [outstat ...
-                            ', ' statistic_name ' = ' num2str(statistic) ]; %#ok<AGROW>
-                    end
-                end
-                logmsg(outstat);
-            end
-            
-        end
-    end
-end
 

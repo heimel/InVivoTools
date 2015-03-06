@@ -39,8 +39,7 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
     stim_pars = cellfun(@getparameters,get(I.st(i).stimscript));
     ind = find_record( stim_pars,selection);
     if isempty(ind)
-        errordlg(['No stimuli matching criterion ' selection],'Tuning_curve/compute'); 
-        disp(['TUNING_CURVE/COMPUTE: No stimuli matching criterion: ' selection]);
+        errormsg(['No stimuli matching criterion ' selection]); 
         tcn = tc;
         return
     end
@@ -48,14 +47,15 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
     s=1;
     interval = zeros(length(ind),2); % assume length(I.st)==1
     cinterval = zeros(length(ind),2);  
-    for j=ind(:)'
+    for j=ind(:)' % over stimuli
         ps = getparameters(get(I.st(i).stimscript,j));
         curve_x(s) = ps.(I.paramname);
         condnames{s} = [I.paramname '=' num2str(curve_x(s))];
         stimlist = find(o==j);
         for k=1:length(stimlist),
             trigs{s}(k)=I.st(i).mti{stimlist(k)}.frameTimes(1);
-            spon{1}(stimlist(k))=trigs{s}(k);
+            %spon{1}(stimlist(k))=trigs{s}(k);
+            spon{s}(k)=trigs{s}(k);
         end
         
         df = mean(diff(I.st(1).mti{1}.frameTimes));
@@ -131,7 +131,7 @@ tc.internals.rast = raster(inp,RAparams,[]);
 if ~isempty(scint)
     RAparams.cinterval=scint;
     RAparams.interval=sint;
-    inp.triggers=spon;
+    inp.triggers={[spon{:}]};
     inp.condnames = {spontlabel};
     tc.internals.spont=raster(inp,RAparams,[]);
     sc = getoutput(tc.internals.spont);
@@ -141,7 +141,8 @@ else
 end;
 
 c = getoutput(tc.internals.rast);
-curve_y=c.ncounts';curve_var=c.ctdev';
+curve_y=c.ncounts';
+curve_var=c.ctdev';
 if isfield(c,'stderr')
     curve_err=c.stderr';
 else

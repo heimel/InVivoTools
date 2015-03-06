@@ -29,7 +29,7 @@ if nargin<1;
 end
 if isempty(whichdb)
     if verbose
-        disp('LOAD_EXPDATABASE: Database is not specified.');
+        logmsg('Database is not specified.');
     end
     return
 end
@@ -45,7 +45,7 @@ if isempty(create)
 end
 
 % remove .mat to be able to add experiment
-if ~isempty(findstr(whichdb,'.mat')) && strcmp(whichdb(end-3:end),'.mat')
+if ~isempty(strfind(whichdb,'.mat')) && strcmp(whichdb(end-3:end),'.mat')
     whichdb = whichdb(1:end-4);
 end
 
@@ -62,7 +62,7 @@ filename=fullfile(expdatabasepath(where),capitalize(experiment),whichexpdb);
 
 if exist(filename,'file')==0
     if verbose
-        disp(['LOAD_EXPDATABASE: Database ' filename ' does not exist.']);
+        logmsg(['Database ' filename ' does not exist.']);
     end
     if ~isempty(experiment)
         % see if we can load the main one and create a new one
@@ -76,7 +76,7 @@ if exist(filename,'file')==0
                     ['Create new database for experiment ' experiment '?'], ...
                     'New database','Ok','Cancel','Cancel');
                 if strcmp(answer,'Ok')
-                    disp(['LOAD_EXPDATABASE: Creating empty database ' filename]);
+                    logmsg(['Creating empty database ' filename]);
                     file = load(filenamemain,'-mat');
                     db = empty_record( file.db );
                     if ~exist(fullfile(expdatabasepath(where),experiment),'dir')
@@ -93,14 +93,13 @@ end
 
 if ~exist(filename,'file') 
     if verbose && load_main
-        disp(['LOAD_EXPDATABASE: Database ' filename ' does not exist.']);
+        logmsg(['Database ' filename ' does not exist.']);
     end
     return
 end
-disp(['LOAD_EXPDATABASE: Loading ' filename ]);
+logmsg(['Loading ' filename ]);
 htemp=figure;
 file=load(filename,'-mat');
-%file=load(filename);
 close(htemp); % strange, but necessary to remove spuriously appearing graph when load ectestdb
 db=file.db;
 

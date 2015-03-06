@@ -32,3 +32,20 @@ global Remote_Comm_host Remote_Comm_port
 global Remote_Comm_socket Remote_Comm_conn
 global Remote_Comm_eol
 global Remote_Comm_remotearchitecture Remote_Comm_localprefix Remote_Comm_remoteprefix
+
+global gNewStim % to replace other globals in the future
+gNewStim.RemoteComm.isremote = Remote_Comm_isremote;
+gNewStim.RemoteComm.enable = Remote_Comm_enable;
+gNewStim.RemoteComm.method = Remote_Comm_method;
+gNewStim.RemoteComm.dir = Remote_Comm_dir;
+gNewStim.RemoteComm.host = Remote_Comm_host; 
+gNewStim.RemoteComm.port = Remote_Comm_port;
+gNewStim.RemoteComm.socket = Remote_Comm_socket; 
+gNewStim.RemoteComm.conn = Remote_Comm_conn;
+gNewStim.RemoteComm.eol = Remote_Comm_eol; 
+gNewStim.RemoteComm.remotearchitecture = Remote_Comm_remotearchitecture; 
+gNewStim.RemoteComm.localprefix = Remote_Comm_localprefix;
+gNewStim.RemoteComm.remoteprefix = Remote_Comm_remoteprefix;
+
+
+

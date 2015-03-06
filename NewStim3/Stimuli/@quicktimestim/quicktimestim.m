@@ -69,7 +69,7 @@ if finish,
     movieparams = struct('duration',0,'fps',0,'width',0,'height',0);
 	qts = class(struct('QTSparams',QTSp,'movieparams',movieparams),'quicktimestim',s);
 	qts.stimulus = setdisplayprefs(qts.stimulus,displayprefs(dp));
-else,
+else
 	qts = [];
 end;
 

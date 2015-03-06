@@ -1,5 +1,8 @@
 function hp=plot_points(x,r,spaced)
 rnonnan=r(~isnan(r));
+if length(r)==1
+    spaced = 0; % to center
+end
 if ~isempty(rnonnan)
   switch(spaced)
     case 0

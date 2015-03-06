@@ -86,8 +86,8 @@ end
 
 
 if isempty(paramname) && ...
-        (~isempty(findstr(lower(record.stim_type),'tile')) ||...
-        ~isempty(findstr(lower(record.stim_type),'position')))
+        (~isempty(strfind(lower(record.stim_type),'til')) ||...
+        ~isempty(strfind(lower(record.stim_type),'position')))
     variable = 'position';
     stimparams = cellfun(@getparameters,get(s.saveScript));
     rects = cat(1,stimparams(:).rect);

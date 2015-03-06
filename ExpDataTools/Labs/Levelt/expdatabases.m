@@ -23,7 +23,6 @@ if isempty(type)
    end
 end
 
-testdb = '';
 experimental_pc = false;
 switch type
     case 'oi'
@@ -38,9 +37,6 @@ switch type
             case {'nin380','nori001','daneel','antigua'}
                 experimental_pc = true;
             otherwise 
-                if ~strcmpi(hostname,host)
-                    disp(['EXPDATABASES: Unknown hostname ' hostname ]);
-                end
                 experimental_pc = false;
         end
         if experimental_pc 
@@ -50,9 +46,6 @@ switch type
         end
     case 'tp'
         switch hostname
-%             case 'nin266' % rajeev's computer
-%                 testdb = 'tptestdb_olympus_rajeev';
-%                 warndlg(['Opening ' testdb ],'Warning','modal');
             case 'wall-e'
                 testdb='tptestdb_olympus';
                 experimental_pc = true;
@@ -61,17 +54,12 @@ switch type
                 experimental_pc = true;
             otherwise
                 testdb='tptestdb_olympus';
-                if strcmp(hostname,'olympus-0603301')==1
-                    experimental_pc = true;
-                end
         end
     case 'ls'
         testdb = 'lstestdb_friederike';
-    case 'roi'
-        testdb = 'roidb';
-    otherwise
-        warning('EXPDATABASES:UNKNOWN_TYPE',['Unknown type ''' type '''']);
-        return
+    otherwise  
+        testdb = [type 'testdb_' hostname];
+        experimental_pc = true;
 end
 if ~strcmpi(hostname,host)
     experimental_pc = false;

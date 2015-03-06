@@ -66,10 +66,10 @@ if haspsychtbox,
 
 		% create a new offscreen window or texture
 		if haspsychtbox<3,
-			offscreen(numframes) = screen(-1,'OpenOffscreenWindow',255,[0 0 x2-x1 y2-y1]);
-   			screen(offscreen(numframes),'PutImage',im);
+			offscreen(numframes) = Screen(-1,'OpenOffscreenWindow',255,[0 0 x2-x1 y2-y1]);
+   			Screen(offscreen(numframes),'PutImage',im);
 		else,
-		   offscreen(numframes) = screen('MakeTexture',StimWindow,double(im));
+		   offscreen(numframes) = Screen('MakeTexture',StimWindow,double(im));
 		end;
 	end;
    end;

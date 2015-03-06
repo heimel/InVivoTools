@@ -1,29 +1,36 @@
 function runexpercallbk(action, fig)
 %RUNEXPERCALLBK
 %
-% <2004-2013
+% 200X-200X Steve Van Hooser
+% 2004-2014 Alexander Heimel
 %
-h=[];
-if nargin==1, fig = gcbf; end;
+
+remotecommglobals
+
+if nargin==1
+    fig = gcbf; 
+end
 h = get(fig,'UserData');
 switch action
     case 'datapath',
         dp = get(h.datapath,'String'); % in local computer format
-        if exist(dp)~=7, % if datapath directory does not exist, make it
-            try,
+        if ~exist(dp,'dir') % if datapath directory does not exist, make it
+            try
                 [p,f,e]=fileparts(dp);
                 mkdir(p,[f e]);
-            end;
-        end;
-        try,
+            catch me
+                errormsg(me.message);
+            end
+        end
+        try
             h.cksds=cksdirstruct(dp);
             set(fig,'userdata',h);
-        catch,
+        catch
             errordlg(['Datapath ' dp ' is not valid']);
             p = getpathname(h.cksds);
             if p(end)==filesep, p = p(1:end-1); end;
             set(h.datapath,'String',p);
-        end;
+        end
     case 'runscript',
         remPath = get(h.remotepath,'String');
         runScrp = get(h.runscript,'String');
@@ -46,7 +53,7 @@ switch action
         else
             set(h.rssb,'enable','off');
         end;
-    case 'showstim',   % show a stimscript
+    case 'showstim'
         saveWaves = get(h.savestims,'value');  % are we acquiring here or just displaying?
         if saveWaves,  % make a new test directory if necessary
             runexpercallbk('datapath',fig);
@@ -54,41 +61,42 @@ switch action
             if ~isempty(ntd), set(h.savedir,'String',ntd); end;
         end;
         datapath = get(h.datapath,'String');
-        if ~exist(datapath),  % make a new data directory if necessary
+        if ~exist(datapath,'dir'),  % make a new data directory if necessary
             [dPath,dFile]=fileparts(datapath);
             mkdir(dPath,dFile);
             if isunix
                 eval(['! chmod 770 ' datapath ';']);
                 eval(['! chgrp dataman ' datapath ';']);
-            end;
-        end;
+            end
+        end
         datapath=[get(h.datapath,'String') filesep get(h.savedir,'String')];
         scriptName = char(lb_getselected(h.rslb));
-        if scriptName(end)~='*', errordlg('Script not loaded','Error');
-            error('no loaded script'); end;
+        if scriptName(end)~='*'
+            errormsg('Script not loaded');
+            return
+        end
         scriptName = scriptName(1:end-1);
-        if isempty(scriptName), error('No script.'); end;
+        if isempty(scriptName)
+            errormsg('No script.');
+            return
+        end
         remPath = get(h.remotepath,'String');
-        if saveWaves && exist(datapath,'dir') && isempty(findstr(lower(datapath),'antigua'))
-            % if the directory already exists there is an error
-            errordlg('Directory already exists.');
-            error('Directory already exists');
+        if saveWaves && exist(datapath,'dir') && isempty(strfind(lower(datapath),'antigua'))
+            errormsg('Directory already exists.');
+            return
         elseif saveWaves,  % otherwise, if we are saving, write the acquisition commands
             [dPath,dFile]=fileparts(datapath);
             mkdir(dPath,dFile);
             if isunix
                 eval(['! chmod 770 ' datapath ';']);
                 eval(['! chgrp dataman ' datapath ';']);
-            end;
-            global initacqreadyNLT;
-            write_pathfile(initacqreadyNLT,localpath2remote(datapath));
-            aqDat=get(h.list_aq,'UserData');
-            if isempty(aqDat)
-                errordlg('Acquisition information is needed.');
-                error('RUNEXPERCALLBK: acquistion information is needed');
             end
-            writeAcqStruct([remPath filesep 'acqParams_in'],aqDat);
-            if strcmp(computer,'LNX86'), eval(['! chmod 770 ' remPath filesep 'acqParams_in;']); end;
+            aqDat = get(h.list_aq,'UserData');
+            if ~isempty(aqDat)
+                writeAcqStruct([remPath filesep 'acqParams_in'],aqDat);
+            end
+            write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
+            %if strcmp(computer,'LNX86'), eval(['! chmod 770 ' remPath filesep 'acqParams_in;']); end;
         end;
         bbb=evalin('base',['exist(''' scriptName ''')']);
         if bbb, % if script also exists locally, show the duration time in RunExperiment window
@@ -98,7 +106,7 @@ switch action
             durrm=fix(durr/60);durr=durr-60*durrm; durrs=fix(durr);
             set(h.ctdwn,'String',['Script duration: ' sprintf('%.2d',durrh) ':' ...
                 sprintf('%.2d',durrm) ':' sprintf('%.2d',durrs) '; Started at '  datestr(now,13) '.']);
-        end;
+        end
         % get any extra command strings that are necessary
         cmdstrs = {};
         if get(findobj(fig,'Tag','extdevcb'),'value'),  % use cb's
@@ -109,47 +117,28 @@ switch action
                     cmdstr = listofcmds{highlightedcmds(i)};
                     endp = find(cmdstr==')');
                     if isempty(endp),  % no (), so just add it
-                        cmdstr = [cmdstr '(datapath,scriptName,saveWaves,remPath)'];
+                        cmdstr = [cmdstr '(datapath,scriptName,saveWaves,remPath)']; %#ok<AGROW>
                     elseif cmdstr(endp-1)=='(', % we have (), remove and add
                         cmdstr=[cmdstr(1:end-2) '(datapath,scriptName,saveWaves,remPath)'];
                     else % we have (), add the extra arguments
                         cmdstr = [cmdstr(1:endp-1) ',datapath,scriptName,saveWaves,remPath)'];
                     end;
                     newcmd = eval(cmdstr);
-                catch
-                    errordlg(['Error running extra device/command ' listofcmds{i} ': ' lasterr]);
-                    error(['Error running extra device/command ' listofcmds{i} ': ' lasterr]);
-                end;
+                catch me
+                    errormsg(['Error running extra device/command ' listofcmds{i} ': ' me.message]);
+                end
                 if ~isempty(newcmd),
                     if size(newcmd,2)>size(newcmd,1),newcmd = newcmd'; end;
                     cmdstrs = cat(1,cmdstrs,newcmd);
-                end;
-            end;
-        end;
-        write_runscript_remote(datapath,scriptName, saveWaves,[remPath filesep 'runit.m'],cmdstrs);
-        if strcmp(computer,'LNX86'),eval(['! chmod 770 ' remPath filesep 'runit.m']); end;
-        
-        if saveWaves % if acquiring, make new record
-            h_tpdb = get_fighandle('TP database*');
-            if ~isempty(h_tpdb)
-                if length(h_tpdb)>1
-                    disp('RUNEXPERCALLBK: Multiple tp databases open. Cannot determine which one to use.');
-                else
-                    ud = get(h_tpdb,'Userdata');
-                    disp('RUNEXPERCALLBK: Adding tp record');
-                    control_db_callback(ud.h.last);
-                    pause(0.1);
-                    ud=new_tptestrecord(ud);
-%                    control_db_callback(ud.h.new);
-%                    ud = get(h_tpdb,'Userdata');
-                    record = ud.db(ud.current_record);
-                    record.epoch = get(h.savedir,'string');
-                    record.stim_type = scriptName;
-                    ud.db(ud.current_record) = record;
-                    set(h_tpdb,'Userdata',ud);
-                    control_db_callback(ud.h.current_record);
                 end
             end
+        end
+        write_runscript_remote(datapath,scriptName, saveWaves,[remPath filesep 'runit.m'],cmdstrs);
+        %if strcmp(computer,'LNX86'),eval(['! chmod 770 ' remPath filesep 'runit.m']); end;
+        
+        if saveWaves % if acquiring, make new record
+            add_record( 'TP', get(h.savedir,'string'), scriptName );
+            add_record( 'Wc', get(h.savedir,'string'), scriptName );
         end
     case 'add_aq',
         aqdata = get(h.list_aq,'UserData');
@@ -198,8 +187,8 @@ switch action
         [fname, pname] = uigetfile('*','Open file ...');
         if fname(1)~=0,  % if user doesn't cancel
             newAqDat = loadStructArray([pname fname]);
-            StrDat = {};
-            for i=1:length(newAqDat),
+            StrDat = cell(length(newAqDat),1);
+            for i=1:length(newAqDat)
                 StrDat{i} = record2str(newAqDat(i));
             end;
             set(h.list_aq,'UserData',newAqDat,'String',StrDat, ...
@@ -280,44 +269,42 @@ dialTitle = 'Record parameters...';
 
 % acquire user-entered recording parameters from promted window
 answer = inputdlg(prompt,dialTitle,1,def);
-if ~isempty(answer),
+if ~isempty(answer)
     fldn = fieldnames(inDat);
     str = '';
-    for i=1:length(fldn),
-        if isnumeric(getfield(inDat,fldn{i})),
-            inDat = setfield(inDat,fldn{i},str2num(answer{i}));
+    for i=1:length(fldn)
+        if isnumeric(inDat.(fldn{i}))
+            inDat.(fldn{i}) = str2num(answer{i}); %#ok<ST2NM>
         else
-            inDat = setfield(inDat,fldn{i},answer{i});
-        end;
-        str = [ str ' : ' answer{i}];
+            inDat.(fldn{i}) = answer{i};
+        end
+        str = [ str ' : ' answer{i}]; %#ok<AGROW>
     end;
     str = str(4:end);
 else
     str = oldstr;
-end;
+end
 dat = inDat;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function str = record2str(inDat)
 if ~isempty(inDat),
     str=[inDat.name ' : ' inDat.type ' : ' inDat.fname ' : ' ...
         num2str(inDat.samp_dt,15) ' : ' int2str(inDat.reps) ' : ' ...
         int2str(inDat.ref) ' : ' int2str(inDat.ECGain)];
-end;
+end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function writeAcqStruct(fname, inDat)
 [fid,msg] = fopen(fname,'wt');
 if fid==-1,
     disp(msg);
-    return;
-end;
+    return
+end
 
 fn = fieldnames(inDat(1));
 s = '';
 for i=1:length(fn),
-    s = [ s char(9) fn{i}];
+    s = [ s char(9) fn{i}]; %#ok<AGROW>
 end;
 s = s(2:end);
 fprintf(fid,'%s\n',s);
@@ -328,5 +315,29 @@ for i=1:length(inDat),
         num2str(inDat(i).samp_dt,15) t int2str(inDat(i).reps) t ...
         int2str(inDat(i).ref) t int2str(inDat(i).ECGain)];
     fprintf(fid,'%s\n',s);
-end;
+end
 fclose(fid);
+
+
+
+function add_record( datatype, epoch, scriptName )
+% finds db control window and adds mouse
+h_db = get_fighandle([datatype ' database*']);
+if ~isempty(h_db)
+    if length(h_db)>1
+        errormsg(['Multiple ' datatype ' databases open. Cannot determine which one to use.']);
+        return
+    else
+        ud = get(h_db,'Userdata');
+        logmsg(['Adding ' datatype ' record ' epoch]);
+        control_db_callback(ud.h.last);
+        pause(0.1);
+        ud = new_testrecord(ud);
+        record = ud.db(ud.current_record);
+        record.epoch = epoch;
+        record.stim_type = scriptName;
+        ud.db(ud.current_record) = record;
+        set(h_db,'Userdata',ud);
+        control_db_callback(ud.h.current_record);
+    end
+end

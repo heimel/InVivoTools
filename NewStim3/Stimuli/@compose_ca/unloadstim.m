@@ -5,7 +5,7 @@ if isloaded(cca)==1,
 	if ~isempty(ds),
 		try,
 			ds = struct(ds);
-			screen(ds.offscreen,'close');
+			Screen(ds.offscreen,'close');
 		catch,
 			os = 0;
 		end;

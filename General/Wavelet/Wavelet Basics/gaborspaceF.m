@@ -10,7 +10,14 @@
 %   Stiliyan, 11.01.00
 
 function  G = gaborspaceF(S,FF,F)
-[nf,ns]=size(FF);
+[nf,ns]=size(FF); 
+ms = min(ns,length(S));
+if ns > ms
+    S=[S;zeros(ns-ms)];
+% elseif length(S) > ms
+%     FF=[FF;zeros(nf,ns-ms)];
+end
+[nf,ns]=size(FF); 
 G=zeros(nf,ns);
 
 SF=fft(S); % calculate fourier space

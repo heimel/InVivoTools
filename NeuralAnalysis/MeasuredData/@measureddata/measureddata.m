@@ -7,7 +7,7 @@ function A = measureddata(intervals, desc_long, desc_brief)
 %  Creates a new MEASUREDDATA object, sampled over the intervals described in
 %  the Nx2 matrix INTERVALS (i.e., there is assumed to be a clock).
 
-if size(intervals,2)==2|isempty(intervals),
+if size(intervals,2)==2||isempty(intervals),
    if nargin>=2, description_long = desc_long;
    else, description_long = ''; end;
    if nargin> 2, description_brief = desc_brief;

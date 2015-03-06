@@ -1,6 +1,6 @@
 function df = displayprefs(parameters)
 
-  % parameters is alternating param name and value
+% parameters is alternating param name and value
 % Part of the NewStim package
 %
 % DP = DISPLAYPREFS(PARAMETERS)
@@ -19,7 +19,7 @@ function df = displayprefs(parameters)
 %  expected, the display could be very slow or result in a crash.
 %
 %  When a displayprefs object is created, the parameters used are stored as
-%  defaults.  
+%  defaults.
 %
 %  The parameters are below, and should be entered as a cell array
 %  (e.g., parameters = {'fps', 4, 'rect', [ 100 100 200 200]} )
@@ -39,41 +39,42 @@ function df = displayprefs(parameters)
 %   Questions to vanhoosr@brandeis.edu
 
 
-  % presently unsupported parameters
-  %  lastframetime - amount of time last frame should be shown before reverting
-  %              to background {presently not supported}
-  %  absStartTime - the absolute time when we should start to play the movie
-  %              (use <0 for immediately) {not implemented yet}
-  %
-  % 
+% presently unsupported parameters
+%  lastframetime - amount of time last frame should be shown before reverting
+%              to background {presently not supported}
+%  absStartTime - the absolute time when we should start to play the movie
+%              (use <0 for immediately) {not implemented yet}
+%
+%
 
-if nargin == 0, 
-	temp_dp_p = {'fps',1,'rect',[0 0 1 1],'frames',1};
-   	df = displayprefs(temp_dp_p);
-	return;
+if nargin == 0,
+    temp_dp_p = {'fps',1,'rect',[0 0 1 1],'frames',1};
+    df = displayprefs(temp_dp_p);
+    return;
 end;
 
 params = struct( ...
-	'fps',		0,		...
-	'rect',		[0 0 0 0],	...
-	'roundFrames',	1,		...
-	'forceMovie',	0,		...
-	'depth',	8,		...
-	'absStartTime',	-1,		...
-	'BGpretime',	0,		...
-	'BGposttime',	0,		...
-	'lastframetime',0,		...
-	'frames',	0		...
-				 );
-params.defaults = parameters;
-				 
+    'fps',		0,		...
+    'rect',		[0 0 0 0],	...
+    'roundFrames',	1,		...
+    'forceMovie',	0,		...
+    'depth',	8,		...
+    'absStartTime',	-1,		...
+    'BGpretime',	0,		...
+    'BGposttime',	0,		...
+    'lastframetime',0,		...
+    'frames',	0		...
+    );
+params.defaults = {};
+
 [good,errormsg] = verify(parameters);
 
 if good,
-	for i=1:2:length(parameters),
-		eval(['params.' parameters{i} ' = parameters{i+1};']);
-	end;
-else, error(['Could not create displayPrefs: ' errormsg]);
-end;
-	
+    for i=1:2:length(parameters),
+        eval(['params.' parameters{i} ' = parameters{i+1};']);
+    end;
+else
+    error(['Could not create displayPrefs: ' errormsg]);
+end
+
 df = class(params,'displayprefs');

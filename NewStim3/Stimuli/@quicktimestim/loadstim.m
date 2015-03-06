@@ -5,14 +5,14 @@ StimWindowGlobals;
 qts = unloadstim(qts);
 QTSp = getparameters(qts);
 
-if exist(QTSp.filename),
+if exist(QTSp.filename,'file')
     [movie,props,props1,props2,props3] = Screen('OpenMovie',StimWindow,QTSp.filename,0);
     qts.movieparams.duration = props; 
     qts.movieparams.fps = props1;
     qts.movieparams.width = props2;
     qts.movieparams.height = props3;    
-    waitsecs(1);
-else,
+    WaitSecs(1);
+else
 	error(['Cannot open quicktime movie file ' QTSp.filename '.']);
 end;
 
@@ -35,7 +35,7 @@ end;
 dps = struct(getdisplayprefs(qts));
 newdp = {'rect', rect,QTSp.dispprefs{:}};
 
-outstim = setDisplayPrefs(qts,displayprefs(newdp));
+outstim = setdisplayprefs(qts,displayprefs(newdp));
 
 outstim.stimulus = setdisplaystruct(outstim.stimulus,displaystruct(dS));
 outstim.stimulus = loadstim(outstim.stimulus);

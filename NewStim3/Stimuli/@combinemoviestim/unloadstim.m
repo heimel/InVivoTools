@@ -5,10 +5,10 @@ if isloaded(cms)==1,
 	p.script = unloadStimScript(p.script);
 	ds = getdisplaystruct(cms);
 	if ~isempty(ds),
-		try,
+		try
 			ds = struct(ds);
-			screen(ds.offscreen,'close');
-		catch,
+			Screen(ds.offscreen,'close');
+        catch
 			os = 0;
 		end;
 	end;

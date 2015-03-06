@@ -25,8 +25,17 @@ bands = oscillation_bands;
 band_names = fields(oscillation_bands);
 
 [stims,stimsfile] = getstimsfile(record);
+if isempty(stims)
+    if ~exist(stimsfile,'file')
+        errormsg(['Cannot find stims file ' stimsfile]);
+    else
+        errormsg(['Empty stims file ' stimsfile]);
+    end
+    return
+end
 
-switch trim(record.analysis)
+
+switch strtrim(record.analysis)
     case ''
         % just run default analysis
     case 'CSO'
@@ -542,7 +551,7 @@ else
 end
 
 if usetril == -1 % use last
-    tril = EVENT.strons.tril(end-n_optotrigs);
+    tril = EVENT.strons.tril(max(1,end-n_optotrigs));
 else
     if usetril > length(EVENT.strons.tril)
         errormsg('Only 1 trigger available. Check ''tril='' in comment field.');

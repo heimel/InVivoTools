@@ -15,7 +15,7 @@ MonitorWindowGlobals;
 
 if isempty(StimWindowMonitor), StimWindowMonitor = 0; end;
 if isempty(StimWindowUseCLUTMapping), StimWindowUseCLUTMapping = 0; end;
-if isempty(NewStimPeriodicStimUseDrawTexture), NewStimPeriodicStimUseDrawTexture = 1; end;
+%if isempty(NewStimPeriodicStimUseDrawTexture), NewStimPeriodicStimUseDrawTexture = 1; end;
 
 if isempty(MonitorComputer), MonitorComputer = 0; end;
 if isempty(MonitorWindowMonitor), MonitorWindowMonitor = 0; end;

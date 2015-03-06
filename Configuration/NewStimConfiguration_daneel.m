@@ -78,8 +78,8 @@ MonitorComputer = 0;       % does this computer have a monitor window?
 
 if StimComputer&haspsychtbox==2,  % set up timing and monitor settings
 	%screen('Preference','SecondsMultiplier',1.000230644770116);
-	screen('Preference','SecondsMultiplier',1.0);
-	screen('Preference','Backgrounding',1); % we'll try this
+	Screen('Preference','SecondsMultiplier',1.0);
+	Screen('Preference','Backgrounding',1); % we'll try this
 else,                          % set the current monitor dimensions for remote comm
 	StimWindowRefresh = 60;
 	StimWindowDepth = 8;

@@ -9,9 +9,9 @@ function h=get_fighandle(name)
 
 h=[];
 fighandles=get(0,'children');
-name=lower(trim(name));
+name=lower(strtrim(name));
 while isempty(h) && ~isempty(fighandles)
-	if streq(lower(trim(get(fighandles(1),'Name'))),name)==1
+	if streq(lower(strtrim(get(fighandles(1),'Name'))),name)==1
 		h=fighandles(1);
 	else
 		fighandles=fighandles(2:end);

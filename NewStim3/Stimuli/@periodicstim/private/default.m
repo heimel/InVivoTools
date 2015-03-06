@@ -26,4 +26,5 @@ parameters = struct( ...
     'size',              NaN,             ... % diameter in degrees. If NaN, it is ignored.
     'ps_add',            ''           ...
 );
-parameters.dispprefs = {};
+
+parameters.dispprefs= {'BGpretime',1}; % if included above it splits parameters in two

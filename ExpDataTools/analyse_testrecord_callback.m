@@ -25,6 +25,7 @@ if isfield(record,'experimenter') && isempty(record.experimenter)
     logmsg('Experimenter field is required.'); 
 end
     
+check_duplicates(record,ud.db,ud.current_record);
 
 switch record.datatype
     case {'oi','fp'} % intrinsic signal or flavoprotein
@@ -37,6 +38,8 @@ switch record.datatype
         record=analyse_tptestrecord( record );
     case 'ls' % linescans
         record=analyse_lstestrecord( record );
+    case 'wc'
+        record=analyse_wctestrecord( record );
     otherwise
         errormsg(['Unknown datatype ' record.datatype ]);
         return
@@ -90,6 +93,8 @@ switch record.datatype
         results_tptestrecord( ud.db(ud.current_record) );
     case 'ls'
         %results_lstestrecord( ud.db(ud.current_record) );
+    case 'wc'
+        results_wctestrecord( ud.db(ud.current_record) );
     otherwise
         errormsg(['Unknown datatype ' record.datatype ]);
         return

@@ -1,7 +1,7 @@
-function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels, verbose)
+function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels, options, verbose)
 % TPREADDATA - Reads twophon data
 %
-%  [DATA, T] = TPREADDATA(RECORDS, INTERVALS, PIXELINDS, MODE, CHANNELS, VERBOSE)
+%  [DATA, T] = TPREADDATA(RECORDS, INTERVALS, PIXELINDS, MODE, CHANNELS, OPT, VERBOSE)
 %
 %  Reads two photon data blocks.  TPREADDATA
 %  allows the user to request data in specific time intervals
@@ -43,6 +43,10 @@ function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels, v
 %  be called, if there are two channels then tpreaddata_single-
 %  channel will be called twice (for ratiometric calcium imaging).
 % 
+%  OPT imaging processing options
+%
+%  VERBOSE
+% 
 %  DATA is an MxN cell list, where M is the number of time
 %  intervals and N is the number of pixel regions specified.
 %  T is also an MxN cell list that contains the exact sample
@@ -55,16 +59,19 @@ function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels, v
 %  Tested:  only tested for T-series records, not other types
 %
 % 200X-200X Steve Hooser, Danielle van Versendaal.
-% 200X-2014 Alexander Heimel
+% 200X-2015 Alexander Heimel
 
 params = tpprocessparams( records(1) ); 
 
 
-if nargin<6
+if nargin<7
     verbose = [];
 end
 if isempty(verbose)
     verbose = true;
+end
+if nargin<6
+    options = [];
 end
 if nargin<5
     channels = [];
@@ -75,10 +82,10 @@ end
 
 switch length(channels)
     case 1 % single channel
-        [data,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels, verbose);
+        [data,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels, options, verbose);
     case 2 % ratiometric
-        [data_enum,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(1), verbose );
-        [data_denom,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(2), verbose );
+        [data_enum,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(1), options, verbose );
+        [data_denom,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(2), options, verbose );
         for i = 1:numel(data_enum)
             if any(data_denom{i}==0)
                 logmsg('Measurement on denominator channel contains 0 value');

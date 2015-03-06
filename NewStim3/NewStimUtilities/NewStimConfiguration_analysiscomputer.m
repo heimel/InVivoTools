@@ -69,7 +69,6 @@ StimComputer = 0;       % is this a stimulus computer?
 StimDebug = false;      % do you want to show stimuli in 640x480 window
 
 StimWindowUseCLUTMapping = 0; % most users will say 0
-NewStimPeriodicStimUseDrawTexture = 1; % most users will say 1
 
 MonitorWindowGlobals;
 MonitorWindowMonitor = 0;  % use the given monitor, 0 is first
@@ -78,7 +77,7 @@ MonitorComputer = 0;       % does this computer have a monitor window?
 
 if StimComputer&&haspsychtbox==2,  % set up timing and monitor settings
     Screen('Preference','SecondsMultiplier',1.0);
-    Screen('Preference','Backgrounding',1); % we'll try this
+    Screen('Preference','Backgrounding',1); 
 else
     % set the current monitor dimensions for remote comm
     StimWindowRefresh = 60;
@@ -87,11 +86,13 @@ else
 end;
 
 % pixels_per_cm of the monitor in use
-pixels_per_cm = 200/9.5; % other monitor 2008-05-14
+pixels_per_cm = 200/9.5;
 
-NewStimViewingDistance = 15; %cm, necessary for Alexander
+NewStimViewingDistance = 15; %cm, 
 
 NewStimTilt = 0; % degree tilt of screen on monitor
+
+NewStimStimDelay = 6; % delay to give acquisition computers time to start
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  Gamma correction settings
@@ -134,17 +135,10 @@ StimSerialStimOutPin = 'dtr';% same
 % Display preferences
 NSUseInitialSerialTrigger = 1;
 NSUseStimSerialTrigger = 0;
-NSUsePCIDIO96Trigger = 1;
-NSUsePCIDIO96InputTrigger = 0;
-
-% PCIDIO96 card option
-StimPCIDIO96Globals;
-UseStimPCIDIO96 = 0;                 % Use the PCIDIO96 card and interface?  Mac OS 9 only
 
 StimDisplayOrderRemote = 0;
 StimTriggerClear
 
 %fitzTrigParams.triggerStimOnset = 1; % 0 means trigger BGpre instead of stim onset
 %StimTriggerAdd('FitzTrig',fitzTrigParams);
-
 %StimTriggerAdd('VHTrig',[]); % add Van Hooser lab triggering

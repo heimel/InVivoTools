@@ -8,7 +8,7 @@ ds = mti.ds;
 dp = mti.dp;
 imgs = [];
 for i=mti.dp.frames,
-  imgs = cat(3,imgs,screen(ds.offscreen(i),'GetImage'));
+  imgs = cat(3,imgs,Screen(ds.offscreen(i),'GetImage'));
 end;
 
   % save as a movie

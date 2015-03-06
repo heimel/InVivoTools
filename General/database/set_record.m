@@ -14,16 +14,16 @@ function record=set_record(record,settings)
     setting=settings{i};
     indis=find(setting=='=');
     if length(indis)~=1
-      display(['SET_RECORD: cannot handle setting ' setting ]);
+      logmsg(['Cannot handle setting ' setting ]);
       return
     end
-    fieldname=trim(setting(1:indis-1));
-    field=getfield(record,fieldname);
-    content=trim(setting(indis+1:end));
+    fieldname = strtrim(setting(1:indis-1));
+    field = record.(fieldname);
+    content = strtrim(setting(indis+1:end));
     if isnumeric(field)
-      record=setfield(record,fieldname,str2num(content));
+      record.(fieldname) = str2num(content);
     else
-      record=setfield(record,fieldname,content);
+      record.(fieldname) = content;
     end
     
   end

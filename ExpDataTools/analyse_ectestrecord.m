@@ -70,10 +70,11 @@ switch lower(record.setup)
         logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
         total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
         clear('WaveTime_Fpikes');
+        WaveTime_Fpikes = struct('time',[],'data',[]);
         if ~isunix
             % cut in 60s blocks
             for i=1:length(channels2analyze)
-                WaveTime_Fpikes(i,1) = struct('time',cell(1:length(channels2analyze),1),'data',[]); 
+                WaveTime_Fpikes(i,1) = struct('time',[],'data',[]); 
             end
             for kk=1:ceil(total_length/60)
                 EVENT.Triallngth = min(60,total_length-60*(kk-1));
@@ -466,9 +467,9 @@ end
 
 % save measures file
 measures = record.measures; %#ok<NASGU>
-measuresfilemehran = fullfile(ecdatapath(record),record.test,['_measures',num2str(channels2analyze),'.mat']);
-logmsg(['Mehran, do you need this file: ' measuresfilemehran])
-save(measuresfilemehran,'WaveTime_Spikes');
+%measuresfilemehran = fullfile(ecdatapath(record),record.test,['_measures',num2str(channels2analyze),'.mat']);
+%logmsg(['Mehran, do you need this file: ' measuresfilemehran])
+%save(measuresfilemehran,'WaveTime_Spikes');
 
 % save measures file
 measuresfile = fullfile(ecdatapath(record),record.test,[record.datatype '_measures.mat']);

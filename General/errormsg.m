@@ -1,10 +1,18 @@
-function errormsg( msg )
+function errormsg( msg, halt )
 %ERRORMSG displays error dialog and logs a copy to the command line
 %
-%  ERRORMSG( MSG )
+%  ERRORMSG( MSG, HALT=false )
+%     if HALT is true, then also break with real error
 %
-% 2013, Alexander Heimel
+% 2013-2015, Alexander Heimel
 %
+
+if nargin<2
+    halt = [];
+end
+if isempty(halt)
+    halt = false;
+end
 
 stack = dbstack(1);
 if ~isempty(stack)
@@ -13,8 +21,16 @@ else
     caller = 'Error';
 end
 
-errordlg(msg,userize(caller));
+if usejava('awt')
+    errordlg(msg,userize(caller));
+end
 logmsg(msg,caller);
+
+if halt
+    stack = dbstack;
+    errid = upper([stack(2).name ':' msg(1:min(end,20))]);
+    error(errid,msg)
+end
 
 function str = userize( str )
 str(str=='_') = ' ';

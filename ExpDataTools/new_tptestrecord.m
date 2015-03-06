@@ -1,4 +1,4 @@
-function ud = new_ectestrecord(ud)
+function ud = new_tptestrecord(ud)
 %NEW_TPTESTRECORD create new tptestrecord 
 %
 %   UD=NEW_TPTESTRECORD(UD)
@@ -7,9 +7,9 @@ function ud = new_ectestrecord(ud)
 % 2010-2012, Alexander Heimel
 %
   
-tests=get(ud.h.which_test,'String');
-test=tests(get(ud.h.which_test,'Value'),:);
-test=trim(lower(test));
+tests = get(ud.h.which_test,'String');
+test = tests(get(ud.h.which_test,'Value'),:);
+test = strtrim(lower(test));
 
 % call general new record
 control_db_callback(ud.h.new);
@@ -31,9 +31,8 @@ record=set_record(record,tptestrecord_defaults(datatype));
 % if not first test, then we could copy somethings from the previous
 if ud.current_record>1
   prev_record=ud.db(ud.current_record-1);
-  %record.setup=prev_record.setup;
   
-  % if on the same day, we good even copy some more
+  % if on the same day, we could even copy some more
   [y,m,d]=datevec(now);
   datetext=sprintf('%04d-%02d-%02d',y,m,d);
   if isempty(record.date) && ...

@@ -34,19 +34,19 @@ if nargin<5; capture_movie = []; end;
 if isempty(capture_movie); capture_movie = false; end
 
 if nargin<2, MTI = DisplayTiming(stimScript); end;
-	
+
 if isempty(MTI), MTI = DisplayTiming(stimScript); end;
 
 prioritylevel = MaxPriority(StimWindowMonitor,'WaitBlanking','SetClut','GetSecs'); % PD
 
 if nargin>=3,
-	if ~isempty(priorit),
-		prioritylevel = priorit;
-	else, % set priority level more carefully if sound is going to be played
-		for i=1:length(MTI),
-			if strcmp(MTI{i}.ds.displayType,'Sound'),prioritylevel=0; end;
-		end;
-	end;
+    if ~isempty(priorit),
+        prioritylevel = priorit;
+    else % set priority level more carefully if sound is going to be played
+        for i=1:length(MTI),
+            if strcmp(MTI{i}.ds.displayType,'Sound'),prioritylevel=0; end;
+        end;
+    end;
 end;
 
 abortable = 1;
@@ -55,9 +55,12 @@ if nargin>=4, abortable = abtable; end;
 
 numstims = numStims(stimScript);
 
-if ~isloaded(stimScript), error(['Cannot display unloaded stimuli']); end;
+if ~isloaded(stimScript)
+    errormsg('Cannot display unloaded stimuli'); 
+    return
+end
 
- % now get ready to display
+% now get ready to display
 
 StimTriggerAct('Trigger_Initialize');
 
@@ -75,40 +78,43 @@ if capture_movie
     end
 end
 
-
-Screen('screens'); try, Snd('open'); Snd('close'); end;  % warm up these functions, try to get them in memory
+Screen('screens'); 
+try % warm up these functions, try to get them in memory
+    Snd('open'); 
+    Snd('close'); 
+catch me
+    logmsg(me.message);
+end
 
 Screen(StimWindow,'WaitBlanking');
 startTrig = StimTriggerAct('Script_Start_trigger');
 Screen(StimWindow,'WaitBlanking');
 
 if NSUseInitialSerialTrigger
-   disp('DISPLAYSTIMSCRIPT: Temporarily hard coded StimSerial trigger for LeveltLab');
-   OpenStimSerial
- %  stimserial(StimSerialScriptOutPin,StimSerialScript,1);
- %  stimserial(StimSerialStimOutPin,StimSerialStim,1);
-   StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
-   WaitSecs(0.001);
-   StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
-  % StimSerial(StimSerialStimOutPin,StimSerialStim,0);
-  % StimSerial(StimSerialStimOutPin,StimSerialStim,1);
-end
-%tic
+    disp('DISPLAYSTIMSCRIPT: Temporarily hard coded StimSerial trigger for LeveltLab');
+    OpenStimSerial
+    StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
 
-i = 1;
+    if exist('NSUseInitialSerialContinuous','var') && ~isempty(NSUseInitialSerialContinuous) && NSUseInitialSerialContinuous
+        StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+    else
+        WaitSecs(0.001);
+        StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+        StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+    end
+end
 
 l = length(MTI);
-
-trigger = getTrigger(stimScript);
+trigger = getTrigger(stimScript); %#ok<NASGU>
 
 if ~abortable,
-	Rush('for i=1:l, [MTI{i}.startStopTimes,ft] = DisplayStimulus(MTI{i},get(stimScript,MTI{i}.stimid),trigger(i),capture_movie); MTI{i}.frameTimes = ft; end; Screen(StimWindow,''FillRect'',0);', prioritylevel);
-else,
-	if StimDisplayOrderRemote,
-		abort = 0;
+    Rush('for i=1:l, [MTI{i}.startStopTimes,ft] = DisplayStimulus(MTI{i},get(stimScript,MTI{i}.stimid),trigger(i),capture_movie); MTI{i}.frameTimes = ft; end; Screen(StimWindow,''FillRect'',0);', prioritylevel);
+else
+    if StimDisplayOrderRemote
+        abort = 0;
         lpt=open_parallelport;
         ready=0;
-		while ~abort,
+        while ~abort,
             %	[thetime,i] = StimTriggerAct('WaitActionCode');
             [go,i]=get_gostim(lpt);
             if ~go    % go has to be off, before another stimulus is shown
@@ -119,40 +125,34 @@ else,
                     disp('DISPLAYSTIMSCRIPT: Stim 0 requested. Assuming bit 5 is missing and showing stim 16');
                     i = l; % changed on 2013-07-01 (changed by Mehran 2013-08-10)
                 end
-%                 
-%                 if i<1||i>numstims
-%                     error(['Requested stimulus ' int2str(i) ' out of range.']); 
-%                 end
                 Rush('DisplayStimulus(MTI{i},[],trigger(i),capture_movie);',prioritylevel);
                 ready=0;
             end
-			abort = KbCheck;
-		end;
-	else,
-		for i=1:l,
+            abort = KbCheck;
+        end;
+    else
+        for i=1:l,
             disp(['current stimID:      ',num2str(i),''])
             Rush('[MTI{i}.startStopTimes,ft]=DisplayStimulus(MTI{i},get(stimScript,MTI{i}.stimid),trigger(i),capture_movie);MTI{i}.frameTimes=ft;',prioritylevel);
-%            disp('DisplayStimScript: TEMPORARILY NOT RUSHING');
- %           eval('[MTI{i}.startStopTimes,ft]=DisplayStimulus(MTI{i},get(stimScript,MTI{i}.stimid),trigger(i));MTI{i}.frameTimes=ft;',prioritylevel);
-            if KbCheck, break; end; % abort if keyboard press
-            
-            % print status
+            if KbCheck % abort if keyboard press
+                break
+            end
             if mod(i,20)==0,
                 fprintf(['Just finished stim ' int2str(i) ' of ' int2str(l) '.\n']);
             end;
             if mod(i,numstims)==0,
                 fprintf(['Just finished trial ' int2str(i/numstims) ' of ' int2str(l/numstims) '.\n']);
             end;
-            %toc
-        end;
-        
-		%screen(StimWindow,'FillRect',0);
-	end;
-end;
+        end
+    end
+end
 
- % clean up
- if capture_movie
-     Screen('FinalizeMovie',moviePtr);
- end
+if NSUseInitialSerialTrigger
+    StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+end
+
+if capture_movie
+    Screen('FinalizeMovie',moviePtr);
+end
 
 ShowCursor;

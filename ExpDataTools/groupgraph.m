@@ -4,7 +4,7 @@ function [r,p,filename,h]=groupgraph(groups,measures,varargin)
 %  [R,P,FILENAME,H]=GROUPGRAPH(GROUPS,MEASURES,VARARGIN);
 %
 %
-% 2007-2014, Alexander Heimel, based on POPGRAPH
+% 2007-2014, Alexander Heimel
 
 global values_x values_y
 
@@ -103,7 +103,7 @@ if length(unique({extra_options{1:2:end}}))~=length({extra_options{1:2:end}})
 end
 
 for i=1:2:length(extra_options)
-    assign(trim(extra_options{i}),extra_options{i+1});
+    assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
 logmsg(['Collecting data for figure ' name ]);
@@ -120,9 +120,9 @@ end
 % LEVELT LAB SPECIFIC SHOULD GO SOMEWHERE ELSE
 if ~iscell(groups);
     bxdshift=0;
-    if strcmp(trim(groups),'BXD* shift')==1
+    if strcmp(strtrim(groups),'BXD* shift')==1
         bxdshift=1;
-    elseif strcmp(trim(groups),'BXD* relative shift')==1
+    elseif strcmp(strtrim(groups),'BXD* relative shift')==1
         bxdshift=2;
     end
     if bxdshift>0
@@ -143,15 +143,14 @@ if ~iscell(groups);
             ',D2 MD 7d from p28' op 'D2 control 1 month ' postop];
         grouplabels='B6,D2';
         for i=1:length(ind_md)
-            if exist('exclude','var') && ~isempty(findstr(groupdb(ind_md(i)).name,'02'))
+            if exist('exclude','var') && ~isempty(strfind(groupdb(ind_md(i)).name,'02'))
                 continue
             end
-            groups=[groups ',' groupdb(ind_md(i)).name op groupdb(ind_ctl(i)).name postop];
-            grouplabels=[grouplabels ',' groupdb(ind_md(i)).name(4:5)];
+            groups=[groups ',' groupdb(ind_md(i)).name op groupdb(ind_ctl(i)).name postop]; %#ok<AGROW>
+            grouplabels=[grouplabels ',' groupdb(ind_md(i)).name(4:5)]; %#ok<AGROW>
         end
     end
 end
-%
 
 % parse groups
 if ~iscell(groups);
@@ -163,7 +162,7 @@ operator_groups=[];
 group_operator=[];
 allgroups={};
 for g=1:length(groups)
-    groups{g}=trim(groups{g});
+    groups{g}=strtrim(groups{g});
     p=[];
     for go=groupoperators
         p=[p find(groups{g}==go)];
@@ -175,8 +174,8 @@ for g=1:length(groups)
         errormsg(['More than one operator (' groupoperators ') in a single group is not allowed.']);
         return
     else
-        allgroups{end+1}=trim(groups{g}(1:p-1));
-        allgroups{end+1}=trim(groups{g}(p+1:end));
+        allgroups{end+1}=strtrim(groups{g}(1:p-1));
+        allgroups{end+1}=strtrim(groups{g}(p+1:end));
         operator_groups(end+1)=length(allgroups)-1;
         group_operator(end+1)=groups{g}(p);
         group_operator(end+1)=' ';
@@ -448,9 +447,9 @@ for m=1:n_measures
         if isempty(grouplabel)
             grouplabel=['group ' num2str(g)];
         end
-        disp([measurelabels{m} ' ' grouplabel ...
-            ' mean = ' num2str(nanmean(r{m}{g}(:)),3) ...
-            ', sem = ' num2str(r_std{m}{g}/sqrt(r_n{m}{g}-1),3) ]);
+%         disp([measurelabels{m} ' ' grouplabel ...
+%             ' mean = ' num2str(nanmean(r{m}{g}(:)),3) ...
+%             ', sem = ' num2str(r_std{m}{g}/sqrt(r_n{m}{g}-1),3) ]);
     end
 end
 
@@ -462,12 +461,12 @@ switch style
         if size(grouplabels,1)>n_groups*n_measures/2
             errormsg(['Wrong number of grouplabels. ' ...
                 num2str(size(grouplabels,1)) ' given, ' num2str(n_groups*n_measures/2) ' expected.' ]);
-            disp(grouplabels)
+            logmsg(grouplabels)
             return
         elseif size(grouplabels,1)<n_groups*n_measures/2
             logmsg(['Wrong number of grouplabels. ' ...
                 num2str(size(grouplabels,1)) ' given, ' num2str(n_groups*n_measures/2) ' expected.' ]);
-            disp(grouplabels)
+            logmsg(grouplabels)
             for i=size(grouplabels,1)+1:n_groups*n_measures/2
                % grouplabels{i} = '';
                 grouplabels(i,:) = ' ';
@@ -477,7 +476,7 @@ switch style
         if size(grouplabels,1)~=n_groups
             errormsg(['Wrong number of grouplabels. ' ...
                 num2str(size(grouplabels,1)) ' given, ' num2str(n_groups) ' expected.' ]);
-            disp(grouplabels)
+            logmsg(grouplabels)
             return
         end
 end
@@ -617,7 +616,7 @@ switch style
                     end
                     barcount=barcount+1;
                     xt=xt+inc_xt_group;
-                elseif isempty(trim(grouplabels(g,:))) || n_measures>1
+                elseif isempty(strtrim(grouplabels(g,:))) || n_measures>1
                     xt=xt+inc_xt_group;
                 else
                     logmsg(['Less than ' num2str(min_n) ...
@@ -654,14 +653,14 @@ end
 
 % legend
 if ~isempty(findstr(lower(legnd),'on')) %i.e. 'on' or 'location'
-    if strcmpi(trim(legnd),'on')
+    if strcmpi(strtrim(legnd),'on')
         legnd = {};
     else
         legnd = eval(legnd);
         legnd = {legnd{:}};
     end
     for g=1:size(grouplabels,1)
-        legnd{end+1} = trim(grouplabels(g,:));
+        legnd{end+1} = strtrim(grouplabels(g,:));
     end
     legnd = cell2str(legnd);
     ind = strmatch('legnd',extra_options);
@@ -676,7 +675,7 @@ end
 logmsg(['Drawing figure ' name ]);
 
 if isempty(add2graph_handle)
-    figure;
+    figure('color',[1 1 1]);
     axishandle = gca;
 elseif ishandle(add2graph_handle)
     axishandle = add2graph_handle;
@@ -688,7 +687,7 @@ end
 h = graph(gy,gx,...
     'ylab',ylab,...
     'xlab',xlab,...
-    'axishandle',gca,...
+    'axishandle',gca,... % seems it should be axishandle
     'style',style,...
     'xticklabels',xticklabels,...
     'prefax',prefax,'errorbars',errorbars,...
@@ -714,6 +713,13 @@ end
 values_x = gx;
 values_y = gy;
 
+if length(values_y)==1 && iscell(values_y{1})
+    values_y = values_y{1};
+end
+if length(values_x)==1 && iscell(values_x{1})
+    values_x = values_x{1};
+end
+
 evalin('base','global values_x values_y');
 logmsg('Values available in workspace as values_x values_y.');
-logmsg('To show data: dispcell(values_y{1})')
+logmsg('To show data: dispcell(values_y)')

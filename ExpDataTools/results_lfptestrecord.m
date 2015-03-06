@@ -38,6 +38,11 @@ if isempty(measures)
     return
 end
 
+if ~isfield(measures,'range')
+    logmsg('No range in measures. Reanalyze first');
+    return
+end
+
 if iscell(measures(1).range) && length(measures(1).range)==2
             triggername{1} = ', Light off';
             triggername{2} = ', Light on';
@@ -153,6 +158,11 @@ for lfpch=1:length(measures)
                 end
                 xlim([-0.1 1]);
                 set(gca,'ytick',[]);
+            end
+            
+            if ~isfield(measures,'powerm')
+                errormsg('No field ''powerm''. Reanalyze lfp data');
+                return
             end
             
             powerms = measures(lfpch).powerm;

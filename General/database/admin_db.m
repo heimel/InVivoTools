@@ -27,6 +27,9 @@ end
 
 set(h_fig,'Name','Database administration');
 
+
+
+
 p = get(h_fig,'Position');
 p(3) = p(3)+80;
 set(h_fig,'Position',p);
@@ -41,6 +44,7 @@ top=10;
 
 ud=get(h_fig,'UserData');
 h=ud.h;
+set(ud.record_form,'CloseRequestFcn','closereq');
 
 maxleft = 0;
 

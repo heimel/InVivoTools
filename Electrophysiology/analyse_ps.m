@@ -15,6 +15,8 @@ if isempty(verbose)
     verbose = true;
 end
 
+processparams = ecprocessparams(record);
+
 measures.usable=1;
 
 paramname = varied_parameters(inp.st.stimscript);
@@ -23,7 +25,7 @@ if isempty(paramname)
     paramname = {'imageType'}; % or 'angle'
 end
 
-ind = strmatch(record.stim_type,paramname);  % notice: changed from record.stim_parameters 2013-03-29!
+ind = find(strcmp(record.stim_type,paramname));  % notice: changed from record.stim_parameters 2013-03-29!
 if isempty(ind)
     paramname = paramname{1};
 else
@@ -31,6 +33,7 @@ else
 end
 
 inp.paramname = paramname; % for tuning_curve
+inp.paramnames = {paramname}; % for periodic_curve
 inp.selection = record.stim_parameters; % selection like, 'contrast=0.4,angle=180'
 
 [sts,triggers] = split_stimscript_by_trigger( inp.st );
@@ -67,7 +70,7 @@ for i = 1:length(triggers)
     end
     measures.curve{i} = curve;
     measures.rate_spont{i} = out(i).spont(1);
-    [measures.rate_max{i} ind_pref] = max(curve(2,:));
+    [measures.rate_max{i}, ind_pref] = max(curve(2,:));
     measures.response_max{i} = measures.rate_max{i} - measures.rate_spont{i};
     if measures.rate_max{i}>0 % i.e.spikes
         measures.preferred_stimulus{i} = curve(1,ind_pref);
@@ -75,6 +78,14 @@ for i = 1:length(triggers)
         measures.preferred_stimulus{i} = NaN;
     end
     measures.range{i} = curve(1,:);
+    
+    if processparams.compute_f1f0
+        pc = periodic_curve(inp,'default');
+        pc_out = getoutput(pc);
+        mf0 = max(pc_out.f0curve{1}(2,:));
+        mf1 = max(pc_out.f1curve{1}(2,:));
+        measures.f1f0{i} = mf1/mf0 ;
+    end
     
     % RESPONSE is RATE MINUS SPONTANEOUS
     % normalization by max for trigger 1 only
@@ -90,13 +101,7 @@ for i = 1:length(triggers)
     %  compute peak time for preferred stimulus
     rast=getoutput(out(i).rast);
     binsize = (rast.bins{1}(end)-rast.bins{1}(1))/(length(rast.bins{1})-1);
-    
-    %    tempst = getparameters(inp.st.stimscript);
-    %    if isfield(tempst,'tFrequency')
-    %       maxbins = ceil(1/tempst.tFrequency/binsize); % one cycle
-    %   else
     maxbins = min(cellfun(@length,rast.counts));
-    %   end
     
     rastcount_max = zeros(1,maxbins);%length decreased because it can fluctuate with one
     ind = find(measures.range{i}==measures.preferred_stimulus{i});
@@ -120,6 +125,7 @@ if length(inps)==1
     measures.curve = measures.curve{1};
 else
     % ugly code to compute friedman test
+    count = zeros(length(measures.curve),length(rast.values),size(rast.values{1},2)); % triggers x range x repetitions
     for i=1:length(measures.curve)
         rast = getoutput(out(i).rast);
         for j=1:length(rast.values)
@@ -128,6 +134,7 @@ else
     end
     
     reps = size(count,3);
+    x = zeros(size(count,2)*reps,length(measures.curve));
     for i=1:length(measures.curve)
         c = 1;
         for j=1:size(count,2)
@@ -153,6 +160,8 @@ switch measures.variable
         measures = compute_angle_measures(measures); % also shifts range around preferred
     case 'gnddirection'
         measures = compute_angle_measures(measures);
+    case 'size'
+        measures = compute_size_measures(measures);
 end
 
 

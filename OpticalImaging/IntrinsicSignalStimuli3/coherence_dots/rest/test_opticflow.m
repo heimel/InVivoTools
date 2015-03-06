@@ -29,7 +29,7 @@ for cond = 1:numConds
         filename = itemlist{theitem};
         [imgArray] = imread(filename, fmt);
         imgArray = uint8((double(imgArray)-127)*(contrast/100)+127);  % change contrast
-        offScrPtr(counter) = SCREEN(window, 'OpenOffscreenWindow', backGroundColor, pixRect);
+        offScrPtr(counter) = Screen(window, 'OpenOffscreenWindow', backGroundColor, pixRect);
         SCREEN(offScrPtr(counter), 'PutImage', imgArray, pixRect);
         counter = counter+1;
     end

@@ -1,4 +1,4 @@
-function df = setvalues(displayPrefs, parameters);
+function df = setvalues(displayPrefs, parameters)
 
 [good, errormsg] = verify(parameters);
 

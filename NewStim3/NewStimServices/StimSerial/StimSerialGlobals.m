@@ -44,6 +44,15 @@
 %        5 4 3   
 %         2 1 
 %   
+% Example use:
+% >> StimSerialGlobals
+% >> OpenStimSerial
+% >> StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+% or
+% >> StimSerial('dtr',StimSerialScript,0);
+%
+% 200X-200X Steve Van Hooser
+% 200X-2014 Alexander Heimel
 
 global StimSerialSerialPort;
 global StimSerialScriptIn StimSerialScriptOut;
@@ -51,3 +60,20 @@ global StimSerialScriptInPin StimSerialScriptOutPin;
 global StimSerialStimIn StimSerialStimOut;
 global StimSerialStimInPin StimSerialStimOutPin;
 global StimSerialScript StimSerialStim;
+
+
+global gNewStim % to replace other globals in the future
+gNewStim.StimSerial.port = StimSerialSerialPort;
+gNewStim.StimSerial.scriptin = StimSerialScriptIn;
+gNewStim.StimSerial.scriptout = StimSerialScriptOut;
+gNewStim.StimSerial.scriptinpin = StimSerialScriptInPin;
+gNewStim.StimSerial.scriptoutpin = StimSerialScriptOutPin;
+gNewStim.StimSerial.stimin = StimSerialStimIn;
+gNewStim.StimSerial.stimout = StimSerialStimOut;
+gNewStim.StimSerial.stiminpin = StimSerialStimInPin;
+gNewStim.StimSerial.stimoutpin = StimSerialStimOutPin;
+gNewStim.StimSerial.script = StimSerialScript;
+gNewStim.StimSerial.stim = StimSerialStim;
+
+
+

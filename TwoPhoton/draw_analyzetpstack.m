@@ -239,7 +239,7 @@ guicreate(button,'String','Neurite','Tag','drawNeuriteBt','left','left','tooltip
 % Snap to
 guicreate(txt,'String','Snap','Enable','on','width','auto','parent',hroilabelspanel,'move','right');
 if ti.NumberOfChannels>1
-    snaptolist = ['no' cellfun(@num2str,num2cell(1:ti.NumberOfChannels,[ti.NumberOfChannels 1]), 'UniformOutput',false)];
+    snaptolist = ['no' cellfun(@num2str,num2cell(1:ti.NumberOfChannels), 'UniformOutput',false)];
 else
     snaptolist = {'no','1'};
 end

@@ -5,10 +5,10 @@ function fig=experiment_db( type, hostname )
 %   FIG=EXPERIMENT_DB( TYPE )
 %   FIG=EXPERIMENT_DB( TYPE, HOSTNAME )
 %
-%     TYPE can be 'oi','ec','tp'
+%     TYPE can be 'oi','ec','tp','wc'
 %     FIG returns handle to the database control figure
 %
-% 2005-2013, Alexander Heimel
+% 2005-2014, Alexander Heimel
 %
 
 if nargout==1
@@ -26,55 +26,33 @@ end
 
 if nargin<2
     hostname = host;
-    if isempty(hostname)
-        % disp(['EXPERIMENT_DB: No hostname set' ]);
-    else        
-        disp(['EXPERIMENT_DB: Working on host ' hostname ]);
+    if ~isempty(hostname)
+        logmsg(['Working on host ' hostname ]);
     end
-end
-
-switch(user)
-    case 'heimel'
-        poweruser = true;
-    otherwise
-        %disp('EXPERIMENT_DB: Temporarily making everybody power user to make test cycling possible');
-        poweruser = true;
 end
 
 %defaults
 select_all_of_name_enabled=0;
 blind_data_enabled = 0;
-analyse_all_enabled = 0;
 reverse_data_enabled = 0;
 open_data_enable = 0;
 channels_enabled = 0;
+average_tests_enabled=0;
+export_tests_enabled=0;
+play_data_enable = 0;
 
 switch type
-    case 'oi'
-        average_tests_enabled=0;
-        export_tests_enabled=0;
     case 'ec'
-        average_tests_enabled=0;
-        export_tests_enabled=0;
         channels_enabled = 1;
-    case 'tp' % twophoton
+    case 'tp' 
         color = [0.4 0.5 1];
-        average_tests_enabled=0;
-        export_tests_enabled=0;
-        %        select_all_of_name_enabled=1;
-        analyse_all_enabled = 0;
         open_data_enable = 1;
         blind_data_enabled = 1;
         reverse_data_enabled = 1; % for reversing database
-    case 'ls' % linescans
+    case 'wc' 
         color = [0.8 0.6 0];
-        average_tests_enabled=0;
-        export_tests_enabled=0;
-    otherwise
-        warning('EXPERIMENT_DB:UNKNOWN_TYPE',['Unknown type ''' type '''']);
-        return
+        play_data_enable = 1;
 end
-
 
 % get which database
 [testdb, experimental_pc] = expdatabases( type, hostname );
@@ -143,31 +121,31 @@ switch type
         end
 end
 
-
-% temporarily adding measurement field % 2013-03-22
-%  switch type
-%      case {'tp'}
-%          if ~isfield(db,'measures')
-%              for i=1:length(db)
-%                  db(i).measures = '';
-%              end
-%              stat = checklock(filename);
-%              if stat~=1
-%                  filename = save_db(db,filename,'');
-%                  rmlock(filename);
-%              end
-%          end
-%  end
-
+if isfield(db,'comment')
+    % Temp removal for multiline comments
+    multiline = false;
+    for i=1:length(db)
+        if size(db(i).comment,1)>1 && ischar(db(i).comment)% i.e. multiline
+            db(i).comment = flatten(db(i).comment')';
+            multiline = true;
+        end
+    end
+    if multiline
+        logmsg('Flattened multiline comments');
+        stat = checklock(filename);
+        if stat~=1
+            filename = save_db(db,filename,'');
+            rmlock(filename);
+        end
+    end
+end
 
 % start control database
 switch testdb
     case {'testdb','ectestdb'}
         h_fig=control_db(db,color);
     otherwise
-        %h_fig=control_db(db,color);
        h_fig=control_db(filename,color); 
-        
 end
 if isempty(h_fig)
     return
@@ -194,13 +172,7 @@ h=ud.h;
 
 % set customize sort to sort button
 set(h.sort,'Tag','sort_testrecords');
-if poweruser
-    set(h.sort,'Enable','on'); % enable sort button
-else
-    % to avoid people messing up the database by accident
-    set(h.sort,'Enable','off');
-end
-
+set(h.sort,'Enable','on'); % enable sort button
 
 if haspsychtbox || experimental_pc
     runexperiment_enabled = 1;
@@ -210,10 +182,10 @@ end
 
 if experimental_pc
     % check diskusage
-    df=diskusage(eval([type 'datapath']));
+    pth = eval([type 'datapath(db(1))']);
+    df=diskusage(pth);
     if df.available < 11000000
-        disp(['EXPERIMENT_DB: less than 11 Gb available on /home/data. Clean up' ...
-            ' disk!']);
+        errormsg(['Less than 11 Gb available on ' pth '. Clean up disk!']);
     end
 end
 
@@ -231,7 +203,6 @@ if strcmp(host,'wall-e')
     left=left+buttonwidth+colsep;
     maxleft=max(maxleft,left);
 end
-
 
 if runexperiment_enabled
     h.runexperiment = ...
@@ -260,6 +231,20 @@ if open_data_enable
     maxleft=max(maxleft,left);
 end
 
+if play_data_enable
+    h.play = ...
+        uicontrol('Parent',h_fig, ...
+        'Units','pixels', ...
+        'BackgroundColor',0.8*[1 1 1],...
+        'Callback','genercallback', ...
+        'ListboxTop',0, ...
+        'Position',[left top buttonwidth buttonheight], ...
+        'String','Play','Tag','play_wctestrecord_callback');
+    left=left+buttonwidth+colsep;
+    maxleft=max(maxleft,left);
+end
+
+
 h.analyse = ...
     uicontrol('Parent',h_fig, ...
     'Units','pixels', ...
@@ -282,17 +267,6 @@ h.results = ...
 left=left+buttonwidth+colsep;
 maxleft=max(maxleft,left);
 
-% h.rois = ...
-%     uicontrol('Parent',h_fig, ...
-%     'Units','pixels', ...
-%     'BackgroundColor',0.8*[1 1 1],...
-%     'Callback','genercallback', ...
-%     'ListboxTop',0, ...
-%     'Position',[left top buttonwidth buttonheight], ...
-%     'String','ROIs','Tag','tptestdb_roidb');
-% left=left+buttonwidth+colsep;
-% maxleft=max(maxleft,left);
-
 h.which_test = ...
     uicontrol('Parent',h_fig, ...
     'Style','popupmenu',...
@@ -305,36 +279,6 @@ h.which_test = ...
     'Tag','');
 left=left+buttonwidth+colsep;
 maxleft=max(maxleft,left);
-
-% h.new_testrecord = ...
-%     uicontrol('Parent',h_fig, ...
-%     'Units','pixels', ...
-%     'BackgroundColor',0.8*[1 1 1],...
-%     'Callback','genercallback', ...
-%     'ListboxTop',0, ...
-%     'Position',[left top buttonwidth buttonheight], ...
-%     'String','New test');
-% left=left+buttonwidth+colsep;
-% maxleft=max(maxleft,left);
-
-if analyse_all_enabled
-    h.analyse_all = ...
-        uicontrol('Parent',h_fig, ...
-        'Units','pixels', ...
-        'BackgroundColor',0.8*[1 1 1],...
-        'Callback','genercallback', ...
-        'ListboxTop',0, ...
-        'Position',[left top buttonwidth buttonheight], ...
-        'Tag','analyse_all_testrecord_callback',...
-        'String','Analyze all');
-    left=left+buttonwidth+colsep;
-    maxleft=max(maxleft,left);
-    if strcmp(user,'heimel') 
-        set(h.analyse_all,'Enable','on');
-    else
-        set(h.analyse_all,'Enable','off');
-    end
-end
 
 if average_tests_enabled
     h.average_tests = ...

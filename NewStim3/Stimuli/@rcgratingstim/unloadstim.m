@@ -5,9 +5,9 @@ if isloaded(RCGstim) == 1,
 	os = ds.offscreen;
 	for i=1:length(os),
 		if os(i)~=0,
-			try,
-				screen(os(i),'close');
-			catch,
+			try
+				Screen(os(i),'close');
+            catch
 				os(i) = 0;
 			end;
 		end;

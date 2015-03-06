@@ -8,8 +8,6 @@ function results_ectestrecord( record )
 
 global measures analysed_script
 
-%
-
 if isfield(record,'electrode') % i.e. ecdata
     data_type = 'ec';
 elseif isfield(record,'laser') % i.e. tpdata
@@ -40,7 +38,11 @@ end
 tit(tit=='_')='-';
 
 measures = merge_measures_from_disk( record );
-measures = select_measures_by_channel( measures, record);
+
+switch record.datatype
+    case {'ec','lfp'}
+        measures = select_measures_by_channel( measures, record);
+end
 
 n_cells=length(measures);
 
@@ -57,9 +59,6 @@ n_cols = 5;
 width = n_cols*subwidth;
 figleft = fix((screensize(3)-width)/2);
 relsubwidth = 1 / n_cols;
-
-
-
 
 row = 1;
 for c=1:n_cells
@@ -118,7 +117,14 @@ for c=1:n_cells
     
     switch record.stim_type
         case {'sg','sg_adaptation'}
-            n_graphs=1+length(measure.rf)+2;
+            if iscell(measure.rf) % deprecated on 2014-11-26
+                n_intervals = length(measure.rf);
+            elseif ndims(measure.rf)==2
+                n_intervals = 1;
+            else
+                n_intervals = size(measure.rf,1);
+            end
+            n_graphs = 3+n_intervals;
             printtext(subst_ctlchars(['rf_n_on: ' num2str(measure.rf_n_on) ]),y);
             y=printtext(subst_ctlchars(['halfmax: ' num2str(measure.halfmax_deg,2) '^o']),y,0.5);
             y=printtext(subst_ctlchars(['onsize : ' num2str(fix(measure.rf_onsize_sqdeg)) ' deg^2']),y);
@@ -134,7 +140,7 @@ for c=1:n_cells
             y=printtext(subst_ctlchars(['roc auc: ' num2str(measure.roc_auc,2) ]),y,0.5);
             
             % rf graphs
-            for i=1:length(measure.rf)
+            for i=1:n_intervals
                 subplot('position',...
                     [ (1+i)/(n_graphs)+0.01 reltitlepos-row*relsubheight 1/(n_graphs)*0.96 relsubheight]);
                 plot_rf( measure,i );
@@ -165,7 +171,7 @@ for c=1:n_cells
                 curves = {curves};
                 psths = {psths};
             elseif length(curves)>1
-                disp('RESULTS_ECTESTRECORD: Darker lines are without trigger.');
+                logmsg('Darker lines are without trigger.');
             end
             
             for i = 1:length(curves)
@@ -222,7 +228,7 @@ for c=1:n_cells
         otherwise
             if ~isfield(measure,'variable')
                 errordlg('Analysis should be run first');
-                disp('RESULTS_ECTESTRECORD: Unknown field ''variable''');
+                logmsg('Unknown field ''variable''');
                 return
             end
             
@@ -231,8 +237,8 @@ for c=1:n_cells
             printfield(measure,'rate_max',y);
             y = printfield(measure,'rate_spont',y,0.5);
             y = printfield(measure,'time_peak',y);
-            y = printfield(measure,'selectivity',y);
-            y = printfield(measure,'selectivity_index',y);
+            %y = printfield(measure,'selectivity',y);
+            %y = printfield(measure,'selectivity_index',y);
             if isfield(measure,'rate_change')
                 y = printtext(subst_ctlchars(['Drate  : ' num2str(measure.rate_change*100,'%2.0f') '%' ]),y);
             end
@@ -254,6 +260,7 @@ for c=1:n_cells
                 case 'position'
                     y = printfield(measure,'rf_center',y);
             end
+            y = printfield(measure,'f1f0',y);
             
             % tuning curve
             col = 2;
@@ -398,19 +405,18 @@ end
 % if 0
 switch data_type
     case 'ec'
-        spikesfile = fullfile(ecdatapath(record),record.test,'_spikes.mat');
-        if exist(spikesfile,'file')
-            cells = [];
-            load(spikesfile);
-            plot_spike_features(cells, record);
-            if exist('isi','var') && params.show_isi
-                plot_spike_isi(isi,record);
+        if params.plot_spike_features
+            spikesfile = fullfile(ecdatapath(record),record.test,'_spikes.mat');
+            if exist(spikesfile,'file')
+                cells = [];
+                load(spikesfile);
+                plot_spike_features(cells, record);
+                if exist('isi','var') && params.show_isi
+                    plot_spike_isi(isi,record);
+                end
             end
         end
 end
-% end
-
-
 
 evalin('base','global measures');
 evalin('base','global analysed_script');
@@ -418,9 +424,9 @@ analysed_stimulus = getstimsfile(record);
 if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
     analysed_script = analysed_stimulus.saveScript; 
 else
-    disp('RESULTS_ECTESTRECORD: No savedscript');
+    logmsg('No savedscript');
 end
-disp('RESULTS_ECTESTRECORD: Measures available in workspace as ''measures'', stimulus as ''analysed_script''.');
+logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_script''.');
 
 return
 
@@ -451,11 +457,9 @@ set(hline,'Color',color);
 return
 
 
-%
 function plot_psth(measure,record)
 clr = 'kbry';
 hold on;
-
 
 last_timepoint = 2;
 first_timepoint = -0.1;
@@ -525,14 +529,21 @@ return
 
 
 function plot_rf( measure , i)
-rf=measure.rf{i};
+if iscell(measure.rf)
+    rf=measure.rf{i}; % deprecated on 2014-11-26
+else
+    if ndims(measure.rf)==2
+        rf = measure.rf;
+    else
+        rf = squeeze(measure.rf(i,:,:));
+    end
+end
 imagesc(rf); axis image
 hold on
 set(gca,'XTick',[]);
 set(gca,'YTick',[]);
-%colormap gray
-%set(gca,'CLim',[256/35 max(20,max(measure.rf{1}(:)) )])
-if max(measure.rf{1})>2 % i.e. luminance and not df/f
+
+if max(rf)>2 % i.e. luminance and not df/f
     colormap hot
     set(gca,'CLim',[256/35 40 ])
 else % df/d 
@@ -548,7 +559,7 @@ if isfield(measure,'rect')
     rf_center(1) = (rf_center(1) - measure.rect(1))/(measure.rect(3)-measure.rect(1)) * size(rf,2)+0.5;
     rf_center(2) = (rf_center(2) - measure.rect(2))/(measure.rect(4)-measure.rect(2)) * size(rf,1)+0.5;
 end
-if max(measure.rf{1})>2 % i.e. luminance and not df/f
+if max(rf)>2 % i.e. luminance and not df/f
 bordersquare(rf_center,[0 1 0]);
 else
     plot(rf_center(1),rf_center(2),'r*');
@@ -580,18 +591,12 @@ for i=1:length(curves) % over triggers
         range = measure.range{i};
     end
     odi = measure.odi{i};
-%     if strcmp(measure.variable,'angle') && length(range)>1
-%         odi(end+1) = odi(1);
-%         range(end+1) = range(1)+360; % complete circle
-%     end
     
     [x,ind] = sort(range);
     y = odi(ind);
     
     plot(x,y,[ linestyle clr(i)]);
     hold on
-    
-    ax=axis;
     ylabel('ODI');
     ylim([-1.1 1.1]);
 end
@@ -634,13 +639,11 @@ for i=1:length(curves) % over triggers
             % fit curve, so don't show line
             linestyle = '.';
     end
-    
-    
+
     switch measure.variable
         case {'typenumber','position'}
             x = 1:size(curve,2);
             bar(x,curve(2,:));
-%            bar(x,curve(2,:),'barcolor',clr(i));
             box off
             set(gca,'XTick',1:size(curve,2));
             set(gca,'XTickLabel',curve(1,:));
@@ -659,9 +662,6 @@ for i=1:length(curves) % over triggers
     errorbar(x,curve(2,:),curve(4,:),[clr(i) '.']);
     
     ylabel(rate_label);
-    
-    
-    
     
 end
 
@@ -733,7 +733,8 @@ for i=1:length(measure.response)
 %     polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:)
 %     curve(2,1)]),[ linestyle clr(i)]);
 %        polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
-        polar([measure.range{i}+measure.preferred_stimulus{i} measure.range{i}(1)+measure.preferred_stimulus{i}]/180*pi,...
+        polar([measure.range{i}+measure.preferred_stimulus{1} ...
+            measure.range{i}(1)+measure.preferred_stimulus{1}]/180*pi,...
             thresholdlinear([measure.response{i} measure.response{i}(1)]),...
             [ linestyle clr(i)]);
     set(gca,'view',[-90 90]);

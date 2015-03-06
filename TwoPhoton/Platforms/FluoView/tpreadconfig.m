@@ -44,8 +44,10 @@ end
 fname = tpfilename(record);
 
 if ~exist(fname,'file')
-    disp(['TPREADCONFIG: ' fname ' does not exist.']);
+    logmsg([fname ' does not exist.']);
     params = [];
+    per_params = params;
+    per_record = rmfields(record,{'ROIs','measures'});
     return
 end
 

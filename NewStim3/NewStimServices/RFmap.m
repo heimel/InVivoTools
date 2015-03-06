@@ -38,11 +38,8 @@ windowheight = StimWindowRect(4)-StimWindowRect(2);
 windowwidth  = StimWindowRect(3)-StimWindowRect(1);
 Onrect = StimWindowRect;
 
-screen(MonitorWindow,'FillRect',RFmap_colors(2,:),Onrect);
-screen(StimWindow,'FillRect',RFmap_colors(2,:),Onrect);
-
-%MonitorWindow = SCREEN(MonitorWindow,'OpenWindow',RFmap_colors(2,:),Onrect);
-%StimWindow = SCREEN(StimWindow,'OpenWindow',RFmap_colors(2,:), Onrect);
+Screen(MonitorWindow,'FillRect',RFmap_colors(2,:),Onrect);
+Screen(StimWindow,'FillRect',RFmap_colors(2,:),Onrect);
 
 widthinc = 5;
 lengthinc = 5;
@@ -71,8 +68,8 @@ RFmap_ptlist(3,2) = y+ylong-yshort;
 RFmap_ptlist(4,1) = x-xlong+xshort;
 RFmap_ptlist(4,2) = y-ylong-yshort;
 
-screen(MonitorWindow,'FillPoly',RFmap_colors(1,:),RFmap_ptlist);
-screen(StimWindow,'FillPoly',RFmap_colors(1,:),RFmap_ptlist);
+Screen(MonitorWindow,'FillPoly',RFmap_colors(1,:),RFmap_ptlist);
+Screen(StimWindow,'FillPoly',RFmap_colors(1,:),RFmap_ptlist);
 					
 while (cntinu)		
 			[x,y,buttons]=getmouse(MonitorWindow);
@@ -89,7 +86,7 @@ while (cntinu)
 				RFmap_ptlist(4,2) = y-ylong-yshort;
 				Screen(MonitorWindow,'FillPoly', RFmap_colors(1,:), RFmap_ptlist);
 				Screen(StimWindow,'FillPoly', RFmap_colors(1,:), RFmap_ptlist);
-				screen(StimWindow,'WaitBlanking');
+				Screen(StimWindow,'WaitBlanking');
 			end
 			
 			[keysdown,secs,keycode]= KbCheck;
@@ -127,8 +124,8 @@ while (cntinu)
 						if RFmap_rlst(1,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(1,3));
 						    ydist = rfl*sin(RFmap_rlst(1,3));
-							screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
-							screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
+							Screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
+							Screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
 					    end
 						xradius = RFmap_length/2;
 						yradius = RFmap_width/2;
@@ -138,70 +135,70 @@ while (cntinu)
 					    RFmap_rlst(1,3) = RFmap_ori;
 						xdist = rfl*cos(RFmap_ori);
 						ydist = rfl*sin(RFmap_ori);
-						screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
+						Screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
 
 				case 121,   %F2
 						if RFmap_rlst(2,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(2,3));
 						    ydist = rfl*sin(RFmap_rlst(2,3));
-						    screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
-						    screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
+						    Screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
+						    Screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
 					    end
 					    RFmap_rlst(2,1) = RFmap_ptlist(3,1);
 					    RFmap_rlst(2,2) = RFmap_ptlist(3,2);
 					    RFmap_rlst(2,3) = RFmap_ori;
 						xdist = rfl*cos(RFmap_ori);
 						ydist = rfl*sin(RFmap_ori);
-						screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
+						Screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
 				
 		       	case 100,     %F3
 						if RFmap_rlst(3,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(3,3)-pi/2);
 						    ydist = rfl*sin(RFmap_rlst(3,3)-pi/2);
-						    screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
-						    screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
+						    Screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
+						    Screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
 					    end
 					    RFmap_rlst(3,1) = RFmap_ptlist(2,1);
 					    RFmap_rlst(3,2) = RFmap_ptlist(2,2);
 					    RFmap_rlst(3,3) = RFmap_ori;
 						xdist = rfl*cos(RFmap_ori-pi/2);
 						ydist = rfl*sin(RFmap_ori-pi/2);
-						screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
+						Screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
 			
 				case 119,      %%F4
 						if RFmap_rlst(4,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(4,3)-pi/2);
 						    ydist = rfl*sin(RFmap_rlst(4,3)-pi/2);
-						    screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
-						    screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
+						    Screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
+						    Screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
 					    end
 					    RFmap_rlst(4,1) = RFmap_ptlist(4,1);
 					    RFmap_rlst(4,2) = RFmap_ptlist(4,2);
 					    RFmap_rlst(4,3) = RFmap_ori;
 						xdist = rfl*cos(RFmap_ori-pi/2);
 						ydist = rfl*sin(RFmap_ori-pi/2);
-						screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
+						Screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
 				
 					case 97,    %F5  clear all markings on MonitorWindow
 						if RFmap_rlst(1,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(1,3));
 						    ydist = rfl*sin(RFmap_rlst(1,3));
-							screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
+							Screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
 					    end
 						if RFmap_rlst(2,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(2,3));
 						    ydist = rfl*sin(RFmap_rlst(2,3));
-						    screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
+						    Screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
 					    end
 						if RFmap_rlst(3,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(3,3)-pi/2);
 						    ydist = rfl*sin(RFmap_rlst(3,3)-pi/2);
-						    screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
+						    Screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
 					    end
 						if RFmap_rlst(4,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(4,3)-pi/2);
 						    ydist = rfl*sin(RFmap_rlst(4,3)-pi/2);
-						    screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
+						    Screen(MonitorWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
 					    end
 				
 						
@@ -209,44 +206,44 @@ while (cntinu)
 						if RFmap_rlst(1,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(1,3));
 						    ydist = rfl*sin(RFmap_rlst(1,3));
-							screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
+							Screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
 					    end
 						if RFmap_rlst(2,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(2,3));
 						    ydist = rfl*sin(RFmap_rlst(2,3));
-						    screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
+						    Screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
 					    end
 						if RFmap_rlst(3,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(3,3)-pi/2);
 						    ydist = rfl*sin(RFmap_rlst(3,3)-pi/2);
-						    screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
+						    Screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
 					    end
 						if RFmap_rlst(4,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(4,3)-pi/2);
 						    ydist = rfl*sin(RFmap_rlst(4,3)-pi/2);
-						    screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
+						    Screen(MonitorWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
 					    end
 						
 					case 99,    %F7  clear all markings on StimWindow
 						if RFmap_rlst(1,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(1,3));
 						    ydist = rfl*sin(RFmap_rlst(1,3));
-							screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
+							Screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
 					    end
 						if RFmap_rlst(2,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(2,3));
 						    ydist = rfl*sin(RFmap_rlst(2,3));
-						    screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
+						    Screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
 					    end
 						if RFmap_rlst(3,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(3,3)-pi/2);
 						    ydist = rfl*sin(RFmap_rlst(3,3)-pi/2);
-						    screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
+						    Screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
 					    end
 						if RFmap_rlst(4,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(4,3)-pi/2);
 						    ydist = rfl*sin(RFmap_rlst(4,3)-pi/2);
-						    screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
+						    Screen(StimWindow,'DrawLine',RFmap_colors(2,:),RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
 					    end
 				
 						
@@ -254,28 +251,28 @@ while (cntinu)
 						if RFmap_rlst(1,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(1,3));
 						    ydist = rfl*sin(RFmap_rlst(1,3));
-							screen(StimWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
+							Screen(StimWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(1,1)+xdist,RFmap_rlst(1,2)+ydist,RFmap_rlst(1,1)-xdist,RFmap_rlst(1,2)-ydist);
 					    end
 						if RFmap_rlst(2,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(2,3));
 						    ydist = rfl*sin(RFmap_rlst(2,3));
-						    screen(StimWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
+						    Screen(StimWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(2,1)+xdist,RFmap_rlst(2,2)+ydist,RFmap_rlst(2,1)-xdist,RFmap_rlst(2,2)-ydist);
 					    end
 						if RFmap_rlst(3,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(3,3)-pi/2);
 						    ydist = rfl*sin(RFmap_rlst(3,3)-pi/2);
-						    screen(StimWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
+						    Screen(StimWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(3,1)+xdist,RFmap_rlst(3,2)+ydist,RFmap_rlst(3,1)-xdist,RFmap_rlst(3,2)-ydist);
 					    end
 						if RFmap_rlst(4,1) > 0 
 							xdist = rfl*cos(RFmap_rlst(4,3)-pi/2);
 						    ydist = rfl*sin(RFmap_rlst(4,3)-pi/2);
-						    screen(StimWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
+						    Screen(StimWindow,'DrawLine',mod(RFmap_colors(1,:),255)+100,RFmap_rlst(4,1)+xdist,RFmap_rlst(4,2)+ydist,RFmap_rlst(4,1)-xdist,RFmap_rlst(4,2)-ydist);
                         end
                     case 6,
                         RFmap_colorind = 1+mod(RFmap_colorind-1+1,length(RFmap_collist));
                         RFmap_colors = RFmap_collist{RFmap_colorind};
-						screen(MonitorWindow,'FillRect',RFmap_colors(2,:),Onrect);
-						screen(StimWindow,'FillRect',RFmap_colors(2,:),Onrect);
+						Screen(MonitorWindow,'FillRect',RFmap_colors(2,:),Onrect);
+						Screen(StimWindow,'FillRect',RFmap_colors(2,:),Onrect);
 						Screen(MonitorWindow,'FillPoly', RFmap_colors(1,:), RFmap_ptlist);
 						Screen(StimWindow,'FillPoly', RFmap_colors(1,:), RFmap_ptlist);
 						%disp(['remapping colors']);
@@ -298,7 +295,7 @@ while (cntinu)
 				RFmap_ptlist(4,2) = y-ylong-yshort;
 				Screen(MonitorWindow,'FillPoly', RFmap_colors(1,:), RFmap_ptlist);
 				Screen(StimWindow,'FillPoly', RFmap_colors(1,:), RFmap_ptlist);
-				screen(StimWindow,'WaitBlanking');
+				Screen(StimWindow,'WaitBlanking');
 
 			end       %if
 			

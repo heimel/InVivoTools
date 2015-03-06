@@ -10,7 +10,7 @@ StimWindowGlobals;
 if NS_PTBv==3,
     currLut = Screen('ReadNormalizedGammaTable', StimWindowMonitor);
     mypriority = MaxPriority(StimWindowMonitor,'WaitBlanking','SetClut','GetSecs'); % PD
-else,
+else
     mypriority = 1;
 end;
 
