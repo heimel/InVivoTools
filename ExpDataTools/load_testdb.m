@@ -15,7 +15,7 @@ if isempty(whichdb)
     whichdb = expdatabases( 'oi' );
 end
 
-if isempty(findstr(whichdb,'.mat'))
+if isempty(strfind(whichdb,'.mat'))
   whichdb=[whichdb '.mat'];
 end
 
@@ -56,8 +56,8 @@ function [db,filename]=load_single_testdb( whichdb,where,db,load_main,verbose )
 switch whichdb
     case {'testdb','testdb.mat'} % join oi databases        
         if verbose
-            disp('LOAD_TESTDB: Concatenating all oi test databases. Changes will not be saved to original database!');
-            disp('LOAD_TESTDB: Use e.g. experiment_db(''oi'',''andrew'') to open specific database, or use host(''andrew'')');
+            logmsg('Concatenating all oi test databases. Changes will not be saved to original database!');
+            logmsg('Use e.g. experiment_db(''oi'',''andrew'') to open specific database, or use host(''andrew'')');
         end
         % load separate testdatabases and merge
         db_daneel=load_expdatabase( 'testdb_daneel',where,[],load_main,verbose);
@@ -80,8 +80,8 @@ switch whichdb
                  end
             otherwise
                 if verbose
-                    disp('LOAD_TESTDB: Concatenating all experimental databases. Changes will not be saved to original database!');
-                    disp('LOAD_TESTDB: Use e.g. experiment_db(''ec'',''nori001'') to open specific database, or use host(''nori001'')');
+                    logmsg('Concatenating all experimental databases. Changes will not be saved to original database!');
+                    logmsg('Use e.g. experiment_db(''ec'',''nori001'') to open specific database, or use host(''nori001'')');
                 end
                 
                 % matching structure to ectestdb_daneel_empty
@@ -111,14 +111,7 @@ switch whichdb
             db_empty = db_empty.db;
             db_single = structconvert(db_single,db_empty);
            end
-%         elseif ~isempty(db_single) &&  isfield(db_single(1),'electrode') % i.e. microscopy record
-%             % matching structure to tptestdb_olympus_empty
-%             db_empty = load(fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty'));
-%             db_empty = db_empty.db;
-%             db_single = structconvert(db_single,db_empty);
         end
-
-        
         db = [db db_single]; 
 end
 

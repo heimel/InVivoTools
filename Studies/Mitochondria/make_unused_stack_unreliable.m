@@ -33,6 +33,12 @@ for i=1:length(db)
 end
 
 % see email Laura to Alexander on 2015-01-15
+
+% for controle alleen meenemen:
+%11.12.15 Xyz 1,2,3,5
+%11.12.28. Xyz 2,3,4
+%11.12.31 Xyz 1,2,3
+
 crit = ['(mouse=11.12.32,stack=xyz4)|' ... % out off lesion projection zone 
     '(mouse=11.12.32,stack=xyz2)|' ...  % % out off lesion projection zone
     '(mouse=11.12.32,stack=xyz5)|' ...% out off lesion projection zone
@@ -45,11 +51,13 @@ crit = ['(mouse=11.12.32,stack=xyz4)|' ... % out off lesion projection zone
     '(mouse=11.12.59,stack=xyz1)|' ...% out off lesion projection zone
     '(mouse=11.12.61,stack=xyz1)|' ...% out off lesion projection zone
     '(mouse=11.12.65,stack=xyz1)|' ...% done by Philippe
+    '(mouse=11.12.65,stack=xyz2)|' ...% done by Philippe? 
+    '(mouse=11.12.65,stack=xyz3)|' ...% done by Philippe?
     '(mouse=11.12.65,stack=xyz4)|' ...% done by Philippe
     '(mouse=11.12.28,stack=xyz1)|' ...% done by Philippe
     '(mouse=11.12.31,stack=xyz4)|' ...% done by Philippe
-    '(mouse=11.12.72,stack=xyz3)' ...% done by Philippe
-    '(mouse=11.12.72,stack=xyz4)' ...% done by Philippe?
+    '(mouse=11.12.72)|' ...% done by Philippe
+    '(mouse=11.12.15,stack=xyz5)' ...  % not analysed? 
     ];
 %[db,filename,perm,lockfile]=open_db( filename, loadpath, filter)
 
