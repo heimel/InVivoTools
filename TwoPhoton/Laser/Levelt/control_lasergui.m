@@ -77,9 +77,8 @@ checkLaserStatus(handles);
 
 % start status check timer
 delete(timerfind('Tag','checklaser'));
-disp('CONTROL_LASERGUI: Starting laser check timer');
+logmsg('Starting laser check timer');
 %disp(  ['control_lasergui(''checkLaserStatus(' num2str(handles) ')'')'])
-disp('CONTROL_LASERGUI: ALEXANDER IS WORKING HERE');
 % t = timer('Tag','checklaser','TimerFcn', ...
 %     ['control_lasergui(''checkLaserStatus(' num2str(handles) ')'')'],...
 %     'ExecutionMode','fixedSpacing','Period',5,...
@@ -201,7 +200,7 @@ end
 pos = laserpower2nsc200(level);
 new_pos = control_nsc200(pos);
 if isempty(new_pos) || new_pos~= pos
-    warning('CONTROL_LASERPOWER:FAIL','CONTROL_LASERPOWER: Failed to set laser power correctly');
+    errormsg('Failed to set laser power correctly');
 else
     GlobalLaserPowerFraction = level; %#ok<NASGU>
 end
@@ -290,7 +289,7 @@ checkLaserStatus(h);
 function [stb,wavelength,power] = checkLaserStatus(h)
 laserglobals;
 
-disp('CONTROL_LASERGUI: checking status');
+logmsg('Checking status');
 
 stb = control_maitai('*STB?');
 if ~isempty(stb) && bitand(stb,2)==2
@@ -346,7 +345,7 @@ control_maitai('WAVELENGTH',round(wavelength));
 while wavelengthactual~= wavelength
     pause(2)
     [~,wavelengthactual] = checkLaserStatus(h);
-    disp(['CONTROL_LASERGUI: Requested wavelength = ' num2str(wavelength) ...
+    logmsg(['Requested wavelength = ' num2str(wavelength) ...
         ', actual wavelength = ' num2str(wavelengthactual)]);
 end
 
@@ -491,7 +490,7 @@ function cbxShutteropen_Callback(hObject, eventdata, h)
 control_maitai('SHUTTER',get(hObject,'Value'));
 pause(1);
 checkLaserStatus(h);
-disp('CONTROL_LASERGUI: SHUTTER STATUS NEEDS TO BE CHECKED AT START!!');
+logmsg('SHUTTER STATUS NEEDS TO BE CHECKED AT START!!');
 
 
 function btn30_Callback(hObject, eventdata, handles)

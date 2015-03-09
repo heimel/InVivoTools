@@ -8,7 +8,7 @@ function position = control_nsc200(position,timeout)
 %
 %  POSITION = CONTROL_NSC200 returns current position in microsteps
 %
-% 2012, Alexander Heimel
+% 2012-2015, Alexander Heimel
 %
 
 port = '/dev/ttyUSB0';  % dependent on setup
@@ -34,7 +34,8 @@ try
 catch me
     switch    me.identifier
         case 'MATLAB:serial:fopen:opfailed'
-            disp(['CONTROL_NSC200: cannot open communications to port ' port]);
+            logmsg(['Cannot open communications to port ' port]);
+            fclose(s);
             position = [];
             return
         otherwise
@@ -46,6 +47,9 @@ end
 if isempty(position) % i.e. read position
     fprintf(s,'1TP?');
     position = parse_output(fscanf(s));
+    if isempty(position)
+        logmsg('Could not read NSC200 position');
+    end
     fclose(s);
     return
 end
@@ -54,8 +58,14 @@ end
 
 fprintf(s,'1TS?');
 val = parse_output(fscanf(s));  % 81, Motor on, motion not in progress; 80 Motor on, motion in progress; 64 Motor off
+if isempty(val)
+    logmsg('Could not read NSC200 state');
+    fclose(s);
+    return
+end
+
 if val == 64
-    disp('CONTROL_NSC200: Motor off. Check!');
+    logmsg('Motor off. Check!');
     fclose(s);
     return
 end
