@@ -98,7 +98,16 @@ if length(y)>2 % multigroup comparison
     logmsg(['Group Kruskal-Wallis: p = ' num2str(h.p_groupkruskalwallis,2) ', df = ' num2str(anovatab{4,3})]);
     [h.p_groupanova,anovatab,stats] = anova1(v,group,'off');
     logmsg(['Group ANOVA: p = ' num2str(h.p_groupanova,2) ', s[' num2str(stats.df) '] = ' num2str(stats.s)]);
-    h.p_grouplevene = vartestn(v,group,'display','off');
+    try
+        h.p_grouplevene = vartestn(v,group,'display','off');
+    catch me
+        switch me.identifier
+            case 'stats:vartestn:BadDisplayOpt' % older matlab versions R2009b
+                h.p_grouplevene = vartestn(v,group,'off');
+            otherwise
+                rethrow(me)
+        end
+    end
     logmsg(['Levene test for equality of variances p = ' num2str(h.p_grouplevene,2)]);
     if h.p_grouplevene<0.05
         [h.p_groupwelchanova,f,df] = welchanova([v group],[],'off');
@@ -111,9 +120,18 @@ if length(y)>2 % multigroup comparison
             logmsg(['Post-hoc Dunnett (first group is common control) group ' num2str(i) ': p = ' num2str(p(i),2)]);
         end
         comparison = multcompare(stats,'ctype','tukey-kramer','display','off');
-        for i=1:size(comparison,1) % over all tests
-            logmsg(['Post-hoc Tukey-Kramer, groups ' num2str(comparison(i,1)) ...
-                ' vs ' num2str(comparison(i,2)) ': p = ' num2str(comparison(i,6),2)]);
+        try
+            for i=1:size(comparison,1) % over all tests
+                logmsg(['Post-hoc Tukey-Kramer, groups ' num2str(comparison(i,1)) ...
+                    ' vs ' num2str(comparison(i,2)) ': p = ' num2str(comparison(i,6),2)]);
+            end
+        catch me
+            switch me.identifier
+                case 'MATLAB:badsubscript' % older matlab versions R2009b
+                    logmsg('No post-hoc Tukey-Kramer tests. Update matlab' );
+                otherwise
+                    rethrow(me)
+            end
         end
     end
     
