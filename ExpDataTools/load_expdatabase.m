@@ -98,9 +98,9 @@ if ~exist(filename,'file')
     return
 end
 logmsg(['Loading ' filename ]);
-htemp=figure;
+%htemp=figure;
 file=load(filename,'-mat');
-close(htemp); % strange, but necessary to remove spuriously appearing graph when load ectestdb
+%close(htemp); % strange, but necessary to remove spuriously appearing graph when load ectestdb
 db=file.db;
 
 

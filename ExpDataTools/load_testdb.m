@@ -16,16 +16,16 @@ if isempty(whichdb)
 end
 
 if isempty(strfind(whichdb,'.mat'))
-  whichdb=[whichdb '.mat'];
+    whichdb=[whichdb '.mat'];
 end
 
 if isempty(where)
-  where='network';
+    where='network';
 end
 
 db = [];
 if strcmpi(experiment,'all')
-    disp('LOAD_TESTDB: Loading databases for all experiments');
+    logmsg('Loading databases for all experiments');
     orgexperiment = experiment;
     experiment('',false);
     db = load_single_testdb( whichdb,where,db,false,false);
@@ -36,13 +36,8 @@ if strcmpi(experiment,'all')
             case {'.','..','Empty'}
                 continue
         end
-  %      try
-            experiment(d(i).name,false);
-            db = load_single_testdb( whichdb,where,db,false,false);
-%         catch me
-%             disp(me.message);
-%             experiment(orgexperiment);
-%         end
+        experiment(d(i).name,false);
+        db = load_single_testdb( whichdb,where,db,false,false);
     end
     experiment(orgexperiment,false);
     whichdb = 'ectestdb.mat';
@@ -54,7 +49,7 @@ end
 
 function [db,filename]=load_single_testdb( whichdb,where,db,load_main,verbose )
 switch whichdb
-    case {'testdb','testdb.mat'} % join oi databases        
+    case {'testdb','testdb.mat'} % join oi databases
         if verbose
             logmsg('Concatenating all oi test databases. Changes will not be saved to original database!');
             logmsg('Use e.g. experiment_db(''oi'',''andrew'') to open specific database, or use host(''andrew'')');
@@ -68,16 +63,16 @@ switch whichdb
         whichdb='testdb.mat';
         filename=fullfile(expdatabasepath(where),whichdb);
     case {'ectestdb','ectestdb.mat'} % join ec databases
-        switch experiment 
+        switch experiment
             case 'examples'
                 [db,filename] = load_expdatabase(whichdb,where,[],load_main,verbose);
-                 % matching structure to ectestdb_daneel_empty
-                 emptydbfilename = fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty');
-                 if exist(emptydbfilename,'file')
-                     db_empty = load(emptydbfilename);
-                     db_empty = db_empty.db;
-                     db = structconvert(db,db_empty);
-                 end
+                % matching structure to ectestdb_daneel_empty
+                emptydbfilename = fullfile(expdatabasepath(where),'Empty', 'ectestdb_daneel_empty');
+                if exist(emptydbfilename,'file')
+                    db_empty = load(emptydbfilename);
+                    db_empty = db_empty.db;
+                    db = structconvert(db,db_empty);
+                end
             otherwise
                 if verbose
                     logmsg('Concatenating all experimental databases. Changes will not be saved to original database!');
@@ -106,13 +101,13 @@ switch whichdb
         [db_single,filename] = load_expdatabase(whichdb,where,[],load_main,verbose);
         if ~isempty(db_single) &&  isfield(db_single(1),'stack') % i.e. microscopy record
             % matching structure to tptestdb_olympus_empty
-           if 0
-            db_empty = load(fullfile(expdatabasepath(where),'Empty', 'tptestdb_olympus_empty'));
-            db_empty = db_empty.db;
-            db_single = structconvert(db_single,db_empty);
-           end
+            if 0
+                db_empty = load(fullfile(expdatabasepath(where),'Empty', 'tptestdb_olympus_empty'));
+                db_empty = db_empty.db;
+                db_single = structconvert(db_single,db_empty);
+            end
         end
-        db = [db db_single]; 
+        db = [db db_single];
 end
 
 
