@@ -1,7 +1,7 @@
-function [im,fname] = tpreadframe(record,channel,frame,opt,verbose)
+function [im,fname] = tpreadframe(record,channel,frame,opt,verbose, fname)
 %TPREADFRAME read frame from multitiff
 %
-%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE )
+%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE, FNAME)
 %
 %
 % 2008-2015, Alexander Heimel
@@ -24,7 +24,9 @@ end
 
 persistent readfname images
 
-fname = tpfilename( record, frame, channel, opt);
+if nargin<6 || isempty(fname)
+    fname = tpfilename( record, frame, channel, opt);
+end
 
 % check if matlabstored file is present
 if strcmp(readfname,fname)==0 % not read in yet
