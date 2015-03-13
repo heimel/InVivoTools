@@ -251,6 +251,10 @@ if isempty(record.imagefile) ...
                     'analyse_record');
                 data=imread(imagepath);
                 record.imagefile=imagefile;
+                
+                
+                %keyboard
+                
                 close(h);
             end
     end
@@ -342,6 +346,45 @@ switch record.stim_type
             record,0);
     case 'retinotopy',
         % retinotopy center is asked in results_oitestrecord
+        
+        % search for reference image
+        if isempty(record.ref_image)
+            posrefs=dir(fullfile(analysispath,'*.bmp'));
+            posrefs=[posrefs dir(fullfile(analysispath,'*.BMP'))];
+            if length(posrefs)==1
+                answ=questdlg(['Is ' posrefs.name ' the right image?'],...
+                    'Reference image','Yes','No');
+                switch answ
+                    case 'Yes',
+                        record.ref_image = posrefs.name;
+                end
+            else
+                posrefs=dir(fullfile(analysispath,'refred*.bmp'));
+                posrefs=[posrefs dir(fullfile(analysispath,'refred*.BMP'))];
+                logmsg('Possible reference images: ');
+                logmsg( {posrefs(:).name});
+            end
+        end
+        
+        if ~isempty(record.imagefile)
+            h_image=figure;
+            data=imread(imagepath);
+            image(data);
+            
+            
+            % lambda is in unbinned coordinates
+            [lambda_x,lambda_y,reffname]=get_bregma(record.ref_image,...
+                datapath,'analysis');
+            
+            
+            % ask for monitor center if necessary and store in record.response
+            if isempty(record.response)
+                record=get_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
+            end
+            
+            close(h_image);
+        end
+        
     case {'orientation','direction'}
         roi_edge = edge(roi);
         cmap = colormap('hsv');
@@ -365,9 +408,6 @@ switch record.stim_type
         if processparams.wta_show_roi
             or_ang(roi_edge'==1) = 0;
         end
-%         figure;
-%         imagesc(or_ang');
-%         set(gca,'clim',[1.3 3])
          
         figure
         image(or_angs');
@@ -427,5 +467,52 @@ switch record.stim_type
         disp([ 'stim_type ' record.stim_type ' is not implemented.']);
 end
 
+
+reliable=check_reliability(record);
+if ~isempty(reliable)
+    if isempty(record.reliable)
+        record.reliable=reliable;
+    elseif record.reliable~=reliable
+        logmsg('Discrepancy with recorded reliability');
+    end
+end
+
 logmsg('Finished analysis');
 record.analysed=datestr(now);
+
+
+
+
+
+function record=get_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y)
+
+
+% only do analysis if not done before
+if ~isempty(record.ref_image)
+    disp('Click on pixel representing center of monitor');
+    axis on
+    figure(h_image);
+    [x,y]=ginput(1);
+    % in binned coordinates
+    
+    % transform monitor center to unbinned coordinates
+    x=round(x)*fileinfo.xbin;
+    y=round(y)*fileinfo.ybin;
+    
+    % and shift to absolute unbinned coordinates
+    x=x+fileinfo.xoffset;
+    y=y+fileinfo.yoffset;
+    
+    if ~isempty(lambda_x) && ~isempty(lambda_y)
+        x=x-lambda_x;
+        y=y-lambda_y;
+        
+        % record.scale should be in unbinned coordinates
+        record.response=[x y]*record.scale;
+        record.response=round(record.response);
+    end
+else
+    disp('No reference image known.');
+end
+
+return

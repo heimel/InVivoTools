@@ -42,7 +42,7 @@ if ~exist(fname,'file')
     return
 end
 
-ind=findstr(upper(fname),'BMP');
+ind = strfind(upper(fname),'BMP');
 if isempty(ind)
     logmsg(['Reference image ' fname ' is not of type BMP.']);
     return

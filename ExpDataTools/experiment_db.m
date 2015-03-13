@@ -392,7 +392,7 @@ set(h_fig,'UserData',ud);
 set(h.analyse,'Tag','analyse_testrecord_callback');
 
 set(h.results,'Enable','on');
-set(h.results,'Tag',['results_' type 'testrecord_callback']);
+set(h.results,'Tag',['results_testrecord_callback']);
 set(h.new,'Callback',...
     ['ud=get(gcf,''userdata'');ud=new_' type 'testrecord(ud);' ...
     'set(gcf,''userdata'',ud);control_db_callback(ud.h.current_record);']);

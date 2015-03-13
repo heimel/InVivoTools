@@ -7,8 +7,6 @@ function newud=analyse_testrecord_callback( ud)
 
 warning('on','all');
 
-newud=ud;
-
 record=ud.db(ud.current_record);
 
 if get(ud.h.filter,'value') && length(ud.ind)>1 % i.e. filter on
@@ -61,29 +59,7 @@ if ~isfield(ud,'no_callback')
     control_db_callback(ud.h.current_record);
 end
 
-newud=ud;
-
-% call results_XXtestrecord to show results of analysis
-switch record.datatype
-    case {'oi','fp'}
-        ud=results_oitestrecord( ud );
-        set(ud.h.fig,'Userdata',ud);
-    case 'ec'
-        results_ectestrecord( ud.db(ud.current_record));
-    case 'lfp'
-        if ~isempty(record.measures) && ~strcmp(record.analysis,'wspectrum') % Mehran temporarily
-            results_lfptestrecord( ud.db(ud.current_record) );
-        end
-    case 'tp'
-        results_tptestrecord( ud.db(ud.current_record) );
-    case 'ls'
-        %results_lstestrecord( ud.db(ud.current_record) );
-    case 'wc'
-        results_wctestrecord( ud.db(ud.current_record) );
-    otherwise
-        errormsg(['Unknown datatype ' record.datatype ]);
-        return
-end
+results_testrecord( record);
 
 ud.changed=1;
 newud=ud;

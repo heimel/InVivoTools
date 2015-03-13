@@ -1,17 +1,14 @@
-function newud=results_oitestrecord( ud )
+function results_oitestrecord( record )
 %RESULTS_OITESTRECORD
 %
-%  RESULTS_OITESTRECORD( UD )
+%  RESULTS_OITESTRECORD( RECORD )
 %
-%  2005-2014, Alexander Heimel
+%  2005-2015, Alexander Heimel
 %
 
-global record
+global global_record
 
-newud=ud;
-ud.changed=0;
-record=ud.db(ud.current_record);
-
+global_record = record;
 
 tit=[record.mouse ' ' record.date ' ' record.test ];
 tit(tit=='_')='-';
@@ -177,38 +174,10 @@ switch record.stim_type
         end
         title(['Retinotopy ' tit])
         
-        % search for reference image
-        if isempty(record.ref_image)
-            posrefs=dir(fullfile(analysispath,'*.bmp'));
-            posrefs=[posrefs dir(fullfile(analysispath,'*.BMP'))];
-            if length(posrefs)==1
-                answ=questdlg(['Is ' posrefs.name ' the right image?'],...
-                    'Reference image','Yes','No');
-                switch answ
-                    case 'Yes',
-                        record.ref_image=posrefs.name;
-                        ud.changed=1;
-                end
-            else
-                posrefs=dir(fullfile(analysispath,'refred*.bmp'));
-                posrefs=[posrefs dir(fullfile(analysispath,'refred*.BMP'))];
-                disp('Possible reference images: ');
-                disp( {posrefs(:).name});
-            end
-        end
-        
+      
         % lambda is in unbinned coordinates
         [lambda_x,lambda_y,reffname]=get_bregma(record.ref_image,...
             datapath,'analysis');
-        
-        
-        % ask for monitor center if necessary and store in record.response
-        if isempty(record.response)
-            record=get_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
-            if ~isempty(record.response)
-                ud.changed=1;
-            end
-        end
         
         % show monitor center
         if params.single_condition_show_monitor_center
@@ -338,79 +307,19 @@ switch record.stim_type
             roi,ror,...
             record);
         
-        reliable=check_reliability(record);
-        if ~isempty(reliable)
-            if isempty(record.reliable)
-                record.reliable=reliable;
-            elseif record.reliable~=reliable
-                logmsg('Discrepancy with recorded reliability');
-            end
-        end
+
 end
 
-% wrap-up
-if ud.changed
-    record.analysed=datestr(now);
-    % insert record into database
-    ud.db(ud.current_record)=record;
-    set(ud.h.fig,'Userdata',ud);
-    % show record in recordform
-    if ~isfield(ud,'no_callback')
-        control_db_callback(ud.h.current_record);
-        control_db_callback(ud.h.current_record);
-    end
-    % get record from recordform
-    if isfield(ud,'record_form')
-        ud.db(ud.current_record)=get_record(ud.record_form);
-    end
-end
 
-newud=ud;
-
-evalin('base','global record');
-logmsg('Record available in workspace as ''record''.');
-return
-
-
-%
-function record=get_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y)
-
-
-% only do analysis if not done before
-if ~isempty(record.ref_image)
-    disp('Click on pixel representing center of monitor');
-    axis on
-    subplot(h_image);
-    [x,y]=ginput(1);
-    % in binned coordinates
-    
-    % transform monitor center to unbinned coordinates
-    x=round(x)*fileinfo.xbin;
-    y=round(y)*fileinfo.ybin;
-    
-    % and shift to absolute unbinned coordinates
-    x=x+fileinfo.xoffset;
-    y=y+fileinfo.yoffset;
-    
-    if ~isempty(lambda_x) && ~isempty(lambda_y)
-        x=x-lambda_x;
-        y=y-lambda_y;
-        
-        % record.scale should be in unbinned coordinates
-        record.response=[x y]*record.scale;
-        record.response=round(record.response);
-    end
-else
-    disp('No reference image known.');
-end
-
+evalin('base','global global_record');
+logmsg('Record available in workspace as ''global_record''.');
 return
 
 
 function plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y)
 
 if isempty(record.response)
-    disp('RESULTS_OITESTRECORD: No monitor center position');
+    logsmg('No monitor center position');
     return
 end
 
