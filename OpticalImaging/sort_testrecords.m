@@ -8,9 +8,9 @@ function newud=sort_testrecords( ud )
 
 newud=ud;
 
-if isfield(ud.db,'test')
-    newud.db=sort_db(ud.db,{'date','mouse','test'});
-else 
-    newud.db=sort_db(ud.db);
-end
+% if isfield(ud.db,'test')
+%     newud.db=sort_db(ud.db,{'date','mouse','test'});
+% else 
+newud.db=sort_db(ud.db);
+% end
 

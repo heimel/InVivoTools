@@ -5,6 +5,8 @@ function wcinfo = wc_getmovieinfo( record)
 %
 % 2015, Alexander Heimel
 
+par = wcprocessparams(record);
+
 d = dir(fullfile(experimentpath(record),'webcam*info.mat'));
 logmsg(['Found ' num2str(length(d)) ' webcam records in ' experimentpath(record)]);
 if isempty(d)
@@ -20,24 +22,32 @@ for i = 1:length(d)
 end
 
 % create mp4 wrappers
-parpath = fullfile(experimentpath(record),'..');
-for i=1:length(d)
-    wcinfo(i).path = parpath;
-    wcinfo(i).mp4name = [ wcinfo(i).filename '.mp4'];
-    if  1 || ~exist(fullfile(parpath,wcinfo(i).mp4name),'file')
-        if isunix
-            cmd = ['MP4Box -fps 30 -add "' fullfile(parpath,wcinfo(i).filename) '" "' fullfile(parpath,wcinfo(i).mp4name) '"'];
+if ~isempty(par.wc_mp4wrappercommand)
+    parpath = fullfile(experimentpath(record),'..');
+    for i=1:length(d)
+        wcinfo(i).path = parpath;
+        wcinfo(i).mp4name = [ wcinfo(i).filename '.mp4'];
+        if  1 || ~exist(fullfile(parpath,wcinfo(i).mp4name),'file')
+            if exist(fullfile(parpath,wcinfo(i).mp4name),'file')
+                logmsg(['Backing up ' fullfile(wcinfo(i).path,wcinfo(i).mp4name)]);
+                movefile(fullfile(wcinfo(i).path,wcinfo(i).mp4name),fullfile(wcinfo(i).path ,[wcinfo(i).mp4name '.bak']));
+            end
+            logmsg(['Creating mp4 wrapper ' fullfile(parpath,wcinfo(i).filename)]);
+            cmd = [par.wc_mp4wrappercommand ' "' fullfile(parpath,wcinfo(i).filename) '" "' fullfile(parpath,wcinfo(i).mp4name) '"'];
             [stat,output ] = system(cmd);
             if stat==0
                 logmsg(['Created mp4 wrapper ' fullfile(parpath,wcinfo(i).filename)]);
             elseif stat==127
                 logmsg(['Cannot create mp4 wrapper for ' fullfile(parpath,wcinfo(i).filename) '. Run sudo apt-get -y install gpac']);
+            else
+                logmsg(['Cannot create mp4 wrapper for ' fullfile(parpath,wcinfo(i).filename) '. ' output]);
             end
-        else
-            logmsg(['Cannot create mp4 wrapper for ' fullfile(parpath,wcinfo(i).filename) '. Try on linux computer, or run sudo apt-get -y install gpac']);
         end
     end
+else
+    logmsg(['Cannot create mp4 wrapper for ' fullfile(parpath,wcinfo(i).filename) '. Try on linux computer, or run sudo apt-get -y install gpac']);
 end
+
 
 for i=1:length(wcinfo)
     logmsg(['Recorded in ' fullfile(parpath,wcinfo(i).filename)]);

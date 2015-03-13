@@ -10,6 +10,8 @@ function load_invivotools
 % 2014, Alexander Heimel
 %
 
+more off
+
 disp([ upper(mfilename) ': Manual available at https://sites.google.com/site/alexanderheimel/protocols/invivotools']);
 
 if isunix

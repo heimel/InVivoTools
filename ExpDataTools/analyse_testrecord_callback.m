@@ -24,7 +24,8 @@ if isfield(record,'experimenter') && isempty(record.experimenter)
     warndlg('Experimenter field is required.','Analyse testrecord callback');
     logmsg('Experimenter field is required.'); 
 end
-    
+
+
 check_duplicates(record,ud.db,ud.current_record);
 
 switch record.datatype
