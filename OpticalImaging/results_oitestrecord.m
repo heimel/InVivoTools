@@ -18,7 +18,7 @@ tit(tit=='_')='-';
 
 [imgdata,roi,ror,data]=load_testrecord( record );
 
-compare_to_pos=findstr(record.comment,'compare_to');
+compare_to_pos = strfind(record.comment,'compare_to');
 if ~isempty(compare_to_pos)
     comma_pos=find(record.comment(compare_to_pos:end)==',');
     start_pos=comma_pos(1)+compare_to_pos;
@@ -262,7 +262,7 @@ switch record.stim_type
         show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
         
         %Joris: plot reference image with V1 border separately
-        if ~isempty(findstr(record.experimenter,'jv'))
+        if ~isempty(strfind(record.experimenter,'jv'))
             logmsg('Showing reference image with border because ''jv'' is experimenter.');
             figure(100);
             try

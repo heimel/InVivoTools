@@ -43,27 +43,13 @@ for count=1:length(ud.ind)
      end
         logmsg( msg);
     switch ud.db(i).datatype
-        case 'oi',
-            ud.db(i)=analyse_oitestrecord( ud.db(i));
-        case 'ls',
-            record = ud.db(i);
-            org_precommands = record.precommands;
-            record.precommands = [record.precommands ';record.process_params.output_show_figures=false;'];
-            record = analyse_lstestrecord( record );
-            record.precommands = org_precommands;
-            ud.db(i) = record;
-        case 'ec'
-            ud.db(i)=analyse_ectestrecord( ud.db(i), false);
+        case {'ec','lfp'}
+            ud.db(i)=analyse_testrecord( ud.db(i), false);
             if strcmp(ud.db(i).eye,'ipsi') || strcmp(ud.db(i).eye,'contra')
                 ud.db(i) = compute_odi_measures( ud.db(i),ud.db);
             end
-        case 'lfp'
-            ud.db(i)=analyse_lfptestrecord( ud.db(i), 0);
-            if strcmp(ud.db(i).eye,'ipsi') || strcmp(ud.db(i).eye,'contra')
-                ud.db(i) = compute_odi_measures( ud.db(i),ud.db);
-            end
-        case 'tp'
-            ud.db(i)=analyse_tptestrecord( ud.db(i), false);
+        otherwise
+            ud.db(i)=analyse_testrecord( ud.db(i), false);
     end
     elapsed=toc;
     ud.changed=1;

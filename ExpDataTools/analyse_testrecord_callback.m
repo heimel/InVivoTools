@@ -28,23 +28,7 @@ end
 
 check_duplicates(record,ud.db,ud.current_record);
 
-switch record.datatype
-    case {'oi','fp'} % intrinsic signal or flavoprotein
-        record=analyse_oitestrecord( record );
-    case 'ec'
-        record=analyse_ectestrecord( record );
-    case 'lfp'
-        record=analyse_lfptestrecord( record );
-    case {'tp','fret'}
-        record=analyse_tptestrecord( record );
-    case 'ls' % linescans
-        record=analyse_lstestrecord( record );
-    case 'wc'
-        record=analyse_wctestrecord( record );
-    otherwise
-        errormsg(['Unknown datatype ' record.datatype ]);
-        return
-end
+record = analyse_testrecord( record );
 
 % insert analysed record into database
 ud.changed=1;
@@ -87,7 +71,7 @@ switch record.datatype
     case 'ec'
         results_ectestrecord( ud.db(ud.current_record));
     case 'lfp'
-        if ~isempty(record.measures) && ~strcmp(record.electrode,'wspectrum') % Mehran temporarily
+        if ~isempty(record.measures) && ~strcmp(record.analysis,'wspectrum') % Mehran temporarily
             results_lfptestrecord( ud.db(ud.current_record) );
         end
     case 'tp'
