@@ -9,6 +9,10 @@ if nargin<2
 end
 
 stimsfile = getstimsfile(record);
+if isempty(stimsfile)
+    return
+end
+
 stims=get(stimsfile.saveScript);
 
 variable = record.measures(1).variable;
