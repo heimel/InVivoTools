@@ -27,9 +27,9 @@ fnb = fieldnames(b);
 
 for i=1:length(fna)
     [j,jj,ii]=intersect(fna{i},fnb);
-    if ~isempty(j),
-        if length(getfield(a,fna{i})) ~= length(getfield(b,fnb{ii})) || ...
-            ~all(getfield(a,fna{i})==getfield(b,fnb{ii}))
+    if ~isempty(j)
+        if length(a.(fna{i})) ~= length(b.(fnb{ii})) || ...
+            ~all(a.(fna{i})(:)==b.(fnb{ii})(:))
             flds{end+1} = fna{i};
             if verbose
                 disp(['Fields ''' fna{i} ''' differ.']);
