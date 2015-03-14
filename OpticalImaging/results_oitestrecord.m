@@ -319,7 +319,7 @@ return
 function plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y)
 
 if isempty(record.response)
-    logsmg('No monitor center position');
+    logmsg('No monitor center position');
     return
 end
 
