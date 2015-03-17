@@ -12,8 +12,13 @@ function [img_rgba, destrect, ds_userfields] = makeclippingrgn(PSstim)
 %  See also: PERIODICSTIM/LOADSTIM, DISPLAYSTRUCT
 
 NewStimGlobals; % for pixels_per_cm
-
 PSparams = PSstim.PSparams;
+
+if exist('NewStimViewingDistance','var') && ~isempty(NewStimViewingDistance)
+    PSparams.distance = NewStimViewingDistance;
+end
+
+
 rect = PSparams.rect;  % this is the rect requested by the user
 width=rect(3)-rect(1); height=rect(4)-rect(2);
 

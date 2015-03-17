@@ -39,7 +39,6 @@ rect = PSparams.rect;  % this is the size requested by the user
 
 if isfield(PSparams,'size') && ~isnan(PSparams.size) % use size to determine rect
     center = [ (rect(1)+rect(3))/2 (rect(2)+rect(4))/2 ];
-    PSparams.distance  
     width = 2 * PSparams.distance * tan( PSparams.size /2 /360*2*pi) * pixels_per_cm * sqrt(2);
     height = 2 * PSparams.distance * tan( PSparams.size /2 /360*2*pi) * pixels_per_cm * sqrt(2);
     rect(1) = center(1) - width/2;
