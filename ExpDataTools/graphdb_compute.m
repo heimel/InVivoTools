@@ -53,6 +53,7 @@ newud.changed=1;
 
 function [r,p,filename,hgraph] = call_groupgraph(record,db,hgraph)
 
+
 if ~isempty(record.add2graph)
     if strcmp(record.add2graph,record.name)
         errormsg('Record name and add2graph are identical. This would lead to endless loop');
@@ -82,3 +83,6 @@ end
     'name',record.name,...
     'path',record.path,'value_per',record.value_per,'ylab',record.ylab,...
     'add2graph_handle',hgraph,'limit',record.limit);
+
+logmsg(['Computed ' struct2char(record,'; ')]);
+

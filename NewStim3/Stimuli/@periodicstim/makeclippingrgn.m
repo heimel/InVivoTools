@@ -24,14 +24,12 @@ width=rect(3)-rect(1); height=rect(4)-rect(2);
 
 if isfield(PSparams,'size') && ~isnan(PSparams.size) % use size to determine rect
     center = [ (rect(1)+rect(3))/2 (rect(2)+rect(4))/2 ];
-    disp(['PERIODICSTIM/MAKECLIPPINGRGN: PSparams.distance = ' num2str(PSparams.distance)]);
     width = 2 * PSparams.distance * tan( PSparams.size /2 /360*2*pi) * pixels_per_cm ;
     height = 2 * PSparams.distance * tan( PSparams.size /2 /360*2*pi) * pixels_per_cm ;
     rect(1) = center(1) - width/2;
     rect(3) = center(1) + width/2;
     rect(2) = center(2) - height/2;
     rect(4) = center(2) + height/2;
-    
 end
 
 

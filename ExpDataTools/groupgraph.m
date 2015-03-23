@@ -82,7 +82,7 @@ if nvarargin>0
 end
 
 % parse extra options
-if ischar(extra_options) %#ok<NODEF>
+if ischar(extra_options)
     if ~isempty(limit)
         if ~isempty(extra_options)
             extra_options = [extra_options ','];
@@ -97,7 +97,7 @@ if mod(length(extra_options),2)==1
     return
 end
 
-if length(unique({extra_options{1:2:end}}))~=length({extra_options{1:2:end}})
+if length(unique(extra_options(1:2:end)))~=length(extra_options(1:2:end))
     errormsg('Some extra options appear twice.');
     return
 end
@@ -108,7 +108,7 @@ end
 
 logmsg(['Collecting data for figure ' name ]);
 
-if isempty(mousedb) %#ok<NODEF>
+if isempty(mousedb) 
     mousedb = load_mousedb;
 end
 
@@ -215,7 +215,7 @@ end
 n_groups=length(groups); % it can be that multiple groups match group criteria
 
 % parse criteria
-criteria = split(criteria,',',true); %#ok<NODEF>
+criteria = split(criteria,',',true); 
 n_criteria = length(criteria);
 
 if ~isfield(groups,'criteria')
@@ -652,7 +652,7 @@ end
 
 
 % legend
-if ~isempty(findstr(lower(legnd),'on')) %i.e. 'on' or 'location'
+if ~isempty(strfind(lower(legnd),'on')) %#ok<*NODEF> %i.e. 'on' or 'location'
     if strcmpi(strtrim(legnd),'on')
         legnd = {};
     else
@@ -671,8 +671,6 @@ if ~exist('gy','var')
     logmsg('No data. Check if mice are present in mouse_db (or use ''add_missing_mice'' to add them). Or try to remove limits.');
     return
 end
-
-logmsg(['Drawing figure ' name ]);
 
 if isempty(add2graph_handle)
     figure('color',[1 1 1]);
@@ -720,6 +718,7 @@ if length(values_x)==1 && iscell(values_x{1})
     values_x = values_x{1};
 end
 
+
+
 evalin('base','global values_x values_y');
-logmsg('Values available in workspace as values_x values_y.');
-logmsg('To show data: dispcell(values_y)')
+logmsg('Values available in workspace as values_x values_y. To show data: dispcell(values_y)');
