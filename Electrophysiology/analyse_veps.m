@@ -103,6 +103,7 @@ switch lower(record.setup)
         EVENT.Mytank = ecdatapath(record);
         EVENT.Myblock = record.test;
         EVENT = importtdt(EVENT);
+
         numchannel = max([EVENT.strms.channels]);
         if any(channels2analyze>EVENT.snips.Snip.channels)
             errormsg(['Did not record more than ' num2str(numchannel) ' channels.']);
@@ -121,6 +122,7 @@ switch lower(record.setup)
 
         sample_interval = 1/EVENT.strms(1,3).sampf;
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
+%         EVENT.strons.tril(1) = EVENT.strons.tril(3);
         startindTDT = EVENT.strons.tril(1)-pre_ttl;
         SIG = signalsTDT(EVENT,stimulus_start+startindTDT);
         n_samples = length(SIG{1,1});

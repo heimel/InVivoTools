@@ -54,6 +54,12 @@ switch lower(record.setup)
         
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
         
+        if (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.OpOn))<10)
+            EVENT.strons.tril(1) = EVENT.strons.tril(end);
+        end
+        
+%         EVENT.strons.tril(1) = EVENT.strons.tril(5);
+        
         EVENT.Myevent = 'Snip';
         EVENT.type = 'snips';
         EVENT.Start = 0;
