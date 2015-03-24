@@ -18,17 +18,17 @@ remotecommglobals;
 Remote_Comm_isremote = 1;
 
 Remote_Comm_enable = 1;  % enable remote communication?
-
 Remote_Comm_eol = '\n';  % End of line, '\r' for MacOS9, '\n' for unix
 Remote_Comm_method = 'filesystem';  % 'sockets' or 'filesystem'
 
 % settings for Remote_Comm_method = 'filesystem'
-Remote_Comm_dir = '/mnt/daneel/Data/stims';   % the local directory in which to write
+Remote_Comm_dir = '/mnt/daneel/Data/Invivo/Electrophys/Daneel/stims';   % the local directory in which to write
+%Remote_Comm_dir = '/mnt/daneel/Invivo/Electrophys/Daneel/stims';   % the local directory in which to write
                                            %   files for the remote
                                            %   computer
 
 % settings for Remote_Comm_method = 'sockets'
-Remote_Comm_host = '152.16.225.216';
+Remote_Comm_host = 'daneel'; %'152.16.225.216';
 Remote_Comm_port = 1205;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -79,12 +79,13 @@ MonitorComputer = 0;       % does this computer have a monitor window?
 
 
 if StimComputer&haspsychtbox==2,  % set up timing and monitor settings
-	Screen('Preference','SecondsMultiplier',1.0);
-	Screen('Preference','Backgrounding',1); % we'll try this
-else                         % set the current monitor dimensions for remote comm
+	%screen('Preference','SecondsMultiplier',1.000230644770116);
+	screen('Preference','SecondsMultiplier',1.0);
+	screen('Preference','Backgrounding',1); % we'll try this
+else,                          % set the current monitor dimensions for remote comm
 	StimWindowRefresh = 120;
 	StimWindowDepth = 8;
-	StimWindowRect = [ 0 0 800 600 ];
+	StimWindowRect = [ 0 0 1440 900 ];
 end;
 
 % pixels_per_cm of the monitor in use
@@ -131,13 +132,13 @@ StimSerialStimOutPin = 'dtr';% same
 NSUseInitialSerialTrigger = 1;
 NSUseStimSerialTrigger = 0;
 NSUsePCIDIO96Trigger = 1;
-NSUsePCIDIO96InputTrigger = 0;
+NSUsePCIDIO96InputTrigger = 1;
 
 % PCIDIO96 card option
 StimPCIDIO96Globals;
 UseStimPCIDIO96 = 0;                 % Use the PCIDIO96 card and interface?  Mac OS 9 only
 
-StimDisplayOrderRemote = 0;
+StimDisplayOrderRemote = 0; % 0
 
 StimTriggerClear
 
