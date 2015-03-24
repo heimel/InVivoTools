@@ -59,7 +59,7 @@ end
 
 % routine could be sped up a lot by calculating complex sin outside loops
 omega=[0:NSa-1]/Fs * 2*pi * Fl  ;
-for h = 1:1  % number of harmonics to remove
+for h = 1:3  % number of harmonics to remove
     for ch=1:NCh
         for k=1:NTr
             
