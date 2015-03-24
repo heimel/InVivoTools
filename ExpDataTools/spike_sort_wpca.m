@@ -37,8 +37,24 @@ end;
 Spikes1=spikes1';
 spikes1=Spikes1(:,1:20);
 cll1 = get_spike_features(spikes1, cll1);
-XX=[cll1.spike_amplitude,cll1.spike_peak_trough_ratio/range(cll1.spike_peak_trough_ratio),cll1.spike_prepeak_trough_ratio/range(cll1.spike_prepeak_trough_ratio),cll1.spike_trough2peak_time/range(cll1.spike_trough2peak_time),spikes1(:,1:5:20)];
-[pc,score,latent,tsquare]=princomp(XX);
+range_peak_trough_ratio = range(cll1.spike_peak_trough_ratio);
+if range_peak_trough_ratio==0
+    range_peak_trough_ratio = 1;
+end
+range_prepeak_trough_ratio = range(cll1.spike_prepeak_trough_ratio);
+if range_prepeak_trough_ratio==0
+    range_prepeak_trough_ratio = 1;
+end
+range_trough2peak_time = range(cll1.spike_trough2peak_time);
+if range_trough2peak_time == 0 
+    range_trough2peak_time = 1;
+end
+XX=[cll1.spike_amplitude,...
+    cll1.spike_peak_trough_ratio/range_peak_trough_ratio,...
+    cll1.spike_prepeak_trough_ratio/range_prepeak_trough_ratio,...
+    cll1.spike_trough2peak_time/range_trough2peak_time,...
+    spikes1(:,1:5:20)];
+[pc,score,latent,tsquare] = princomp(XX);
 % figure;
 % subplot(2,2,1);plot(score(:,2),score(:,3),'.')
 % subplot(2,2,2);plot(score(:,1),score(:,3),'.')
