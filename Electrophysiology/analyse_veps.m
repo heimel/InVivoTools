@@ -181,7 +181,7 @@ if verbose
 end
 
 for ch = 1:length(channels2analyze)    
-    measures(ch).depth = record.depth-record.surface;
+    measures(ch).depth = record.depth-record.surface; %#ok<*AGROW>
     measures(ch).channel = channels2analyze(ch);
     if ~isempty(area)
         for a=1:length(area)
@@ -251,7 +251,7 @@ for ch = 1:length(channels2analyze)
             % select stimuli matching condition
             crit = [measures.variable '=' num2str(parameter_values(i))];
             if ~isempty(record.stim_parameters)
-                crit = [crit ',' record.stim_parameters]; %#ok<AGROW>
+                crit = [crit ',' record.stim_parameters]; 
             end
             ind_matching = find_record( stim_pars,crit);
             ind = [];
@@ -265,7 +265,6 @@ for ch = 1:length(channels2analyze)
             end
             
             waves_mean(i,:) = mean(waves(ind,:),1);
-            waves_std(i,:) = std(waves(ind,:),1);
             
             if process_params.entropy_analysis
                 measures(ch) = entropy_analysis( waves, waves_time, Fs, ind, measures(ch), i);
@@ -308,10 +307,10 @@ for ch = 1:length(channels2analyze)
             measures(ch).([band '_power_post']){1,t} = mean( powerm.power_post(ind_band,:,:),1);
             
             for c = 1:n_conditions
-                [measures(ch).([band '_peak_freq_pre']){1,t}(c) ...
+                [measures(ch).([band '_peak_freq_pre']){1,t}(c), ...
                     measures(ch).([band '_peak_power_pre']){1,t}(c) ] = ...
                     extract_peak(powerm.freqs(ind_band),powerm.power_pre(ind_band,:,c)');
-                [measures(ch).([band '_peak_freq_post']){1,t}(c) ...
+                [measures(ch).([band '_peak_freq_post']){1,t}(c), ...
                     measures(ch).([band '_peak_power_post']){1,t}(c)] = ...
                     extract_peak(powerm.freqs(ind_band),powerm.power_post(ind_band,:,c)');
             end
@@ -418,14 +417,20 @@ switch params.vep_poweranalysis_type
     case 'wavelet'
         [pxx,freqs,time] = GetPowerWavelet(waves,Fs,onsettime,verbose);
     case 'spectrogram'
-        [s,freqs,time,pxx] = spectrogram(waves(:,:,1),100,[],256,Fs); %#ok<ASGLU>
-        pxx = 10*log10(abs(pxx));
+        segmentwidth = 0.05;%0.2; % s
+        window = ceil(segmentwidth *Fs);
+        noverlap = ceil(window/4); %100;%[];
+        nfft = 512;
+        [s,freqs,time,pxx] = spectrogram(waves(:,:,1),window,noverlap,nfft,Fs); %#ok<ASGLU>
         for i=2:size(waves,3)
-            [s,freqs,time,pxxt] = spectrogram(waves(:,:,i),100,[],256,Fs); %#ok<ASGLU>
-            pxx = pxx +  10*log10(abs(pxxt));
+            [s,freqs,time,pxxt] = spectrogram(waves(:,:,i),window,noverlap,nfft,Fs); %#ok<ASGLU>
+            pxx = pxx +  pxxt;
         end
+        pxx = pxx/size(waves,3);
         freqs = freqs';
         time = time - onsettime;
+    otherwise
+        errormsg(['Power analysis ' params.vep_poweranalysis_type ' is not implemented. Should be ''wavelet'' or ''spectrogram'''],true);
 end
 
 function  data = remove_vep_mean( data )
@@ -447,13 +452,13 @@ if isfield(record,'channel_info') && ~isempty(record.channel_info)
         recorded_channels = sort(str2num(channel_info{1})); %#ok<ST2NM>
     else
         for i=1:2:length(channel_info)
-            area( (i+1)/2 ).channels = sort(str2num(channel_info{i})); %#ok<ST2NM,AGROW>
-            area( (i+1)/2 ).name = lower(channel_info{i+1}); %#ok<AGROW>
+            area( (i+1)/2 ).channels = sort(str2num(channel_info{i})); %#ok<ST2NM>
+            area( (i+1)/2 ).name = lower(channel_info{i+1});
             if ~isempty(intersect(recorded_channels,area( (i+1)/2 ).channels))
                 errormsg('There is a channel assigned to two areas');
                 return
             end
-            recorded_channels = [recorded_channels area( (i+1)/2 ).channels]; %#ok<AGROW>
+            recorded_channels = [recorded_channels area( (i+1)/2 ).channels];
         end
         recorded_channels = sort( recorded_channels );
     end

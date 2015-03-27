@@ -13,7 +13,7 @@ function [AChn,frq,t] = GetPowerWavelet(Data, Fs, onsettime, verbose)
 % see for a plot example at the end
 %
 % Timo van Kerkoerle
-% 2012-2013, modified by Alexander Heimel
+% 2012-2015, modified by Alexander Heimel
 %
 
 persistent persistent_Fs persistent_nsamples Ffilter persistent_frq
@@ -57,9 +57,8 @@ if compute_filters
     WF = round(Fs/FF); % min wavelength
     Fr = params.vep_wavelet_freq_res; % Frequency resolution
     
-    %[GS,freqs,filter]=gaborspace(S,scls,alpha,beta,req)
-
-    [alaki,frq,filter]=gaborspace(rand(NSa, 1), [WF, W1, Fr],1,3); %#ok<ASGLU> %make filters
+    [alaki,frq,filter] = gaborspace(rand(NSa, 1), [WF, W1, Fr], ...
+        params.vep_wavelet_alpha,params.vep_wavelet_beta); %#ok<ASGLU> %make filters
     Ffilter=fourier_embed(filter, NSa); %filters in fourier space
     
     persistent_frq = frq*Fs; %from units in samples to units in Hz
