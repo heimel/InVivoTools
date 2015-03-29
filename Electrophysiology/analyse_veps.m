@@ -121,6 +121,9 @@ switch lower(record.setup)
 
         sample_interval = 1/EVENT.strms(1,3).sampf;
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
+        if (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.OpOn))<10)
+            EVENT.strons.tril(1) = EVENT.strons.tril(end);
+        end
 %         EVENT.strons.tril(1) = EVENT.strons.tril(3);
         startindTDT = EVENT.strons.tril(1)-pre_ttl;
         SIG = signalsTDT(EVENT,stimulus_start+startindTDT);
