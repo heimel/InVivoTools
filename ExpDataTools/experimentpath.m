@@ -36,15 +36,24 @@ switch vers
             return
         end
     case '2015'
-        root = '';
         if isfield(record,'epoch')
             test = record.epoch;
         else
             test = record.test;
         end
-        
-        fullfile(root,record.experiment,record.mouse,record.date,record.setup,test)
-        errormsg('New experimentpath not yet implemented');
+        if isfield(record,'experiment') 
+            experiment = record.experiment;
+        else
+            % oi database
+            p = find(record.mouse=='.',2);
+            if length(p)==2
+                experiment = record.mouse(1:p(2)-1);
+            else
+                experiment = 'Other';
+            end
+        end
+        setup = capitalize(record.setup);
+        datapath = fullfile(localpathbase,'Experiments',experiment,record.mouse,record.date,setup,test);
     otherwise
         errormsg(['Unknown datapath format ' ver]);
         return
