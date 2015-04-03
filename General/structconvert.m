@@ -7,6 +7,10 @@ function [s,changed] = structconvert(s,template)
 %
 changed = false;
 
+if isempty(template)
+    return
+end
+
 if isempty(s)
     s = template([]);
     changed = true;

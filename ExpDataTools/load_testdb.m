@@ -1,50 +1,53 @@
-function [db,filename]=load_testdb( whichdb,where )
+function [db,filename]=load_testdb( datatype, hostname)
 %LOAD_TESTDB loads test_db
 %
-%  [DB,FILENAME] = LOAD_TESTDB( WHICHDB, WHERE )
-%     WHICHDB contains database filename. Extension '.mat' is optional
-%     WHERE defaults to 'network'
+%  [DB,FILENAME] = LOAD_TESTDB( DATATYPE, HOSTNAME )
+%    FILENAME may be cell array of string
 %
-% 2005-2013, Alexander Heimel
+% 2005-2015, Alexander Heimel
 %
 
-if nargin<1; whichdb=''; end
-if nargin<2; where ='';end
-
-if isempty(whichdb)
-    whichdb = expdatabases( 'oi' );
+if nargin<1 || isempty(datatype)
+    datatype = 'oi';
+end
+if nargin<2 || isempty(hostname)
+    hostname = host;
 end
 
-if isempty(strfind(whichdb,'.mat'))
-    whichdb=[whichdb '.mat'];
+whichdb = expdatabases( datatype, hostname);
+
+[db,filename] = load_expdatabase(whichdb,'network',[],true,true);
+if isempty(db)
+    hostname = '*';
+    whichdb = expdatabases( datatype, hostname);
+    [db,filename] = load_expdatabase(whichdb,'network',[],true,true); % filename may be cell array
 end
 
-if isempty(where)
-    where='network';
-end
 
-db = [];
-if strcmpi(experiment,'all')
-    logmsg('Loading databases for all experiments');
-    orgexperiment = experiment;
-    experiment('',false);
-    db = load_single_testdb( whichdb,where,db,false,false);
-    d = dir(expdatabasepath(where));
-    d = d([d.isdir]);
-    for i=1:length(d)
-        switch d(i).name
-            case {'.','..','Empty'}
-                continue
-        end
-        experiment(d(i).name,false);
-        db = load_single_testdb( whichdb,where,db,false,false);
-    end
-    experiment(orgexperiment,false);
-    whichdb = 'ectestdb.mat';
-    filename=fullfile(expdatabasepath(where),whichdb);
-else
-    [db,filename] = load_single_testdb( whichdb,where,db,true,true );
-end
+
+% 
+% db = [];
+% if strcmpi(experiment,'all')
+%     logmsg('Loading databases for all experiments');
+%     orgexperiment = experiment;
+%     experiment('',false);
+%     db = load_single_testdb( whichdb,where,db,false,false);
+%     d = dir(expdatabasepath(where));
+%     d = d([d.isdir]);
+%     for i=1:length(d)
+%         switch d(i).name
+%             case {'.','..','Empty'}
+%                 continue
+%         end
+%         experiment(d(i).name,false);
+%         db = load_single_testdb( whichdb,where,db,false,false);
+%     end
+%     experiment(orgexperiment,false);
+%     whichdb = 'ectestdb.mat';
+%     filename=fullfile(expdatabasepath(where),whichdb);
+% else
+%     [db,filename] = load_single_testdb( whichdb,where,db,true,true );
+% end
 
 
 function [db,filename]=load_single_testdb( whichdb,where,db,load_main,verbose )

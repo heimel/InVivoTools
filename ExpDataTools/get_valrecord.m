@@ -79,7 +79,7 @@ end
 switch record.stim_type
   case 'retinotopy',
     if isempty(record.response)
-      disp(['Warning response is empty for ' record.date ...
+      logmsg(['Warning response is empty for ' record.date ...
         'test ' record.test]);
       %  else
       %    val=record.response(1);
@@ -145,13 +145,13 @@ switch record.stim_type
     if y(ind_none)>2*dy(ind_none)
       val=nan;
       val_sem=nan;
-      disp('none too high')
+      logmsg('none too high')
     else
 
       switch measure
         case 'contra',
           if ~isempty(findstr(record.rorfile,'empty'))
-            disp('ROR is empty. Cannot be used for absolute responses');
+            logmsg('ROR is empty. Cannot be used for absolute responses');
             val=nan;
             val_sem=nan;
           else
@@ -160,7 +160,7 @@ switch record.stim_type
           end
         case 'ipsi',
           if ~isempty(findstr(record.rorfile,'empty'))
-            disp('ROR is empty. Cannot be used for absolute responses');
+            logmsg('ROR is empty. Cannot be used for absolute responses');
             val=nan;
             val_sem=nan;
           else
@@ -169,7 +169,7 @@ switch record.stim_type
           end
         case {'response','c+i'}
           if ~isempty(findstr(record.rorfile,'empty'))
-            disp('ROR is empty. Cannot be used for absolute responses');
+            logmsg('ROR is empty. Cannot be used for absolute responses');
             val=nan;
             val_sem=nan;
           else
@@ -296,7 +296,7 @@ switch record.stim_type
                 find( contrast>(selected_contrast/100-5) & ...
                 contrast< (selected_contrast/100+5));
             else
-              disp(['Error: unknown response measure ' measure{2}]);
+              logmsg(['Error: unknown response measure ' measure{2}]);
             end
         end
         switch measure{3}
@@ -317,7 +317,7 @@ switch record.stim_type
                 find( contrast>(selected_contrast/100-0.05) & ...
                 contrast< (selected_contrast/100+0.05));
             else
-               disp(['Error unknown response measure ' measure{3} ]);
+               logmsg(['Error unknown response measure ' measure{3} ]);
             end
         end
 
@@ -338,7 +338,7 @@ switch record.stim_type
               val=val/max(y(indchigh,indsflow));
               val_sem=dy/max(y(indchigh,indsflow));
             otherwise
-              disp(['Error unknown response measure ' measure{4} ]);
+              logmsg(['Error unknown response measure ' measure{4} ]);
           end
         end
 
@@ -508,7 +508,7 @@ switch record.stim_type
         onsetframe=floor(record.stim_onset/0.6)
         offsetframe=min(size(record.timecourse_roi,1),ceil(record.stim_offset/0.6));
         % hard coded frame duration
-        disp('hard coded frameduration of 0.6s');
+        logmsg('hard coded frameduration of 0.6s');
         r=record.timecourse_roi;
         r=(r-repmat(mean(r(1:onsetframe,:),1),13,1))./repmat(mean(r(1:onsetframe,:),1),13,1);
         val=-mean(r(onsetframe+1:offsetframe,condind),1);
@@ -516,7 +516,7 @@ switch record.stim_type
         onsetframe=floor(record.stim_onset/0.6)
         offsetframe=min(size(record.timecourse_roi,1),ceil(record.stim_offset/0.6));
         % hard coded frame duration
-        disp('hard coded frameduration of 0.6s');
+        logmsg('hard coded frameduration of 0.6s');
         r=record.timecourse_roi;
         r=(r-repmat(mean(r(1:onsetframe,:),1),13,1))./repmat(mean(r(1:onsetframe,:),1),13,1);
         val=-mean(r(onsetframe+1:offsetframe,condind),1);
@@ -525,7 +525,7 @@ switch record.stim_type
 
 
   otherwise
-    disp(['Error in get_valrecord: stim_type ' record.stim_type ...
+    logmsg(['Error in get_valrecord: stim_type ' record.stim_type ...
       ' is not implemented.'])
 
 end

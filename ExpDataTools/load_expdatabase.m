@@ -1,4 +1,4 @@
-function [db,filename]=load_expdatabase( whichdb,where,create,load_main,verbose )
+function [db,filename]=load_expdatabase( whichdb,where,create,load_main,verbose)
 %LOAD_EXPDATABASE loads local or network copy of a database
 %
 %  [DB,FILENAME] = LOAD_EXPDATABASE(WHICHDB,WHERE,CREATE,LOAD_MAIN,VERBOSE)
@@ -10,37 +10,26 @@ function [db,filename]=load_expdatabase( whichdb,where,create,load_main,verbose 
 db=[];
 filename='';
 
-if nargin<5
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<5 || isempty(verbose)
     verbose = true;
 end
 
-if nargin<4
-    load_main = [];
-end
-if isempty(load_main)
+if nargin<4 ||  isempty(load_main)
     load_main = true;
 end
 
-if nargin<1;
-    whichdb='';
-end
-if isempty(whichdb)
+if nargin<1 ||  isempty(whichdb)
     if verbose
         logmsg('Database is not specified.');
     end
     return
 end
 
-if nargin<2; where ='';end
-if isempty(where)
+if nargin<2 ||  isempty(where)
     where='network';
 end
 
-if nargin<3; create = [];end
-if isempty(create)
+if nargin<3 || isempty(create)
     create = false;
 end
 
@@ -57,50 +46,79 @@ end
 
 whichexpdb=[whichexpdb '.mat'];
 
-
 filename=fullfile(expdatabasepath(where),capitalize(experiment),whichexpdb);
 
 if exist(filename,'file')==0
-    if verbose
-        logmsg(['Database ' filename ' does not exist.']);
-    end
-    if ~isempty(experiment)
-        % see if we can load the main one and create a new one
-        filenamemain = fullfile(expdatabasepath(where),[whichdb '.mat']);
-        if load_main && exist(filenamemain,'file')
-            if ~create
-                %disp(['LOAD_EXPDATABASE: Loading main database ' filenamemain ' instead.']);
-                filename = filenamemain;
-            else
-                answer = questdlg( ...
-                    ['Create new database for experiment ' experiment '?'], ...
-                    'New database','Ok','Cancel','Cancel');
-                if strcmp(answer,'Ok')
-                    logmsg(['Creating empty database ' filename]);
-                    file = load(filenamemain,'-mat');
-                    db = empty_record( file.db );
-                    if ~exist(fullfile(expdatabasepath(where),experiment),'dir')
-                        mkdir(fullfile(expdatabasepath(where),experiment));
-                    end
-                    save(filename,'db');
-                else
-                    filename = filenamemain;
-                end
+    
+    
+    d= dir(filename);
+    if ~isempty(d) % i.e. multiple files
+        filename = {};
+        for i=1:length(d)
+            [sdb,fname] = load_single_expdatabase( fullfile( expdatabasepath(where),capitalize(experiment),d(i).name));
+            if ~isempty(fname) && ~isempty(sdb)
+                filename{end+1} = fname; %#ok<AGROW>
+            end
+            try
+                db = [db structconvert(sdb,db)]; %#ok<AGROW>
+            catch
+                db = [structconvert(db,sdb) sdb];
             end
         end
-    end
-end
+    elseif load_main && ~create
+        if verbose
+            logmsg(['Database ' filename ' does not exist.']);
+        end
 
-if ~exist(filename,'file') 
-    if verbose && load_main
+        
+        exp = experiment;
+        experiment('',false);
+        [db,filename]=load_expdatabase( whichdb,where,create,false,verbose);
+        experiment(exp,false);
+
+        
+        %         if ~isempty(experiment)
+        %     % see if we can load the main one and create a new one
+        %     filenamemain = fullfile(expdatabasepath(where),[whichdb '.mat']);
+        %     if load_main && exist(filenamemain,'file')
+        %         if ~create
+        %             filename = filenamemain;
+        %         else
+        %             answer = questdlg( ...
+        %                 ['Create new database for experiment ' experiment '?'], ...
+        %                 'New database','Ok','Cancel','Cancel');
+        %             if strcmp(answer,'Ok')
+        %                 logmsg(['Creating empty database ' filename]);
+        %                 file = load(filenamemain,'-mat');
+        %                 db = empty_record( file.db );
+        %                 if ~exist(fullfile(expdatabasepath(where),experiment),'dir')
+        %                     mkdir(fullfile(expdatabasepath(where),experiment));
+        %                 end
+        %                 save(filename,'db');
+        %             else
+        %                 filename = filenamemain;
+        %             end
+        %         end
+        %     end
+        % end
+        %
+    elseif verbose
         logmsg(['Database ' filename ' does not exist.']);
     end
-    return
+else
+    db = load_single_expdatabase( filename);
 end
+
+
+function [db, filename] = load_single_expdatabase( filename)
+
 logmsg(['Loading ' filename ]);
-%htemp=figure;
-file=load(filename,'-mat');
-%close(htemp); % strange, but necessary to remove spuriously appearing graph when load ectestdb
-db=file.db;
+file = load(filename,'-mat');
+if isfield(file,'db')
+    db = file.db;
+else
+    filename = [];
+    db = [];
+end
 
 

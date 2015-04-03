@@ -23,11 +23,8 @@ if nargin<2
     end
 end
 
-% get which database
-[testdb, experimental_pc] = expdatabases( type, hostname );
-
 % load database
-[db,filename]=load_testdb(testdb);
+db = load_testdb( type, hostname );
 
 mice = uniq(sort({db.mouse}));
 

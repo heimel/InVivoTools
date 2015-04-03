@@ -98,10 +98,14 @@ switch measuress.datatype
         if isempty(expdb_cache) || ...
                 ~isfield(expdb_cache,measuress.datatype) || ...
                 ~isfield( expdb_cache.(measuress.datatype),'type') || ...
-                ~strcmp(expdatabases(measuress.datatype), expdb_cache.(measuress.datatype).type)
+                ~strcmp(measuress.datatype, expdb_cache.(measuress.datatype).type)
             reload = true;
         else
-            d = dir(expdb_cache.(measuress.datatype).filename);
+            if iscell(expdb_cache.(measuress.datatype).filename)
+                d = dir(expdb_cache.(measuress.datatype).filename{1});
+            else
+                d = dir(expdb_cache.(measuress.datatype).filename);
+            end
             if isempty(d) % probably concatenated database
                 reload = false;
             elseif ~strcmp(d.date, expdb_cache.(measuress.datatype).date) % i.e. changed
@@ -127,7 +131,8 @@ switch measuress.datatype
         end
         
         if reload
-            expdb_cache.(measuress.datatype).type = expdatabases(measuress.datatype) ;
+%            expdb_cache.(measuress.datatype).type = expdatabases(measuress.datatype) ;
+            expdb_cache.(measuress.datatype).type = measuress.datatype ;
             if exist('dbname','var') && ischar(dbname)
                 temp = load(dbname);
                 expdb_cache.(measuress.datatype).db = temp.db;
@@ -137,7 +142,11 @@ switch measuress.datatype
                 [expdb_cache.(measuress.datatype).db,expdb_cache.(measuress.datatype).filename] = ...
                     load_testdb(expdb_cache.(measuress.datatype).type);
             end
-            d = dir(expdb_cache.(measuress.datatype).filename);
+            if iscell(expdb_cache.(measuress.datatype).filename)
+                d = dir(expdb_cache.(measuress.datatype).filename{1});
+            else
+                d = dir(expdb_cache.(measuress.datatype).filename);
+            end
             expdb_cache.(measuress.datatype).date = d.date;
         else
             logmsg(['Using cache of ' expdb_cache.(measuress.datatype).filename '. Type ''clear functions'' to clear cache.']);

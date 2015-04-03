@@ -20,8 +20,7 @@ if nargin<1
     db = [];
 end
 if isempty(db)
-    [testdb, experimental_pc] = expdatabases( 'ec', host );
-    [db,filename]=load_testdb(testdb);
+    [db,filename]=load_testdb('ec',host);
 end
 
 if nargin<2

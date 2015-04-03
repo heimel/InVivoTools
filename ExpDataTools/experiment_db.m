@@ -54,15 +54,16 @@ switch type
         play_data_enable = 1;
 end
 
-% get which database
-[testdb, experimental_pc] = expdatabases( type, hostname );
 
 % load database
-[db,filename]=load_testdb(testdb);
+[db,filename]=load_testdb(type, hostname);
+
 
 if isempty(db)
     return
 end
+
+experimental_pc = is_experimental_pc( hostname);
 
 % temporarily adding anesthetic field % 2013-03-18
 switch type
@@ -141,11 +142,10 @@ if isfield(db,'comment')
 end
 
 % start control database
-switch testdb
-    case {'testdb','ectestdb'}
-        h_fig=control_db(db,color);
-    otherwise
-       h_fig=control_db(filename,color); 
+if ~iscell(filename)
+    h_fig = control_db(filename,color);
+else
+    h_fig = control_db(db,color);
 end
 if isempty(h_fig)
     return
