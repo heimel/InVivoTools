@@ -313,8 +313,8 @@ if is_movie
 end
 
 % save measures file
-if exist(tpdatapath(record),'dir')
-    measuresfile = fullfile(tpdatapath(record),'tp_measures.mat');
+if exist(experimentpath(record),'dir')
+    measuresfile = fullfile(experimentpath(record),'tp_measures.mat');
     measures = record.measures;
     try
         save(measuresfile,'measures');

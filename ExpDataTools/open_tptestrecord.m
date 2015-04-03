@@ -11,8 +11,8 @@ if strcmp(record.datatype,'tp')~=1
 end
 
 tpsetup(record);
-if ~exist(tpdatapath(record),'dir')
-    errormsg(['There is no directory ' tpdatapath(record) ]);
+if ~exist(experimentpath(record),'dir')
+    errormsg(['There is no directory ' experimentpath(record) ]);
     return
 end
 [filename,record] = tpfilename(record);

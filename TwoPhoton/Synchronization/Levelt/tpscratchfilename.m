@@ -31,8 +31,7 @@ end
 
 record = records(1);
 
-%ds = dirstruct(tpdatapath(record));
-scratchdir = fullfile(tpdatapath(record),'analysis','scratch');%getscratchdirectory( ds, 1);
+scratchdir = fullfile(experimentpath(record),'analysis','scratch');%getscratchdirectory( ds, 1);
 if ~exist(scratchdir,'dir')
     mkdir(scratchdir);
 end

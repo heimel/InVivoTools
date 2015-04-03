@@ -10,7 +10,7 @@ function b = stiminterview(argument)
 %
 if isstruct(argument)
     record = argument;
-    dirname = tpdatapath( record );
+    dirname = experimentpath( record );
 else
     dirname = argument;
 end

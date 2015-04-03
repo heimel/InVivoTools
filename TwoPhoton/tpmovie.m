@@ -59,7 +59,7 @@ fps = 1/cfg.frame_period * params.movie_sync_factor;
 
 if isempty(filename)
     fname = [record.date '_' record.epoch '_' movietype];
-     fname = fullfile(tpdatapath(record),fname);
+     fname = fullfile(experimentpath(record),fname);
 end
 
 

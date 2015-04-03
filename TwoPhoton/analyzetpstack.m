@@ -1105,7 +1105,7 @@ switch command,
     case 'infoBt'
         tpstackinfo(ud.record);
     case 'checkDriftBt',
-        dirname = tpdatapath(ud.record);
+        dirname = experimentpath(ud.record);
         val = get(ft(fig,'celllist'),'value');
         ancestors = {'.'};%getallparents(ud,dirname);
         changes = getChanges(ud,val,dirname,ancestors);
@@ -1174,7 +1174,7 @@ switch command,
         dF = get(ft(fig,'moviedFCB'),'value');
         sorted=get(ft(fig,'movieSortCB'),'value');
         movfname = [ud.record.date '_' ud.record.epoch '_' get(ft(fig,'movieFileEdit'),'string') ];
-        movfname = fullfile(tpdatapath(ud.record),movfname);
+        movfname = fullfile(experimentpath(ud.record),movfname);
         tpmovie(ud.record,ud.channel,trialslist,stimlist,sorted,dF,movfname);
     case 'QuickMapBt'
         thresh = str2double(get(ft(fig,'mapthreshEdit'),'string'));

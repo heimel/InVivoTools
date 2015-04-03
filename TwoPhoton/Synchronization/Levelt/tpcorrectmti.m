@@ -22,7 +22,7 @@ return
 
 if nargin>2, globetime = globaltime; else, globetime = 0; end;
 
-filename = fullfile(tpdatapath(record),'stimtimes.txt');
+filename = fullfile(experimentpath(record),'stimtimes.txt');
 
 skip_correction=1;
 if skip_correction

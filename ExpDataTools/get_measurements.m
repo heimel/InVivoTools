@@ -478,12 +478,7 @@ switch measure.measure
         results=datenum(testrecord.date,'yyyy-mm-dd') ;
     otherwise
         if strcmp(measure.measure(1:min(end,4)),'file')
-            switch measure.datatype
-                case 'tp'
-                    saved_data_file = fullfile(tpdatapath(testrecord),[measure.datatype '_measures.mat']);
-                case {'ec','lfp'}
-                    saved_data_file = fullfile(experimentpath(testrecord),testrecord.test,[measure.datatype '_measures.mat']);
-            end
+            saved_data_file = fullfile(experimentpath(testrecord),[measure.datatype '_measures.mat']);
             if exist(saved_data_file,'file')
                 saved_data = load(saved_data_file); 
                 results = [];

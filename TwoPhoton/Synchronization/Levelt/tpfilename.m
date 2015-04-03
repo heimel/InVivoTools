@@ -6,7 +6,7 @@ function [fname,record] = tpfilename( record, frame, channel, image_processing)
 %     RECORD contains experiment description needed to locate the imagefile
 %     check HELP TP_ORGANIZATION for detailed explanation of record fields
 %
-%     FNAME contains full path to the image file taking for TPDATAPATH
+%     FNAME contains full path to the image file 
 %     RECORD could be filled by TFILENAME with some default parameters
 %
 % 2009-2012, Alexander Heimel
@@ -69,7 +69,7 @@ if strcmpi(stack(end-length(ext)+1:end),ext)
     stack = stack(1:end-length(ext));
 end
 
-fname = fullfile( tpdatapath( record ),processed,...
+fname = fullfile(experimentpath( record ),processed,...
     [stack fmiddle optcode ext]);
 
 
