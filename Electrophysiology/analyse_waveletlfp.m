@@ -36,7 +36,7 @@ pre_ttl = max_pretime-stimulus_start;
 post_ttl = stimulus_start+max_duration+max_posttime;
 
 
-datapath=ecdatapath(record);
+datapath=experimentpath(record,false);
 %         chnorder = 1:numchannel;
 %         Tankname = 'Mouse';
 blocknames = [record.test];
@@ -167,7 +167,7 @@ for t = 1:length(stimss) % run over triggers
     end
     close(hh)
     fname = ['waveletspectrum_data_trig',num2str(t),'channels',num2str(channels_to_read),'.mat'];
-    wavefile=fullfile(ecdatapath(record),record.test,fname);
+    wavefile=fullfile(experimentpath(record),fname);
     save(wavefile,'Wlfp','gammapower','period','waves_time','channels_to_read');
 end
 % figure;

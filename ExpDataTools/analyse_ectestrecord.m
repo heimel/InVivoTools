@@ -21,7 +21,7 @@ if isempty(record.monitorpos)
     errormsg(['Monitor position is missing in record. mouse=' record.mouse ',date=' record.date ',test=' record.test]);
 end
 
-datapath=ecdatapath(record);
+datapath=experimentpath(record,false);
 if ~exist(datapath,'dir')
     errormsg(['Folder ' datapath ' does not exist.']);
     return
@@ -203,7 +203,7 @@ logmsg(['After sorting ' num2str(length(cells)) ' cells.']);
 
 transfer2cksdirstruct(cells,datapath);
 
-spikesfile = fullfile(ecdatapath(record),record.test, '_spikes.mat');
+spikesfile = fullfile(experimentpath(record), '_spikes.mat');
 
 isi = [];
 if exist(spikesfile,'file')
@@ -478,7 +478,7 @@ measures = record.measures; %#ok<NASGU>
 %save(measuresfilemehran,'WaveTime_Spikes');
 
 % save measures file
-measuresfile = fullfile(ecdatapath(record),record.test,[record.datatype '_measures.mat']);
+measuresfile = fullfile(experimentpath(record),[record.datatype '_measures.mat']);
 measures = record.measures; %#ok<NASGU>
 try
     save(measuresfile,'measures'); 

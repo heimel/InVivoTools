@@ -8,12 +8,8 @@ function measures = merge_measures_from_disk(record)
 
 measures_on_disk = []; 
 
-switch record.datatype
-    case {'ec','lfp'}
-    measuresfile = fullfile(experimentpath(record),record.test,[record.datatype '_measures.mat']);
-    case {'tp','fret'}
-    measuresfile = fullfile(experimentpath(record),[record.datatype '_measures.mat']);
-end
+measuresfile = fullfile(experimentpath(record),[record.datatype '_measures.mat']);
+
 if exist(measuresfile ,'file')
     load(measuresfile);
     if exist('measures','var')

@@ -15,7 +15,7 @@ if nargin<1
 end
 
 if ~isempty(record)
-    cd(oidatapath(record));
+    cd(experimentpath(record));
 end
 
 load('spontaneous_frames.mat')

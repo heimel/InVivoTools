@@ -1,4 +1,4 @@
-function [db,filename]=load_testdb( datatype, hostname)
+function [db,filename]=load_testdb( datatype, hostname, create,load_main,verbose)
 %LOAD_TESTDB loads test_db
 %
 %  [DB,FILENAME] = LOAD_TESTDB( DATATYPE, HOSTNAME )
@@ -13,14 +13,26 @@ end
 if nargin<2 || isempty(hostname)
     hostname = host;
 end
+if nargin<5 || isempty(verbose)
+    verbose = true;
+end
+if nargin<3 || isempty(create)
+    create = [];
+end
+if nargin<4 || isempty(load_main)
+    load_main = [];
+end
 
 whichdb = expdatabases( datatype, hostname);
 
-[db,filename] = load_expdatabase(whichdb,'network',[],true,true);
+[db,filename] = load_expdatabase(whichdb,'network',create,load_main,verbose);
 if isempty(db)
     hostname = '*';
     whichdb = expdatabases( datatype, hostname);
-    [db,filename] = load_expdatabase(whichdb,'network',[],true,true); % filename may be cell array
+    [db,filename] = load_expdatabase(whichdb,'network',create,load_main,verbose); % filename may be cell array
+    if iscell(filename) && length(filename)==1
+        filename = filename{1};
+    end
 end
 
 

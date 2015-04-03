@@ -10,11 +10,9 @@ global measures analysed_stimulus powerm waves_time
 measures = merge_measures_from_disk(record);
 measures = select_measures_by_channel( measures, record);
 
-datapath = ecdatapath(record);
-
 switch record.analysis
     case 'CSO'
-        MatFile=fullfile(datapath,record.test,'CSO_data.mat'); % contact point distance for SC 0.05, for VC 0.10
+        MatFile=fullfile(experimentpath(record),'CSO_data.mat'); % contact point distance for SC 0.05, for VC 0.10
         load(MatFile)
         F=length(CSO); %#ok<USENS>
         figure

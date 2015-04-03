@@ -21,7 +21,7 @@ end
 if isempty(record)
     datapath = pwd;
 else
-    datapath = ecdatapath(record);
+    datapath = experimentpath(record,false);
 end
 
 params = ecprocessparams;

@@ -6,17 +6,30 @@ folders = folders(3:end); % don't take local and parent
 
 host('giskard');
 
-for d = 1; %1:length(folders)
+datatypes = {'oi','tp','ec','wc','ls'};
+
+for d = 1:3 %1:length(folders)
     logmsg(['Migrating experiment ' folders(d).name]);
-    experiment(folders(d).name)
-
-    db = load_testdb;
-% 
-% for i=1:length(db)
-%     cmd = [ 'copyfile(''' fullfile(experimentpath(db(i),[],'2004'),[db(i).test '*'])... 
-%         ''',''' experimentpath(db(i),[],'2015') ''')'];
-%     disp(cmd);
-%     
-% end
-
+    exp = experiment(folders(d).name,false);
+    for t = 1:length(datatypes)
+        datatype = datatypes{t};
+        [db,filename] = load_testdb(datatype,[],false,false,false);
+        for i=1:length(db)
+            
+            switch datatype
+                case 'oi'
+                    src = fullfile(experimentpath(db(i),false,false,'2004'), '*');
+                    trg = experimentpath(db(i),false,true,'2015');
+                otherwise
+            end
+            if ~exist(trg,'dir')
+                errormsg(['Could not create ' trg]);
+                return
+            end
+            cmd = [ 'copyfile(''' src ...
+                ''',''' trg  ''')'];
+            disp(cmd);
+        end
+    end
+    
 end

@@ -23,7 +23,7 @@ end
 if isstruct(ref_image)
     record = ref_image;
     ref_image = record.ref_image;
-    datapath = oidatapath(record);
+    datapath = experimentpath(record);
     analysispath = 'analysis';
 end
 

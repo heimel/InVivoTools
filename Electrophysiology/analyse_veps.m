@@ -99,7 +99,7 @@ post_ttl = stimulus_start+max_duration+max_posttime;
 switch lower(record.setup)
     case 'antigua'
         clear EVENT
-        EVENT.Mytank = ecdatapath(record);
+        EVENT.Mytank = experimentpath(record,false);
         EVENT.Myblock = record.test;
         EVENT = importtdt(EVENT);
 
@@ -132,7 +132,7 @@ switch lower(record.setup)
         if isempty(channels2analyze)
             channels2analyze = 1;
         end
-        smrfile=fullfile(ecdatapath(record),record.test,'data.smr');
+        smrfile=fullfile(experimentpath(record),'data.smr');
         results = importspike2_lfp(smrfile,record.stim_type,pre_ttl,post_ttl,true,record.amplification,verbose);
         n_samples = length(results.waves{1,channels2analyze(1)});
         sample_interval = results.sample_interval;
@@ -364,7 +364,7 @@ end
 for ch=1:length(channels2analyze)
     waves = meanwaves{ch}; %#ok<NASGU>
     powerm = powers{ch}; %#ok<NASGU>
-    wavefile = fullfile(ecdatapath(record),record.test,['saved_data_veps_ch',num2str(channels2analyze(ch)),'.mat']);
+    wavefile = fullfile(experimentpath(record),['saved_data_veps_ch',num2str(channels2analyze(ch)),'.mat']);
     save(wavefile,'waves','waves_time','powerm');
 end
 
@@ -393,7 +393,7 @@ else
 end
 
 % save measures file
-measuresfile = fullfile(ecdatapath(record),record.test,[record.datatype '_measures.mat']);
+measuresfile = fullfile(experimentpath(record),[record.datatype '_measures.mat']);
 measures = record.measures; %#ok<NASGU>
 try
     save(measuresfile,'measures');

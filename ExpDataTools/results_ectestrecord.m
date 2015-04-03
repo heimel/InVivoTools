@@ -410,7 +410,7 @@ end
 switch data_type
     case 'ec'
         if params.plot_spike_features
-            spikesfile = fullfile(ecdatapath(record),record.test,'_spikes.mat');
+            spikesfile = fullfile(experimentpath(record),'_spikes.mat');
             if exist(spikesfile,'file')
                 cells = [];
                 load(spikesfile);

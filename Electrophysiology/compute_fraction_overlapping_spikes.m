@@ -6,7 +6,7 @@ function compute_fraction_overlapping_spikes( record )
 
 bin = 0.001;
 
-datapath = fullfile(ecdatapath( record ),record.test);
+datapath = experimentpath(record);
 if ~exist(fullfile(datapath,'_spikes.mat'),'file')
     return
 end

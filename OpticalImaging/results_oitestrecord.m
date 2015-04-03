@@ -32,8 +32,8 @@ else
 end
 
 % get data and analysispath
-datapath=oidatapath(record);
-analysispath=fullfile(datapath,'analysis');
+datapath = experimentpath(record);
+analysispath = fullfile(datapath,'analysis');
 
 params = oiprocessparams(record);
 
@@ -47,7 +47,7 @@ fileinfo=imagefile_info( fullfile(datapath,...
 
 switch record.stim_type
     case 'significance'
-        fname = fullfile(oidatapath(record),[record.test '_significance.mat']);
+        fname = fullfile(experimentpath(record),[record.test '_significance.mat']);
         load(fname);
         figure('Name','Significant response');
         imagesc(signif_response')
@@ -74,7 +74,7 @@ switch record.stim_type
         show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
 
         
-        file = fullfile(oidatapath(record),[record.test '_B' ...
+        file = fullfile(experimentpath(record),[record.test '_B' ...
                 mat2str([min(record.blocks) max(record.blocks)]) ...
                 '_' record.stim_type '.png']);
         if exist(file, 'file')
@@ -111,7 +111,7 @@ switch record.stim_type
         if 0
             switch record.stim_type
                 case 'orientation'
-                    file = fullfile(oidatapath(record),[record.test '_B' ...
+                    file = fullfile(experimentpath(record),[record.test '_B' ...
                         mat2str([min(record.blocks) max(record.blocks)]) ...
                         '_hor-ver' '.png']);
                     if exist(file, 'file')

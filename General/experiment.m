@@ -10,6 +10,7 @@ function experimentname = experiment( experimentname,verbose )
 % EXPERIMENTNAME = EXPERIMENT('')
 %   resets hostname to system host
 %
+% 200X-2015 Alexander Heimel
 
 persistent experimentname_pers notfirstentry
 
@@ -35,7 +36,7 @@ if nargin<1
             loaded = true;
             experimentname_pers = experimentname;
             if isempty(notfirstentry) && verbose
-                disp(['EXPERIMENT: Experiment is ''' experimentname '''. Type ''experiment(''XXX'') to change.']);
+                logmsg(['Experiment is ''' experimentname '''. Type ''experiment(''XXX'') to change.']);
             end
         else
             experimentname = '';
@@ -59,7 +60,7 @@ if ~strcmp(experimentname,experimentname_pers) && ...
     fprintf(fid,'%s\n',experimentname);
     fclose(fid);
     if verbose
-        disp(['EXPERIMENT: Saved experimentname ''' experimentname ''' to ' filename ]);
+        logmsg(['Saved experimentname ''' experimentname ''' to ' filename ]);
     end
 end
 

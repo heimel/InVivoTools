@@ -482,7 +482,7 @@ switch measure.measure
                 case 'tp'
                     saved_data_file = fullfile(tpdatapath(testrecord),[measure.datatype '_measures.mat']);
                 case {'ec','lfp'}
-                    saved_data_file = fullfile(ecdatapath(testrecord),testrecord.test,[measure.datatype '_measures.mat']);
+                    saved_data_file = fullfile(experimentpath(testrecord),testrecord.test,[measure.datatype '_measures.mat']);
             end
             if exist(saved_data_file,'file')
                 saved_data = load(saved_data_file); 

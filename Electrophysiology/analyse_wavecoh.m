@@ -50,7 +50,7 @@ for kk = [5 6]
         post_ttl = stimulus_start+max_duration+max_posttime;
         
         
-        datapath=ecdatapath(record);
+        datapath=experimentpath(record,false);
         %         chnorder = 1:numchannel;
         %         Tankname = 'Mouse';
         blocknames = [record.test];
@@ -193,7 +193,7 @@ for kk = [5 6]
                 %     waves_std(i,:) = std(waves(ind,:),1);
             end
             fname = ['coh_data_trig',num2str(t),',',num2str(channels_to_read1),',',num2str(channels_to_read2),'.mat'];
-            wavefile=fullfile(ecdatapath(record),record.test,fname);
+            wavefile=fullfile(experimentpath(record),fname);
             save(wavefile,'Wcoh','period','waves_time','channels_to_read1','channels_to_read2');
         end
         waitbar(cc/4);

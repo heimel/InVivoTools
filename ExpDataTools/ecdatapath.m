@@ -1,6 +1,7 @@
 function datapath=ecdatapath( record )
 %ECDATAPATH constructs the datapath for ec-experiments
 %
+% DEPRECATED: Use EXPERIMENTPATH instead
 %
 % 2007-2014 Alexander Heimel
 %

@@ -29,7 +29,7 @@ else
     compression=1;
 end
 
-datapath=oidatapath( record);
+datapath=experimentpath( record);
 if ~exist(datapath,'dir')
     errormsg(['Datapath ' datapath ' does not exist.']);
     return
@@ -416,7 +416,7 @@ switch record.stim_type
         set(gca,'clim',[0 180])
         
         h = image_intensity(or_angs',or_abs',cmap);
-        filename= fullfile(oidatapath(record),[record.test '_B' ...
+        filename= fullfile(experimentpath(record),[record.test '_B' ...
             mat2str([min(record.blocks) max(record.blocks)]) '_orientation.png']);
         imwrite(get(get(gca,'children'), 'cdata') ,filename, 'png');
         logmsg(['Orientation map saved as: ' filename]);

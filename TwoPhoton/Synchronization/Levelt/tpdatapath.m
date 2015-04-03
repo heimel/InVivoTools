@@ -7,6 +7,8 @@ function path=tpdatapath( record )
 %
 % check TP_ORGANIZATION for organization of the files
 %
+% DEPRECATED: Use EXPERIMENTPATH instead
+%
 % 2008-2014, Alexander Heimel
 %
 

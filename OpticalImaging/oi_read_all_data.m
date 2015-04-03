@@ -29,7 +29,7 @@ else
     blocks = [];
 end
 
-filenames = fullfilelist(oidatapath(record),convert_cst2cell(record.test));
+filenames = fullfilelist(experimentpath(record),convert_cst2cell(record.test));
 
 experimentlist={};
 extension='';

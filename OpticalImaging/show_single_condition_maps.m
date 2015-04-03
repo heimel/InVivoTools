@@ -31,10 +31,10 @@ params = oiprocessparams(record);
 
 if isempty(fname)
    tests=convert_cst2cell(record.test);
-   fname = {fullfile(oidatapath(record),tests{1})};
+   fname = {fullfile(experimentpath(record),tests{1})};
 end
 if isempty(fileinfo)
-    fileinfo=imagefile_info( fullfile(oidatapath(record),...
+    fileinfo=imagefile_info( fullfile(experimentpath(record),...
     [ tests{1} 'B0.BLK']));
 end
 
