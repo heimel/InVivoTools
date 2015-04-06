@@ -96,6 +96,12 @@ function [p, iter_used, corr, failed, settings, xpixelposition, ypixelposition] 
 % copyright David Greenberg, david.greenberg@caesar.de
 %
 %==========================================================================
+%
+% This is an outdated version. Most recent version can be obtained from
+%  https://github.com/dgreenberg/correct_scanned_imaging
+%
+%==========================================================================
+
 
 sD = size(data); sD(end+1:3) = 1; nlines = sD(1); linewidth = sD(2); nframes = sD(3);
 irows = size(base_image,1); icols = size(base_image,2);

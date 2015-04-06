@@ -70,10 +70,14 @@ switch vers
         
         datapath = fullfile(localpathbase,'Experiments',experiment,record.mouse,record.date,setup,test);
         
-        if ~exist(datapath,'dir') && ~create
-            oldpath = experimentpath( record,include_test, create, '2004' );
-            if exist(oldpath,'dir')
-                datapath=oldpath;
+        if ~exist(datapath,'dir') 
+            if create
+                mkdir(datapath);
+            else
+                oldpath = experimentpath( record,include_test, create, '2004' );
+                if exist(oldpath,'dir')
+                    datapath=oldpath;
+                end
             end
         end
         
