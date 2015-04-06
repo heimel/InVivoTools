@@ -121,6 +121,8 @@ for i = 1:length(triggers)
     measures.psth_count{i} = rastcount_max;
     measures.psth_count_all{i} = rastcount_all;
     
+    measures.psth_count_raw{i} = rast.counts;
+    
     filterwidth = 0.05/binsize; % 50 ms width = too broad for onset times!
     rastcount_max = spatialfilter(rastcount_max,filterwidth);
     [ind_max_label,ind_max] = max(rastcount_max);
