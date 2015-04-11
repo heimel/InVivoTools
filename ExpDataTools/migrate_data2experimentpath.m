@@ -39,14 +39,16 @@ for d = 1:2 %1:length(folders)
         if apply
             for c = 1:length(cmd)
                 logmsg(cmd{c});
-%                 try
+                 try
                     eval(cmd{c});
-%                 catch me
-%                     switch me.identifier
-%                         case 'MATLAB:MOVEFILE:OSError'
-%                             
-%                     end
-%                 end
+                 catch me
+                     switch me.identifier
+                         case 'MATLAB:MOVEFILE:OSError'
+                            logmsg(['Problem with '  cmd{c}]);
+                         otherwise
+                             rethrow(me);
+                     end
+                 end
             end
         end
     end
