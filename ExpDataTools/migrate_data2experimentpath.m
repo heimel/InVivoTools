@@ -10,7 +10,7 @@ host('giskard');
 
 datatypes = {'oi','tp','ec','wc','ls'};
 
-for d = 1:3 %1:length(folders)
+for d = 1:1 %1:length(folders)
     logmsg(['Migrating experiment ' folders(d).name]);
     exp = experiment(folders(d).name,false);
     for t = 1:length(datatypes)
@@ -31,7 +31,7 @@ for d = 1:3 %1:length(folders)
                 errormsg(['Could not create ' trg]);
                 return
             end
-            cmd{end+1} = [ 'movefile(''' src ...
+            cmd{end+1} = [ 'copyfile(''' src ...
                 ''',''' trg  ''',''f'')'];
         end
         cmd = unique(cmd);
@@ -40,7 +40,7 @@ for d = 1:3 %1:length(folders)
             for c = 1:length(cmd)
                 logmsg(cmd{c});
 %                 try
-                    eval(cmd{c});
+%                    eval(cmd{c});
 %                 catch me
 %                     switch me.identifier
 %                         case 'MATLAB:MOVEFILE:OSError'

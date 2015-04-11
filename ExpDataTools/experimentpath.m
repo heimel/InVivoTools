@@ -68,7 +68,7 @@ switch vers
             test = '';
         end
         
-        datapath = fullfile(localpathbase,'Experiments',experiment,record.mouse,record.date,setup,test);
+        datapath = fullfile(localpathbase(vers),'Experiments',experiment,record.mouse,record.date,setup,test);
         
         if ~exist(datapath,'dir') 
             if create
