@@ -65,7 +65,7 @@ for d = 1:length(experiments)
                 continue
             end
             trg = experimentpath(db(i),false,apply,'2015',true);
-            if ~exist(trg,'dir')
+            if apply && ~exist(trg,'dir')
                 errormsg(['Could not create ' trg]);
                 return
             end
