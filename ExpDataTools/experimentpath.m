@@ -1,4 +1,4 @@
-function datapath = experimentpath( record, include_test, create, vers )
+function datapath = experimentpath( record, include_test, create, vers, recurse )
 %EXPERIMENTPATH returns datapath for an experimental record
 %
 %  DATAPATH = EXPERIMENTPATH(RECORD, INCLUDE_TEST=true, CREATE=false, VERS='2004' )
@@ -8,6 +8,10 @@ function datapath = experimentpath( record, include_test, create, vers )
 %
 % 2014-2015, Alexander Heimel
 %
+
+if nargin<5 || isempty(recurse)
+    recurse = false;
+end
 
 if nargin<4 || isempty(vers)
     vers = '2004';
@@ -24,20 +28,36 @@ switch vers
         if isfield(record,'datatype')
             switch record.datatype
                 case {'tp','fret','ls'}
-                    datapath = tpdatapath(record);
-                    if ~include_test
-                        errormsg('tpdatapath always includes test');
-                    end
+                    datapath = tpdatapath(record,include_test);
                 case {'ec','lfp'}
                     datapath = ecdatapath(record);
                     if include_test
-                        datapath = fullfile(datapath,record.test);
+                        if isfield(record,'test')
+                            datapath = fullfile(datapath,record.test);
+                        elseif isfield(record,'epoch')
+                            datapath = fullfile(datapath,record.epoch);
+                        else
+                            errormsg('Asked to include test field, but none present');
+                        end
                     end
                 case {'oi','fp'}
                     datapath = oidatapath(record);
                 case 'wc'
                     datapath = wcdatapath(record,create);
+                otherwise
+                    errormsg(['Unknown datatype ' record.datatype ' in ' recordfilter(record)]);
+                    datapath = '';
             end
+            
+            if ~recurse && ~create
+                newpath = experimentpath( record,include_test, create, '2015',true );
+                if exist(newpath,'dir')
+                    datapath=newpath;
+                end
+                
+            end
+            
+            
             return
         else
             errormsg('Unknown record format');
@@ -73,8 +93,8 @@ switch vers
         if ~exist(datapath,'dir') 
             if create
                 mkdir(datapath);
-            else
-                oldpath = experimentpath( record,include_test, create, '2004' );
+            elseif  ~recurse 
+                oldpath = experimentpath( record,include_test, create, '2004' ,true);
                 if exist(oldpath,'dir')
                     datapath=oldpath;
                 end
