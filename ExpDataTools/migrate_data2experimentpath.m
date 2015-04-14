@@ -5,7 +5,7 @@ function migrate_data2experimentpath( experiments, datatypes, apply )
 if nargin<1 || isempty(experiments)
     experiments = {experiment};
 else
-    if strcmpi('experiments','all')
+    if strcmpi(experiments,'all')
         folders = dir(expdatabasepath);
         folders = folders([folders.isdir]); % select folders only
         folders = folders(3:end); % don't take local and parent
@@ -20,6 +20,7 @@ else
         experiments = {experiments};
     end
 end
+logmsg(['Migrating ' num2str(length(experiments)) ' experiments']);
 
 if nargin<2 || isempty(apply)
     apply = false;
@@ -40,6 +41,11 @@ if nargin<3 || isempty(datatypes)
     end
 end
 
+if ~iscell(datatypes)
+    datatypes = {datatypes};
+end
+
+
 for d = 1:length(experiments)
     exp = experiment(experiments{d},false);
     mentioned = false;
@@ -47,7 +53,10 @@ for d = 1:length(experiments)
         
         cmd = {};
         datatype = datatypes{t};
-        [db,filename] = load_testdb(datatype,[],false,false,false);
+        [db,filename] = load_testdb(datatype,host,false,false,false);
+        if isempty(strfind( filename,host))
+            continue
+        end
         if isempty(db)
             continue
         end
@@ -56,7 +65,15 @@ for d = 1:length(experiments)
             mentioned = true;
         end
         for i=1:length(db)
-            src = fullfile(experimentpath(db(i),false,false,'2004',true), '*');
+            switch datatype
+                case {'ec','lfp'}
+                    include_test = true;
+                otherwise
+                    include_test = false;
+            end
+            
+            
+            src = fullfile(experimentpath(db(i),include_test,false,'2004',true), '*');
             if isempty(src)
                 continue
             end
@@ -64,7 +81,7 @@ for d = 1:length(experiments)
             if length(srcd)<3 % i.e. no files
                 continue
             end
-            trg = experimentpath(db(i),false,apply,'2015',true);
+            trg = experimentpath(db(i),include_test,apply,'2015',true);
             if apply && ~exist(trg,'dir')
                 errormsg(['Could not create ' trg]);
                 return
@@ -86,6 +103,7 @@ for d = 1:length(experiments)
                 switch me.identifier
                     case 'MATLAB:MOVEFILE:OSError'
                         logmsg(['Problem with '  cmd{c}]);
+                        logmsg(me.message);
                         keyboard
                     otherwise
                         rethrow(me);
