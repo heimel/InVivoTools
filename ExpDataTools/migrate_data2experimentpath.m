@@ -1,32 +1,20 @@
-function migrate_data2experimentpath( experiments, datatypes, apply )
+function migrate_data2experimentpath( experiments, datatypes, cmode, apply )
+%MIGRARE_DATA2EXPERIMENTPATH restructures InVivo data
+%
+% 2015, Alexander Heimel
 
+logmsg('NEED TO UPDATE ALL EXPERIMENTS FROM MVP/INVIVO');
 
+if ~isunix
+    logmsg('Script only written for linux');
+    return
+end
 
 if nargin<1 || isempty(experiments)
     experiments = {experiment};
-else
-    if strcmpi(experiments,'all')
-        folders = dir(expdatabasepath);
-        folders = folders([folders.isdir]); % select folders only
-        folders = folders(3:end); % don't take local and parent
-        experiments = {};
-        for i=1:length(folders)
-            experiments{i} = folders(i).name;
-        end
-    end
-    
-    
-    if ~iscell(experiments)
-        experiments = {experiments};
-    end
-end
-logmsg(['Migrating ' num2str(length(experiments)) ' experiments']);
-
-if nargin<2 || isempty(apply)
-    apply = false;
 end
 
-if nargin<3 || isempty(datatypes)
+if nargin<2 || isempty(datatypes)
     switch host
         case {'wall-e','olympus'}
             datatypes = {'tp','ls'};
@@ -41,19 +29,63 @@ if nargin<3 || isempty(datatypes)
     end
 end
 
+if nargin<3 || isempty(cmode)
+    cmode = 'update'; % alternative mode
+end
+
+if strcmpi(cmode,'update') && ~isunix
+    logmsg('Update mode only works in linux. Quitting');
+    return
+end
+
+if nargin<4 || isempty(apply)
+    apply = false;
+end
+
+
+
 if ~iscell(datatypes)
     datatypes = {datatypes};
 end
 
+if ~iscell(experiments)
+    experiments = {experiments};
+end
+if strcmpi(experiments{1},'all')
+    folders = dir(expdatabasepath);
+    folders = folders([folders.isdir]); % select folders only
+    folders = folders(3:end); % don't take local and parent
+    experiments = {};
+    for i=1:length(folders)
+        switch folders(i).name
+            case {'Holtmaat','Examples','Friederike','Crumbs'}
+                    experiments{end+1} = folders(i).name;
+            otherwise
+                if ~isempty(strfind(folders(i).name,'.')) && length(folders(i).name)==5
+                    experiments{end+1} = folders(i).name;
+                end
+        end
+    end
+end
+
+logmsg(['Migrating ' num2str(length(experiments)) ' experiments in mode ' cmode]);
+if apply
+    logmsg('Press key to continue or Ctrl-C to abort.');
+    pause
+end
 
 for d = 1:length(experiments)
     exp = experiment(experiments{d},false);
     mentioned = false;
     for t = 1:length(datatypes)
-        
         cmd = {};
+        trga = {};
+        srca = {};
         datatype = datatypes{t};
         [db,filename] = load_testdb(datatype,host,false,false,false);
+        if iscell(filename) && length(filename)~=1
+            continue
+        end
         if isempty(strfind( filename,host))
             continue
         end
@@ -72,8 +104,8 @@ for d = 1:length(experiments)
                     include_test = false;
             end
             
-            
-            src = fullfile(experimentpath(db(i),include_test,false,'2004',true), '*');
+            src = fullfile(experimentpath(db(i),include_test,false,'2004',true));
+
             if isempty(src)
                 continue
             end
@@ -81,30 +113,66 @@ for d = 1:length(experiments)
             if length(srcd)<3 % i.e. no files
                 continue
             end
-            trg = experimentpath(db(i),include_test,apply,'2015',true);
+            src = ['"' fullfile(experimentpath(db(i),include_test,false,'2004',true)) '"' filesep '*'];
+
+            trg =  experimentpath(db(i),include_test,apply,'2015',true) ;
             if apply && ~exist(trg,'dir')
                 errormsg(['Could not create ' trg]);
                 return
             end
-            cmd{end+1} = [ 'movefile(''' src ...
-                ''',''' trg  ''',''f'')'];
+            trg = ['"' experimentpath(db(i),include_test,apply,'2015',true) '"'];
+            switch cmode
+                case 'update'
+                    cmd{end+1} = [ '[status,result]=system(''cp -au ''' src ''' ''' trg  ''');'];
+                case 'move' 
+                    if ~isempty(strfind(src,'mnt'))
+                       % logmsg('Should not move from MVP');           
+                       continue
+                        %cmd{end+1} = [ '[status,result]=system(''cp -au ''' src ''' ''' trg  ''');'];
+                    else
+                        cmd{end+1} = [ '[status,result]=system(''mv ' src ' ' trg  ''');'];
+                    end
+                otherwise
+                    logmsg(['Unknown mode ' cmode]);
+                    return
+            end
+            trga{end+1} = trg;
+            srca{end+1} = src;
         end
-        cmd = unique(cmd);
+        [cmd,ind] = unique(cmd);
         cmd = cmd(end:-1:1); % to ensure doing subfolders first
+        srca = srca(ind(end:-1:1));
+        trga = trga(ind(end:-1:1));
+        
         logmsg([ num2str(length(db)) ' records. ' num2str(length(cmd)) ' operations.']);
-        %logmsg(cmd);
         for c = 1:length(cmd)
             logmsg(cmd{c});
             try
                 if apply
                     eval(cmd{c});
+                    if status
+                        if strcmpi(cmode,'move')
+                            if ~isempty(strfind(result,'Directory not empty'))
+                                cmd{c} = ['cp -au ' srca{c} ' ' trga{c} ];
+                                [status,result]=system(cmd{c} );
+                                if ~status
+                                    cmd{c} = ['rm -r ' srca{c}  ];
+                                    [status,result]=system(cmd{c} );
+                                end
+                            end
+                        end
+                        if status %
+                            error('MIGRATE:MIGRATE_ERROR',['Problem with ' cmd{c}]);
+                        end
+                    end
                 end
             catch me
                 switch me.identifier
-                    case 'MATLAB:MOVEFILE:OSError'
-                        logmsg(['Problem with '  cmd{c}]);
+                    case {'MATLAB:MOVEFILE:OSError','MIGRATE:MIGRATE_ERROR'}
                         logmsg(me.message);
-                        keyboard
+                        if exist('result','var')
+                            logmsg(result);
+                        end
                     otherwise
                         rethrow(me);
                 end
@@ -113,3 +181,5 @@ for d = 1:length(experiments)
     end
     
 end
+
+logmsg(['Finished migrating ' num2str(length(experiments)) ' experiments in mode ' cmode]);
