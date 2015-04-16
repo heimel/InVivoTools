@@ -7,7 +7,11 @@ persistent home_pers
 
 
 if isempty(home_pers)
-    home_pers = lower(getenv('HOME'));
+    if ispc
+        home_pers = getenv('userprofile');
+    else
+        home_pers = lower(getenv('HOME'));
+    end
 end
 
 home = home_pers;
