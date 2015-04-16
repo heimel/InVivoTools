@@ -23,7 +23,7 @@ switch vers
             base = '/home/data/InVivo';
         end
     case '2015'
-        base = fullfile('/home',user,'Dropbox (CSF)');
+        base = fullfile(userhome,'Dropbox (NIN)');
 end
     
 if ~exist(base,'dir')

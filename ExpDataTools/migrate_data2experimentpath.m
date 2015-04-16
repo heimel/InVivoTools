@@ -61,7 +61,7 @@ if strcmpi(experiments{1},'all')
             case {'Holtmaat','Examples','Friederike','Crumbs'}
                     experiments{end+1} = folders(i).name;
             otherwise
-                if ~isempty(strfind(folders(i).name,'.')) && length(folders(i).name)==5
+                if length(folders(i).name)>4 && folders(i).name(3)=='.' 
                     experiments{end+1} = folders(i).name;
                 end
         end
