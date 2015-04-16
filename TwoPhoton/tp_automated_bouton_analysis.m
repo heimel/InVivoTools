@@ -31,7 +31,7 @@ for i = 1:length(axons) % over axons
        % plot(ROIlist(axon).xi(posindx), ROIlist(axon).yi(posindx), '*')
         
     end
-    %find closest spot on axon for each axon_int +and take this position as position order
+    %find closest spot on axon for each axon_int and take this position as position order
     for j = 1:length(axon_ints)
         ax_int = axon_ints(j);
         %position of this bouton
@@ -43,13 +43,40 @@ for i = 1:length(axons) % over axons
         ROIlist(ax_int).extra = posindx;
     end
     
+    
+    %now we have ordered boutons and axonints in space, take two axon ints
+    %besides each bouton and calculate fractional response of bouton.
+    
+    if( length(axon_ints) > 1 && ~isempty(boutons))
+        for j = 1:length(boutons)
+            bouton = boutons(j);
+            bp = ROIlist(bouton).extra;
+            idxb = find([ROIlist(axon_ints).extra] < bp); 
+            nxtb = [ROIlist(axon_ints(idxb)).extra]; % %next before
+            idxa = find([ROIlist(axon_ints).extra] > bp);
+            nxta = [ROIlist(axon_ints(idxa)).extra]; % %next after
+            if(~isempty(nxtb) && ~isempty(nxta))
+                [~, p1] = min(abs(nxtb-bp)); %closest to this bouton but before
+                [~, p2] = min(abs(nxta-bp)); %closest to this bouton but after
+                
+                intnxt1 = ROIlist(axon_ints(idxb(p1))).intensity_mean; 
+                intnxt2 = ROIlist(axon_ints(idxa(p2))).intensity_mean; 
+                
+                intensity = ROIlist(bouton).intensity_mean;             
+                ROIlist(bouton).intensity_rel2dendrite = intensity*2/(intnxt1 + intnxt2);
+            else
+                    disp('no relevant axon_ints to compare with!!!!')
+            end
+        end
+    else
+        disp('Data not adequate, missing either axon_ints or boutons!.....')
+    end
 end
 
 record.ROIs.celllist = ROIlist;
 
 
-%now we have ordered boutons and axonints in space, take two axon ints
-%besides each bouton and calculate fractional response of bouton.
+
 
 
 
