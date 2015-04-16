@@ -69,8 +69,19 @@ switch host
     case {'eto','giskard'}
     otherwise
         if ~exist(datapath,'dir')
-            logmsg(['No local data directory ' datapath '. Checking network path']);
-            datapath=fullfile(networkpathbase,'Imaging',capitalize(record.setup),pathend);
+            %logmsg(['No local data directory ' datapath '. Checking old path']);
+            
+            % construct pathend
+            oldpathend=record.date;
+            switch lower(record.setup)
+                case 'andrew'
+                    oldpathend(end+1)='a';
+            end
+            datapath=fullfile(params.oidatapath_localroot,oldpathend);
+            if ~exist(datapath,'dir')
+                %logmsg(['No local data directory ' datapath '. Checking network path']);
+                datapath=fullfile(networkpathbase,'Imaging',capitalize(record.setup),pathend);
+            end
         end
         if ~exist(datapath,'dir')
             logmsg(['Could not find data directory ' datapath ]);
