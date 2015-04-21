@@ -71,6 +71,20 @@ if strcmpi(experiments{1},'all')
                 end
         end
     end
+elseif any(experiments{1}=='*')
+    folders = dir(fullfile(expdatabasepath,experiments{1}));
+    folders = folders([folders.isdir]); % select folders only
+    experiments = {};
+    for i=1:length(folders)
+        switch folders(i).name
+            case {'Holtmaat','Examples','Friederike','Crumbs'}
+                    experiments{end+1} = folders(i).name;
+            otherwise
+                if length(folders(i).name)>4 && folders(i).name(3)=='.' 
+                    experiments{end+1} = folders(i).name;
+                end
+        end
+    end
 end
 
 logmsg(['Migrating ' num2str(length(experiments)) ' experiments in mode ' cmode]);
