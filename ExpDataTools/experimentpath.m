@@ -64,7 +64,7 @@ switch vers
             datapath = '';
             return
         end
-    case '2015'
+    case {'2015','2015t'} % 2015t is temporary format, should be removed later
         if isfield(record,'epoch') % tp database
             test = record.epoch;
         elseif isfield(record,'blocks') % oi database
@@ -72,7 +72,7 @@ switch vers
         else
             test = record.test;
         end
-        if isfield(record,'experiment') 
+        if isfield(record,'experiment')
             experiment = record.experiment;
         else
             % oi database
@@ -83,17 +83,49 @@ switch vers
                 experiment = 'Other';
             end
         end
+        
         setup = capitalize(record.setup);
         if ~include_test
             test = '';
         end
         
-        datapath = fullfile(localpathbase(vers),'Experiments',experiment,record.mouse,record.date,setup,test);
+        switch record.datatype
+            case {'oi','fp'}
+                datatype = 'Imaging';
+            case {'ec','lfp'}
+                datatype = 'Electrophys';
+            case {'tp','ls','fret'}
+                datatype = 'Twophoton';
+            case {'wc'}
+                datatype = 'Webcam';
+            otherwise
+                errormsg(['Unknown datatype ' record.datatype],true);
+        end
         
-        if ~exist(datapath,'dir') 
+        
+        switch vers
+            case '2015t'
+                datapath = fullfile(localpathbase('2015'),...
+                    'Experiments',...
+                    experiment,...
+                    record.mouse,...
+                    record.date,...
+                    setup,...
+                    test);
+            otherwise
+                datapath = fullfile(localpathbase(vers),...
+                    'InVivo',...
+                    datatype,...
+                    setup,...
+                    experiment,...
+                    record.mouse,...
+                    record.date,...
+                    test);
+        end
+        if ~exist(datapath,'dir')
             if create
                 mkdir(datapath);
-            elseif  ~recurse 
+            elseif  ~recurse
                 oldpath = experimentpath( record,include_test, create, '2004' ,true);
                 if exist(oldpath,'dir')
                     datapath=oldpath;

@@ -3,7 +3,12 @@ function migrate_data2experimentpath( experiments, datatypes, cmode, apply )
 %
 % 2015, Alexander Heimel
 
-logmsg('NEED TO UPDATE ALL EXPERIMENTS FROM MVP/INVIVO');
+logmsg('NEED TO UPDATE ALL EXPERIMENTS FROM 2015t to 2015, and also from ToTransfer');
+
+%srcver = '2015t';%'2004';
+srcver = '2004';
+trgver = '2015';
+
 
 if ~isunix
     logmsg('Script only written for linux');
@@ -104,7 +109,7 @@ for d = 1:length(experiments)
                     include_test = false;
             end
             
-            src = fullfile(experimentpath(db(i),include_test,false,'2004',true));
+            src = fullfile(experimentpath(db(i),include_test,false,srcver,true));
 
             if isempty(src)
                 continue
@@ -113,18 +118,20 @@ for d = 1:length(experiments)
             if length(srcd)<3 % i.e. no files
                 continue
             end
-            src = ['"' fullfile(experimentpath(db(i),include_test,false,'2004',true)) '"' filesep '*'];
+            src = ['"' fullfile(experimentpath(db(i),include_test,false,srcver,true)) '"' filesep '*'];
 
-            trg =  experimentpath(db(i),include_test,apply,'2015',true) ;
+            trg =  experimentpath(db(i),include_test,apply,trgver,true) ;
             if apply && ~exist(trg,'dir')
                 errormsg(['Could not create ' trg]);
                 return
             end
-            trg = ['"' experimentpath(db(i),include_test,apply,'2015',true) '"'];
+            trg = ['"' experimentpath(db(i),include_test,apply,trgver,true) '"'];
             switch cmode
                 case 'update'
-                    cmd{end+1} = [ '[status,result]=system(''cp -au ''' src ''' ''' trg  ''');'];
+                    cmd{end+1} = [ '[status,result]=system(''cp -au ' src ' ' trg  ''');'];
                 case 'move' 
+                    errormsg('Move option disabled',true);
+                    
                     if ~isempty(strfind(src,'mnt'))
                        % logmsg('Should not move from MVP');           
                        continue

@@ -17,8 +17,13 @@ function db=import_mdb( filename, table, crit )
 %
 %
 
-mdbsql='/home/heimel/Software/mdbtools/mdbtools-0.6pre1/src/util/mdb-sql';
-options=' -p -d , ';
+
+delimiter = ',';
+
+%mdbsql='/home/heimel/Software/mdbtools/mdbtools-0.6pre1/src/util/mdb-sql';
+mdbsql='/home/heimel/Software/mdbtools/mdbtools/src/util/mdb-sql';
+%options=' -p -d , '; % version 0.6
+options = [' -P -d ' delimiter]; % version 0.7
 defaultfilename = '/mnt/orange/group\ folders/MuizenlijstLeveltLab/Mice.mdb';
 
 if nargin<3
@@ -38,7 +43,7 @@ if isempty(filename)
   filename = defaultfilename;
   if ~exist(filename,'file')
     filename='~/Documents/Mice/Mice.mdb';
-    disp(['IMPORT_MDB: Using offline database ' filename ]);
+    logmsg(['Using offline database ' filename ]);
   end
 end
 if isempty(crit)
@@ -58,7 +63,7 @@ disp(['IMPORT_MDB: Parsing: ' sql ]);
 [s,w]=system(['echo ' sql  ]); %#ok<ASGLU>
 disp(w);
 
-[s,w]=system(['echo ' sql ' | ' mdbsql options filename] ); %#ok<ASGLU>
+[s,w]=system(['echo ' sql ' | ' mdbsql ' ' options ' ' filename] ); %#ok<ASGLU>
 
 
 %w=w(1:1000);
@@ -69,16 +74,19 @@ disp(w{2})
 disp(w{3})
 disp(w{4})
 if length(w)<6
-  disp('IMPORT_MDB: No records returned.');
+  logmsg('No records returned.');
   db=[];
   return;
 end
 
-fields = split(w{3});
+headerline = find(strncmp('Muisnummer',w(1:4),10));
+
+
+fields = split(w{headerline},delimiter);
 fields = sanitize(fields);
 
 disp(w{end-1});
-w=split( {w{4:end-2}} );
+w=split( {w{(headerline+1):end-2}},delimiter );
 
 while size(w,2)>length(fields)
   fields{end+1}=['field' num2str(length(fields)+1) ]; 
