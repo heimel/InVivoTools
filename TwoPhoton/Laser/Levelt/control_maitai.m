@@ -8,7 +8,7 @@ function out = control_maitai(command,parameter)
 % 2012, Alexander Heimel
 %
 
-disp(['CONTROL_MAITAI: Command = ' command ]);
+logmsg(['Command = ' command ]);
 
 port = '/dev/ttyS0';  % dependent on setup
 
@@ -27,7 +27,7 @@ try
 catch me
     switch    me.identifier
         case 'MATLAB:serial:fopen:opfailed'
-            disp(['CONTROL_MAITAI: cannot open communications to port ' port]);
+            logmsg(['Cannot open communications to port ' port]);
             return
         otherwise
             rethrow(me);
