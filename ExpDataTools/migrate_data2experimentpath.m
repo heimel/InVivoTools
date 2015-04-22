@@ -93,6 +93,12 @@ if apply
     pause
 end
 
+if isunix
+    copycommand = 'cp -au ';
+else
+    copycommand = 'xcopy /d /s  ';
+end    
+
 for d = 1:length(experiments)
     exp = experiment(experiments{d},false);
     mentioned = false;
@@ -142,10 +148,9 @@ for d = 1:length(experiments)
             trg = ['"' experimentpath(db(i),include_test,apply,trgver,true) '"'];
             switch cmode
                 case 'update'
-                    cmd{end+1} = [ '[status,result]=system(''cp -au ' src ' ' trg  ''');'];
+                    cmd{end+1} = [ '[status,result]=system('''  copycommand ' ' src ' ' trg  ''');'];
                 case 'move' 
                     errormsg('Move option disabled',true);
-                    
                     if ~isempty(strfind(src,'mnt'))
                        % logmsg('Should not move from MVP');           
                        continue
