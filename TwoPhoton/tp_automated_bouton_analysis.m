@@ -63,7 +63,9 @@ for i = 1:length(axons) % over axons
                 intnxt2 = ROIlist(axon_ints(idxa(p2))).intensity_mean; 
                 
                 intensity = ROIlist(bouton).intensity_mean;             
-                ROIlist(bouton).intensity_rel2dendrite = intensity*2/(intnxt1 + intnxt2);
+               % ROIlist(bouton).intensity_rel2dendrite(1) = intensity*2/(intnxt1 + intnxt2);
+               measures(bouton).intensity_rel2dendrite = intensity*2/(intnxt1 + intnxt2);
+                disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
             else
                     disp('no relevant axon_ints to compare with!!!!')
             end
@@ -74,6 +76,7 @@ for i = 1:length(axons) % over axons
 end
 
 record.ROIs.celllist = ROIlist;
+record.measures = measures;
 
 
 
