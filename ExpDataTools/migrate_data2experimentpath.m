@@ -10,10 +10,10 @@ srcver = '2004';
 trgver = '2015';
 
 
-if ~isunix
-    logmsg('Script only written for linux');
-    return
-end
+% if ~isunix
+%     logmsg('Script only written for linux');
+%     return
+% end
 
 if nargin<1 || isempty(experiments)
     experiments = {experiment};
@@ -38,10 +38,10 @@ if nargin<3 || isempty(cmode)
     cmode = 'update'; % alternative mode
 end
 
-if strcmpi(cmode,'update') && ~isunix
-    logmsg('Update mode only works in linux. Quitting');
-    return
-end
+% if strcmpi(cmode,'update') && ~isunix
+%     logmsg('Update mode only works in linux. Quitting');
+%     return
+% end
 
 if nargin<4 || isempty(apply)
     apply = false;
@@ -89,8 +89,8 @@ end
 
 logmsg(['Migrating ' num2str(length(experiments)) ' experiments in mode ' cmode]);
 if apply
-    logmsg('Press key to continue or Ctrl-C to abort.');
-    pause
+%     logmsg('Press key to continue or Ctrl-C to abort.');
+%     pause
 end
 
 if isunix
