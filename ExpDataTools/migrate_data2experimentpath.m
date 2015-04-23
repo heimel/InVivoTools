@@ -71,6 +71,20 @@ if strcmpi(experiments{1},'all')
                 end
         end
     end
+elseif any(experiments{1}=='*')
+    folders = dir(fullfile(expdatabasepath,experiments{1}));
+    folders = folders([folders.isdir]); % select folders only
+    experiments = {};
+    for i=1:length(folders)
+        switch folders(i).name
+            case {'Holtmaat','Examples','Friederike','Crumbs'}
+                    experiments{end+1} = folders(i).name;
+            otherwise
+                if length(folders(i).name)>4 && folders(i).name(3)=='.' 
+                    experiments{end+1} = folders(i).name;
+                end
+        end
+    end
 end
 
 logmsg(['Migrating ' num2str(length(experiments)) ' experiments in mode ' cmode]);
@@ -78,6 +92,12 @@ if apply
     logmsg('Press key to continue or Ctrl-C to abort.');
     pause
 end
+
+if isunix
+    copycommand = 'cp -au ';
+else
+    copycommand = 'xcopy /d /s  ';
+end    
 
 for d = 1:length(experiments)
     exp = experiment(experiments{d},false);
@@ -128,10 +148,9 @@ for d = 1:length(experiments)
             trg = ['"' experimentpath(db(i),include_test,apply,trgver,true) '"'];
             switch cmode
                 case 'update'
-                    cmd{end+1} = [ '[status,result]=system(''cp -au ' src ' ' trg  ''');'];
+                    cmd{end+1} = [ '[status,result]=system('''  copycommand ' ' src ' ' trg  ''');'];
                 case 'move' 
                     errormsg('Move option disabled',true);
-                    
                     if ~isempty(strfind(src,'mnt'))
                        % logmsg('Should not move from MVP');           
                        continue

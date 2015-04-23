@@ -95,13 +95,19 @@ switch vers
             case {'ec','lfp'}
                 datatype = 'Electrophys';
             case {'tp','ls','fret'}
-                datatype = 'Twophoton';
+                datatype = 'Microscopy';
+                switch setup
+                    case 'Olympus-0603301' 
+                        setup = 'Wall-e';
+                end
             case {'wc'}
                 datatype = 'Webcam';
             otherwise
                 errormsg(['Unknown datatype ' record.datatype],true);
         end
         
+         
+       
         
         switch vers
             case '2015t'
