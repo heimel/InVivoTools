@@ -114,22 +114,6 @@ for i=1:n_maps
         % draw ror
         immap(image_outline(ror)>0.08) = immin;
     end
-    if params.single_condition_show_monitor_center  && ...
-            length(record.response)==2 && ...
-            strcmpi(record.stim_type,'retinotopy')
-        
-        
-        % lambda is in unbinned coordinates
-        [lambda_x,lambda_y]=get_bregma(record.ref_image,...
-            experimentpath(record),'analysis');
-        
-        % show monitor center
-        if params.wta_show_monitor_center
-          %  plot_monitorcenter(record,h.single_condition(i),fileinfo,lambda_x,lambda_y);
-        end
-        
-        
-    end
     
     if scaling
         imagesc(double(immap));
@@ -169,6 +153,21 @@ for i=1:n_maps
             axis(lims);
         end
     end
+    
+    if params.single_condition_show_monitor_center  && ...
+            length(record.response)==2 && ...
+            strcmpi(record.stim_type,'retinotopy')
+        
+        % lambda is in unbinned coordinates
+        [lambda_x,lambda_y]=get_bregma(record.ref_image,...
+            experimentpath(record),'analysis');
+        
+        % show monitor center
+        if params.wta_show_monitor_center
+            oi_plot_monitorcenter(record,h.single_condition(i),fileinfo,lambda_x,lambda_y);
+        end
+    end
+
 end
 
 % intensity bar

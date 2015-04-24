@@ -181,7 +181,7 @@ switch record.stim_type
         
         % show monitor center
         if params.wta_show_monitor_center
-            plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
+            oi_plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
         end
         
         % show reference image
@@ -316,41 +316,3 @@ logmsg('Record available in workspace as ''global_record''.');
 return
 
 
-function plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y)
-
-if isempty(record.response)
-    logmsg('No monitor center position');
-    return
-end
-
-subplot(h_image);
-
-% convert x y back to image scale
-xy=record.response/record.scale;
-x=xy(1);y=xy(2);
-
-% shift by lambda
-x=x+lambda_x;
-y=y+lambda_y;
-
-% shift to absolute unbinned coordinates
-if isfield(fileinfo,'xoffset')
-    x=x-fileinfo.xoffset;
-    y=y-fileinfo.yoffset;
-else
-    disp('no xoffset in fileinfo. probably missing data file');
-    return
-end
-
-
-
-% transform monitor center to binned coordinates
-x=round(x)/fileinfo.xbin;
-y=round(y)/fileinfo.ybin;
-
-hold on
-plot(x,y,'ow');
-h=plot(x,y,'ow');
-set(h,'MarkerSize',10);
-
-return
