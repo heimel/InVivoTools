@@ -180,7 +180,7 @@ switch record.stim_type
             datapath,'analysis');
         
         % show monitor center
-        if params.single_condition_show_monitor_center
+        if params.wta_show_monitor_center
             plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
         end
         
