@@ -2,6 +2,13 @@ function [db,filename]=load_testdb( datatype, hostname, create,load_main,verbose
 %LOAD_TESTDB loads test_db
 %
 %  [DB,FILENAME] = LOAD_TESTDB( DATATYPE, HOSTNAME )
+%      where DATATYPE is one of the 4 main datatypes with different record structures:
+%       'ec' - electrophysiology
+%       'tp' - two-photon and regular microscopy
+%       'wc' - webcam data
+%       'oi' - intrinsic signal, flavoprotein and gcamp wide field imaging
+%       and HOSTNAME is one of the acquistion computers, e.g. jander, daneel or wall-e.
+%
 %    FILENAME may be cell array of string
 %
 % 2005-2015, Alexander Heimel
