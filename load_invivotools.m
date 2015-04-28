@@ -12,7 +12,7 @@ function load_invivotools
 
 more off
 
-disp([ upper(mfilename) ': Manual available at https://sites.google.com/site/alexanderheimel/protocols/invivotools']);
+disp([ upper(mfilename) ': Manual available at https://github.com/heimel/InVivoTools/wiki']);
 
 if isunix
     updatestr = ['To update InVivoTools: update_invivotools'];

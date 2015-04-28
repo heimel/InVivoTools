@@ -58,7 +58,7 @@ end
 acqready_props_prev = dir(acqready);
 if isempty(acqready_props_prev)
     acqready_props_prev = [];
-    acqready_props_prev.datenum = datenum('2001-01-01');
+    acqready_props_prev.datenum = datenum('01/01/2001');
 end
 
 logmsg(['Checking for change in ' acqready]);

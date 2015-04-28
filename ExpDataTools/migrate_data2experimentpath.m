@@ -9,12 +9,6 @@ logmsg('NEED TO UPDATE ALL EXPERIMENTS FROM 2015t to 2015, and also from ToTrans
 srcver = '2004';
 trgver = '2015';
 
-
-if ~isunix
-    logmsg('Script only written for linux');
-    return
-end
-
 if nargin<1 || isempty(experiments)
     experiments = {experiment};
 end
@@ -38,16 +32,9 @@ if nargin<3 || isempty(cmode)
     cmode = 'update'; % alternative mode
 end
 
-if strcmpi(cmode,'update') && ~isunix
-    logmsg('Update mode only works in linux. Quitting');
-    return
-end
-
 if nargin<4 || isempty(apply)
     apply = false;
 end
-
-
 
 if ~iscell(datatypes)
     datatypes = {datatypes};
@@ -89,15 +76,21 @@ end
 
 logmsg(['Migrating ' num2str(length(experiments)) ' experiments in mode ' cmode]);
 if apply
-    logmsg('Press key to continue or Ctrl-C to abort.');
-    pause
+%     logmsg('Press key to continue or Ctrl-C to abort.');
+%     pause
 end
 
 if isunix
-    copycommand = 'cp -au ';
+    copycommand = 'cp ';
+    copypreargs = ' -au ';
+    copypostargs = '';
 else
-    copycommand = 'xcopy /d /s  ';
-end    
+    copycommand = 'xcopy ';
+    copypreargs = '';
+    copypostargs = ' /d /s /y ';
+end 
+
+
 
 for d = 1:length(experiments)
     exp = experiment(experiments{d},false);
@@ -148,7 +141,8 @@ for d = 1:length(experiments)
             trg = ['"' experimentpath(db(i),include_test,apply,trgver,true) '"'];
             switch cmode
                 case 'update'
-                    cmd{end+1} = [ '[status,result]=system('''  copycommand ' ' src ' ' trg  ''');'];
+                    cmd{end+1} = [ '[status,result]=system('''  ...
+                        copycommand ' ' copypreargs ' ' src ' ' trg ' ' copypostargs ''');'];
                 case 'move' 
                     errormsg('Move option disabled',true);
                     if ~isempty(strfind(src,'mnt'))
@@ -178,6 +172,7 @@ for d = 1:length(experiments)
                     eval(cmd{c});
                     if status
                         if strcmpi(cmode,'move')
+                            errormsg('Move option disabled',true);
                             if ~isempty(strfind(result,'Directory not empty'))
                                 cmd{c} = ['cp -au ' srca{c} ' ' trga{c} ];
                                 [status,result]=system(cmd{c} );
