@@ -321,7 +321,7 @@ switch windowname
                     rmlock(filename);
                 end
             case 'help'
-                help_url = 'https://sites.google.com/site/alexanderheimel/protocols/invivotools';
+                help_url = 'https://github.com/heimel/InVivoTools/wiki';
                 help_local = fullfile(fileparts(which('startup')),'Manual','ManualInVivoTools.html');
                 switch computer
                     case {'PCWIN','PCWIN64'}

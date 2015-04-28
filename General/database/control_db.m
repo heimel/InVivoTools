@@ -16,7 +16,7 @@ function fig = control_db( db, color)
 %     global global_db global_record
 %
 %  Check at
-%  https://sites.google.com/site/alexanderheimel/protocols/invivotools
+%  https://github.com/heimel/InVivoTools/wiki
 %  for a full manual describing the InVivoTools
 %
 %  2005-2013, Alexander Heimel
