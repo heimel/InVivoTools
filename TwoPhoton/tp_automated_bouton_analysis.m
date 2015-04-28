@@ -18,7 +18,10 @@ for i = 1:length(axons) % over axons
     axon_ints = find(([measures.linked2neurite]==axoni) & [measures.axon_int]);
     BgRoi = find([measures.bg], 1, 'first');
     if ~isempty(BgRoi)
-        Bgintensity = ROIlist(BgRoi).intensity_mean;
+        Bgintensity = ROIlist(BgRoi).intensity_mean(2); %green 2nd channel
+        if isnan(Bgintensity)
+            Bgintensity = 0;
+        end
     end
    % ObjPos(i).axonidx = axoni;
    %find closest spot on axon for each bouton +and take this position as position order
@@ -70,10 +73,10 @@ for i = 1:length(axons) % over axons
                 nxtb = find([ROIlist(axon_ints).extra] < bp, 1, 'last'); %next before
                 nxta = find([ROIlist(axon_ints).extra] > bp, 1, 'first'); %next after
                 if(~isempty(nxtb) && ~isempty(nxta))
-                    intnxt1 = ROIlist(axon_ints(idxb)).intensity_mean-Bgintensity;
-                    intnxt2 = ROIlist(axon_ints(idxa)).intensity_mean-Bgintensity;
+                    intnxt1 = ROIlist(axon_ints(nxtb)).intensity_mean(2)-Bgintensity;
+                    intnxt2 = ROIlist(axon_ints(nxta)).intensity_mean(2)-Bgintensity;
                     
-                    intensity = ROIlist(bouton).intensity_mean-Bgintensity;
+                    intensity = ROIlist(bouton).intensity_mean(2)-Bgintensity;
                     % ROIlist(bouton).intensity_rel2dendrite(1) = intensity*2/(intnxt1 + intnxt2);
                     measures(bouton).intensity_rel2dendrite = intensity*2/(intnxt1 + intnxt2);
                     disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
@@ -92,10 +95,10 @@ for i = 1:length(axons) % over axons
                 nxtb = find([ROIlist(axon_ints).extra] < bp, 1, 'last'); %next before
                 nxta = find([ROIlist(axon_ints).extra] > bp, 1, 'first'); %next after
                 if(~isempty(nxtb) && ~isempty(nxta))
-                    intnxt1 = ROIlist(axon_ints(idxb)).intensity_mean-Bgintensity;
-                    intnxt2 = ROIlist(axon_ints(idxa)).intensity_mean-Bgintensity;
+                    intnxt1 = ROIlist(axon_ints(nxtb)).intensity_mean(2)-Bgintensity;
+                    intnxt2 = ROIlist(axon_ints(nxta)).intensity_mean(2)-Bgintensity;
                     
-                    intensity = ROIlist(t_b).intensity_mean-Bgintensity;
+                    intensity = ROIlist(t_b).intensity_mean(2)-Bgintensity;
                     % ROIlist(bouton).intensity_rel2dendrite(1) = intensity*2/(intnxt1 + intnxt2);
                     measures(t_b).intensity_rel2dendrite = intensity*2/(intnxt1 + intnxt2);
                     disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
