@@ -159,8 +159,7 @@ for i=1:n_maps
             strcmpi(record.stim_type,'retinotopy')
         
         % lambda is in unbinned coordinates
-        [lambda_x,lambda_y]=get_bregma(record.ref_image,...
-            experimentpath(record),'analysis');
+        [lambda_x,lambda_y]=get_bregma(record);
         
         % show monitor center
         if params.wta_show_monitor_center

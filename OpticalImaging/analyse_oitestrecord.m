@@ -110,7 +110,7 @@ switch roifile
         rel_x=rel_x / record.scale; % L-M rel to Lambda in pxls
         rel_y=rel_y / record.scale; % A-P rel to Lambda in pxls
         
-        [bregma_x,bregma_y]=get_bregma(record.ref_image,datapath,'analysis');
+        [bregma_x,bregma_y] = get_bregma(record);
         
         rel_x=rel_x+bregma_x; % L-M rel to top left camera in pxls
         rel_y=rel_y+bregma_y; % A-P rel to top left camera in pxls
@@ -373,8 +373,7 @@ switch record.stim_type
             
             
             % lambda is in unbinned coordinates
-            [lambda_x,lambda_y,reffname]=get_bregma(record.ref_image,...
-                datapath,'analysis');
+            [lambda_x,lambda_y] = get_bregma(record);
             
             
             % ask for monitor center if necessary and store in record.response
