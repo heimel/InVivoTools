@@ -86,15 +86,37 @@ end
 [recstart,filename] = start_recording(recdatapath);
 acqparams_in = fullfile(datapath,'acqParams_in');
 
-pin = 'datasetready';
 
 try
-  s = serial('/dev/ttyUSB0');
-  fopen(s);
-  prev_cts = get(s,pin);
+  % edit Sven april 2015: Try different ttyUSBs, can be changed in something smarter if necessary
+  if ~isempty(dir('/dev/ttyUSB0'))
+  	s1 = serial('/dev/ttyUSB0');
+  else
+	s1 = serial('/dev/ttyUSB1');
+  end
+  fopen(s1);
+  %edit Sven april 2015: Made compatible with two versions of instrument-control
+  if isfield(get(s1),'pinstatus')
+	new_instr_contr = 1;
+	pin = 'DataSetReady'; 
+  else
+	new_instr_contr = 0;
+	pin = 'datasetready';
+  end
+  if new_instr_contr
+	s2 = get(s1,'pinstatus');
+  	prev_cts = s2.(pin);
+  else
+	prev_cts = s2.(pin);
+  end
   org_cts = 'on'; %prev_cts; 
   while 1
-    cts = get(s,pin);
+    if new_instr_contr
+	s2 = get(s1,'pinstatus');
+	cts = s2.(pin);
+    else
+	cts = s2.(pin);
+    end
     if cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)  % i.e. changed and not same as original
 	stimstart =  time - recstart;
         logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
@@ -115,7 +137,7 @@ try
 catch
     logmsg('HIER');
     stop_recording(filename);
-    fclose(s);
+    fclose(s1);
    % rethrow(lasterror)
 end
 
