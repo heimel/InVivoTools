@@ -1,6 +1,8 @@
 function [val,val_sem]=get_compound_measure_from_record(record,measure,criteria,extra_options)
 %GET_COMPOUND_MEASURE_FROM_RECORD gets formulaic measures from record
 %
+%  [val,val_sem]=get_compound_measure_from_record(record,measure,criteria,extra_options)
+%
 % 2014, Alexander Heimel
 %
 
