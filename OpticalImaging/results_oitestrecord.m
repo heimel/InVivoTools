@@ -1,24 +1,21 @@
-function newud=results_oitestrecord( ud )
+function results_oitestrecord( record )
 %RESULTS_OITESTRECORD
 %
-%  RESULTS_OITESTRECORD( UD )
+%  RESULTS_OITESTRECORD( RECORD )
 %
-%  2005-2014, Alexander Heimel
+%  2005-2015, Alexander Heimel
 %
 
-global record
+global global_record
 
-newud=ud;
-ud.changed=0;
-record=ud.db(ud.current_record);
-
+global_record = record;
 
 tit=[record.mouse ' ' record.date ' ' record.test ];
 tit(tit=='_')='-';
 
 [imgdata,roi,ror,data]=load_testrecord( record );
 
-compare_to_pos=findstr(record.comment,'compare_to');
+compare_to_pos = strfind(record.comment,'compare_to');
 if ~isempty(compare_to_pos)
     comma_pos=find(record.comment(compare_to_pos:end)==',');
     start_pos=comma_pos(1)+compare_to_pos;
@@ -35,8 +32,8 @@ else
 end
 
 % get data and analysispath
-datapath=oidatapath(record);
-analysispath=fullfile(datapath,'analysis');
+datapath = experimentpath(record);
+analysispath = fullfile(datapath,'analysis');
 
 params = oiprocessparams(record);
 
@@ -50,7 +47,7 @@ fileinfo=imagefile_info( fullfile(datapath,...
 
 switch record.stim_type
     case 'significance'
-        fname = fullfile(oidatapath(record),[record.test '_significance.mat']);
+        fname = fullfile(experimentpath(record),[record.test '_significance.mat']);
         load(fname);
         figure('Name','Significant response');
         imagesc(signif_response')
@@ -77,7 +74,7 @@ switch record.stim_type
         show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
 
         
-        file = fullfile(oidatapath(record),[record.test '_B' ...
+        file = fullfile(experimentpath(record),[record.test '_B' ...
                 mat2str([min(record.blocks) max(record.blocks)]) ...
                 '_' record.stim_type '.png']);
         if exist(file, 'file')
@@ -114,7 +111,7 @@ switch record.stim_type
         if 0
             switch record.stim_type
                 case 'orientation'
-                    file = fullfile(oidatapath(record),[record.test '_B' ...
+                    file = fullfile(experimentpath(record),[record.test '_B' ...
                         mat2str([min(record.blocks) max(record.blocks)]) ...
                         '_hor-ver' '.png']);
                     if exist(file, 'file')
@@ -177,42 +174,13 @@ switch record.stim_type
         end
         title(['Retinotopy ' tit])
         
-        % search for reference image
-        if isempty(record.ref_image)
-            posrefs=dir(fullfile(analysispath,'*.bmp'));
-            posrefs=[posrefs dir(fullfile(analysispath,'*.BMP'))];
-            if length(posrefs)==1
-                answ=questdlg(['Is ' posrefs.name ' the right image?'],...
-                    'Reference image','Yes','No');
-                switch answ
-                    case 'Yes',
-                        record.ref_image=posrefs.name;
-                        ud.changed=1;
-                end
-            else
-                posrefs=dir(fullfile(analysispath,'refred*.bmp'));
-                posrefs=[posrefs dir(fullfile(analysispath,'refred*.BMP'))];
-                disp('Possible reference images: ');
-                disp( {posrefs(:).name});
-            end
-        end
-        
+      
         % lambda is in unbinned coordinates
-        [lambda_x,lambda_y,reffname]=get_bregma(record.ref_image,...
-            datapath,'analysis');
-        
-        
-        % ask for monitor center if necessary and store in record.response
-        if isempty(record.response)
-            record=get_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
-            if ~isempty(record.response)
-                ud.changed=1;
-            end
-        end
+        [lambda_x,lambda_y,reffname] = get_bregma(record);
         
         % show monitor center
-        if params.single_condition_show_monitor_center
-            plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
+        if params.wta_show_monitor_center
+            oi_plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
         end
         
         % show reference image
@@ -262,7 +230,7 @@ switch record.stim_type
         show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
         
         %Joris: plot reference image with V1 border separately
-        if ~isempty(findstr(record.experimenter,'jv'))
+        if ~isempty(strfind(record.experimenter,'jv'))
             logmsg('Showing reference image with border because ''jv'' is experimenter.');
             figure(100);
             try
@@ -338,110 +306,12 @@ switch record.stim_type
             roi,ror,...
             record);
         
-        reliable=check_reliability(record);
-        if ~isempty(reliable)
-            if isempty(record.reliable)
-                record.reliable=reliable;
-            elseif record.reliable~=reliable
-                logmsg('Discrepancy with recorded reliability');
-            end
-        end
+
 end
 
-% wrap-up
-if ud.changed
-    record.analysed=datestr(now);
-    % insert record into database
-    ud.db(ud.current_record)=record;
-    set(ud.h.fig,'Userdata',ud);
-    % show record in recordform
-    if ~isfield(ud,'no_callback')
-        control_db_callback(ud.h.current_record);
-        control_db_callback(ud.h.current_record);
-    end
-    % get record from recordform
-    if isfield(ud,'record_form')
-        ud.db(ud.current_record)=get_record(ud.record_form);
-    end
-end
 
-newud=ud;
-
-evalin('base','global record');
-logmsg('Record available in workspace as ''record''.');
+evalin('base','global global_record');
+logmsg('Record available in workspace as ''global_record''.');
 return
 
 
-%
-function record=get_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y)
-
-
-% only do analysis if not done before
-if ~isempty(record.ref_image)
-    disp('Click on pixel representing center of monitor');
-    axis on
-    subplot(h_image);
-    [x,y]=ginput(1);
-    % in binned coordinates
-    
-    % transform monitor center to unbinned coordinates
-    x=round(x)*fileinfo.xbin;
-    y=round(y)*fileinfo.ybin;
-    
-    % and shift to absolute unbinned coordinates
-    x=x+fileinfo.xoffset;
-    y=y+fileinfo.yoffset;
-    
-    if ~isempty(lambda_x) && ~isempty(lambda_y)
-        x=x-lambda_x;
-        y=y-lambda_y;
-        
-        % record.scale should be in unbinned coordinates
-        record.response=[x y]*record.scale;
-        record.response=round(record.response);
-    end
-else
-    disp('No reference image known.');
-end
-
-return
-
-
-function plot_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y)
-
-if isempty(record.response)
-    disp('RESULTS_OITESTRECORD: No monitor center position');
-    return
-end
-
-subplot(h_image);
-
-% convert x y back to image scale
-xy=record.response/record.scale;
-x=xy(1);y=xy(2);
-
-% shift by lambda
-x=x+lambda_x;
-y=y+lambda_y;
-
-% shift to absolute unbinned coordinates
-if isfield(fileinfo,'xoffset')
-    x=x-fileinfo.xoffset;
-    y=y-fileinfo.yoffset;
-else
-    disp('no xoffset in fileinfo. probably missing data file');
-    return
-end
-
-
-
-% transform monitor center to binned coordinates
-x=round(x)/fileinfo.xbin;
-y=round(y)/fileinfo.ybin;
-
-hold on
-plot(x,y,'ow');
-h=plot(x,y,'ow');
-set(h,'MarkerSize',10);
-
-return

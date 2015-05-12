@@ -4,6 +4,8 @@ function datapath=oidatapath( record )
 %   DATAPATH = OIDATAPATH( RECORD )
 %   used from RECORD are fields DATE and SETUP
 %
+% DEPRECATED: Use EXPERIMENTPATH instead
+%
 % 2009-2013, Alexander Heimel
 %
 
@@ -16,7 +18,7 @@ switch lower(record.setup)
     case {'andrew','daneel','jander'}
         % do nothing
     otherwise
-        error(['OIDATAPATH: Unknown imaging setup [' record.setup ']']);
+        errormsg(['Unknown imaging setup [' record.setup ']'],true);
 end
 
 % construct pathend
@@ -67,11 +69,22 @@ switch host
     case {'eto','giskard'}
     otherwise
         if ~exist(datapath,'dir')
-            disp(['OIDATAPATH: No local data directory ' datapath '. Checking network path']);
-            datapath=fullfile(networkpathbase,'Imaging',capitalize(record.setup),pathend);
+            %logmsg(['No local data directory ' datapath '. Checking old path']);
+            
+            % construct pathend
+            oldpathend=record.date;
+            switch lower(record.setup)
+                case 'andrew'
+                    oldpathend(end+1)='a';
+            end
+            datapath=fullfile(params.oidatapath_localroot,oldpathend);
+            if ~exist(datapath,'dir')
+                %logmsg(['No local data directory ' datapath '. Checking network path']);
+                datapath=fullfile(networkpathbase,'Imaging',capitalize(record.setup),pathend);
+            end
         end
         if ~exist(datapath,'dir')
-            warning(['OIDATAPATH: Could not find data directory ' datapath ]);
+            logmsg(['Could not find data directory ' datapath ]);
         end
 end
 

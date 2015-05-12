@@ -3,13 +3,10 @@ function fig=group_db
 %
 %  FIG=GROUP_DB
 %
-% 2007, Alexander Heimel
+% 2007-2015, Alexander Heimel
 %
 
 [groupdb,filename]=load_groupdb;
-
-[dbpath,dbfilename]=fileparts(filename);
-dbfile=fullfile(dbpath,dbfilename);
 
 h_fig=control_db(filename,[1 0.5 0.5]); % which will load the file again
 set(h_fig,'Name','Group database');

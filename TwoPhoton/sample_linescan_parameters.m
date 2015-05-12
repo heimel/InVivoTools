@@ -7,7 +7,7 @@ function sample_linescan_parameters
 db = []; % to mask db function in matlab library
 datapath = fileparts(which('tplinescandb'));
 
-load_testdb(expdatabases('ls'))
+load_testdb('ls');
 org_db = db;
 
 

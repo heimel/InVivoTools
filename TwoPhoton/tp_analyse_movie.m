@@ -7,8 +7,8 @@ function record = tp_analyse_movie( record )
 %
 
 
-if ~exist(tpdatapath(record),'dir')
-    errormsg(['There is no directory ' tpdatapath(record) ]);
+if ~exist(experimentpath(record),'dir')
+    errormsg(['There is no directory ' experimentpath(record) ]);
     return
 end
 [filename,record] = tpfilename(record);

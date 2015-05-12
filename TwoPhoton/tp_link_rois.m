@@ -59,6 +59,11 @@ if isfield(roilist,'neurite')
         record.measures(i).distance2neurite = roilist(i).neurite(2) *  params.x_step;
         if isinf(record.measures(i).distance2neurite)
             record.measures(i).distance2neurite = NaN;
+            record.measures(i).linked2neurite = NaN;
+        elseif roilist(i).index ~= roilist(i).neurite(1)
+            record.measures(i).linked2neurite = roilist(i).neurite(1);
+        else
+            record.measures(i).linked2neurite = NaN;
         end
     end
 end

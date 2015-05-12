@@ -24,10 +24,7 @@ if isempty(roifiles)
 end
 
 % read image resolution to convert imaris measurements from um to pixels
-%imgpath=tpdatapath(record);
-%imgname=tpfilename(record,1,1);
 inf = tpreadconfig(record );
-%inf = tiffinfo(imgname,1, tpscratchfilename(record,[],'tiffinfo') );
 switch inf.x_unit
     case 'um'
         x_step = inf.x_step;        

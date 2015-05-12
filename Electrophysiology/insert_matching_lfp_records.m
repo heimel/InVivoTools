@@ -20,8 +20,7 @@ if nargin<1
     db = [];
 end
 if isempty(db)
-    [testdb, experimental_pc] = expdatabases( 'ec', host );
-    [db,filename]=load_testdb(testdb);
+    [db,filename]=load_testdb('ec',host);
 end
 
 if nargin<2
@@ -49,7 +48,7 @@ for i=ind_ec(:)'
         continue
     end
     
-    disp(['Adding ecrecord ' num2str(i) ]);
+    logmsg(['Adding ecrecord ' num2str(i) ]);
     lfprecord = ecrecord;
     lfprecord.datatype = 'lfp';
     if analyse
@@ -58,9 +57,7 @@ for i=ind_ec(:)'
                 lfprecord = analyse_lfptestrecord( lfprecord, 0);
             end
         catch
-            errordlg(['Could not analyse record: mouse=' lfprecord.mouse ...
-                ',date=' lfprecord.date ',test=' lfprecord.test]);
-            disp(['INSERT_MATCHING_LFP_RECORDS: Could not analyse record mouse=' lfprecord.mouse ...
+            errormsg(['Could not analyse record: mouse=' lfprecord.mouse ...
                 ',date=' lfprecord.date ',test=' lfprecord.test]);
         end
     else
@@ -76,13 +73,13 @@ end
 function result = has_lfp_channel( record )
 result = false;
 
-smrfilename=fullfile(ecdatapath(record),record.test,'data.smr');
+smrfilename=fullfile(experimentpath(record),'data.smr');
 if ~exist(smrfilename,'file')
-    disp(['INSERT_MATCHING_LFP_RECORDS: ' smrfilename  ' does not exist.']);
+    logmsg([ smrfilename  ' does not exist.']);
 end
 fid=fopen(smrfilename);
 if fid==-1
-    errordlg(['INSERT_MATCHING_LFP_RECORDS: Failed to open  ' smrfilename],'Insert matching LFP records');
+    errormsg(['Failed to open  ' smrfilename],'Insert matching LFP records');
     return
 end
 lfpchannelname='LFP';

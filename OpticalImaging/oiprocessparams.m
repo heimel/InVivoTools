@@ -28,6 +28,7 @@ params.average_image_normmethod = 'subtractframe_ror'; % Delta R/R_baseline / (1
 params.wta_equalize_area = false;
 params.wta_show_roi = true;
 params.wta_show_ror = true;
+params.wta_show_monitor_center = true;
 switch experiment
     case '12.54'
         params.wta_equalize_area = false;

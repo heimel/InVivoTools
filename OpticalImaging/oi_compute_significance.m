@@ -95,8 +95,7 @@ for x=1:1:n_x
 end % x
 close(h)
 
-%fname = fullfile(oidatapath(record),[record.test '_significance' num2str(combine_conditions) '.mat']);
-fname = fullfile(oidatapath(record),[record.test '_significance.mat']);
+fname = fullfile(experimentpath(record),[record.test '_significance.mat']);
 save(fname,'signif_between_groups','signif_response','comp_conds');
 
 figure;

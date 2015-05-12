@@ -64,7 +64,7 @@ record.datatype = 'tp';
 record.experimenter = 'FS';
 record.slice = '';
 record.epoch ='01';
-fpath = tpdatapath( record );
+fpath = experimentpath(record);
 if ~exist(fpath,'dir')
     success = mkdir( fpath );
     if ~success

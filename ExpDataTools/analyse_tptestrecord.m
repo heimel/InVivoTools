@@ -71,7 +71,7 @@ if is_zstack
         end
     else
         if ~isfield(params,'z_step')
-            errordlg(['Image is not a z-stack. ' recordfilter(record)],'Get neurite length.');
+            errormsg(['Image is not a z-stack. ' recordfilter(record)]);
         end
         for i=1:n_rois
             record.measures(i).length  = tp_get_neurite_length( record.ROIs.celllist(i), record, params );
@@ -152,7 +152,7 @@ if isfield(record.measures,'present') && ...
     series_measures =  process_params.series_measures;
     ref_record = tp_get_refrecord(record,false);
     if ~isempty(ref_record) && ischar(ref_record.reliable)
-        ref_record.reliable = str2num(ref_record.reliable);
+        ref_record.reliable = str2num(ref_record.reliable); %#ok<ST2NM>
     end
     if ~isempty(ref_record) && ~isempty(ref_record.reliable) && ~ref_record.reliable
         logmsg(['Reference record unreliable thus cannot compute gained and lost: ' recordfilter(ref_record)]);
@@ -294,6 +294,8 @@ if isfield(record,'measures') && isfield(record.measures,'mito') && any([record.
 end
 if isfield(record,'measures') && isfield(record.measures,'bouton') && any([record.measures(:).bouton])
     record = tp_bouton_close( record );
+    
+    record = tp_automated_bouton_analysis( record );
 end
 
 % getting densities
@@ -313,8 +315,8 @@ if is_movie
 end
 
 % save measures file
-if exist(tpdatapath(record),'dir')
-    measuresfile = fullfile(tpdatapath(record),'tp_measures.mat');
+if exist(experimentpath(record),'dir')
+    measuresfile = fullfile(experimentpath(record),'tp_measures.mat');
     measures = record.measures;
     try
         save(measuresfile,'measures');

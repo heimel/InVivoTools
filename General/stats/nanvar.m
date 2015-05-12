@@ -28,10 +28,10 @@ function y = nanvar(x,w,dim)
 %   Copyright 1984-2005 The MathWorks, Inc.
 %   $Revision: 1.1.6.4 $  $Date: 2005/03/23 20:25:41 $
 
-if nargin < 2 | isempty(w), w = 0; end
+if nargin < 2 || isempty(w), w = 0; end
 
 sz = size(x);
-if nargin < 3 | isempty(dim)
+if nargin < 3 || isempty(dim)
     % The output size for [] is a special case when DIM is not given.
     if isequal(x,[]), y = NaN(class(x)); return; end
 

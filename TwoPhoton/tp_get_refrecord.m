@@ -20,7 +20,7 @@ end
 % check to see if it is open
  h_db = get_fighandle('TP database*');
 if isempty( h_db ) % not open, load from disk
-    db = load_testdb(expdatabases( 'tp' ));
+    db = load_testdb( 'tp' );
         else
     ud = get(h_db,'userdata');
     db=ud.db;

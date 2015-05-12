@@ -53,7 +53,7 @@ sy = NaN(n_stim,1);
 cxy = NaN(n_stim,1);
 PeakOD = NaN(n_stim,1);
 
-filename = fullfile(oidatapath(record),[record.test '_response_centers.mat']);
+filename = fullfile(experimentpath(record),[record.test '_response_centers.mat']);
 if ~exist(filename,'file') || recalculate
     hwait = waitbar(0,'Calculating response centers');
     for i=1:n_stim
@@ -130,8 +130,7 @@ img_monitorpatch_y = reshape(Fmonitorpatch_y([gx(:) gy(:)]),size(gx,1),size(gx,2
 % colormap hsv
 
 figure
-image(imread(fullfile(oidatapath(record),'analysis',record.imagefile)));
-hold on
+image(imread(fullfile(experimentpath(record),'analysis',record.imagefile)));
 hold on
 
 [c,h] = contour(gy,gx,img_monitorpatch_x,(min(monitorpatch_x)+0.5):(max(monitorpatch_x)-0.5)  );

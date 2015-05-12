@@ -9,7 +9,7 @@ function [db,ind]=sort_db(db,alt_order,show_waitbar)
 %     ALT_ORDER is an optional alternative ordering of the fields to use,
 %     can be a subset of fields
 %
-%  2005-2013, Alexander Heimel
+%  2005-2015, Alexander Heimel
 %
 
 if isempty(db)
@@ -37,15 +37,6 @@ end
 if ~iscell(order)
     order = {order};
 end
-
-%if length(order)<length(fieldnames(db(1)))
-%    other_fields = fieldnames(db(1));
-%    for i = 1:length(other_fields)
-%        if ~ismember( other_fields{i},order)
-%            order{end+1} = other_fields{i}; %#ok<AGROW>
-%        end
-%    end
-%end
 
 n=length(db);
 ind=(1:n);
@@ -89,7 +80,8 @@ while ~list_is_sorted
             ind(i+1)=indtemp;
             
             list_is_sorted=0;
-            %swaps = swaps +1;
+        elseif ~later_record(db(i+1),db(i),order)
+           logmsg([ 'More than one record like ' recordfilter(db(i)) ]);
         end
     end
     pass=pass+1;
@@ -111,8 +103,8 @@ function val=later_record(rec1,rec2,fields)
 
 val=0;
 for i=1:length(fields)
-    f1 = getfield(rec1,fields{i});
-    f2 = getfield(rec2,fields{i});
+    f1 = rec1.(fields{i});
+    f2 = rec2.(fields{i});
     
     if ~isnumeric(f1)  % for Levelt Lab only
         if strcmp(f1(1:min(5,end)),'mouse')==1
@@ -121,9 +113,9 @@ for i=1:length(fields)
             % to number.
             digits_ind1=find(f1<58 & f1>47);
             digits_ind2=find(f2<58 & f2>47);
-            if ~isempty(digits_ind1) & ~isempty(digits_ind2)
-                f1=str2num( f1(digits_ind1) );
-                f2=str2num( f2(digits_ind2) );
+            if ~isempty(digits_ind1) && ~isempty(digits_ind2)
+                f1 = str2num( f1(digits_ind1) ); %#ok<ST2NM>
+                f2 = str2num( f2(digits_ind2) ); %#ok<ST2NM>
             end
         end
         
@@ -140,8 +132,6 @@ for i=1:length(fields)
             val = 1;
             return
         end
-        
-        %    if length(f1) ==1 & length(f2)==1
         if isnan(f1(1)) && ~isnan(f2(1))
             val = 1; % sort nans to end
             return
@@ -163,9 +153,6 @@ for i=1:length(fields)
             val=1;
             return;
         end
-    else
-        % goto next field
-       % return
     end
 end
 

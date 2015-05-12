@@ -1,31 +1,16 @@
-function [x,y,fname]=get_bregma(ref_image,datapath,analysispath)
+function [x,y,fname] = get_bregma(record)
 %GET_BREGMA reads bregma from file or point in image relative to reference 
 %
-%   [X,Y] = GET_BREGMA(REF_IMAGE,DATAPATH,ANALYSISPATH)
 %   [X,Y] = GET_BREGMA(RECORD)
 %
-%  2005-2014, Alexander Heimel
+%  2005-2015, Alexander Heimel
 %
 x=[];
 y=[];
-fname='';
 
-if nargin<3
-    analysispath=[];
-end
-if nargin<2
-    datapath=[];
-end
-if nargin<1
-    return;
-end
-
-if isstruct(ref_image)
-    record = ref_image;
-    ref_image = record.ref_image;
-    datapath = oidatapath(record);
-    analysispath = 'analysis';
-end
+ref_image = record.ref_image;
+datapath = experimentpath(record);
+analysispath = 'analysis';
 
 fname=ref_image;
 if exist(fname,'file')
@@ -42,7 +27,7 @@ if ~exist(fname,'file')
     return
 end
 
-ind=findstr(upper(fname),'BMP');
+ind = strfind(upper(fname),'BMP');
 if isempty(ind)
     logmsg(['Reference image ' fname ' is not of type BMP.']);
     return
@@ -63,7 +48,7 @@ if ~exist(fnamebrg,'file')
     [x,y]=ginput(1);
     x=round(x);
     y=round(y);
-    disp(['GET_BREGMA: Clicked on ' num2str(x) ', ' num2str(y)]);
+    logmsg(['Clicked on ' num2str(x) ', ' num2str(y)]);
     save(fnamebrg,'x','y','-mat');
     close(h);
 else

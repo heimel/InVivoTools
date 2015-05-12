@@ -7,7 +7,7 @@ function [response_framenumbers,baseline_framenumbers] = oi_get_framenumbers(rec
 %
 params = oiprocessparams(record);
 
-filenames = fullfilelist(oidatapath(record),convert_cst2cell(record.test));
+filenames = fullfilelist(experimentpath(record),convert_cst2cell(record.test));
 d = dir([filenames{1} '*BLK']);
 if isempty(d)
     baseline_framenumbers = [];
@@ -15,7 +15,7 @@ if isempty(d)
     errormsg(['Cannot find files for record ' recordfilter(record)]);
     return
 end
-fileinfo = imagefile_info(fullfile(oidatapath(record),d(1).name));
+fileinfo = imagefile_info(fullfile(experimentpath(record),d(1).name));
 
 baseline_framenumbers =...
     (1: floor((record.stim_onset+ params.extra_baseline_time)/fileinfo.frameduration)  );

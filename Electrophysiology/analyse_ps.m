@@ -111,8 +111,17 @@ for i = 1:length(triggers)
       measures.fano{i} = mean(rast.fano(ind));
     rastcount_max = rastcount_max/length(ind);
     
+    rastcount_all = zeros(1,maxbins);
+    for j=1:length(rast.counts)
+        rastcount_all = rastcount_all+rast.counts{j}(1:length(rastcount_all))/rast.N(j);
+    end
+    rastcount_all = rastcount_all/length(rast.counts);
+    
     measures.psth_tbins{i} = binsize*((1:maxbins)-0.5);
     measures.psth_count{i} = rastcount_max;
+    measures.psth_count_all{i} = rastcount_all;
+    
+    measures.psth_count_raw{i} = rast.counts;
     
     filterwidth = 0.05/binsize; % 50 ms width = too broad for onset times!
     rastcount_max = spatialfilter(rastcount_max,filterwidth);

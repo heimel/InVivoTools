@@ -1,10 +1,12 @@
-function [im,fname]=tpreadframe(record,channel,frame,opt,verbose)
+function [im,fname]=tpreadframe(record,channel,frame,opt,verbose,fname)
 %TPREADFRAME read frame from liff (Leica Image Format File)
 %
-%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME )
+%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE, FNAME )
 %
+%    Using FNAME as an input argument can bypass constructing the filename,
+%    and speeds up calling TPREADFRAME
 %
-% 2011-2014, Alexander Heimel
+% 2011-2015, Alexander Heimel
 %
 persistent readfname images
 
@@ -16,11 +18,15 @@ if nargin<4
     opt = [];
 end
 
-fname = tpfilename( record, frame, channel, opt);
+if nargin<6 || isempty(fname)
+    fname = tpfilename( record, frame, channel, opt);
+end
 
 % check if matlabstored file is present
 if strcmp(readfname,[fname ':' record.slice])==0 % not read in yet
-    logmsg('First time loading this stack. reading all frames');
+    if verbose
+        logmsg('First time loading this stack. reading all frames');
+    end
     org_fname = tpfilename( record, frame, channel); % no options
     iminf = tpreadconfig(record);
     if iminf.BitsPerSample~=16
@@ -41,6 +47,7 @@ if strcmp(readfname,[fname ':' record.slice])==0 % not read in yet
     else % i.e. no right processed file exist
         %images(:,:,fr,ch)
         data = bfopen_single_series(org_fname,iminf.Series); % only use first=last? session
+        warning('off','BF:lowJavaMemory');
         for ch = 1:iminf.NumberOfChannels
             for fr = 1:iminf.NumberOfFrames
                 
@@ -51,14 +58,16 @@ if strcmp(readfname,[fname ':' record.slice])==0 % not read in yet
         % now do image processing
         images = tp_image_processing( images, opt );
         % save processed file for later use
-        disp(['TPREADFRAME: writing processed image stack as ' fname]);
+        logmsg(['Writing processed image stack as ' fname]);
         writepath = fileparts(fname);
         if ~exist(writepath,'dir')
             mkdir(writepath);
         end
         fluoviewtiffwrite(images,fname,iminf)
     end
-    disp('TPREADFRAME: finished reading')
+    if verbose
+        logmsg('Finished reading')
+    end
     readfname=[fname ':' record.slice]; % when completely loaded set readfname
 else
     % disp(['reading frame ' num2str(frame)]);
@@ -70,6 +79,7 @@ im=images(:,:,frame,channel);
 %im(:,:,:,channel)=images(:,:,frame,channel);
 
 mlock
+
 return
 
 

@@ -37,7 +37,7 @@ for i=1:m,
 	n(end+1) = l;
 	p = cat(2,p,reshape(x,1,l));
 end;
-r = ranks2(p);
+r = ranks(p);
 
 k = 0;
 j = 0;

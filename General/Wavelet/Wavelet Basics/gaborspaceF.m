@@ -13,7 +13,7 @@ function  G = gaborspaceF(S,FF,F)
 [nf,ns]=size(FF); 
 ms = min(ns,length(S));
 if ns > ms
-    S=[S;zeros(ns-ms)];
+    S=[S;zeros(ns-ms,1)];
 % elseif length(S) > ms
 %     FF=[FF;zeros(nf,ns-ms)];
 end

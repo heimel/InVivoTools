@@ -26,7 +26,7 @@ function tp_organization
 %      for morphological recordings also epoch could be empty
 %
 %
-%   TPDATAPATH( RECORD ) returns path where epoch directories (t00001, etc) are located
+%   EXPERIMENTPATH( RECORD ) returns path where epoch directories (t00001, etc) are located
 %   TPFILENAME( RECORD, FRAME, CHANNEL) returns filename of imagefile
 %   including epoch name (i.e. t00001/Live_0000.tif)
 %

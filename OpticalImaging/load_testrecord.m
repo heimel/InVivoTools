@@ -8,7 +8,7 @@ function [imgdata,roi,ror,data]=load_testrecord( record )
   imgdata=[];roi=[];ror=[];data=[];
   
   
-analysispath=fullfile(oidatapath(record),'analysis');
+analysispath=fullfile(experimentpath(record),'analysis');
   
   if ~isempty(record.imagefile)
     if record.imagefile(1)=='/' % abs path

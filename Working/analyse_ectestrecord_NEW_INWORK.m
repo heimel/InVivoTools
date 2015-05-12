@@ -24,7 +24,7 @@ if isempty(record.monitorpos)
     errordlg(msg,'Analyse ectestrecord');
 end
 
-datapath=ecdatapath(record);
+datapath=experimentpath(record,false);
 if ~exist(datapath,'dir')
     errordlg(['Folder ' datapath ' does not exist.']);
     disp(['ANALYSE_ECTESTRECORD: Folder ' datapath ' does not exist.'])
@@ -252,7 +252,7 @@ switch lower(record.setup)
 end
 
 % save all spikes
-spikesfile = fullfile(ecdatapath(record),record.test,'_spikes.mat');
+spikesfile = fullfile(experimentpath(record),'_spikes.mat');
 
 save(spikesfile,'cells','isi');
 

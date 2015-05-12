@@ -8,12 +8,7 @@ function [stims,filename] = getstimsfile( record )
 %
 
 stimsname = 'stims.mat';
-switch record.datatype
-    case 'tp'
-        filename = fullfile( tpdatapath(record),stimsname);
-    case {'ec','lfp'}
-        filename = fullfile( ecdatapath(record), record.test,stimsname);
-end
+filename = fullfile( experimentpath(record),stimsname);
 if exist( filename, 'file')
     stims = load( filename, '-mat');
 else

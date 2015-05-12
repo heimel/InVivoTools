@@ -10,12 +10,12 @@ function b = stiminterview(argument)
 %
 if isstruct(argument)
     record = argument;
-    dirname = tpdatapath( record );
+    dirname = experimentpath(record);
 else
     dirname = argument;
 end
 
-disp(['Beginning user interview to describe stimuli in ' dirname '.']);
+logmsg(['Beginning user interview to describe stimuli in ' dirname '.']);
 
 stimlist = [];
 stimtimesfilename=fullfile( fixpath(dirname),'stimtimes.txt');

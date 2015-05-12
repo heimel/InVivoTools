@@ -48,7 +48,7 @@ pre_ttl = max_pretime-stimulus_start;
 post_ttl = stimulus_start+max_duration+max_posttime;
 
 
-datapath=ecdatapath(record);
+datapath = experimentpath(record,false);
 %         chnorder = 1:numchannel;
 %         Tankname = 'Mouse';
 blocknames = [record.test];
@@ -184,7 +184,7 @@ for i = 1:n_conditions
     CSO = [CSO,WAVE_CSO];
 %     waves_std(i,:) = std(waves(ind,:),1);
 end
-wavefile=fullfile(ecdatapath(record),record.test,['CSO_data',num2str(t),'.mat']);
+wavefile=fullfile(experimentpath(record),['CSO_data',num2str(t),'.mat']);
 save(wavefile,'CSO');
 end
 display('finished!')

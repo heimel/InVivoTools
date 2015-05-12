@@ -79,8 +79,17 @@ if length(r1)>1 && length(r2)>1
             else
                 vartype = 'equal';
             end
+            try
+                [h,p,ci,stats]=ttest2(r1,r2,'alpha',0.05,'tail',tail,'vartype',vartype);  %#ok<ASGLU>
+            catch me
+                switch me.identifier
+                    case 'MATLAB:TooManyInputs' % older matlab versions R2009b
+                        [h,p,ci,stats]=ttest2(r1,r2,0.05,tail,vartype);  %#ok<ASGLU>
+                    otherwise
+                        rethrow(me)
+                end
+            end
             
-            [h,p,ci,stats]=ttest2(r1,r2,'alpha',0.05,'tail',tail,'vartype',vartype);  %#ok<ASGLU>
             statistic = stats.tstat;
             statistic_name = 't';
             dof=stats.df;
@@ -91,7 +100,16 @@ if length(r1)>1 && length(r2)>1
                 testperformed = 't-test';
             end
         case {'ranksum','mann-whitney','mannwhitney'}
-            [p,h,stats]=ranksum(r1,r2,'alpha',0.05,'tail',tail); 
+            try
+                [p,h,stats]=ranksum(r1,r2,'alpha',0.05,'tail',tail);
+            catch me
+               switch me.identifier
+                   case 'stats:ranksum:BadParamName'
+                       [p,h,stats]=ranksum(r1,r2,'alpha',0.05);
+                   otherwise
+                       rethrow(me)
+               end
+            end            
             if isfield(stats,'zval') % for too few numbers it is missing
                 statistic = stats.zval;
                 statistic_name = 'z';

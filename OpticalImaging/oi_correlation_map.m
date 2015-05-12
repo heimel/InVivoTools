@@ -13,22 +13,6 @@ if nargin<1
     record = [];
 end
 
-% if ~isempty(record)
-%     cd(oidatapath(record));
-% end
-
-% load('spontaneous_frames.mat')
-% logmsg('WORKING HERE: SHOULD USE OI_READ_ALL_DATA INSTEAD');
-% data = zeros(size(ffrr{1},1),size(ffrr{1},2),length(ffrr));
-% for i=1:length(ffrr)
-%     data(:,:,i) = ffrr{i};
-% end
-
-% for i=1:size(data,1)
-%     for j=1:size(data,2)
-%         data(i,j,:)=detrend(squeeze(data(i,j,:)));
-%     end
-% end
 
 data = oi_read_all_data( record );
 

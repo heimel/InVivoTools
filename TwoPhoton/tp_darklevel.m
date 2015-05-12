@@ -18,7 +18,6 @@ switch params.darklevel_determination
             im = tpreadframe(record,ch,ceil(impar.NumberOfFrames/2));
             darklevel(ch) =  prctile(im(:),5);
         end
-        darklevel = 0;
         logmsg(['Darklevel = ' mat2str(darklevel)]);
     otherwise
         errormsg(['Unknown darklevel determination: ' params.darklevel_determination]);

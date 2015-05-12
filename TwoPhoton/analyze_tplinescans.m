@@ -14,7 +14,7 @@ end
 
 db = [];
 
-load_testdb(expdatabases('ls'))
+load_testdb('ls')
 
 if  reanalyze
     db = analyze_all(db);

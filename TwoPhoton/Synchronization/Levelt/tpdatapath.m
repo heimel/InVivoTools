@@ -1,4 +1,4 @@
-function path=tpdatapath( record )
+function path=tpdatapath( record,include_test )
 %TPDATAPATH constructs a twophoton data path
 %
 % PATH = TPDATAPATH( RECORD )
@@ -7,8 +7,14 @@ function path=tpdatapath( record )
 %
 % check TP_ORGANIZATION for organization of the files
 %
-% 2008-2014, Alexander Heimel
+% DEPRECATED: Use EXPERIMENTPATH instead
 %
+% 2008-2015, Alexander Heimel
+%
+
+if nargin<2 || isempty(include_test)
+    include_test = true;
+end
 
 data_name = 'Twophoton';
 
@@ -35,7 +41,7 @@ if ~exist(params.tpdatapath_localroot,'dir') % fall back on current folder
     params.tpdatapath_localroot = '.';
 end
 
-if nargin==1
+if nargin>0
     if isempty(record.mouse)
         warning('TPDATAPATH:NO_MOUSE_NUMBER','Record does not contain mouse number, e.g. 08.26.1.06');
         warning('OFF','TPDATAPATH:NO_MOUSE_NUMBER');
@@ -46,14 +52,26 @@ if nargin==1
     end
     
     % first try local root
-    path=fullfile(params.tpdatapath_localroot,record.experiment,record.mouse,record.date,record.epoch);
+    if include_test
+        path=fullfile(params.tpdatapath_localroot,record.experiment,record.mouse,record.date,record.epoch);
+    else
+        path=fullfile(params.tpdatapath_localroot,record.experiment,record.mouse,record.date);
+    end
     if ~exist(path,'dir')
-        path=fullfile(params.tpdatapath_networkroot,record.experiment,record.mouse,record.date,record.epoch);
+        if include_test
+            path=fullfile(params.tpdatapath_networkroot,record.experiment,record.mouse,record.date,record.epoch);
+        else
+            path=fullfile(params.tpdatapath_networkroot,record.experiment,record.mouse,record.date);
+        end
         if ~exist(path,'dir')
             % fall back to local path
-            path=fullfile(params.tpdatapath_localroot,record.experiment,record.mouse,record.date,record.epoch);
-        end       
-    end        
+            if include_test
+                path=fullfile(params.tpdatapath_localroot,record.experiment,record.mouse,record.date,record.epoch);
+            else
+                path=fullfile(params.tpdatapath_localroot,record.experiment,record.mouse,record.date);
+            end
+        end
+    end
 else
     path=params.tpdatapath_localroot;
     if ~exist(path,'dir')

@@ -4,7 +4,7 @@ function [mousedb,filename]=load_mousedb
 % 2005, Alexander Heimel
 %
 
-[mousedb,filename] = load_expdatabase('mousedb');
+[mousedb,filename] = load_expdatabase('mousedb',[],[],[],false);
 
 logmsg('Temp removal for multiline comments');
 for i=1:length(mousedb)

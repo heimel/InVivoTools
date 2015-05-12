@@ -32,6 +32,7 @@ set(g,'Name','Run experiment','NumberTitle','off','MenuBar','none');
 
 if nargin<2
     record.mouse = 'test';
+    record.test = 't00001';
     record.datatype = 'ec';
     record.date = datestr(now,'yyyy-mm-dd');
     record.setup = host;

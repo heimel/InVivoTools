@@ -9,6 +9,10 @@ if nargin<2
 end
 
 stimsfile = getstimsfile(record);
+if isempty(stimsfile)
+    return
+end
+
 stims=get(stimsfile.saveScript);
 
 variable = record.measures(1).variable;
@@ -22,8 +26,6 @@ if isempty(variable)
     end
 end
 
-vx = [0];
-vy = [0];
 
 starttime = 0;
 stoptime = stimsfile.MTI2{end}.startStopTimes(end)-stimsfile.start;
@@ -38,6 +40,9 @@ stimlabel = {};
 ax = axis;
 low = ax(3);
 high = ax(4);
+
+vx = [0];
+vy = low;
 
 for i=1:length(stimsfile.MTI2)
     % on
@@ -80,6 +85,7 @@ set(h,'edgecolor',ShadingColor);
 if ~isempty(xlims)
     xlim(xlims);
 end
+ylim([low high]);
 
 children = get(gca,'children');
 set(gca,'children',children(end:-1:1));

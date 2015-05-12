@@ -282,7 +282,11 @@ for c=1:n_cells
                     plot_polar_curve(measure,'-');
                     switch lower(record.setup)
                         case {'nin380','nori001','antigua'}
-                            set(gca,'xdir','reverse' ); 
+                            % do nothing for backprojection screen
+                            %set(gca,'ydir','reverse' ); 
+                        otherwise
+                            set(gca,'ydir','reverse' ); 
+                            
                     end
                     
                     hold on
@@ -406,7 +410,7 @@ end
 switch data_type
     case 'ec'
         if params.plot_spike_features
-            spikesfile = fullfile(ecdatapath(record),record.test,'_spikes.mat');
+            spikesfile = fullfile(experimentpath(record),'_spikes.mat');
             if exist(spikesfile,'file')
                 cells = [];
                 load(spikesfile);

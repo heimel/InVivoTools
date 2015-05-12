@@ -8,8 +8,6 @@ function [fig,ud] = draw_analyzetpstack( record, analysis_parameters, process_pa
 
 ud.record = record;
 ud.channel = 1;
-%ud.ds = dirstruct(tpdatapath(ud.record));
-
 
 ti = tpreadconfig( record );
 if isempty(ti)

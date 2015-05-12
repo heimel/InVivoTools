@@ -15,7 +15,7 @@ end
 if isempty(record)
     datapath = pwd;
 else
-    datapath = ecdatapath(record);
+    datapath = experimentpath(record,false);
 end
 
 channels = unique([orgcells.channel]);
@@ -115,35 +115,7 @@ for ch = channels
     end
     fclose(fidt);
     fclose(fidf);
-    
-    
-    %     try
-    %         cksds=cksdirstruct(ecdatapath(record));
-    %     catch
-    %         disp(['IMPORTSPIKE2: Could not create/open cksdirstruct ' path])
-    %         return
-    %     end
-    %
-    %     % load acquisitionfile for electrode name
-    %     % to get samplerate acqParams_out should be used instead of _in
-    %     ff=fullfile(getpathname(cksds),trial,'acqParams_in');
-    %     f=fopen(ff,'r');
-    %     if f==-1
-    %         disp(['Error: could not open ' ff ]);
-    %         return;
-    %     end
-    %     fclose(f);  % just to get proper error
-    %     acqinfo=loadStructArray(ff);
-    %
-    %
-    %     unitchannelname = 'Spikes';
-    
-    % cellnamedel=sprintf('cell_%s_%s_%.4d_*',acqinfo(1).name,unitchannelname,acqinfo(1).ref);
-    % deleteexpvar(cksds,cellnamedel); % delete all old representations
-    % [px,expf] = getexperimentfile(cksds,1);
-    % delete(px);
-    % [px,expf] = getexperimentfile(cksds,1);
-    
+        
     for cl=1:length(cells)
         if cells(cl).data<10 % don't include cells with less than 10 spikes
             continue
@@ -157,7 +129,7 @@ for ch = channels
         outcells(count).channel = ch;
         outcells(count).intervals = intervals;
         outcells(count).sample_interval = sample_interval;
-        outcells(count).desc_long = fullfile(ecdatapath(record),record.test);
+        outcells(count).desc_long = experimentpath(record);
         outcells(count).desc_brief = record.test;
         outcells(count).detector_params = [];
         outcells(count).trial = record.test;

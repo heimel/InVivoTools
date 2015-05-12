@@ -52,18 +52,15 @@ switch protocol
         params.rc_interval=[0.0205 0.2205];
 end
 
-params.vep_poweranalysis_type = 'wavelet'; % or 'periodogram' or 'wavelet'
-
+params.vep_poweranalysis_type = 'wavelet'; % or 'spectrogram' or 'wavelet'
 params.vep_remove_line_noise = 'temporal_domain'; % 'frequency_domain' or 'none' or 'temporal_domain'
-
 params.vep_remove_vep_mean = true; % removes average VEP response before power analysis
-
 params.vep_log10_freqs = true;
-
 params.vep_wavelet_freq_high = 100;
 params.vep_wavelet_freq_low = 1;
 params.vep_wavelet_freq_res = params.vep_wavelet_freq_high; % reduce this to increase speed
-
+params.vep_wavelet_alpha = 3; % was 1
+params.vep_wavelet_beta = 1; % was 3
 
 params.cell_colors = repmat('kbgrcmy',1,50);
 

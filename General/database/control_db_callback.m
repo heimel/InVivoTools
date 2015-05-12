@@ -321,22 +321,15 @@ switch windowname
                     rmlock(filename);
                 end
             case 'help'
-                help_url = 'https://sites.google.com/site/alexanderheimel/protocols/invivotools';
-                help_local = fullfile(fileparts(which('startup')),'Manual','ManualInVivoTools.html');
-                switch computer
-                    case {'PCWIN','PCWIN64'}
-                        msgbox('Database and record available by ''global global_db global_record''');
-                        dos(['start ' help_url]);
-                    otherwise
-                        web(help_local)
-                        logmsg(['Load ' help_url ' in your favorite browser. Database and record available by ''global global_db global_record''']);
-                end
+                help_url = 'https://github.com/heimel/InVivoTools/wiki';
+                logmsg(['Opening ' help_url ' in default browser.']);
+                web(help_url,'-browser');
                 
                 global global_db global_record
                 global_db = ud.db;
                 global_record = ud.db(ud.current_record);
                 evalin('base','global global_db global_record');
-                logmsg('Database and record available as global_db and global_record');
+                errormsg('Database and record available as global_db and global_record');
             case 'close'
                 if ud.changed==1 % changes to be saved
                     answer=questdlg('Do you want to save changes?',...

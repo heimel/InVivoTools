@@ -98,10 +98,14 @@ switch measuress.datatype
         if isempty(expdb_cache) || ...
                 ~isfield(expdb_cache,measuress.datatype) || ...
                 ~isfield( expdb_cache.(measuress.datatype),'type') || ...
-                ~strcmp(expdatabases(measuress.datatype), expdb_cache.(measuress.datatype).type)
+                ~strcmp(measuress.datatype, expdb_cache.(measuress.datatype).type)
             reload = true;
         else
-            d = dir(expdb_cache.(measuress.datatype).filename);
+            if iscell(expdb_cache.(measuress.datatype).filename)
+                d = dir(expdb_cache.(measuress.datatype).filename{1});
+            else
+                d = dir(expdb_cache.(measuress.datatype).filename);
+            end
             if isempty(d) % probably concatenated database
                 reload = false;
             elseif ~strcmp(d.date, expdb_cache.(measuress.datatype).date) % i.e. changed
@@ -127,7 +131,8 @@ switch measuress.datatype
         end
         
         if reload
-            expdb_cache.(measuress.datatype).type = expdatabases(measuress.datatype) ;
+            %            expdb_cache.(measuress.datatype).type = expdatabases(measuress.datatype) ;
+            expdb_cache.(measuress.datatype).type = measuress.datatype ;
             if exist('dbname','var') && ischar(dbname)
                 temp = load(dbname);
                 expdb_cache.(measuress.datatype).db = temp.db;
@@ -137,7 +142,11 @@ switch measuress.datatype
                 [expdb_cache.(measuress.datatype).db,expdb_cache.(measuress.datatype).filename] = ...
                     load_testdb(expdb_cache.(measuress.datatype).type);
             end
-            d = dir(expdb_cache.(measuress.datatype).filename);
+            if iscell(expdb_cache.(measuress.datatype).filename)
+                d = dir(expdb_cache.(measuress.datatype).filename{1});
+            else
+                d = dir(expdb_cache.(measuress.datatype).filename);
+            end
             expdb_cache.(measuress.datatype).date = d.date;
         else
             logmsg(['Using cache of ' expdb_cache.(measuress.datatype).filename '. Type ''clear functions'' to clear cache.']);
@@ -178,10 +187,10 @@ for g=1:n_groups
             
         otherwise
             logmsg([ 'measure = ' measuress.measure ', group=' groupss(g).name ...
-                ' : mean = ' num2str(nanmean(double(results{g}(:)))) ...
-                ' , std = ' num2str(nanstd(double(results{g}(:)))) ...
-                ' , sem = ' num2str(sem(double(results{g}(:)))) ...
-                ' , N = ' num2str(min(n(:)))]);
+                ' : mean = ' num2str(nanmean(double(results{g}(:))),3) ...
+                ' , std = ' num2str(nanstd(double(results{g}(:))),3) ...
+                ' , sem = ' num2str(sem(double(results{g}(:))),3) ...
+                ' , N = ' num2str(min(n(:))) ' ' value_per 's']);
     end
 end % g (groups)
 
@@ -462,72 +471,74 @@ end
 switch measure.measure
     case 'weight'
         results = get_mouse_weight( mouse);
+        return
     case 'age'
         results = age(mouse.birthdate,testrecord.date);
         dresults = NaN;
+        return
     case 'expdate'  % day number since 1-1-0000
-        results=datenum(testrecord.date,'yyyy-mm-dd') ;
-    otherwise
-        if strcmp(measure.measure(1:min(end,4)),'file')
-            switch measure.datatype
-                case 'tp'
-                    saved_data_file = fullfile(tpdatapath(testrecord),[measure.datatype '_measures.mat']);
-                case {'ec','lfp'}
-                    saved_data_file = fullfile(ecdatapath(testrecord),testrecord.test,[measure.datatype '_measures.mat']);
+        results = datenum(testrecord.date,'yyyy-mm-dd') ;
+        return
+end
+
+if strcmp(measure.measure(1:min(end,4)),'file') % read measure from file
+    saved_data_file = fullfile(experimentpath(testrecord),[measure.datatype '_measures.mat']);
+    if exist(saved_data_file,'file')
+        saved_data = load(saved_data_file);
+        results = [];
+        try
+            for c = 1:length(saved_data.measures) % channel or cell
+                eval(['results = [results saved_data.measures(' num2str(c) ').' measure.measure(6:end) '];']);
             end
-            if exist(saved_data_file,'file')
-                saved_data = load(saved_data_file); 
-                results = [];
-                try
-                    for c = 1:length(saved_data.measures) % channel or cell
-                        eval(['results = [results saved_data.measures(' num2str(c) ').' measure.measure(6:end) '];']);
-                    end
-                catch me
-                    logmsg(['Error in retrieving ' measure.measure(6:end) ' from ' saved_data_file '. ' me.identifier ]);
-                end
-                logmsg(['Retrieved ' ...
-                    measure.measure(6:end) ' from ' saved_data_file ...
-                    '. Results is of size ' num2str(size(results)) ]);
-                dresults = nan(size(results));
-            end
-        else
-            [results,dresults] = get_compound_measure_from_record(testrecord,measure.measure,criteria,extra_options);
-            results = double(results);
-            dresults = double(dresults);
-            if strcmpi(value_per,'neurite')
-                linked2neurite = get_compound_measure_from_record(testrecord,'linked2neurite',criteria,extra_options);
-                if length(linked2neurite)~=length(results)
-                    errormsg('Not an equal number of values and neurite numbers.');
-                    return
-                end
-                uniqneurites =  uniq(sort(linked2neurite(~isnan(linked2neurite))));
-                res = [];
-                dres = [];
-                for neurite = uniqneurites(:)'
-                    res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
-                    dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
-                end
-                results = res;
-                dresults = dres;
-            end
-            if isempty(results) && ~strcmp(measure.measure,'depth')
-                [results,dresults]=get_valrecord(testrecord,measure.measure,mouse);
-            end
+        catch me
+            logmsg(['Error in retrieving ' measure.measure(6:end) ' from ' saved_data_file '. ' me.identifier ]);
         end
-        if ~isempty(results)
-            switch value_per
-                case {'measurement','neurite'}
-                    if ndims(results)<3 && numel(results)<200 %#ok<ISMAT>
-                        textres=mat2str(results',3);
-                        if ~isempty(textres) && textres(1)=='['
-                            textres=textres(2:end-1);
-                        end
-                    else
-                        textres = [num2str(ndims(results)) 'd array'];
-                    end
-                    logmsg([linehead measure.name '=' textres]);
-            end
+        logmsg(['Retrieved ' ...
+            measure.measure(6:end) ' from ' saved_data_file ...
+            '. Results is of size ' num2str(size(results)) ]);
+        dresults = nan(size(results));
+    end
+else
+    [results,dresults] = get_compound_measure_from_record(testrecord,measure.measure,criteria,extra_options);
+    
+    results = double(results);
+    dresults = double(dresults);
+    
+    if strcmpi(value_per,'neurite') % take mean per neurite
+        linked2neurite = get_compound_measure_from_record(testrecord,'linked2neurite',criteria,extra_options);
+        if length(linked2neurite)~=length(results)
+            errormsg('Not an equal number of values and neurite numbers.');
+            return
         end
+        uniqneurites =  uniq(sort(linked2neurite(~isnan(linked2neurite))));
+        res = [];
+        dres = [];
+        for neurite = uniqneurites(:)'
+            res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
+            dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
+        end
+        results = res;
+        dresults = dres;
+    end
+    
+    if isempty(results) && ~strcmp(measure.measure,'depth')
+        [results,dresults]=get_valrecord(testrecord,measure.measure,mouse);
+    end
+end
+
+if ~isempty(results)
+    switch value_per
+        case {'measurement','neurite'}
+            if ndims(results)<3 && numel(results)<200 %#ok<ISMAT>
+                textres = mat2str(results',3);
+                if ~isempty(textres) && textres(1)=='['
+                    textres = textres(2:end-1);
+                end
+            else
+                textres = [num2str(ndims(results)) 'd array'];
+            end
+            logmsg([linehead measure.name '=' textres]);
+    end
 end
 return
 

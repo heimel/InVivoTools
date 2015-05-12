@@ -12,6 +12,8 @@ tpsetup(record);
 inf = tpreadconfig( record );
 if isfield(inf,'third_axis_name') && strcmpi(inf.third_axis_name,'T') ...
         || ( isfield(record,'measures') && isfield(record.measures,'curve')) 
+    record.measures = merge_measures_from_disk( record );
+
     tpplotraw(record);
     results_ectestrecord( record );
 else

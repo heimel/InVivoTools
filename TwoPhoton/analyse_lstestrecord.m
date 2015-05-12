@@ -38,7 +38,7 @@ for i=1:length(epochs)
         single_record_data = load(matfile,'-mat');
     else
         opwd = pwd;
-        cd(  tpdatapath(single_record) );
+        cd(  experimentpath(single_record) );
         convert_linescan2mat( tpfilename(single_record), single_record.linescan_period, single_record.compression);
         single_record_data = load(matfile,'-mat');
         cd(opwd);

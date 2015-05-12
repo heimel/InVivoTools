@@ -48,7 +48,7 @@ end
 if res==0 
   switch button
       case 'Open read-only'
-          disp(['OPEN_DB: Cannot get lock on ' filename '. Opening as READ-ONLY']);
+          logmsg(['Cannot get lock on ' filename '. Opening as READ-ONLY']);
           perm='ro';
       case 'Cancel'
           db = [];
@@ -62,7 +62,7 @@ else
 end
 
 if exist(filename,'file')~=2
-	disp(['OPEN_DB: Unable to open ' filename ': No such file']);
+	logmsg(['Unable to open ' filename ': No such file']);
 	db = [];
 else
     [dummy1,dummy2,ext] = fileparts(filename);
@@ -70,10 +70,10 @@ else
         case '.mdb'
             table='Mouse list';
             crit = [];
-             db=import_mdb( filename, table, crit )
+             db = import_mdb( filename, table, crit );
         otherwise % 'mat' and default
-            x=load(filename,'-mat');
-            db=x.db;
+            x = load(filename,'-mat');
+            db = x.db;
     end
 end
 

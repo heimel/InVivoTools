@@ -5,6 +5,8 @@ function path=wcdatapath( record, create )
 %  by default PATH is the networkpath, unless a local data folder is
 %  present
 %
+% DEPRECATED: Use EXPERIMENTPATH instead
+%
 % 2014-2015, Alexander Heimel
 %
 

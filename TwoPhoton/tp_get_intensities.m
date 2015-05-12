@@ -74,11 +74,12 @@ for i = ind_dendrite(:)'
     
     for ch = 1:params.NumberOfChannels
         intensity = zeros(length(roi_dendrite.xi),1);
+        fname = '';
         for j = 1:length(roi_dendrite.xi)
             local_intensity = [];
             for frame = (max(1,round(roi_dendrite.zi(j))-1):...
                     min(params.NumberOfFrames,round(roi_dendrite.zi(j))+1))
-                im = tpreadframe(record,ch,frame,process_parameters,verbose);
+                [im,fname] = tpreadframe(record,ch,frame,process_parameters,verbose,fname);
                 im = double(squeeze(im));
                 x = round(roi_dendrite.xi(j));
                 y = round(roi_dendrite.yi(j));
@@ -111,7 +112,9 @@ for i = ind_dendrite(:)'
         record.measures(i).(['intensity_mean_ch' num2str(ch)]) = mean(intensity);
         record.measures(i).(['intensity_median_ch' num2str(ch)]) = median(intensity);
         record.measures(i).(['intensity_max_ch' num2str(ch)]) = max(intensity);
-        
+        record.measures(i).(['intensity_rel2dendrite_ch' num2str(ch)]) = NaN;
+        record.measures(i).(['intensity_rel2synapse_ch' num2str(ch)]) = NaN;
+ 
         if mean(intensity)<1
             logmsg(['Mean intensity of dendrite ' num2str(roi_dendrite.index) ...
                 ' channel ' num2str(ch) ' is less than 1.']);
@@ -166,6 +169,8 @@ for j = 1:length(celllist)
     if length(roi.pixelinds)~=length(computed_pixelinds) || any(roi.pixelinds~=computed_pixelinds)
         logmsg(['Discrepancy on pixelinds of ROI ' num2str(roi.index) '. Replacing with recalculated inds.' ]);
         roi.pixelinds = computed_pixelinds;
+        
+        record.ROIs.celllist(j).pixelinds = roi.pixelinds;
     end
     
     frame = roi.zi(1);
@@ -186,7 +191,9 @@ for j = 1:length(celllist)
         end
         intensity_dendrite = NaN(size(roi.intensity_mean));
     else
-        intensity_dendrite = celllist(ind_dendrite ).intensity_mean;
+        for ch= 1:params.NumberOfChannels
+            intensity_dendrite(ch) = record.measures(ind_dendrite).(['intensity_mean_ch' num2str(ch)]);
+        end
     end
     
     if frame~=round(frame)
@@ -213,6 +220,7 @@ for j = 1:length(celllist)
         record.measures(j).(['intensity_max_ch' num2str(ch)]) = roi.intensity_max(ch);
         record.measures(j).(['intensity_rel2dendrite_ch' num2str(ch)]) = roi.intensity_rel2dendrite(ch);
         record.measures(j).(['intensity_rel2synapse_ch' num2str(ch)]) = roi.intensity_rel2synapse(ch);
+      
     end
     if verbose
         waitbar(0.5+ 0.5*j/length(celllist),hbar);

@@ -51,7 +51,7 @@ for kk = [5 6]
         post_ttl = stimulus_start+max_duration+max_posttime;
         
         
-        datapath=ecdatapath(record);
+        datapath=experimentpath(record,false);
         %         chnorder = 1:numchannel;
         %         Tankname = 'Mouse';
         blocknames = [record.test];
@@ -201,7 +201,7 @@ for kk = [5 6]
 end
 
 fname = ['wtcorr_data,',num2str(a1),',',num2str(b1),',',num2str(a2),',',num2str(b2),'.mat'];
-wavefile=fullfile(ecdatapath(record),record.test,fname);
+wavefile=fullfile(experimentpath(record),fname);
 save(wavefile,'WTcorr','period','waves_time','a1','b1','a2','b2');
 
 pause(10)

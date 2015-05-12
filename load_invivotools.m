@@ -10,7 +10,9 @@ function load_invivotools
 % 2014, Alexander Heimel
 %
 
-disp([ upper(mfilename) ': Manual available at https://sites.google.com/site/alexanderheimel/protocols/invivotools']);
+more off
+
+disp([ upper(mfilename) ': Manual available at https://github.com/heimel/InVivoTools/wiki']);
 
 if isunix
     updatestr = ['To update InVivoTools: update_invivotools'];

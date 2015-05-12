@@ -16,7 +16,7 @@ end
 function measures_db = extract_db( measures_db, datatype)
 
 % get which database
-[testdb, experimental_pc] = expdatabases( datatype );
+testdb = expdatabases( datatype );
 
 [db,filename]=load_expdatabase( testdb,'',false,false,true );
 if isempty(db)

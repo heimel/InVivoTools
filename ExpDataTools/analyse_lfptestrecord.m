@@ -15,8 +15,8 @@ if isempty(verbose)
     verbose = 1;
 end
 
-datapath = ecdatapath(record);
-smrfile=fullfile(datapath,record.test,'data.smr');
+datapath = experimentpath(record,false);
+smrfile=fullfile(experimentpath(record),'data.smr');
 
 measures = record.measures;
 

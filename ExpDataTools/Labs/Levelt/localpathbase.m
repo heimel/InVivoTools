@@ -1,31 +1,33 @@
-function base=localpathbase
+function base=localpathbase(vers)
 %LOCALPATHBASE return base of local data path
 %
-% BASE = LOCALPATHBASE
+% BASE = LOCALPATHBASE(VERS='2004')
 %
-%  LEVELTLAB dependent, returns path to levelt storage share 
-%
-% 2012, Alexander Heimel
+% 2012-2015, Alexander Heimel
 %
 
-switch computer
-    case 'MACI64'
-            base = '/Volumes/MVP/Common/InVivo';
-    case 'MACI' 
-        base = '/Users/user/Dropbox/Data';
-    case {'GLNX86','GLNXA64'}
-        base = '/home/data/InVivo';
-    case {'PCWIN','PCWIN64'}
-        base = 'D:\Data\InVivo';
-        if ~exist(base,'dir')
-            base = 'C:\Data\InVivo';
+if nargin<1 || isempty(vers)
+    vers = '2004';
+end
+
+switch vers
+    case '2004'
+        if ispc % i.e. windows
+            base = 'D:\Data\InVivo';
+            if ~exist(base,'dir')
+                base = 'C:\Data\InVivo';
+            end
+        elseif ismac
+            base = '/Users/user/Dropbox/Data';
+        else % linux
+            base = '/home/data/InVivo';
         end
-    otherwise
-            error(['LOCALPATHBASE: Unknown computer type ' computer ]);
+    case '2015'
+        base = fullfile(userhome,'Dropbox (NIN)');
 end
     
 if ~exist(base,'dir')
-    disp(['LOCALPATHBASE: Folder ' base ' does not exist.']);
+    logmsg(['Folder ' base ' does not exist.']);
 end
 
   

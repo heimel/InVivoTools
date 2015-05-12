@@ -37,7 +37,7 @@ if proceed,
 		proceed = 0; errormsg = 'animType must be 0,1,..., or 5.';
 	elseif sum(parameters.flickerType*ones(1,3)==(0:2))~=1,
 		proceed = 0; errormsg = 'flickerType must be 0,1, or 2.';
-	elseif parameters.distance<=0, proceed = 0; errormsg = 'distance must be positive.';
+%	elseif parameters.distance<=0, proceed = 0; errormsg = 'distance must be positive.';
 	elseif sum(parameters.sFrequency<=0), proceed = 0; errormsg = 'sFrequency must be positive.';
 	elseif sum(parameters.tFrequency<=0), proceed = 0; errormsg = 'tFrequency must be positive.';
 	elseif sum(parameters.barWidth<=0), proceed = 0; errormsg = 'barWidth must be positive.';
