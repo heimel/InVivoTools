@@ -104,7 +104,7 @@ if length(r1)>1 && length(r2)>1
                 [p,h,stats]=ranksum(r1,r2,'alpha',0.05,'tail',tail);
             catch me
                switch me.identifier
-                   case 'stats:ranksum:BadParamName'
+                   case {'stats:ranksum:BadParamName','stats:internal:parseArgs:BadParamName'}
                        [p,h,stats]=ranksum(r1,r2,'alpha',0.05);
                    otherwise
                        rethrow(me)
