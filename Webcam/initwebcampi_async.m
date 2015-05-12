@@ -86,36 +86,42 @@ end
 [recstart,filename] = start_recording(recdatapath);
 acqparams_in = fullfile(datapath,'acqParams_in');
 
-
 try
-  % edit Sven april 2015: Try different ttyUSBs, can be changed in something smarter if necessary
-  if ~isempty(dir('/dev/ttyUSB0'))
-  	s1 = serial('/dev/ttyUSB0');
-  else
-	s1 = serial('/dev/ttyUSB1');
+  % edit Sven april 2015: Try ttyUSB0-9, can be changed in something smarter if necessary
+  for i = 1:10
+	devfolder = strcat('/dev/ttyUSB',num2str(i-1));
+	if ~isempty(dir(devfolder))
+	  	s1 = serial(devfolder);
+		break;
+  	end
   end
   fopen(s1);
+
   %edit Sven april 2015: Made compatible with two versions of instrument-control
   if isfield(get(s1),'pinstatus')
 	new_instr_contr = 1;
 	pin = 'DataSetReady'; 
+
   else
 	new_instr_contr = 0;
 	pin = 'datasetready';
   end
+
   if new_instr_contr
 	s2 = get(s1,'pinstatus');
   	prev_cts = s2.(pin);
   else
-	prev_cts = s2.(pin);
+	prev_cts = get(s1,pin);
   end
+
   org_cts = 'on'; %prev_cts; 
+
   while 1
     if new_instr_contr
 	s2 = get(s1,'pinstatus');
 	cts = s2.(pin);
     else
-	cts = s2.(pin);
+	cts = get(s1,pin);
     end
     if cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)  % i.e. changed and not same as original
 	stimstart =  time - recstart;
@@ -135,13 +141,13 @@ try
     pause(0.05);
   end
 catch
-    logmsg('HIER');
+
     stop_recording(filename);
     fclose(s1);
    % rethrow(lasterror)
 end
 
-logmsg('DAAR');
+
 
 
 
