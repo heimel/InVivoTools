@@ -33,7 +33,7 @@ if ~isempty(record.add2graph)
     end
 end
 
-[r,p,filename,hgraph] = groupgraph(record.groups,record.measures,...
+[gy,gx,p,filename,hgraph] = groupgraph(record.groups,record.measures,...
     'criteria',record.criteria,...
     'style',record.style,'test',record.test,'showpoints',record.showpoints,...
     'color',record.color,'prefax',record.prefax,'spaced',record.spaced,...
@@ -44,7 +44,10 @@ end
     'path',record.path,'value_per',record.value_per,'ylab',record.ylab,...
     'add2graph_handle',hgraph,'limit',record.limit);
 
-    
+record.values.gy = gy;
+record.values.gx = gx;
+record.values.p = p;
+
 [path,filename,ext] = fileparts(filename); %#ok<ASGLU>
 record.filename = [filename ext];
 record.modified = datestr(now);

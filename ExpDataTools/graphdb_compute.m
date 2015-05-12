@@ -1,9 +1,9 @@
 function newud=graphdb_compute( ud)
 %GRAPHDB_COMPUTE
 %
-%   NEWUD=GRAPHDB_COMPUTE( UD)
+%   NEWUD = GRAPHDB_COMPUTE( UD)
 %
-% 2007-2013, Alexander Heimel
+% 2007-2015, Alexander Heimel
 
 newud = ud;
 
@@ -33,42 +33,3 @@ end
 
 newud = ud;
 newud.changed = 1;
-
-
-
-% 
-% function [r,p,filename,hgraph] = call_groupgraph(record,db,hgraph)
-% 
-% 
-% if ~isempty(record.add2graph)
-%     if strcmp(record.add2graph,record.name)
-%         errormsg('Record name and add2graph are identical. This would lead to endless loop');
-%     else
-%         ind_add2 = find_record(db,record.add2graph);
-%         if ~isempty(ind_add2)
-%             if length(ind_add2)>1
-%                 logmsg('Multiple records fit add2graph name. Taking first');
-%                 ind_add2 = ind_add2(1);
-%             end
-%             
-%             [~,~,~,h] = call_groupgraph(db(ind_add2),db,hgraph);
-%             if ~isempty(h)
-%                 hgraph = h.fig;
-%             end
-%         end
-%     end
-% end
-% 
-% [r,p,filename,hgraph] = groupgraph(record.groups,record.measures,...
-%     'criteria',record.criteria,...
-%     'style',record.style,'test',record.test,'showpoints',record.showpoints,...
-%     'color',record.color,'prefax',record.prefax,'spaced',record.spaced,...
-%     'signif_y',record.signif_y,'grouplabels',record.grouplabels,...
-%     'measurelabels',record.measurelabels,'extra_options',record.extra_options,...
-%     'extra_code',record.extra_code,'filename',record.filename,...
-%     'name',record.name,...
-%     'path',record.path,'value_per',record.value_per,'ylab',record.ylab,...
-%     'add2graph_handle',hgraph,'limit',record.limit);
-% 
-% logmsg(['Computed ' struct2char(record,'; ')]);
-

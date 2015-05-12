@@ -1,10 +1,10 @@
-function [r,p,filename,h]=groupgraph(groups,measures,varargin)
+function [gy,gx,p,filename,h]=groupgraph(groups,measures,varargin)
 %GROUPGRAPH
 %
-%  [R,P,FILENAME,H]=GROUPGRAPH(GROUPS,MEASURES,VARARGIN);
+%  [GY,GX,P,FILENAME,H] = GROUPGRAPH(GROUPS,MEASURES,VARARGIN);
 %
 %
-% 2007-2014, Alexander Heimel
+% 2007-2015, Alexander Heimel
 
 global values_x values_y
 
@@ -717,8 +717,6 @@ end
 if length(values_x)==1 && iscell(values_x{1})
     values_x = values_x{1};
 end
-
-
 
 evalin('base','global values_x values_y');
 logmsg('Values available in workspace as values_x values_y. To show data: dispcell(values_y)');

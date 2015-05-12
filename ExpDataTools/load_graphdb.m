@@ -13,29 +13,6 @@ end
 
 [db,filename]=load_expdatabase('graphdb',[],create);
 
-% % temporarily add add2graph field % 2013-03-22
-% if ~isfield(db,'add2graph')
-%     for i=1:length(db)
-%         db(i).add2graph = '';
-%     end
-%     stat = checklock(filename);
-%     if stat~=1
-%         filename = save_db(db,filename,'');
-%         rmlock(filename);
-%     end
-% end
-% 
-% % temporarily add limit field % 2013-04-23
-% if ~isfield(db,'limit')
-%     for i=1:length(db)
-%         db(i).limit = '';
-%     end
-%     stat = checklock(filename);
-%     if stat~=1
-%         filename = save_db(db,filename,'');
-%         rmlock(filename);
-%     end
-% end
 if isempty(db)
     return
 end
