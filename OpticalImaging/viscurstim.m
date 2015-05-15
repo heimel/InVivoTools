@@ -1,3 +1,5 @@
+%%
+ sca
  % visual_and_current_stimulation
 %
 %   Shows continuous visual stimulation and reads stims bits and instructs
@@ -29,6 +31,7 @@ if ~isempty(s)
 end
 
 flag = 1;
+
 
 s = serial(comPort);
 set(s, 'DataBits', 8);

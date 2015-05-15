@@ -7,14 +7,14 @@ if nargin<2
     oldstim = [];
 end
 
-default.filename = 'large_circle.png';
+default.filename = 'square_red100.png';
 default.appear = 1;
-default.stay = 1;
-default.stoppoint = 3;
+default.stay = 0;
+default.stoppoint = 15;
 default.start_position = 'left';
-default.velocity_degps = [10 0]; % vx,vy in deg/s, right and up and away are positive
+default.velocity_degps = [60 0]; % vx,vy in deg/s, right and up and away are positive
 default.duration = 5; % duration of movement in s
-default.extent_deg = [1 1]; % extent in degrees
+default.extent_deg = [6 6]; % extent in degrees
 default.backdrop = [0.5 0.5 0.5];
 default.dispprefs = '{''BGpretime'',0}';
 if isempty(oldstim)

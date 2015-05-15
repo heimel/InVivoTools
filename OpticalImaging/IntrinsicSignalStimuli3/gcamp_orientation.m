@@ -1,8 +1,8 @@
-%RETINOTOPY_2x2
+%GCAMP_ORIENTATION
 %
-% RETINOTOPY_2x2, NewStim3 version
+% GCAMP_ORIENTATION, NewStim3 version
 % 
-% 2012, Alexander Heimel
+% 2015, Alexander Heimel
 %
 
 % To skip initial tests
@@ -19,8 +19,8 @@ ShowStimScreen;
 StimWindowGlobals
 
 % how many blocks 
-n_x = 6;
-n_y = 4;
+n_x = 1;
+n_y = 1;
 
 r = StimWindowRect; % screen size
 width = round( (r(3)-r(1))/n_x);
@@ -39,32 +39,29 @@ pspar.backdrop = 0.5;
 pspar.windowShape = 0;
 pspar.dispprefs = {'BGpretime',0,'BGposttime',0};
 pspar.angle = 45;
-total_duration = 3;
+total_duration = 8;
 pspar.prestim_time = 2;
-angles = [0:pspar.angle:360-pspar.angle];
+angles = [45 135]; 
 
-for i = 1:n_x*n_y
+for i = 1:length(angles)
     iss_script(i) = StimScript(0);
    
     % location
-    row=floor( (i-1)/n_x);
-    col=i-1-row*n_x;
+    row=0;%floor( (1-1)/n_x);
+    col=0;%1-1-row*n_x;
     pspar.rect = [col*width row*height (col+1)*width (row+1)*height];
     
-    pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
-    angles = angles( randperm(length(angles)) );
-    for angle = angles
-        pspar.angle = angle;
-        retinotopy_stim = periodicstim(pspar);
-        iss_script(i) = append(iss_script(i),retinotopy_stim);
-    end
+    pspar.nCycles = total_duration * pspar.tFrequency ;
+    pspar.angle = angles(i);
+    retinotopy_stim = periodicstim(pspar);
+    iss_script(i) = append(iss_script(i),retinotopy_stim);
     iss_script(i) = loadStimScript(iss_script(i));
 end
 
 tic
 % show script as test
-MTI = DisplayTiming(iss_script(4));
-DisplayStimScript(iss_script(4),MTI,0,0);
+MTI = DisplayTiming(iss_script(1));
+DisplayStimScript(iss_script(1),MTI,0,0);
 toc
 
 
@@ -78,6 +75,7 @@ try
         if ~go    % go has to be off, before another stimulus is shown
             ready=1;
         end
+        stim = bitand(stim,3);
         if go && ready
             if stim~=0 % not blank
                 pause(pspar.prestim_time);

@@ -39,7 +39,7 @@ while ~unique_record && f<=length(flds)
     else
         val = record.(flds{f});
     end
-    s = [s ',' flds{f} '=' val ];
+    s = [s ',' flds{f} '="' val '"' ];
     ind = find_record(db,s);
     unique_record = (length(ind)==1);
     f = f + 1;

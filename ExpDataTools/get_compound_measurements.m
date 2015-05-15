@@ -1,6 +1,8 @@
 function [results,dresults,measurelabels,wordtypes]=get_compound_measurements(groups,measures,varargin)
 %GET_COMPOUND_MEASUREMENTS
 %
+%    [results,dresults,measurelabels,wordtypes] = get_compound_measurements(groups,measures,varargin)
+%
 % 2007-2014, Alexander Heimel
 %
 
