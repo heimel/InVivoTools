@@ -127,6 +127,10 @@ if ~get
     return
 end
 
+if isfield(record,'response') % i.e. oi record, no measures field
+    record.measures.(measure) = get_valrecord(record,measure);
+end
+
 if isfield(record,measure)
     val = record.(measure);
     if islogical(val)
@@ -158,7 +162,6 @@ end
 if exist('max_snr','var')
     errormsg('min_snr is deprecated and is ignored. Use limit instead.',true);
 end
-
 
 for c=1:length(record.measures) % over all cells or ROIs
     get = 1;

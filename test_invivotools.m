@@ -1,23 +1,23 @@
 function test_invivotools( datatypes, breakonerror)
 %TEST_INVIVOTOOLS analyses example databases and checks results
 %
-%  TEST_INVIVOTOOLS
+%  TEST_INVIVOTOOLS( DATATYPES, BREAKONERROR)
+%      DATATYPES is a cell list with datatype strings. Use empty to
+%      test only graph_db
 %
 %  useful for checking software after making changes
 %
 % 2015, Alexander Heimel
 
 if nargin<1 || isempty(datatypes)
-    datatypes = {'tp'};
+    datatypes = {};
 end
 if nargin<2 || isempty(breakonerror)
     breakonerror = true;
 end
 
-
 prev_exp = experiment;
 experiment('examples')
-
 
 % experiment databases
 for d = 1:length(datatypes)
@@ -28,7 +28,7 @@ for d = 1:length(datatypes)
         prev_values = record.measures;
         record = analyse_testrecord(record,false);
         if ~isempty(prev_values)
-            if ~isequaln(record.measures,prev_values) 
+            if ~isequaln(record.measures,prev_values)
                 errormsg([recordfilter(record,db) ' does not give the same values as previously ']);
                 if length(record.measures)~=length(prev_values)
                     logmsg(['Difference in the number of cells or ROIs. ' ...
@@ -55,12 +55,13 @@ for i=1:length(db)
     if ~isempty(prev_values)
         if ~isequaln(record.values.gx,prev_values.gx) || ...
                 ~isequaln(record.values.gy,prev_values.gy) || ...
-                ~isequaln(record.values.p,prev_values.p) 
-                errormsg([recordfilter(record,db) ' does not give the same values as previously ']);
+                ~isequaln(record.values.p,prev_values.p)
+            errormsg([recordfilter(record,db) ' does not give the same values as previously ']);
+            if breakonerror
+                keyboard
+            end
         end
     end
 end
-
-
 
 experiment(prev_exp);

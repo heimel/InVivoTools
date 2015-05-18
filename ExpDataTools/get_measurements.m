@@ -538,9 +538,6 @@ else
         dresults = dres;
     end
     
-    if isempty(results) && ~strcmp(measure.measure,'depth')
-        [results,dresults]=get_valrecord(testrecord,measure.measure,mouse);
-    end
 end
 
 if ~isempty(results)
