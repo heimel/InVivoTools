@@ -270,30 +270,30 @@ if strcmpi(measure.datatype,'genenetwork')
     results=get_genenetwork_probe(mouse.strain,measure.stim_type,measure.measure);
 end
 
-if isempty(measure.stim_type) || strcmp(measure.stim_type,'*')
-    switch measure.measure
-        case 'sex', % only once per mouse
-            results=strcmp(mouse.sex,'male');
-            return
-        case 'weight'
-            results = get_mouse_weight( mouse );
-            return
-        case 'bregma2lambda'
-            if ~isempty(mouse.bregma2lambda)
-                results = mouse.bregma2lambda(1);
-            else
-                results = [];
-            end
-            return
-        case 'skullwidth'
-            if ~isempty(mouse.bregma2lambda)
-                results = mouse.bregma2lambda(2);
-            else
-                results = [];
-            end
-            return
-    end
-end
+% if isempty(measure.stim_type) || strcmp(measure.stim_type,'*')
+%     switch measure.measure
+%         case 'sex', % only once per mouse
+%             results=strcmp(mouse.sex,'male');
+%             return
+%         case 'weight'
+%             results = get_mouse_weight( mouse );
+%             return
+%         case 'bregma2lambda'
+%             if ~isempty(mouse.bregma2lambda)
+%                 results = mouse.bregma2lambda(1);
+%             else
+%                 results = [];
+%             end
+%             return
+%         case 'skullwidth'
+%             if ~isempty(mouse.bregma2lambda)
+%                 results = mouse.bregma2lambda(2);
+%             else
+%                 results = [];
+%             end
+%             return
+%     end
+% end
 
 
 cond=[ 'mouse=' mouse.mouse  ];
@@ -469,6 +469,9 @@ switch measure.datatype
 end
 
 switch measure.measure
+    case 'sex'
+        results=strcmp(mouse.sex,'male');
+        return
     case 'weight'
         results = get_mouse_weight( mouse);
         return
@@ -478,6 +481,20 @@ switch measure.measure
         return
     case 'expdate'  % day number since 1-1-0000
         results = datenum(testrecord.date,'yyyy-mm-dd') ;
+        return
+    case 'bregma2lambda'
+        if ~isempty(mouse.bregma2lambda)
+            results = mouse.bregma2lambda(1);
+        else
+            results = [];
+        end
+        return
+    case 'skullwidth'
+        if ~isempty(mouse.bregma2lambda)
+            results = mouse.bregma2lambda(2);
+        else
+            results = [];
+        end
         return
 end
 

@@ -104,7 +104,16 @@ if length(unique(extra_options(1:2:end)))~=length(extra_options(1:2:end))
 end
 
 for i=1:2:length(extra_options)
+    try
     assign(strtrim(extra_options{i}),extra_options{i+1});
+    catch me
+        switch me.identifier
+            case 'MATLAB:assigninInvalidVariable'
+                errormsg(['''' extra_options{i} ''' is not a valid extra option.'])
+                return
+        end
+        rethrow(me);
+    end
 end
 
 logmsg(['Collecting data for figure ' name ]);
