@@ -8,7 +8,8 @@ function [gy,gx,p,filename,h]=groupgraph(groups,measures,varargin)
 
 global values_x values_y
 
-r = [];
+gy = {};
+gx = {};
 p = [];
 h = [];
 
@@ -108,7 +109,7 @@ end
 
 logmsg(['Collecting data for figure ' name ]);
 
-if isempty(mousedb) 
+if isempty(mousedb)
     mousedb = load_mousedb;
 end
 
@@ -165,7 +166,7 @@ for g=1:length(groups)
     groups{g}=strtrim(groups{g});
     p=[];
     for go=groupoperators
-        p=[p find(groups{g}==go)];
+        p=[p find(groups{g}==go)]; %#ok<*AGROW>
     end
     if isempty(p)
         allgroups{end+1}=groups{g};
@@ -192,9 +193,9 @@ for g=1:n_groups
     if ~isempty(ind_g)
         group=groupdb(ind_g);
     else
-         % perhaps a whole filter
-            filter = allgroups{g};
-            ind_m=find_record(mousedb,filter);
+        % perhaps a whole filter
+        filter = allgroups{g};
+        ind_m=find_record(mousedb,filter);
         if isempty(ind_m)
             % perhaps a mouse number
             filter = ['mouse=' allgroups{g}];
@@ -215,7 +216,7 @@ end
 n_groups=length(groups); % it can be that multiple groups match group criteria
 
 % parse criteria
-criteria = split(criteria,',',true); 
+criteria = split(criteria,',',true);
 n_criteria = length(criteria);
 
 if ~isfield(groups,'criteria')
@@ -293,7 +294,7 @@ end
 clear('tmpcolor');
 
 if exist('set_value','var')
-    set_value = eval(set_value); %#ok<NODEF>
+    set_value = eval(set_value);
     msr=set_value{1};
     if msr==-1
         msr=(1:n_measures);
@@ -437,22 +438,21 @@ if ~isempty(operator_groups)
     n_groups=length(r{1});
 end
 
-for m=1:n_measures
-    for g=1:n_groups
-        if length(grouplabels)==n_groups
-            grouplabel=grouplabels{g};
-        else
-            grouplabel='';
-        end
-        if isempty(grouplabel)
-            grouplabel=['group ' num2str(g)];
-        end
-%         disp([measurelabels{m} ' ' grouplabel ...
-%             ' mean = ' num2str(nanmean(r{m}{g}(:)),3) ...
-%             ', sem = ' num2str(r_std{m}{g}/sqrt(r_n{m}{g}-1),3) ]);
-    end
-end
-
+% for m=1:n_measures
+%     for g=1:n_groups
+%         if length(grouplabels)==n_groups
+%             grouplabel=grouplabels{g};
+%         else
+%             grouplabel='';
+%         end
+%         if isempty(grouplabel)
+%             grouplabel=['group ' num2str(g)];
+%         end
+%         %         disp([measurelabels{m} ' ' grouplabel ...
+%         %             ' mean = ' num2str(nanmean(r{m}{g}(:)),3) ...
+%         %             ', sem = ' num2str(r_std{m}{g}/sqrt(r_n{m}{g}-1),3) ]);
+%     end
+% end
 
 % center grouplabels for use in captions
 grouplabels=strjust(char(grouplabels),'center');
@@ -468,7 +468,7 @@ switch style
                 num2str(size(grouplabels,1)) ' given, ' num2str(n_groups*n_measures/2) ' expected.' ]);
             logmsg(grouplabels)
             for i=size(grouplabels,1)+1:n_groups*n_measures/2
-               % grouplabels{i} = '';
+                % grouplabels{i} = '';
                 grouplabels(i,:) = ' ';
             end
         end
@@ -476,8 +476,8 @@ switch style
         if size(grouplabels,1)~=n_groups
             errormsg(['Wrong number of grouplabels. ' ...
                 num2str(size(grouplabels,1)) ' given, ' num2str(n_groups) ' expected.' ]);
-            logmsg(grouplabels)
-            return
+            logmsg(cellstr(grouplabels));
+%            return
         end
 end
 
@@ -499,10 +499,10 @@ end
 
 
 % call graph
-clear('gx','gy');
-glabel={};
-ny={};
-ystd={};
+%clear('gx','gy');
+glabel = {};
+ny = {};
+ystd = {};
 gz = {};
 switch style
     case 'surf'
@@ -532,8 +532,6 @@ switch style
         xlab=measurelabels{1};
         ylab=measurelabels{2};
         xticklabels='';
-        
-            
     case 'xy'
         if mod(length(r),2)==0 % i.e. even number of measures
             % odd measures will be on x-axis
@@ -569,12 +567,11 @@ switch style
                 gy{g}=r{1}{n_groups/2+g};
                 gcolor{g}=color{g};
             end
-            glabel={};
             xticklabels='';
             xlab=grouplabels(1,:);
             if size(grouplabels,1)>1
                 ylab=grouplabels(2,:);
-            else 
+            else
                 ylab = '';
             end
         end
@@ -647,7 +644,6 @@ switch style
                 end
                 xticklabels=glabel;
         end
-        
 end
 
 
@@ -667,7 +663,7 @@ if ~isempty(strfind(lower(legnd),'on')) %#ok<*NODEF> %i.e. 'on' or 'location'
     extra_options{ind+1} = legnd;
 end
 
-if ~exist('gy','var')
+if ~exist('gy','var') || isempty(gy)
     logmsg('No data. Check if mice are present in mouse_db (or use ''add_missing_mice'' to add them). Or try to remove limits.');
     return
 end

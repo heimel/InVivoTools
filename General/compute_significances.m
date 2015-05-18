@@ -31,6 +31,8 @@ if strcmp(test,'none')
     return
 end
 
+test = lower(subst_specialchars(strtrim(test))); % to substitute spaces by _
+
 if  strcmp(test,'chi2')
     d = zeros(length(y),2);
     for i=1:length(y)
@@ -50,7 +52,7 @@ w=0.1;
 for i=1:length(y)
     ind = ~isnan(y{i});
     
-    logmsg(['Group ' num2str(i) ':  ' num2str(mean(y{i}(ind)),2) ...
+    logmsg(['Group ' num2str(i) ':  ' num2str(mean(y{i}(ind)),3) ...
         ' +/- ' num2str(std(y{i}(ind)),2) ...
         ' [' num2str(sem(y{i}(ind)),2) ']' ...
         ' (mean +/- std [sem]), n = ' num2str(length(y{i}(ind))) ]);
