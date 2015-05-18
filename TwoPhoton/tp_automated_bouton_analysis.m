@@ -72,16 +72,27 @@ for i = 1:length(axons) % over axons
                 bp = ROIlist(bouton).extra;
                 nxtb = find([ROIlist(axon_ints).extra] < bp, 1, 'last'); %next before
                 nxta = find([ROIlist(axon_ints).extra] > bp, 1, 'first'); %next after
+                
                 if(~isempty(nxtb) && ~isempty(nxta))
                     intnxt1 = ROIlist(axon_ints(nxtb)).intensity_mean(2)-Bgintensity;
                     intnxt2 = ROIlist(axon_ints(nxta)).intensity_mean(2)-Bgintensity;
                     
                     intensity = ROIlist(bouton).intensity_mean(2)-Bgintensity;
-                    % ROIlist(bouton).intensity_rel2dendrite(1) = intensity*2/(intnxt1 + intnxt2);
                     measures(bouton).intensity_rel2dendrite = intensity*2/(intnxt1 + intnxt2);
-                    disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
+                    %disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
+                    
+                elseif(~isempty(nxtb) || ~isempty(nxta))
+                        if ~isempty(nxtb)
+                            intnxt = ROIlist(axon_ints(nxtb)).intensity_mean(2)-Bgintensity;
+                        else
+                            intnxt = ROIlist(axon_ints(nxta)).intensity_mean(2)-Bgintensity;
+                        end
+                        intensity = ROIlist(bouton).intensity_mean(2)-Bgintensity;
+                        measures(bouton).intensity_rel2dendrite = intensity/intnxt;
+                        %disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
                 else
                     disp('no relevant axon_ints to compare with!!!!')
+                    
                 end
             end
         else
