@@ -234,12 +234,23 @@ end
 
 if n_criteria>0
     count = 1;
-    for c=1:n_criteria
-        for g=1:n_groups
-            ngroups(count) = groups(g);
-            ngroups(count).criteria = criteria{c};
-            count = count+1;
-        end
+    switch group_by
+        case 'criteria'
+            for c=1:n_criteria
+                for g=1:n_groups
+                    ngroups(count) = groups(g);
+                    ngroups(count).criteria = criteria{c};
+                    count = count+1;
+                end
+            end
+        otherwise
+            for g=1:n_groups
+                for c=1:n_criteria
+                    ngroups(count) = groups(g);
+                    ngroups(count).criteria = criteria{c};
+                    count = count+1;
+                end
+            end
     end
     groups = ngroups;
     n_groups = length(groups);
