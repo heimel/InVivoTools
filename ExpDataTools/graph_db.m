@@ -114,6 +114,7 @@ set(ud.record_form,'Position',pos_record);
 
 function assignud2base(hObject, cbdata)
    % h = hObject.parent;
-    ud = cbdata.Source.Parent.UserData;
+    hP = get(hObject, 'Parent');
+    ud = get(hP, 'Userdata');
     assignin('base', 'ud', ud)
 
