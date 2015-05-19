@@ -100,7 +100,6 @@ if NSUseInitialSerialTrigger
     else
         WaitSecs(0.001);
         StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
-        StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
     end
 end
 
