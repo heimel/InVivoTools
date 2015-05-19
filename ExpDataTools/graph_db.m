@@ -19,12 +19,10 @@ if isempty(db)
    return
 end
 
-
 h_fig=control_db(filename,[0 1 1]); % which will load the file again
 if isempty(h_fig)
     return
 end
-
 
 if nargout==1
   fig=h_fig;
@@ -50,7 +48,6 @@ h.compute = ...
   'String','Compute','Tag','graphdb_compute' );
 left=left+buttonwidth+colsep;
 
-
 h.show = ...
   uicontrol('Parent',h_fig, ...
   'Units','pixels', ...
@@ -60,8 +57,6 @@ h.show = ...
   'Position',[left top buttonwidth buttonheight], ...
   'String','Show' , 'Tag','graphdb_show');
 left=left+buttonwidth+colsep;
-
-
 
 h.groupdb = ...
   uicontrol('Parent',h_fig, ...

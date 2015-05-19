@@ -96,3 +96,18 @@ A: I added a trigger parameter to the stimscript object, to make a conditional t
 this made changes in 
 DisplayStimulus,DisplayStimScript, stimscript, stimscript/setDisplayMethod, ScriptObjEditor
 and introduced stimscript/getTrigger
+
+
+
+----------
+Questions for Steve:
+- is 'adjust_duration.m' still part of the code?
+- is 'checkscript.m'  still part of the code?
+
+- I have implemented NewStimList and NewStimScriptList as by getting all class files from the Stimuli and Script directories. Isn't that nicer?
+
+- Should ReceptiveFieldMapper not go into NewStim?
+
+- Should RFmap.m be in NewStimServices?
+
+- why all the evals in NewStimInit instead of direct function calls? 

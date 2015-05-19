@@ -12,17 +12,14 @@ function plot_significance(x1,x2,y,p,height,w)
 % 2007-2014 Alexander Heimel
 %
 
-if nargin<6;w=[];end
-if nargin<5;height=[];end
-
-if isempty(w)
-    w=0;
+if nargin<6 || isempty(w)
+    w = 0;
 end
-if isempty(height)
-    height=0;
+if nargin<5 || isempty(height)
+    height = 0;
 end
 
-if p>0.05
+if p>0.05 || isnan(p)
     return
 end
 

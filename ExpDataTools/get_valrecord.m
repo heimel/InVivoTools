@@ -1,11 +1,11 @@
-function [val,val_sem]=get_valrecord(record,measure,mouserecord)
+function [val,val_sem]=get_valrecord(record,measure)
 %GET_VALRECORD gets measure from record
 %
-%   [VAL,VAL_SEM]=GET_VALRECORD(RECORD,MEASURE,MOUSERECORD)
+%   [VAL,VAL_SEM]=GET_VALRECORD(RECORD,MEASURE)
 %               set record.reliable=2 to reduce stringency
 %
 %
-% 2005, Alexander Heimel
+% 2005-2015, Alexander Heimel
 %
 
 val=[];
@@ -13,13 +13,8 @@ val_sem=[];
 
 switch measure
   case 'depth'
-    switch record.datatype
-      case 'oi'
-        val=record.depth;
-      case 'ec'
-        val=record.depth-record.surface;
-    end
-    return
+      val = record.depth;
+      return
 end
 
 if ~isfield(record,'response')
@@ -38,8 +33,6 @@ if ~isempty(record)
   [conditions,condnames]=get_conditions_from_record(record);
 end
 
-
-
 switch measure
   case 'adaptation_low'
     % adaption_low computes the slope of the response versus
@@ -48,8 +41,8 @@ switch measure
     t=t-mean(t);
     y=record.response_all;
     y=y-repmat(mean(y),size(y,1),1);
-    conditions(find(conditions==0))=nan; % to avoid picking blank
-    conditions(find(conditions==-2))=nan; % to avoid picking
+    conditions(conditions==0) = nan; % to avoid picking blank
+    conditions(conditions==-2) = nan; % to avoid picking
     % shutters closed
     [m,ind]=min(conditions);
     y=y(:,ind);
@@ -62,8 +55,8 @@ switch measure
     t=t-mean(t);
     y=record.response_all;
     y=y-repmat(mean(y),size(y,1),1);
-    conditions(find(conditions==0))=nan; % to avoid picking blank
-    conditions(find(conditions==-2))=nan; % to avoid picking
+    conditions(conditions==0) = nan; % to avoid picking blank
+    conditions(conditions==-2) = nan; % to avoid picking
     % shutters closed
     [m,ind]=max(conditions);
     y=y(:,ind);
@@ -74,50 +67,18 @@ switch measure
 
 end
 
-
-
 switch record.stim_type
   case 'retinotopy',
     if isempty(record.response)
       logmsg(['Warning response is empty for ' record.date ...
         'test ' record.test]);
-      %  else
-      %    val=record.response(1);
-      %    writeln(fid,l,measure,val,val_sem,sep);
-      %    measure='screen_center_ap';
-      %    val=record.response(2);
-      %    writeln(fid,l,measure,val,val_sem,sep);
     end
     switch measure
       case 'screen_center_ml',
         val=record.response(1)/1000; % convert to mm
         val_sem=nan;
-      case 'screen_center_ml_b2l',
-        if ~isempty(mouserecord.bregma2lambda)
-          val=record.response(1)/1000;% convert to mm
-          val=val/mouserecord.bregma2lambda(1);
-        else
-          val=nan;
-        end
-        val_sem=nan;
-      case 'screen_center_ml_sw' % skullwidth
-        if length(mouserecord.bregma2lambda)>1
-          val=record.response(1)/1000;% convert to mm
-          val=val/mouserecord.bregma2lambda(2);
-        else
-          val=nan;
-        end
-        val_sem=nan;
       case 'screen_center_ap',
         val=record.response(2)/1000;% convert to mm
-        val_sem=nan;
-      case 'screen_center_ap_b2l',
-        if ~isempty(mouserecord.bregma2lambda)
-          val=record.response(2)/1000;% convert to mm
-          val=val/mouserecord.bregma2lambda(1);
-        else
-          val=nan;
-        end
         val_sem=nan;
     end
   case 'rt_response'
@@ -150,7 +111,7 @@ switch record.stim_type
 
       switch measure
         case 'contra',
-          if ~isempty(findstr(record.rorfile,'empty'))
+          if ~isempty(strfind(record.rorfile,'empty'))
             logmsg('ROR is empty. Cannot be used for absolute responses');
             val=nan;
             val_sem=nan;
@@ -159,7 +120,7 @@ switch record.stim_type
             val_sem=dy(ind_contra);
           end
         case 'ipsi',
-          if ~isempty(findstr(record.rorfile,'empty'))
+          if ~isempty(strfind(record.rorfile,'empty'))
             logmsg('ROR is empty. Cannot be used for absolute responses');
             val=nan;
             val_sem=nan;
@@ -168,7 +129,7 @@ switch record.stim_type
             val_sem=dy(ind_ipsi);
           end
         case {'response','c+i'}
-          if ~isempty(findstr(record.rorfile,'empty'))
+          if ~isempty(strfind(record.rorfile,'empty'))
             logmsg('ROR is empty. Cannot be used for absolute responses');
             val=nan;
             val_sem=nan;
@@ -207,16 +168,11 @@ switch record.stim_type
       end
     end
   case {'sf_contrast','contrast_sf'}
-
     sf=record.stim_sf;
     contrast=record.stim_contrast;
-
-    %		x=reshape(conditions(1,:),length(sf),length(contrast))';
-
     % dim y = n_contrasts x n_sf
     y=reshape(y,length(sf),length(contrast))';
     dy=reshape(dy,length(sf),length(contrast))';
-
 
     measure=split(measure,'_');
     switch measure{1}
@@ -227,7 +183,7 @@ switch record.stim_type
         val=contrast;
         val_sem=0*val;
       case {'c50','threshold','sensitivity'}
-        if length(measure)>1 && ~isempty(findstr(measure{2},'cpd'))
+        if length(measure)>1 && ~isempty(strfind(measure{2},'cpd'))
           selected_sf=measure{2}(1:end-3);
           if strcmp(selected_sf,'all')
             indsf=(1:length(sf));
@@ -272,31 +228,28 @@ switch record.stim_type
               end
           end
           val_sem=[val_sem nan];
-
-
         end
       case 'max'
         [val,ind]=max(y(:));
         val_sem=dy(ind);
       case 'response'
         switch measure{2}
-
           case 'all'
             indcontrast=(1:length(contrast));
             indsf=(1:length(sf));
           case 'allcpd'
             indsf=(1:length(sf));
           otherwise
-            if ~isempty(findstr(measure{2},'cpd'))
+            if ~isempty(strfind(measure{2},'cpd'))
               selected_sf=eval(measure{2}(1:end-3));
               [selsf,indsf]=find( sf> selected_sf-0.05 & sf<selected_sf+0.05 );
-            elseif ~isempty(findstr(measure{2},'%'))
+            elseif ~isempty(strfind(measure{2},'%'))
               selected_contrast=eval(measure{2}(1:end-3));
               [selcon,indcontrast]=...
                 find( contrast>(selected_contrast/100-5) & ...
                 contrast< (selected_contrast/100+5));
             else
-              logmsg(['Error: unknown response measure ' measure{2}]);
+              errormsg(['Unknown response measure ' measure{2}]);
             end
         end
         switch measure{3}
@@ -311,13 +264,13 @@ switch record.stim_type
           case 'highsf'
             [tmp,indsf]=max(sf);
           otherwise
-            if ~isempty(findstr(measure{3},'%'))
+            if ~isempty(strfind(measure{3},'%'))
               selected_contrast=eval(measure{3}(1:end-1));
               [selcon,indcontrast]=...
                 find( contrast>(selected_contrast/100-0.05) & ...
                 contrast< (selected_contrast/100+0.05));
             else
-               logmsg(['Error unknown response measure ' measure{3} ]);
+               errormsg(['Unknown response measure ' measure{3} ]);
             end
         end
 
@@ -328,7 +281,6 @@ switch record.stim_type
           val=nan*zeros(length(indcontrast),1);
           val_sem=val;
         end
-
 
         if length(measure)==4
           switch measure{4}
@@ -454,7 +406,7 @@ switch record.stim_type
       case 'ratio15_5';
         i5=find(x==5);
         i15=find(x==15);
-        if ~isempty(i15) & ~isempty(i5)
+        if ~isempty(i15) && ~isempty(i5)
           val=y(i15)/y(i5);
           val_sem=0;
         else
@@ -505,7 +457,7 @@ switch record.stim_type
         val=y(condind)/y(condind(indc));
         val_sem=dy(condind)/y(condind(indc));
       case 'response_roi'
-        onsetframe=floor(record.stim_onset/0.6)
+        onsetframe=floor(record.stim_onset/0.6);
         offsetframe=min(size(record.timecourse_roi,1),ceil(record.stim_offset/0.6));
         % hard coded frame duration
         logmsg('hard coded frameduration of 0.6s');
@@ -513,7 +465,7 @@ switch record.stim_type
         r=(r-repmat(mean(r(1:onsetframe,:),1),13,1))./repmat(mean(r(1:onsetframe,:),1),13,1);
         val=-mean(r(onsetframe+1:offsetframe,condind),1);
       case 'response_roi_normalized'
-        onsetframe=floor(record.stim_onset/0.6)
+        onsetframe=floor(record.stim_onset/0.6);
         offsetframe=min(size(record.timecourse_roi,1),ceil(record.stim_offset/0.6));
         % hard coded frame duration
         logmsg('hard coded frameduration of 0.6s');
@@ -522,11 +474,7 @@ switch record.stim_type
         val=-mean(r(onsetframe+1:offsetframe,condind),1);
         val=val/max(val);
     end
-
-
   otherwise
-    logmsg(['Error in get_valrecord: stim_type ' record.stim_type ...
-      ' is not implemented.'])
-
+    errormsg(['Stim type ' record.stim_type ' is not implemented.'])
 end
 

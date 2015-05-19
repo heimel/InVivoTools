@@ -22,17 +22,22 @@ if isempty(test)
     if isnormal(r1) && isnormal(r2)
         if length(r1)==length(r2) % assume paired
             test = 'paired_ttest';
+            logmsg('Data is normal, and assuming to be paired. Use test=ttest otherwise.');
         else
             test = 'ttest';
         end
     else
         if length(r1)==length(r2) % assume paired
             test = 'signrank';
+            logmsg('Data is not normal, and assuming to be paired. Use test=ranksum otherwise.');
         else
             test = 'ranksum';%'kruskalwallis';%'ranksum';
         end
     end
 end
+
+test = lower(subst_specialchars(strtrim(test))); % to substitute spaces by _
+
 if isempty(tail)
     tail='both';
 elseif isempty(strfind(test,'ttest')) && isempty(strfind(test,'t-test'))
@@ -48,11 +53,10 @@ testperformed = '';
 r1=r1(~isnan(r1));
 r2=r2(~isnan(r2));
 
-
 h=0;
 if length(r1)>1 && length(r2)>1
-    switch lower(test)
-        case {'paired_ttest','paired ttest'}
+    switch test
+        case 'paired_ttest'
             if length(r1)==length(r2)
                 [h,p,ci,stats]=ttest(r1,r2,0.05,tail); %#ok<ASGLU>
                 statistic=stats.tstat;
@@ -104,7 +108,7 @@ if length(r1)>1 && length(r2)>1
                 [p,h,stats]=ranksum(r1,r2,'alpha',0.05,'tail',tail);
             catch me
                switch me.identifier
-                   case 'stats:ranksum:BadParamName'
+                   case {'stats:ranksum:BadParamName','stats:internal:parseArgs:BadParamName'}
                        [p,h,stats]=ranksum(r1,r2,'alpha',0.05);
                    otherwise
                        rethrow(me)

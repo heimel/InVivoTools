@@ -1,4 +1,4 @@
- % RETINOTOPY_2x2
+% RETINOTOPY_2x2
 %
 % RETINOTOPY_2x2, NewStim3 version
 % 

@@ -176,8 +176,7 @@ switch record.stim_type
         
       
         % lambda is in unbinned coordinates
-        [lambda_x,lambda_y,reffname]=get_bregma(record.ref_image,...
-            datapath,'analysis');
+        [lambda_x,lambda_y,reffname] = get_bregma(record);
         
         % show monitor center
         if params.wta_show_monitor_center
