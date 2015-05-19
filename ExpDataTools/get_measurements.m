@@ -1,4 +1,4 @@
-function [results,dresults,measurelabel] = get_measurements( groups, measure, varargin )
+function [results,dresults,measurelabel, rawdata] = get_measurements( groups, measure, varargin )
 %GET_MEASUREMENTS gets results for groups of mice for one or more measures
 %
 % [RESULTS,DRESULTS,MEASURELABELS] = GET_MEASUREMENTS( GROUPS, MEASURE,
@@ -16,6 +16,7 @@ persistent expdb_cache
 
 results={};
 dresults={};
+rawdata = {};
 
 pos_args={...
     'value_per','measurement',... % 'group','mouse','test','measurement', 'stack','neurite' %'reliable',1,...  % 1 to only use reliable records (record.reliable!0), 0 to use all
@@ -166,10 +167,11 @@ end
 
 results = cell(1,n_groups);
 dresults = cell(1,n_groups);
+rawdata = cell(1,n_groups);
 
 for g=1:n_groups
     newlinehead=[linehead groupss(g).name ': '];
-    [results{g},dresults{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
+    [results{g},dresults{g}, rawdata{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
     n=sum(~isnan(results{g})) ;
     if n<min_n
         results{g}=nan;
@@ -197,9 +199,10 @@ end % g (groups)
 return
 
 
-function [results, dresults]=get_measurements_for_group( group, measure, value_per, mousedb,testdb,extra_options,linehead)
+function [results, dresults, rawdata]=get_measurements_for_group( group, measure, value_per, mousedb,testdb,extra_options,linehead)
 results=[];
 dresults=[];
+rawdata = [];
 
 if strcmp(strtrim(group.name),'empty')
     return
@@ -215,7 +218,7 @@ end
 for i_mouse=indmice
     mouse=mousedb(i_mouse);
     newlinehead = linehead;
-    [res,dres]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,testdb,extra_options,newlinehead);
+    [res,dres, raw]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,testdb,extra_options,newlinehead);
     
     switch value_per
         case 'mouse' %{'mouse','group'}
@@ -236,11 +239,14 @@ for i_mouse=indmice
     if ~isempty(res) && numel(res)==length(res)
         results=[results(:)' res(:)'];
         dresults=[dresults(:)' dres(:)'];
+        rawdata = [rawdata raw];
+        
     elseif isempty(res)
         % do nothing
     elseif isempty(results)
         results = res;
         dresults = dres;
+        rawdata = raw;
     else
         % ugly and not very general!
         xl = min(size(results,1),size(res,1));
@@ -253,9 +259,10 @@ end % i_mouse (mice)
 return
 
 
-function [results, dresults]=get_measurements_for_mouse( mouse, measure, criteria,value_per, testdb,extra_options,linehead)
+function [results, dresults, rawdata]=get_measurements_for_mouse( mouse, measure, criteria,value_per, testdb,extra_options,linehead)
 results=[];
 dresults=[];
+rawdata = [];
 
 if isempty(testdb)
     return
@@ -365,7 +372,7 @@ indtests=find_record(testdb,cond);
 for i_test=indtests
     testrecord=testdb(i_test);
     newlinehead = [linehead recordfilter(testrecord) ':'];
-    [res,dres]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
+    [res,dres, raw]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
     switch value_per
         case {'test','stack'}
             if ~isempty(res)
@@ -386,11 +393,13 @@ for i_test=indtests
     if ~isempty(res) && numel(res)==length(res) % i.e. 1D results
         results=[results(:)' res(:)'];
         dresults=[dresults(:)' dres(:)'];
+        rawdata = [rawdata raw];
     elseif isempty(res)
         % do nothing
     elseif isempty(results)
         results = res;
         dresults = dres;
+        rawdata = raw;
     else
         % ugly and not very general!
         sr = size(results);
@@ -413,9 +422,10 @@ for i_test=indtests
 end % test records
 
 
-function [results, dresults]=get_measurements_for_test(testrecord, mouse, measure, criteria,value_per,extra_options,linehead)
+function [results, dresults, rawdata]=get_measurements_for_test(testrecord, mouse, measure, criteria,value_per,extra_options,linehead)
 results = [];
 dresults = [];
+rawdata = {};
 
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
@@ -495,9 +505,13 @@ switch measure.measure
                 dresults = nan(size(results));
             end
         else
+            %selects entries from the measures list of this record from the
+            %measure column
+            %defined by the values in other columns (criteria), 
             [results,dresults] = get_compound_measure_from_record(testrecord,measure.measure,criteria,extra_options);
             results = double(results);
             dresults = double(dresults);
+            
             if strcmpi(value_per,'neurite')
                 linked2neurite = get_compound_measure_from_record(testrecord,'linked2neurite',criteria,extra_options);
                 if length(linked2neurite)~=length(results)
@@ -507,9 +521,17 @@ switch measure.measure
                 uniqneurites =  uniq(sort(linked2neurite(~isnan(linked2neurite))));
                 res = [];
                 dres = [];
+                cnt = 0;
                 for neurite = uniqneurites(:)'
                     res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
                     dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
+                    
+                    R = results(linked2neurite==neurite);
+                    R = R(~isnan(R));
+                    if ~isempty(R)
+                        cnt = cnt + 1;
+                        rawdata(cnt) = {R};
+                    end
                 end
                 results = res;
                 dresults = dres;
