@@ -9,6 +9,10 @@ axons = find([measures.axon]);
 ind_axons = indices(axons);  % just the axons
 Bgintensity = 0; %background density
 
+for i=1:length(measures)
+    measures(i).intensity_rel2dendrite = NaN;
+end
+
 %ObjPos = [];
 for i = 1:length(axons) % over axons
     axon = axons(i);
@@ -121,15 +125,15 @@ for i = 1:length(axons) % over axons
                         intensity = ROIlist(t_b).intensity_mean(2)-Bgintensity;
                         measures(t_b).intensity_rel2dendrite = intensity/intnxt;
                 else
-                    disp('no relevant axon_ints to compare with!!!!')
+                    logmsg(['No relevant axon_ints to compare with!!!!' recordfilter(record)])
                 end
             end
         else
-            disp('No t_boutons')
+            logmsg(['No t_boutons in ' recordfilter(record)])
         end
         
     else
-        disp('Data missing, no axon_ints')
+        logmsg(['Data missing, no axon_ints' recordfilter(record)])
     end
 end
 

@@ -540,6 +540,7 @@ else
         uniqneurites =  uniq(sort(linked2neurite(~isnan(linked2neurite))));
         res = [];
         dres = [];
+        cnt = 0;
         for neurite = uniqneurites(:)'
             res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
             dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
@@ -550,6 +551,9 @@ else
                 cnt = cnt + 1;
                 rawdata(cnt) = {R};
             end
+        end
+        if exist('pool_short_neurites','var') || pool_short_neurites
+            logmsg('Pooling short neurites could be done here');
         end
         results = res;
         dresults = dres;
