@@ -11,6 +11,8 @@ function [db,filename]=load_testdb( datatype, hostname, create,load_main,verbose
 %
 %    FILENAME may be cell array of string
 %
+% See also SAVE_DB, OPEN_DB
+%
 % 2005-2015, Alexander Heimel
 %
 

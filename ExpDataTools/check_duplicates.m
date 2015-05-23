@@ -14,7 +14,14 @@ for i = ind
         continue
     end
     logmsg(['Record ' num2str(i) ' only differs in fields ' cell2str(flds)]);
-    
+    for f = 1:length(flds)
+        field = db(i).(flds{f});
+        switch class(field)
+            case 'char'
+                logmsg(['Record ' num2str(i) ' ' flds{f} ' = ' field]);
+        end
+    end
+
     if (length(flds)==1 && flds=={'ROIs'}) || (length(flds)==2 && flds=={'ROIs','measures'})
         warning('CHECK_DUPLICATES:ONLY_ROIS_DIFFER',['Record ' num2str(i) ' only differs in fields ' cell2str(flds)]);
         if isfield(record,'ROIs') && isfield(record.ROIs,'celllist')
@@ -23,6 +30,7 @@ for i = ind
             if isfield(db(i),'ROIs') && isfield(db(i).ROIs,'celllist')
                 otherroinum =length(db(i).ROIs.celllist);
                 logmsg(['Record ' num2str(i) ' has ' num2str(otherroinum) ' ROIs']);
+                logmsg(['Different ROI numbers ' num2str(setdiff([db(i).ROIs.celllist.index],[record.ROIs.celllist.index]))]);
             end
         end
     end

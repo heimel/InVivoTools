@@ -17,6 +17,14 @@ end
 data = transpose(squeeze(struct2cell(db)));
 colnames = fields(db);
   
+for i=1:numel(data)
+    switch class(data{i})
+        case 'double'
+            data{i} = num2str(data{i});
+        case 'struct'
+            data{i} = 'struct';
+    end
+end
 
 t = uitable(h_fig, ...
     'Data', data, ...
