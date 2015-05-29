@@ -1,4 +1,4 @@
-function newpc = setparameters(pc,parameters)
+function newpc = setparameters(pc,parameters,record)
 
 %  NEWRA = SETPARAMETERS(PC,P)
 %
@@ -8,6 +8,10 @@ function newpc = setparameters(pc,parameters)
 %  the string 'default' then the default parameters are chosen.
 %
 %  See also:  PERIODIC_CURVE, GETPARAMETERS
+
+if nargin<3
+    record = [];
+end
 
 gP1 = struct('draw',1,'howdraw',1,'showstderr',1,'showstddev',1,...
                      'showspont',1,'whattoplot',3,'whichdata',[]);
@@ -22,14 +26,12 @@ gP = [gP1 gP2 gP3 gP4];
 default_p=struct('title','','res',0.010,'lag',0,'paramnames',{{}},...
                  'paramvalues',{{}},'graphParams',gP);
 
-if isempty(parameters)||(ischar(parameters)&&strcmp(parameters,'default')),
+if isempty(parameters)||(ischar(parameters)&&strcmp(parameters,'default'))
         parameters = default_p; 
-end;
-
-%[good,er]=verifyparameters(parameters,getinputs(tc));
-%if ~good,error(['PARAMETERS: ' er]);end;
+end
 
 pc.PCparams = parameters;
 configuremenu(pc);
-pc = compute(pc); draw(pc);
+pc = compute(pc,record); 
+draw(pc);
 newpc = pc;

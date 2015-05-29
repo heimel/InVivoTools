@@ -39,14 +39,9 @@ end
 
 computations=struct('curve',[],'maxes',[],'mins',[],'spont',[]);
 
-% tc.computations=struct('curve',curve,'maxes',maxes,'mins',mins,...
-%     'spont',spontval,'spontrast',tc.internals.spont,...
-%     'rast',tc.internals.rast);
-
 internals = struct('rast',[],'spont',[]);
 
 [good,er]=verifyinputs(inputs); 
-%good = 1; disp('TUNING_CURVE: TEMPORARY IGNORING PARAMETERS' );
 if ~good,error(['INPUT: ' er]); end;
 
 nag=analysis_generic([],[],where); 
@@ -58,5 +53,4 @@ tc = class(struct('inputs',inputs,'TCparams',[],'internals',internals,...
 tc = setparameters(tc,parameters,record); % must be immediately after above
 delete(contextmenu(tc)); 
 tc = newcontextmenu(tc);  % install new contextmenu
-  %tc = compute(tc);
 tc = setlocation(tc,where);

@@ -1,4 +1,4 @@
-function pcn = compute(pc)
+function pcn = compute(pc,record)
 
 % Part of the NeuralAnalysis package
 %
@@ -9,6 +9,14 @@ function pcn = compute(pc)
 %
 %  See also:  ANALYSIS_GENERIC/compute, PERIODIC_CURVE
 
+%#ok<*AGROW>
+
+if nargin<2
+    record = [];
+end
+
+processparams = ecprocessparams(record);
+
 p = getparameters(pc);
 I = getinputs(pc);
 
@@ -16,9 +24,10 @@ if ~isempty(pc.internals.oldparams),
     if eqlen(pc.internals.oldparams.paramnames,p.paramnames)&&...
             pc.internals.oldparams.res==p.res&&...
             pc.internals.oldparams.lag==p.lag,
-        pcn=pc; return;
-    end;
-end;
+        pcn=pc; 
+        return;
+    end
+end
 
 % otherwise, we have new parameter values which affect the computation
 
@@ -66,7 +75,6 @@ for i=inc
             if eqlen(vars{j},par.(I.paramnames{2}))
                 vals{j} = cat(2,vals{j},i); 
                 used=1; 
-                %#ok<*AGROW>
             end
         end
         if ~used
@@ -97,14 +105,18 @@ for z=1:length(vars), % looping over second parameter
             trigs{z}{s}(k)=mti{stimlist(k)}.frameTimes(1);
             spon{1}(stimlist(k))=trigs{z}{s}(k);
         end;
-        if length(mti)>=2,
-            if dp.BGposttime>0,pst = pst+1;
-                interval{z}(j,:) = [cinterval{z}(j,1) cinterval{z}(j,2)+dp.BGposttime];
-            elseif dp.BGpretime>0, pre=pre+1;
+        if length(mti)>=2
+            if dp.BGpretime - processparams.separation_from_prev_stim_off >= processparams.minimum_spontaneous_time
+                % use BGpretime
+                pre=pre+1;
                 interval{z}(j,:) = [cinterval{z}(j,1)-dp.BGpretime cinterval{z}(j,2)];
+            elseif dp.BGposttime - processparams.separation_from_prev_stim_off >= processparams.minimum_spontaneous_time
+                % use BGposttime
+                pst = pst+1;
+                interval{z}(j,:) = [cinterval{z}(j,1) cinterval{z}(j,2)+dp.BGposttime];
             else
                 interval{z}(j,:) = cinterval{z}(j,:);
-            end;
+            end
         else
             interval{z}(j,:) = interval{z}(j,:);
         end
@@ -113,11 +125,12 @@ end
 sint = [ min(interval{1}(:,1)) max(interval{1}(:,2)) ];
 if pre==0&&pst>0  %BGposttime used
     spontlabel='stimulus / spontaneous';
-    scint = [ max(cinterval{1}(:,2)) max(interval{1}(:,2))];
+    scint = [ max(cinterval{1}(:,2))+processparams.separation_from_prev_stim_off max(interval{1}(:,2))];
 elseif pst==0&&pre>0  % BGpretime used
     spontlabel='spontaneous / stimulus';
-    scint = [ min(interval{1}(:,1)) min(cinterval{1}(:,1)) ];
+    scint = [ min(interval{1}(:,1))+processparams.separation_from_prev_stim_off min(cinterval{1}(:,1)) ];
 else
+    logmsg('No or too short spontaneous period. Consider changing separation_from_prev_stim_off or minimum_spontaneous_time in processparams_local');
     spontlabel='trials';
     scint = sint;
 end
