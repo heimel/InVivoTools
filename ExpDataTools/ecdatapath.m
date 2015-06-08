@@ -3,7 +3,7 @@ function datapath=ecdatapath( record )
 %
 % DEPRECATED: Use EXPERIMENTPATH instead
 %
-% 2007-2014 Alexander Heimel
+% 2007-2015 Alexander Heimel
 %
 
 if nargin<1
@@ -31,10 +31,16 @@ switch record.setup
 end
 
 if ~exist(datapath,'dir')
-    switch record.setup
-        case 'antigua'
-            datapath=fullfile('Z:\InVivo\Electrophys\Antigua',record.date(1:4),record.date(6:7),record.date(9:10),'Mouse');
-        case 'nin380'
-            datapath=fullfile('V:\InVivo\Electrophys\Nin380',record.date(1:4),record.date(6:7),record.date(9:10));
+    if ispc
+        switch record.setup
+            case 'antigua'
+                root = 'Z:\InVivo\';
+            case 'nin380'
+                root = 'V:\InVivo\';
+        end
+    else
+        root = networkpathbase;
     end
+    datapath=fullfile(root,'Electrophys',capitalize(record.setup),...
+        record.date(1:4),record.date(6:7),record.date(9:10),'Mouse');
 end

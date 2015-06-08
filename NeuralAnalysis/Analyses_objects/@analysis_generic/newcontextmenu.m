@@ -5,7 +5,7 @@ function newag = newcontextmenu(ag)
 %  Creates a new contextmenu for the ANALYSIS_GENERIC object AG.
 %  If the current contextmenu is valid, then no change is made.
 
-if isempty(contextmenu(ag))|~ishandle(contextmenu(ag)),
+if isempty(contextmenu(ag))||~ishandle(contextmenu(ag)),
 
  cb = 'agcontextmenucallback(analysis_generic([],[],[]))';
 

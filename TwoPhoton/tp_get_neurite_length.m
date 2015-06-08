@@ -1,8 +1,13 @@
 function l = tp_get_neurite_length( roi, record, params )
-%TP_GET_NEURITE_LENGTH returns length of rois
+%TP_GET_NEURITE_LENGTH returns length of rois in units of image 
+%
+%  L = TP_GET_NEURITE_LENGTH( ROI, RECORD, PARAMS)
+%
+%    L is in units derived from X_unit, X_step in original image
 %
 % 2012-2015, Alexander Heimel
 %
+
 if nargin<3
     params = [];
 end

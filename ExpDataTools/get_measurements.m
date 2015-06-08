@@ -552,9 +552,9 @@ else
                 rawdata(cnt) = {R};
             end
         end
-        if exist('pool_short_neurites','var') || pool_short_neurites
-            logmsg('Pooling short neurites could be done here');
-        end
+         if exist('pool_short_neurites','var') && pool_short_neurites
+             logmsg('Pooling short neurites could be done here');
+         end
         results = res;
         dresults = dres;
     end

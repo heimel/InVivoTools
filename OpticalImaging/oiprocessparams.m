@@ -37,7 +37,7 @@ switch experiment
     case '13.61'
           params.wta_equalize_area = false;
     case '13.62'
-        params.wta_equalize_area = false;
+        params.wta_equalize_area = true;
     otherwise
         if isfield(record,'stim_type')
             switch record.stim_type

@@ -4,13 +4,10 @@ function params = ecprocessparams( record )
 %  Local changes to settings should be made in processparams_local.m
 %  This should be an edited copy of processparams_local_org.m
 %
-% 2012-2014, Alexander Heimel
+% 2012-2015, Alexander Heimel
 %
 
-if nargin<1
-    record = [];
-end
-if isempty(record)
+if nargin<1 || isempty(record)
     record.mouse = '00.00.0.00';
     record.setup = 'nin380';
 end
@@ -25,6 +22,7 @@ end
 params.pre_window = [-Inf 0]; % ignored for ec and tp
 params.post_window = [0 Inf]; % ignored for tp
 params.separation_from_prev_stim_off = 0.5;  % time (s) to stay clear of prev_stim_off
+params.minimum_spontaneous_time = 0.5; % need at least this period for spontaneous activity
 %params.early_response_window = [0.05 0.2];  % not implemented yet
 %params.late_response_window = [0.5 inf]; % not implemented yet
 

@@ -1,15 +1,14 @@
 function tpstackinfo( record )
 %TPSTACKINFO returns an overview with image data
 %
-%TPSTACKINFO ( RECORD )
+%    TPSTACKINFO ( RECORD )
 %
 % 2013, Alexander Heimel
 %
 
 inf = tpreadconfig( record );
 if isempty(inf)
-    errordlg('No image information found.','Results');
-    disp('TPSTACKINFO: No image information found.');
+    errormsg('No image information found.');
     return;
 end
 
@@ -29,30 +28,16 @@ else
     image_processing.spatial_filter = 0;
 end
 
-
 % position figure snugly into TP database and record set
 h_tp = get_fighandle('TP database*');
 ud = get(h_tp,'userdata');
 record_pos = get(ud.record_form,'position');
 
-
-
-
 figure ('Name',['Stack info: ' record.mouse filesep record.date filesep record.epoch ],...
     'Position',[record_pos(1)+record_pos(3) record_pos(2)+record_pos(4)-425 806 425],...
     'NumberTitle','off');
 
-
-% subplot('position',[0.02 0.02 0.66 0.96]); % preview
-%tp_image(imgimg,[1 2],[-0.1 0],[0 0],[-1 1],tp_channel2rgb(record))
-
-%hold on
-
-%subplot('position',[0.7 0.05 0.25 0.9]);
-% image info
-
 axis off;
-
 
 [y,x]=printtext(tpfilename(record));
 try
@@ -72,12 +57,7 @@ try
     [y,x]=printtext(['Display, Scan & Start Mode: ' num2str(inf(1).ParsedImageDescription.DisplayMode),', ',num2str(inf(1).ParsedImageDescription.ScanMode),', ',num2str(inf(1).ParsedImageDescription.Scan_Start_Mode)],y);
 end
 
-%subplot(1,3,3);
-% image info continued
-%
-%axis off;
 try
-%    [y,x]=printtext(' ');
     [y,x]=printtext(['Magnification & Zoom: ' num2str(inf.ParsedImageDescription.Magnification),'x, ',num2str(inf.ParsedImageDescription.Zoom_Size) 'x'],y);
     [y,x]=printtext(['Scan Speed (Sec/Line): ' num2str(inf.ParsedImageDescription.Scan_Speed),' (',num2str(inf.ParsedImageDescription.SecondsPerScanLine),')'],y);
     [y,x]=printtext(['PMT1,Gain,Offset: ' num2str(inf.ParsedImageDescription.PMT_Voltage_Ch1),'V, ',num2str(inf.ParsedImageDescription.Gain_Ch1),'x, ',num2str(inf.ParsedImageDescription.Offset_Ch1) '%'],y);

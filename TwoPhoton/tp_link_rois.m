@@ -29,6 +29,7 @@ ind_no_neurites = find(~cellfun(@is_neurite,{roilist.type}));
 
 for j = ind_neurites
     neurite_poly(j) = interpolate_poly(interpolate_poly(interpolate_poly(roilist(j)))); %#ok<AGROW>
+    roilist(j).neurite =[roilist(j).index tp_get_neurite_length(roilist(j),record)];
 end
 
 
@@ -45,7 +46,7 @@ for i = ind_no_neurites
                 roilist(i).neurite(1) = roilist(j).index;
                 roilist(i).neurite(2) = dis;
             else % only replace if closer
-                if dis <  roilist(i).neurite(2) 
+                if dis <  roilist(i).neurite(2)
                     roilist(i).neurite(1) = roilist(j).index;
                     roilist(i).neurite(2) = dis;
                 end
@@ -60,15 +61,16 @@ if isfield(roilist,'neurite')
         if isinf(record.measures(i).distance2neurite)
             record.measures(i).distance2neurite = NaN;
             record.measures(i).linked2neurite = NaN;
-        elseif roilist(i).index ~= roilist(i).neurite(1)
+        elseif roilist(i).index ~= roilist(i).neurite(1) % i.e. really linked
             record.measures(i).linked2neurite = roilist(i).neurite(1);
         else
+            record.measures(i).distance2neurite = NaN;
             record.measures(i).linked2neurite = NaN;
         end
     end
 end
 
-record.ROIs.celllist = roilist; 
+record.ROIs.celllist = roilist;
 
 
 function dis = distance_point2polygon( point,poly)
