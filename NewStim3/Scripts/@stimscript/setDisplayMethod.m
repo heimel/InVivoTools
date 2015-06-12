@@ -22,89 +22,63 @@ function A = setDisplayMethod(S, newmethod, methodarg, trigger)
 %
 %   See also:  STIMSCRIPT, GETDISPLAYORDER, NUMSTIMS
 %                               Questions to  vanhoosr@brandeis.edu
-% 
-%   Stephen VanHooser, Alexander Heimel
+%
+%   200X Stephen VanHooser
+%   200X-2015, Alexander Heimel
 %
 
-if nargin<4
-    trigger = [];
-end
-if isempty(trigger)
+if nargin<4 || isempty(trigger)
     trigger = 'none';
 end
 
 methodarg = fix(methodarg);
 
-switch(newmethod),
-	case 0,
-		if methodarg>0,
-			S.displayOrder = repmat(1:numStims(S),1,methodarg);
-		else,
-			error('METHODARG must be greater than 0.');
-		end;
-	case 1,
-		if methodarg>0,
-			N = numStims(S);
-			if N>1,p=[0:1/(N-1):1]; else, p=[];end;
-			dO = randperm(N);
-			for i=2:round(methodarg),
-				if N==1, dO = [ dO 1 ];
-				else,
-					r = rand(1,1);
-					f=find(p(1:end-1)<r&p(2:end)>=r);
-					n=[ 1:dO(end)-1 dO(end)+1:N];
-					n=n(f);
-					d=[ 1:n-1 n+1:N ];
-					di = randperm(N-1);
-					dO = [dO n d(di)];
-				end;
-			end;
-			S.displayOrder = dO;
-		else,
-			error('METHODARG must be greater than 0.');
-		end;
-	case 2,
-		methodarg= fix(methodarg);  % make sure integer
-		if (min(methodarg)>=1)&(max(methodarg)<=numStims(S)),
-			S.displayOrder = methodarg;
-		else, error(['Error in setDisplayMethod: elements of ' ...
-				'METHODARG should run 1..numStims.']);
-		end;
-	otherwise,
-		error('Error in setDisplayMethod: unknown method.');
-end;
-
-if isnumeric(trigger)
-    S.trigger = trigger * ones(size(S.displayOrder));
-else
-    switch trigger
-        case 'none'
-            S.trigger = zeros(size(S.displayOrder));
-        case 'interleaved'
-            % show every stimulus twice
-            % alternate for each repetitions whether first
-            S.trigger = zeros(length(S.displayOrder),2);
-            numrep = ceil(length(S.displayOrder)/numStims(S));
-            tmp = repmat(1:numrep,numStims(S),1);
-            % x = zeros(length(S.displayOrder),2);
-            x = (mod(tmp(1:length(S.displayOrder)),2)==0);
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %disp('changes made by Joris on 14 08 2012: does not randomize interleaved');
-            %tmp = flatten([x; 1-x]');
-            %new_vec = repmat([0 1]',length(tmp)/2,1);
-            %S.trigger = new_vec;
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            if size(x,2)==1
-                x = x';
+switch(newmethod)
+    case 0
+        if methodarg>0,
+            S.displayOrder = repmat(1:numStims(S),1,methodarg);
+        else
+            error('METHODARG must be greater than 0.');
+        end
+    case 1
+        if methodarg>0,
+            N = numStims(S);
+            if N>1
+                p = 0:1/(N-1):1;
+            else
+                p=[];
             end
-            S.trigger = flatten([x(1:end)' 1-x(1:end)']');
-            S.trigger
-            
-            S.displayOrder = S.displayOrder(fix(1:0.5:end+0.5));
-        case 'all'
-            S.trigger = ones(size(S.displayOrder));
-    end
+            dO = randperm(N);
+            for i=2:round(methodarg)
+                if N==1
+                    dO = [ dO 1 ]; %#ok<AGROW>
+                else
+                    r = rand(1,1);
+                    n=[ 1:dO(end)-1 dO(end)+1:N];
+                    n=n(p(1:end-1)<r&p(2:end)>=r);
+                    d=[ 1:n-1 n+1:N ];
+                    di = randperm(N-1);
+                    dO = [dO n d(di)]; %#ok<AGROW>
+                end
+            end
+            S.displayOrder = dO;
+        else
+            error('METHODARG must be greater than 0.');
+        end
+    case 2,
+        methodarg= fix(methodarg);  % make sure integer
+        if (min(methodarg)>=1)&&(max(methodarg)<=numStims(S)),
+            S.displayOrder = methodarg;
+        else
+            error(['Error in setDisplayMethod: elements of ' ...
+                'METHODARG should run 1..numStims.']);
+        end
+    otherwise
+        error('Error in setDisplayMethod: unknown method.');
 end
+logmsg(['Display order: ' mat2str(S.displayOrder)]);
+
+S = setTrigger( S, trigger );
 
 A = S;
 
