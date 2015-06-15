@@ -53,9 +53,15 @@ switch lower(record.setup)
         end
         
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
+<<<<<<< HEAD
         
         
         
+=======
+  if 0 && strmatch(record.stim_type,'background')==1
+      EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.5;
+  end
+>>>>>>> origin/master
 %         EVENT.strons.tril(1) = EVENT.strons.tril(5);
         
         EVENT.Myevent = 'Snip';
@@ -476,7 +482,11 @@ measures = record.measures; %#ok<NASGU>
 %save(measuresfilemehran,'WaveTime_Spikes');
 
 % save measures file
-measuresfile = fullfile(experimentpath(record),[record.datatype '_measures.mat']);
+if 0 && strmatch(record.stim_type,'background')==1
+measuresfile = fullfile(experimentpath(record),[record.datatype '_measures_OFF.mat']);
+else
+    measuresfile = fullfile(experimentpath(record),[record.datatype '_measures.mat']);
+end
 measures = record.measures; %#ok<NASGU>
 try
     save(measuresfile,'measures'); 
