@@ -7,6 +7,9 @@ function cell = get_spike_features( spikes, cell )
 % 2012-2013, Mehran Ahmadlou & Alexander Heimel
 %
 
+logmsg('Inverting spikes');
+%spikes = -spikes;
+
 if isempty(spikes)
 cell.spike_amplitude = [];
 cell.spike_trough2peak_time = [];
@@ -34,7 +37,11 @@ triggered_trough = (spikes(:,trigger_ind)<0)';
 
 [dum3,rel_trough_ind] = min(spikes(~triggered_trough,trigger_ind:end),[],2);
 trough_ind(~triggered_trough) = trigger_ind-1+rel_trough_ind;
-trough_ind(triggered_trough) = trigger_ind;
+
+
+[dum3,rel_trough_ind_short] = min(spikes(triggered_trough,max(1,trigger_ind-2):min(end,trigger_ind+5)),[],2);
+trough_ind(triggered_trough) = max(1,trigger_ind-2)-1+rel_trough_ind_short;
+
 for i=1:n_spikes
     trough_depth(i) = spikes(i,trough_ind(i));
 end
@@ -96,7 +103,7 @@ if 0
             [  spikes(i,round(mean([late1_ind late2_ind]))) - 0.5*lateslope(i)*cell.sample_interval*diff([late1_ind late2_ind])...
             spikes(i,round(mean([late1_ind late2_ind])))+0.5*lateslope(i)*cell.sample_interval*diff([late1_ind late2_ind]) ]);
         pause
-        i = i +1;
+        i = i + 1;
     end
 end
 
@@ -106,3 +113,7 @@ cell.spike_peak_trough_ratio = -peak_height ./ trough_depth;
 cell.spike_prepeak_trough_ratio = -prepeak_height ./ trough_depth;
 cell.spike_lateslope = lateslope / 1000;
 
+cell.spike_peak_height = peak_height;
+cell.spike_trough_depth = trough_depth;
+
+figure;plot(spikes(1:min(end,1000),:)')

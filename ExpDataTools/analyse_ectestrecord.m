@@ -53,9 +53,15 @@ switch lower(record.setup)
         end
         
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
+<<<<<<< HEAD
+        
+        
+        
+=======
   if 0 && strmatch(record.stim_type,'background')==1
       EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.5;
   end
+>>>>>>> origin/master
 %         EVENT.strons.tril(1) = EVENT.strons.tril(5);
         
         EVENT.Myevent = 'Snip';
@@ -213,8 +219,8 @@ end
 
 switch lower(record.setup)
     case 'antigua'
-        %         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
-        isi = [];
+                 isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+        %isi = [];
     otherwise
 %         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
         isi = [];
