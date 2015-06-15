@@ -109,6 +109,18 @@ for ch=channels
     subplot(n_features-1,n_features-1,n_features-1);
     show_cluster_overlap( record, ch)
     
+  
+    figure
+    for i=1:n_features
+        for  cl=1:n_cells
+        subplot(n_cells,n_features,i+(cl-1)*n_features);
+            [n,x]=hist(cells(cl).(features{i}),300);
+            clr = colors( mod(cl-1,n_colors)+1);
+            h=bar(x,n,clr);
+            xlabel(features{i});
+        end
+    end
+    
 end % channel ch
 
 

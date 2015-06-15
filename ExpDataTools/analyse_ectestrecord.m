@@ -54,9 +54,7 @@ switch lower(record.setup)
         
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
         
-        if (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.OpOn))<10)
-            EVENT.strons.tril(1) = EVENT.strons.tril(end);
-        end
+        
         
 %         EVENT.strons.tril(1) = EVENT.strons.tril(5);
         
@@ -215,8 +213,8 @@ end
 
 switch lower(record.setup)
     case 'antigua'
-        %         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
-        isi = [];
+                 isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+        %isi = [];
     otherwise
 %         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
         isi = [];
@@ -546,6 +544,9 @@ if usetril == -1 % use last
         tril = EVENT.strons.tril(end-n_optotrigs);
     else
         tril = EVENT.strons.tril(1);
+    end
+    if (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.OpOn))<12)
+            EVENT.strons.tril(1) = EVENT.strons.tril(end);
     end
 else
     if usetril > length(EVENT.strons.tril)
