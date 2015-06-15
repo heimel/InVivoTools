@@ -39,6 +39,12 @@ for i=start:stepsize:stop-windowsize,
 	if ~isempty(INDs),
 		eval(['Yn(end+1)=' func ' (Y(INDs));']);
         y = Y(INDs)';
+%                 if nargout==3&nargin==8, Yerr(end+1) =
+%                 nanstderr(Y(INDs)'); %% for addaptation stim analysis
+%         elseif nargout==3&nargin==9, eval(['Yerr(end+1)=' intervalfunc ';']); end;
+% 	end;
+% 	if zeropad&isempty(INDs), Yn(end+1) = 0; if nargout==3, Yerr(end+1) = 0; end; end;
+% end;
         if nargout==3&&nargin==8
             Yerr(end+1) = nanstderr(Y(INDs)');
         elseif nargout==3&&nargin==9
