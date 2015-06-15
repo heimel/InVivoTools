@@ -138,7 +138,29 @@ for i = 1:length(axons) % over axons
 end
 
 record.ROIs.celllist = ROIlist;
+
+
+
 record.measures = measures;
+
+% add previous_intensity_rel2dendrite
+ref_record = tp_get_refrecord(record,false);
+if ~isempty(ref_record)
+    if isfield(ref_record,'measures') && isfield(ref_record.measures,'intensity_rel2dendrite')
+        for i=1:length(record.measures)
+            ref_i = find([ref_record.measures.index]==record.measures(i).index);
+            if length(ref_i)>1
+                msg = ['More than one ROIs with index ' num2str(record.measures(i).index) ...
+                    ' in ' recordfilter(ref_record) '. Taking first only.'];
+                errormsg(msg);
+                ref_i = ref_i(1);
+            end
+            if ~isempty(ref_i)
+                record.measures(i).previous_intensity_rel2dendrite = ref_record.measures(ref_i).intensity_rel2dendrite;
+            end
+        end
+    end
+end
 
 
 

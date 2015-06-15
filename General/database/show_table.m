@@ -13,6 +13,10 @@ if isempty(h_fig)
 else
     figure(h_fig);
 end
+if isempty(db)
+    errormsg('Table is empty.');
+    return
+end
 
 data = transpose(squeeze(struct2cell(db)));
 colnames = fields(db);
