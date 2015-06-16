@@ -541,24 +541,26 @@ else
         res = [];
         dres = [];
         cnt = 0;
-        pooled = [];
+        
         if exist('pool_short_neurites','var') && (eval(pool_short_neurites)>0)
+            pooled = [];
+            Crit = eval(pool_short_neurites);
             logmsg('Pooling short neurites');
-                for neurite = uniqneurites(:)'                  
-                    R = results(linked2neurite==neurite);
-                    R = R(~isnan(R));
-                    if ~isempty(R)
-                        if length(R) < 3
-                            pooled = [pooled R];
-                        else
-                            res = [res mean(R)];
-                            dres = [dres std(R)];
-                        end
+            for neurite = uniqneurites(:)'
+                R = results(linked2neurite==neurite);
+                R = R(~isnan(R));
+                if ~isempty(R)
+                    if length(R) < Crit
+                        pooled = [pooled R];%#ok<AGROW>
+                    else
+                        res = [res mean(R)];%#ok<AGROW>
+                        dres = [dres std(R)];%#ok<AGROW>
                     end
-                end   
-               res = [res mean(pooled)];
-                dres = [dres std(pooled)];
-        else            
+                end
+            end
+            res = [res mean(pooled)];
+            dres = [dres std(pooled)];
+        else
             for neurite = uniqneurites(:)'
                 res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
                 dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
