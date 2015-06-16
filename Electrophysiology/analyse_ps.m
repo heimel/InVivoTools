@@ -79,7 +79,7 @@ for i = 1:length(triggers)
     end
     measures.range{i} = curve(1,:);
     
-    if processparams.compute_f1f0
+    if processparams.compute_f1f0 && isa(inp.st.stimscript,'periodicscript')
         pc = periodic_curve(inp,'default',[],record);
         pc_out = getoutput(pc);
         mf0 = max(pc_out.f0curve{1}(2,:));
