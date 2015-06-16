@@ -8,12 +8,12 @@ if isunix
     par.wc_player = 'vlc' ;
     [status,out] = system(['which ' par.wc_player]);
     if status==0
-        par.wc_playercommand = out ;
+        par.wc_playercommand = strtrim(out) ;
     else
         par.wc_player = 'totem';
         [status,out] = system(['which ' par.wc_player]);
         if status==0
-            par.wc_playercommand = out;
+            par.wc_playercommand = strtrim(out);
         else
             par.wc_playercommand = '';
         end

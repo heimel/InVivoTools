@@ -15,3 +15,4 @@ end
 
 wcinfo = wc_getmovieinfo( record);
 
+[freezeTimes, flightTimes] = wc_track_mouse(record,true);
