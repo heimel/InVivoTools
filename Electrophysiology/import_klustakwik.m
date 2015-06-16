@@ -35,7 +35,7 @@ count = 1;
 flds = fields(orgcells);
 ind = strmatch('spike_',flds);
 features = flds(ind);
-if ~any(isnan(flatten({allcells(:).spike_lateslope})))
+if ~any(isnan(flatten({orgcells(:).spike_lateslope})))
     use_lateslope = true;
 else
     use_lateslope = false;
@@ -60,6 +60,7 @@ for ch = channels
     fidf = fopen(filenamef,'r');
     if fidf==-1
         logmsg(['Cannot open ' filenamef ' for reading']);
+         fclose(fidc);
         return
     end
     
@@ -69,6 +70,8 @@ for ch = channels
     fidt = fopen(filenamet,'r');
     if fidt==-1
         logmsg(['Cannot open ' filenamet ' for reading']);
+         fclose(fidc);
+         fclose(fidf);
         return
     end
     
@@ -115,6 +118,9 @@ for ch = channels
     for i=1:length(cellnumber)
         if feof(fidt)
             logmsg(['Premature end to ' filenamet 'at line number ' num2str(i)]);
+            fclose(fidt);
+         fclose(fidf);
+
             return
         end
         c = cellnumber(i);
@@ -155,11 +161,9 @@ for ch = channels
         outcells(count).wave = zeros(1,32);
         outcells(count).std = zeros(1,32);
         outcells(count).snr = NaN;
-        outcells(count).spike_amplitude = cells(cl).spike_amplitude;
-        outcells(count).spike_trough2peak_time = cells(cl).spike_trough2peak_time;
-        outcells(count).spike_peak_trough_ratio = cells(cl).spike_peak_trough_ratio;
-        outcells(count).spike_prepeak_trough_ratio = cells(cl).spike_prepeak_trough_ratio;
-        outcells(count).spike_lateslope = cells(cl).spike_lateslope;
+        for f = 1:n_features
+            outcells(count).(features{f}) = cells(cl).(features{f}); 
+        end
         outcells(count).mean_amplitude = mean(outcells(count).spike_amplitude);
         count = count + 1;
     end

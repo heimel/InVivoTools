@@ -54,6 +54,7 @@ for ch=channels
     filenamet = fullfile(datapath,record.test,[ 'klustakwik.tim.' num2str(ch)]);
     fidt = fopen(filenamet,'w');
     if fidt==-1
+        fclose(fidf);
         errormsg(['Cannot open ' filenamet ' for writing']);
         return
     end
