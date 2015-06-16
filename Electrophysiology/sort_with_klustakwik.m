@@ -48,12 +48,12 @@ if isempty(cells) %|| 1
          ' -ElecNo 1' ...
          ' -nStarts 1' ...
         ' -MinClusters 1' ...   % 20
-        ' -MaxClusters 5' ...   % 30
+        ' -MaxClusters ' num2str(params.max_spike_clusters) ...   % 30
          ' -MaxPossibleClusters ' num2str(params.max_spike_clusters) ...  % 100
          ' -UseDistributional 0' ... 
          ' -PriorPoint 1'...
          ' -FullStepEvery 20'...
-        ' -UseFeatures 10101'...   %10111 11111
+        ' -UseFeatures 1010100'... %10101  %10111 11111
          ' -SplitEvery 40' ...
          ' -RandomSeed 1' ...
          ' -MaxIter 500' ...  % 500  
@@ -66,7 +66,11 @@ if isempty(cells) %|| 1
 %         ' -AssignToFirstClosestMask 1'... 
 
     for ch=channels
-        system([kkexecutable ' klustakwik ' num2str(ch) ' ' arguments]);
+        cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments];
+        [status,result] = system(cmd);
+        if status == 1
+            errormsg(result(max(1,end-100):end),true);
+        end
     end
     cd(savepwd);
     cells = import_klustakwik(record,orgcells);

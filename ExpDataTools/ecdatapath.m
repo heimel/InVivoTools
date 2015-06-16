@@ -18,7 +18,7 @@ params.ecdatapath_localroot = fullfile(localpathbase,'Electrophys',capitalize(re
 params = processparams_local(params);
 
 if ~exist(params.ecdatapath_localroot,'dir')
-    logmsg(['Folder ' params.ecdatapath_localroot ' does not exist.']);
+    %logmsg(['Folder ' params.ecdatapath_localroot ' does not exist.']);
     if exist(networkpathbase,'dir')
         params.ecdatapath_localroot = fullfile(networkpathbase,'Electrophys',capitalize(record.setup));
     end
