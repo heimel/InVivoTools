@@ -93,7 +93,7 @@ switch lower(record.setup)
                 end
             end
         else % linux
-            WaveTime_Fpikes = ExsnipTDT(EVENT);
+            WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1));
         end
         
         %         if isempty(WaveTime_Fpikes)

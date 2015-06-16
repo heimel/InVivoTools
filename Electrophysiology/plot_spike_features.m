@@ -73,14 +73,14 @@ for ch=channels
                 end
                 
                 plot(cells(cl).(features{j})(ind),...
-                    cells(cl).(features{i})(ind),[clr '.']);
-                if ~isnan(lims(i,1)) % Mehran
-                    xlim( lims(j,:)+[0 0.0001]);
-                    ylim( lims(i,:)+[0 0.0001]);
-                else
-                    xlim([-0.1 0.3]);
-                    ylim([-0.5 10]);
-                end
+                    cells(cl).(features{i})(ind),[clr '.'],'markersize',1);
+%                 if ~isnan(lims(i,1)) && ~isnan(lims(j,1)) 
+%                     xlim( lims(j,:)+[0 0.0001]);
+%                     ylim( lims(i,:)+[0 0.0001]);
+%                 else
+%                     xlim([-0.1 0.3]);
+%                     ylim([-0.5 10]);
+%                 end
                 if i==1
                     xlabel(capitalize(features{j}));
                 else

@@ -1,4 +1,4 @@
-function [EVENT, CSnip] = importtdt_linux( EVENT )
+function [EVENT, CSnip] = importtdt_linux( EVENT, start )
 %IMPORTTDT_LINUX reads from TDT tank in format of tdt2ml
 %
 %  EVENT = IMPORTTDT_LINUX( EVENT )
@@ -19,6 +19,9 @@ function [EVENT, CSnip] = importtdt_linux( EVENT )
 % 2013-2014, Adapted by Alexander Heimel
 %
 
+if nargin<2 
+    start = [];
+end
 
 E.UNKNOWN = hex2dec('0');  %"Unknown"
 E.STRON = hex2dec('101');  % Strobe ON "Strobe+"
@@ -220,6 +223,12 @@ if nargout>1
         %         T2 = Times(ChnIdx == i);
         CSnip(Nc,1).time = SNIPS.chan_info(ind,1);
         CSnip(Nc,1).data = 1000*SNIPS.sample_point(SNIPS.chan_info(:,2)==i,:);
+        
+        if ~isempty(start)
+            ind = (CSnip(Nc,1).time> start);
+            CSnip(Nc,1).time = CSnip(Nc,1).time(ind);
+            CSnip(Nc,1).data = CSnip(Nc,1).data(ind,:);
+        end
         Nc = Nc + 1;
     end
     logmsg(['Retrieved spikes of ' blockname ' for channels ' mat2str(Chans)]);
