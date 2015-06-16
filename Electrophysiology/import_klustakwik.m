@@ -32,6 +32,21 @@ end
 
 count = 1;
 
+flds = fields(orgcells);
+ind = strmatch('spike_',flds);
+features = flds(ind);
+if ~any(isnan(flatten({allcells(:).spike_lateslope})))
+    use_lateslope = true;
+else
+    use_lateslope = false;
+end
+
+if ~use_lateslope
+    features = setdiff(features,'spike_lateslope');
+end
+n_features = length(features);
+
+
 for ch = channels
     filenamec = fullfile(datapath,record.test,[ 'klustakwik.clu.' num2str(ch)]);
     fidc = fopen(filenamec,'r');
@@ -104,13 +119,17 @@ for ch = channels
         end
         c = cellnumber(i);
         cells(c).data(spikecount(c),1) = str2double( fgets(fidt));
-        cells(c).spike_amplitude(spikecount(c),1) = fscanf(fidf,'%f',1); % was %d
-        cells(c).spike_trough2peak_time(spikecount(c),1) = fscanf(fidf,'%f',1);
-        cells(c).spike_peak_trough_ratio(spikecount(c),1) = fscanf(fidf,'%f',1);
-        cells(c).spike_prepeak_trough_ratio(spikecount(c),1) = fscanf(fidf,'%f',1);
-        if n_fet>4
-            cells(c).spike_lateslope(spikecount(c),1) = fscanf(fidf,'%f',1); % was %d
+        for f = 1:n_features
+            cells(c).(features{f})(spikecount(c),1) = fscanf(fidf,'%f',1); 
         end
+        
+%         cells(c).spike_amplitude(spikecount(c),1) = fscanf(fidf,'%f',1); % was %d
+%         cells(c).spike_trough2peak_time(spikecount(c),1) = fscanf(fidf,'%f',1);
+%         cells(c).spike_peak_trough_ratio(spikecount(c),1) = fscanf(fidf,'%f',1);
+%         cells(c).spike_prepeak_trough_ratio(spikecount(c),1) = fscanf(fidf,'%f',1);
+%         if n_fet>4
+%             cells(c).spike_lateslope(spikecount(c),1) = fscanf(fidf,'%f',1); % was %d
+%         end
         spikecount(c) = spikecount(c)+1;
     end
     fclose(fidt);

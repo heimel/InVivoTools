@@ -39,7 +39,12 @@ end
 if isempty(cells) %|| 1
     channels = unique([orgcells.channel]);
 
-    
+    if params.sort_always_resort
+        for ch = channels
+            filenamef = fullfile(experimentpath(record,true),[ 'klustakwik.*.' num2str(ch)]);
+            delete(filenamef);
+        end
+    end
     
     write_spike_features_for_klustakwik( orgcells, record,channels );
     savepwd = pwd;
@@ -52,8 +57,7 @@ if isempty(cells) %|| 1
          ' -MaxPossibleClusters ' num2str(params.max_spike_clusters) ...  % 100
          ' -UseDistributional 0' ... 
          ' -PriorPoint 1'...
-         ' -FullStepEvery 20'...
-        ' -UseFeatures 1010100'... %10101  %10111 11111
+         ' -FullStepEvery 20'... %' -UseFeatures 1010100'... %10101  %10111 11111
          ' -SplitEvery 40' ...
          ' -RandomSeed 1' ...
          ' -MaxIter 500' ...  % 500  
@@ -67,9 +71,12 @@ if isempty(cells) %|| 1
 
     for ch=channels
         cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments];
+        logmsg(cmd);
         [status,result] = system(cmd);
         if status == 1
             errormsg(result(max(1,end-100):end),true);
+        else
+            logmsg(result(max(1,end-100):end));
         end
     end
     cd(savepwd);

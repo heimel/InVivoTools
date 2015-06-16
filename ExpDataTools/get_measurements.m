@@ -542,7 +542,7 @@ else
         dres = [];
         cnt = 0;
         pooled = [];
-        if exist('pool_short_neurites','var') && pool_short_neurites
+        if exist('pool_short_neurites','var') && (eval(pool_short_neurites)>0)
             logmsg('Pooling short neurites');
                 for neurite = uniqneurites(:)'                  
                     R = results(linked2neurite==neurite);
@@ -556,7 +556,7 @@ else
                         end
                     end
                 end   
-                res = [res mean(pooled)];
+               res = [res mean(pooled)];
                 dres = [dres std(pooled)];
         else            
             for neurite = uniqneurites(:)'

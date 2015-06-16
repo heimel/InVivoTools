@@ -185,7 +185,6 @@ end
 switch processparams.spike_sorting_routine
     case 'klustakwik'
         cells = sort_with_klustakwik(cells,record);
-        logmsg('WORKING HERE');
     case 'sort_wpca'
         cells = sort_with_wpca(cells,record,processparams.max_spike_clusters);
     otherwise
@@ -278,7 +277,7 @@ for i=1:length(g) % for all cells
     end
     inp.cellnames{1} = [g{i}];
     inp.title=[g{i}]; % only used in period_curve
-    disp(['ANALYSE_ECTESTRECORD: Cell ' num2str(i) ' of ' num2str( length(g) ) ...
+    logmsg(['Cell ' num2str(i) ' of ' num2str( length(g) ) ...
         ', ' g{i} ', ' num2str(n_spikes) ' spikes']);
     
     stim_type = record.stim_type;

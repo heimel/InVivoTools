@@ -4,10 +4,10 @@ function cell = get_spike_features( spikes, cell )
 %    late_slope is slope of the waveform 0.5 ms after initial trough
 %
 %
-% 2012-2013, Mehran Ahmadlou & Alexander Heimel
+% 2012-2015, Mehran Ahmadlou & Alexander Heimel
 %
 
-logmsg('Inverting spikes');
+%logmsg('Inverting spikes');
 %spikes = -spikes;
 
 if isempty(spikes)
@@ -112,8 +112,7 @@ cell.spike_trough2peak_time = (peak_ind-trough_ind)*cell.sample_interval*1000; %
 cell.spike_peak_trough_ratio = -peak_height ./ trough_depth;
 cell.spike_prepeak_trough_ratio = -prepeak_height ./ trough_depth;
 cell.spike_lateslope = lateslope / 1000;
-
 cell.spike_peak_height = peak_height;
 cell.spike_trough_depth = trough_depth;
 
-figure;plot(spikes(1:min(end,1000),:)')
+%figure;plot(spikes(1:min(end,1000),:)')
