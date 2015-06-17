@@ -449,8 +449,10 @@ end % if cluster_spikes
 
 
 % insert measures into record.measures
-if (length(channels2analyze)==length(recorded_channels) && all( sort(channels2analyze)==sort(recorded_channels)))...
-        || ~isfield(measures,'channel')|| ~isfield(record.measures,'channel')
+if (length(channels2analyze)==length(recorded_channels) && ...
+        all( sort(channels2analyze)==sort(recorded_channels))) || ...
+        ~isfield(measures,'channel') || ...
+        ~isfield(record.measures,'channel')
     record.measures = measures;
 else
     try
@@ -482,7 +484,7 @@ measuresfile = fullfile(experimentpath(record),[record.datatype '_measures_OFF.m
 else
     measuresfile = fullfile(experimentpath(record),[record.datatype '_measures.mat']);
 end
-measures = record.measures; %#ok<NASGU>
+
 try
     save(measuresfile,'measures'); 
 catch me

@@ -49,26 +49,8 @@ if isempty(cells) %|| 1
     write_spike_features_for_klustakwik( orgcells, record,channels );
     savepwd = pwd;
     cd(experimentpath(record));
-    arguments = [ ...
-         ' -ElecNo 1' ...
-         ' -nStarts 1' ...
-        ' -MinClusters 1' ...   % 20
-        ' -MaxClusters ' num2str(params.max_spike_clusters) ...   % 30
-         ' -MaxPossibleClusters ' num2str(params.max_spike_clusters) ...  % 100
-         ' -UseDistributional 0' ... 
-         ' -PriorPoint 1'...
-         ' -FullStepEvery 20'... %
-         ' -UseFeatures  1010100' ... %10101  %10111 11111
-         ' -SplitEvery 40' ...
-         ' -RandomSeed 1' ...
-         ' -MaxIter 500' ...  % 500  
-        ' -DistThresh 6.9' ...   % 6.9
-        ' -ChangedThresh 0.05' ... % 0.05
-        ' -PenaltyK 0'... % 0 
-        ' -PenaltyKLogN 1' ]; % 1
-
-%             ' -UseMaskedInitialConditions 1'...  % 1
-%         ' -AssignToFirstClosestMask 1'... 
+    arguments = params.sort_klustakwik_arguments;
+    
 
     for ch=channels
         cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments];

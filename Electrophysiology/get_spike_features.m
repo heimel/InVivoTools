@@ -115,5 +115,5 @@ cell.spike_lateslope = lateslope / 1000;
 cell.spike_peak_height = peak_height;
 cell.spike_trough_depth = trough_depth;
 
-logmsg('got spike features');
+%logmsg('got spike features');
 %figure;plot(spikes(1:min(end,1000),:)')
