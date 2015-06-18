@@ -4,6 +4,8 @@ function [SPs,NumClust] = spike_sort_wpca(SPIKESdata,cll1,NumClust,verbose)
 % 2013, Mehran Ahmadlou
 %
 
+rng('default')
+
 if nargin<3
     NumClust = [];
 end
@@ -29,16 +31,28 @@ if NumClust == 1
     return
 end
 
-spikes1=zeros(30,size(SPIKESdata,1));
-for i=1:size(SPIKESdata,1)
-    A=wavelet_decompose(SPIKESdata(i,:),3,'db4');
-    spikes1(:,i)=A(1:30,3);
-    spikes2(:,i)=A(1:30,1);
-end;
-Spikes1=spikes1';
-spikes1=Spikes1(:,1:20);
-Spikes2=spikes2';
-spikes2=Spikes2(:,1:20);
+% spikes1=zeros(30,size(SPIKESdata,1));
+% for i=1:size(SPIKESdata,1)
+%     A=wavelet_decompose(SPIKESdata(i,:),3,'db4');
+%     spikes1(:,i)=A(1:30,3);
+%     spikes2(:,i)=A(1:30,1);
+% end;
+% Spikes1=spikes1';
+% spikes1=Spikes1(:,1:30);
+% Spikes2=spikes2';
+% spikes2=Spikes2(:,1:30);
+
+% spikes1=zeros(30,size(SPIKESdata,1));
+% for i=1:size(SPIKESdata,1)
+%     A=wavelet_decompose(SPIKESdata(i,:),3,'db4');
+%     spikes1(:,i)=A(1:30,3);
+%     spikes2(:,i)=A(1:30,1);
+% end;
+Spikes1=SPIKESdata;
+spikes1=Spikes1(:,1:30);
+Spikes2=SPIKESdata;
+spikes2=Spikes2(:,1:30);
+
 cll2 = cll1;
 cll1 = get_spike_features(spikes1, cll1);
 cll2 = get_spike_features(spikes2, cll2);
@@ -89,7 +103,7 @@ for i=1:NumClust
     SPs=[SPs;sps];
 end
 
-if 1 %verbose
+if verbose
     subp1=floor(sqrt(NumClust+1));
     subp2=ceil(sqrt(NumClust));
     figure;
