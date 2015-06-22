@@ -38,11 +38,14 @@ end
 
 if isempty(cells) %|| 1
     channels = unique([orgcells.channel]);
-
+    fclose('all'); 
     if params.sort_always_resort
         for ch = channels
             filenamef = fullfile(experimentpath(record,true),[ 'klustakwik.*.' num2str(ch)]);
-            delete(filenamef);
+            d = dir(filenamef);
+            if ~isempty(d)
+                delete(filenamef);
+            end
         end
     end
     

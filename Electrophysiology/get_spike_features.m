@@ -1,4 +1,4 @@
-function cell = get_spike_features( spikes, cell )
+function cell = get_spike_features( spikes, cell, record )
 %GET_SPIKE_FEATURES computes Niell & Stryker 2008 spike features
 %
 %    late_slope is slope of the waveform 0.5 ms after initial trough
@@ -9,6 +9,13 @@ function cell = get_spike_features( spikes, cell )
 
 %logmsg('Inverting spikes');
 %spikes = -spikes;
+
+if nargin<3 
+    record = [];
+end
+
+params = ecprocessparams(record);
+
 
 if isempty(spikes)
 cell.spike_amplitude = [];
@@ -31,7 +38,21 @@ trough_depth = nan(n_spikes,1);
 [dum1,trough_ind ] = min(spikes,[],2);
 [dum2,peak_ind ] = max(spikes,[],2);
 
-trigger_ind = mode([trough_ind;peak_ind]);
+trigger_ind = [];
+[postrigger,postrigger_ind]=max(min(spikes,[],1));
+if postrigger>0
+    trigger_ind = postrigger_ind;
+end
+[negtrigger,negtrigger_ind]=min(max(spikes,[],1));
+if negtrigger<0 && isempty(trigger_ind)
+    trigger_ind = negtrigger_ind;
+end
+if isfield(params,'sort_trigger_ind') && ~isempty(trigger_ind)
+        trigger_ind = params.sort_trigger_ind;
+%     else
+%         trigger_ind = mode([trough_ind;peak_ind]);
+%     end
+end
 
 triggered_trough = (spikes(:,trigger_ind)<0)';
 

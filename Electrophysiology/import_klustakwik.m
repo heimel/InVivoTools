@@ -115,32 +115,28 @@ for ch = channels
     
     spikecount = ones(100,1);
 
-    for i=1:length(cellnumber)
-        if feof(fidt)
-            logmsg(['Premature end to ' filenamet 'at line number ' num2str(i)]);
-            fclose(fidt);
-         fclose(fidf);
-
-            return
-        end
-        c = cellnumber(i);
-        cells(c).data(spikecount(c),1) = str2double( fgets(fidt));
-        for f = 1:n_features
-            cells(c).(features{f})(spikecount(c),1) = fscanf(fidf,'%f',1); 
-        end
-        
-%         cells(c).spike_amplitude(spikecount(c),1) = fscanf(fidf,'%f',1); % was %d
-%         cells(c).spike_trough2peak_time(spikecount(c),1) = fscanf(fidf,'%f',1);
-%         cells(c).spike_peak_trough_ratio(spikecount(c),1) = fscanf(fidf,'%f',1);
-%         cells(c).spike_prepeak_trough_ratio(spikecount(c),1) = fscanf(fidf,'%f',1);
-%         if n_fet>4
-%             cells(c).spike_lateslope(spikecount(c),1) = fscanf(fidf,'%f',1); % was %d
-%         end
-        spikecount(c) = spikecount(c)+1;
-    end
-    fclose(fidt);
+    featuresdata = fscanf(fidf,'%f',[n_features,length(cellnumber)]);
     fclose(fidf);
-        
+    spiketimes = fscanf(fidt,'%f',inf);
+    fclose(fidt);
+    
+%     for i=1:length(cellnumber)
+%         c = cellnumber(i);
+%         %cells(c).data(spikecount(c),1) = spiketimes(i);
+%          for f = 1:n_features
+%             cells(c).(features{f})(spikecount(c),1) = featuresdata(f,i); 
+%          end
+%         spikecount(c) = spikecount(c)+1;
+%     end
+
+    for c=cellnumbers(:)'
+        ind = find(cellnumber==c);
+        cells(c).data = spiketimes(ind);
+         for f = 1:n_features
+            cells(c).(features{f})(:,1) = featuresdata(f,ind); 
+         end
+    end
+
     for cl=1:length(cells)
         if cells(cl).data<10 % don't include cells with less than 10 spikes
             continue

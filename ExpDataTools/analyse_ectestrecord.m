@@ -110,7 +110,7 @@ switch lower(record.setup)
             kll.sample_interval = 1/EVENT.snips.Snip.sampf;
             kll.data = WaveTime_Fpikes(ii,1).time;
             spikes = WaveTime_Fpikes(ii,1).data;
-            kll = get_spike_features(spikes, kll );
+            kll = get_spike_features(spikes, kll, record );
             
             [wtime_sp,nclusters] = spike_sort_wpca(spikes,kll,processparams.max_spike_clusters);
             for cluster = 1:nclusters
@@ -157,7 +157,7 @@ switch lower(record.setup)
             cll.wave = mean(spikes,1);
             cll.std = std(spikes,1);
             cll.snr = (max(cll.wave)-min(cll.wave))/mean(cll.std);
-            cll = get_spike_features(spikes, cll );
+            cll = get_spike_features(spikes, cll, record );
             cells = [cells,cll]; %#ok<AGROW>
         end
         
@@ -214,8 +214,8 @@ end
 
 switch lower(record.setup)
     case 'antigua'
-                 isi = get_spike_interval( cells, isi ); %#ok<NASGU>
-        %isi = [];
+%                  isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+        isi = [];
     otherwise
 %         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
         isi = [];

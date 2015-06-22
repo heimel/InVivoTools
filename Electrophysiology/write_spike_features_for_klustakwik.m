@@ -37,12 +37,14 @@ n_features = length(features);
 
 addnoise = 0;
 
+
+
 for ch=channels
     cells = allcells([allcells.channel]==ch);
     n_cells = length(cells);
     
     filenamef = fullfile(datapath,record.test,[ 'klustakwik.fet.' num2str(ch)]);
-    fidf = fopen(filenamef,'w');
+    fidf = fopen(filenamef,'W');
     if fidf==-1
         errormsg(['Cannot open ' filenamef ' for writing']);
         return
@@ -52,7 +54,7 @@ for ch=channels
     
     
     filenamet = fullfile(datapath,record.test,[ 'klustakwik.tim.' num2str(ch)]);
-    fidt = fopen(filenamet,'w');
+    fidt = fopen(filenamet,'W');
     if fidt==-1
         fclose(fidf);
         errormsg(['Cannot open ' filenamet ' for writing']);
@@ -67,12 +69,23 @@ for ch=channels
     fprintf(fidf,lineend);
     for c=1:n_cells
         n_spikes = length(cells(c).data);
+            fprintf(fidt,['%f' lineend],cells(c).data); % spike time
         for i=1:n_spikes
-            fprintf(fidt,['%f' lineend],cells(c).data(i)); % spike time
-            for f = 1:n_features
-                fprintf(fidf,'%f ',cells(c).(features{f})(i) + addnoise*rand(1)*0.01  );
-            end % feature f
-            fprintf(fidf,lineend);
+        %    fprintf(fidt,['%f' lineend],cells(c).data(i)); % spike time
+            
+%             for f = 1:n_features
+%                 fprintf(fidf,'%f ',cells(c).(features{f})(i) + addnoise*rand(1)*0.01  );
+%             end % feature f
+%             fprintf(fidf,lineend);
+    fprintf(fidf,['%f %f %f %f %f %f %f ' lineend],...
+        cells(c).(features{1})(i),...
+        cells(c).(features{2})(i),...
+        cells(c).(features{3})(i),...
+        cells(c).(features{4})(i),...
+        cells(c).(features{5})(i),...
+        cells(c).(features{6})(i),...
+        cells(c).(features{7})(i));
+        
         end % spike i
     end % cell c
     
