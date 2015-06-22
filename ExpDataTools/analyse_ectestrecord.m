@@ -210,6 +210,15 @@ if exist(spikesfile,'file')
     if isfield(old,'isi')
         isi = old.isi;
     end
+    if ~isempty(old.cells) && ~isempty(cells)
+        othercells = old.cells(~ismember([old.cells.channel],channels2analyze));
+        if ~isempty(othercells)
+            othercells = structconvert( othercells,cells);
+            allcells = [cells othercells];
+            [~,ind] = sort([allcells.channel]);
+            allcells = allcells(ind);
+        end
+    end
 end
 
 switch lower(record.setup)
@@ -220,8 +229,15 @@ switch lower(record.setup)
 %         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
         isi = [];
 end
-save(spikesfile,'cells','isi');
 
+if exist('allcells','var')
+    orgcells = cells;
+    cells = allcells; %#ok<NASGU>
+    save(spikesfile,'cells','isi');
+    cells = orgcells;
+else
+    save(spikesfile,'cells','isi');
+end  
 
 
 ssts = getstimscripttimestruct(cksds,record.test);
@@ -406,7 +422,8 @@ else
     logmsg('No fuzzy toolbox present for spike clustering');
 end
 
-if cluster_spikes            % compute cluster overlap
+if processparams.sort_compute_cluster_overlap &&  cluster_spikes           
+    % compute cluster overlap
     for c = channels2analyze % do this per channel
         ind = find([measures.channel]==c);
         n_cells = length(measures(ind));

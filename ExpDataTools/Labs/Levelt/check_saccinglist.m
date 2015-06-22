@@ -3,7 +3,7 @@ function [db,alivedb,sacdb] = check_saccinglist
 %
 %  [DB,ALIVEDB,SACDB] = CHECK_SACCINGLIJST
 %
-% 2013, Alexander Heimel
+% 2013-2015, Alexander Heimel
 %
 
 % crit = ['\(not Action like \''dead\''\) ' ...
@@ -18,7 +18,9 @@ function [db,alivedb,sacdb] = check_saccinglist
 %     ' and \(not Action like \''Nestler\''\) ' ...
 %     ];
 
-crit = ['\(\(Action like \''alive\''\) or \(Action like \''om af te voeren\''\) or \(Action like \''inzetten%\''\)\)'];
+aftevoeren_str = 'om af te voeren';
+
+crit = ['\(\(Action like \''alive\''\) or \(Action like \''' aftevoeren_str '\''\) or \(Action like \''inzetten%\''\)\)'];
 %strains = ['\(Transgene like \''T5\''\)'];
 %strains = [strains ' or \(Transgene like \''DBA\''\)'];
 %strains = [strains ' or \(Transgene like \''DBA\''\)'];
@@ -31,14 +33,14 @@ strains = '(Transgene=T5)|(Transgene=DBA)|(KOdKI=GCamp3)|(KOdKI=R26TOM)|(Cre=GAD
 db = db(find_record( db,strains));
 
 if isempty(db)
-    disp('CHECK_SACCINGLIST: No records found. ');
+    logmsg('No records found. ');
     return
 end
 
 db = reorder_fields(db,[3 4 5 1]);
 db = sort_db(db);
 
-sacdb = db(find_record(db,'Action=om af te voeren'));
+sacdb = db(find_record(db,['Action=' aftevoeren_str]));
 hsac = show_table(sacdb);
 set(hsac,'Name','Saccing');
 
