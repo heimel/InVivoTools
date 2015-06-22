@@ -185,10 +185,13 @@ switch rorfile
         else
             rorfile=fullfile(analysispath,record.rorfile);
         end
-        ror=double(imread(rorfile));
-        if ~isempty(n_x)
-            if size(ror,2)~=n_x || size(ror,1)~=n_y
-                record.rorfile=[];
+        if exist(rorfile,'file')
+            
+            ror=double(imread(rorfile));
+            if ~isempty(n_x)
+                if size(ror,2)~=n_x || size(ror,1)~=n_y
+                    record.rorfile=[];
+                end
             end
         end
 end
@@ -290,7 +293,7 @@ if isempty(roifile) ||  ~exist(roifile,'file')
 end
 
 % if no ROR defined, let user draw one
-if isempty(record.rorfile)
+if isempty(record.rorfile)||  ~exist(rorfile,'file')
     %data=imread(imagepath);
     h_ror=figure;
     image(data); axis image;
@@ -298,7 +301,14 @@ if isempty(record.rorfile)
     set(gca,'YTick',[]);
     logmsg('Please select ROR polygon');
     ror=select_polygon;
-    rorfile= [ record.test '_ror_c' num2str(compression) '.png'];
+    if isempty(record.rorfile)
+        
+        rorfile= [ record.test '_ror_c' num2str(compression) '.png'];
+    end
+    if ~isempty(rorfile==filesep)
+        [rorpath,rorfile,ext]=fileparts(rorfile); %#ok<ASGLU>
+        rorfile=[rorfile  ext];
+    end
     rorpath=fullfile(analysispath,rorfile);
     ror=ror & (~roi);
     imwrite(ror,rorpath);
