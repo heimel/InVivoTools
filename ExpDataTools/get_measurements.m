@@ -12,7 +12,10 @@ function [results,dresults,measurelabel, rawdata] = get_measurements( groups, me
 % 2007-2014, Alexander Heimel
 %
 
+
 persistent expdb_cache
+
+global pooled
 
 results={};
 dresults={};
@@ -171,6 +174,9 @@ rawdata = cell(1,n_groups);
 
 for g=1:n_groups
     newlinehead=[linehead groupss(g).name ': '];
+    pooled.group = g;
+    pooled.idx = 0;
+    
     [results{g},dresults{g}, rawdata{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
     n=sum(~isnan(results{g})) ;
     if n<min_n
@@ -429,6 +435,7 @@ function [results, dresults, rawdata]=get_measurements_for_test(testrecord, mous
 results = [];
 dresults = [];
 rawdata = {};
+global pooled
 
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
@@ -549,74 +556,63 @@ else
         dres = [];
         rcnt = 0;
         
-        if exist('pool_short_neurites','var') && (eval(pool_short_neurites)>0)
-            Crit = eval(pool_short_neurites);
-            logmsg(['Pooling short neurites: Crit < ' pool_short_neurites]);
+        if exist('pool_short_neurites','var')
             
-            %first pool then average
-            Cnt = 0;
-            Set = [];         
-            for neurite = uniqneurites(:)'
-                R = results(linked2neurite==neurite);
-                R = R(~isnan(R));
-                if  ~isempty(R)
-                    if length(R) >= Crit
-                        Cnt = Cnt + 1;
-                        Set{Cnt}  = R;
-                        
-                    elseif Cnt > 0
-                        bAdd = 0; %added to short neurite?
-                        for i = 1:Cnt
-                            if length(Set{i}) < Crit
-                                Set{i} = [Set{i} R];
-                                bAdd = 1;
-                                continue
-                            end
-                        end
-                        if ~bAdd %no => make new
-                            Cnt = Cnt + 1;
-                            Set{Cnt}  = R;
-                        end
-                    else
-                        Cnt = Cnt + 1;
-                        Set{Cnt}  = R;
+            if ~isfield(pooled, 'all')
+                errormsg('Pooled does not exist');
+                return
+            else
+                pooled.idx = pooled.idx + 1; %keep track of where we are
+                logmsg(['Pooling short neurites: Crit < ' pool_short_neurites]);
+              
+                pool = pooled.all(pooled.group).pool{pooled.idx}.Set;
+                if isempty(pool)
+                    errormsg('Empty pool, returning');
+                    return
+                end
+                linked = pooled.all(pooled.group).linked2neurite{pooled.idx};
+                if length(unique(linked)) ~= length(unique(linked2neurite))
+                     disp('Warning: Not an equal number of pooled and linked neurite numbers.');
+                end 
+                %first pool then average
+                Cnt = 0;
+                Set = cell(1, length(pool));
+                for i = 1:length(pool)
+                    nids = pool{i};
+                    for neurite = nids
+                        R = results(linked2neurite==neurite);
+                        R = R(~isnan(R));
+                        Set{i} = [Set{i} R];
                     end
                 end
-            end
-            %last set should be added to previous if too short
-            if Cnt > 1
-                if length(Set{Cnt}) < Crit
-                    Set{Cnt-1} = [Set{Cnt-1} Set{Cnt}];
-                    Set = Set(1:Cnt-1);
+                
+                %now get estimates from each neurite set
+                if ~isempty(Set)
+                    for i = 1:length(Set)
+                        res = [res mean(Set{i})];
+                        dres = [dres std(Set{i})];
+                    end
+                    rawdata = Set;
                 end
             end
-            %now get estimates from each neurite set
-            if ~isempty(Set)
-                for i = 1:length(Set)
-                    res = [res mean(Set{i})];
-                    dres = [dres std(Set{i})];
+        else
+            for neurite = uniqneurites(:)'
+                res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
+                dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
+                
+                R = results(linked2neurite==neurite);
+                R = R(~isnan(R));
+                if ~isempty(R)
+                    rcnt = rcnt + 1;
+                    rawdata(rcnt) = {R};
                 end
-                rawdata = Set;
             end
-        end
-    else
-        for neurite = uniqneurites(:)'
-            res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
-            dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
             
-            R = results(linked2neurite==neurite);
-            R = R(~isnan(R));
-            if ~isempty(R)
-                rcnt = rcnt + 1;
-                rawdata(rcnt) = {R};
-            end
-        end
-        
+         end   
+            results = res;
+            dresults = dres;
     end
-    results = res;
-    dresults = dres;
 end
-
 
 if ~isempty(results)
     switch value_per
