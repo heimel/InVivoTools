@@ -8,7 +8,7 @@ function [val,val_sem]=get_compound_measure_from_record(record,measure,criteria,
 
 measure = strtrim(measure);
 
-logmsg(measure)
+%logmsg(measure)
 
 if measure(1)=='['
     if ~measure(end)==']'         
