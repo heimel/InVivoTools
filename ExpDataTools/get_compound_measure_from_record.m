@@ -8,6 +8,8 @@ function [val,val_sem]=get_compound_measure_from_record(record,measure,criteria,
 
 measure = strtrim(measure);
 
+logmsg(measure)
+
 if measure(1)=='['
     if ~measure(end)==']'         
         errormsg('Missing end ]-bracket',true);
@@ -24,7 +26,9 @@ end
 ops = find(is_operator(measure),1);
 ob = find(measure=='(',1);
 
-if isempty(ops) || (~isempty(ob) && ob<ops && measure(end)==')')% i.e. no compound
+if isempty(ops) ||  length(find(measure(1:ops-1)=='('))~= length(find(measure(1:ops-1)==')'))
+    % i.e. no compound
+    %(~isempty(ob) && ob<ops && measure(end)==')')
     if isempty(ob) % no '(' 
         [val,val_sem] = get_measure_from_record(record,measure,criteria,extra_options);
         return

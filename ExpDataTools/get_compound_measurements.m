@@ -87,6 +87,8 @@ if ischar(measures) && ~isempty(find(measures==',',1))
     return
 end
 
+logmsg(measures);
+
 measuresstring=measures;
 results={};
 dresults={};
@@ -262,9 +264,13 @@ switch wordtypes{w+1}
         new_wordtype='measure';
     case 'scalar'
         new_results = feval(func,results_list{w+1});
-        new_dresults = cell(size(new_results)); % corrected 2014-11-15
-        for r=1:length(new_results)
-            new_dresults{r} = nan*new_results{r};
+        if iscell(new_results)
+            new_dresults = cell(size(new_results)); % corrected 2014-11-15
+            for r=1:length(new_results)
+                new_dresults{r} = nan*new_results{r};
+            end
+        else
+            new_dresults = NaN;
         end
         new_measurelabel=[measurelabels{w} ' ' measurelabels{w+1}];
         new_wordtype='scalar';
