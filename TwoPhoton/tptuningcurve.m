@@ -340,11 +340,13 @@ catch me
     p = nan(size(data,2),1);
 end
 
-for c=1:size(data,2)
-    if ~isnan(responsive(c))
-        record.measures(c).responsive = responsive(c);
+if length(responsive)==size(data,2)
+    for c=1:size(data,2)
+        if ~isnan(responsive(c))
+            record.measures(c).responsive = responsive(c);
+        end
+        record.measures(c).responsive_p = p(c);
     end
-    record.measures(c).responsive_p = p(c);
 end
 
 
