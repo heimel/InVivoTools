@@ -198,7 +198,7 @@ end
 % maximum bouton to mitochrondion 
 params.max_bouton_mito_distance_um = 2; 
 
-params.bouton_close_minimum_intensity_rel2dendrite = 1.8; 
+params.bouton_close_minimum_intensity_rel2dendrite = zeros(1,100); %max 100 channels
 
 % get intensities
 params.get_intensities = false;

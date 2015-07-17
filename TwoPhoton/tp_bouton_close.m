@@ -39,7 +39,7 @@ for i = ind_no_bouton(:)'
     for j = ind_bouton(:)'
        if  roilist(j).present 
            if isfield(roilist,'intensity_rel2dendrite') && ...
-                   roilist(j).intensity_rel2dendrite<processparams.bouton_close_minimum_intensity_rel2dendrite
+                   any(roilist(j).intensity_rel2dendrite<processparams.bouton_close_minimum_intensity_rel2dendrite(1:length(roilist(j).intensity_rel2dendrite)))
                continue
            end
            record.measures(i).distance2bouton  = min(record.measures(i).distance2bouton, norm(r(i,:)-r(j,:)) );
