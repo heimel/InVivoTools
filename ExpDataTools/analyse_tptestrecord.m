@@ -294,9 +294,8 @@ if isfield(record,'measures') && isfield(record.measures,'mito') && any([record.
     record = tp_automated_mito_analysis( record ); % entry by RR for mito intensity measurement
 end
 if isfield(record,'measures') && isfield(record.measures,'bouton') && any([record.measures(:).bouton])
-    record = tp_bouton_close( record );
-    
     record = tp_automated_bouton_analysis( record );
+    record = tp_bouton_close( record );
 end
 
 % getting densities
