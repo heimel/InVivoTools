@@ -571,8 +571,11 @@ else
                     return
                 end
                 linked = pooled.all(pooled.group).linked2neurite{pooled.idx};
-                if length(unique(linked)) ~= length(unique(linked2neurite))
+                if length(unique(linked)) ~= length(uniqneurites)
                      disp('Warning: Not an equal number of pooled and linked neurite numbers.');
+                     disp('Neurites not in pool, wil not be added to dataset');
+                     disp(['Pool: ', num2str(linked)])
+                     disp(['Linked: ', num2str(uniqneurites)])
                 end 
                 %first pool then average
                 Cnt = 0;
