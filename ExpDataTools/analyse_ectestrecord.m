@@ -112,7 +112,7 @@ switch lower(record.setup)
             spikes = WaveTime_Fpikes(ii,1).data;
             kll = get_spike_features(spikes, kll, record );
             
-            [wtime_sp,nclusters] = spike_sort_wpca(spikes,kll,processparams.max_spike_clusters);
+            [wtime_sp,nclusters] = spike_sort_wpca(spikes,kll,record);
             for cluster = 1:nclusters
                 wtime_sp(cluster).channel = channels2analyze(ii);
             end
@@ -185,6 +185,20 @@ end
 switch processparams.spike_sorting_routine
     case 'klustakwik'
         cells = sort_with_klustakwik(cells,record);
+%         TC=[];
+        for i = 1:length(cells)
+%             TC = [TC , cells(i).channel];
+            cell_time = floor(1000*(cells(i).data-timeshift)/processparams.secondsmultiplier);
+            bm=find(channels2analyze==cells(i).channel);
+            aaa=WaveTime_Fpikes(bm).time;bbb=WaveTime_Fpikes(bm).data;
+            allcell_time = floor(1000*aaa);
+        cells(i).wave = mean(bbb(ismember(allcell_time,cell_time),:));
+        cells(i).std = std(bbb(ismember(allcell_time,cell_time),:));
+        cells(i).snr = (max(cells(i).wave)-min(cells(i).wave))/mean(cells(i).std);
+        end
+%         [TD,td] = sort(TC);
+%         cells2 = cells(td);
+%         cells = cells2;
     case 'sort_wpca'
         cells = sort_with_wpca(cells,record,processparams.max_spike_clusters);
     otherwise
@@ -213,7 +227,11 @@ if exist(spikesfile,'file')
     if ~isempty(old.cells) && ~isempty(cells)
         othercells = old.cells(~ismember([old.cells.channel],channels2analyze));
         if ~isempty(othercells)
-            othercells = structconvert( othercells,cells);
+            try
+                othercells = structconvert( othercells,cells);
+            catch
+                othercells = [];
+            end
             allcells = [cells othercells];
             [~,ind] = sort([allcells.channel]);
             allcells = allcells(ind);

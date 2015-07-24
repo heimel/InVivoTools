@@ -163,13 +163,13 @@ for ch = channels
         outcells(count).mean_amplitude = mean(outcells(count).spike_amplitude);
         count = count + 1;
     end
-    % sort by spike amplitude from low to high
-    indices = [ outcells.index];
-    [m,ind] = sort([outcells.mean_amplitude]);
-    outcells = outcells(ind);
-    for i = 1:length(outcells)
-        outcells(i).index = indices(i);
-    end
+%     % sort by spike amplitude from low to high
+%     indices = [ outcells.index];
+%     [m,ind] = sort([outcells.mean_amplitude]);
+%     outcells = outcells(ind);
+%     for i = 1:length(outcells)
+%         outcells(i).index = indices(i);
+%     end
 end % channel ch
 
 

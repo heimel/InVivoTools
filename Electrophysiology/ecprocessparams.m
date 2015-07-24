@@ -67,9 +67,9 @@ params.max_spike_clusters = 4;
 params.cluster_overlap_threshold = 0.5;
 
 
-params.show_isi = true;
+params.show_isi = false;
 
-params.plot_spike_features = true;
+params.plot_spike_features = false;
 
 % entropy analysis
 switch record.mouse(1:min(end,5))
@@ -96,7 +96,7 @@ switch lower(record.setup)
                 params.compare_with_klustakwik = true;
             otherwise
                 params.spike_sorting_routine = '';
-                params.compare_with_klustakwik = true;
+                params.compare_with_klustakwik = false;
         end
 end
 switch lower(record.setup)
