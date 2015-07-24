@@ -44,7 +44,7 @@ end;
 
 default_p = struct('BG',[ 0 0 0],'value',[255 255 255],'random',0, ...
               'repeat',1,'bgpause',0,'fps',3,'rect',[100 100 200 200], ...
-              'pixSize',[50 50],'randState',rand('state'));
+              'pixSize',[50 50],'randState',rng);
 default_p.dispprefs = {};
 
 

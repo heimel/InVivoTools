@@ -145,9 +145,13 @@ if ~( length(signif_y)==1 && signif_y==0)
         switch test
             case 'ttest'
                 % check normality
-                [h_norm,p_norm] = swtest(y{i});
-                if h_norm
-                    logmsg(['Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to kruskal_wallis']);
+                if length(y{i})>2
+                    [h_norm,p_norm] = swtest(y{i});
+                    if h_norm
+                        logmsg(['Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to kruskal_wallis']);
+                    end
+                else
+                    logmsg(['Too few observation to test normality of group ' num2str(i)]);
                 end
             case 'paired_ttest'
                 % check normality

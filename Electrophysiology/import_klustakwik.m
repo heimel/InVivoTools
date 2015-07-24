@@ -33,8 +33,7 @@ end
 count = 1;
 
 flds = fields(orgcells);
-ind = strmatch('spike_',flds);
-features = flds(ind);
+features = flds(strncmp('spike_',flds,6)); 
 if ~any(isnan(flatten({orgcells(:).spike_lateslope})))
     use_lateslope = true;
 else
@@ -65,6 +64,9 @@ for ch = channels
     end
     
     n_fet = str2double(fgetl(fidf)); % number of features
+    if n_features ~= n_fet
+        logmsg(['Discrepancy in number of features in ' filenamef]);
+    end
     
     filenamet = fullfile(datapath,record.test,[ 'klustakwik.tim.' num2str(ch)]);
     fidt = fopen(filenamet,'r');
@@ -74,6 +76,8 @@ for ch = channels
          fclose(fidf);
         return
     end
+    spiketimes = fscanf(fidt,'%f',inf);
+    fclose(fidt);
     
     
     n_spikes = 0;
@@ -83,43 +87,62 @@ for ch = channels
     
     cells = [];
     logmsg('Loading Klustakwik assignments.');
-    spikecount = zeros(100,1);
-    cellnumber = nan(n_spikes,1);
-    i = 1;
-    fgetl(fidc); % extra line????, but necessary
-    while(~feof(fidc))
-        c = fscanf(fidc,'%d',1);
-        if isempty(c)
-            logmsg('Too few spikes assigned?');
-        else
-            cellnumber(i) =  c;
-            %        cellnumber(end+1) = str2double( fgets(fidc));
-            spikecount(cellnumber(i)) =  spikecount(cellnumber(i))+1;
-            i = i+1;
-        end
-    end
-    logmsg(['Imported ' num2str(i-1) ' assignments']);
-    cellnumber(i:end) = [];
+    
+    n_cells = fscanf(fidc,'%d',1); % number of clusters
+    cellnumber = fscanf(fidc,'%d',inf);
     fclose(fidc);
-    logmsg('Loading Klustakwik data');
+    
+    logmsg(['Imported ' num2str(length(cellnumber)) ' spike assignments to ' num2str(n_cells) ' cells.']);
+    if length(cellnumber)~=n_spikes
+        logmsg('Number of imported spikes differs from original number');
+    end
+    
+    
+    spikecount = zeros(100,1);
+%     cellnumber = nan(n_spikes,1);
+%     i = 1;
+%     fgetl(fidc); % extra line????, but necessary
+%     while(~feof(fidc))
+%         c = fscanf(fidc,'%d',1);
+%         if isempty(c)
+%             logmsg('Too few spikes assigned?');
+%         else
+%             cellnumber(i) =  c;
+%             %        cellnumber(end+1) = str2double( fgets(fidc));
+%             spikecount(cellnumber(i)) =  spikecount(cellnumber(i))+1;
+%             i = i+1;
+%         end
+%     end
+    
+for c = 1:n_cells
+    spikecount(c) = sum(cellnumber==c);
+end
 
-    cellnumbers = find(spikecount>0);
-    for c=cellnumbers(:)'
+%     logmsg(['Imported ' num2str(i-1) ' assignments']);
+%     cellnumber(i:end) = [];
+%     fclose(fidc);
+%     logmsg('Loading Klustakwik data');
+% 
+%     cellnumbers = find(spikecount>0);
+
+    
+    featuresdata = fscanf(fidf,'%f',[n_features,length(cellnumber)]);
+    fclose(fidf);
+
+    for c=1:n_cells; %cellnumbers(:)'
         cells(c).data = zeros(spikecount(c),1);
         cells(c).spike_amplitude = zeros(spikecount(c),1);
         cells(c).spike_trough2peak_time = zeros(spikecount(c),1);
         cells(c).spike_peak_trough_ratio = zeros(spikecount(c),1);
         cells(c).spike_prepeak_trough_ratio = zeros(spikecount(c),1);
         cells(c).spike_lateslope = zeros(spikecount(c),1);
-    end
+%     end
     
-    spikecount = ones(100,1);
-
-    featuresdata = fscanf(fidf,'%f',[n_features,length(cellnumber)]);
-    fclose(fidf);
-    spiketimes = fscanf(fidt,'%f',inf);
-    fclose(fidt);
-    
+%     spikecount = ones(100,1);
+% 
+%     featuresdata = fscanf(fidf,'%f',[n_features,length(cellnumber)]);
+%     fclose(fidf);
+%     
 %     for i=1:length(cellnumber)
 %         c = cellnumber(i);
 %         %cells(c).data(spikecount(c),1) = spiketimes(i);
@@ -129,7 +152,7 @@ for ch = channels
 %         spikecount(c) = spikecount(c)+1;
 %     end
 
-    for c=cellnumbers(:)'
+%     for c=cellnumbers(:)'
         ind = find(cellnumber==c);
         cells(c).data = spiketimes(ind);
          for f = 1:n_features

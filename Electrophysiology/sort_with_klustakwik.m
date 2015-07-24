@@ -16,7 +16,7 @@ else
     kkexecutable = which('KlustaKwik.exe');
 end
 
-[status,res] = system(kkexecutable);
+status = system(kkexecutable);
 
 if status~=1
     if isunix
@@ -24,11 +24,11 @@ if status~=1
     else
         kkexecutable = which('MaskedKlustaKwik.exe');
     end
-    [status,res] = system(kkexecutable);
+    status = system(kkexecutable);
 end
 
 if status~=1
-    logmsg('KlustaKwik not present');
+    logmsg('KlustaKwik not present. Go to https://github.com/klusta-team/klustakwik and follow instructions to install.');
     return
 end
 
@@ -56,7 +56,8 @@ if isempty(cells) %|| 1
     
 
     for ch=channels
-        cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments];
+    %    cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments ' -StartCluFile klustakwik.clu.7'];
+       cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments];
         logmsg(cmd);
         [status,result] = system(cmd);
         if status == 1
