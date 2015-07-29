@@ -380,7 +380,7 @@ for i_test=indtests
     newlinehead = [linehead recordfilter(testrecord) ':'];
     [res,dres, raw]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
     
-    disp(['length of record ' num2str(i_test) ':  ' num2str(length(res))])
+    %disp(['length of record ' num2str(i_test) ':  ' num2str(length(res))])
     
     switch value_per
         case {'test','stack'}
@@ -538,7 +538,7 @@ if strcmp(measure.measure(1:min(end,4)),'file') % read measure from file
 else
     [results,dresults] = get_compound_measure_from_record(testrecord,measure.measure,criteria,extra_options);
     if isempty(results)
-        disp('no results...')
+        %disp('no results...')
         return
     end
     

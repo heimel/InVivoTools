@@ -210,6 +210,10 @@ switch record.experiment
             case 'lif'
                 params.get_intensities = true;
         end
+    otherwise
+        if strncmp(record.experiment,'11.12',5)
+                params.get_intensities = true;
+        end            
 end
 
 % loudly complain about absent data
