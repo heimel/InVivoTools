@@ -227,6 +227,19 @@ for j = 1:length(celllist)
     end
 end
 
+% put back intensities into celllist for backward compatibility
+for i=1:length(record.measures)
+    record.ROIs.celllist(i).intensity_mean = [];
+    record.ROIs.celllist(i).intensity_median = [];
+    record.ROIs.celllist(i).intensity_max = [];
+    for ch=1:params.NumberOfChannels
+        record.ROIs.celllist(i).intensity_mean(ch) = record.measures(i).(['intensity_mean_ch' num2str(ch)]);
+        record.ROIs.celllist(i).intensity_median(ch) = record.measures(i).(['intensity_median_ch' num2str(ch)]);
+        record.ROIs.celllist(i).intensity_max(ch) = record.measures(i).(['intensity_max_ch' num2str(ch)]);
+    end
+end
+
+
 % set ranks
 intensity_rank = zeros(length(celllist),params.NumberOfChannels);
 for ch=1:params.NumberOfChannels
