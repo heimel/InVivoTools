@@ -215,6 +215,8 @@ switch record.experiment
                 params.get_intensities = true;
         end            
 end
+params.tp_rank_only_present = true;
+
 
 % loudly complain about absent data
 params.tp_mumble_not_present = false;
