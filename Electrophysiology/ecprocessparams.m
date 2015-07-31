@@ -66,7 +66,7 @@ params.cell_colors = repmat('kbgrcmy',1,50);
 params.max_spike_clusters = 4;
 params.cluster_overlap_threshold = 0.5;
 
-
+params.compute_isi = false;
 params.show_isi = false;
 
 params.plot_spike_features = false;

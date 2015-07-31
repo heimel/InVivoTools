@@ -70,6 +70,7 @@ fit=''; % to overload matlab function CURVEFIT/FIT
 % possible varargins with default values
 pos_args={...
     'axishandle',[],...
+    'bottomline','',... % none
     'showpoints',1,...
     'test','',... %'ttest',...
     'spaced',1,...
@@ -824,8 +825,13 @@ end
 switch style
     case {'bar','box'}
         % add bottomline
-        ax=axis;
-        line([ ax(1) ax(2)],[ax(3) ax(3)],'Color','k');
+        switch bottomline
+            case 'none'
+                set(gca,'xcolor',[1 1 1])
+            otherwise
+                ax=axis;
+                line([ ax(1) ax(2)],[ax(3) ax(3)],'Color','k');
+        end
 end
 
 % set xticklabels

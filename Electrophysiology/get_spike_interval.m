@@ -29,17 +29,11 @@ for ch=chans % only do per channel for the moment.
     n_cells = length(cells);
     for c1=1:n_cells
         for c2=1:c1
-             spikes1 = repmat( cells(c1).data(1:min(end,max_spikes))',...
-                length(cells(c2).data(1:min(end,max_spikes))),1);
-            spikes2 = repmat( cells(c2).data(1:min(end,max_spikes)),...
-                1,length(cells(c1).data(1:min(end,max_spikes))));
-            intervals = flatten(spikes2-spikes1);
-            intervals(intervals==0) = [];
+            isi(counter).data = compute_isi( cells(c1).data,cells(c2).data, max_spikes,max_interval);
             isi(counter).pair(1) = cells(c1).index;
             isi(counter).channel(1) = cells(c1).channel; 
             isi(counter).pair(2) = cells(c2).index;
             isi(counter).channel(2) = cells(c2).channel; 
-            isi(counter).data = intervals(abs(intervals)<max_interval);
             counter = counter+1;
         end
     end

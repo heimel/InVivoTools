@@ -96,7 +96,7 @@ if length(y)>2 % multigroup comparison
     
     
     
-    [h.p_groupkruskalwallis,anovatab,stats] = kruskalwallis(v,group,'off');
+    [h.p_groupkruskalwallis,anovatab,kwstats] = kruskalwallis(v,group,'off');
     logmsg(['Group Kruskal-Wallis: p = ' num2str(h.p_groupkruskalwallis,2) ', df = ' num2str(anovatab{4,3})]);
     [h.p_groupanova,anovatab,stats] = anova1(v,group,'off');
     logmsg(['Group ANOVA: p = ' num2str(h.p_groupanova,2) ', s[' num2str(stats.df) '] = ' num2str(stats.s)]);
@@ -119,18 +119,34 @@ if length(y)>2 % multigroup comparison
     if h.p_groupanova<0.05 || (isfield(h,'p_groupwelchanova') && h.p_groupwelchanova<0.05)
         p = dunnett(stats);
         for i=2:length(p)
-            logmsg(['Post-hoc Dunnett (first group is common control) group ' num2str(i) ': p = ' num2str(p(i),2)]);
+            logmsg(['Post-hoc parametric Dunnett (first group is common control) group ' num2str(i) ': p = ' num2str(p(i),2)]);
         end
         comparison = multcompare(stats,'ctype','tukey-kramer','display','off');
         try
             for i=1:size(comparison,1) % over all tests
-                logmsg(['Post-hoc Tukey-Kramer, groups ' num2str(comparison(i,1)) ...
+                logmsg(['Post-hoc parametric Tukey-Kramer, groups ' num2str(comparison(i,1)) ...
                     ' vs ' num2str(comparison(i,2)) ': p = ' num2str(comparison(i,6),2)]);
             end
         catch me
             switch me.identifier
                 case 'MATLAB:badsubscript' % older matlab versions R2009b
                     logmsg('No post-hoc Tukey-Kramer tests. Update matlab' );
+                otherwise
+                    rethrow(me)
+            end
+        end
+    end
+    if h.p_groupkruskalwallis<0.05
+        comparison = multcompare(stats,'ctype','bonferroni','display','off');
+        try
+            for i=1:size(comparison,1) % over all tests
+                logmsg(['Post-hoc bonferroni corrected Mann-Whitney U test, groups ' num2str(comparison(i,1)) ...
+                    ' vs ' num2str(comparison(i,2)) ': p = ' num2str(comparison(i,6),2)]);
+            end
+        catch me
+            switch me.identifier
+                case 'MATLAB:badsubscript' % older matlab versions R2009b
+                    logmsg('No post-hoc tests. Update matlab' );
                 otherwise
                     rethrow(me)
             end
@@ -145,9 +161,13 @@ if ~( length(signif_y)==1 && signif_y==0)
         switch test
             case 'ttest'
                 % check normality
-                [h_norm,p_norm] = swtest(y{i});
-                if h_norm
-                    logmsg(['Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to kruskal_wallis']);
+                if length(y{i})>2
+                    [h_norm,p_norm] = swtest(y{i});
+                    if h_norm
+                        logmsg(['Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to kruskal_wallis']);
+                    end
+                else
+                    logmsg(['Too few observation to test normality of group ' num2str(i)]);
                 end
             case 'paired_ttest'
                 % check normality

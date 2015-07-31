@@ -3,12 +3,9 @@ function record=analyse_ectestrecord(record,verbose)
 %
 %   RECORD=ANALYSE_ECTESTRECORD( RECORD, VERBOSE )
 %
-% 2007-2014, Alexander Heimel, Mehran Ahmadlou
+% 2007-2015, Alexander Heimel, Mehran Ahmadlou
 
-if nargin<2
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<2 || isempty(verbose)
     verbose = true;
 end
 
@@ -54,11 +51,9 @@ switch lower(record.setup)
         
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
 
-  if 0 && strmatch(record.stim_type,'background')==1
-      EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.55;
-  end
-
-%         EVENT.strons.tril(1) = EVENT.strons.tril(5);
+        if 0 && strmatch(record.stim_type,'background')==1
+            EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.55;
+        end
         
         EVENT.Myevent = 'Snip';
         EVENT.type = 'snips';
@@ -72,7 +67,7 @@ switch lower(record.setup)
             channels2analyze = 1:EVENT.snips.Snip.channels;
         end
         EVENT.CHAN = channels2analyze;
- 
+        
         logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
         total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
         clear('WaveTime_Fpikes');
@@ -80,14 +75,12 @@ switch lower(record.setup)
         if ~isunix
             % cut in 60s blocks
             for i=1:length(channels2analyze)
-                WaveTime_Fpikes(i,1) = struct('time',[],'data',[]); 
+                WaveTime_Fpikes(i,1) = struct('time',[],'data',[]);
             end
             for kk=1:ceil(total_length/60)
                 EVENT.Triallngth = min(60,total_length-60*(kk-1));
                 WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
                 for i=1:length(channels2analyze)
-%                     WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(channels2analyze(i),1).time];
-%                     WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(channels2analyze(i),1).data];
                     WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(i,1).time];
                     WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(i,1).data];
                 end
@@ -95,10 +88,6 @@ switch lower(record.setup)
         else % linux
             WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1));
         end
-        
-        %         if isempty(WaveTime_Fpikes)
-        %             return
-        %         end
         
         % spike sorting
         for ii=1:length(channels2analyze)
@@ -112,7 +101,15 @@ switch lower(record.setup)
             spikes = WaveTime_Fpikes(ii,1).data;
             kll = get_spike_features(spikes, kll, record );
             
-            [wtime_sp,nclusters] = spike_sort_wpca(spikes,kll,record);
+            
+            if processparams.max_spike_clusters == 1
+                wtime_sp.data = spikes;
+                wtime_sp.time = kll.data;
+                nclusters = 1;
+            else
+                [wtime_sp,nclusters] = spike_sort_wpca(spikes,kll,record);
+            end
+            
             for cluster = 1:nclusters
                 wtime_sp(cluster).channel = channels2analyze(ii);
             end
@@ -129,11 +126,11 @@ switch lower(record.setup)
         intervals=[stimsfile.start ...
             stimsfile.MTI2{end}.frameTimes(end)+10];
         % shift time to fit with TTL and stimulustimes
-
+        
         timeshift = stimsfile.start-EVENT.strons.tril(1);
         timeshift = timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
         
-       
+        
         cells = struct([]);
         cll.name = '';
         cll.intervals = intervals;
@@ -185,20 +182,20 @@ end
 switch processparams.spike_sorting_routine
     case 'klustakwik'
         cells = sort_with_klustakwik(cells,record);
-%         TC=[];
+        %         TC=[];
         for i = 1:length(cells)
-%             TC = [TC , cells(i).channel];
+            %             TC = [TC , cells(i).channel];
             cell_time = floor(1000*(cells(i).data-timeshift)/processparams.secondsmultiplier);
             bm=find(channels2analyze==cells(i).channel);
             aaa=WaveTime_Fpikes(bm).time;bbb=WaveTime_Fpikes(bm).data;
             allcell_time = floor(1000*aaa);
-        cells(i).wave = mean(bbb(ismember(allcell_time,cell_time),:));
-        cells(i).std = std(bbb(ismember(allcell_time,cell_time),:));
-        cells(i).snr = (max(cells(i).wave)-min(cells(i).wave))/mean(cells(i).std);
+            cells(i).wave = mean(bbb(ismember(allcell_time,cell_time),:));
+            cells(i).std = std(bbb(ismember(allcell_time,cell_time),:));
+            cells(i).snr = (max(cells(i).wave)-min(cells(i).wave))/mean(cells(i).std);
         end
-%         [TD,td] = sort(TC);
-%         cells2 = cells(td);
-%         cells = cells2;
+        %         [TD,td] = sort(TC);
+        %         cells2 = cells(td);
+        %         cells = cells2;
     case 'sort_wpca'
         cells = sort_with_wpca(cells,record,processparams.max_spike_clusters);
     otherwise
@@ -239,13 +236,10 @@ if exist(spikesfile,'file')
     end
 end
 
-switch lower(record.setup)
-    case 'antigua'
-%                  isi = get_spike_interval( cells, isi ); %#ok<NASGU>
-        isi = [];
-    otherwise
-%         isi = get_spike_interval( cells, isi ); %#ok<NASGU>
-        isi = [];
+if processparams.compute_isi
+    isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+else
+    isi = []; %#ok<NASGU>
 end
 
 if exist('allcells','var')
@@ -255,7 +249,7 @@ if exist('allcells','var')
     cells = orgcells;
 else
     save(spikesfile,'cells','isi');
-end  
+end
 
 
 ssts = getstimscripttimestruct(cksds,record.test);
@@ -357,8 +351,8 @@ for i=1:length(g) % for all cells
     try
         % compute signal to noise ratio (don't confuse with cell quality snr)
         for t=1:length(cellmeasures.rate_max)
-        cellmeasures.response_snr{t}= (cellmeasures.rate_max{t}-cellmeasures.rate_spont{t}) /...
-            cellmeasures.rate_spont{t};
+            cellmeasures.response_snr{t}= (cellmeasures.rate_max{t}-cellmeasures.rate_spont{t}) /...
+                cellmeasures.rate_spont{t};
         end
     end
     
@@ -402,7 +396,7 @@ for i=1:length(g) % for all cells
     end
     
     flds = fields(cells);
-    spike_flds = {flds{strmatch('spike_',flds)}};
+    spike_flds = flds(strncmp('spike_',flds,6));
     for field = spike_flds
         cellmeasures.(field{1}) = median( cells(i).(field{1}));
     end
@@ -440,7 +434,7 @@ else
     logmsg('No fuzzy toolbox present for spike clustering');
 end
 
-if processparams.sort_compute_cluster_overlap &&  cluster_spikes           
+if processparams.sort_compute_cluster_overlap &&  cluster_spikes
     % compute cluster overlap
     for c = channels2analyze % do this per channel
         ind = find([measures.channel]==c);
@@ -507,21 +501,17 @@ else
 end
 
 
-% save measures file
 measures = record.measures; %#ok<NASGU>
-%measuresfilemehran = fullfile(ecdatapath(record),record.test,['_measures',num2str(channels2analyze),'.mat']);
-%logmsg(['Mehran, do you need this file: ' measuresfilemehran])
-%save(measuresfilemehran,'WaveTime_Spikes');
 
 % save measures file
-if 0 && strmatch(record.stim_type,'background')==1
-measuresfile = fullfile(experimentpath(record),[record.datatype '_measures_OFF.mat']);
+if 0 && strncmp(record.stim_type,'background',10)==1
+    measuresfile = fullfile(experimentpath(record),[record.datatype '_measures_OFF.mat']);
 else
     measuresfile = fullfile(experimentpath(record),[record.datatype '_measures.mat']);
 end
 
 try
-    save(measuresfile,'measures'); 
+    save(measuresfile,'measures');
 catch me
     errormsg(['Could not write measures file ' measuresfile '. ' me.message]);
 end
@@ -580,15 +570,13 @@ else
 end
 
 if usetril == -1 % use last
-
-    
     if length(EVENT.strons.tril)>(n_optotrigs+1)
         tril = EVENT.strons.tril(end-n_optotrigs);
     else
         tril = EVENT.strons.tril(1);
     end
     if (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.OpOn))<12)
-            EVENT.strons.tril(1) = EVENT.strons.tril(end);
+        EVENT.strons.tril(1) = EVENT.strons.tril(end);
     end
 else
     if usetril > length(EVENT.strons.tril)

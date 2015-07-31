@@ -140,6 +140,14 @@ for j = 1:length(celllist)
         continue
     end
     
+    for ch = 1:params.NumberOfChannels
+        record.measures(j).(['intensity_mean_ch' num2str(ch)]) = NaN;
+        record.measures(j).(['intensity_median_ch' num2str(ch)]) = NaN;
+        record.measures(j).(['intensity_max_ch' num2str(ch)]) = NaN;
+        record.measures(j).(['intensity_rel2dendrite_ch' num2str(ch)]) = NaN;
+        record.measures(j).(['intensity_rel2synapse_ch' num2str(ch)]) = NaN;
+    end
+        
     celllist(j).intensity_mean = NaN(1,params.NumberOfChannels);
     celllist(j).intensity_max = NaN(1,params.NumberOfChannels);
     celllist(j).intensity_rel2dendrite = NaN(1,params.NumberOfChannels);
@@ -227,14 +235,43 @@ for j = 1:length(celllist)
     end
 end
 
+% put back intensities into celllist for backward compatibility
+for i=1:length(record.measures)
+    record.ROIs.celllist(i).intensity_mean = NaN(1,params.NumberOfChannels);
+    record.ROIs.celllist(i).intensity_median = NaN(1,params.NumberOfChannels);
+    record.ROIs.celllist(i).intensity_max = NaN(1,params.NumberOfChannels);
+    for ch=1:params.NumberOfChannels
+        record.ROIs.celllist(i).intensity_mean(ch) = record.measures(i).(['intensity_mean_ch' num2str(ch)]);
+        record.ROIs.celllist(i).intensity_median(ch) = record.measures(i).(['intensity_median_ch' num2str(ch)]);
+        record.ROIs.celllist(i).intensity_max(ch) = record.measures(i).(['intensity_max_ch' num2str(ch)]);
+    end
+end
+
+
 % set ranks
-intensity_rank = zeros(length(celllist),params.NumberOfChannels);
-for ch=1:params.NumberOfChannels
-    intensity_rank(present & synapse,ch) = ranks(intensities_abs(present & synapse,ch));
+intensity_rank = NaN(length(celllist),params.NumberOfChannels);
+intensity_rank_relative = NaN(length(celllist),params.NumberOfChannels);
+intensities_abs = reshape( [record.ROIs.celllist.intensity_mean],params.NumberOfChannels,length(record.ROIs.celllist))';
+
+types = unique({record.ROIs.celllist.type});
+for t = 1:length(types)
+    roitype = types{t};
+    oftype = cellfun(@(x) strcmp(x,roitype),{record.ROIs.celllist.type});
+    if process_parameters.tp_rank_only_present 
+        use = present;
+    else
+        use = true(size(present));
+    end
+    
+    for ch=1:params.NumberOfChannels
+        intensity_rank(use & oftype,ch) = ranks(intensities_abs(use & oftype,ch));
+        intensity_rank_relative(use & oftype,ch) =( intensity_rank(use & oftype,ch)-0.5) / sum(use & oftype);
+    end
 end
 for i=1:length(celllist)
     for ch=1:params.NumberOfChannels
-         record.measures(i).(['intensity_rank_ch' num2str(ch)]) = intensity_rank(i,ch);
+        record.measures(i).(['intensity_rank_ch' num2str(ch)]) = intensity_rank(i,ch);
+        record.measures(i).(['intensity_rank_relative_ch' num2str(ch)]) = intensity_rank_relative(i,ch);
     end
 end
 
