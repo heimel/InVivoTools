@@ -55,7 +55,7 @@ switch lower(record.setup)
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
 
   if 0 && strmatch(record.stim_type,'background')==1
-      EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.5;
+      EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.55;
   end
 
 %         EVENT.strons.tril(1) = EVENT.strons.tril(5);
