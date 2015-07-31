@@ -237,9 +237,9 @@ end
 
 % put back intensities into celllist for backward compatibility
 for i=1:length(record.measures)
-    record.ROIs.celllist(i).intensity_mean = NaN(params.NumberOfChannels, 1);
-    record.ROIs.celllist(i).intensity_median = NaN(params.NumberOfChannels, 1);
-    record.ROIs.celllist(i).intensity_max = NaN(params.NumberOfChannels, 1);
+    record.ROIs.celllist(i).intensity_mean = NaN(1,params.NumberOfChannels);
+    record.ROIs.celllist(i).intensity_median = NaN(1,params.NumberOfChannels);
+    record.ROIs.celllist(i).intensity_max = NaN(1,params.NumberOfChannels);
     for ch=1:params.NumberOfChannels
         record.ROIs.celllist(i).intensity_mean(ch) = record.measures(i).(['intensity_mean_ch' num2str(ch)]);
         record.ROIs.celllist(i).intensity_median(ch) = record.measures(i).(['intensity_median_ch' num2str(ch)]);
