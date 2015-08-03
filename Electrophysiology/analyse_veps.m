@@ -123,6 +123,11 @@ switch lower(record.setup)
         sample_interval = 1/EVENT.strms(1,3).sampf;
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
         
+        if process_params.ec_temporary_timeshift~=0 % to check gad2 cells
+            errormsg(['Shifted time by ' num2str(process_params.ec_temporary_timeshift) ' s to check laser response']);
+            EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
+        end
+        
 %         EVENT.strons.tril(1) = EVENT.strons.tril(3);
         startindTDT = EVENT.strons.tril(1)-pre_ttl;
         SIG = signalsTDT(EVENT,stimulus_start+startindTDT);

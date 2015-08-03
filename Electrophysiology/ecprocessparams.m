@@ -25,6 +25,7 @@ params.separation_from_prev_stim_off = 0.5;  % time (s) to stay clear of prev_st
 params.minimum_spontaneous_time = 0.5; % need at least this period for spontaneous activity
 %params.early_response_window = [0.05 0.2];  % not implemented yet
 %params.late_response_window = [0.5 inf]; % not implemented yet
+params.ec_temporary_timeshift = 0; % to induce a timeshift for analysis
 
 switch protocol
     case '11.35'

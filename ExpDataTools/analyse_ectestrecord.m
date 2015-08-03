@@ -54,6 +54,10 @@ switch lower(record.setup)
         if 0 && strncmp(record.stim_type,'background',10)==1
             EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.5;
         end
+        if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
+            errormsg(['Shifted time by ' num2str(processparams.ec_temporary_timeshift) ' s to check laser response']);
+            EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
+        end
         
         %         EVENT.strons.tril(1) = EVENT.strons.tril(5);
         
