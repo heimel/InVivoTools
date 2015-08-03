@@ -50,16 +50,14 @@ switch lower(record.setup)
         end
         
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
-        
-        if 0 && strncmp(record.stim_type,'background',10)==1
-            EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.5;
+
+        if 0 && strmatch(record.stim_type,'background')==1
+            EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.55;
         end
         if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
             errormsg(['Shifted time by ' num2str(processparams.ec_temporary_timeshift) ' s to check laser response']);
             EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
         end
-        
-        %         EVENT.strons.tril(1) = EVENT.strons.tril(5);
         
         EVENT.Myevent = 'Snip';
         EVENT.type = 'snips';
