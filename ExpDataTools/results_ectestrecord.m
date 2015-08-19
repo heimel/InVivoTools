@@ -430,7 +430,6 @@ if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
 else
     logmsg('No savedscript');
 end
-logmsg(['Shown results of ' recordfilter(record)]);
 logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_script''.');
 
 return
