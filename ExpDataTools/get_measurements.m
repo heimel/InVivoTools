@@ -175,7 +175,7 @@ rawdata = cell(1,n_groups);
 for g=1:n_groups
     newlinehead=[linehead groupss(g).name ': '];
     pooled.group = g;
-    pooled.idx = 0;
+    disp(['Group: ', num2str(g)])
     
     [results{g},dresults{g}, rawdata{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
     n=sum(~isnan(results{g})) ;
@@ -224,6 +224,7 @@ end
 for i_mouse=indmice
     mouse=mousedb(i_mouse);
     newlinehead = linehead;
+    disp(mouse.mouse)
     [res,dres, raw]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,testdb,extra_options,newlinehead);
     
     switch value_per
@@ -266,6 +267,7 @@ return
 
 
 function [results, dresults, rawdata]=get_measurements_for_mouse( mouse, measure, criteria,value_per, testdb,extra_options,linehead)
+global pooled
 results=[];
 dresults=[];
 rawdata = [];
@@ -377,6 +379,13 @@ end
 indtests=find_record(testdb,cond);
 for i_test=indtests
     testrecord=testdb(i_test);
+    disp([testrecord.stack ' ' testrecord.slice])
+    mouseid = mouse.mouse;
+    stackid = testrecord.stack;   
+    Stacks = pooled.all(pooled.group).linked2neurite;
+    pooled.idx = find(strcmp(mouseid, Stacks(:,2)) & strcmp(stackid, Stacks(:,3)));
+    
+    
     newlinehead = [linehead recordfilter(testrecord) ':'];
     [res,dres, raw]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
     
@@ -562,7 +571,8 @@ else
                 errormsg('Pooled does not exist');
                 return
             else
-                pooled.idx = pooled.idx + 1; %keep track of where we are
+               % pooled.idx = pooled.idx + 1; %keep track of where we are
+                
                 logmsg(['Pooling short neurites: Crit < ' pool_short_neurites]);
               
                 pool = pooled.all(pooled.group).pool{pooled.idx}.Set;
@@ -573,8 +583,8 @@ else
                 linked = pooled.all(pooled.group).linked2neurite{pooled.idx};
                 if length(unique(linked)) ~= length(uniqneurites)
                      disp('Warning: Not an equal number of pooled and linked neurite numbers.');
-                     disp('Neurites not in pool, wil not be added to dataset');
-                     disp(['Pool: ', num2str(linked)])
+                     disp('Neurites not in pool, will not be added to dataset');
+                     disp(['Pool: ', num2str(unique(linked))])
                      disp(['Linked: ', num2str(uniqneurites)])
                 end 
                 %first pool then average
