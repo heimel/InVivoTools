@@ -380,10 +380,12 @@ indtests=find_record(testdb,cond);
 for i_test=indtests
     testrecord=testdb(i_test);
     disp([testrecord.stack ' ' testrecord.slice])
-    mouseid = mouse.mouse;
-    stackid = testrecord.stack;   
-    Stacks = pooled.all(pooled.group).linked2neurite;
-    pooled.idx = find(strcmp(mouseid, Stacks(:,2)) & strcmp(stackid, Stacks(:,3)));
+    if exist('pool_short_neurites','var')
+        mouseid = mouse.mouse;
+        stackid = testrecord.stack;
+        Stacks = pooled.all(pooled.group).linked2neurite;
+        pooled.idx = find(strcmp(mouseid, Stacks(:,2)) & strcmp(stackid, Stacks(:,3)));
+    end
     
     
     newlinehead = [linehead recordfilter(testrecord) ':'];
