@@ -117,5 +117,4 @@ function assignud2base(hObject, cbdata)
     hP = get(hObject, 'Parent');
     ud = get(hP, 'Userdata');
     assignin('base', 'ud', ud)
-    logmsg('Userdata available in workspace as ''ud''');
 
