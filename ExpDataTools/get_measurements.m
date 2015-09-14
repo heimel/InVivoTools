@@ -175,7 +175,10 @@ rawdata = cell(1,n_groups);
 for g=1:n_groups
     newlinehead=[linehead groupss(g).name ': '];
     pooled.group = g;
-    disp(['Group: ', num2str(g)])
+    
+    if exist('verbose','var') && verbose
+        logmsg(['Group: ', num2str(g)])
+    end
     
     [results{g},dresults{g}, rawdata{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
     n=sum(~isnan(results{g})) ;
@@ -224,7 +227,9 @@ end
 for i_mouse=indmice
     mouse=mousedb(i_mouse);
     newlinehead = linehead;
-    disp(mouse.mouse)
+    if exist('verbose','var') && verbose 
+        logmsg(mouse.mouse)
+    end
     [res,dres, raw]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,testdb,extra_options,newlinehead);
     
     switch value_per
@@ -380,8 +385,10 @@ indtests=find_record(testdb,cond);
 for i_test=indtests
     testrecord=testdb(i_test);
     
-    if isfield(testrecord,'stack') && isfield(testrecord,'slice')
-        logmsg([testrecord.stack ' ' testrecord.slice])
+    if exist('verbose','var') && verbose
+        if isfield(testrecord,'stack') && isfield(testrecord,'slice')
+            logmsg([testrecord.stack ' ' testrecord.slice])
+        end
     end
     
     if exist('pool_short_neurites','var')
@@ -394,8 +401,10 @@ for i_test=indtests
     
     newlinehead = [linehead recordfilter(testrecord) ':'];
     [res,dres, raw]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
-    
-    logmsg(['length of record ' num2str(i_test) ':  ' num2str(length(res))])
+   
+    if exist('verbose','var') && verbose
+        logmsg(['Length of record ' num2str(i_test) ':  ' num2str(length(res))])
+    end
     
     switch value_per
         case {'test','stack'}
@@ -553,7 +562,9 @@ if strcmp(measure.measure(1:min(end,4)),'file') % read measure from file
 else
     [results,dresults] = get_compound_measure_from_record(testrecord,measure.measure,criteria,extra_options);
     if isempty(results)
-        disp('no results...')
+        if exist('verbose','var') && verbose
+            logmsg('No results...')
+        end
         return
     end
     
@@ -588,10 +599,10 @@ else
                 end
                 linked = pooled.all(pooled.group).linked2neurite{pooled.idx};
                 if length(unique(linked)) ~= length(uniqneurites)
-                     disp('Warning: Not an equal number of pooled and linked neurite numbers.');
-                     disp('Neurites not in pool, will not be added to dataset');
-                     disp(['Pool: ', num2str(unique(linked))])
-                     disp(['Linked: ', num2str(uniqneurites)])
+                     logmsg('Warning: Not an equal number of pooled and linked neurite numbers.');
+                     logmsg('Neurites not in pool, will not be added to dataset');
+                     logmsg(['Pool: ', num2str(unique(linked))])
+                     logmsg(['Linked: ', num2str(uniqneurites)])
                 end 
                 %first pool then average
                 Cnt = 0;
