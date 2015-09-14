@@ -379,7 +379,11 @@ end
 indtests=find_record(testdb,cond);
 for i_test=indtests
     testrecord=testdb(i_test);
-    disp([testrecord.stack ' ' testrecord.slice])
+    
+    if isfield(testrecord,'stack') && isfield(testrecord,'slice')
+        logmsg([testrecord.stack ' ' testrecord.slice])
+    end
+    
     if exist('pool_short_neurites','var')
         mouseid = mouse.mouse;
         stackid = testrecord.stack;
@@ -391,7 +395,7 @@ for i_test=indtests
     newlinehead = [linehead recordfilter(testrecord) ':'];
     [res,dres, raw]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
     
-    disp(['length of record ' num2str(i_test) ':  ' num2str(length(res))])
+    logmsg(['length of record ' num2str(i_test) ':  ' num2str(length(res))])
     
     switch value_per
         case {'test','stack'}
