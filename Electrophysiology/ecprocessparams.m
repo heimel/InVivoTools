@@ -4,13 +4,10 @@ function params = ecprocessparams( record )
 %  Local changes to settings should be made in processparams_local.m
 %  This should be an edited copy of processparams_local_org.m
 %
-% 2012-2014, Alexander Heimel
+% 2012-2015, Alexander Heimel
 %
 
-if nargin<1
-    record = [];
-end
-if isempty(record)
+if nargin<1 || isempty(record)
     record.mouse = '00.00.0.00';
     record.setup = 'nin380';
 end
@@ -25,8 +22,10 @@ end
 params.pre_window = [-Inf 0]; % ignored for ec and tp
 params.post_window = [0 Inf]; % ignored for tp
 params.separation_from_prev_stim_off = 0.5;  % time (s) to stay clear of prev_stim_off
+params.minimum_spontaneous_time = 0.5; % need at least this period for spontaneous activity
 %params.early_response_window = [0.05 0.2];  % not implemented yet
 %params.late_response_window = [0.5 inf]; % not implemented yet
+params.ec_temporary_timeshift = 0; % to induce a timeshift for analysis
 
 switch protocol
     case '11.35'
@@ -48,7 +47,7 @@ params.rc_interval = [0.0205 0.4205];
 params.rc_timeres = 0.2; % time resolution
 % params.rc_peak_interval_number = 1; % which interval to use for peak computation
 switch protocol
-    case '13.20' 
+    case '13.20'
         params.rc_interval=[0.0205 0.2205];
 end
 
@@ -65,13 +64,13 @@ params.vep_wavelet_beta = 1; % was 3
 params.cell_colors = repmat('kbgrcmy',1,50);
 
 % spike isolation
-params.max_spike_clusters = 2;
+params.max_spike_clusters = 4;
 params.cluster_overlap_threshold = 0.5;
 
+params.compute_isi = false;
+params.show_isi = false;
 
-params.show_isi = true;
-
-params.plot_spike_features = true;
+params.plot_spike_features = false;
 
 % entropy analysis
 switch record.mouse(1:min(end,5))
@@ -98,14 +97,42 @@ switch lower(record.setup)
                 params.compare_with_klustakwik = true;
             otherwise
                 params.spike_sorting_routine = '';
-                params.compare_with_klustakwik = true;
+                params.compare_with_klustakwik = false;
         end
 end
+switch lower(record.setup)
+    case 'antigua'
+        params.sort_trigger_ind = 8;
+    otherwise
+        params.sort_trigger_ind = 8; % should be changed[];
+end
 params.sort_always_resort = false;
+params.sort_compute_cluster_overlap = false;
+params.sort_klustakwik_arguments = [ ...
+    ' -ElecNo 1' ...
+    ' -nStarts 1' ...
+    ' -MinClusters 1' ...   % 20
+    ' -MaxClusters ' num2str(params.max_spike_clusters) ...   % 30
+    ' -MaxPossibleClusters ' num2str(params.max_spike_clusters) ...  % 100
+    ' -UseDistributional 0' ...
+    ' -PriorPoint 1'...
+    ' -FullStepEvery 20'... %
+    ' -UseFeatures  1010100' ... %10101  %10111 11111
+    ' -SplitEvery 40' ...
+    ' -RandomSeed 1' ...
+    ' -MaxIter 500' ...  % 500
+    ' -DistThresh 6.9' ...   % 6.9
+    ' -ChangedThresh 0.05' ... % 0.05
+    ' -PenaltyK 0'... % 0
+    ' -PenaltyKLogN 1' ]; % 1
+
+%             ' -UseMaskedInitialConditions 1'...  % 1
+%         ' -AssignToFirstClosestMask 1'...
+
 
 % time calibration
 switch lower(record.setup)
-    case 'antigua' 
+    case 'antigua'
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
         params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time
     otherwise

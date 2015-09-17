@@ -37,11 +37,15 @@ for i = ind_no_bouton(:)'
     record.measures(i).bouton_close = false;
     record.measures(i).distance2bouton = inf;
     for j = ind_bouton(:)'
-       if  roilist(j).present
+       if  roilist(j).present 
+           if isfield(record.measures(j),'intensity_rel2dendrite') && ...
+                   any(record.measures(j).intensity_rel2dendrite<processparams.bouton_close_minimum_intensity_rel2dendrite(1:length(record.measures(j).intensity_rel2dendrite)))
+               continue
+           end
            record.measures(i).distance2bouton  = min(record.measures(i).distance2bouton, norm(r(i,:)-r(j,:)) );
        end
     end
-    if record.measures(i).distance2bouton <=processparams.max_bouton_mito_distance_um
+    if record.measures(i).distance2bouton <=processparams.max_bouton_mito_distance_um 
         record.measures(i).bouton_close = true;
     end
 end

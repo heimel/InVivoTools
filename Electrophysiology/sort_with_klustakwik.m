@@ -16,7 +16,7 @@ else
     kkexecutable = which('KlustaKwik.exe');
 end
 
-[status,res] = system(kkexecutable);
+status = system(kkexecutable);
 
 if status~=1
     if isunix
@@ -24,11 +24,11 @@ if status~=1
     else
         kkexecutable = which('MaskedKlustaKwik.exe');
     end
-    [status,res] = system(kkexecutable);
+    status = system(kkexecutable);
 end
 
 if status~=1
-    logmsg('KlustaKwik not present');
+    logmsg('KlustaKwik not present. Go to https://github.com/klusta-team/klustakwik and follow instructions to install.');
     return
 end
 
@@ -38,35 +38,33 @@ end
 
 if isempty(cells) %|| 1
     channels = unique([orgcells.channel]);
-
-    
+    fclose('all'); 
+    if params.sort_always_resort
+        for ch = channels
+            filenamef = fullfile(experimentpath(record,true),[ 'klustakwik.*.' num2str(ch)]);
+            d = dir(filenamef);
+            if ~isempty(d)
+                delete(filenamef);
+            end
+        end
+    end
     
     write_spike_features_for_klustakwik( orgcells, record,channels );
     savepwd = pwd;
     cd(experimentpath(record));
-    arguments = [ ...
-         ' -ElecNo 1' ...
-         ' -nStarts 1' ...
-        ' -MinClusters 1' ...   % 20
-        ' -MaxClusters 5' ...   % 30
-         ' -MaxPossibleClusters ' num2str(params.max_spike_clusters) ...  % 100
-         ' -UseDistributional 0' ... 
-         ' -PriorPoint 1'...
-         ' -FullStepEvery 20'...
-        ' -UseFeatures 10101'...   %10111 11111
-         ' -SplitEvery 40' ...
-         ' -RandomSeed 1' ...
-         ' -MaxIter 500' ...  % 500  
-        ' -DistThresh 6.9' ...   % 6.9
-        ' -ChangedThresh 0.05' ... % 0.05
-        ' -PenaltyK 0'... % 0 
-        ' -PenaltyKLogN 1' ]; % 1
-
-%             ' -UseMaskedInitialConditions 1'...  % 1
-%         ' -AssignToFirstClosestMask 1'... 
+    arguments = params.sort_klustakwik_arguments;
+    
 
     for ch=channels
-        system([kkexecutable ' klustakwik ' num2str(ch) ' ' arguments]);
+    %    cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments ' -StartCluFile klustakwik.clu.7'];
+       cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments];
+        logmsg(cmd);
+        [status,result] = system(cmd);
+        if status == 1
+            errormsg(result(max(1,end-100):end),true);
+        else
+            logmsg(result(max(1,end-100):end));
+        end
     end
     cd(savepwd);
     cells = import_klustakwik(record,orgcells);

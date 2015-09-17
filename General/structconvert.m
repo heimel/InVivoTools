@@ -16,17 +16,18 @@ if isempty(s)
     changed = true;
 end
 
-%flds = fields(template);
 flds = fieldnames(template);
 for f = flds'
     if ~isfield(s,f{1})
         changed = true;
         for i = 1:length(s)
-            s(i).(f{1}) = template.(f{1});
+            temp = template.(f{1});
+            s(i).(f{1}) = temp([]);
         end
-        
     end
 end
+s = rmfields(s, setdiff(fieldnames(s),flds)); % remove fields that are not in the template
+
 [s,perm] = orderfields(s,template);
 if ~all( perm==(1:length(perm))' )
     changed = changed | true;

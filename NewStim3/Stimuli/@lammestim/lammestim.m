@@ -36,10 +36,11 @@ function stim = lammestim(params, OLDSTIM)
 %   8       | figdir      | gnddir       | no         | no
 %   9       | figdir      | figdir + 90  | yes        | yes
 %  10       | no fig pres.| gnddir       | yes        | no
+%  11       | figdir,phase| gnddir       | yes        | yes
 % ------------------------------------------------------------------
 %
 %
-% 2010-2013, Alexander Heimel
+% 2010-2015, Alexander Heimel
 %
 
 NewStimListAdd('lammestim');
@@ -68,8 +69,7 @@ paramlist(end+1) = cell2struct({'figspeed', '30', [1 1],[0 100],'Speed of figure
 paramlist(end+1) = cell2struct({'figshape', '1', [1 1],[0 2],'Figure shape, 0=rect, 1=oval, 2=polygon'},fields,2);
 paramlist(end+1) = cell2struct({'figorientation', 'NaN', [1 1],[0 359],'Figure orientation (deg) for rect and polygon shape. NaN to match figure direction'},fields,2);
 paramlist(end+1) = cell2struct({'figpolygon', '[]', [nan 2],[0 1200],'Polygon point list, only relevant for polygon shape'},fields,2);
-paramlist(end+1) = cell2struct({'figtextureparams', '[20 10 0.5 NaN]', [1 4],[0 359],'Figure texture parameters (width length density angle)'},fields,2);
-% paramlist(end+1) = cell2struct({'fixed_aperture', '1', [1 1],[0 359],'Figure moves within fixed aperture'},fields,2);
+paramlist(end+1) = cell2struct({'figtextureparams', '[20 10 0.5 NaN 0]', [1 NaN],[0 359],'Figure texture parameters (width length density angle phaseoffset)'},fields,2);
 paramlist(end+1) = cell2struct({'rf_clearance_radius', '0', [1 1],[0 inf],'Radius around figure center to be free of ground'},fields,2);
 paramlist(end+1) = cell2struct({'gndsize', '90', [1 nan],[0 inf],'Radius of surround [0 inf]'},fields,2);
 paramlist(end+1) = cell2struct({'gndcontrast', '1', [1 nan],[-1 1],'Contrast of ground, (L_gnd-L_BG)/L_BG'},fields,2);
@@ -130,7 +130,7 @@ end;
 
 
 % make stimulus object from parameters
-dp = {'fps', -1, 'rect',params.rect, 'frames',[], params.displayprefs{:}};
+dp = [{'fps', -1, 'rect',params.rect, 'frames',[]}, params.displayprefs];
 
 s = stimulus(5);
 stim = class(struct('params',params),'lammestim',s);

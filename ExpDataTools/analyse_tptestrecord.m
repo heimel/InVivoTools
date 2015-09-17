@@ -144,6 +144,16 @@ if ~isempty(record.slice)
     end
 end
 
+if isfield(record,'measures') && isfield(record.measures,'mito') && any([record.measures(:).mito])
+    record = tp_mito_close( record );
+end
+
+if isfield(record,'measures') && isfield(record.measures,'bouton') && any([record.measures(:).bouton])
+    record = tp_automated_bouton_analysis( record );
+    record = tp_bouton_close( record );
+end
+
+
 % get presence time lapse series
 if isfield(record.measures,'present') && ...
         (~isempty(strfind(record.slice,'day')) || ...
@@ -287,15 +297,6 @@ if is_zstack
         case {'11.21','12.81','Examples'}
             record = tp_get_distance_from_pia( record );
     end
-end
-
-if isfield(record,'measures') && isfield(record.measures,'mito') && any([record.measures(:).mito])
-    record = tp_mito_close( record );
-end
-if isfield(record,'measures') && isfield(record.measures,'bouton') && any([record.measures(:).bouton])
-    record = tp_bouton_close( record );
-    
-    record = tp_automated_bouton_analysis( record );
 end
 
 % getting densities

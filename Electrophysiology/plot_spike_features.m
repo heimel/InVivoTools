@@ -1,7 +1,7 @@
 function plot_spike_features( cells, record )
 %PLOTS_SPIKE_FEATURES plot features obtained with get_spike_features
 %
-% 2013, Alexander Heimel
+% 2013-2015, Alexander Heimel
 %
 
 if nargin<2
@@ -18,7 +18,7 @@ params = ecprocessparams(record);
 flds = fields(cells);
 ind = strmatch('spike_',flds);
 if isempty(ind)
-    disp('PLOT_SPIKES_FEATURES: No features available');
+    logmsg('No features available');
     return
 end
 features = {flds{ind}};
@@ -27,7 +27,7 @@ n_features = length(ind);
 
 if isfield(cells,'channel')
     channels = get_channels2analyze( record );
-    if isempty(channels) 
+    if isempty(channels)
         channels = uniq(sort([cells.channel]));
     end
 else
@@ -39,7 +39,7 @@ allcells = cells;
 for ch=channels
     if isfield(allcells,'channel')
         cells = allcells( [allcells.channel]==ch);
-    end        
+    end
     if isempty(cells)
         continue
     end
@@ -73,14 +73,14 @@ for ch=channels
                 end
                 
                 plot(cells(cl).(features{j})(ind),...
-                    cells(cl).(features{i})(ind),[clr '.']);
-                if ~isnan(lims(i,1)) % Mehran
-                    xlim( lims(j,:)+[0 0.0001]);
-                    ylim( lims(i,:)+[0 0.0001]);
-                else
-                    xlim([-0.1 0.3]);
-                    ylim([-0.5 10]);
-                end
+                    cells(cl).(features{i})(ind),[clr '.'],'markersize',1);
+                %                 if ~isnan(lims(i,1)) && ~isnan(lims(j,1))
+                %                     xlim( lims(j,:)+[0 0.0001]);
+                %                     ylim( lims(i,:)+[0 0.0001]);
+                %                 else
+                %                     xlim([-0.1 0.3]);
+                %                     ylim([-0.5 10]);
+                %                 end
                 if i==1
                     xlabel(capitalize(features{j}));
                 else
@@ -108,6 +108,17 @@ for ch=channels
     
     subplot(n_features-1,n_features-1,n_features-1);
     show_cluster_overlap( record, ch)
+
+    figure('Name',['Spike feature histograms: ' record.test ', ' record.date ', channel=' num2str(ch) ] ,'Numbertitle','off');
+    for i=1:n_features
+        for  cl=1:n_cells
+            subplot(n_cells,n_features,i+(cl-1)*n_features);
+            [n,x]=hist(cells(cl).(features{i}),300);
+            clr = colors( mod(cl-1,n_colors)+1);
+            h=bar(x,n,clr);
+            xlabel(features{i});
+        end
+    end
     
 end % channel ch
 
@@ -128,8 +139,6 @@ if isfield(record.measures,'channel')
 else
     measures = record.measures;
 end
-    
-    
 
 if ~isfield(measures,'clust')
     return
@@ -162,9 +171,9 @@ multiunits = uniq(sort(multiunits));
 singleunits = setdiff(find([measures.contains_data]),multiunits);
 
 if ~isempty(singleunits)
-    disp(['PLOT_SPIKE_FEATURES: Isolated single units: ' mat2str(singleunits)]);
+    logmsg(['Isolated single units: ' mat2str(singleunits)]);
 else
-    disp(['PLOT_SPIKE_FEATURES: No well isolated single units']);
+    logmsg(['No well isolated single units']);
 end
 
 if 0 && isfield(measures,'clust')
@@ -184,12 +193,12 @@ end
 
 if isfield(measures,'p_multiunit')
     for c=1:n_cells
-        disp(['PLOT_SPIKE_FEATURES: ' num2str(measures(c).index,'%3d') ' P(multiunit) = ' num2str(measures(c).p_multiunit,2)]);
-        disp(['PLOT_SPIKE_FEATURES: ' num2str(measures(c).index,'%3d') ' P(subunit)   = ' num2str(measures(c).p_subunit,2)]);
+        logmsg([num2str(measures(c).index,'%3d') ' P(multiunit) = ' num2str(measures(c).p_multiunit,2)]);
+        logmsg([num2str(measures(c).index,'%3d') ' P(subunit)   = ' num2str(measures(c).p_subunit,2)]);
     end
 end
 
 
 if suggest_resort
-    disp(['PLOT_SPIKE_FEATURES: Occasional cluster overlap larger than ' num2str(report_overlap) '. Consider resorting.']);
+    logmsg(['Occasional cluster overlap larger than ' num2str(report_overlap) '. Consider resorting.']);
 end

@@ -13,10 +13,22 @@ if isempty(h_fig)
 else
     figure(h_fig);
 end
+if isempty(db)
+    errormsg('Table is empty.');
+    return
+end
 
 data = transpose(squeeze(struct2cell(db)));
 colnames = fields(db);
   
+for i=1:numel(data)
+    switch class(data{i})
+        case 'double'
+            data{i} = num2str(data{i});
+        case 'struct'
+            data{i} = 'struct';
+    end
+end
 
 t = uitable(h_fig, ...
     'Data', data, ...

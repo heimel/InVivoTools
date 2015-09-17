@@ -22,6 +22,14 @@ end
 if nargin<2 || isempty(include_test)
     include_test = true;
 end
+if nargin<1 || isempty(record)
+    record.datatype = 'ec';
+    record.setup = host;
+    record.date = datestr(now,'yyyy-mm-dd');
+    record.test = 't00001';
+    record.mouse = 'test';
+    record.experiment = 'test';
+end
 
 switch vers
     case '2004'

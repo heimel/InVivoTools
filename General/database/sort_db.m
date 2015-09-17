@@ -1,9 +1,7 @@
-function [db,ind]=sort_db(db,alt_order,show_waitbar)
+function [db,ind,changed]=sort_db(db,alt_order,show_waitbar)
 %SORT_DB sorts the records of a structarray by field order
 %
-%  [NEWDB,IND] = SORT_DB(DB)
-%  [NEWDB,IND] = SORT_DB(DB,ALT_ORDER)
-%  [NEWDB,IND] = SORT_DB(DB,ALT_ORDER,VERBOSE)
+%  [NEWDB,IND,CHANGED] = SORT_DB(DB,ALT_OLDER=[],VERBOSE=true)
 %    uses quicksort only to sort first fields,
 %    and bubblesort for all other fields, i.e. it is extremely slow
 %     ALT_ORDER is an optional alternative ordering of the fields to use,
@@ -12,23 +10,18 @@ function [db,ind]=sort_db(db,alt_order,show_waitbar)
 %  2005-2015, Alexander Heimel
 %
 
+changed = false;
+
 if isempty(db)
     ind = [];
     return
 end
 
-if nargin<3
-    show_waitbar = [];
-end
-if isempty(show_waitbar)
+if nargin<3 || isempty(show_waitbar)
     show_waitbar = true;
 end
 
-if nargin<2
-    alt_order=[];
-end
-
-if isempty(alt_order)
+if nargin<2 || isempty(alt_order)
     order=fieldnames(db(1));
 else
     order=alt_order;
@@ -93,6 +86,9 @@ while ~list_is_sorted
 end
 if show_waitbar
     close(hbar);
+end
+if pass>1
+    changed = true;
 end
 
 return

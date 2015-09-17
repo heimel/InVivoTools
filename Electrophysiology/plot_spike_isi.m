@@ -1,7 +1,7 @@
 function plot_spike_isi( isi, record )
 %PLOTS_SPIKE_ISI plot isis obtained with get_spike_interval
 %
-% 2013-2014, Alexander Heimel
+% 2013-2015, Alexander Heimel
 %
 
 if isempty(isi)
@@ -15,12 +15,9 @@ end
 
 params = ecprocessparams(record);
 
-
 xl = [-0.05 0.05];
 x = xl(1):0.001:xl(2);
 if isstruct(isi)
-    
-    
     channels2analyze = get_channels2analyze( record );
     if isempty(channels2analyze) % then take all
         channels2analyze = unique( [isi.channel]);
@@ -29,6 +26,9 @@ if isstruct(isi)
     isi = isi(ind);
     
     chan = unique( [isi.channel]);
+    if isempty(chan)
+        return
+    end
     for ch = chan
         isi_on_channel = isi(logical(flatten(cellfun(@(x) x(1)==ch&x(2)==ch,{isi.channel},'UniformOutput',false))));
         figure('Name',['Spike intervals: ' record.test ',' record.date ',channel=' num2str(ch)] ,'Numbertitle','off');
@@ -51,13 +51,12 @@ else % deprecated way from before 2014-04-04
         return
     end
     if n_cells>15
-        disp('PLOT_SPIKE_ISI: Too many cells, I am too lazy to plot them.');
+        logmsg('Too many cells, I am too lazy to plot them.');
         return
     end
     
     figure('Name',['Spike intervals: ' record.test ',' record.date] ,'Numbertitle','off');
     colors = params.cell_colors;
-    n_colors = length(colors);
     
     for c1=1:n_cells
         for c2=1:c1

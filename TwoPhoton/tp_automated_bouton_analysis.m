@@ -9,6 +9,10 @@ axons = find([measures.axon]);
 ind_axons = indices(axons);  % just the axons
 Bgintensity = 0; %background density
 
+for i=1:length(measures)
+    measures(i).intensity_rel2dendrite = NaN;
+end
+
 %ObjPos = [];
 for i = 1:length(axons) % over axons
     axon = axons(i);
@@ -72,16 +76,27 @@ for i = 1:length(axons) % over axons
                 bp = ROIlist(bouton).extra;
                 nxtb = find([ROIlist(axon_ints).extra] < bp, 1, 'last'); %next before
                 nxta = find([ROIlist(axon_ints).extra] > bp, 1, 'first'); %next after
+                
                 if(~isempty(nxtb) && ~isempty(nxta))
                     intnxt1 = ROIlist(axon_ints(nxtb)).intensity_mean(2)-Bgintensity;
                     intnxt2 = ROIlist(axon_ints(nxta)).intensity_mean(2)-Bgintensity;
                     
                     intensity = ROIlist(bouton).intensity_mean(2)-Bgintensity;
-                    % ROIlist(bouton).intensity_rel2dendrite(1) = intensity*2/(intnxt1 + intnxt2);
                     measures(bouton).intensity_rel2dendrite = intensity*2/(intnxt1 + intnxt2);
-                    disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
+                    %disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
+                    
+                elseif(~isempty(nxtb) || ~isempty(nxta))
+                        if ~isempty(nxtb)
+                            intnxt = ROIlist(axon_ints(nxtb)).intensity_mean(2)-Bgintensity;
+                        else
+                            intnxt = ROIlist(axon_ints(nxta)).intensity_mean(2)-Bgintensity;
+                        end
+                        intensity = ROIlist(bouton).intensity_mean(2)-Bgintensity;
+                        measures(bouton).intensity_rel2dendrite = intensity/intnxt;
+                        %disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
                 else
                     disp('no relevant axon_ints to compare with!!!!')
+                    
                 end
             end
         else
@@ -99,24 +114,53 @@ for i = 1:length(axons) % over axons
                     intnxt2 = ROIlist(axon_ints(nxta)).intensity_mean(2)-Bgintensity;
                     
                     intensity = ROIlist(t_b).intensity_mean(2)-Bgintensity;
-                    % ROIlist(bouton).intensity_rel2dendrite(1) = intensity*2/(intnxt1 + intnxt2);
                     measures(t_b).intensity_rel2dendrite = intensity*2/(intnxt1 + intnxt2);
-                    disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
+                   % disp(['Axon: ' num2str(axoni) 'Bouton: ' num2str(bouton) ] )
+               elseif(~isempty(nxtb) || ~isempty(nxta))
+                        if ~isempty(nxtb)
+                            intnxt = ROIlist(axon_ints(nxtb)).intensity_mean(2)-Bgintensity;
+                        else
+                            intnxt = ROIlist(axon_ints(nxta)).intensity_mean(2)-Bgintensity;
+                        end
+                        intensity = ROIlist(t_b).intensity_mean(2)-Bgintensity;
+                        measures(t_b).intensity_rel2dendrite = intensity/intnxt;
                 else
-                    disp('no relevant axon_ints to compare with!!!!')
+                    logmsg(['No relevant axon_ints to compare with!!!!' recordfilter(record)])
                 end
             end
         else
-            disp('No t_boutons')
+            logmsg(['No t_boutons in ' recordfilter(record)])
         end
         
     else
-        disp('Data missing, no axon_ints')
+        logmsg(['Data missing, no axon_ints' recordfilter(record)])
     end
 end
 
 record.ROIs.celllist = ROIlist;
+
+
+
 record.measures = measures;
+
+% add previous_intensity_rel2dendrite
+ref_record = tp_get_refrecord(record,false);
+if ~isempty(ref_record)
+    if isfield(ref_record,'measures') && isfield(ref_record.measures,'intensity_rel2dendrite')
+        for i=1:length(record.measures)
+            ref_i = find([ref_record.measures.index]==record.measures(i).index);
+            if length(ref_i)>1
+                msg = ['More than one ROIs with index ' num2str(record.measures(i).index) ...
+                    ' in ' recordfilter(ref_record) '. Taking first only.'];
+                errormsg(msg);
+                ref_i = ref_i(1);
+            end
+            if ~isempty(ref_i)
+                record.measures(i).previous_intensity_rel2dendrite = ref_record.measures(ref_i).intensity_rel2dendrite;
+            end
+        end
+    end
+end
 
 
 

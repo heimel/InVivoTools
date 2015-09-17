@@ -7,24 +7,25 @@ function [V] = getgridvalues(SGSstim)
 %  where X and Y are the dimensions of the grid (see GETGRID) and T is the
 %  number of frames.
 
-  SGSparams = SGSstim.SGSparams;
+SGSparams = SGSstim.SGSparams;
 
-  [X,Y] = getgrid(SGSstim);
+[X,Y] = getgrid(SGSstim);
 
-  XY = X*Y;
+XY = X*Y;
 
-  probs = cumsum(SGSparams.dist(1:end))'; probs = probs ./ probs(end);
-  phs = ones(XY,1) * probs;
-  pls = [ zeros(XY,1) phs(:,1:end-1)];
+probs = cumsum(SGSparams.dist(1:end))'; probs = probs ./ probs(end);
+phs = ones(XY,1) * probs;
+pls = [ zeros(XY,1) phs(:,1:end-1)];
 
-  rand('state',SGSparams.randState);
+%  rand('state',SGSparams.randState);
+rng(SGSparams.randState(1),'v5uniform'); % Changed on 2015-06-23
 
-  % zero the output
-  V = zeros(XY,SGSparams.N);
+% zero the output
+V = zeros(XY,SGSparams.N);
 
-  for i=1:SGSparams.N,
-	f = rand(XY,1) * ones(1,length(SGSparams.dist));
-	[I,J] = find(f>pls & f<=phs);
-	[y,is] = sort(I);
-        V(:,i) = J(is);
-  end;
+for i=1:SGSparams.N
+    f = rand(XY,1) * ones(1,length(SGSparams.dist));
+    [I,J] = find(f>pls & f<=phs);
+    [y,is] = sort(I);
+    V(:,i) = J(is);
+end

@@ -150,7 +150,7 @@ else % it is a callback
             ScriptEditor Update
         case 'Replace',
             ud = get(gcbf,'UserData');
-            oldscriptname = char(lb_getselected(ud.lb));
+            %            oldscriptname = char(lb_getselected(ud.lb));
             % should only occur when 1 stimulus is selected
             namenotfound=1;
             prompt={'Name of new script:'}; def = {''};
@@ -158,7 +158,11 @@ else % it is a callback
             while (namenotfound),
                 answ=inputdlg(prompt,dlgTitle,lineNo,def);
                 an = char(answ);
-                if isempty(answ), 
+                g = lb_getselected(lb); 
+                g = char(g);
+                ty = evalin('base',['class(' g ')']);
+                an = newscriptname(an,ty);
+                if isempty(answ) 
                     namenotfound = 0; %cancelled
                 elseif isempty(an)
                     uiwait(errordlg('Syntax error in name'));

@@ -66,7 +66,7 @@ if ischar(measures) && ~isempty(find(measures==',',1))
     dresults = cell(1,length(measures));
     measurelabels = cell(1,length(measures));
     for m=1:length(measures)
-        [result,dresult,measurelabel]=get_compound_measurements(groups,measures{m},...
+        [result,dresult,measurelabel] = get_compound_measurements(groups,measures{m},...
             'testdb',testdb,...
             'mousedb',mousedb,...
             'groupdb',groupdb,...
@@ -87,6 +87,8 @@ if ischar(measures) && ~isempty(find(measures==',',1))
     return
 end
 
+logmsg(measures);
+
 measuresstring=measures;
 results={};
 dresults={};
@@ -95,11 +97,12 @@ words={};
 wordtypes={};
 results_list={};
 dresults_list={};
+rawdata = {};
 while ~isempty(measuresstring)
     [words{end+1},wordtypes{end+1},measuresstring]=get_next_word(measuresstring); %#ok<AGROW>
     switch wordtypes{end}
         case 'measure'
-            [results_list{end+1},dresults_list{end+1},measurelabels{end+1}]=get_measurements(groups,words{end},...
+            [results_list{end+1},dresults_list{end+1},measurelabels{end+1}, rawdata]=get_measurements(groups,words{end},...
                 'testdb',testdb,...
                 'mousedb',mousedb,...
                 'groupdb',groupdb,...
@@ -108,7 +111,7 @@ while ~isempty(measuresstring)
                 'extra_options',extra_options ...
                 ); %#ok<AGROW>
         case 'compound'
-            [results,dresults,measurelabel,wordtype]=get_compound_measurements(groups,words{end}(2:end-1),...
+            [results,dresults,measurelabel,wordtype] = get_compound_measurements(groups,words{end}(2:end-1),...
                 'testdb',testdb,...
                 'mousedb',mousedb,...
                 'groupdb',groupdb,...
@@ -143,6 +146,8 @@ while ~isempty(measuresstring)
     
     
 end
+
+assignin('base', 'rawdata', rawdata);
 
 if isempty(wordtypes)
     return
@@ -259,9 +264,13 @@ switch wordtypes{w+1}
         new_wordtype='measure';
     case 'scalar'
         new_results = feval(func,results_list{w+1});
-        new_dresults = cell(size(new_results)); % corrected 2014-11-15
-        for r=1:length(new_results)
-            new_dresults{r} = nan*new_results{r};
+        if iscell(new_results)
+            new_dresults = cell(size(new_results)); % corrected 2014-11-15
+            for r=1:length(new_results)
+                new_dresults{r} = nan*new_results{r};
+            end
+        else
+            new_dresults = NaN;
         end
         new_measurelabel=[measurelabels{w} ' ' measurelabels{w+1}];
         new_wordtype='scalar';

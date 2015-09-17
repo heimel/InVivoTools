@@ -32,6 +32,20 @@ end
 
 count = 1;
 
+flds = fields(orgcells);
+features = flds(strncmp('spike_',flds,6)); 
+if ~any(isnan(flatten({orgcells(:).spike_lateslope})))
+    use_lateslope = true;
+else
+    use_lateslope = false;
+end
+
+if ~use_lateslope
+    features = setdiff(features,'spike_lateslope');
+end
+n_features = length(features);
+
+
 for ch = channels
     filenamec = fullfile(datapath,record.test,[ 'klustakwik.clu.' num2str(ch)]);
     fidc = fopen(filenamec,'r');
@@ -45,17 +59,25 @@ for ch = channels
     fidf = fopen(filenamef,'r');
     if fidf==-1
         logmsg(['Cannot open ' filenamef ' for reading']);
+         fclose(fidc);
         return
     end
     
     n_fet = str2double(fgetl(fidf)); % number of features
+    if n_features ~= n_fet
+        logmsg(['Discrepancy in number of features in ' filenamef]);
+    end
     
     filenamet = fullfile(datapath,record.test,[ 'klustakwik.tim.' num2str(ch)]);
     fidt = fopen(filenamet,'r');
     if fidt==-1
         logmsg(['Cannot open ' filenamet ' for reading']);
+         fclose(fidc);
+         fclose(fidf);
         return
     end
+    spiketimes = fscanf(fidt,'%f',inf);
+    fclose(fidt);
     
     
     n_spikes = 0;
@@ -65,57 +87,79 @@ for ch = channels
     
     cells = [];
     logmsg('Loading Klustakwik assignments.');
-    spikecount = zeros(100,1);
-    cellnumber = nan(n_spikes,1);
-    i = 1;
-    fgetl(fidc); % extra line????, but necessary
-    while(~feof(fidc))
-        c = fscanf(fidc,'%d',1);
-        if isempty(c)
-            logmsg('Too few spikes assigned?');
-        else
-            cellnumber(i) =  c;
-            %        cellnumber(end+1) = str2double( fgets(fidc));
-            spikecount(cellnumber(i)) =  spikecount(cellnumber(i))+1;
-            i = i+1;
-        end
-    end
-    logmsg(['Imported ' num2str(i-1) ' assignments']);
-    cellnumber(i:end) = [];
+    
+    n_cells = fscanf(fidc,'%d',1); % number of clusters
+    cellnumber = fscanf(fidc,'%d',inf);
     fclose(fidc);
-    logmsg('Loading Klustakwik data');
+    
+    logmsg(['Imported ' num2str(length(cellnumber)) ' spike assignments to ' num2str(n_cells) ' cells.']);
+    if length(cellnumber)~=n_spikes
+        logmsg('Number of imported spikes differs from original number');
+    end
+    
+    
+    spikecount = zeros(100,1);
+%     cellnumber = nan(n_spikes,1);
+%     i = 1;
+%     fgetl(fidc); % extra line????, but necessary
+%     while(~feof(fidc))
+%         c = fscanf(fidc,'%d',1);
+%         if isempty(c)
+%             logmsg('Too few spikes assigned?');
+%         else
+%             cellnumber(i) =  c;
+%             %        cellnumber(end+1) = str2double( fgets(fidc));
+%             spikecount(cellnumber(i)) =  spikecount(cellnumber(i))+1;
+%             i = i+1;
+%         end
+%     end
+    
+for c = 1:n_cells
+    spikecount(c) = sum(cellnumber==c);
+end
 
-    cellnumbers = find(spikecount>0);
-    for c=cellnumbers(:)'
+%     logmsg(['Imported ' num2str(i-1) ' assignments']);
+%     cellnumber(i:end) = [];
+%     fclose(fidc);
+%     logmsg('Loading Klustakwik data');
+% 
+%     cellnumbers = find(spikecount>0);
+
+    
+    featuresdata = fscanf(fidf,'%f',[n_features,length(cellnumber)]);
+    fclose(fidf);
+
+    for c=1:n_cells; %cellnumbers(:)'
         cells(c).data = zeros(spikecount(c),1);
         cells(c).spike_amplitude = zeros(spikecount(c),1);
         cells(c).spike_trough2peak_time = zeros(spikecount(c),1);
         cells(c).spike_peak_trough_ratio = zeros(spikecount(c),1);
         cells(c).spike_prepeak_trough_ratio = zeros(spikecount(c),1);
         cells(c).spike_lateslope = zeros(spikecount(c),1);
-    end
+%     end
     
-    spikecount = ones(100,1);
+%     spikecount = ones(100,1);
+% 
+%     featuresdata = fscanf(fidf,'%f',[n_features,length(cellnumber)]);
+%     fclose(fidf);
+%     
+%     for i=1:length(cellnumber)
+%         c = cellnumber(i);
+%         %cells(c).data(spikecount(c),1) = spiketimes(i);
+%          for f = 1:n_features
+%             cells(c).(features{f})(spikecount(c),1) = featuresdata(f,i); 
+%          end
+%         spikecount(c) = spikecount(c)+1;
+%     end
 
-    for i=1:length(cellnumber)
-        if feof(fidt)
-            logmsg(['Premature end to ' filenamet 'at line number ' num2str(i)]);
-            return
-        end
-        c = cellnumber(i);
-        cells(c).data(spikecount(c),1) = str2double( fgets(fidt));
-        cells(c).spike_amplitude(spikecount(c),1) = fscanf(fidf,'%f',1); % was %d
-        cells(c).spike_trough2peak_time(spikecount(c),1) = fscanf(fidf,'%f',1);
-        cells(c).spike_peak_trough_ratio(spikecount(c),1) = fscanf(fidf,'%f',1);
-        cells(c).spike_prepeak_trough_ratio(spikecount(c),1) = fscanf(fidf,'%f',1);
-        if n_fet>4
-            cells(c).spike_lateslope(spikecount(c),1) = fscanf(fidf,'%f',1); % was %d
-        end
-        spikecount(c) = spikecount(c)+1;
+%     for c=cellnumbers(:)'
+        ind = find(cellnumber==c);
+        cells(c).data = spiketimes(ind);
+         for f = 1:n_features
+            cells(c).(features{f})(:,1) = featuresdata(f,ind); 
+         end
     end
-    fclose(fidt);
-    fclose(fidf);
-        
+
     for cl=1:length(cells)
         if cells(cl).data<10 % don't include cells with less than 10 spikes
             continue
@@ -136,21 +180,19 @@ for ch = channels
         outcells(count).wave = zeros(1,32);
         outcells(count).std = zeros(1,32);
         outcells(count).snr = NaN;
-        outcells(count).spike_amplitude = cells(cl).spike_amplitude;
-        outcells(count).spike_trough2peak_time = cells(cl).spike_trough2peak_time;
-        outcells(count).spike_peak_trough_ratio = cells(cl).spike_peak_trough_ratio;
-        outcells(count).spike_prepeak_trough_ratio = cells(cl).spike_prepeak_trough_ratio;
-        outcells(count).spike_lateslope = cells(cl).spike_lateslope;
+        for f = 1:n_features
+            outcells(count).(features{f}) = cells(cl).(features{f}); 
+        end
         outcells(count).mean_amplitude = mean(outcells(count).spike_amplitude);
         count = count + 1;
     end
-    % sort by spike amplitude from low to high
-    indices = [ outcells.index];
-    [m,ind] = sort([outcells.mean_amplitude]);
-    outcells = outcells(ind);
-    for i = 1:length(outcells)
-        outcells(i).index = indices(i);
-    end
+%     % sort by spike amplitude from low to high
+%     indices = [ outcells.index];
+%     [m,ind] = sort([outcells.mean_amplitude]);
+%     outcells = outcells(ind);
+%     for i = 1:length(outcells)
+%         outcells(i).index = indices(i);
+%     end
 end % channel ch
 
 

@@ -40,6 +40,7 @@ switch strtrim(record.analysis)
         % just run default analysis
     case 'CSO'
         analyse_CSO(record,stimsfile,50,verbose); % contact point distance for SC 50, for VC 100
+        results_lfptestrecord( record );
         return
     case 'coherence'
         analyse_wavecoh(record,stimsfile); % contact point distance for SC 50, for VC 100
@@ -121,9 +122,12 @@ switch lower(record.setup)
 
         sample_interval = 1/EVENT.strms(1,3).sampf;
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
-        if (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.OpOn))<10)
-            EVENT.strons.tril(1) = EVENT.strons.tril(end);
+        
+        if process_params.ec_temporary_timeshift~=0 % to check gad2 cells
+            errormsg(['Shifted time by ' num2str(process_params.ec_temporary_timeshift) ' s to check laser response']);
+            EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
         end
+        
 %         EVENT.strons.tril(1) = EVENT.strons.tril(3);
         startindTDT = EVENT.strons.tril(1)-pre_ttl;
         SIG = signalsTDT(EVENT,stimulus_start+startindTDT);
@@ -490,6 +494,9 @@ end
 
 if usetril == -1 % use last
     tril = EVENT.strons.tril(max(1,end-n_optotrigs));
+    if (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.OpOn))<10)
+            EVENT.strons.tril(1) = EVENT.strons.tril(end);
+    end
 else
     if usetril > length(EVENT.strons.tril)
         errormsg('Only 1 trigger available. Check ''tril='' in comment field.');

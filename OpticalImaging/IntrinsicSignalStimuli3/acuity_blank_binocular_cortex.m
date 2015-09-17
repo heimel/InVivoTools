@@ -1,5 +1,6 @@
-%RETINOTOPY_2x2
-%
+ %RETINOTOPY_2x2
+%with blank stimulation Mariska
+
 % RETINOTOPY_2x2, NewStim3 version
 % 
 % 2012, Alexander Heimel
@@ -7,6 +8,12 @@
 
 % To skip initial tests
 % Screen('Preference', 'SkipSyncTests', 2)
+
+display (['IMP: If stimuli is tilted change NewStimTilt in'])
+display (['NewStimConfiguration to 0 (normal), 10 (left) or -10 (right)'])
+display (['Press space to proceed ..........'])
+
+pause
 
 
 NewStimInit;
@@ -18,9 +25,9 @@ ShowStimScreen;
  
 StimWindowGlobals
 
-% how many blocks 
-n_x = 2;
-n_y = 2;
+% how many blocks
+n_x = 1;
+n_y = 1;
 
 r = StimWindowRect; % screen size
 width = round( (r(3)-r(1))/n_x);
@@ -29,28 +36,41 @@ height = round( (r(4)-r(2))/n_y);
 ps=periodicstim('default');
 pspar = getparameters(ps);
 pspar.distance = NewStimViewingDistance;
-pspar.imageType = 1;
+pspar.imageType = 2; % 2 for sinusoidal, 1 for squarewave gratings
 pspar.animType = 4;
 pspar.tFrequency = 2;
-pspar.sFrequency = 0.05;
+% pspar.sFrequency = 0.1;
 pspar.nCycles = 1.5;
 pspar.background = 0.5;
 pspar.backdrop = 0.5;
 pspar.windowShape = 0;
 pspar.dispprefs = {'BGpretime',0,'BGposttime',0};
 pspar.angle = 45;
+pspar.rect=[0 0 960 540];
 total_duration = 3;
-pspar.prestim_time = 2;
+pspar.prestim_time = 3;
 angles = [0:pspar.angle:360-pspar.angle];
+spatialfrequency = [0.1 0.2 0.3 0.4 0.5 0.6 0.7];
+pspar.contrast = 1;
 
-for i = 1:n_x*n_y
+for i = 1:length(spatialfrequency)
     iss_script(i) = StimScript(0);
-   
-    % location
-    row=floor( (i-1)/n_x);
-    col=i-1-row*n_x;
-    pspar.rect = [col*width row*height (col+1)*width (row+1)*height];
-    
+    % spatial frequency
+    pspar.sFrequency = spatialfrequency(i);
+     
+    pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
+    angles = angles( randperm(length(angles)) );
+    for angle = angles
+        pspar.angle = angle;
+        retinotopy_stim = periodicstim(pspar);
+        iss_script(i) = append(iss_script(i),retinotopy_stim);
+    end
+    iss_script(i) = loadStimScript(iss_script(i));
+end
+
+for i = length(spatialfrequency)+1
+    iss_script(i) = StimScript(0);
+    pspar.contrast = 0;
     pspar.nCycles = total_duration * pspar.tFrequency / length(angles);
     angles = angles( randperm(length(angles)) );
     for angle = angles
@@ -63,8 +83,8 @@ end
 
 tic
 % show script as test
-MTI = DisplayTiming(iss_script(4));
-DisplayStimScript(iss_script(4),MTI,0,0);
+MTI = DisplayTiming(iss_script(3));
+DisplayStimScript(iss_script(3),MTI,0,0);
 toc
 
 
@@ -98,5 +118,6 @@ try
 catch me
     CloseStimScreen;
     rethrow(me);
+    close_parallelport(lpt);
 end
 

@@ -16,9 +16,23 @@ switch record.analysis
         load(MatFile)
         F=length(CSO); %#ok<USENS>
         figure
-        for i=1:F
-            subplot(F,1,i);imagesc(-1:1,8:1,CSO{1,i},[-0.0001 0.0001]);
+        mcso = [];
+        scso = [];
+        for i=2:size(CSO{1,1},1)-1
+            mcso = [mcso , mean(CSO{1,1}(i,750:1000))];
+            scso = [scso , std(CSO{1,1}(i,750:1000))];
         end
+        MCSO = mean(mcso);
+        SCSO = mean(scso);
+        for i=1:F
+            subplot(F,1,i);imagesc(-1:1,8:1,CSO{1,i},[MCSO-3*SCSO MCSO+3*SCSO]);
+        end
+        figure;
+        for i=1:F
+            DD=interp2(CSO{1,i},1);
+            subplot(F,1,i);imagesc(-1:1,8:1,DD,[MCSO-3*SCSO MCSO+3*SCSO]);
+        end
+        
         return
     case 'coherence'
         return

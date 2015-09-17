@@ -8,7 +8,8 @@ function tcn = compute(tc,record)
 %
 %  See also:  ANALYSIS_GENERIC/compute, TUNING_CURVE
 %
-% Steve Van Hooser, modified by Alexander Heimel
+% 200X Steve Van Hooser
+% 200X-2015, modified by Alexander Heimel 
 %
 
 if nargin<2
@@ -27,7 +28,6 @@ else
 end
 
 curve_x = [];
-curve_y = [];
 interval = [];
 cinterval = [];
 pst=0;
@@ -49,12 +49,11 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
     cinterval = zeros(length(ind),2);  
     for j=ind(:)' % over stimuli
         ps = getparameters(get(I.st(i).stimscript,j));
-        curve_x(s) = ps.(I.paramname);
+        curve_x(s) = ps.(I.paramname); %#ok<*AGROW>
         condnames{s} = [I.paramname '=' num2str(curve_x(s))];
         stimlist = find(o==j);
         for k=1:length(stimlist),
             trigs{s}(k)=I.st(i).mti{stimlist(k)}.frameTimes(1);
-            %spon{1}(stimlist(k))=trigs{s}(k);
             spon{s}(k)=trigs{s}(k);
         end
         
@@ -63,17 +62,18 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
         Cinterval(s,:) = ...
             [0 I.st(1).mti{stimlist(1)}.frameTimes(end)-I.st(1).mti{stimlist(1)}.frameTimes(1)+df];
         if length(I.st(1).mti)>=2,
-            if dp.BGpretime>0
+            if dp.BGpretime - processparams.separation_from_prev_stim_off >= processparams.minimum_spontaneous_time
+                % use BGpretime
                 pre=pre+1;
                 interval(s,:) = [ Cinterval(s,1)-dp.BGpretime Cinterval(s,2)];
-            elseif dp.BGposttime>0 
+            elseif dp.BGposttime - processparams.separation_from_prev_stim_off >= processparams.minimum_spontaneous_time 
+                % use BGposttime
                 pst = pst + 1;
                 interval(s,:) = [ Cinterval(s,1) Cinterval(s,2)+dp.BGposttime];
             else
                 interval(s,:) = Cinterval(s,:);
             end;
         else % if only one stim, really shouldn't happen
-            spontlabel='raw activity';
             interval(s,:) = Cinterval(s,:);
         end;
         s = s + 1;
@@ -82,19 +82,14 @@ end % i
 
 
 sint = [ min(interval(:,1)) max(interval(:,2)) ];
-if pre==0 && pst>0,  %BGposttime used
+if pre==0 && pst>0  %BGposttime used
     spontlabel='stimulus / spontaneous';
-    scint = [ max(Cinterval(:,2)) max(interval(:,2))];
-elseif pst==0 && pre>0,  % BGpretime used
+    scint = [ max(Cinterval(:,2))+processparams.separation_from_prev_stim_off max(interval(:,2))];
+elseif pst==0 && pre>0  % BGpretime used
     spontlabel='spontaneous / stimulus';
-    scint = [ min(interval(:,1)) min(Cinterval(:,1)) ];
-    if (scint(2)-scint(1)) >= (processparams.separation_from_prev_stim_off+0.5) % keep at least 0.5 s
-        scint(1)=scint(1)+processparams.separation_from_prev_stim_off;
-    else
-        warning('TUNING_CURVE:COMPUTE:SHORTBGPRETIME','Too little time between stimulus offset and next stimulus');
-        warning('off','TUNING_CURVE:COMPUTE:SHORTBGPRETIME');
-    end
+    scint = [ min(interval(:,1))+processparams.separation_from_prev_stim_off min(Cinterval(:,1)) ];
 else
+    logmsg('No or too short spontaneous period. Consider changing separation_from_prev_stim_off or minimum_spontaneous_time in processparams_local');
     spontlabel='trials';
     scint = sint;
 end
@@ -107,14 +102,14 @@ switch p.int_meth
 end
 
 if ~isempty(processparams) && isfield(processparams,'post_window')
-    cinterval( cinterval(:,1)<processparams.post_window(1),1)=processparams.post_window(1);
-    cinterval( cinterval(:,2)>processparams.post_window(2),2)=processparams.post_window(2);
+    cinterval( cinterval(:,1)<processparams.post_window(1),1) = processparams.post_window(1);
+    cinterval( cinterval(:,2)>processparams.post_window(2),2) = processparams.post_window(2);
 end
 
 [curve_x,inds]=sort(curve_x); 
-trigs={trigs{inds}}; 
+trigs = trigs(inds); 
 spontval = [];
-inp.condnames = {condnames{inds}}; 
+inp.condnames = condnames(inds); 
 inp.spikes = I.spikes; 
 inp.triggers=trigs;
 RAparams.res = p.res; 
@@ -146,13 +141,10 @@ curve_var=c.ctdev';
 if isfield(c,'stderr')
     curve_err=c.stderr';
 else
-    disp('TUNING_CURVE/COMPUTE: Temporary adding stderr field');
+    logmsg('Temporary adding stderr field');
     curve_err=nan * curve_var;
 end
 curve = [curve_x; curve_y; curve_var; curve_err];
-
-
-
 
 % take mean over remaining varied parameters
 uniqx = uniq(sort(curve(1,:)));
@@ -169,8 +161,6 @@ end
 curve = newcurve;
 
 % find maxes and mins
-% [dummy,maxes] = max(curve_y); maxes = curve_x(maxes);
-% [dummy,mins] = min(curve_y); mins = curve_x(mins);
 [dummy,maxes] = max(curve(2,:));  %#ok<ASGLU>
 maxes = curve(1,maxes);
 [dummy,mins] = min(curve(2,:));  %#ok<ASGLU>

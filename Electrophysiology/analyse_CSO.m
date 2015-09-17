@@ -56,6 +56,7 @@ clear EVENT
 EVENT.Mytank = datapath;
 EVENT.Myblock = blocknames;
 EVENT = importtdt(EVENT);
+EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
 numchannel = max([EVENT.strms.channels]);
 %         channels_to_read = 1:numchannel;
 if isfield(record, 'channels') &&  ~isempty(record.channels)
@@ -175,7 +176,7 @@ for i = 1:n_conditions
     wave_cso=0;
     for k=ind
             w = filter(a_low,b_low,waves{k});
-        w = filter(a_high,b_high,w);
+%         w = filter(a_high,b_high,w);
         wave_cso = wave_cso + w;
     end;
     wave_cso = wave_cso/length(ind);
@@ -184,7 +185,47 @@ for i = 1:n_conditions
     CSO = [CSO,WAVE_CSO];
 %     waves_std(i,:) = std(waves(ind,:),1);
 end
+if t > 1
 wavefile=fullfile(experimentpath(record),['CSO_data',num2str(t),'.mat']);
 save(wavefile,'CSO');
+else
+wavefile=fullfile(experimentpath(record),'CSO_data.mat');
+save(wavefile,'CSO');
+end
 end
 display('finished!')
+
+function  tril = use_right_trigger(record,EVENT)
+usetril=regexp(record.comment,'usetril=(\s*\d+)','tokens');
+if ~isempty(usetril)
+    usetril = str2double(usetril{1}{1});
+else
+    usetril = -1; % i.e. last
+end
+
+if usetril == -1
+    if (isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1) || ...
+            (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1)
+        errormsg(['More than one trigger in ' recordfilter(record) '. Taking last. Set usetril=XX in comment to overrule']);
+    end
+end
+
+if isfield(EVENT.strons,'OpOn')
+    n_optotrigs = length(EVENT.strons.OpOn);
+else
+    n_optotrigs = 0;
+end
+
+if usetril == -1 % use last
+    tril = EVENT.strons.tril(max(1,end-n_optotrigs));
+    if (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.OpOn))<10)
+            EVENT.strons.tril(1) = EVENT.strons.tril(end);
+    end
+else
+    if usetril > length(EVENT.strons.tril)
+        errormsg('Only 1 trigger available. Check ''tril='' in comment field.');
+        tril = EVENT.strons.tril(end);
+        return
+    end
+    tril = EVENT.strons.tril(usetril);
+end

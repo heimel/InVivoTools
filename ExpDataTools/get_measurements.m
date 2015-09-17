@@ -1,4 +1,4 @@
-function [results,dresults,measurelabel] = get_measurements( groups, measure, varargin )
+function [results,dresults,measurelabel, rawdata] = get_measurements( groups, measure, varargin )
 %GET_MEASUREMENTS gets results for groups of mice for one or more measures
 %
 % [RESULTS,DRESULTS,MEASURELABELS] = GET_MEASUREMENTS( GROUPS, MEASURE,
@@ -12,10 +12,14 @@ function [results,dresults,measurelabel] = get_measurements( groups, measure, va
 % 2007-2014, Alexander Heimel
 %
 
+
 persistent expdb_cache
+
+global pooled
 
 results={};
 dresults={};
+rawdata = {};
 
 pos_args={...
     'value_per','measurement',... % 'group','mouse','test','measurement', 'stack','neurite' %'reliable',1,...  % 1 to only use reliable records (record.reliable!0), 0 to use all
@@ -166,10 +170,17 @@ end
 
 results = cell(1,n_groups);
 dresults = cell(1,n_groups);
+rawdata = cell(1,n_groups);
 
 for g=1:n_groups
     newlinehead=[linehead groupss(g).name ': '];
-    [results{g},dresults{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
+    pooled.group = g;
+    
+    if exist('verbose','var') && verbose
+        logmsg(['Group: ', num2str(g)])
+    end
+    
+    [results{g},dresults{g}, rawdata{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
     n=sum(~isnan(results{g})) ;
     if n<min_n
         results{g}=nan;
@@ -187,19 +198,20 @@ for g=1:n_groups
             
         otherwise
             logmsg([ 'measure = ' measuress.measure ', group=' groupss(g).name ...
-                ' : mean = ' num2str(nanmean(double(results{g}(:))),3) ...
-                ' , std = ' num2str(nanstd(double(results{g}(:))),3) ...
-                ' , sem = ' num2str(sem(double(results{g}(:))),3) ...
-                ' , N = ' num2str(min(n(:))) ' ' value_per 's']);
+                ': mean = ' num2str(nanmean(double(results{g}(:))),3) ...
+                ', std = ' num2str(nanstd(double(results{g}(:))),3) ...
+                ', sem = ' num2str(sem(double(results{g}(:))),3) ...
+                ', N = ' num2str(min(n(:))) ' ' value_per 's']);
     end
 end % g (groups)
 
 return
 
 
-function [results, dresults]=get_measurements_for_group( group, measure, value_per, mousedb,testdb,extra_options,linehead)
+function [results, dresults, rawdata]=get_measurements_for_group( group, measure, value_per, mousedb,testdb,extra_options,linehead)
 results=[];
 dresults=[];
+rawdata = [];
 
 if strcmp(strtrim(group.name),'empty')
     return
@@ -215,7 +227,10 @@ end
 for i_mouse=indmice
     mouse=mousedb(i_mouse);
     newlinehead = linehead;
-    [res,dres]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,testdb,extra_options,newlinehead);
+    if exist('verbose','var') && verbose 
+        logmsg(mouse.mouse)
+    end
+    [res,dres, raw]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,testdb,extra_options,newlinehead);
     
     switch value_per
         case 'mouse' %{'mouse','group'}
@@ -236,11 +251,14 @@ for i_mouse=indmice
     if ~isempty(res) && numel(res)==length(res)
         results=[results(:)' res(:)'];
         dresults=[dresults(:)' dres(:)'];
+        rawdata = [rawdata raw];
+        
     elseif isempty(res)
         % do nothing
     elseif isempty(results)
         results = res;
         dresults = dres;
+        rawdata = raw;
     else
         % ugly and not very general!
         xl = min(size(results,1),size(res,1));
@@ -253,9 +271,11 @@ end % i_mouse (mice)
 return
 
 
-function [results, dresults]=get_measurements_for_mouse( mouse, measure, criteria,value_per, testdb,extra_options,linehead)
+function [results, dresults, rawdata]=get_measurements_for_mouse( mouse, measure, criteria,value_per, testdb,extra_options,linehead)
+global pooled
 results=[];
 dresults=[];
+rawdata = [];
 
 if isempty(testdb)
     return
@@ -270,30 +290,30 @@ if strcmpi(measure.datatype,'genenetwork')
     results=get_genenetwork_probe(mouse.strain,measure.stim_type,measure.measure);
 end
 
-if isempty(measure.stim_type) || strcmp(measure.stim_type,'*')
-    switch measure.measure
-        case 'sex', % only once per mouse
-            results=strcmp(mouse.sex,'male');
-            return
-        case 'weight'
-            results = get_mouse_weight( mouse );
-            return
-        case 'bregma2lambda'
-            if ~isempty(mouse.bregma2lambda)
-                results = mouse.bregma2lambda(1);
-            else
-                results = [];
-            end
-            return
-        case 'skullwidth'
-            if ~isempty(mouse.bregma2lambda)
-                results = mouse.bregma2lambda(2);
-            else
-                results = [];
-            end
-            return
-    end
-end
+% if isempty(measure.stim_type) || strcmp(measure.stim_type,'*')
+%     switch measure.measure
+%         case 'sex', % only once per mouse
+%             results=strcmp(mouse.sex,'male');
+%             return
+%         case 'weight'
+%             results = get_mouse_weight( mouse );
+%             return
+%         case 'bregma2lambda'
+%             if ~isempty(mouse.bregma2lambda)
+%                 results = mouse.bregma2lambda(1);
+%             else
+%                 results = [];
+%             end
+%             return
+%         case 'skullwidth'
+%             if ~isempty(mouse.bregma2lambda)
+%                 results = mouse.bregma2lambda(2);
+%             else
+%                 results = [];
+%             end
+%             return
+%     end
+% end
 
 
 cond=[ 'mouse=' mouse.mouse  ];
@@ -364,8 +384,28 @@ end
 indtests=find_record(testdb,cond);
 for i_test=indtests
     testrecord=testdb(i_test);
+    
+    if exist('verbose','var') && verbose
+        if isfield(testrecord,'stack') && isfield(testrecord,'slice')
+            logmsg([testrecord.stack ' ' testrecord.slice])
+        end
+    end
+    
+    if exist('pool_short_neurites','var')
+        mouseid = mouse.mouse;
+        stackid = testrecord.stack;
+        Stacks = pooled.all(pooled.group).linked2neurite;
+        pooled.idx = find(strcmp(mouseid, Stacks(:,2)) & strcmp(stackid, Stacks(:,3)));
+    end
+    
+    
     newlinehead = [linehead recordfilter(testrecord) ':'];
-    [res,dres]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
+    [res,dres, raw]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
+   
+    if exist('verbose','var') && verbose
+        logmsg(['Length of record ' num2str(i_test) ':  ' num2str(length(res))])
+    end
+    
     switch value_per
         case {'test','stack'}
             if ~isempty(res)
@@ -386,11 +426,13 @@ for i_test=indtests
     if ~isempty(res) && numel(res)==length(res) % i.e. 1D results
         results=[results(:)' res(:)'];
         dresults=[dresults(:)' dres(:)'];
+        rawdata = [rawdata raw];
     elseif isempty(res)
         % do nothing
     elseif isempty(results)
         results = res;
         dresults = dres;
+        rawdata = raw;
     else
         % ugly and not very general!
         sr = size(results);
@@ -413,9 +455,11 @@ for i_test=indtests
 end % test records
 
 
-function [results, dresults]=get_measurements_for_test(testrecord, mouse, measure, criteria,value_per,extra_options,linehead)
+function [results, dresults, rawdata]=get_measurements_for_test(testrecord, mouse, measure, criteria,value_per,extra_options,linehead)
 results = [];
 dresults = [];
+rawdata = {};
+global pooled
 
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
@@ -469,6 +513,9 @@ switch measure.datatype
 end
 
 switch measure.measure
+    case 'sex'
+        results=strcmp(mouse.sex,'male');
+        return
     case 'weight'
         results = get_mouse_weight( mouse);
         return
@@ -478,6 +525,20 @@ switch measure.measure
         return
     case 'expdate'  % day number since 1-1-0000
         results = datenum(testrecord.date,'yyyy-mm-dd') ;
+        return
+    case 'bregma2lambda'
+        if ~isempty(mouse.bregma2lambda)
+            results = mouse.bregma2lambda(1);
+        else
+            results = [];
+        end
+        return
+    case 'skullwidth'
+        if ~isempty(mouse.bregma2lambda)
+            results = mouse.bregma2lambda(2);
+        else
+            results = [];
+        end
         return
 end
 
@@ -500,6 +561,12 @@ if strcmp(measure.measure(1:min(end,4)),'file') % read measure from file
     end
 else
     [results,dresults] = get_compound_measure_from_record(testrecord,measure.measure,criteria,extra_options);
+    if isempty(results)
+        if exist('verbose','var') && verbose
+            logmsg('No results...')
+        end
+        return
+    end
     
     results = double(results);
     dresults = double(dresults);
@@ -513,16 +580,67 @@ else
         uniqneurites =  uniq(sort(linked2neurite(~isnan(linked2neurite))));
         res = [];
         dres = [];
-        for neurite = uniqneurites(:)'
-            res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
-            dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
-        end
-        results = res;
-        dresults = dres;
-    end
-    
-    if isempty(results) && ~strcmp(measure.measure,'depth')
-        [results,dresults]=get_valrecord(testrecord,measure.measure,mouse);
+        rcnt = 0;
+        
+        if exist('pool_short_neurites','var')
+            
+            if ~isfield(pooled, 'all')
+                errormsg('Pooled does not exist');
+                return
+            else
+               % pooled.idx = pooled.idx + 1; %keep track of where we are
+                
+                logmsg(['Pooling short neurites: Crit < ' pool_short_neurites]);
+              
+                pool = pooled.all(pooled.group).pool{pooled.idx}.Set;
+                if isempty(pool)
+                    errormsg('Empty pool, returning');
+                    return
+                end
+                linked = pooled.all(pooled.group).linked2neurite{pooled.idx};
+                if length(unique(linked)) ~= length(uniqneurites)
+                     logmsg('Warning: Not an equal number of pooled and linked neurite numbers.');
+                     logmsg('Neurites not in pool, will not be added to dataset');
+                     logmsg(['Pool: ', num2str(unique(linked))])
+                     logmsg(['Linked: ', num2str(uniqneurites)])
+                end 
+                %first pool then average
+                Cnt = 0;
+                Set = cell(1, length(pool));
+                for i = 1:length(pool)
+                    nids = pool{i};
+                    for neurite = nids
+                        R = results(linked2neurite==neurite);
+                        R = R(~isnan(R));
+                        Set{i} = [Set{i} R];
+                    end
+                end
+                
+                %now get estimates from each neurite set
+                if ~isempty(Set)
+                    for i = 1:length(Set)
+                        res = [res mean(Set{i})];
+                        dres = [dres std(Set{i})];
+                    end
+                    rawdata = Set;
+                end
+            end
+        else
+            for neurite = uniqneurites(:)'
+                res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
+                dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
+                
+                R = results(linked2neurite==neurite);
+                R = R(~isnan(R));
+                if ~isempty(R)
+                    rcnt = rcnt + 1;
+                    rawdata(rcnt) = {R};
+                end
+            end
+            
+         end   
+            results = res;
+            dresults = dres;
     end
 end
 
@@ -541,6 +659,10 @@ if ~isempty(results)
     end
 end
 return
+
+
+
+
 
 
 

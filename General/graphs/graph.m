@@ -70,6 +70,7 @@ fit=''; % to overload matlab function CURVEFIT/FIT
 % possible varargins with default values
 pos_args={...
     'axishandle',[],...
+    'bottomline','',... % none
     'showpoints',1,...
     'test','',... %'ttest',...
     'spaced',1,...
@@ -658,6 +659,11 @@ switch style
                     end
                 case {'linear','linear_together'}
                     for i=1:length(ry)
+                        if length(rx{i})~=length(ry{i})
+                            errormsg('Cannot do a fit, because number of elements of x and y are unequal');
+                            fity{i} = [];
+                            continue
+                        end
                         rc=nancov(rx{i},ry{i})/nancov(rx{i});
                         rc=rc(1,2);
                         offset=nanmean(ry{i})-rc*nanmean(rx{i});
@@ -719,8 +725,10 @@ switch style
             end
             if ~isempty(fit)
                 for i=1:length(ry)
-                    h.fit(i)=plot(fitx,fity{i},'-');
-                    set(h.fit(i),'Color',color{i});
+                    if ~isempty(fity{i})
+                        h.fit(i)=plot(fitx,fity{i},'-');
+                        set(h.fit(i),'Color',color{i});
+                    end
                 end
                 axis(ax);
                 
@@ -817,8 +825,13 @@ end
 switch style
     case {'bar','box'}
         % add bottomline
-        ax=axis;
-        line([ ax(1) ax(2)],[ax(3) ax(3)],'Color','k');
+        switch bottomline
+            case 'none'
+                set(gca,'xcolor',[1 1 1])
+            otherwise
+                ax=axis;
+                line([ ax(1) ax(2)],[ax(3) ax(3)],'Color','k');
+        end
 end
 
 % set xticklabels

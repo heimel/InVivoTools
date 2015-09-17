@@ -198,6 +198,8 @@ end
 % maximum bouton to mitochrondion 
 params.max_bouton_mito_distance_um = 2; 
 
+params.bouton_close_minimum_intensity_rel2dendrite = zeros(1,100); %max 100 channels
+
 % get intensities
 params.get_intensities = false;
 switch record.experiment
@@ -209,6 +211,8 @@ switch record.experiment
                 params.get_intensities = true;
         end
 end
+params.tp_rank_only_present = true;
+
 
 % loudly complain about absent data
 params.tp_mumble_not_present = false;

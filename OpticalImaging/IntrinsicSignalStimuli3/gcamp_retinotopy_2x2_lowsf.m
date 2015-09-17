@@ -19,7 +19,7 @@ ShowStimScreen;
 StimWindowGlobals
 
 % how many blocks 
-n_x = 2;
+n_x = 4;
 n_y = 2;
 
 r = StimWindowRect; % screen size
@@ -32,7 +32,7 @@ pspar.distance = NewStimViewingDistance;
 pspar.imageType = 1;
 pspar.animType = 4;
 pspar.tFrequency = 2;
-pspar.sFrequency = 0.05;
+pspar.sFrequency = 0.01;
 pspar.nCycles = 1.5;
 pspar.background = 0.5;
 pspar.backdrop = 0.5;

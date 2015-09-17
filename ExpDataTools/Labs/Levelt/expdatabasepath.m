@@ -33,7 +33,7 @@ switch where
         elseif ispc
             base='C:\Data\InVivo';
         end
-        params = processparams_local;
+        params = processparams_local([]);
         if isfield(params,'databasepath_localroot')
             base = params.databasepath_localroot;
         end

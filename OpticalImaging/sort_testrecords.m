@@ -3,14 +3,12 @@ function newud=sort_testrecords( ud )
 %
 %    NEWUD=SORT_TESTRECORD( UD )
 %
-% 2006, Alexander Heimel
+% 2006-2015, Alexander Heimel
 %
 
-newud=ud;
+newud = ud;
 
-% if isfield(ud.db,'test')
-%     newud.db=sort_db(ud.db,{'date','mouse','test'});
-% else 
-newud.db=sort_db(ud.db);
-% end
+[newud.db,dummy,changed] = sort_db(ud.db);
+newud.changed = ud.changed || changed;
 
+ control_db_callback(newud.h.current_record);

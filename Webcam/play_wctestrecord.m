@@ -12,6 +12,11 @@ end
 
 wcinfo = wc_getmovieinfo( record);
 
+if isempty(wcinfo)
+    errormsg(['No movie found for ' recordfilter(record)]);
+    return
+end
+
 rec = 1;
 starttime = (wcinfo(rec).stimstart-par.wc_playbackpretime) * 1.015;
 cmd = par.wc_playercommand;
@@ -20,13 +25,14 @@ switch par.wc_player
         cmd = [ cmd ' --start-time=' num2str(starttime)];
 end
 
-cmd = [ cmd ' ' fullfile(    wcinfo(rec).path,wcinfo(rec).mp4name) ];
+cmd = [ cmd ' "' fullfile(    wcinfo(rec).path,wcinfo(rec).mp4name) '"'];
 
 switch par.wc_player
     case 'vlc'
         logmsg('Press ''p'' to replay.');
 end
 
+logmsg(cmd);
 [status,out] = system(cmd);
 
 out

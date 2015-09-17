@@ -38,8 +38,8 @@ inp.selection = record.stim_parameters; % selection like, 'contrast=0.4,angle=18
 
 [sts,triggers] = split_stimscript_by_trigger( inp.st );
 for t = 1:length(sts)
-    inps(t)  = inp;
-    inps(t).st = sts(t);
+    inps(t)  = inp; %#ok<AGROW>
+    inps(t).st = sts(t); %#ok<AGROW>
 end
 
 for i = 1:length(triggers) 
@@ -56,8 +56,8 @@ for i = 1:length(triggers)
     else
         where = []; % turn off extra figure
     end
-    tc = tuning_curve(inp,par,where);
-    out(i) = getoutput(tc);
+    tc = tuning_curve(inp,par,where,record);
+    out(i) = getoutput(tc); %#ok<AGROW>
     % out.curve contains per responses
     % (1,:) parameter value
     % (2,:) average firing rate
@@ -79,8 +79,8 @@ for i = 1:length(triggers)
     end
     measures.range{i} = curve(1,:);
     
-    if processparams.compute_f1f0
-        pc = periodic_curve(inp,'default');
+    if processparams.compute_f1f0 && isa(inp.st.stimscript,'periodicscript')
+        pc = periodic_curve(inp,'default',[],record);
         pc_out = getoutput(pc);
         mf0 = max(pc_out.f0curve{1}(2,:));
         mf1 = max(pc_out.f1curve{1}(2,:));
@@ -125,7 +125,7 @@ for i = 1:length(triggers)
     
     filterwidth = 0.05/binsize; % 50 ms width = too broad for onset times!
     rastcount_max = spatialfilter(rastcount_max,filterwidth);
-    [ind_max_label,ind_max] = max(rastcount_max);
+    [ind_max_label,ind_max] = max(rastcount_max); %#ok<ASGLU>
     measures.time_peak{i} = ind_max*binsize;
   
 end % trigger i

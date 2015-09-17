@@ -26,20 +26,36 @@ function [Yn,Xn,Yerr] = slidingwindowfunc(X, Y, start, stepsize, stop, windowsiz
 %
 %  Xn is the center location of each window and Yn is the result of the
 %  function in each window.
+%
+% 200X, Steve Van Hooser (?)
 
 Xn = []; Yn = []; Yerr = [];
 for i=start:stepsize:stop-windowsize,
 	INDs = find(X>=i&X<i+windowsize);
 	
-	if zeropad|~isempty(INDs),
+	if zeropad||~isempty(INDs),
 		Xn(end+1) = mean([i i+windowsize]);
 	end;
 	if ~isempty(INDs),
 		eval(['Yn(end+1)=' func ' (Y(INDs));']);
         y = Y(INDs)';
-        if nargout==3&nargin==8, Yerr(end+1) = nanstderr(Y(INDs)');
-        elseif nargout==3&nargin==9, eval(['Yerr(end+1)=' intervalfunc ';']); end;
-	end;
-	if zeropad&isempty(INDs), Yn(end+1) = 0; if nargout==3, Yerr(end+1) = 0; end; end;
-end;
+%                 if nargout==3&nargin==8, Yerr(end+1) =
+%                 nanstderr(Y(INDs)'); %% for addaptation stim analysis
+%         elseif nargout==3&nargin==9, eval(['Yerr(end+1)=' intervalfunc ';']); end;
+% 	end;
+% 	if zeropad&isempty(INDs), Yn(end+1) = 0; if nargout==3, Yerr(end+1) = 0; end; end;
+% end;
+        if nargout==3&&nargin==8
+            Yerr(end+1) = nanstderr(Y(INDs)');
+        elseif nargout==3&&nargin==9
+            eval(['Yerr(end+1)=' intervalfunc ';']); 
+        end
+    end
+	if zeropad&&isempty(INDs)
+        Yn(end+1) = 0; 
+        if nargout==3
+            Yerr(end+1) = 0; 
+        end 
+    end
+end
 

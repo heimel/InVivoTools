@@ -46,7 +46,7 @@ if nargin<1
 end
 
 for i=1:length(db)
-    if isstruct(db(i).measures)
+    if isfield(db(i),'measures') && isstruct(db(i).measures)
         measures = uniq(sort(cat(1,measures,fields(db(i).measures))))';
     end
 end
