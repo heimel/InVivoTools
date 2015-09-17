@@ -41,7 +41,7 @@ if Remote_Comm_isremote
     warmupps=periodicstim('default');
     wp = getparameters(warmupps);
     wp.imageType = 2;
-    wp.dispprefs={'BGpretime',0,'BGposttime',0};
+    wp.dispprefs={'BGpretime',0,'BGposttime',0.05};
     wp.sFrequency = 1.5;% to check linearization
     warmupps = periodicstim(wp);
     warmup = stimscript(0); warmup=append(warmup,warmupps);warmup=loadStimScript(warmup);
