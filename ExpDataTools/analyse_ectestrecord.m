@@ -14,7 +14,7 @@ if strcmp(record.datatype,'ec')~=1
     return
 end
 
-if isempty(record.monitorpos)
+if isfield(record,'monitorpos') && isempty(record.monitorpos)
     errormsg(['Monitor position is missing in record. mouse=' record.mouse ',date=' record.date ',test=' record.test]);
 end
 
@@ -162,13 +162,13 @@ switch lower(record.setup)
             cells = [cells,cll]; %#ok<AGROW>
         end
         
-        
+    case 'wall-e'
+        channels2analyze = 1;
+        cells = importaxon(record,verbose);
     otherwise
-        % import spike2 data into experiment file
         channels2analyze = 1;
         cells = importspike2([record.test filesep 'data.smr'],record.test,datapath,'Spikes','TTL',[],[],record.amplification);
 end
-
 n_spikes = 0;
 for i=1:length(cells);
     n_spikes = n_spikes+ length(cells(i).data);
@@ -255,8 +255,12 @@ else
     save(spikesfile,'cells','isi');
 end
 
-
-ssts = getstimscripttimestruct(cksds,record.test);
+if isfield(record,'test')
+    test = record.test;
+else
+    test = record.epoch;
+end
+ssts = getstimscripttimestruct(cksds,test);
 
 if isfield(record,'stimscript') && isempty(record.stimscript)
     % fill in stimscript class
@@ -414,7 +418,11 @@ for i=1:length(g) % for all cells
         cellmeasures.usable = 0;
     end
     
-    cellmeasures.depth = record.depth-record.surface;
+    if isfield(record,'depth')
+        cellmeasures.depth = record.depth-record.surface;
+    else
+        cellmeasures.depth = [];
+    end
     
     if isfield(cells,'channel') % then check area
         cellmeasures.channel = cells(i).channel;

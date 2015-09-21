@@ -19,6 +19,8 @@ else
 end
 
 % defaults
+params.ec_axon_default_filename = 'data.abf'; 
+
 params.pre_window = [-Inf 0]; % ignored for ec and tp
 params.post_window = [0 Inf]; % ignored for tp
 params.separation_from_prev_stim_off = 0.5;  % time (s) to stay clear of prev_stim_off
@@ -136,6 +138,11 @@ switch lower(record.setup)
     case 'antigua'
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
         params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time
+    case 'wall-e'
+        params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
+        params.secondsmultiplier = 1; % multiplification factor of electrophysical signal time
+        warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
+        warning('off', 'ECPROCESSPARAMS:TIMING');
     otherwise
         warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
         warning('off', 'ECPROCESSPARAMS:TIMING');

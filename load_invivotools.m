@@ -131,6 +131,7 @@ if params.load_electrophys
     addpath(fullfile(path2invivotools,'Electrophysiology'),...
         fullfile(path2invivotools,'Electrophysiology','Son'),...    %libraries for importing spike2 data
         fullfile(path2invivotools,'Electrophysiology','TDT'),... % for importing tdt data in linux
+        fullfile(path2invivotools,'Electrophysiology','Axon'),... % for importing Axon abf files
         genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5')));    % for MClust spike sorter
 end
 

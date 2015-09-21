@@ -51,7 +51,7 @@ end
 try
     cksds=cksdirstruct(datapath);
 catch
-    disp(['IMPORTSPIKE2: Could not create/open cksdirstruct ' datapath])
+    logmsg(['Could not create/open cksdirstruct ' datapath])
     return
 end
 
@@ -72,7 +72,7 @@ function cells=loadcells(cksds,trial,smrfilename,unitchannelname,ttlchannelname,
 
 fid=fopen(smrfilename);
 if fid==-1
-    disp(['IMPORTSPIKE2: Failed to open  ' smrfilename]);
+    logmsg(['Failed to open  ' smrfilename]);
     cells=[];
     return;
 end
@@ -87,19 +87,16 @@ end
 [data_units,header_units]=SONGetChannel(fid,unitchannel);
 if ~isfield(header_units,'kind') || header_units.kind~=6
     cells = [];
-    disp(['IMPORTSPIKE2: Unitchannel is of unexpected kind for ' smrfilename']);
+    logmsg(['Unitchannel is of unexpected kind for ' smrfilename']);
     return
 end
 sample_interval=SONGetSampleInterval(fid,unitchannel);
 [data_ttl,header_ttl]=SONGetChannel(fid,ttlchannel);
 if ~isstruct(header_ttl) || header_ttl.kind~= 3
-    disp(['IMPORTSPIKE2: TTLchannel is of unexpected kind for ' smrfilename]);
+    logmsg(['TTLchannel is of unexpected kind for ' smrfilename]);
     cells = [];
     return
 end
-% if length(data_ttl)>1
-%     disp('IMPORTSPIKE2: Expected just one ttl');
-% end
 
 if 0 % to get raw single units
     rawsinglechannel=findchannel(list_of_channels,'singleEC');
@@ -116,7 +113,7 @@ data_units.timings = data_units.timings * secondsmultiplier;
 ff=fullfile(getpathname(cksds),trial,'acqParams_in');
 f=fopen(ff,'r');
 if f==-1
-    disp(['Error: could not open ' ff ]);
+    logmsg(['Could not open ' ff ]);
     return;
 end
 fclose(f);  % just to get proper error
@@ -277,7 +274,7 @@ while ch<=length(list_of_channels)
     end
 end
 if channel==-1
-    disp(['IMPORTSPIKE2: Could not find channel named ' channelname]);
+    logmsg(['Could not find channel named ' channelname]);
 end
 return
 

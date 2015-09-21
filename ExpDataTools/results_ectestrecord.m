@@ -780,7 +780,7 @@ if isfield(measure,'sample_interval')
     x=measure.sample_interval*x*1000; % to make it ms
     xlab='Time (ms)';
 end
-if ~isempty(record.amplification)
+if isfield(record,'amplification') && ~isempty(record.amplification)
     amplification=record.amplification;
     ylab='Potential (mV)';
 else

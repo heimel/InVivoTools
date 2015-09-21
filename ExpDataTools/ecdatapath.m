@@ -11,6 +11,15 @@ if nargin<1
     record.setup = host;
 end
 
+switch lower(record.setup)
+    case 'wall-e'
+        record.experiment =record.mouse(1:min(end,5));
+        record.epoch = '';
+        datapath = tpdatapath(record);
+        return
+end
+
+
 % first check locally
 params.ecdatapath_localroot = fullfile(localpathbase,'Electrophys',capitalize(record.setup));
 

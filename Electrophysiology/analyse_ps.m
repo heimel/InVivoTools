@@ -34,7 +34,11 @@ end
 
 inp.paramname = paramname; % for tuning_curve
 inp.paramnames = {paramname}; % for periodic_curve
-inp.selection = record.stim_parameters; % selection like, 'contrast=0.4,angle=180'
+if isfield(record,'stim_parameters')
+    inp.selection = record.stim_parameters; % selection like, 'contrast=0.4,angle=180'
+else
+    inp.selection = '';
+end
 
 [sts,triggers] = split_stimscript_by_trigger( inp.st );
 for t = 1:length(sts)
