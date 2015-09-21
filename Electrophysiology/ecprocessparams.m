@@ -26,6 +26,7 @@ params.minimum_spontaneous_time = 0.5; % need at least this period for spontaneo
 %params.early_response_window = [0.05 0.2];  % not implemented yet
 %params.late_response_window = [0.5 inf]; % not implemented yet
 params.ec_temporary_timeshift = 0; % to induce a timeshift for analysis
+params.results_show_psth_count_all = false;
 
 switch protocol
     case '11.35'

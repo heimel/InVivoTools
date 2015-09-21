@@ -30,7 +30,7 @@ switch record.setup
         datapath = fullfile(datapath,'Mouse');
 end
 
-if ~exist(datapath,'dir')
+if ~exist(datapath,'dir') || length(dir(datapath))==3
     if ispc
         switch record.setup
             case 'antigua'

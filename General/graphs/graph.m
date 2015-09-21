@@ -758,8 +758,12 @@ switch style
                 continue
             end
             delete(h.points(i))
-            h.points(i)=plot(x{i},y{i},'o');
-            set(h.points(i),'markersize',markersize);
+            if markersize>0
+                h.points(i)=plot(x{i},y{i},'o');
+                set(h.points(i),'markersize',markersize);
+            else
+                h.points(i)=plot(x{i},y{i},'.');
+            end
             set(h.points(i),'color',color{i});
             if exist('linestyles','var') && ~isempty(linestyles)
                 if ~iscell(linestyles)

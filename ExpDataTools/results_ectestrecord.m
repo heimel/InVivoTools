@@ -156,7 +156,7 @@ for c=1:n_cells
             % PSTH graph
             subplot('position',...
                 [ (1.1)/(n_graphs) reltitlepos-(row-0.3)*relsubheight 1/(n_graphs)*0.8 relsubheight*0.7]);
-            plot_psth(measure);
+            plot_psth(measure,record);
         case {'hupe','lammemotion','lammetexture'}
             color = 'bgrcmybgrcmy';
                 
@@ -462,6 +462,9 @@ return
 
 
 function plot_psth(measure,record)
+
+processparams = ecprocessparams(record);
+
 clr = 'kbry';
 hold on;
 
@@ -470,7 +473,20 @@ first_timepoint = -0.1;
 if isfield(measure,'psth_tbins') && ~isempty(measure.psth_tbins) && ~isempty(measure.psth_tbins{1})
     for t=1:length(measure.psth_tbins) % over triggers
         if isfield(measure,'psth_count')
-            bar(measure.psth_tbins{t},measure.psth_count{t},clr(t));
+            if processparams.results_show_psth_count_all && isfield(measure,'psth_tbins_all')
+                count = measure.psth_count_all{t};
+                tbins = measure.psth_tbins_all{t};
+            else
+                count = measure.psth_count{t};
+                tbins = measure.psth_tbins{t};
+            end
+            
+            if length(measure.psth_tbins)>1
+%               plot(tbins,count,clr(t));
+               plot(tbins,smoothen(count,3),clr(t));
+            else
+                bar(tbins,count,clr(t));
+            end
         else
             n_stimuli = length(measure.range{t});
             tbins = reshape(measure.psth_tbins{t},...
@@ -478,11 +494,12 @@ if isfield(measure,'psth_tbins') && ~isempty(measure.psth_tbins) && ~isempty(mea
             response = reshape(measure.psth_response{t},...
                 numel(measure.psth_response{t})/length(measure.range{t}),n_stimuli);
             plot(tbins,response);
-            first_timepoint = min(tbins(:));
         end
-        if measure.psth_tbins{t}(end)>last_timepoint
-            last_timepoint = measure.psth_tbins{t}(end);
-        end
+        first_timepoint = min(tbins(:));
+        last_timepoint = max(tbins(:));
+%         if measure.psth_tbins{t}(end)>last_timepoint
+%             last_timepoint = measure.psth_tbins{t}(end);
+%         end
     end
 elseif isfield(measure,'psth')
     bar(measure.psth.tbins,measure.psth.data);

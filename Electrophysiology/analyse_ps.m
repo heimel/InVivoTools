@@ -116,9 +116,18 @@ for i = 1:length(triggers)
         rastcount_all = rastcount_all+rast.counts{j}(1:length(rastcount_all))/rast.N(j);
     end
     rastcount_all = rastcount_all/length(rast.counts);
+
+    tbins = binsize*((1:maxbins)-0.5);
+
+    % add spontaneous raster
+    spontrast =  getoutput(out(i).spontrast);
+    rastcount_all = [spontrast.counts{1}/spontrast.N rastcount_all];
+    tbins_all = [spontrast.bins{1} tbins];
     
-    measures.psth_tbins{i} = binsize*((1:maxbins)-0.5);
+    measures.psth_tbins{i} = tbins;
     measures.psth_count{i} = rastcount_max;
+
+    measures.psth_tbins_all{i} = tbins_all;
     measures.psth_count_all{i} = rastcount_all;
     
     measures.psth_count_raw{i} = rast.counts;
