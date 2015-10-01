@@ -52,7 +52,9 @@ if isfield(inf(1),'x_step') && isfield(inf(1),'x_unit') && isfield(inf(1),'y_ste
         num2str(inf(1).y_step) ' ' inf(1).y_unit ],y);
 end
 [y,x]=printtext(['Bits per Sample: ' num2str(inf(1).BitsPerSample)],y);
-[y,x]=printtext(['Max-Min Value: ' num2str(inf(1).MaxSampleValue),' - ',num2str(inf(1).MinSampleValue)],y);
+try
+    [y,x]=printtext(['Max-Min Value: ' num2str(inf(1).MaxSampleValue),' - ',num2str(inf(1).MinSampleValue)],y);
+end
 try
     [y,x]=printtext(['Display, Scan & Start Mode: ' num2str(inf(1).ParsedImageDescription.DisplayMode),', ',num2str(inf(1).ParsedImageDescription.ScanMode),', ',num2str(inf(1).ParsedImageDescription.Scan_Start_Mode)],y);
 end
