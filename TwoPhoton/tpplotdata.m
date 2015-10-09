@@ -75,7 +75,7 @@ for interval = 1:size(data,1)
     for i=1:size(data,2)
         hold on;
         ind=mod(i-1,length(colors))+1;
-        plot(t{interval,i}, data{interval,i} + stack_lines * (i-1) * 0.2 ,'line',linestyle,'color',colors{ind},'marker',marker);
+        plot(t{interval,i}, data{interval,i} + stack_lines * (i-1) * 0.2 ,'linestyle',linestyle,'color',colors{ind},'marker',marker);
     end
 end
 % if length(listofcells)<10

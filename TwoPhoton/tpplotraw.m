@@ -49,7 +49,7 @@ for i=1:length(record.measures)
     ind=mod(i-1,length(colors))+1;
     plot(record.measures(i).raw_t, ...
         record.measures(i).raw_data + stack_lines * (i-1) * 0.2 ,...
-        'line',linestyle,'color',colors{ind},'marker',marker);
+        'linestyle',linestyle,'color',colors{ind},'marker',marker);
 end
 ylabel(ylab);
 xlabel('Time (s)');
