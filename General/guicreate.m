@@ -223,7 +223,7 @@ if ~isempty(cdata)
     style.cdata = cdata;
 end
 
-if strcmp(lower(style.Style),'popupmenu')
+if strcmpi(style.Style,'popupmenu')
     position = position + [ 0 2 0 0];
 end
 

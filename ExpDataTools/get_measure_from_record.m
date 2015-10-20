@@ -396,6 +396,29 @@ for c=1:length(record.measures) % over all cells or ROIs
                 end
                 [~,ind] = max(curve(2,:)); % for highest response
                 tempval = curve(3,ind)^2;
+                
+            case 'roihash'
+                switch record.datatype
+                    case 'tp'
+                        hash = factorial(11)+helphash(record.mouse) + helphash(record.stack) ;
+                        hash = hash + 41 * measures.index;
+                    otherwise
+                        hash = factorial(11)+helphash(record.mouse) + helphash(record.date) +...
+                            helphash(record.epoch) + helphash(record.stack) + ...
+                            helphash(record.slice);
+                end
+                tempval = mod(hash^2,factorial(10)+1);
+                
+            case 'neuritehash'
+                switch record.datatype
+                    case 'tp'
+                        hash = factorial(11)+helphash(record.mouse) + helphash(record.stack) ;
+                        hash = hash + 41 * measures.linked2neurite;
+                        tempval = mod(hash^2,factorial(10)+1);
+                    otherwise
+                        logmsg('Neurite hash is not implemented for data other than tp');
+                end
+                
         end
     end % no field with name
     
@@ -424,4 +447,12 @@ end % next cell c
 
 if any(size(val)~=size(val_sem))
     logmsg('Sizes of VAL and VAL_SEM are not equal');
+end
+
+
+function hh = helphash( str )
+if isempty(str)
+    hh = 0;
+else
+    hh = str*2.^(1:length(str))';
 end

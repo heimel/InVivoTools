@@ -573,8 +573,10 @@ else
     
     if strcmpi(value_per,'neurite') % take mean per neurite
         linked2neurite = get_compound_measure_from_record(testrecord,'linked2neurite',criteria,extra_options);
-        if length(linked2neurite)~=length(results)
-            errormsg('Not an equal number of values and neurite numbers.');
+        index = get_compound_measure_from_record(testrecord,'index',criteria,extra_options);
+
+        if length(linked2neurite)~=length(results) || length(index)~=length(results) 
+            errormsg('Not an equal number of values and neurite numbers or ROI indices.');
             return
         end
         uniqneurites =  uniq(sort(linked2neurite(~isnan(linked2neurite))));
@@ -627,8 +629,8 @@ else
             end
         else
             for neurite = uniqneurites(:)'
-                res = [res nanmean(results(linked2neurite==neurite))]; %#ok<AGROW>
-                dres = [dres nanstd(results(linked2neurite==neurite))]; %#ok<AGROW>
+                res = [res nanmean(results(linked2neurite==neurite | index==neurite))]; %#ok<AGROW>
+                dres = [dres nanstd(results(linked2neurite==neurite |index==neurite))]; %#ok<AGROW>
                 
                 R = results(linked2neurite==neurite);
                 R = R(~isnan(R));
