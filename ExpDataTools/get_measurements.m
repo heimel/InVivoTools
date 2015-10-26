@@ -227,7 +227,7 @@ end
 for i_mouse=indmice
     mouse=mousedb(i_mouse);
     newlinehead = linehead;
-    if exist('verbose','var') && verbose 
+    if exist('verbose','var') && verbose
         logmsg(mouse.mouse)
     end
     [res,dres, raw]=get_measurements_for_mouse( mouse, measure, group.criteria, value_per,testdb,extra_options,newlinehead);
@@ -392,16 +392,20 @@ for i_test=indtests
     end
     
     if exist('pool_short_neurites','var')
-        mouseid = mouse.mouse;
-        stackid = testrecord.stack;
+        if ~isfield(pooled,'all')
+            errormsg('Run poolingneurites script first.',true);
+            return
+        end
         Stacks = pooled.all(pooled.group).linked2neurite;
-        pooled.idx = find(strcmp(mouseid, Stacks(:,2)) & strcmp(stackid, Stacks(:,3)));
+        pooled.idx = find( ...
+            strcmp(mouse.mouse, Stacks(:,2)) & ...
+            strcmp(testrecord.stack, Stacks(:,3)));
     end
     
     
     newlinehead = [linehead recordfilter(testrecord) ':'];
     [res,dres, raw]=get_measurements_for_test( testrecord,mouse, measure,criteria,value_per,extra_options,newlinehead);
-   
+    
     if exist('verbose','var') && verbose
         logmsg(['Length of record ' num2str(i_test) ':  ' num2str(length(res))])
     end
@@ -415,12 +419,10 @@ for i_test=indtests
             end
         case {'testsum','stacksum'} % take the sum over cells/ROIs in test or stack-record
             if ~isempty(res)
-                dres=norm(dres(~isnan(dres))) .* sum(~isnan(res));
-                res=nansum(res);
+                dres = norm(dres(~isnan(dres))) .* sum(~isnan(res));
+                res = mynansum(res);
                 logmsg([newlinehead measure.name '='  num2str(res,3)]);
             end
-            
-            
     end
     
     if ~isempty(res) && numel(res)==length(res) % i.e. 1D results
@@ -563,7 +565,7 @@ else
     [results,dresults] = get_compound_measure_from_record(testrecord,measure.measure,criteria,extra_options);
     if isempty(results)
         if exist('verbose','var') && verbose
-            logmsg('No results...')
+            logmsg('No results.')
         end
         return
     end
@@ -571,29 +573,23 @@ else
     results = double(results);
     dresults = double(dresults);
     
-    if strcmpi(value_per,'neurite') % take mean per neurite
-        linked2neurite = get_compound_measure_from_record(testrecord,'linked2neurite',criteria,extra_options);
-        index = get_compound_measure_from_record(testrecord,'index',criteria,extra_options);
-
-        if length(linked2neurite)~=length(results) || length(index)~=length(results) 
-            errormsg('Not an equal number of values and neurite numbers or ROI indices.');
-            return
-        end
-        uniqneurites =  uniq(sort(linked2neurite(~isnan(linked2neurite))));
-        res = [];
-        dres = [];
-        rcnt = 0;
-        
-        if exist('pool_short_neurites','var')
+    switch value_per
+        case {'neurite','neuritesum'}
+            linked2neurite = get_compound_measure_from_record(testrecord,'linked2neurite',criteria,extra_options);
+            index = get_compound_measure_from_record(testrecord,'index',criteria,extra_options);
             
-            if ~isfield(pooled, 'all')
-                errormsg('Pooled does not exist');
+            if length(linked2neurite)~=length(results) || length(index)~=length(results)
+                errormsg('Not an equal number of values and neurite numbers or ROI indices.');
                 return
-            else
-               % pooled.idx = pooled.idx + 1; %keep track of where we are
-                
-                logmsg(['Pooling short neurites: Crit < ' pool_short_neurites]);
-              
+            end
+            uniqneurites =  uniq(sort(linked2neurite(~isnan(linked2neurite))));
+            
+            if exist('pool_short_neurites','var')
+                if ~isfield(pooled, 'all')
+                    errormsg('Pooled does not exist');
+                    return
+                end
+                %  logmsg(['Pooling short neurites: Crit < ' pool_short_neurites]);
                 pool = pooled.all(pooled.group).pool{pooled.idx}.Set;
                 if isempty(pool)
                     errormsg('Empty pool, returning');
@@ -601,54 +597,59 @@ else
                 end
                 linked = pooled.all(pooled.group).linked2neurite{pooled.idx};
                 if length(unique(linked)) ~= length(uniqneurites)
-                     logmsg('Warning: Not an equal number of pooled and linked neurite numbers.');
-                     logmsg('Neurites not in pool, will not be added to dataset');
-                     logmsg(['Pool: ', num2str(unique(linked))])
-                     logmsg(['Linked: ', num2str(uniqneurites)])
-                end 
-                %first pool then average
-                Cnt = 0;
-                Set = cell(1, length(pool));
-                for i = 1:length(pool)
-                    nids = pool{i};
-                    for neurite = nids
-                        R = results(linked2neurite==neurite);
-                        R = R(~isnan(R));
-                        Set{i} = [Set{i} R];
-                    end
+                    logmsg('Warning: Not an equal number of pooled and linked neurite numbers.');
+                    logmsg('Neurites not in pool, will not be added to dataset');
+                    logmsg(['Pool: ', num2str(unique(linked))])
+                    logmsg(['Linked: ', num2str(uniqneurites)])
                 end
-                
-                %now get estimates from each neurite set
-                if ~isempty(Set)
-                    for i = 1:length(Set)
-                        res = [res mean(Set{i})];
-                        dres = [dres std(Set{i})];
-                    end
-                    rawdata = Set;
+            else % don't pool neurites
+                pool = num2cell(uniqneurites);
+            end
+            
+            % pool results
+            result_for_neuritepool = cell(1, length(pool));
+            for i = 1:length(pool)
+                nids = pool{i};
+                for neurite = nids
+                    result_for_neurite = results(linked2neurite==neurite | index==neurite);
+                    result_for_neuritepool{i} = [result_for_neuritepool{i} result_for_neurite];
                 end
             end
-        else
-            for neurite = uniqneurites(:)'
-                res = [res nanmean(results(linked2neurite==neurite | index==neurite))]; %#ok<AGROW>
-                dres = [dres nanstd(results(linked2neurite==neurite |index==neurite))]; %#ok<AGROW>
-                
-                R = results(linked2neurite==neurite);
-                R = R(~isnan(R));
-                if ~isempty(R)
-                    rcnt = rcnt + 1;
-                    rawdata(rcnt) = {R};
+
+            res = [];
+            dres = [];
+            
+            if strcmp(measure.measure,'neuritehash')
+                switch value_per
+                    case 'neuritesum'
+                        value_per = 'neurite';
+                    case 'stacksum'
+                        value_per = 'stacksum';
                 end
             end
             
-         end   
+            switch value_per
+                case 'neurite'
+                    for i = 1:length(result_for_neuritepool)
+                        res = [res nanmean(result_for_neuritepool{i})]; %#ok<AGROW>
+                        dres = [dres nanstd(result_for_neuritepool{i})]; %#ok<AGROW>
+                    end
+                case 'neuritesum'
+                    for i = 1:length(result_for_neuritepool)
+                            res = [res mynansum(result_for_neuritepool{i})]; %#ok<AGROW>
+                    end
+                    dres = NaN(size(res));
+            end
+            
+            rawdata = result_for_neuritepool;
             results = res;
             dresults = dres;
-    end
+    end % switch value_per
 end
 
 if ~isempty(results)
     switch value_per
-        case {'measurement','neurite'}
+        case {'measurement','neurite','neuritesum'}
             if ndims(results)<3 && numel(results)<200 %#ok<ISMAT>
                 textres = mat2str(results',3);
                 if ~isempty(textres) && textres(1)=='['
