@@ -636,7 +636,7 @@ else
                     end
                 case 'neuritesum'
                     for i = 1:length(result_for_neuritepool)
-                            res = [res mynansum(result_for_neuritepool{i})]; %#ok<AGROW>
+                        res = [res nansum(result_for_neuritepool{i})]; %#ok<AGROW>
                     end
                     dres = NaN(size(res));
             end
