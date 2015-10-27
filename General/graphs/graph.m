@@ -579,7 +579,7 @@ switch style
                 end
                 h.errorbar(i)=plot_errorbars({y{i}},x{i},{ystd{i}},[],y{i},...
                     errorbars,ebsides,errorbars_tick);
-                if ~isnan(h.errorbar(i))
+                if ishandle(h.errorbar(i)) || ~isnan(h.errorbar(i))
                     set(h.errorbar(i),'color',color{i},'clipping','off');
                 end
             end
@@ -754,7 +754,7 @@ switch style
         end
         % plot points
         for i=1:length(y)
-            if isnan(h.points(i))
+            if ~ishandle(h.points(i)) && isnan(h.points(i))
                 continue
             end
             delete(h.points(i))
