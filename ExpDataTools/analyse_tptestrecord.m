@@ -56,7 +56,7 @@ if isfield(record,'ROIs') && isfield(record.ROIs,'celllist')
 end
 
 % linking ROIs to lines / neurites
-if is_zstack
+if is_zstack && process_params.tp_always_relink_rois
     record = tp_link_rois( record );
 end
 

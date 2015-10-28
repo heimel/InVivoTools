@@ -167,6 +167,7 @@ switch lower(record.experiment)
         params.align_channel = 2; % for Daan's original stacks
 end
 
+params.tp_always_relink_rois = false;
 % maximum distance for linking ROI to neurite
 switch record.experiment
     case '11.21'
