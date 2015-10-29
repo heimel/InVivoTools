@@ -1608,7 +1608,7 @@ switch command,
         btn=questdlg('Do you want to link all ROIs by distance to neurite?','Link all','Ok','Cancel','Ok');
         if strcmp(btn,'Ok')
             ud.record.ROIs.celllist = ud.celllist;
-            ud.record = tp_link_rois( ud.record );
+            ud.record = tp_link_rois( ud.record, true);
             ud.celllist = ud.record.ROIs.celllist;
             set(fig,'userdata',ud);
             analyzetpstack('UpdateCellList',[],fig);
@@ -1622,7 +1622,7 @@ switch command,
             neurite_index = str2double(answer{1});
             if ~isnan(neurite_index)
                 for i = items
-                    ud.celllist(i).neurite = neurite_index;
+                    ud.celllist(i).neurite = neurite_index; % only a scalar to show it is linked by hand
                 end
                 set(fig,'userdata',ud);
                 analyzetpstack('UpdateCellList',[],fig);

@@ -24,6 +24,11 @@ processparams = tpprocessparams(record);
 
 roilist = record.ROIs.celllist;
 
+if ~isfield(roilist,'neurite')
+    % i.e. nothing has been linked
+    linkall = true;
+end
+
 ind_neurites = find(cellfun(@is_neurite,{roilist.type}));
 ind_no_neurites = find(~cellfun(@is_neurite,{roilist.type}));
 
@@ -33,8 +38,6 @@ for j = ind_neurites
     neurite_poly(j) = interpolate_poly(interpolate_poly(interpolate_poly(roilist(j)))); %#ok<AGROW>
     roilist(j).neurite =[roilist(j).index tp_get_neurite_length(roilist(j),record)];
 end
-
-
 
 
 if linkall
