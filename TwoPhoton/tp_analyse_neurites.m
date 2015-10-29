@@ -46,27 +46,16 @@ for i = ind % neurites
     neuritelength = tp_get_neurite_length( roi, record,params );
     record.measures(i).length = neuritelength;
     roi.neurite = [roi.index neuritelength ]; % use of length here is deprecated
-    % roi.extra.length = neuritelength; % use of length here is deprecated
     
-    % get puncta density
-    neurites = reshape([roilist.neurite],2,length(roilist));
+    % get present puncta 
+    neurites = cellfun(@(x) x(1),{roilist.neurite});
+    ind_puncta = find(neurites==roi.index & [roilist.present]==1);
     
-    % get puncta
-    ind_puncta = find(neurites(1,:)==roi.index);
-    ind_puncta = ind_puncta(find_record(roilist(ind_puncta),'present=1'));
-
-    
-    record.measures(i).density = length(   find_record(roilist(ind_puncta),'present=1')) / neuritelength;
+    record.measures(i).density = length(ind_puncta) / neuritelength;
     for t = density_types(:)'
-        field = ['density_' t{1}];
-        record.measures(i).(field) = length(   find_record(roilist(ind_puncta),['present=1,type=' t{1}])) / neuritelength;
+        record.measures(i).(['density_' t{1}]) = length(   find_record(roilist(ind_puncta),['type=' t{1}])) / neuritelength;
     end
 
-    % next lines are deprecated 2013-04-17
-    %roi.extra.density_puncta = length(   find_record(roilist(ind_puncta),'present=1,(type=shaft|type=spine)')) / neuritelength;
-    %roi.extra.density_shaft = length(   find_record(roilist(ind_puncta),'present=1,type=shaft')) / neuritelength;
-    %roi.extra.density_spine = length(   find_record(roilist(ind_puncta),'present=1,type=spine')) / neuritelength;
-    
     roilist(i) = roi;
 end
 

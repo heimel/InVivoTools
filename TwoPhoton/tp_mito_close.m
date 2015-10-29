@@ -6,7 +6,7 @@ function record = tp_mito_close(record, params)
 %       PARAMS is results of TPREADCONFIG(RECORD) and can be given as an
 %       argument to save time
 %
-% 2013, Alexander Heimel
+% 2013-2015, Alexander Heimel
 %
 if nargin<2
     params = tpreadconfig(record);
@@ -18,10 +18,6 @@ if isempty(params)
 end
 
 processparams = tpprocessparams(record);
-
-
-%disp('TP_MITO_CLOSE: Maximum distance bouton to mitochondrion set in tpprocesparams');
-
 
 roilist = record.ROIs.celllist;
 n_rois = length(roilist);

@@ -320,6 +320,7 @@ for c=1:length(record.measures) % over all cells or ROIs
     else % no field with measure name
         switch measure
             case 'linked2neurite'
+                logmmsg(['linked2neurite should come from measures. Please analyze record ' recordfilter(record)]);
                 if length(record.ROIs.celllist)<c
                     logmsg(['ROIs in record is shorter than measures for ' recordfilter(record)]);
                     tempval = NaN;

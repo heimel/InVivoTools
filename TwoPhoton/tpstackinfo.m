@@ -82,7 +82,7 @@ end
 
 if isfield(record.ROIs,'celllist')
     celllist = record.ROIs.celllist;
-    header = 'idx,     type,p,neu,dis,int_av,int_mx,  x,  y,  z';
+    header = 'idx,     type,p,neu,int_av,int_mx,  x,  y,  z';
     disp(header);
     for i=1:length(celllist)
         roi = celllist(i);
@@ -90,7 +90,7 @@ if isfield(record.ROIs,'celllist')
         if isfield(roi,'index'), row = [row num2str(roi.index,'%03d')];end
         if isfield(roi,'type'), row = [row ',' sprintf('%9s',roi.type)];end
         if isfield(roi,'present'), row = [row ',' num2str(roi.present)];end
-        if isfield(roi,'neurite'), row = [row ',' num2str(roi.neurite(1),'%03d') ',' sprintf('%3s',num2str(fix(roi.neurite(2)))) ];end
+        if isfield(roi,'neurite'), row = [row ',' num2str(roi.neurite(1),'%03d')  ];end
         if isfield(roi,'intensity_mean'), row = [row ',  ' sprintf('%4s',num2str(fix(roi.intensity_mean(1))))];end
         if isfield(roi,'intensity_max'), row = [row ',  ' sprintf('%4s',num2str(fix(roi.intensity_max(1))))];end
         if isfield(roi,'xi'), row = [row ',' num2str(fix(mean(roi.xi)),'%03d')  ];end

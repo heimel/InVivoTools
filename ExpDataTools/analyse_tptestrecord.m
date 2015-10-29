@@ -55,9 +55,9 @@ if isfield(record,'ROIs') && isfield(record.ROIs,'celllist')
     end
 end
 
-% linking ROIs to lines / neurites
+% compute distances of ROIs to lines / neurites, do not relink
 if is_zstack 
-    record = tp_link_rois( record );
+    record = tp_link_rois( record, false );
 end
 
 % compute ROI lengths / circumferences

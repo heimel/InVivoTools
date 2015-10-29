@@ -157,20 +157,21 @@ record.ROIs.celllist = sort_db(record.ROIs.celllist,{'neurite'});
 
 
 % temp function to solve problem with missing distance in neurite field
-disp('TP_MATCH_ROIS_WITH_REFERENCE: temporary fix for missing distance');
-ln = cellfun(@length,{record.ROIs.celllist.neurite});
-for i=find(ln==1)
-    record.ROIs.celllist(i).neurite(2) = NaN;
-end
+% disp('TP_MATCH_ROIS_WITH_REFERENCE: temporary fix for missing distance');
+% ln = cellfun(@length,{record.ROIs.celllist.neurite});
+% for i=find(ln==1)
+%     record.ROIs.celllist(i).neurite(2) = NaN;
+% end
+%neuritestab = reshape([record.ROIs.celllist(:).neurite],2,length(record.ROIs.celllist(:)))';
 
-neuritestab = reshape([record.ROIs.celllist(:).neurite],2,length(record.ROIs.celllist(:)))';
-neurites = uniq(neuritestab(:,1));
+neuritestab = cellfun(@(x) x(1),{record.ROIs.celllist.neurite});
+neurites = uniq(neuritestab);
 neurites = neurites(~isnan(neurites));
 
 for i = 1:length(neurites)
     % find neurite and sort along longest axis
     ind_neurite = find([record.ROIs.celllist(:).index]==neurites(i));
-    ind = (neuritestab(:,1)==neurites(i));
+    ind = (neuritestab==neurites(i));
     if range(record.ROIs.celllist(ind_neurite).xi) > range(record.ROIs.celllist(ind_neurite).yi)
         record.ROIs.celllist(ind) = sort_db(record.ROIs.celllist(ind),{'xi'});
     else
