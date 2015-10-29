@@ -14,38 +14,40 @@ measures.usable=1;
 ss = get(inp.st.stimscript);
 p = getparameters(ss{1});
 
-measures.duration = p.duration;
+if isfield(p,'duration')
+    measures.duration = p.duration;
+end
 switch record.stim_type
     case {'hupe','lammemotion'}
         if ~isa(ss{1},'hupestim') && ~isa(ss{1},'lammestim')
-            error('ANALYSE_ECTEST_BY_TYPENUMBER: stimulus is not a hupestim or lammestim');
+            errormsg('Stimulus is not a hupestim or lammestim');
         end
         measures.start_stim_difference =  p.movement_onset;
         measures.start_analysis_after_stim_difference = 0.2; % s
     case {'lammetexture'}
         if ~isa(ss{1},'lammestim')
-            error('ANALYSE_ECTEST_BY_TYPENUMBER: stimulus is not a lammestim');
+            errormsg('Stimulus is not a lammestim');
         end
         measures.start_stim_difference =  p.figure_onset;
         % 100 ms after figure onset
         measures.start_analysis_after_stim_difference = 0.2; % s
     case 'border'
         if ~isa(ss{1},'borderstim')
-            error('ANALYSE_ECTEST_BY_TYPENUMBER: stimulus is not a borderstim');
+            errormsg('Stimulus is not a borderstim');
         end
         measures.start_stim_difference =  0;
         measures.start_analysis_after_stim_difference = 0; % s
     otherwise
         measures.start_stim_difference =  0;
         measures.start_analysis_after_stim_difference = 0; % s
-        warning('ANALYSE_ECTEST_BY_TYPENUMBER: unknown stimulus type');
+        warning('Unknown stimulus type');
 end
 int_meth = 0;
 interval = [measures.start_stim_difference+measures.start_analysis_after_stim_difference 0];
 
 trigger = getTrigger(inp.st.stimscript);
 if any(diff(trigger)) % i.e. more than one type of trigger
-    disp('ANALYSE_ECTEST_BY_TYPENUMBER: Some stimuli give triggers (e.g. for light stimulation)');
+    logmsg('Some stimuli give triggers (e.g. for light stimulation)');
     sts = split_stimscript_by_trigger( inp.st );
     for t = 1:length(sts)
         inps(t)  = inp;
@@ -109,7 +111,7 @@ for i = 1:length(inps) % loop over multiple triggers
             psth(j).data = mean(reshape([raster_full.counts{ind}],length(raster_full.counts{ind(1)}),length(ind))',1) ...  %#ok<UDIM>
                 / mean(diff(psth(j).tbins)) / raster_full.N(ind(1));
         catch
-            disp(['Bins sizes unequal in ' record.mouse ', test ' record.test '. Not adding PSTH']);
+            logmsg(['Bins sizes unequal in ' record.mouse ', test ' record.test '. Not adding PSTH']);
         end
     end % j
     

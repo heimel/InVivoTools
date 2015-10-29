@@ -257,7 +257,7 @@ for c=1:n_cells
                     y = printfield(measure,'nk_rm',y,0.5);
                     printfield(measure,'nk_b',y);
                     y = printfield(measure,'nk_n',y,0.5);
-                case 'position'
+                case {'position','location'}
                     y = printfield(measure,'rf_center',y);
             end
             y = printfield(measure,'f1f0',y);
@@ -290,7 +290,7 @@ for c=1:n_cells
                     end
                     
                     hold on
-                case 'position'
+                case {'position','location'}
                     % overlap = str2double(answer{3})/100;
                     col = 3;
                     subplot('position',...
