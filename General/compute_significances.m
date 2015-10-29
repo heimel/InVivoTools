@@ -69,7 +69,7 @@ end
 
 
 for i=1:length(y)
-    if sum(~isnan(y{i}))>2
+    if sum(~isnan(y{i}))>2 && ~all(y{i}==y{i}(1))
         [hsw,p] = swtest(y{i}); %#ok<ASGLU>
         if p<0.05
             notnormal = true;
@@ -161,7 +161,7 @@ if ~( length(signif_y)==1 && signif_y==0)
         switch test
             case 'ttest'
                 % check normality
-                if length(y{i})>2
+                if length(y{i})>2 && ~all(y{i}==y{i}(1))
                     [h_norm,p_norm] = swtest(y{i});
                     if h_norm
                         logmsg(['Group ' num2str(i) ' is not normal. Shapiro-Wilk test p = ' num2str(p_norm) '. Change test to kruskal_wallis']);
