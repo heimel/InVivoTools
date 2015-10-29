@@ -15,54 +15,58 @@ end
 
 processparams = tpprocessparams(record);
 
-maximum_distance_pxl = processparams.max_roi_linking_distance_um / params.x_step ;
-
-%logmsg('Linking parameters are set in tpprocesparams');
-
-roilist = record.ROIs.celllist;
-
-ind_neurites = find(cellfun(@is_neurite,{roilist.type}));
-ind_no_neurites = find(~cellfun(@is_neurite,{roilist.type}));
-
-% each no_neurite_roi will be connected to closest neurite_roi within
-% maximum_distance_pxl
-
-for j = ind_neurites
-    neurite_poly(j) = interpolate_poly(interpolate_poly(interpolate_poly(roilist(j)))); %#ok<AGROW>
-    roilist(j).neurite =[roilist(j).index tp_get_neurite_length(roilist(j),record)];
-end
-
-
-for i = ind_no_neurites
-    roilist(i).neurite = [NaN Inf];
-    center_roi1.xi = median(roilist(i).xi); % take center
-    center_roi1.yi = median(roilist(i).yi); % take center
-    center_roi1.zi = median(roilist(i).zi); % take center
+if processparams.tp_always_relink_rois
+    
+    maximum_distance_pxl = processparams.max_roi_linking_distance_um / params.x_step ;
+    
+    %logmsg('Linking parameters are set in tpprocesparams');
+    roilist = record.ROIs.celllist;
+    
+    ind_neurites = find(cellfun(@is_neurite,{roilist.type}));
+    ind_no_neurites = find(~cellfun(@is_neurite,{roilist.type}));
+    
+    % each no_neurite_roi will be connected to closest neurite_roi within
+    % maximum_distance_pxl
     
     for j = ind_neurites
-        dis = distance_point2polygon( center_roi1,neurite_poly(j) );
-        if dis <= maximum_distance_pxl
-            if isempty(roilist(i).neurite)
-                roilist(i).neurite(1) = roilist(j).index;
-                roilist(i).neurite(2) = dis;
-            else % only replace if closer
-                if dis <  roilist(i).neurite(2)
+        neurite_poly(j) = interpolate_poly(interpolate_poly(interpolate_poly(roilist(j)))); %#ok<AGROW>
+        roilist(j).neurite =[roilist(j).index tp_get_neurite_length(roilist(j),record)];
+    end
+    
+    
+    for i = ind_no_neurites
+        roilist(i).neurite = [NaN Inf];
+        center_roi1.xi = median(roilist(i).xi); % take center
+        center_roi1.yi = median(roilist(i).yi); % take center
+        center_roi1.zi = median(roilist(i).zi); % take center
+        
+        for j = ind_neurites
+            dis = distance_point2polygon( center_roi1,neurite_poly(j) );
+            if dis <= maximum_distance_pxl
+                if isempty(roilist(i).neurite)
                     roilist(i).neurite(1) = roilist(j).index;
                     roilist(i).neurite(2) = dis;
+                else % only replace if closer
+                    if dis <  roilist(i).neurite(2)
+                        roilist(i).neurite(1) = roilist(j).index;
+                        roilist(i).neurite(2) = dis;
+                    end
                 end
             end
-        end
-    end % i
-end % j
+        end % i
+    end % j
+    record.ROIs.celllist = roilist;
+end % link
 
-if isfield(roilist,'neurite')
-    for i = 1:length(roilist)
-        record.measures(i).distance2neurite = roilist(i).neurite(2) *  params.x_step;
+% copy ROI info to measures
+if isfield(record.ROIs.celllist,'neurite')
+    for i = 1:length(record.ROIs.celllist)
+        record.measures(i).distance2neurite = record.ROIs.celllist(i).neurite(2) *  params.x_step;
         if isinf(record.measures(i).distance2neurite)
             record.measures(i).distance2neurite = NaN;
             record.measures(i).linked2neurite = NaN;
-        elseif roilist(i).index ~= roilist(i).neurite(1) % i.e. really linked
-            record.measures(i).linked2neurite = roilist(i).neurite(1);
+        elseif record.ROIs.celllist(i).index ~= record.ROIs.celllist(i).neurite(1) % i.e. really linked
+            record.measures(i).linked2neurite = record.ROIs.celllist(i).neurite(1);
         else
             record.measures(i).distance2neurite = NaN;
             record.measures(i).linked2neurite = NaN;
@@ -70,7 +74,6 @@ if isfield(roilist,'neurite')
     end
 end
 
-record.ROIs.celllist = roilist;
 
 
 function dis = distance_point2polygon( point,poly)
