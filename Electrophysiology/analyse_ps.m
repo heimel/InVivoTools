@@ -184,8 +184,6 @@ switch measures.variable
         measures = compute_angle_measures(measures);
     case 'size'
         measures = compute_size_measures(measures);
-        
-        
     case 'location'
         stimparams = cellfun(@getparameters,get(inp.st.stimscript));
         rects = cat(1,stimparams(:).rect);
@@ -197,15 +195,14 @@ switch measures.variable
         center_y = (top+bottom)/2;
         n_x = length(center_x);
         n_y = length(center_y);
-        stimrect = [min(left) min(top) max(right) max(bottom)];
-        
-        
-        measures.rect = stimrect;
-        resp_by_pos = reshape(measures.response{1},n_x,n_y)';
-        measures.rf{1} = resp_by_pos;
-        center_of_mass_x = center_x(:)'*  sum(resp_by_pos,1)'/sum(resp_by_pos(:));
-        center_of_mass_y = center_y(:)'*sum(resp_by_pos,2)/sum(resp_by_pos(:));
-        measures.rf_center{1} = round([center_of_mass_x center_of_mass_y]);
+        measures.rect = [min(left) min(top) max(right) max(bottom)];
+        for t = 1:length(triggers) 
+            resp_by_pos = reshape(measures.response{t},n_x,n_y)';
+            measures.rf{t} = resp_by_pos;
+            center_of_mass_x = center_x(:)' * sum(resp_by_pos,1)'/sum(resp_by_pos(:));
+            center_of_mass_y = center_y(:)' * sum(resp_by_pos,2)/sum(resp_by_pos(:));
+            measures.rf_center{t} = round([center_of_mass_x center_of_mass_y]);
+        end
 end
 
 
