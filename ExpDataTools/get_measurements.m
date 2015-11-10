@@ -621,8 +621,8 @@ else
             
             if strcmp(measure.measure,'neuritehash')
                 switch value_per
-                    case 'neuritesum'
-                        value_per = 'neurite';
+                    case {'neuritesum','neurite'}
+                        value_per = 'neuriteuniqmean';
                     case 'stacksum'
                         value_per = 'stacksum';
                 end
@@ -639,6 +639,11 @@ else
                         res = [res nansum(result_for_neuritepool{i})]; %#ok<AGROW>
                     end
                     dres = NaN(size(res));
+                case 'neuriteuniqmean'
+                    for i = 1:length(result_for_neuritepool)
+                        res = [res nanmean(unique(result_for_neuritepool{i}))]; %#ok<AGROW>
+                        dres = [dres nanstd(unique(result_for_neuritepool{i}))]; %#ok<AGROW>
+                    end
             end
             
             rawdata = result_for_neuritepool;
