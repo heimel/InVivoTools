@@ -335,7 +335,7 @@ end
 if isfield(testdb,'comment') &&  exist('comment','var')
     comment = strtrim(comment); %#ok<NODEF>
     if comment(1)=='{'
-        comment = split( comment(2:end-1));
+        comment = strtrim(split( comment(2:end-1)));
     else
         comment = {comment};
     end
