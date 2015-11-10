@@ -750,6 +750,9 @@ end
 for i=1:length(measure.response)
     polar(0,m,'w');
     hold on
+    switch measure.variable
+        case 'angle' 
+    
 %    curve = curves{i};
 %     polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:)
 %     curve(2,1)]),[ linestyle clr(i)]);
@@ -759,6 +762,17 @@ for i=1:length(measure.response)
             thresholdlinear([measure.response{i} measure.response{i}(1)]),...
             [ linestyle clr(i)]);
     set(gca,'view',[-90 90]);
+        otherwise % figdirection or so
+            if iscell(measure.curve)
+                curve = measure.curve{i};
+            else
+                curve = measure.curve;
+            end
+            polar([curve(1,:) curve(1,1)]/180*pi,...
+                thresholdlinear([curve(2,:) curve(2,1)]),[ linestyle clr(i)]);
+            %polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
+            set(gca,'view',[-90 90]);
+    end
     %phi =linspace(0,2*pi,100);
     %polar(phi,measure.rate_spont(i)*ones(size(phi)),[clr(i) '--']);
 end

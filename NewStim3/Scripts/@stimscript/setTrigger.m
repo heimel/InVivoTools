@@ -34,7 +34,9 @@ end
 
 S.trigger = repmat(trigger(:)',1,length(S.displayOrder)/length(trigger));
 
-logmsg(['Trigger order: ' mat2str(S.trigger)]);
+if any(S.trigger)
+    logmsg(['Trigger order: ' mat2str(S.trigger)]);
+end
 
 A = S;
 

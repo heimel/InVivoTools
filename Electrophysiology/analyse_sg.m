@@ -173,7 +173,8 @@ for i=1:length(onframetimes)
         n_spikes_per_no_onframe(i)=length(spiketimes_afterthisframe);
     catch
         % probable only happens for first or last frame
-        warning(['data not sampled over entire requested interval around onframe ' num2str(i)]);
+        warning('ANALYSE_SG:DATA_NOT_FULLY_SAMPLED',['data not sampled over entire requested interval around onframe ' num2str(i)]);
+        warning('off','ANALYSE_SG:DATA_NOT_FULLY_SAMPLED');
     end
 end
 

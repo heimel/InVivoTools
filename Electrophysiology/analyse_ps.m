@@ -198,6 +198,7 @@ switch measures.variable
         measures.rect = [min(left) min(top) max(right) max(bottom)];
         for t = 1:length(triggers) 
             resp_by_pos = reshape(measures.response{t},n_x,n_y)';
+            %resp_by_pos = thresholdlinear(resp_by_pos);
             measures.rf{t} = resp_by_pos;
             center_of_mass_x = center_x(:)' * sum(resp_by_pos,1)'/sum(resp_by_pos(:));
             center_of_mass_y = center_y(:)' * sum(resp_by_pos,2)/sum(resp_by_pos(:));
