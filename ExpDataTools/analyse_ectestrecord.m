@@ -51,7 +51,7 @@ switch lower(record.setup)
         
         EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
 
-        if 0 && strmatch(record.stim_type,'background')==1
+        if 0 && strncmp(record.stim_type,'background',10)==1
             EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.55;
         end
         if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
@@ -352,33 +352,30 @@ for i=1:length(g) % for all cells
         cellmeasures.type='su';
     end
     
-    try % compute Reponse Index
+    if isfield(cellmeasures,'rate_peak') && isfield(cellmeasures,'rate_spont')
         cellmeasures.ri= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
             cellmeasures.rate_peak;
     end
-    try
+    if isfield(cellmeasures,'rate_max') && isfield(cellmeasures,'rate_spont')
         % compute signal to noise ratio (don't confuse with cell quality snr)
         for t=1:length(cellmeasures.rate_max)
             cellmeasures.response_snr{t}= (cellmeasures.rate_max{t}-cellmeasures.rate_spont{t}) /...
                 cellmeasures.rate_spont{t};
         end
     end
-    
-    try % compute selectivity index
+    if isfield(cellmeasures,'rate') % compute selectivity index
         for t = 1:length(cellmeasures.rate)
             cellmeasures.selectivity_index{t} = ...
                 (max(cellmeasures.rate{t})-min(cellmeasures.rate{t})) / ...
                 max(cellmeasures.rate{t});
         end % t
     end
-    
-    try
+    if isfield(cellmeasures,'rate_peak') && isfield(cellmeasures,'rate_spont')
         % compute signal to noise ratio (don't confuse with cell quality snr)
         cellmeasures.response_snr= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
             cellmeasures.rate_spont;
     end
-    
-    try
+    if isfield(cellmeasures,'rate_late') && isfield(cellmeasures,'rate_early') && isfield(cellmeasures,'rate_spont')
         % compute Prolonged Discharge Index
         cellmeasures.pdi=thresholdlinear( ...
             (cellmeasures.rate_late-cellmeasures.rate_spont) /...
@@ -436,7 +433,7 @@ for i=1:length(g) % for all cells
         end
     end
     
-    measures = [measures cellmeasures];
+    measures = [measures cellmeasures]; %#ok<AGROW>
 end % cell i
 
 if exist('fcm','file')

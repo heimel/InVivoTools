@@ -3,9 +3,12 @@ function measures=analyse_ectest_by_typenumber( inp , record)
 %
 %  MEASURES=ANALYSE_ECTEST_BY_TYPENUMBER( INP , RECORD)
 %
+%  DEPRECATED
 %
 % 2010 Alexander Heimel
 %
+
+logmsg('Deprecated. Better to change stim_type in record and use ANALYSE_PS instead');
 
 measures.usable=1;
 
