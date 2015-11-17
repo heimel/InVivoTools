@@ -55,7 +55,7 @@ blocknames = [record.test];
 clear EVENT
 EVENT.Mytank = datapath;
 EVENT.Myblock = blocknames;
-EVENT = importtdt(EVENT);
+EVENT = load_tdt(EVENT);
 EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
 numchannel = max([EVENT.strms.channels]);
 %         channels_to_read = 1:numchannel;

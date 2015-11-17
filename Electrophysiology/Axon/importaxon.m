@@ -74,9 +74,7 @@ cll.trial = record.test;
 cll.channel = 1;
 cll.wave = []; %mean(spikes,1) ;
 cll.std = []; %std(spikes,1);
-cll.snr = []; %(max(cll.wave)-min(cll.wave))/mean(cll.std);
-cll = get_spike_features([], cll );
-
+cll.spikes = [];
 cells = cll;
 
 

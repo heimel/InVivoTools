@@ -25,235 +25,23 @@ if ~exist(datapath,'dir')
 end
 
 % per date one cksdirstruct to conform to Nelsonlab practice
-cksds=cksdirstruct(datapath);
+cksds = cksdirstruct(datapath);
 
 processparams = ecprocessparams(record);
 
 [recorded_channels,area] = get_recorded_channels( record );
-
 channels2analyze = get_channels2analyze( record );
-
 if isempty(channels2analyze)
     channels2analyze = recorded_channels;
 end
 
-WaveTime_Spikes = struct([]);
-switch lower(record.setup)
-    case 'antigua'
-        EVENT.Mytank = datapath;
-        EVENT.Myblock = record.test;
-        EVENT = importtdt(EVENT);
-        if ~isfield(EVENT,'strons')
-            errormsg(['No triggers present in ' recordfilter(record)]);
-            record.measures = [];
-            return
-        end
-        
-        EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
-
-        if 0 && strncmp(record.stim_type,'background',10)==1
-            EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.55;
-        end
-        if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
-            errormsg(['Shifted time by ' num2str(processparams.ec_temporary_timeshift) ' s to check laser response']);
-            EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
-        end
-        
-        EVENT.Myevent = 'Snip';
-        EVENT.type = 'snips';
-        EVENT.Start = 0;
-        
-        if any(channels2analyze>EVENT.snips.Snip.channels)
-            errormsg(['Did not record more than ' num2str(EVENT.snips.Snip.channels) ' channels.']);
-            return
-        end
-        if isempty(channels2analyze)
-            channels2analyze = 1:EVENT.snips.Snip.channels;
-        end
-        EVENT.CHAN = channels2analyze;
-        
-        logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
-        total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
-        clear('WaveTime_Fpikes');
-        WaveTime_Fpikes = struct('time',[],'data',[]);
-        if ~isunix
-            % cut in 60s blocks
-            for i=1:length(channels2analyze)
-                WaveTime_Fpikes(i,1) = struct('time',[],'data',[]);
-            end
-            for kk=1:ceil(total_length/60)
-                EVENT.Triallngth = min(60,total_length-60*(kk-1));
-                WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
-                for i=1:length(channels2analyze)
-                    WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(i,1).time];
-                    WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(i,1).data];
-                end
-            end
-        else % linux
-            WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1));
-        end
-        
-        % spike sorting
-        for ii=1:length(channels2analyze)
-            logmsg(['Sorting channel ' num2str(channels2analyze(ii))]);
-            clear kll
-            if isempty(WaveTime_Fpikes(ii,1).time)
-                continue
-            end
-            kll.sample_interval = 1/EVENT.snips.Snip.sampf;
-            kll.data = WaveTime_Fpikes(ii,1).time;
-            spikes = WaveTime_Fpikes(ii,1).data;
-            kll = get_spike_features(spikes, kll, record );
-            
-            
-            if processparams.max_spike_clusters == 1
-                wtime_sp.data = spikes;
-                wtime_sp.time = kll.data;
-                nclusters = 1;
-            else
-                [wtime_sp,nclusters] = spike_sort_wpca(spikes,kll,record);
-            end
-            
-            for cluster = 1:nclusters
-                wtime_sp(cluster).channel = channels2analyze(ii);
-            end
-            WaveTime_Spikes = [WaveTime_Spikes;wtime_sp]; %#ok<AGROW>
-        end
-        n_cells = length(WaveTime_Spikes);
-        
-        % load stimulus starttime
-        stimsfile = getstimsfile( record );
-        
-        EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
-        
-        
-        intervals=[stimsfile.start ...
-            stimsfile.MTI2{end}.frameTimes(end)+10];
-        % shift time to fit with TTL and stimulustimes
-        
-        timeshift = stimsfile.start-EVENT.strons.tril(1);
-        timeshift = timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
-        
-        
-        cells = struct([]);
-        cll.name = '';
-        cll.intervals = intervals;
-        cll.sample_interval = 1/EVENT.snips.Snip.sampf;
-        cll.detector_params = [];
-        cll.trial = record.test;
-        cll.desc_long = fullfile(datapath,record.test);
-        cll.desc_brief = record.test;
-        channels_new_index = (0:1000)*10+1; % works for up to 1000 channels, and max 10 cells per channel
-        for c = 1:n_cells
-            if isempty(WaveTime_Spikes(c,1))
-                continue
-            end
-            cll.channel = WaveTime_Spikes(c,1).channel;
-            cll.index = channels_new_index(cll.channel); % used to identify cell
-            channels_new_index(cll.channel) = channels_new_index(cll.channel) + 1;
-            cll.name = sprintf('cell_%s_%.3d',...
-                subst_specialchars(record.test),cll.index);
-            cll.data = WaveTime_Spikes(c,1).time * processparams.secondsmultiplier + timeshift;
-            spikes = WaveTime_Spikes(c,1).data;
-            cll.wave = mean(spikes,1);
-            cll.std = std(spikes,1);
-            cll.snr = (max(cll.wave)-min(cll.wave))/mean(cll.std);
-            cll = get_spike_features(spikes, cll, record );
-            cells = [cells,cll]; %#ok<AGROW>
-        end
-        
-    case 'wall-e'
-        channels2analyze = 1;
-        cells = importaxon(record,verbose);
-    otherwise
-        channels2analyze = 1;
-        cells = importspike2([record.test filesep 'data.smr'],record.test,datapath,'Spikes','TTL',[],[],record.amplification);
-end
-n_spikes = 0;
-for i=1:length(cells);
-    n_spikes = n_spikes+ length(cells(i).data);
-end
-
+cells = import_spikes( record, channels2analyze ); %
 
 if isempty(cells)
-    logmsg('Imported no cells.');
     return
-else
-    logmsg(['Imported ' num2str(length(cells)) ' cells with ' num2str(n_spikes ) ' spikes.']);
 end
 
-
-switch processparams.spike_sorting_routine
-    case 'klustakwik'
-        cells = sort_with_klustakwik(cells,record);
-        %         TC=[];
-        for i = 1:length(cells)
-            %             TC = [TC , cells(i).channel];
-            cell_time = floor(1000*(cells(i).data-timeshift)/processparams.secondsmultiplier);
-            bm=find(channels2analyze==cells(i).channel);
-            aaa=WaveTime_Fpikes(bm).time;bbb=WaveTime_Fpikes(bm).data;
-            allcell_time = floor(1000*aaa);
-            cells(i).wave = mean(bbb(ismember(allcell_time,cell_time),:));
-            cells(i).std = std(bbb(ismember(allcell_time,cell_time),:));
-            cells(i).snr = (max(cells(i).wave)-min(cells(i).wave))/mean(cells(i).std);
-        end
-        %         [TD,td] = sort(TC);
-        %         cells2 = cells(td);
-        %         cells = cells2;
-    case 'sort_wpca'
-        cells = sort_with_wpca(cells,record,processparams.max_spike_clusters);
-    otherwise
-        % no sorting
-end
-
-if processparams.compare_with_klustakwik
-    kkcells = sort_with_klustakwik(cells,record);
-    if ~isempty(kkcells)
-        cells = compare_spike_sortings( cells, kkcells);
-    end
-end
-
-logmsg(['After sorting ' num2str(length(cells)) ' cells.']);
-
-transfer2cksdirstruct(cells,datapath);
-
-spikesfile = fullfile(experimentpath(record), '_spikes.mat');
-
-isi = [];
-if exist(spikesfile,'file')
-    old = load( spikesfile);
-    if isfield(old,'isi')
-        isi = old.isi;
-    end
-    if ~isempty(old.cells) && ~isempty(cells)
-        othercells = old.cells(~ismember([old.cells.channel],channels2analyze));
-        if ~isempty(othercells)
-            try
-                othercells = structconvert( othercells,cells);
-            catch
-                othercells = [];
-            end
-            allcells = [cells othercells];
-            [~,ind] = sort([allcells.channel]);
-            allcells = allcells(ind);
-        end
-    end
-end
-
-if processparams.compute_isi
-    isi = get_spike_interval( cells, isi ); %#ok<NASGU>
-else
-    isi = []; %#ok<NASGU>
-end
-
-if exist('allcells','var')
-    orgcells = cells;
-    cells = allcells; %#ok<NASGU>
-    save(spikesfile,'cells','isi');
-    cells = orgcells;
-else
-    save(spikesfile,'cells','isi');
-end
+% now compute responses to stimuli
 
 if isfield(record,'test')
     test = record.test;
@@ -346,11 +134,11 @@ for i=1:length(g) % for all cells
         cellmeasures.usable=0;
     end
     
-    if isempty(measures) % may not be correct! check importspike2
-        cellmeasures.type='mu';
-    else
-        cellmeasures.type='su';
-    end
+%     if isempty(measures)
+%         cellmeasures.type='mu';
+%     else
+%         cellmeasures.type='su';
+%     end
     
     if isfield(cellmeasures,'rate_peak') && isfield(cellmeasures,'rate_spont')
         cellmeasures.ri= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
@@ -383,6 +171,7 @@ for i=1:length(g) % for all cells
     end
     
     cellmeasures.index = cells(i).index;
+    cellmeasures.type = cells(i).type;
     if isfield(cells,'wave')
         cellmeasures.wave = cells(i).wave;
         cellmeasures.std = cells(i).std;
@@ -509,7 +298,6 @@ else
     end
 end
 
-
 measures = record.measures; %#ok<NASGU>
 
 % save measures file
@@ -553,47 +341,6 @@ if isfield(record,'channel_info') && ~isempty(record.channel_info)
         end
         recorded_channels = sort( recorded_channels );
     end
-end
-
-
-
-function  tril = use_right_trigger(record,EVENT)
-usetril=regexp(record.comment,'usetril=(\s*\d+)','tokens');
-if ~isempty(usetril)
-    usetril = str2double(usetril{1}{1});
-else
-    usetril = -1; % i.e. last
-end
-
-if usetril == -1
-    if (isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1) || ...
-            (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1)
-        errormsg(['More than one trigger in ' recordfilter(record) '. Taking last. Set usetril=XX in comment to overrule']);
-    end
-end
-
-if isfield(EVENT.strons,'OpOn')
-    n_optotrigs = length(EVENT.strons.OpOn);
-else
-    n_optotrigs = 0;
-end
-
-if usetril == -1 % use last
-    if length(EVENT.strons.tril)>(n_optotrigs+1)
-        tril = EVENT.strons.tril(end-n_optotrigs);
-    else
-        tril = EVENT.strons.tril(1);
-    end
-    if (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.OpOn))<12)
-        EVENT.strons.tril(1) = EVENT.strons.tril(end);
-    end
-else
-    if usetril > length(EVENT.strons.tril)
-        errormsg(['Only ' num2str(length(EVENT.strons.tril)) ' triggers available. Check ''tril='' in comment field.']);
-        tril = EVENT.strons.tril(end);
-        return
-    end
-    tril = EVENT.strons.tril(usetril);
 end
 
 

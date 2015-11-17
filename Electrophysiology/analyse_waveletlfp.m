@@ -43,7 +43,7 @@ blocknames = [record.test];
 clear EVENT
 EVENT.Mytank = datapath;
 EVENT.Myblock = blocknames;
-EVENT = importtdt(EVENT);
+EVENT = load_tdt(EVENT);
 numchannel = max([EVENT.strms.channels]);
 %         channels_to_read = 1:numchannel;
 if isfield(record, 'channels') &&  ~isempty(record.channels)

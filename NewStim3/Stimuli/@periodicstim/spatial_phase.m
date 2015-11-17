@@ -34,7 +34,6 @@ if exist('NewStimViewingDistance','var') && ~isempty(NewStimViewingDistance)
     PSparams.distance = NewStimViewingDistance;
 end
 
- % SPATIAL PARAMETERS %%%%%%%%%5
 rect = PSparams.rect;  % this is the size requested by the user
 
 if isfield(PSparams,'size') && ~isnan(PSparams.size) % use size to determine rect
@@ -45,14 +44,10 @@ if isfield(PSparams,'size') && ~isnan(PSparams.size) % use size to determine rec
     rect(3) = center(1) + width/2;
     rect(2) = center(2) - height/2;
     rect(4) = center(2) + height/2;
-
 end
 
 width=rect(3)-rect(1); 
 height=rect(4)-rect(2);
-
-%width_offscreen = ceil(max(width,height)*sqrt(2));  % this is the size of the offscreen texture
-%height_offscreen = ceil(max(width,height)*sqrt(2)); % this is the size of the offscreen texture
 
 width_offscreen = ceil(sqrt(width^2 + height^2));
 height_offscreen = ceil(sqrt(width^2 + height^2));
@@ -61,5 +56,12 @@ destination_rect = CenterRect([0 0 width_offscreen, height_offscreen],rect); % t
 
 wLeng = (PSparams.distance * tan((pi/180))/PSparams.sFrequency) * pixels_per_cm;  % units: pixels per cycle
 pixelIncrement = 2*pi/wLeng;
-spatialphase = mod( PSparams.sPhaseShift + (0:pixelIncrement:(width_offscreen-1)*pixelIncrement) , 2*pi);  % 1-D grating phase as a function of space
+
+%
+%spatialphase = mod( PSparams.sPhaseShift + (0:pixelIncrement:(width_offscreen-1)*pixelIncrement) , 2*pi);  % 1-D grating phase as a function of space
+%
+
+% Changged spatial phase behavior, to be consistent in the center of the
+% stimulus. The contrast changes polarity at the center, and 0 and 180 degrees are different 2015-11-16 AH
+spatialphase = mod( 0.5 * pi + PSparams.sPhaseShift + (0:pixelIncrement:(width_offscreen-1)*pixelIncrement) - (width_offscreen-1)/2*pixelIncrement , 2*pi);  % 1-D grating phase as a function of space
 

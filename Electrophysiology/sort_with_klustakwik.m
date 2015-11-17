@@ -1,12 +1,15 @@
 function cells = sort_with_klustakwik(orgcells,record)
 %SORT_WITH_KLUSTAKWIK
 %
-%   SORT_WITH_KLUSTAKWIK 
+%   CELLS = SORT_WITH_KLUSTAKWIK( ORGCELLS, RECORD )
 %
-% 2013, Alexander Heimel
+% 2013-2015, Alexander Heimel
 %
 
 params = ecprocessparams(record);
+
+orgcells = pool_cells( orgcells );
+
 
 cells = [];
 

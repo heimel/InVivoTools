@@ -21,20 +21,6 @@ function [t,wv] = loadspike2(smrfilename,records_to_get,record_units)
 %
 %  2013, Alexander Heimel
 %
-%cells = loadspike2(trial,stimulustrial,path,unitchannelname,ttlchannelname,secondsmultiplier,ttl_delay)
-%IMPORTSPIKE2 stores spike2-sorted spikes into Nelsonlab experiment file
-%
-%   CELLS=importspike2(trial,stimulustrial,path,unitchannelname,ttlchannelname)
-%
-%       TRIAL, name e.g. 'Data04-01-14e'
-%       STIMULUSTRIAL, e.g. 't00001'
-%       PATH,  default 'C:\Documents and
-%       Settings\Jan-Alexander\Desktop\testdata'
-%       UNITCHANNELNAME, default 'units'
-%       TTLCHANNELNAME, default 'TTL'
-%
-% 2004-2013, Alexander Heimel
-%
 
 t = [];
 wv = [];
@@ -44,8 +30,8 @@ cells={};
 ttl_delay = 0.0115;
 
 %    secondsmultiplier = 1.000018; % nin380 2012-08
-warning('IMPORTSPIKE2:TIMING','IMPORTSPIKE2: Alexander: improve and generalize timing correction, joint for ec and lfp');
-warning('off', 'IMPORTSPIKE2:TIMING');
+warning('LOADSPIKE2:TIMING','LOADSPIKE2: Alexander: improve and generalize timing correction, joint for ec and lfp');
+warning('off', 'LOADSPIKE2:TIMING');
 
 secondsmultiplier = 1.000032; % daneel 2012-09-18
 
@@ -55,7 +41,7 @@ unitchannelname='Spikes';
 
 fid=fopen(smrfilename);
 if fid==-1
-    disp(['LOADSPIKE2: Failed to open  ' smrfilename]);
+    logmsg(['Failed to open  ' smrfilename]);
     return;
 end
 
@@ -67,13 +53,13 @@ if unitchannel==-1 || ttlchannel==-1
 end
 [data_units,header_units]=SONGetChannel(fid,unitchannel);
 if ~isfield(header_units,'kind') || header_units.kind~=6
-    disp(['LOADSPIKE2: Unitchannel is of unexpected kind for ' smrfilename']);
+    logmsg(['Unitchannel is of unexpected kind for ' smrfilename']);
     return
 end
 sample_interval=SONGetSampleInterval(fid,unitchannel);
 [data_ttl,header_ttl]=SONGetChannel(fid,ttlchannel);
 if ~isstruct(header_ttl) || header_ttl.kind~= 3
-    disp(['LOADSPIKE2: TTLchannel is of unexpected kind for ' smrfilename]);
+    logmsg(['TTLchannel is of unexpected kind for ' smrfilename]);
     return
 end
 fclose(fid);
@@ -122,7 +108,7 @@ while ch<=length(list_of_channels)
     end
 end
 if channel==-1
-    disp(['IMPORTSPIKE2: Could not find channel named ' channelname]);
+    logmsg(['Could not find channel named ' channelname]);
 end
 return
 

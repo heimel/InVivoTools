@@ -1,7 +1,7 @@
-function cells = importspike2(trial,stimulustrial,datapath,unitchannelname,ttlchannelname,secondsmultiplier,ttl_delay,amplification)
+function cells = importspike2(record)
 %IMPORTSPIKE2 stores spike2-sorted spikes into Nelsonlab experiment file
 %
-%   CELLS=importspike2(trial,stimulustrial,path,unitchannelname,ttlchannelname)
+%   CELLS = IMPORTSPIKE2( RECORD )
 %
 %       TRIAL, name e.g. 'Data04-01-14e'
 %       STIMULUSTRIAL, e.g. 't00001'
@@ -10,42 +10,23 @@ function cells = importspike2(trial,stimulustrial,datapath,unitchannelname,ttlch
 %       UNITCHANNELNAME, default 'units'
 %       TTLCHANNELNAME, default 'TTL'
 %
-% 2004-2014, Alexander Heimel
+% 2004-2015, Alexander Heimel
 %
 
-cells={};
-if nargin<8
-    amplification = [];
-end
-if isempty(amplification)
+cells = {};
+
+trial = [record.test filesep 'data.smr'];
+datapath = experimentpath(record,false);
+unitchannelname = 'Spikes'; % was 'units'
+ttlchannelname = 'TTL';
+warning('IMPORTSPIKE2:TIMING','IMPORTSPIKE2: Alexander: improve and generalize timing correction, joint for ec and lfp');
+warning('off', 'IMPORTSPIKE2:TIMING');
+secondsmultiplier = 1.000032; % daneel 2012-09-18
+ttl_delay = 0.0115;
+if ~isfield(record,'amplification') || isempty(record.amplification) 
     amplification = 5000;
-end
-
-if nargin<7
-    ttl_delay = [];
-end
-if isempty(ttl_delay)
-    ttl_delay = 0.0115;
-end
-
-if nargin<6
-    secondsmultiplier = [];
-end
-if isempty(secondsmultiplier)
-    %    secondsmultiplier = 1.000018; % nin380 2012-08
-    warning('IMPORTSPIKE2:TIMING','IMPORTSPIKE2: Alexander: improve and generalize timing correction, joint for ec and lfp');
-    warning('off', 'IMPORTSPIKE2:TIMING');
-    secondsmultiplier = 1.000032; % daneel 2012-09-18
-end
-if nargin<5
-    ttlchannelname='TTL';
-end
-if nargin<4
-    unitchannelname='units';
-end
-if nargin<3
-    warning('IMPORTSPIKE2:nopath','No path given to importspike2.');
-    return
+else
+    amplification = record.amplification;
 end
 
 try
@@ -55,12 +36,12 @@ catch
     return
 end
 
-[px,expf] = getexperimentfile(cksds,1);
+px = getexperimentfile(cksds,1);
 delete(px);
 
 smrfilename=fullfile(datapath,trial);
 
-cells=loadcells(cksds,stimulustrial,smrfilename,unitchannelname,ttlchannelname,secondsmultiplier,ttl_delay,amplification);
+cells=loadcells(cksds,record.test,smrfilename,unitchannelname,ttlchannelname,secondsmultiplier,ttl_delay,amplification);
 
 return
 
@@ -68,7 +49,7 @@ return
 function cells=loadcells(cksds,trial,smrfilename,unitchannelname,ttlchannelname,secondsmultiplier,ttl_delay,amplification)
 % LOADCELLS reads spike2-smr file into spikedata object
 
-[px,expf] = getexperimentfile(cksds,1);
+px = getexperimentfile(cksds,1);
 
 fid=fopen(smrfilename);
 if fid==-1
@@ -170,39 +151,17 @@ for cl=1:n_classes
     cll.trial=trial;
     cll.channel = 1;
     spikes = double(data_units.adc(ind,:))/10/amplification; % to get mV
-    if 0 % wavelet smoothening Mehran temporarily
-        spikes1=zeros(size(spikes));
-        for i=1:size(spikes,1)
-            A=wavelet_decompose(spikes(i,:),3,'db4');A=A';
-            spikes1(i,:)=A(1,:);
-        end;
-        spikes=spikes1;
-    end
     cll.wave = mean(spikes,1) ;
     cll.std = std(spikes,1);
     cll.snr = (max(cll.wave)-min(cll.wave))/mean(cll.std);
-    cll = get_spike_features(spikes, cll );
-    cells(cl) = cll;
-    if 0 && ~isempty(ind)
-        figure; hold on;
-        t=(0:length(cells(cl).wave)-1)*sample_interval*1000; % ms
-        
-        if length(ind)>100
-            indsel=ind(round(linspace(1,length(ind),100)));
-        else
-            indsel=ind;
-        end
-        for j=indsel
-            plot(t,double(data_units.adc(j,:)));
-        end
-        plot(t, 10*cells(cl).wave ,'k-');
-        plot(t, 10*cells(cl).wave+cells(cl).std,'-','color',[0.7 0.7 0.7]);
-        plot(t, 10*cells(cl).wave-cells(cl).std,'-','color',[0.7 0.7 0.7]);
-        xlabel('Time (ms)');
-        ylabel('Potential (0.1 mV)');
-        bigger_linewidth(3);
-        smaller_font(-12);
+    cll.spikes = spikes;
+    cll.ind_spike = []; %[1:length(spikes)]';
+    if cl==1
+        cll.type = 'mu';
+    else
+        cll.type = 'su';
     end
+    cells(cl) = cll;
  end % cl n_classes
 
 

@@ -21,7 +21,7 @@ if nargin==1,
 	ud = get(f,'userdata');
 	%l = getalltests(cksds);
 	l = {'t00048'};
-	vl = get(ud.gettests,'String'),
+	vl = get(ud.gettests,'String');
 	nr = getallnamerefs(cksds);
 	nv = get(ud.namerefs,'value');
 	% l{vl}=>vl,
@@ -30,10 +30,12 @@ if nargin==1,
 	usepc = get(ud.usepc,'value');
 
 	% import spike2 data for Leveltlab: added 25-1-2007 JAH
-	cells=importspike2([vl filesep 'data.smr'],vl,getpathname(cksds),'Spikes','TTL');
+    record.date = 'Something';
+    logmgs('FSAPU not fixed for InVivoTools yet. Please ask Alexander to do so');
+	cells = importspike2(record);
 
-	ps = get(ud.param,'String')
-	pv = get(ud.param,'value') 
+	ps = get(ud.param,'String');
+	pv = get(ud.param,'value');
 	par = ps{pv}
 	try, s = getstimscripttimestruct(cksds,vl); catch, errordlg('does not exist2.'); error('does not exist.'); end;
 	try, g = getcells(cksds,nr(nv)); catch, errordlg('does not exist3.'); 

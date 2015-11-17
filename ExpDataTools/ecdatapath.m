@@ -50,6 +50,12 @@ if ~exist(datapath,'dir') || length(dir(datapath))==3
     else
         root = networkpathbase;
     end
-    datapath=fullfile(root,'Electrophys',capitalize(record.setup),...
-        record.date(1:4),record.date(6:7),record.date(9:10),'Mouse');
+    switch record.setup
+        case 'antigua'
+            datapath=fullfile(root,'Electrophys',capitalize(record.setup),...
+                record.date(1:4),record.date(6:7),record.date(9:10),'Mouse');
+        case 'nin380'
+            datapath=fullfile(root,'Electrophys',capitalize(record.setup),...
+                record.date(1:4),record.date(6:7),record.date(9:10));
+    end         
 end

@@ -102,7 +102,7 @@ switch lower(record.setup)
         clear EVENT
         EVENT.Mytank = experimentpath(record,false);
         EVENT.Myblock = record.test;
-        EVENT = importtdt(EVENT);
+        EVENT = load_tdt(EVENT);
 
         numchannel = max([EVENT.strms.channels]);
         if any(channels2analyze>EVENT.snips.Snip.channels)

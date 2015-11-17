@@ -1,191 +1,167 @@
-function EVENT = importtdt(EVENT)
+function cells = importtdt(record, channels2analyze)
 %IMPORTTDT
+%
+% CELLS = IMPORTTDT( RECORD, CHANNELS2ANALYZE )
+%
+% 2015, Alexander Heimel
+%
 
-%called by Tdt2ml to retrieve info about events and
-%the timing data of strobe events from a TDT Tank
-%
-%If used in a batch file you must initialize these values:
-%input: EVENT.Mytank = full path to the tank you want to read from 
-%       EVENT.Myblock = name of the block you want to read from
-%
-%output: EVENT ;  a structure containing a lot of info
-%        Trilist ; an array containing timing info about all the trials
-%             1st column contains stimulus onset times
-%             4th target onset times
-%             7th micro stim times
-% Chris van der Togt, 29/05/2006
-%
-%uses GetEpocsV to retrieve stobe-on epocs; Updated 17/04/2007
+processparams = ecprocessparams(record);
 
-if isunix
-    logmsg('Using TDTREAD on linux.');
-    EVENT = importtdt_linux(EVENT);
+
+datapath=experimentpath(record,false);
+
+
+EVENT.Mytank = datapath;
+EVENT.Myblock = record.test;
+EVENT = load_tdt(EVENT);
+if ~isfield(EVENT,'strons')
+    errormsg(['No triggers present in ' recordfilter(record)]);
+    cells = [];
+    return
+end
+
+EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
+
+if 0 && strncmp(record.stim_type,'background',10)==1
+    EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.55;
+end
+if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
+    errormsg(['Shifted time by ' num2str(processparams.ec_temporary_timeshift) ' s to check laser response']);
+    EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
+end
+
+EVENT.Myevent = 'Snip';
+EVENT.type = 'snips';
+EVENT.Start = 0;
+
+if any(channels2analyze>EVENT.snips.Snip.channels)
+    errormsg(['Did not record more than ' num2str(EVENT.snips.Snip.channels) ' channels.']);
     return
 end
 
 
-matfile = fullfile(EVENT.Mytank,EVENT.Myblock); %name of file used to save event structure
-MatFile=fullfile(matfile,EVENT.Myblock);
-% if exist([MatFile '.mat'], 'file')
-%     load(MatFile);
-%     return
-% end
-
-
-%E.UNKNOWN = hex2dec('0');  %"Unknown"
-E.STRON = hex2dec('101');  % Strobe ON "Strobe+"
-%E.STROFF = hex2dec('102');  % Strobe OFF "Strobe-"
-%E.SCALAR = hex2dec('201');  % Scalar "Scalar"
-E.STREAM = hex2dec('8101');  % Stream "Stream"
-E.SNIP = hex2dec('8201');  % Snip "Snip"
-%E.MARK = hex2dec('8801');  % "Mark"
-%E.HASDATA = hex2dec('8000');  % has associated waveform data "HasData"
-
-%event info indexes
-I.SIZE   = 1;
-%I.TYPE   = 2;
-%I.EVCODE = 3;
-I.CHAN   = 4;
-%I.SORT   = 5;
-I.TIME   = 6;
-I.SCVAL  = 7;
-%I.FORMAT  = 8;
-I.HZ     = 9;
-I.ALL    = 0;
-
-F = figure('Visible', 'off');
-H = actxcontrol('TTANK.X', [20 20 60 60], F);
-H.ConnectServer('local','me');
-H.OpenTank(EVENT.Mytank, 'R');
-H.SelectBlock(EVENT.Myblock);
-
-
-EVENT.timerange = H.GetValidTimeRangesV();
-H.CreateEpocIndexing;
-%ALL = H.GetEventCodes(0);
-%AllCodes = cell(length(ALL),1);
-%for i = 1:length(ALL)
-%        AllCodes{i} = H.CodeToString(ALL(i));
-%  AllCodes{i} = H.GetEpocCode(i-1);
-%end
-invalidchar = '^[^a-zA-Z]|\W+';
-
-EVS = H.GetEventCodes(E.STREAM); %gets the long codes of event types
-STRMS = size(EVS,2);
-strms = cell(STRMS,1);
-if ~isnan(EVS)
-    for i = 1:STRMS;
-        strms{i} = H.CodeToString(EVS(i));
-        %        IxC = find(strcmp(AllCodes, strms(i)));
-        %        AllCodes(IxC) = [];
-    end
-    
-    for j = 1:length(strms)
-        Epoch = char(strms{j});
-        Recnum = H.ReadEventsV(1000, Epoch, 0, 0, 0, 0, 'ALL'); %read in number of events
-        %call ReadEventsV before ParseEvInfoV !!!! I don't expct more than a
-        %1000 channels per event
-        
-        T = H.ParseEvV(0, 1);
-        
-        EVENT.strms(j).name = Epoch;
-        EVENT.strms(j).size = size(T,1);    %number of samples in each event epoch
-        EVENT.strms(j).sampf = H.ParseEvInfoV(0, 1, I.HZ); %9 = sample frequency
-        EVENT.strms(j).channels = max(H.ParseEvInfoV(0, Recnum, I.CHAN)); %4 = number of channels
-        EVENT.strms(j).bytes = H.ParseEvInfoV(0, 1, I.SIZE); %1 = number of samples * bytes (4??)
-        
-    end
+if isempty(channels2analyze)
+    channels2analyze = 1:EVENT.snips.Snip.channels;
 end
-%get snip events
+EVENT.CHAN = channels2analyze;
 
-EVS = H.GetEventCodes(E.SNIP);
-SNIPS = size(EVS,2);
-snips = cell(SNIPS,1);
-if ~isnan(EVS)
-    for i = 1:SNIPS;
-        snips{i} = H.CodeToString(EVS(i));
-        %remove this item from allcodes
-        %            IxC = find(strcmp(AllCodes, snips(i)));
-        %            AllCodes(IxC) = [];
+WaveTime_Spikes = struct([]);
+
+logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
+total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
+clear('WaveTime_Fpikes');
+WaveTime_Fpikes = struct('time',[],'data',[]);
+if ~isunix
+    % cut in 60s blocks
+    for i=1:length(channels2analyze)
+        WaveTime_Fpikes(i,1) = struct('time',[],'data',[]);
     end
-    for j = 1:length(snips)
-        Epoch = char(snips{j});
-        invc = regexp(Epoch, invalidchar); %check for invalid characters
-        Epch = Epoch;
-        if ~isempty(invc)
-            Epoch(invc) = '_';
-            errordlg(['Invalid character(s) in Epoch name; ' Epch 'replaced by underscore: ' Epoch])
-        end
-        Recnum = H.ReadEventsV(100000, Epch, 0, 0, 0, 0, 'ALL'); %read in number of events
-        if Recnum ~= 0
-            T = H.ParseEvV(0, 1);
-            EVENT.snips.(Epoch).size = size(T,1); %number of samples per epoch event
-            EVENT.snips.(Epoch).sampf = H.ParseEvInfoV(0, 1, I.HZ); %9 = sample frequency
-            
-            Timestamps = H.ParseEvInfoV(0, Recnum, I.TIME); %6 = the time stamp
-            Channel =    H.ParseEvInfoV(0, Recnum, I.CHAN);
-            Chnm = max(Channel);
-            EVENT.snips.(Epoch).channels = Chnm;
-            EVENT.snips.(Epoch).bytes = H.ParseEvInfoV(0, 1, I.SIZE);
-            
-            while Recnum == 100000
-                Recnum = H.ReadEventsV(100000, Epoch, 0, 0, 0, 0, 'NEW'); %read in number of events
-                Timestamps = [Timestamps H.ParseEvInfoV(0, Recnum, I.TIME)];
-                Channel = [Channel H.ParseEvInfoV(0, Recnum, I.CHAN)];
-            end
-            Times = cell(Chnm,1);
-            for k = 1:Chnm
-                Times(k) = {Timestamps(Channel == k)};
-            end
-            
-            
-            EVENT.snips.(Epoch).name = Epoch;
-            EVENT.snips.(Epoch).times = Times;
-        else
-            EVENT.snips.(Epoch).name = Epoch;
-            EVENT.snips.(Epoch).size = nan; %number of samples per epoch event
-            EVENT.snips.(Epoch).sampf = nan; %9 = sample frequency
-            EVENT.snips.(Epoch).times = [];
+    for kk=1:ceil(total_length/60)
+        EVENT.Triallngth = min(60,total_length-60*(kk-1));
+        WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
+        for i=1:length(channels2analyze)
+            WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(i,1).time];
+            WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(i,1).data];
         end
     end
+else % linux
+    WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1));
+end
+
+for ii=1:length(channels2analyze)
+    %logmsg(['Sorting channel ' num2str(channels2analyze(ii))]);
+    %clear kll
+    if isempty(WaveTime_Fpikes(ii,1).time)
+        continue
+    end
+    %kll.sample_interval = 1/EVENT.snips.Snip.sampf;
+    %kll.data = WaveTime_Fpikes(ii,1).time;
+
+    wtime_sp.data =  WaveTime_Fpikes(ii,1).data;
+    wtime_sp.time = WaveTime_Fpikes(ii,1).time;
+    wtime_sp.channel = channels2analyze(ii);
+    WaveTime_Spikes = [WaveTime_Spikes wtime_sp]; %#ok<AGROW>
+end %% channel channels2analyze(ii)
+n_cells = length(WaveTime_Spikes);
+
+% load stimulus starttime
+stimsfile = getstimsfile( record );
+
+EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
+
+% shift time to fit with TTL and stimulustimes
+
+timeshift = stimsfile.start-EVENT.strons.tril(1);
+timeshift = timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
+
+cells = struct([]);
+cll.name = '';
+cll.intervals = [stimsfile.start stimsfile.MTI2{end}.frameTimes(end)+10];
+cll.sample_interval = 1/EVENT.snips.Snip.sampf;
+cll.detector_params = [];
+cll.trial = record.test;
+cll.desc_long = fullfile(datapath,record.test);
+cll.desc_brief = record.test;
+channels_new_index = (0:1000)*10+1; % works for up to 1000 channels, and max 10 cells per channel
+for c = 1:n_cells
+    if isempty(WaveTime_Spikes(c))
+        continue
+    end
+    cll.channel = WaveTime_Spikes(c).channel;
+    cll.index = channels_new_index(cll.channel); % used to identify cell
+    channels_new_index(cll.channel) = channels_new_index(cll.channel) + 1;
+    cll.name = sprintf('cell_%s_%.3d',...
+        subst_specialchars(record.test),cll.index);
+    cll.data = WaveTime_Spikes(c).time * processparams.secondsmultiplier + timeshift;
+    spikes = WaveTime_Spikes(c).data; % spikes x samples
+    cll.wave = mean(spikes,1);
+    cll.std = std(spikes,1);
+    cll.spikes = spikes; 
+    cll.ind_spike = [];
+    cells = [cells,cll]; %#ok<AGROW>
 end
 
 
-
-stron = H.GetEpocCode(0);
-i = 0;
-strons = {};
-while ~isempty(stron)
-    i = i + 1;
-    strons(i) = {stron};
-    stron = H.GetEpocCode(i);
+function  tril = use_right_trigger(record,EVENT)
+usetril=regexp(record.comment,'usetril=(\s*\d+)','tokens');
+if ~isempty(usetril)
+    usetril = str2double(usetril{1}{1});
+else
+    usetril = -1; % i.e. last
 end
 
-for j = 1:length(strons)
-    Epoch = char(strons{j});
-    Temp = H.GetEpocsV( Epoch, 0, 0, 100000);
-    if isnan(Temp)
-        disp([ Epoch ' Event has been recorded, but cannot be retrieved']);
+if usetril == -1
+    if (isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1) || ...
+            (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1)
+        errormsg(['More than one trigger in ' recordfilter(record) '. Taking last. Set usetril=XX in comment to overrule']);
+    end
+end
+
+if isfield(EVENT.strons,'OpOn')
+    n_optotrigs = length(EVENT.strons.OpOn);
+else
+    n_optotrigs = 0;
+end
+
+if usetril == -1 % use last
+    if length(EVENT.strons.tril)>(n_optotrigs+1)
+        tril = EVENT.strons.tril(end-n_optotrigs);
     else
-        TINFO = Temp(2,:);
-        
-        if (strcmp(Epoch, 'word') || strcmp(Epoch, 'Word'))
-            TINFO(2,:) = Temp(1,:);
-        end
-        EVENT.strons.(Epoch) = TINFO;
+        tril = EVENT.strons.tril(1);
     end
+    if (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.OpOn))<12)
+        EVENT.strons.tril(1) = EVENT.strons.tril(end);
+    end
+else
+    if usetril > length(EVENT.strons.tril)
+        errormsg(['Only ' num2str(length(EVENT.strons.tril)) ' triggers available. Check ''tril='' in comment field.']);
+        tril = EVENT.strons.tril(end);
+        return
+    end
+    tril = EVENT.strons.tril(usetril);
 end
 
 
-H.CloseTank;
-H.ReleaseServer;
-close(F)
 
-save(MatFile, 'EVENT')
 
-% % % keyboard
-% EVENT.Myevent = 'Snip';
-% EVENT.type = 'snips';
-% G=EVENT.strons.stim;f = find(~isnan(G));
-% Trials = G(f);
-% Event=signalsTDT(EVENT, Trials);

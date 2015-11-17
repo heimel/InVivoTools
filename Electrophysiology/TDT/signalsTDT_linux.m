@@ -33,7 +33,7 @@ if nargin<1
 end
 
 if ~isfield(EVENT,'strms')
-    EVENT = importtdt_linux( EVENT );
+    EVENT = load_tdt_linux( EVENT );
 end    
 
 Rt = strmatch(EVENT.Myevent, {EVENT.strms(:).name} );

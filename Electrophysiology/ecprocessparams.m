@@ -83,6 +83,8 @@ switch record.mouse(1:min(end,5))
         params.entropy_analysis = false;
 end
 
+params.ec_wavelet_smoothing = false;
+
 switch lower(record.setup)
     case {'antigua','daneel','nin380'}
         params.spike_sorting_routine = '';

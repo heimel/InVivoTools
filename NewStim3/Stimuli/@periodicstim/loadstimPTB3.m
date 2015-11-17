@@ -5,11 +5,11 @@ function [outstim] = loadstimPTB3(PSstim)
 PSstim = unloadstim(PSstim);
 
 StimWindowGlobals;
+% 
+% [spatialphase, pixelIncrement, wLeng, destination_rect, ...
+%     width_offscreen, height_offscreen] = spatial_phase(PSstim);
 
-[spatialphase, pixelIncrement, wLeng, destination_rect, ...
-    width_offscreen, height_offscreen] = spatial_phase(PSstim);
-
-[img, frames, ds_userfield] = animate(PSstim);
+[img, frames, ds_userfield, destination_rect] = animate(PSstim);
 
 colors = pscolors(PSstim);
 
@@ -29,7 +29,6 @@ clut_bg = ones(256,1)*colors.backdropRGB;
 clut_usage = ones(size(clut_bg)); % we'll claim we'll use all slots
 clut = repmat(linspace(0,1,256)'*255,1,3);  
 
-%DP_stim = displayprefs({'fps',StimWindowRefresh,'rect',destination_rect,'frames',frames,PSstim.PSparams.dispprefs{:}});
 DP_stim = getdisplayprefs(PSstim);
 DP_stim = setvalues(DP_stim,{'fps',StimWindowRefresh,'rect',destination_rect,'frames',frames});
 
@@ -39,7 +38,6 @@ dS_stim = { 'displayType', 'Movie', 'displayProc', 'standard', ...
 DS_stim = displaystruct(dS_stim);
 
 ds_userfield = MovieParams2MTI(DS_stim,DP_stim);
-
 
 ps_add_tex = [];
 
@@ -64,9 +62,6 @@ fullscreen = (isnan(PSstim.PSparams.size)||isinf(PSstim.PSparams.size)) && ...
     PSstim.PSparams.rect(3)>=StimWindowRect(3) && ...
     PSstim.PSparams.rect(4)>=StimWindowRect(4);
     
-
-
-
 if PSstim.PSparams.windowShape>-1 && ~fullscreen
 	[clip_image,clip_dest_rect,ds_clipuserfield] = makeclippingrgn(PSstim);
 	clip_tex = Screen('MakeTexture',StimWindow,clip_image);
@@ -105,6 +100,5 @@ outstim = PSstim;
 outstim.stimulus = setdisplaystruct(outstim.stimulus,displaystruct(dS));
 outstim.stimulus = loadstim(outstim.stimulus);
 
-
-return;
+return
 
