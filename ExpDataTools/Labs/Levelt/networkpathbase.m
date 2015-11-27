@@ -8,6 +8,13 @@ function base=networkpathbase
 % 2009, Alexander
 %
 
+persistent base_persistent
+
+if ~isempty(base_persistent)
+    base = base_persistent;
+    return
+end
+
 if isunix
     switch computer
         case {'MACI64','MACI'} 
@@ -24,5 +31,5 @@ else % assume windows
       base = '\\vs01\MVP\Shared\InVivo';
   end
 end
-
+base_persistent = base;
   

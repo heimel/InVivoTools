@@ -1,11 +1,18 @@
-function [im,fname] = tpreadframe(record,channel,frame,opt,verbose, fname)
+function [im,fname] = tpreadframe(record,channel,frame,opt,verbose, fname,multiple_frames_mode)
 %TPREADFRAME read frame from multitiff
 %
-%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE, FNAME)
+%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE, FNAME, multiple_frames_mode )
 %
+%
+%    if multiple_frames_mode == 0, output individual frames, if
+%    multiple_frames_mode ==1, output sum
 %
 % 2008-2015, Alexander Heimel
 %
+
+if nargin<7 || isempty( multiple_frames_mode )
+    multiple_frames_mode = 0;
+end
 
 if nargin<5
     verbose = [];
@@ -121,6 +128,10 @@ if strcmp(readfname,fname)==0 % not read in yet
 end
 
 % return selected images
-im=images(:,:,frame,channel);
-
+switch multiple_frames_mode
+    case 0
+        im=images(:,:,frame,channel);
+    case 1
+        im=sum(double(images(:,:,frame,channel)),3);
+end
 
