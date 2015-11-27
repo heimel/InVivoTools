@@ -1916,7 +1916,7 @@ end
 function figure_keyrelease(src,event) %#ok<INUSL>
 global shift_state control_state
 
-if isfield(event,'Key')
+if isfield(event,'Key') || isa(event,'matlab.ui.eventdata.KeyData')
     switch event.Key
         case 'shift'
             shift_state = false;
@@ -1956,7 +1956,7 @@ global shift_state control_state
 
 set(src,'WindowKeyPressFcn',[]);
 
-if isfield(event,'Key')
+if isfield(event,'Key') || isa(event,'matlab.ui.eventdata.KeyData')
     obj = get(src,'currentobject');
     prop = get(obj);
     if isfield(prop,'Style') && strcmp(prop.Style,'edit')
