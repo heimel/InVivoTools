@@ -4,6 +4,8 @@ function FinalImage = fasttifread( FileTif, InfoImage )
 % IM = FASTTIFREAD( FILENAME, [INFOIMAGE] )
 %     fragile code, makes assumptions on data, use with caution
 %
+% Code adapted from: http://www.matlabtips.com/how-to-load-tiff-stacks-fast-really-fast/
+%
 % Note: uses tifflib mexfiles in private folder
 %
 % 2015, Alexander Heimel

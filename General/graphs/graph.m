@@ -37,6 +37,7 @@ function h=graph(y,x,varargin)
 %     'legnd',''  % legend,example legnd,{wt,t1}
 %     'save_as',''
 %     'z',{}
+%     'showpairing',false
 %     'extra_options',''
 %
 %  EXTRA_OPTIONS is a comma-separated string containing option and value
@@ -46,7 +47,7 @@ function h=graph(y,x,varargin)
 %        fit, linear
 %
 %
-% 2006-2014, Alexander Heimel
+% 2006-2015, Alexander Heimel
 %
 
 h=[];
@@ -102,6 +103,7 @@ pos_args={...
     'smoothing',0,...
     'merge_x',[],...
     'transform','',... % for statistics, not implemented yet
+    'showpairing',false,...
     };
 
 assign(pos_args{:});
@@ -461,8 +463,18 @@ switch style
         % plot points
         if showpoints
             for i=1:length(y)
-                plot_points(x(i),y{i},spaced);
+                hp = plot_points(x(i),y{i},spaced);
+                switch markers
+                    case 'none'
+                        set(hp,'marker','none');
+                    case 'closed_circle'
+                        set(hp,'marker','o');
+                end
             end
+        end
+        
+        if showpairing
+            plot(repmat(x,numel(y{1}),1)',reshape([y{:}],numel(y{1}),length(y))','linewidth',3)
         end
         
         % compute and plot significances
