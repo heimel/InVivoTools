@@ -98,13 +98,13 @@ switch mode
            try
                 im(:,:,c) = tpreadframe(record,c,frame_selection,opt,verbose,[],1);
             catch me
-                logmsg(['Slower summing. Report to Alexander. ' me.message]);
+                logmsg(['PLEASE TELL ALEXANDER: ' me.message]);
                 im(:,:,c) = double( tpreadframe(record,c,frame_selection(1),opt,verbose) );
                 for f=frame_selection(2:end)
                     im(:,:,c) = im(:,:,c) + double(tpreadframe(record,c,f,opt,verbose));
-                    if verbose
-                        waitbar(((c-1)*length(frame_selection)+f)/length(channel)/length(frame_selection));
-                    end
+%                     if verbose
+%                         waitbar(((c-1)*length(frame_selection)+f)/length(channel)/length(frame_selection));
+%                     end
                 end
             end
         end
@@ -118,13 +118,18 @@ switch mode
             hwait = waitbar(0,'Loading preview');
         end
         for c=channel
-            im(:,:,c) = double( tpreadframe(record,c,frame_selection(1),opt,verbose) );
-            for f=frame_selection(2:end)
-                im(:,:,c) = max(im(:,:,c), double(tpreadframe(record,c,f,opt,verbose)));
-                if verbose
-                    waitbar(((c-1)*length(frame_selection)+f)/length(channel)/length(frame_selection));
+            try
+                im(:,:,c) = tpreadframe(record,c,frame_selection,opt,verbose,[],2);
+            catch me
+                logmsg(['PLEASE TELL ALEXANDER: ' me.message]);
+                im(:,:,c) = double( tpreadframe(record,c,frame_selection(1),opt,verbose) );
+                for f=frame_selection(2:end)
+                    im(:,:,c) = max(im(:,:,c), double(tpreadframe(record,c,f,opt,verbose)));
+                    %                 if verbose
+                    %                     waitbar(((c-1)*length(frame_selection)+f)/length(channel)/length(frame_selection));
+                    %                 end
                 end
-            end;
+            end
         end
         if verbose
             close(hwait);

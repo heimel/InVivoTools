@@ -69,12 +69,16 @@ if strcmp(readfname,fname)==0 % not read in yet
             end
         end
     else % i.e. no right processed file exist
-        for ch = 1:iminf.NumberOfChannels
-            for fr = 1:iminf.NumberOfFrames
-                images(:,:,fr,ch)=imread(org_fname,(ch-1)*iminf.NumberOfFrames+fr);
+        try
+             images = fasttifread(org_fname,iminf);
+        catch me
+            logmsg(['PLEASE TELL ALEXANDER: ' me.message]);
+            for ch = 1:iminf.NumberOfChannels
+                for fr = 1:iminf.NumberOfFrames
+                    images(:,:,fr,ch)=imread(org_fname,(ch-1)*iminf.NumberOfFrames+fr);
+                end
             end
         end
-        
         % shift bidirectional scanned image
         if isfield(iminf,'bidirectional') && iminf.bidirectional
             % determine optimal shift
@@ -131,7 +135,9 @@ end
 switch multiple_frames_mode
     case 0
         im=images(:,:,frame,channel);
-    case 1
+    case 1 % sum
         im=sum(double(images(:,:,frame,channel)),3);
+    case 2 % max
+        im=max(double(images(:,:,frame,channel)),[],3);
 end
 
