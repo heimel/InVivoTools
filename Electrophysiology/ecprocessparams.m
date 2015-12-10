@@ -30,6 +30,8 @@ params.minimum_spontaneous_time = 0.5; % need at least this period for spontaneo
 params.ec_temporary_timeshift = 0; % to induce a timeshift for analysis
 params.results_show_psth_count_all = false;
 
+params.always_use_matlab_tdt = false;
+
 switch protocol
     case '11.35'
         params.pre_window = [-inf 0];

@@ -8,13 +8,26 @@ function cells = importtdt(record, channels2analyze)
 
 processparams = ecprocessparams(record);
 
+if processparams.always_use_matlab_tdt || isunix
+    use_matlab_tdt = true;
+else
+    try
+        F = figure('Visible', 'off');
+        
+        H = actxcontrol('TTANK.X', [20 20 60 60], F);
+        close(F)
+    catch me
+        if strcmp(me.identifier,'MATLAB:COM:InvalidProgid')
+            use_matlab_tdt = true;
+        end
+    end
+end
 
 datapath=experimentpath(record,false);
 
-
 EVENT.Mytank = datapath;
 EVENT.Myblock = record.test;
-EVENT = load_tdt(EVENT);
+EVENT = load_tdt(EVENT, use_matlab_tdt);
 if ~isfield(EVENT,'strons')
     errormsg(['No triggers present in ' recordfilter(record)]);
     cells = [];
@@ -52,21 +65,21 @@ logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
 total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
 clear('WaveTime_Fpikes');
 WaveTime_Fpikes = struct('time',[],'data',[]);
-if ~isunix
+if ~use_matlab_tdt
     % cut in 60s blocks
     for i=1:length(channels2analyze)
         WaveTime_Fpikes(i,1) = struct('time',[],'data',[]);
     end
     for kk=1:ceil(total_length/60)
         EVENT.Triallngth = min(60,total_length-60*(kk-1));
-        WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1));
+        WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1),use_matlab_tdt);
         for i=1:length(channels2analyze)
             WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(i,1).time];
             WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(i,1).data];
         end
     end
-else % linux
-    WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1));
+else
+    WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1),use_matlab_tdt);
 end
 
 for ii=1:length(channels2analyze)

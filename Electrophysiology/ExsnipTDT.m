@@ -1,4 +1,4 @@
-function CSnip = ExsnipTDT(EVENT, Trials)
+function CSnip = ExsnipTDT(EVENT, Trials, use_matlab_tdt)
 %SIG = Exsnip(EVENT, Trials)
 %
 %Called by invivotools to retrieve spikes (only snip data)
@@ -21,12 +21,14 @@ function CSnip = ExsnipTDT(EVENT, Trials)
 %updated 01/06/2006
 
 
-switch computer
-    case {'GLNX86','GLNXA64'}
-        [EVENT,CSnip] = load_tdt_linux(EVENT, Trials); %#ok<ASGLU>
-        return
+if nargin<2 || isempty(use_matlab_tdt)
+    use_matlab_tdt = isunix;
 end
 
+if use_matlab_tdt
+    [EVENT,CSnip] = load_tdt_linux(EVENT, Trials); %#ok<ASGLU>
+    return
+end
 
 CSnip = [];
 % Rt = strmatch(EVENT.Myevent, {EVENT.snips.Snip.name} );

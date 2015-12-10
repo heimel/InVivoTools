@@ -1,7 +1,7 @@
-function EVENT = load_tdt(EVENT)
+function EVENT = load_tdt(EVENT, use_matlab_tdt)
 %LOAD_TDT
 %
-%   EVENT = LOAD_TDT( EVENT ) 
+%   EVENT = LOAD_TDT( EVENT, [USE_MATLAB_TDT] ) 
 %
 %called by Tdt2ml to retrieve info about events and
 %the timing data of strobe events from a TDT Tank
@@ -19,44 +19,44 @@ function EVENT = load_tdt(EVENT)
 %
 %uses GetEpocsV to retrieve stobe-on epocs; Updated 17/04/2007
 
-if isunix
-    logmsg('Using TDTREAD on linux.');
+if nargin<2 || isempty(use_matlab_tdt)
+    use_matlab_tdt = isunix;
+end
+
+if use_matlab_tdt
+    logmsg('Using TDTREAD matlab routines.');
     EVENT = load_tdt_linux(EVENT);
     return
 end
 
+F = figure('Visible', 'off');
+try
+    H = actxcontrol('TTANK.X', [20 20 60 60], F);
+catch me
+    me.identifier
+end
 
-matfile = fullfile(EVENT.Mytank,EVENT.Myblock); %name of file used to save event structure
-MatFile=fullfile(matfile,EVENT.Myblock);
-% if exist([MatFile '.mat'], 'file')
-%     load(MatFile);
-%     return
-% end
-
-
-%E.UNKNOWN = hex2dec('0');  %"Unknown"
+E.UNKNOWN = hex2dec('0');  %"Unknown"
 E.STRON = hex2dec('101');  % Strobe ON "Strobe+"
-%E.STROFF = hex2dec('102');  % Strobe OFF "Strobe-"
-%E.SCALAR = hex2dec('201');  % Scalar "Scalar"
+E.STROFF = hex2dec('102');  % Strobe OFF "Strobe-"
+E.SCALAR = hex2dec('201');  % Scalar "Scalar"
 E.STREAM = hex2dec('8101');  % Stream "Stream"
 E.SNIP = hex2dec('8201');  % Snip "Snip"
-%E.MARK = hex2dec('8801');  % "Mark"
-%E.HASDATA = hex2dec('8000');  % has associated waveform data "HasData"
+E.MARK = hex2dec('8801');  % "Mark"
+E.HASDATA = hex2dec('8000');  % has associated waveform data "HasData"
 
 %event info indexes
 I.SIZE   = 1;
-%I.TYPE   = 2;
-%I.EVCODE = 3;
+I.TYPE   = 2;
+I.EVCODE = 3;
 I.CHAN   = 4;
-%I.SORT   = 5;
+I.SORT   = 5;
 I.TIME   = 6;
 I.SCVAL  = 7;
-%I.FORMAT  = 8;
+I.FORMAT  = 8;
 I.HZ     = 9;
 I.ALL    = 0;
 
-F = figure('Visible', 'off');
-H = actxcontrol('TTANK.X', [20 20 60 60], F);
 H.ConnectServer('local','me');
 H.OpenTank(EVENT.Mytank, 'R');
 H.SelectBlock(EVENT.Myblock);
@@ -178,11 +178,11 @@ for j = 1:length(strons)
     end
 end
 
-
 H.CloseTank;
 H.ReleaseServer;
 close(F)
 
+MatFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
 save(MatFile, 'EVENT')
 
 % % % keyboard

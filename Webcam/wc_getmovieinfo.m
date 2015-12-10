@@ -21,14 +21,15 @@ for i = 1:length(d)
     wcinfo(i).filename = [wcinfo(i).filename '.h264'];
 end
 
-% create mp4 wrappers
-if ~isempty(par.wc_mp4wrappercommand)
-    parpath = fullfile(experimentpath(record),'..');
+% create mp4 wrappers   
+parpath = fullfile(experimentpath(record),'..');
+
+if ~isempty(par.wc_mp4wrappercommand) 
     for i=1:length(d)
         wcinfo(i).path = parpath;
         wcinfo(i).mp4name = [ wcinfo(i).filename '.mp4'];
         if  ~exist(fullfile(parpath,wcinfo(i).mp4name),'file') || ...
-            getfield(dir(fullfile(parpath,wcinfo(i).mp4name)),'datenum')<getfield(dir(fullfile(parpath,wcinfo(i).filename)),'datenum')
+                getfield(dir(fullfile(parpath,wcinfo(i).mp4name)),'datenum')<getfield(dir(fullfile(parpath,wcinfo(i).filename)),'datenum') 
             if exist(fullfile(parpath,wcinfo(i).mp4name),'file')
                 logmsg(['Backing up ' fullfile(wcinfo(i).path,wcinfo(i).mp4name)]);
                 movefile(fullfile(wcinfo(i).path,wcinfo(i).mp4name),fullfile(wcinfo(i).path ,[wcinfo(i).mp4name '.bak']));
