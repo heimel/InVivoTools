@@ -24,22 +24,14 @@ n_rois = length(roilist);
 ind_mito = strmatch('mito',{roilist.type});
 ind_no_mito = setdiff(1:length(roilist),ind_mito);
 
-
 r = zeros(n_rois,3);
 for i = 1:n_rois
-%     r(i,1) = median(roilist(i).xi); % take center
-%     r(i,2) = median(roilist(i).yi); % take center
-%     r(i,3) = median(roilist(i).zi); % take center
-%    r(i,1) = mean(roilist(i).xi); % take center
-%     r(i,2) = mean(roilist(i).yi); % take center
-%     r(i,3) = mean(roilist(i).zi); % take center
     r(i,1) = sum(roilist(i).xi)/length(roilist(i).xi); % take center
     r(i,2) = sum(roilist(i).yi)/length(roilist(i).yi); % take center
     r(i,3) = sum(roilist(i).zi)/length(roilist(i).zi); % take center
 end
 
 r = r.*repmat([params.x_step params.y_step params.z_step],size(r,1),1); 
-
 
 ind_mito_present = ind_mito([roilist(ind_mito).present]==1);
 
