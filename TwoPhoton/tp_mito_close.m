@@ -1,4 +1,4 @@
-function record = tp_mito_close(record, params)
+function record = tp_mito_close(record, params, processparams)
 %TP_MITO_CLOSE computes for ROIs whether there is a mito type ROI close
 %
 %  RECORD = TP_MITO_CLOSE(RECORD, [PARAMS])
@@ -16,8 +16,9 @@ if isempty(params)
     logmsg('No image information. Cannot link ROIs');
     return
 end
-
-processparams = tpprocessparams(record);
+if nargin<3 || isempty(processparams)
+    processparams = tpprocessparams(record);
+end
 
 roilist = record.ROIs.celllist;
 n_rois = length(roilist);

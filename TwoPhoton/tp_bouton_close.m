@@ -1,4 +1,4 @@
-function record = tp_bouton_close(record, params)
+function record = tp_bouton_close(record, params,processparams)
 %TP_BOUTON_CLOSE computes for ROIs whether there is a bouton type ROI close
 %
 %  RECORD = TP_BOUTON_CLOSE(RECORD)
@@ -15,7 +15,9 @@ if isempty(params)
     return
 end
 
-processparams = tpprocessparams(record);
+if nargin<3 || isempty(processparams)
+    processparams = tpprocessparams(record);
+end
 
 roilist = record.ROIs.celllist;
 n_rois = length(roilist);
