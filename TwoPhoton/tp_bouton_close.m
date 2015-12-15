@@ -35,7 +35,7 @@ r = r.*repmat([params.x_step params.y_step params.z_step],size(r,1),1);
 
 ind_bouton_present = ind_bouton([roilist(ind_bouton).present]==1);
 
-if isfield(record.measures,'intensity_rel2dendrite')
+if 0 && isfield(record.measures,'intensity_rel2dendrite')
     ind_bouton_present_and_bright = [];
     for j = ind_bouton_present(:)'
         if all(record.measures(j).intensity_rel2dendrite>processparams.bouton_close_minimum_intensity_rel2dendrite(1:length(record.measures(j).intensity_rel2dendrite)))

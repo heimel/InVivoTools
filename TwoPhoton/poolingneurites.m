@@ -11,7 +11,7 @@ groupdb=load_groupdb;
 
 [testdb.db, testdb.filename] = load_testdb('tp');
 
-strgroups = {'11.12 no lesion','11.12 lesion'};
+strgroups = {'11.12 lesion','11.12 lesion'};
 n_groups = length(strgroups);
 groups = cell(n_groups,1);
     for g=1:n_groups
