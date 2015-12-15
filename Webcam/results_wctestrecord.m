@@ -6,3 +6,5 @@ function results_wctestrecord( record )
 % 2015, Alexander Heimel
 
 experimentpath(record)
+
+record.measures

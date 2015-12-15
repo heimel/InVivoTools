@@ -14,5 +14,9 @@ if isempty(verbose)
 end
 
 wcinfo = wc_getmovieinfo( record);
+filename = fullfile(wcinfo.path,wcinfo.mp4name);
 
-[freezeTimes, flightTimes] = wc_track_mouse(record,true);
+[freezeTimes, flightTimes] = trackmouse(filename,true)
+
+record.measures.freezeTimes = freezeTimes;
+record.measures.flightTimes = freezeTimes;
