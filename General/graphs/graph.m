@@ -469,6 +469,10 @@ switch style
                         set(hp,'marker','none');
                     case 'closed_circle'
                         set(hp,'marker','o');
+                        set(hp,'markerfacecolor',color{i});                        set(hp,'markerfacecolor',color{i});
+%                        set(hp,'markeredgecolor',color{i});
+                    case 'open_circle'
+                        set(hp,'marker','o');
                 end
             end
         end
