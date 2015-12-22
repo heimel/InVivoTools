@@ -12,7 +12,7 @@ switch lower(record.setup)
         cells = importtdt( record, channels2analyze); 
     case 'wall-e'
         channels2analyze = 1;
-        cells = importaxon(record,verbose);
+        cells = importaxon(record,true);
     otherwise % spike2 on daneel
         channels2analyze = 1;
         cells = importspike2(record);
