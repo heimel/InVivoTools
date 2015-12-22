@@ -42,7 +42,11 @@ end
 if isempty(filename)
   filename = defaultfilename;
   if ~exist(filename,'file')
-    filename='~/Documents/Mice/Mice.mdb';
+      if isunix
+         filename='~/Documents/Mice/Mice.mdb';
+      else
+          filename = fullfile(getdesktopfolder,'Mice.mdb');
+      end
     logmsg(['Using offline database ' filename ]);
   end
 end
@@ -58,13 +62,17 @@ if ~isempty(crit)
   sql=[sql ' where ' crit ];
 end
 
-disp(['IMPORT_MDB: Parsing: ' sql ]);
+logmsg(['Parsing: ' sql ]);
 
 [s,w]=system(['echo ' sql  ]); %#ok<ASGLU>
 disp(w);
 
 [s,w]=system(['echo ' sql ' | ' mdbsql ' ' options ' ' filename] ); %#ok<ASGLU>
 
+if s
+    errormsg([w ': ' mdbsql]);
+    return
+end
 
 %w=w(1:1000);
 w=split(w,10); % splits at CR
