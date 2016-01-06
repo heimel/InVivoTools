@@ -13,9 +13,9 @@ if processparams.always_use_matlab_tdt || isunix
 else
     try
         F = figure('Visible', 'off');
-        
         H = actxcontrol('TTANK.X', [20 20 60 60], F);
         close(F)
+        use_matlab_tdt = false;
     catch me
         if strcmp(me.identifier,'MATLAB:COM:InvalidProgid')
             use_matlab_tdt = true;
@@ -100,6 +100,12 @@ n_cells = length(WaveTime_Spikes);
 
 % load stimulus starttime
 stimsfile = getstimsfile( record );
+
+if isempty(stimsfile)
+    errormsg(['No stimsfile for record ' recordfilter(record) '. Use ''stiminterview(global_record)'' to generate stimsfile.']);
+    cells = [];
+    return
+end
 
 EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
 

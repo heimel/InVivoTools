@@ -85,7 +85,7 @@ switch record.mouse(1:min(end,5))
         params.entropy_analysis = false;
 end
 
-params.ec_wavelet_smoothing = false;
+params.ec_spike_smoothing = ''; % '', 'wavelet', or 'sgolay' 
 
 switch lower(record.setup)
     case {'antigua','daneel','nin380'}

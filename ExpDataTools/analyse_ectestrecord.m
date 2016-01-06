@@ -115,6 +115,8 @@ for i=1:length(g) % for all cells
         end
     end
     
+    
+    
     switch stim_type
         case {'sg','sg_adaptation'}
             cellmeasures = analyse_sg(inp,n_spikes,record);

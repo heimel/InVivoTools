@@ -193,13 +193,19 @@ if nargout>1
     nsample = (data.size(row)-10) * table{format,2};
     SNIPS.sample_point = NaN(length(fp_loc),max(nsample));
     for n=1:length(fp_loc)
-        if n==1
-            fseek(tev,fp_loc(n),'bof');
-        else
-            fseek(tev,fp_loc(n)-fp_loc(n-1),'cof');
-        end
+        fseek(tev,fp_loc(n),'bof');
         % For the snip type, each row of sample_point corresponds to each waveform.
-        SNIPS.sample_point(n,1:nsample(n)) = fread(tev,[1 nsample(n)],table{format,3});
+        try
+            SNIPS.sample_point(n,1:nsample(n)) = fread(tev,[1 nsample(n)],table{format,3});
+        catch me
+            switch me.identifier
+                case 'MATLAB:subsassigndimmismatch'
+                    errormsg(['Partially missing data for tank ' EVENT.Mytank]);
+                    break
+                otherwise
+                    rethrow(me)
+            end
+        end
     end
     fclose(tev);
     

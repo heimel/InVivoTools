@@ -31,7 +31,9 @@ if nargin==1,
 	return;
 end;
 
-if fid<0, error(['Could not open file ' filename ', with error ' lasterr '.']); end;
+if fid<0
+    error(['Could not open file ' filename ', with error ' lasterr '.']); 
+end
 
 mtis = struct('preBGframes',0,'postBGframes',0,'pauseRefresh',[],'frameTimes',[],'startStopTimes',[],'ds',[],'df',[],...
 	'stimid','0','GammaCorrectionTable',repmat((0:255)',1,3));
@@ -79,5 +81,6 @@ end;
 saveScript = setDisplayMethod(saveScript,2,dispOrder);
 
 [thedir,thename] = fileparts(filename);
-MTI2 = mti2; start = 0;
+MTI2 = mti2;  %#ok<NASGU>
+start = 0; %#ok<NASGU>
 save ([fixpath(thedir) 'stims.mat'],'saveScript','MTI2','start','-mat');

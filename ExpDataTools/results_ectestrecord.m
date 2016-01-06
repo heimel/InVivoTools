@@ -6,7 +6,9 @@ function results_ectestrecord( record )
 %  2007-2014, Alexander Heimel
 %
 
-global measures analysed_script
+global measures analysed_script global_record
+
+global_record = record;
 
 if isfield(record,'electrode') % i.e. ecdata
     data_type = 'ec';
@@ -424,13 +426,14 @@ end
 
 evalin('base','global measures');
 evalin('base','global analysed_script');
+evalin('base','global global_record');
 analysed_stimulus = getstimsfile(record);
 if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
     analysed_script = analysed_stimulus.saveScript; 
 else
     logmsg('No savedscript');
 end
-logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_script''.');
+logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_script'', record as ''global_record''.');
 
 return
 

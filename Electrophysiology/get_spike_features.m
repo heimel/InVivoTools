@@ -42,7 +42,7 @@ for c=1:length(cells)
     if negtrigger<0 && isempty(trigger_ind)
         trigger_ind = negtrigger_ind;
     end
-    if isfield(params,'sort_trigger_ind') && ~isempty(trigger_ind)
+    if isfield(params,'sort_trigger_ind') && isempty(trigger_ind)
         trigger_ind = params.sort_trigger_ind;
     end
     
