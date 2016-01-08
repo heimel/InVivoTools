@@ -105,4 +105,7 @@ for c=1:length(cells)
     cells(c).spike_lateslope = lateslope / 1000;
     cells(c).spike_peak_height = peak_height;
     cells(c).spike_trough_depth = trough_depth;
+    cells(c).spike_prepeak_ind = prepeak_ind'; 
+    cells(c).spike_trough_ind = trough_ind; 
+    cells(c).spike_peak_ind = peak_ind; 
 end % c

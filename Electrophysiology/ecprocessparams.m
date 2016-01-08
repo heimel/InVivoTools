@@ -75,7 +75,10 @@ params.cluster_overlap_threshold = 0.5;
 params.compute_isi = false;
 params.show_isi = false;
 
-params.plot_spike_features = false;
+params.plot_spike_features = true;
+params.plot_spike_shapes = true;
+params.plot_spike_shapes_max_spikes = 500;
+
 
 % entropy analysis
 switch record.mouse(1:min(end,5))

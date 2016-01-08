@@ -408,15 +408,19 @@ if isfield(record,'eye') && strcmp(record.eye,'ipsi') && isfield(measures,'odi')
     end % c
 end
 
-% if 0
 switch data_type
     case 'ec'
-        if params.plot_spike_features
+        if params.plot_spike_features || params.plot_spike_shapes
             spikesfile = fullfile(experimentpath(record),'_spikes.mat');
             if exist(spikesfile,'file')
                 cells = [];
                 load(spikesfile);
-                plot_spike_features(cells, record);
+                if params.plot_spike_features
+                    plot_spike_features(cells, record);
+                end
+                if params.plot_spike_shapes
+                    plot_spike_shapes(cells, record);
+                end
                 if exist('isi','var') && params.show_isi
                     plot_spike_isi(isi,record);
                 end
