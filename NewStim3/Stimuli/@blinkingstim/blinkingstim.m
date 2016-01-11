@@ -42,9 +42,15 @@ if nargin==0,
 	return;
 end;
 
+if ~exist('rng','file') % for backwards compatibility with R2009
+    rs = rand('state');
+else
+    rs = rng;
+end
+
 default_p = struct('BG',[ 0 0 0],'value',[255 255 255],'random',0, ...
               'repeat',1,'bgpause',0,'fps',3,'rect',[100 100 200 200], ...
-              'pixSize',[50 50],'randState',rng);
+              'pixSize',[50 50],'randState',rs);
 default_p.dispprefs = {};
 
 

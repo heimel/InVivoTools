@@ -53,22 +53,30 @@ end;
 default_p = default; % private function
 finish = 1;
 
-if nargin==1, oldstim=[]; else, oldstim = OLDSTIM; end;
+if nargin==1
+    oldstim=[]; 
+else
+    oldstim = OLDSTIM; 
+end
 
 if ischar(SGSp),
 	if strcmp(SGSp,'graphical'),
 		% load parameters graphically, check values
 		p = get_graphical_input(oldstim);
-		if isempty(p), finish = 0; else, SGSp = p; end;
+		if isempty(p)
+            finish = 0; 
+        else
+            SGSp = p; 
+        end;
 	elseif strcmp(SGSp,'default'),
 		SGSp = default_p;
-	else,
+    else
 		error('Unknown string input to stochasticgridstim.');
 	end;
-else,  % they are just parameters
+else  % they are just parameters
 	[good, err] = verifystochasticgridstim(SGSp);
 	if ~good, error(['Could not create stochasticgridstim: ' err]); end;
-end;
+end
 
 if finish,
 	dp = {'fps', SGSp.fps, 'rect',SGSp.rect, 'frames', 1:SGSp.N, ...
@@ -76,9 +84,9 @@ if finish,
 	s = stimulus(5);
 	sgs = class(struct('SGSparams',SGSp),'stochasticgridstim',s);
 	sgs.stimulus = setdisplayprefs(sgs.stimulus,displayprefs(dp));
-else,
+else
 	sgs = [];
-end;
+end
 
 function params = get_graphical_input(oldstim)
 
@@ -93,7 +101,7 @@ if isempty(oldstim),
 	rs_str =    'rand(''state'')';
 	dp_str =    '{}';
 	angle_str = '0';
-else,
+else
 	oldsP = struct(oldstim); SGSparams = oldsP.SGSparams;
 	rect_str = mat2str(SGSparams.rect);
 	bg_str = mat2str(SGSparams.BG);
@@ -106,7 +114,7 @@ else,
 	dp_str = wimpcell2str(SGSparams.dispprefs);
 	if isfield(SGSparams,'angle'), 
 		angle_str = num2str(SGSparams.angle);
-	else,
+    else
 		angle_str = '0';
 	end;
 end;
