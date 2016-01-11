@@ -16,7 +16,7 @@ double voltage_out = 1 * stimulation_current;  // depending on current gerenerat
 int dcoutput = (( voltage_out * 4095) / 6.6); // relative to zerolevel    ((~~Maximum Voltage: 3.3Volts))
 
 const int sample = 120;     //samples in sine[] table
-const int zerolevel = 2064;  // calibrated such no stimulation occurs
+const int zerolevel = 2044;  // calibrated such no stimulation occurs
 const int default_frequency = 1; // Hz
 
 int oneHzSample = 1000000 / sample ; // sample for the 1Hz signal expressed in microseconds

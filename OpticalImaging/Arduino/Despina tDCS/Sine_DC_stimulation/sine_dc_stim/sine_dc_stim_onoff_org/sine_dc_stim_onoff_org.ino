@@ -1,12 +1,12 @@
 //sine wave + DC pulses
 
-int waveform = 1; // 1:AC Stimulation        2:DC Stimulation
+int waveform = 2; // 1:AC Stimulation        2:DC Stimulation
 int AC = 1;       // 1:Complete sine wave    2:Anodal sine        3:Cathodal sine
 int DC = 1;       // 1:Anodal DC             2:Cathodal DC
 
 //Sine wave:
 double elec_diameter = 3; //in mm  ~Set diameter~
-double current_density = 0.014;    //in mA/mm^2  ~Set density~
+double current_density = 0.0105;    //in mA/mm^2  ~Set density~
 
 const double pi = 3.14159;
 double elec_surface = pi * sq(elec_diameter / 2);
@@ -16,7 +16,7 @@ double voltage_out = 1 * stimulation_current;  // depending on current gerenerat
 double output = (( voltage_out * 4095) / 6.6); // normalization!    ((~~Maximum Voltage: 3.3Volts))
 
 const int sample = 120;     //samples in sine[] table
-const int zerolevel = 2064;
+const int zerolevel = 2044;
 const int default_frequency = 1; // Hz
 
 int oneHzSample = 1000000 / sample ; // sample for the 1Hz signal expressed in microseconds
@@ -132,10 +132,7 @@ void loop() {
             }
             Serial.flush();
           }
-
-
-
-
+          
           int N = 0;
           int i = 0;
           int cycles = sample * stimulus_period * frequency;

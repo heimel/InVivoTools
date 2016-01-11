@@ -6,7 +6,7 @@ int DC = 1;       // 1:Anodal DC             2:Cathodal DC
 
 //Sine wave:
 const double elec_diameter = 3; //in mm  ~Set diameter~
-const double current_density = 0.014;    //in mA/mm^2  ~Set density~
+const double current_density = 0.0105;    //in mA/mm^2  ~Set density~
 
 const double pi = 3.14159;
 double elec_surface = pi * sq(elec_diameter / 2);
@@ -16,7 +16,7 @@ double voltage_out = 1 * stimulation_current;  // depending on current gerenerat
 int dcoutput = (3-2*DC)*(( voltage_out * 4095) / 6.6); // relative to zerolevel    ((~~Maximum Voltage: 3.3Volts))
 
 const int sample = 120;     //samples in sine[] table
-const int zerolevel = 2069;  // calibrated such no stimulation occurs
+const int zerolevel = 2049;  // calibrated such no stimulation occurs
 const int default_frequency = 1; // Hz
 
 int oneHzSample = 1000000 / sample ; // sample for the 1Hz signal expressed in microseconds
