@@ -1,4 +1,4 @@
-function record = analyse_wctestrecord( record, verbose )
+function record = track_wctestrecord( record, verbose )
 %ANALYSE_WCTESTRECORD analyses webcam testrecord
 %
 %  RECORD = ANALYSE_WCTESTRECORD( RECORD, VERBOSE=true )
@@ -48,9 +48,9 @@ record.freezing_computed = ~isempty(freezeTimes);
 
 manualoverride=regexp(record.comment,'freezing=(\s*\d+)','tokens');
 if ~isempty(manualoverride)
-    record.measures.freezing = manualoverride{1};
+    record.freezing = manualoverride{1};
 else
-    record.measures.freezing = record.measures.freezing_computed;
+    record.freezing = record.freezing_computed;
 end
 
 if isempty(freezeTimes) == 0
