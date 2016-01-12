@@ -37,16 +37,15 @@ if nargin<4
     record = [];
 end
 
-computations=struct('curve',[],'maxes',[],'mins',[],'spont',[]);
-
+computations = struct('curve',[],'maxes',[],'mins',[],'spont',[]);
 internals = struct('rast',[],'spont',[]);
 
 [good,er]=verifyinputs(inputs); 
 if ~good,error(['INPUT: ' er]); end;
 
-nag=analysis_generic([],[],where); 
+nag = analysis_generic([],[],where); 
 delete(nag); 
-ag=analysis_generic([],[],[]);
+ag = analysis_generic([],[],[]);
 
 tc = class(struct('inputs',inputs,'TCparams',[],'internals',internals,...
         'computations',computations),'tuning_curve',ag);

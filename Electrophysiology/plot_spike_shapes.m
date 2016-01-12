@@ -9,6 +9,7 @@ if nargin<2
     record.date = '';
 end
 
+
 if isempty(cells)
     return
 end
@@ -26,6 +27,12 @@ end
 
 allcells = cells;
 
+if ~isfield(cells,'spikes') 
+    logmsg('No spikes saved.');
+    return
+end
+
+
 for ch=channels
     if isfield(allcells,'channel')
         cells = allcells( [allcells.channel]==ch);
@@ -33,6 +40,7 @@ for ch=channels
     if isempty(cells)
         continue
     end
+    
     
     n_cells = length(cells);
     % plot clusters
@@ -43,33 +51,40 @@ for ch=channels
     hold on
     colors = params.cell_colors;
     n_colors = length(colors);
-
     
     for c=1:n_cells
         n_spikes = size(cells(c).spikes,1);
+        if n_spikes==0
+            continue
+        end
         stp = ceil(size(cells(c).spikes,1)/params.plot_spike_shapes_max_spikes);
         clr = colors( mod(c-1,n_colors)+1);
         ind = 1:stp:n_spikes;
         t = repmat( 1:size(cells(c).spikes,2),length(ind),1);
-        [dum,trig_ind]=min(cells(c).spikes(ind,:),[],2);
+        %        [dum,trig_ind]=min(cells(c).spikes(ind,:),[],2);
         subplot(1,3,1);
         hold on
         plot(t',cells(c).spikes(ind,:)',clr);
         subplot(1,3,2);
         hold on
-    %    plot(t'-repmat(trig_ind,1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
-        plot(t'-repmat(cells(c).spike_prepeak_ind(ind),1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
+        %    plot(t'-repmat(trig_ind,1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
+        if isfield(cells,'spike_prepeak_ind')
+            plot(t'-repmat(cells(c).spike_prepeak_ind(ind),1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
+        end
         subplot(1,3,3);
         hold on
-    %    plot(t'-repmat(trig_ind,1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
-        plot(t'-repmat(cells(c).spike_trough_ind(ind),1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
+        %    plot(t'-repmat(trig_ind,1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
+        if isfield(cells,'spike_trough_ind')
+            
+            plot(t'-repmat(cells(c).spike_trough_ind(ind),1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
+        end
     end
     for i=1:3
         subplot(1,3,i);
         c = get(gca,'children');
         set(gca,'children',c(randperm(length(c))))
         xlabel('Samples');
-
+        
     end
     for c=1:n_cells
         subplot(1,3,1);
@@ -85,9 +100,9 @@ for ch=channels
         plot((1:length(cells(c).wave))-trig_ind,cells(c).wave,colors( mod(c-1,n_colors)+1),'linewidth',3)
     end
     
-
     
-   
+    
+    
 end % channel ch
 
 

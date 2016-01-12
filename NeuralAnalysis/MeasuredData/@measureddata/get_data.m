@@ -1,4 +1,4 @@
-function [data,t,discont,nmd] = get_data (measureddata, interval, warnon);
+function [data,t,discont,nmd] = get_data (measureddata, interval, warnon)
 
 %  [DATA,TIME,DISCONT, NMD] = GET_DATA(MEASUREDDATA,INTERVAL, WARN)
 %
@@ -19,25 +19,37 @@ function [data,t,discont,nmd] = get_data (measureddata, interval, warnon);
 
    % determine whether bounds are exceeded
 
-     if nargin<=2, warn = 0; else, warn = warnon; end;
+     if nargin<=2
+         warn = 0; 
+     else
+         warn = warnon; 
+     end
 
      if ~isempty(measureddata.intervals),
        check1 = ones(size(measureddata.intervals));
        check2 = check1;
 
-       check1(find(interval(1)<measureddata.intervals)) =0;
-       check2(find(interval(2)<=measureddata.intervals)) =0;
+       check1(interval(1)<measureddata.intervals) = 0;
+       check2(interval(2)<=measureddata.intervals) = 0;
 
        s1 = sum(check1); s2 = sum(check2);
-       if (s1~=s2), discont = 1;
-       else, discont = 0; end;
-     else, discont = 1;
+       if (s1~=s2)
+           discont = 1;
+       else
+           discont = 0; 
+       end;
+     else
+         discont = 1;
      end; 
 
-     if discont&(warn==0), error(['get_data error: data not sampled ' ...
-                                 'over entire requested interval.']); end;
-     if discont&(warn==1), warning(['get_data: data not sampled ' ...
-                                 'over entire requested interval.']); end;
+     if discont && (warn==0)
+         error(['get_data error: data not sampled ' ...
+                                 'over entire requested interval.']); 
+     end;
+     if discont && (warn==1)
+         warning(['get_data: data not sampled ' ...
+                                 'over entire requested interval.']); 
+     end;
 
      data = [];
      t = [];

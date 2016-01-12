@@ -178,7 +178,7 @@ for cl=1:n_classes
          %    XX=[cll.spike_amplitude,cll.spike_peak_trough_ratio,cll.spike_prepeak_trough_ratio,cll.spike_trough2peak_time,cll.spike_lateslope];
       XX=[cll.spike_amplitude,cll.spike_peak_trough_ratio/range(cll.spike_peak_trough_ratio),cll.spike_prepeak_trough_ratio/range(cll.spike_prepeak_trough_ratio),cll.spike_trough2peak_time/range(cll.spike_trough2peak_time),cll.spike_lateslope/range(cll.spike_lateslope)]; %spikes(:,2:4:end)
          
-     if  1 % add replace features by PCs
+     if  0 % add replace features by PCs
          
          [pc,score,latent,tsquare] = princomp(XX);
          score = score( randperm(size(score,1)),:);

@@ -13,7 +13,7 @@ if processparams.always_use_matlab_tdt || isunix
 else
     try
         F = figure('Visible', 'off');
-        H = actxcontrol('TTANK.X', [20 20 60 60], F);
+        actxcontrol('TTANK.X', [20 20 60 60], F);
         close(F)
         use_matlab_tdt = false;
     catch me
@@ -102,21 +102,23 @@ n_cells = length(WaveTime_Spikes);
 stimsfile = getstimsfile( record );
 
 if isempty(stimsfile)
-    errormsg(['No stimsfile for record ' recordfilter(record) '. Use ''stiminterview(global_record)'' to generate stimsfile.']);
-    cells = [];
-    return
+    errormsg(['No stimsfile for record ' recordfilter(record) '. Use ''stiminterview(global_record)'' to generate stimsfile. Now no analysis']);
+    intervals = [EVENT.timerange(1) EVENT.timerange(2)]; % arbitrary, no link to real stimulus
+else
+    intervals = [stimsfile.start stimsfile.MTI2{end}.frameTimes(end)+10];
 end
+
 
 EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
 
 % shift time to fit with TTL and stimulustimes
 
-timeshift = stimsfile.start-EVENT.strons.tril(1);
+timeshift = intervals(1)-EVENT.strons.tril(1);
 timeshift = timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
 
 cells = struct([]);
 cll.name = '';
-cll.intervals = [stimsfile.start stimsfile.MTI2{end}.frameTimes(end)+10];
+cll.intervals = intervals;
 cll.sample_interval = 1/EVENT.snips.Snip.sampf;
 cll.detector_params = [];
 cll.trial = record.test;
