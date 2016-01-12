@@ -49,10 +49,10 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
     cinterval = zeros(length(ind),2);  
     for j=ind(:)' % over stimuli
         ps = getparameters(get(I.st(i).stimscript,j));
-        if isfield(ps,'I.paramname')
+        if isfield(ps,I.paramname)
             curve_x(s) = ps.(I.paramname); %#ok<*AGROW>
             condnames{s} = [I.paramname '=' num2str(curve_x(s))];
-        else % contiguency plan
+        else % contigency plan
             curve_x(s) = j; % stim number
             condnames{s} = ['stimnumber = ' num2str(j)];
         end
