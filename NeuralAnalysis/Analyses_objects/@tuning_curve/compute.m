@@ -49,8 +49,13 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
     cinterval = zeros(length(ind),2);  
     for j=ind(:)' % over stimuli
         ps = getparameters(get(I.st(i).stimscript,j));
-        curve_x(s) = ps.(I.paramname); %#ok<*AGROW>
-        condnames{s} = [I.paramname '=' num2str(curve_x(s))];
+        if isfield(ps,'I.paramname')
+            curve_x(s) = ps.(I.paramname); %#ok<*AGROW>
+            condnames{s} = [I.paramname '=' num2str(curve_x(s))];
+        else % contiguency plan
+            curve_x(s) = j; % stim number
+            condnames{s} = ['stimnumber = ' num2str(j)];
+        end
         stimlist = find(o==j);
         for k=1:length(stimlist),
             trigs{s}(k)=I.st(i).mti{stimlist(k)}.frameTimes(1);
@@ -89,7 +94,7 @@ elseif pst==0 && pre>0  % BGpretime used
     spontlabel='spontaneous / stimulus';
     scint = [ min(interval(:,1))+processparams.separation_from_prev_stim_off min(Cinterval(:,1)) ];
 else
-    logmsg('No or too short spontaneous period. Consider changing separation_from_prev_stim_off or minimum_spontaneous_time in processparams_local');
+    errormsg('No or too short spontaneous period. Consider changing separation_from_prev_stim_off or minimum_spontaneous_time in processparams_local');
     spontlabel='trials';
     scint = sint;
 end

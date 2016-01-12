@@ -40,8 +40,8 @@ end
 computations = struct('curve',[],'maxes',[],'mins',[],'spont',[]);
 internals = struct('rast',[],'spont',[]);
 
-[good,er]=verifyinputs(inputs); 
-if ~good,error(['INPUT: ' er]); end;
+% [good,er]=verifyinputs(inputs); 
+% if ~good,error(['INPUT: ' er]); end;
 
 nag = analysis_generic([],[],where); 
 delete(nag); 

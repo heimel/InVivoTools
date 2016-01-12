@@ -10,6 +10,19 @@ global measures analysed_script global_record
 
 global_record = record;
 
+evalin('base','global measures');
+evalin('base','global analysed_script');
+evalin('base','global global_record');
+analysed_stimulus = getstimsfile(record);
+if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
+    analysed_script = analysed_stimulus.saveScript; 
+else
+    logmsg('No savedscript');
+end
+
+
+
+
 if isfield(record,'electrode') % i.e. ecdata
     data_type = 'ec';
 elseif isfield(record,'laser') % i.e. tpdata
@@ -428,17 +441,8 @@ if isfield(record,'eye') && strcmp(record.eye,'ipsi') && isfield(measures,'odi')
     end % c
 end
 
-
-evalin('base','global measures');
-evalin('base','global analysed_script');
-evalin('base','global global_record');
-analysed_stimulus = getstimsfile(record);
-if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
-    analysed_script = analysed_stimulus.saveScript; 
-else
-    logmsg('No savedscript');
-end
 logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_script'', record as ''global_record''.');
+
 
 return
 

@@ -1,5 +1,4 @@
-function [mti2, saveScript] = createmti(filename,isi,paramname,stimlist,paramval)
-
+function [mti2, saveScript] = createmti(filename,isi,paramname,stimlist,paramval,sscript)
 % CREATEMTI - Create NewStim MTI based on recorded times, info
 %
 % [MTI2,SAVESCRIPTED] = CREATEMTI(STIMTIMEFILE, ISI, PARAMNAME,...
@@ -22,6 +21,9 @@ function [mti2, saveScript] = createmti(filename,isi,paramname,stimlist,paramval
 %
 % If the interstimulus ISI, PARAMNAME, and PARAMVALUES are not specified
 % then the user is interviewed for these values.
+%
+% 200X, Steve Van Hooser
+% 2016, Alexander Heimel
 
 fid = fopen(filename);
 
@@ -29,7 +31,10 @@ if nargin==1,
     [dirname] = fileparts(filename);
     stiminterview(dirname);
     return;
-end;
+end
+if nargin<6
+    sscript = [];
+end
 
 if fid<0
     error(['Could not open file ' filename ', with error ' lasterr '.']);
@@ -42,7 +47,7 @@ mti2 = {};
 dispOrder = [];
 StimWindowGlobals;
 
-while ~feof(fid),
+while ~feof(fid)
     mtin = mtis;
     stimline = fgets(fid);
     if length(stimline)>2,
@@ -71,20 +76,22 @@ elseif isi>0
 end
 
 % now create the stims
-saveScript = stimscript(0);
-
-for i = 1:length(stimlist)
-    stim(i) = periodicstim;
-    p = getparameters(stim(i));
-    p.(paramname) = paramval(i);
-    setparameters(stim(i),p);
-    stim(i) = setdisplayprefs(stim(i),displayprefs(dp));
-    saveScript =  append(saveScript,stim(i));
+if ~isempty(sscript)
+    saveScript = sscript;
+else
+    saveScript = stimscript(0);
+    for i = 1:length(stimlist)
+        stim(i) = periodicstim;
+        p = getparameters(stim(i));
+        p.(paramname) = paramval(i);
+        setparameters(stim(i),p);
+        stim(i) = setdisplayprefs(stim(i),displayprefs(dp));
+        saveScript =  append(saveScript,stim(i));
+    end
+    saveScript = setDisplayMethod(saveScript,2,dispOrder);
 end
-
-saveScript = setDisplayMethod(saveScript,2,dispOrder);
 
 thedir = fileparts(filename);
 MTI2 = mti2;  %#ok<NASGU>
 start = 0; %#ok<NASGU>
-save (fullfile(thedir, 'stims.mat'),'saveScript','MTI2','start','-mat');
+save(fullfile(thedir, 'stims.mat'),'saveScript','MTI2','start','-mat');

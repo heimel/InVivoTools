@@ -998,7 +998,7 @@ switch errorbars
         dyeb=[dy{:}];
         
         if any(size(x)~=size(means))
-            logmsg('GRAPH: X and MEANS are of unequal sizes. Cannot draw errorbars.');
+            logmsg('X and MEANS are of unequal sizes. Cannot draw errorbars.');
             h = nan;
             return
         end
