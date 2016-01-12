@@ -50,9 +50,10 @@ else
     logmsg(['Cannot create mp4 wrapper for ' fullfile(parpath,wcinfo(i).filename) '. Try on linux computer, or run sudo apt-get -y install gpac']);
 end
 
-
+real_stimstart = [];
 for i=1:length(wcinfo)
+    real_stimstart(i) = (wcinfo(i).stimstart)*1.015;
     logmsg(['Recorded in ' fullfile(parpath,wcinfo(i).filename)]);
-    logmsg(['Stimulus started: ' num2str(wcinfo(i).stimstart) ' s = '...
-        num2str(floor(wcinfo(i).stimstart/60)) ':' num2str(wcinfo(i).stimstart-60*floor(wcinfo(i).stimstart/60),'%02.2f')   ]);
+    logmsg(['Stimulus started: ' num2str(real_stimstart) ' s = '...
+        num2str(floor(real_stimstart/60)) ':' num2str(real_stimstart-60*floor(real_stimstart/60),'%02.2f')   ]);
 end
