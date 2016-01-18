@@ -52,6 +52,7 @@ if trigger
     StimSerialGlobals
     disp('trigger');
     StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+
     WaitSecs(0.001);
     StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
     
