@@ -51,10 +51,11 @@ end
 if nargin==0
     inputs = [];
 else
-    [good,er]=verifyinputs(inputs);if ~good,error(['INPUT: ' er]);end;
-    
+    [good,er]=verifyinputs(inputs);
+    if ~good
+        error(['INPUT: ' er]);
+    end
 end
-
 
 computations = struct('bins',[],'counts',[],'variation',[],'ncounts',[],...
 			'ctdev',[],'rast',[]);

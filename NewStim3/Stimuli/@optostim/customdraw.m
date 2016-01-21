@@ -17,7 +17,7 @@ switch params.waveform
 end
 
 done = 1;
-stamp = [];    
+stamp = 1;    
 
 
 
