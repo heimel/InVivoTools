@@ -114,6 +114,13 @@ end
 
 EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
 
+if 0 % to check alignment of triggers with stimulus times
+    stims= getstimsfile(record);
+    ss=[cellfun(@(x) getfield(x(1),'startStopTimes'),stims.MTI2,'UniformOutput',false)]
+    ss= cellfun(@(x) x(1),ss);
+    figure;plot(EVENT.strons.tril(2:end)-ss(1:2:end)+stims.start,'.');
+end
+
 % shift time to fit with TTL and stimulustimes
 
 timeshift = intervals(1)-EVENT.strons.tril(1);
