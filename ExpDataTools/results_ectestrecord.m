@@ -53,6 +53,12 @@ switch data_type
         end
 end
 
+switch record.analysis
+    case 'movie'
+        results_ecmovie(record);
+        return
+end
+
 switch data_type
     case 'ec'
         tit=[record.test ', ' record.mouse ', ' record.date ', ' ...

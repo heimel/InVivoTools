@@ -101,15 +101,25 @@ n_cells = length(WaveTime_Spikes);
 % load stimulus starttime
 stimsfile = getstimsfile( record );
 
-if isempty(stimsfile)
+
+if isempty(stimsfile) 
     errormsg(['No stimsfile for record ' recordfilter(record) '. Use ''stiminterview(global_record)'' to generate stimsfile. Now no analysis']);
     intervals = [EVENT.timerange(1) EVENT.timerange(2)]; % arbitrary, no link to real stimulus
+elseif isempty(stimsfile.MTI2{end}.frameTimes)
+    intervals = [stimsfile.start stimsfile.start+60*60];
 else
     intervals = [stimsfile.start stimsfile.MTI2{end}.frameTimes(end)+10];
 end
 
 
 EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
+
+if 0 % to check alignment of triggers with stimulus times
+    stims= getstimsfile(record);
+    ss=[cellfun(@(x) getfield(x(1),'startStopTimes'),stims.MTI2,'UniformOutput',false)]
+    ss= cellfun(@(x) x(1),ss);
+    figure;plot(EVENT.strons.tril(2:end)-ss(1:2:end)+stims.start,'.');
+end
 
 % shift time to fit with TTL and stimulustimes
 

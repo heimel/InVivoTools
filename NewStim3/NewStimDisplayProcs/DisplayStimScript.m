@@ -30,24 +30,25 @@ NewStimGlobals;
 StimWindowGlobals;
 StimTriggerOpen;
 
-if nargin<5; capture_movie = []; end;
-if isempty(capture_movie); capture_movie = false; end
+if nargin<5 || isempty(capture_movie); 
+    capture_movie = false; 
+end
 
-if nargin<2, MTI = DisplayTiming(stimScript); end;
-
-if isempty(MTI), MTI = DisplayTiming(stimScript); end;
+if nargin<2 || isempty(MTI)
+    MTI = DisplayTiming(stimScript); 
+end
 
 prioritylevel = MaxPriority(StimWindowMonitor,'WaitBlanking','SetClut','GetSecs'); % PD
 
-if nargin>=3,
+if nargin>=3
     if ~isempty(priorit),
         prioritylevel = priorit;
     else % set priority level more carefully if sound is going to be played
         for i=1:length(MTI),
             if strcmp(MTI{i}.ds.displayType,'Sound'),prioritylevel=0; end;
-        end;
-    end;
-end;
+        end
+    end
+end
 
 abortable = 1;
 

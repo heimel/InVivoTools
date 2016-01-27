@@ -52,6 +52,7 @@ if trigger
     StimSerialGlobals
     disp('trigger');
     StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+
     WaitSecs(0.001);
     StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
     
@@ -207,7 +208,7 @@ elseif strcmp(MTI.ds.displayProc,'customdraw'), % calls the stim's 'customdraw' 
             StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,stampNum);
         end
     end
-    
+    frameTimes
 elseif strcmpi(MTI.ds.displayType,'QUICKTIME'),   % note, quicktime play only supported in PTB-3
     Screen('LoadNormalizedGammaTable',StimWindow,StimWindowPreviousCLUT);
     Screen('SetMovieTimeIndex', MTI.ds.userfield.movie, 0); % play from beginning, regardless of where we played last time

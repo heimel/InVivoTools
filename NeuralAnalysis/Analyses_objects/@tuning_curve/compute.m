@@ -58,14 +58,28 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
         end
         stimlist = find(o==j);
         for k=1:length(stimlist),
-            trigs{s}(k)=I.st(i).mti{stimlist(k)}.frameTimes(1);
+            if ~isempty(I.st(i).mti{stimlist(k)}.frameTimes)
+                trigs{s}(k)=I.st(i).mti{stimlist(k)}.frameTimes(1);
+            else
+                trigs{s}(k)=I.st(i).mti{stimlist(k)}.startStopTimes(1);
+            end
             spon{s}(k)=trigs{s}(k);
         end
         
+        
         df = mean(diff(I.st(1).mti{1}.frameTimes));
+        if isnan(df) % for instance if only a single frame was shown
+            df = 1/60; % hard coded 60 Hz monitor framerate
+        end
         dp = struct(getdisplayprefs(get(I.st(1).stimscript,j)));
-        Cinterval(s,:) = ...
-            [0 I.st(1).mti{stimlist(1)}.frameTimes(end)-I.st(1).mti{stimlist(1)}.frameTimes(1)+df];
+        if length(I.st(1).mti{stimlist(1)}.frameTimes)>1
+            Cinterval(s,:) = ...
+                [0 I.st(1).mti{stimlist(1)}.frameTimes(end)-I.st(1).mti{stimlist(1)}.frameTimes(1)+df];
+        else
+            logmsg('No frametimes recorded. Using startStopTimes');
+            Cinterval(s,:) = [0 I.st(1).mti{stimlist(1)}.startStopTimes(3)-I.st(1).mti{stimlist(1)}.startStopTimes(2)]; % for optostim
+        end
+        
         if length(I.st(1).mti)>=2,
             if dp.BGpretime - processparams.separation_from_prev_stim_off >= processparams.minimum_spontaneous_time
                 % use BGpretime

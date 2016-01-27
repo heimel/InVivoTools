@@ -1954,7 +1954,7 @@ function figure_keypress(src,event)
 % short-cut key catching and handling
 global shift_state control_state
 
-set(src,'WindowKeyPressFcn',[]);
+%set(src,'WindowKeyPressFcn',[]);
 
 if isfield(event,'Key') || isa(event,'matlab.ui.eventdata.KeyData')
     obj = get(src,'currentobject');
@@ -2040,7 +2040,11 @@ if isfield(event,'Key') || isa(event,'matlab.ui.eventdata.KeyData')
             end
             
     end
-elseif isfield(event,'VerticalScrollCount')
+elseif ~isempty(findprop(event,'VerticalScrollCount'))
+    % elseif isfield(event,'VerticalScrollCount')
+    % field changed to property in matlab 2015
+    % line was changed
+    
     obj = get(src,'currentobject');
     prop = get(obj);
     if isfield(prop,'Style') && strcmp(prop.Style,'listbox')

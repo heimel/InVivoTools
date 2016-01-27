@@ -12,8 +12,9 @@ default_p = struct('res',0.001,'interval',[-0.1 1.0],'fracpsth',0.5,...
         'normpsth',1,'showvar',1,'psthmode',0,'showfrac',1,'cinterval',[0 1],...
 	'showcbars',1,'axessameheight',1);
 
-if isempty(parameters)|(ischar(parameters)&strcmp(parameters,'default')),
-        parameters = default_p; end;
+if isempty(parameters)||(ischar(parameters)&&strcmp(parameters,'default'))
+        parameters = default_p; 
+end
 
 [good,er]=verifyparameters(parameters,getinputs(ra));
 if ~good,error(['PARAMETERS: ' er]);end;
