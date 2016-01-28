@@ -142,10 +142,18 @@ params.sort_klustakwik_arguments = [ ...
 
 % time calibration
 switch lower(record.setup)
-    case 'antigua'
+    case 'antigua' % tdt data on nin380
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
         params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time
     case 'wall-e'
+        params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
+        params.secondsmultiplier = 1; % multiplification factor of electrophysical signal time
+        warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
+        warning('off', 'ECPROCESSPARAMS:TIMING');
+    case 'daneel'
+        params.trial_ttl_delay = 0.0115;
+        params.secondsmultiplier = 1.000032; % aligned on 2012-09-18
+    case 'nin380' % spike2 data on nin380
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
         params.secondsmultiplier = 1; % multiplification factor of electrophysical signal time
         warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');

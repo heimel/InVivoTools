@@ -19,10 +19,16 @@ trial = [record.test filesep 'data.smr'];
 datapath = experimentpath(record,false);
 unitchannelname = 'Spikes'; % was 'units'
 ttlchannelname = 'TTL';
-warning('IMPORTSPIKE2:TIMING','IMPORTSPIKE2: Alexander: improve and generalize timing correction, joint for ec and lfp');
-warning('off', 'IMPORTSPIKE2:TIMING');
-secondsmultiplier = 1.000032; % daneel 2012-09-18
-ttl_delay = 0.0115;
+
+params = ecprocessparams( record );
+if isfield(params,'secondsmultiplier')
+    secondsmultiplier = params.secondsmultiplier;
+    ttl_delay = params.trial_ttl_delay;
+else
+    secondsmultiplier = 1.000032; % daneel 2012-09-18
+    ttl_delay = 0.0115;
+end
+
 if ~isfield(record,'amplification') || isempty(record.amplification) 
     amplification = 5000;
 else
