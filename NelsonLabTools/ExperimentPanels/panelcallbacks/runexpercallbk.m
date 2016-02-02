@@ -25,7 +25,8 @@ switch action
         try
             h.cksds=cksdirstruct(dp);
             set(fig,'userdata',h);
-        catch
+        catch me
+            disp(me.message);
             errordlg(['Datapath ' dp ' is not valid']);
             p = getpathname(h.cksds);
             if p(end)==filesep, p = p(1:end-1); end;
@@ -94,13 +95,13 @@ switch action
             aqDat = get(h.list_aq,'UserData');
             if ~isempty(aqDat)
                 writeAcqStruct([remPath filesep 'acqParams_in'],aqDat);
+            else
+                disp('RUNEXPERCALLBK: Empty acquisition list');
             end
             write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
-            %if strcmp(computer,'LNX86'), eval(['! chmod 770 ' remPath filesep 'acqParams_in;']); end;
         end;
         bbb=evalin('base',['exist(''' scriptName ''')']);
-        if bbb, % if script also exists locally, show the duration time in RunExperiment window
-            % [ty,tm,td,th,tm,ts]=datevec(now);
+        if bbb % if script also exists locally, show the duration time in RunExperiment window
             durr=evalin('base',['duration(' scriptName ')']);
             durrh=fix(durr/3600); durr=durr-3600*durrh;
             durrm=fix(durr/60);durr=durr-60*durrm; durrs=fix(durr);
@@ -153,7 +154,7 @@ switch action
             set(h.list_aq,'UserData',aqdata, ...
                 'String',strDat,'value',l+1);
         end;
-    case 'edit_aq',
+    case 'edit_aq'
         aqdata = get(h.list_aq,'UserData');
         strDat = get(h.list_aq,'String');
         val = get(h.list_aq,'value');
@@ -161,7 +162,7 @@ switch action
             [strDat{val},aqdata(val)]=input_aq(strDat{val},aqdata(val));
         end;
         set(h.list_aq,'UserData',aqdata,'String',strDat);
-    case 'delete_aq',
+    case 'delete_aq'
         aqdata = get(h.list_aq,'UserData');
         strDat = get(h.list_aq,'String');
         l = length(strDat);
