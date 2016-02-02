@@ -17,6 +17,10 @@ switch record.datatype
 		set(h,'String',{'behavior : wc : behavior : NaN : 1 : 1 : NaN '});
 		set(h,'UserData',(struct('name','behavior','type','wc','fname','behavior',...
 			'samp_dt',NaN,'reps',1','ref',1,'ECGain',NaN)));
+	case {'eg','oi'} % electro(cardio/myo/encephalo)gram
+		set(h,'String',{'eg : eg : eg : NaN : 1 : 1 : NaN '});
+		set(h,'UserData',(struct('name','eg','type','eg','fname','eg',...
+			'samp_dt',NaN,'reps',1','ref',1,'ECGain',NaN)));
 	otherwise
 		% do nothing
 end
