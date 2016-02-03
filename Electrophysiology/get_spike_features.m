@@ -60,6 +60,7 @@ for c=1:length(cells)
     end
     
     [dum4,rel_prepeak_ind] = max(spikes(triggered_trough,1:trigger_ind),[],2);
+    prepeak_ind = [];
     prepeak_ind(triggered_trough) = rel_prepeak_ind;
     prepeak_ind(~triggered_trough) = trigger_ind;
     for i=1:n_spikes
