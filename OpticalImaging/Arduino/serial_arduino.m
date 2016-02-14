@@ -30,7 +30,7 @@ if isempty(port)
         case {'GLNX86','GLNXA64'}
             port = '/dev/ttyS100';
         case {'PCWIN','PCWIN64'}
-            port = 'COM11';
+            port = 'COM4';
         otherwise
             disp('OPEN_ARDUINO: Do not know to which COM port Arduino is connected.');
             errordlg('Do not know to which COM port Arduino is connected.','Open_arduino');
