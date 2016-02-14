@@ -18,7 +18,7 @@ input_arg.simulate = false;
 
 % checks whether running in simulation mode
 if input_arg.simulate == true
-    [input_arg.save_dir_temp] = daq_simulation();
+     [input_arg.save_dir_temp] = daq_simulation();
 end
 
 % finds and stops active data acquisistion-objects and terminates them

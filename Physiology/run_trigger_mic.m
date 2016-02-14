@@ -25,7 +25,7 @@ wait(ai_mic,(settings.duration + 0.5));
 file_str = 'ultra_sound_data';
 save_to = fullfile(settings.data_dir,file_str);
 channel_settings = ai_mic.Channel;
-save(save_to,'data','time','channel_settings');
+save(save_to,'data','time','settings','-v7');
 
 % Done acquiring and saving session data
 done_msg = sprintf('\n \n Done acquiring and saving microphone recordings \n \n');
