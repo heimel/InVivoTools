@@ -54,8 +54,8 @@ settings.daq_hw_id = '1';                 % Hardware ID
 settings.sample_rate = 10000;             % Set sample rate (Hz), max = 200000Hz, min = 1Hz.
 settings.trigger_type = 'Immediate';      % Set trigger type -> Triggerd immediate when start is executed
 settings.trigger_type = 'HwDigital';      % Set trigger type -> Triggerd from hardware (digital channel) TTL
-% settings.trigger_cond = 'TrigPosEdge';    % Set trigger condition -> Triggered when a positive edge is detected
-settings.trigger_cond = 'TrigNegEdge';    % Set trigger condition -> Triggered when a negative edge is detected -> TTL convention used by stimulus-PC.
+settings.trigger_cond = 'TrigPosEdge';    % Set trigger condition -> Triggered when a positive edge is detected
+% settings.trigger_cond = 'TrigNegEdge';    % Set trigger condition -> Triggered when a negative edge is detected -> TTL convention used by stimulus-PC.
 settings.samples_per_trigger = 0;         % Sets samples per trigger manually if not equal to 0.
 settings.trigger_repeat = 0;              % the amount of triggered samples to be taken if false than default
                                           % when counted 0 is 1, but cannot be used eg. 10 -> 11 triggers
@@ -177,7 +177,6 @@ disp(' ');
 % show summarized information Analog Input objects
 disp(ai_mic);
 disp(ai);
-
 
 end
 

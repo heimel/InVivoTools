@@ -1,4 +1,4 @@
-function calibrate_mic
+function calibrate_mic()
 %CALIBRATE_MIC function to analyse settings used in load_micriphone
 %   This function does read-in the set parameters found in daq_parameters
 %   nor in load_microphone -> these values should be added manually.

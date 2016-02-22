@@ -29,7 +29,7 @@ wp.dispprefs={'BGpretime',1,'BGposttime',1};
 wp.tf = 4;
 wp.nCycles = 5*wp.tf;
 
-warmup = StimScript(0);
+warmup = stimscript(0);
 backgrounds = (0:0.1:1);
 for i = 1:length(backgrounds);
     wp.background = backgrounds(i);

@@ -20,7 +20,7 @@ try
 catch me
     logmsg(me.message);
     try
-        import parport.ParallelPort;
+        eval('import parport.ParallelPort;');
     catch me
         logmsg(['SERIAL_ARDUINO: ' me.message]);
         lpt = [];

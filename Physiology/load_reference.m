@@ -31,11 +31,14 @@ function [ block_number, data_dir] = load_reference
 % get global variables
 remotecommglobals;
 acqready = fullfile(Remote_Comm_dir,'acqReady');
+
 delimiterIn = '	';
 
 
 % import data
 path_data = importdata(acqready,delimiterIn);
+
+
 
 % convert cell to string
 temp = cell2mat(path_data(2));
@@ -44,7 +47,11 @@ temp = cell2mat(path_data(2));
 % directory used for both reading the trigger parameter as storing the
 % session data.
 
+
+
 data_dir_file = fullfile(temp,'acqParams_in');
+
+
 data_dir = fullfile(temp);
 
 
