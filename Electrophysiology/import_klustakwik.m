@@ -98,6 +98,10 @@ for ch = channels
     
     featuresdata = fscanf(fidf,'%f',[n_features,length(cellnumber)]);
     fclose(fidf);
+    if ~all(size(featuresdata)==[n_features,length(cellnumber)])
+        errormsg('Problem with reading in feature file. Incorrect number of spikes or features',true);
+    end
+    
     
     for c = 1:n_cells
         cells(c).ind_spike = find(cellnumber==c);

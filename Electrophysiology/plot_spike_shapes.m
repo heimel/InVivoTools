@@ -70,13 +70,14 @@ for ch=channels
         %    plot(t'-repmat(trig_ind,1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
         if isfield(cells,'spike_prepeak_ind')
             plot(t'-repmat(cells(c).spike_prepeak_ind(ind),1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
+            set(gca,'yticklabel',[]);
         end
         subplot(1,3,3);
         hold on
         %    plot(t'-repmat(trig_ind,1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
         if isfield(cells,'spike_trough_ind')
-            
             plot(t'-repmat(cells(c).spike_trough_ind(ind),1,size(cells(c).spikes,2))',cells(c).spikes(ind,:)',clr);
+            set(gca,'yticklabel',[]);
         end
     end
     for i=1:3

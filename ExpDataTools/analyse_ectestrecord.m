@@ -35,7 +35,7 @@ if isempty(channels2analyze)
     channels2analyze = recorded_channels;
 end
 
-cells = import_spikes( record, channels2analyze ); %
+cells = import_spikes( record, channels2analyze, verbose ); %
 
 if isempty(cells)
     return
