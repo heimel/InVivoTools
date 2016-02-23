@@ -82,69 +82,66 @@ if ~isempty(datapath) && any(datapath==filesep)
     recdatapath = datapath(1:find(datapath==filesep,1,'last'));
 end
 
+logmsg('Finding serial port')
+for i = 1:10
+    devfolder = strcat('/dev/ttyUSB',num2str(i-1));
+    if ~isempty(dir(devfolder))
+        s1 = serial(devfolder);
+        break
+    end
+end
 
 [recstart,filename] = start_recording(recdatapath);
 acqparams_in = fullfile(datapath,'acqParams_in');
 
 try
-  % edit Sven april 2015: Try ttyUSB0-9, can be changed in something smarter if necessary
-  for i = 1:10
-	devfolder = strcat('/dev/ttyUSB',num2str(i-1));
-	if ~isempty(dir(devfolder))
-	  	s1 = serial(devfolder);
-		break;
-  	end
-  end
-  fopen(s1);
-
-  %edit Sven april 2015: Made compatible with two versions of instrument-control
-  if isfield(get(s1),'pinstatus')
-	new_instr_contr = 1;
-	pin = 'DataSetReady'; 
-
-  else
-	new_instr_contr = 0;
-	pin = 'datasetready';
-  end
-
-  if new_instr_contr
-	s2 = get(s1,'pinstatus');
-  	prev_cts = s2.(pin);
-  else
-	prev_cts = get(s1,pin);
-  end
-
-  org_cts = 'on'; %prev_cts; 
-
-  while 1
-    if new_instr_contr
-	s2 = get(s1,'pinstatus');
-	cts = s2.(pin);
+    fopen(s1);
+    
+    %edit Sven april 2015: Made compatible with two versions of instrument-control
+    if isfield(get(s1),'pinstatus')
+        new_instr_contr = 1;
+        pin = 'DataSetReady';
     else
-	cts = get(s1,pin);
+        new_instr_contr = 0;
+        pin = 'datasetready';
     end
-    if cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)  % i.e. changed and not same as original
-	stimstart =  time - recstart;
-        logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
-
-        fid = fopen(acqready,'r');
-        fgetl(fid); % pathSpec line
-        datapath = fgetl(fid);
-        fclose(fid);
-
-	recording_name = fullfile(datapath,['webcam_' host '_info.mat']);
-	mkdir(datapath);
-	save('-v7',recording_name,'filename','stimstart');
-	logmsg(['Saved timing info in ' recording_name]);
-    end	
-    prev_cts = cts;
-    pause(0.05);
-  end
+    
+    if new_instr_contr
+        s2 = get(s1,'pinstatus');
+        prev_cts = s2.(pin);
+    else
+        prev_cts = get(s1,pin);
+    end
+    
+    org_cts = 'on'; %prev_cts;
+    
+    while 1 % loop to find trigger
+        if new_instr_contr
+            s2 = get(s1,'pinstatus');
+            cts = s2.(pin);
+        else
+            cts = get(s1,pin);
+        end
+        if cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)  % i.e. changed and not same as original
+            stimstart =  time - recstart;
+            logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
+            
+            fid = fopen(acqready,'r');
+            fgetl(fid); % pathSpec line
+            datapath = fgetl(fid);
+            fclose(fid);
+            
+            recording_name = fullfile(datapath,['webcam_' host '_info.mat']);
+            mkdir(datapath);
+            save('-v7',recording_name,'filename','stimstart');
+            logmsg(['Saved timing info in ' recording_name]);
+        end
+        prev_cts = cts;
+        pause(0.01);
+    end
 catch
-
     stop_recording(filename);
     fclose(s1);
-   % rethrow(lasterror)
 end
 
 
@@ -155,14 +152,14 @@ end
 function [starttime,filename] = start_recording(datapath)
 
 % system('raspivid -t 0 --keypress -o test.h264 -w 640 -h 480 -p 100,100,300,300',false,'async' );
-starttime = time;
 mkdir(datapath);
 filename = fullfile(datapath,['webcam_' host '_' subst_filechars(datestr(now,31)) '.h264'] );
 %cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480 -p 100,100,300,300 '];
 cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480  '];
-system(cmd,false,'async' );
 logmsg(['Started recording ' filename ' at ' datestr(now)]);
 logmsg('Use Ctrl-C to stop recording');
+system(cmd,false,'async' );
+starttime = time;
 
 function stop_recording(filename)
 logmsg('Stopping raspivid');
@@ -171,7 +168,7 @@ system('pkill raspivid',false,'async');
 % possibly need to wrap to mp4
 % sudo apt-get install gpac
 
-[stat,output ] = system(['MP4Box -fps 30 -add ' filename ' ' filename '.mp4'],false,'async')
+[stat,output ] = system(['MP4Box -fps 30 -add ' filename ' ' filename '.mp4'],false,'async');
 %or
 % avconv -i ...h264 -vcodec copy ...mp4
 % play video with omxplayer

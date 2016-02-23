@@ -67,25 +67,37 @@ for ch=channels
         
     fprintf(fidf,'%d',n_features); % file starts with number of features
     fprintf(fidf,lineend);
+
+    st =  'fprintf(fidf,[''';
+    for f = 1:n_features
+        st = [st '%f '];
+    end
+    st = [st ' '' lineend]'];
+    for f = 1:n_features
+        st = [st ',cells(c).(features{' num2str(f) '})(i)'];
+    end
+    st = [st ');'];
+
+    
     for c=1:n_cells
         n_spikes = length(cells(c).data);
             fprintf(fidt,['%f' lineend],cells(c).data); % spike time
         for i=1:n_spikes
         %    fprintf(fidt,['%f' lineend],cells(c).data(i)); % spike time
-            
+             
 %             for f = 1:n_features
 %                 fprintf(fidf,'%f ',cells(c).(features{f})(i) + addnoise*rand(1)*0.01  );
 %             end % feature f
 %             fprintf(fidf,lineend);
-    fprintf(fidf,['%f %f %f %f %f %f %f ' lineend],...
-        cells(c).(features{1})(i),...
-        cells(c).(features{2})(i),...
-        cells(c).(features{3})(i),...
-        cells(c).(features{4})(i),...
-        cells(c).(features{5})(i),...
-        cells(c).(features{6})(i),...
-        cells(c).(features{7})(i));
-        
+%     fprintf(fidf,['%f %f %f %f %f %f %f ' lineend],...
+%         cells(c).(features{1})(i),...
+%         cells(c).(features{2})(i),...
+%         cells(c).(features{3})(i),...
+%         cells(c).(features{4})(i),...
+%         cells(c).(features{5})(i),...
+%         cells(c).(features{6})(i),...
+%         cells(c).(features{7})(i));
+        eval(st);
         end % spike i
     end % cell c
     

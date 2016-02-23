@@ -1,8 +1,12 @@
-function cells = import_spikes( record, channels2analyze )
+function cells = import_spikes( record, channels2analyze, verbose )
 %IMPORT_SPIKES
 %
-% 2015, Alexander Heimel
+% 2015-2016, Alexander Heimel
 %
+
+if nargin<3 || isempty(verbose)
+    verbose = true;
+end
 
 processparams = ecprocessparams(record);
 
@@ -53,7 +57,7 @@ switch processparams.spike_sorting_routine
     case 'klustakwik'
         cells = sort_with_klustakwik(cells,record);
     case 'wpca'
-        cells = sort_with_wpca(cells,record);
+        cells = sort_with_wpca(cells,record,verbose);
     case '';
         % don't sort
     otherwise
