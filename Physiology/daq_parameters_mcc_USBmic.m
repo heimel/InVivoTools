@@ -11,12 +11,12 @@ function [ ai_vec, settings ] = daq_parameters_mcc( input_arg )
 %   MCC DAQ PCI DAS-6025 has a fixed 12 bits per sample and 8 analog 
 %   differential inputs.
 %
-%   Returns the configure Analog Input object.
+%   Returns the vector ai_vec which contains multiple Analog Input objects.
 %
 %   -> to be completed: add more about functionallity in header
-%                      
+%                       add check code to check if mic is connected to usb
 %    
-%   (c) feb-2016, Simon Lansbergen.
+%   (c) 2016, Simon Lansbergen.
 %   
 
 
@@ -130,7 +130,7 @@ settings.units_range_channel(2) = 5;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Create Analog Input Object %%%
+%%% Create Analog Input Object %%%      <- Load this before load_microphone
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Get analog input with settings struct as an input.
@@ -139,13 +139,32 @@ settings.units_range_channel(2) = 5;
 [ai, ai_channel_setting] = create_analog_input(settings);     
 
 
+%%%%%%%%%%%%%%%%%%%%%%%
+%%% Load Microphone %%%     <- Need to be loaded after ai MCC
+%%%%%%%%%%%%%%%%%%%%%%%
+
+% load fixed microphone settings with load_microphone(). This will acquire
+% an Analog Object object which is fully configured for Dodotronic Ultramic
+% 250kHz Ultrasonic USB microphone.
+
+% first check if the microphone is connected
+
+temp = daqhwinfo('winsound');
+[~, winsound_count] = size(temp.InstalledBoardIds);
+if winsound_count > 2
+    [ai_mic]=load_microphone(settings);
+else
+    logmsg('Dodotronic UltraMic not detected. No sound recording from USB');
+    ai_mic = 0;
+end
+
 %%%%%%%%%%%%%%%%%%%%%%
 %%% Finalize Setup %%%
 %%%%%%%%%%%%%%%%%%%%%%
 
 % put both Analog Input ojects (i.e. microphone and data acquisistion card
 % in one vector to start both at the same instant.
-ai_vec=[ai];
+ai_vec=[ai ai_mic];
 
 % Add miscellaneous and info to settings struct for debug analysis
 settings.ai_channel_setting = ai_channel_setting;
@@ -155,6 +174,7 @@ settings.simulate           = input_arg.simulate;
 % info on configuration
 disp(' ');
 logmsg('*** MCC PCI DAS-6025 pre-configured Analog Input ***');
+logmsg('*** Dodotronic UltraMic 250kHz pre-configured Analog Input ***');
 disp(' ');
 logmsg('Look into parameter function file to set specific');
 logmsg('configuration settings displayed below and found in');
@@ -163,6 +183,7 @@ disp(' ');
 disp(' ');
 
 % show summarized information Analog Input objects
+disp(ai_mic);
 disp(ai);
 
 end
