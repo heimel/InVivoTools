@@ -177,8 +177,8 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
         end;
         if StimWindowUseCLUTMapping, Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1); end;
         switch host
-            case 'barney'
-                % dont flip to background gray
+%             case 'barney'
+%                 % dont flip to background gray
             otherwise
                 Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(end)-0.5)/StimWindowRefresh);
         end
