@@ -17,8 +17,41 @@ if isempty(wcinfo)
     return
 end
 
+
+filename = fullfile(wcinfo.path,wcinfo.mp4name);
+try 
+    vid=VideoReader(filename);
+catch me
+    logmsg(['Some problem: ' me.message]);
+end
+
+% %Get paramters of video
+% numFrames = get(vid, 'NumberOfFrames');
+% frameRate = get(vid, 'FrameRate'); %30 frames/sec
+% frame = round(numFrames/2);
+% figure
+% while   1
+%     imframe = read(vid, frame);
+%     image(imframe)
+%     [x,y,k]=ginput(1);
+%
+%     k;
+%     switch k
+%         case 29 % arrow right
+%             frame = frame +1
+%     end
+% end
+% %             snapframe = read(vid, i);%+vidlag
+
+
+
 rec = 1;
-starttime = (wcinfo(rec).stimstart-par.wc_playbackpretime) * 1.015;
+
+timemultiplier = 1.015;
+timeshift = 0;
+wc_playbackpretime = par.wc_playbackpretime;
+%wc_playbackpretime  = 0;
+starttime = (wcinfo(rec).stimstart-wc_playbackpretime) * timemultiplier + timeshift;
 cmd = par.wc_playercommand;
 switch par.wc_player
     case 'vlc'
