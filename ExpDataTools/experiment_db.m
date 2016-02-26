@@ -51,7 +51,7 @@ switch type
         blind_data_enabled = 1;
         reverse_data_enabled = 1; % for reversing database
     case 'wc' 
-        color = [0.8 0.6 0];
+        color = [1 0.4 0.2];
         play_data_enable = 1;
         track_data_enable = 1;
 end
