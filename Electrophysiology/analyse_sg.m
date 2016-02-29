@@ -1,4 +1,4 @@
-function measures=analyse_sg( inp , n_spikes,record)
+function measures=analyse_sg( inp , n_spikes,record,verbose)
 %ANALYSE_SG analyses stochastic grid stimulus ecdata
 %
 %  MEASURES=ANALYSE_SG( INP , N_SPIKES, RECORD)
@@ -6,8 +6,12 @@ function measures=analyse_sg( inp , n_spikes,record)
 % n_spikes used for calculating feature mean, should be dropped and spont
 % rate should be used instead for doing RF patch size calculation.
 %
-% 2007-2014 Alexander Heimel
+% 2007-2016 Alexander Heimel
 %
+
+if nargin<4 || isempty(verbose)
+    verbose = true;
+end
 
 processparams = ecprocessparams(record);
 
@@ -15,7 +19,7 @@ saved_stims = getstimsfile( record ); % to get monitorinfo
 
 measures.usable=1;
 
-if 0
+if verbose
     where.figure=figure;
     where.rect=[0 0 1 1];
     where.units='normalized';
@@ -37,7 +41,7 @@ para_rc=getparameters(rc);
 % para_rc.interval=[0.0205 0.2205];   %% for OFF RF : [0.0205 0.2205], Mehran
 para_rc.interval = processparams.rc_interval;
 para_rc.timeres = processparams.rc_timeres;
-
+para_rc.gain = processparams.rc_gain;
 para_rc.bgcolor=2;
 rc=setparameters(rc,para_rc);
 rcs=getoutput(rc);
