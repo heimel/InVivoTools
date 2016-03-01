@@ -2,7 +2,7 @@ function [pk_frR,pk_frL] = search_stim_onset(filename, stimStart)
 v = VideoReader(filename);
 frameRate = get(v, 'FrameRate');
 stimFrame = stimStart*frameRate;
-start_frame = stimFrame-30;
+start_frame = stimFrame-30-10; %30:length of the stim, 10:for interval
 end_frame = stimFrame+90+30;
 num_frames  = numel(start_frame:end_frame);%;v.NumberofFrames;
 fontSize = 14;
@@ -13,6 +13,8 @@ axis on;
 set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
 message1 = sprintf('Select the chamber arena region.');
 message2 = sprintf('Left click and hold to begin drawing.\nSimply lift the mouse button to finish');
+% message1=msgbox('Select the chamber arena region.');
+% set(message1, 'Position', [100 100 100 100])
 uiwait(msgbox(message1));
 % roiR = getrect; % this is a classical methid. which is also ok but the one bellow is better
 h = imrect; % select a ROI in the frame
@@ -51,7 +53,8 @@ imshow(burned_frame,[]); axis on; title('ROI');
         im_roiL = imcrop(frame,roiL);
         brightness(1,j)  = mean(im_roiR(:));
         brightness(2,j)  = mean(im_roiL(:));
-       
+       crossR = min(im_roiR);
+       crossL = min(im_roiL);
     end
     len = length(brightness);
     frames = start_frame:end_frame;
@@ -107,8 +110,6 @@ imshow(burned_frame,[]); axis on; title('ROI');
         end
     end
     
-    pk_frR = frames(indexR);
-    pk_frL = frames(indexL);
     valid_crossR = diff(cross_indR)<2; % find the first of the crossings ina series
     valid_crossL = diff(cross_indL)<2; % find the first of the crossings ina series
     detectR = cross_indR(valid_crossR);
@@ -120,6 +121,9 @@ imshow(burned_frame,[]); axis on; title('ROI');
     plot(frames,threshMaxR,'--','color',[0 1/3 1]);
     plot(frames,threshMinL,'--','color',[1 1/3 0]);
     plot(frames,threshMaxL,'--','color',[1 1/3 0]);
+    
+    pk_frR = frames(indexR);
+    pk_frL = frames(indexL);
     plot(pk_frR,peaksR,'k^','markerfacecolor','k'); axis tight;
     plot(pk_frL,peaksL,'k^','markerfacecolor','m'); axis tight;
     

@@ -519,7 +519,11 @@ for i = target_frames
                         %get the positions of nose, arse and stim manually
                         p = 1; framesforward = 0;
                         message1 =sprintf('Click first on nose then on arse');
+                        if k==1
                         uiwait(msgbox(message1));
+                        else 
+                        logmsg(message1);
+                        end
                         [xn, yn] = ginput(2);
                         %                                         while p<3   %Alexander's looking
                         %                                         at frames and checking
@@ -556,7 +560,7 @@ for i = target_frames
                         arse(k, 1:2) = [xn(2), yn(2)];
                         plot([nose(k,1),arse(k,1)],[nose(k,2),arse(k,2)], 'linewidth', 2); %head line
                         hold on;
-                        if startTime<ActStartTime || startTime>ActEndFrame
+                        if startTime<ActStartTime || startTime>ActEndTime+0.2
                             logmsg('Stimulus not in view');
                             stim(k, :) = [NaN NaN];
                         else
@@ -566,7 +570,8 @@ for i = target_frames
                             if eq(button,110)
                                 while p<2   % looking at frames and checking
                                     message3 = ('use left and right arrow keys');
-                                    uiwait(msgbox(message3));
+%                                     uiwait(msgbox(message3));
+logmsg(message3);
                                     [xs(p), ys(p), button] = ginput(1);
                                     switch button
                                         case 28 % left arrow
