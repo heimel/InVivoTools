@@ -33,7 +33,7 @@ switch vers
 end
     
 if ~exist(base,'dir')
-    logmsg(['Folder ' base ' does not exist.']);
+    logmsg(['Folder ' base ' does not exist. Perhaps set params.experimentpath_localroot in processparams_local.m']);
 end
 
   
