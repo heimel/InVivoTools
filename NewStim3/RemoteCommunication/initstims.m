@@ -72,6 +72,8 @@ switch Remote_Comm_method
                 errorflag = 0;
                 txt = checkscript('runit.m');
                 if ~isempty(txt),
+                    pause(0.05); % to make sure runit is fully written
+                    txt = checkscript('runit.m');
                     try
                         eval(txt)
                         disp(txt);
@@ -91,6 +93,7 @@ switch Remote_Comm_method
                         delete('toremote');
                     end
                     logmsg('Waiting for remote commands...press Ctrl-C to interrupt.');
+                    pause(1);
                 end
             end
         catch me
