@@ -41,8 +41,15 @@ if ~params.blind_shuffle
             slices = {db(ind).slice};
             days = cellfun(@(x) str2double(x(4:end)), slices,'UniformOutput',false);
             days = [days{:}];
-            
-            if make_blind && reverse_order(stacks{s},db(ind(1)))
+            if make_blind && ismember(stacks{s},params.blind_stacks_with_specific_shuffle(1:2:end))
+                logmsg(['Using specified sorting for ' stacks{s}]);
+                ind_r = strmatch(stacks{s},params.blind_stacks_with_specific_shuffle(1:2:end));
+                ind_sort = params.blind_stacks_with_specific_shuffle{ind_r*2};
+                if length(days)~=length(ind_sort)
+                    errormsg(['Inconsistent number of days specified for blinding ' stacks{s}]);
+                end
+                days = days(ind_sort);
+            elseif make_blind && reverse_order(stacks{s},db(ind(1)))
                 %disp('reversing order')
                 [days,ind_sort] = sort(days,2,'descend'); %#ok<ASGLU>
             else
