@@ -35,7 +35,7 @@ if nargin<3
     fittype = [];
 end
 if isempty(fittype)
-    fittype = 'best';
+    fittype = 'extpow';
 end
 if nargin<1
     rgb = repmat( (0:0.1:1)',1,3);

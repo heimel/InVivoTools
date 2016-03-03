@@ -7,16 +7,13 @@ function run_trigger(ai,event,settings)
 %   session is saved to a pre-set data directory (set by the stimulus-PC).
 %
 %   The data and time variables which are collected by getdata() are stored
-%   as one channel each collum. So when multiple channels are simultaneously
-%   saved, all data is stored in one variable with number of collums
-%   related to the configured channels.
+%   as one channel each collum. This data is later stored in individual
+%   saved varaibles names after the channel names given in the 
+%   parameter file.
 %   
-%   Calculates the heart and breath rate by Gaussian smoothing at a pre set
-%   value, which can be changed in daq_parameters settings script.
 %
-%       -> TO DO: make Gaussian blur variable availible in script!
 %
-%   (c) 2016, Simon Lansbergen.
+%   (c) 15-2-2016, Simon Lansbergen.
 % 
 
 
@@ -25,16 +22,25 @@ function run_trigger(ai,event,settings)
 wait(ai,(settings.duration + 0.5));
 
 % get actual data
-[data, time] = getdata(ai);
+[data_temp, time] = getdata(ai);
 
-smooth_hr = smoothen(data,150);        % Smoothen heart rate
-smooth_br = smoothen(data,1000);       % Smoothen breath rate
 
-% save both time and data, as well as hardware and configution
-file_str = 'physiological_data';
-save_to = fullfile(settings.data_dir,file_str);
-channel_settings = ai.Channel;
-save(save_to,'data','smooth_br','smooth_hr','time','settings','-v7');
+% save file according to channel name
+[~,x]=size(settings.hwchannels);
+if x == 1
+    file_str = cell2mat(settings.hwnames(1));
+    save_to = fullfile(settings.data_dir,file_str);
+    data = data_temp(:,1);      
+    save(save_to,'data','time','settings','-v7');
+else 
+    for i=1:x
+        file_str = cell2mat(settings.hwnames(i));
+        save_to = fullfile(settings.data_dir,file_str);
+        data = data_temp(:,i);      
+        save(save_to,'data','time','settings','-v7');
+    end  
+    
+end
 
 % Done acquiring and saving session data
 done_msg = sprintf('\n \n Done acquiring and saving session \n \n');

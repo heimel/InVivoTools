@@ -8,7 +8,7 @@ function init_physiological_measurement(parameter_file_name)
 % 
 %   If no value is added to init_physiological_measurement to load the
 %   according measurent and vendor specific configuration, a default
-%   configuration will be used 
+%   configuration will be used -> daq_parameters_mcc_USBmic.m
 %
 %   Physiological measurement scripts are written to be part of the
 %   InVivoToolbox and cannot operate stand alone (except for some
@@ -97,7 +97,6 @@ text = uicontrol(button_window,'Style', 'text',...
 % while loop which check for a change in acqReady
 logmsg('Checking for acqReady change');
 while (ishandle(push_button))     % needs control-C or push button to exit
-% while break_counter == 0
     acqready_props = dir(acqready);
     if ~isempty(acqready_props) && acqready_props.datenum > acqready_props_prev.datenum
         logmsg('acqReady changed');

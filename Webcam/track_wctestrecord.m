@@ -43,22 +43,13 @@ record.measures.freezetimes = freezeTimes;
 record.measures.nose = nose;
 record.measures.arse = arse;
 record.measures.stim = stim;
+record.measures.mouse_move = mouse_move;
 
-record.freezing_computed = ~isempty(freezeTimes);
+record.measures.freezing_computed = ~isempty(freezeTimes);
 
 manualoverride=regexp(record.comment,'freezing=(\s*\d+)','tokens');
 if ~isempty(manualoverride)
-    record.freezing = manualoverride{1};
+    record.measures.freezing = manualoverride{1};
 else
-    record.freezing = record.freezing_computed;
-end
-
-if isempty(freezeTimes) == 0
-    [head_theta, pos_theta] = angle_cal(record);
-    
-    record.measures.head_theta = head_theta;
-    record.measures.pos_theta = pos_theta;
-else
-    record.measures.head_theta = [];
-    record.measures.pos_theta = [];
+    record.measures.freezing = record.measures.freezing_computed;
 end

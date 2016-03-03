@@ -24,7 +24,7 @@ delimiter = ',';
 mdbsql='/home/heimel/Software/mdbtools/mdbtools/src/util/mdb-sql';
 %options=' -p -d , '; % version 0.6
 options = [' -P -d ' delimiter]; % version 0.7
-defaultfilename = '/mnt/orange/group\ folders/MuizenlijstLeveltLab/Mice.mdb';
+defaultfilename = '~/Dropbox (NIN)/Documents/Mice/Mice.mdb';
 
 if nargin<3
   crit=[];
@@ -44,11 +44,14 @@ if isempty(filename)
   if ~exist(filename,'file')
       if isunix
          filename='~/Documents/Mice/Mice.mdb';
-      else
+      end
+      if ~exist(filename,'file')
           filename = fullfile(getdesktopfolder,'Mice.mdb');
       end
     logmsg(['Using offline database ' filename ]);
   end
+  filename = regexprep(filename,'([\\ ()])','\\$1');
+  
 end
 if isempty(crit)
   crit='Muisnummer\>15000';

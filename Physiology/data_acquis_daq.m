@@ -57,6 +57,7 @@ load_parameters = str2func(parameter_file_name);
 % not specified the default settings (daq_parameters) will be used.
 [ai, ~] = load_parameters( input_arg );    
 
+[~,ai_count]=size(ai);  % how many ai objects were created
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% On-Screen Session Information %%%
@@ -90,8 +91,13 @@ while true
    
     if (ai(1).TriggersExecuted == 1 && counter == 1);
         logmsg(' *** Acquisition Started ***')
-        trigger(ai(2));
         counter = counter + 1;
+        
+        % manual triggers microphone recordings if ai exist
+        if ai_count == 2
+        trigger(ai(2));     
+        end
+               
     end
     
     % breaks from loop if daq is inactive (i.e. waiting for start command)

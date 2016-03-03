@@ -30,12 +30,22 @@ startside = stimparams.start_position;
 rec = 1;
 % stimStart = (wcinfo(rec).stimstart-par.wc_playbackpretime) * 1.015
 
-stimStart = round(wcinfo(rec).stimstart * 1.015);%*100)/100 ;%-1.2;
+stimStart = wcinfo(rec).stimstart * 1.015;%*100)/100 ;%-1.2;
 %Factor for fixing delay (1/015) -0.8 correction %1.01445 more precisely %(stimstart*1.01445);
 
 
-[freezeTimes, nose, arse, stim, mouse_move, mouse_2der] = ...
+[freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
+    averageMovement,minimalMovement,difTreshold,deriv2Tresh,fig_n, freeze_duration] = ...
     trackmouseblack_pi(filename,false,stimStart,startside);
+
+record.measures = [];
+%
+% if isfield(record,'measures') && isfield(record.measures,'freezeTimes')
+%     if ~isfield(record.measures,'freezetimes')
+%         record.measures.freezetimes = record.measures.freezeTimes;
+%     end
+%     record.measures = rmfield(record.measures,'freezeTimes');
+% end
 
 record.measures.stimstart = stimStart;
 record.measures.freezetimes = freezeTimes;
@@ -43,8 +53,17 @@ record.measures.freezetimes = freezeTimes;
 record.measures.nose = nose;
 record.measures.arse = arse;
 record.measures.stim = stim;
+record.measures.mousemove = mouse_move;
+record.measures.move2der = move_2der;
+record.measures.trajectorylength = trajectory_length;
+record.measures.averagemovement = averageMovement;
+record.measures.minimalmovement = minimalMovement;
+record.measures.diftreshold = difTreshold;
+record.measures.deriv2tresh = deriv2Tresh;
+record.measures.fign = fig_n;
+record.measures.freeze_duration = freeze_duration;
 
-record.freezing_computed = ~isempty(freezeTimes);
+record.measures.freezing_computed = ~isempty(freezeTimes);
 
 manualoverride=regexp(record.comment,'freezing=(\s*\d+)','tokens');
 if ~isempty(manualoverride)
@@ -53,7 +72,7 @@ else
     record.measures.freezing = record.measures.freezing_computed;
 end
 
-if isempty(freezeTimes) == 0
+if ~isempty(freezeTimes)
     [head_theta, pos_theta] = angle_cal(record);
     
     record.measures.head_theta = head_theta;

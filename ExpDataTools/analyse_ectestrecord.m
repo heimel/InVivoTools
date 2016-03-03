@@ -120,7 +120,7 @@ for i=1:length(g) % for all cells
     if ~isempty(inp.st) && ~isempty(inp.st.stimscript)
         switch stim_type
             case {'sg','sg_adaptation'}
-                cellmeasures = analyse_sg(inp,n_spikes,record);
+                cellmeasures = analyse_sg(inp,n_spikes,record,verbose);
             case {'hupe','border','lammemotion','lammetexture'}
                 cellmeasures = analyse_ectest_by_typenumber(inp,record);
             otherwise

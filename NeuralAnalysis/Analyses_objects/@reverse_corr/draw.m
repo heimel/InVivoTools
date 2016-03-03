@@ -15,7 +15,9 @@ if ~isempty(w),
   for i=1:length(z), delete(z(i)); end;
   figure(w.figure);
 
-  p=getparameters(rc); in = rc.internal; I = getinputs(rc);
+  p=getparameters(rc); 
+  in = rc.internal; 
+  I = getinputs(rc);
 
   [r1,r2,r3,r4]=getdrawrects(rc);
 
