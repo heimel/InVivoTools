@@ -3,7 +3,14 @@ function [ ai_mic ] = load_microphone(settings)
 %   
 %   Changes to the microphone Analog Input object can be made here.
 %   Configuration dedicated to Dodotronic Ultramic 250kHz
-%    
+%   
+%
+%   Last edited 7-3-2016. SL
+%
+%   *** REVISION:
+%           -> Extended sample rate needs to be checked (calibrated).
+%
+%
 %   (c) 2016, Simon Lansbergen.
 %   
 
@@ -15,8 +22,10 @@ settings_mic.hwchannels = 1;
 settings_mic.hwnames = 'UltraSonic Mic';
 settings_mic.trigger_type = 'Manual';
 
-% Set sample rate (Hz), max = 96kHz, min = 5 kHz.
-settings_mic.sample_rate = 96000;
+% *** Extended range to 250kHZ ***
+% Set sample rate (Hz), max = 250kHz, min = 5 kHz.
+settings_mic.sample_rate = 250000;
+% settings_mic.sample_rate = 96000;
 
 % copy relevant information from daq_parameters
 settings_mic.duration = settings.duration;
