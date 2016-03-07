@@ -145,7 +145,9 @@ params.sort_klustakwik_arguments = [ ...
 switch lower(record.setup)
     case 'antigua' % tdt data on nin380
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
-        params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time
+        params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time 
+        % calibrated on 4-2-2016 (experiment 14.14), should be 1.0000190, but kept at 1.000017
+        % to not change previous analysis
     case 'wall-e'
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
         params.secondsmultiplier = 1; % multiplification factor of electrophysical signal time
