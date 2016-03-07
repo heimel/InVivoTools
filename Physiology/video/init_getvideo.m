@@ -1,9 +1,29 @@
 function init_getvideo
-%INIT_GETVIDEO.m
+%INIT_GETVIDEO.m initialization script for video acquisition. 
+%Runs main_getvideo() in a loop. No input.
+%-------------------------------------------------------------------------%
+%     
+%   Initialization script for video acquisition using Basler Ace 640-90um
+%   USB 3.0 CCD camera and NI 6008 USB data acquisition board. 
 %
-%   Runs..
+%   Written exclusivly for InVivoTools-toolbox and the above mentioned 
+%   hardware. Matlab 32-bits mandatory for trigger setup using the NI DAQ.
+%
+%   The script gets the according dirtectories by running remotecommglobals()
+%   from the InVivoTools toolbox, which setups communication between 
+%   stimulation, acquisition and triggering systems.
+%
+%   Used scripts:
+%       remotecommglobals()
+%       main_getvideo()
 %
 %
+%   Last edited 7-3-2016. SL
+%
+%
+%   (c) 2016, Simon Lansbergen.
+%
+%-------------------------------------------------------------------------%
 
 %-------------------------------------------------------------------------%
 % Initialisation
@@ -15,12 +35,11 @@ clc             % Clear Command window
 
 % get global communication variables.
 remotecommglobals;
+
 % SIMULATION -> REMOVE
 Remote_Comm_dir = fullfile('D:\Software\temp');     % <- REMOVE
 
 acqready = fullfile(Remote_Comm_dir,'acqReady');
-
-
 
 % check for existance save directory
 theDir = Remote_Comm_dir;
@@ -73,11 +92,8 @@ while (ishandle(push_button))     % needs control-C or push button to exit
         logmsg('acqReady changed');
         acqready_props_prev = acqready_props;
         
-                      
-        open_grab(); % start acquisition session
-        
-        
-        
+        % Start acquisition session based on remotecommglobals() input
+        main_getvideo(); % --> start video acquisition session      
         
     else
         pause(0.3);
