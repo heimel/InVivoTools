@@ -48,6 +48,7 @@ params.load_electrophys = 1; % needed for electrophysiology recording and analys
 params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_webcam = 1; % needed for InVivoTools analysis
 params.load_studies = {}; % folders of Studies to load
+params.load_physiology = 1; % needed for EXG recordings
 
 % set default lab, can be overruled depending on host:
 % alternatives 'Fitzpatrick','Levelt','Lohmann'
@@ -133,6 +134,13 @@ if params.load_electrophys
         fullfile(path2invivotools,'Electrophysiology','TDT'),... % for importing tdt data in linux
         fullfile(path2invivotools,'Electrophysiology','Axon'),... % for importing Axon abf files
         genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5')));    % for MClust spike sorter
+end
+
+
+% Physiology analyses
+if params.load_physiology
+    addpath(fullfile(path2invivotools,'Physiology'),...
+        fullfile(path2invivotools,'Physiology','video'));    % for video 
 end
 
 % NeuralAnalysis package
