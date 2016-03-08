@@ -28,7 +28,7 @@ db = load_testdb( type, hostname );
 
 mice = uniq(sort({db.mouse}));
 
-filename = fullfile(expdatabasepath, 'mousedb.mat');
+[mousedb,filename] = load_expdatabase('mousedb',[],[],[],false);
 [db,filename,perm,lockfile]=open_db( filename);
 if strcmp(perm,'rw')==0
     logmsg('Could not get lock for mouse_db. Quitting.');
