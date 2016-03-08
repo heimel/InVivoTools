@@ -80,7 +80,8 @@ if saveWaves, % save the stimulus timings;
   
   fprintf(fid,'save stims MTI2 start saveScript StimWindowRefresh NewStimViewingDistance NewStimPixelsPerCm;\n');
   fprintf(fid,'cd(gggg);\n');
-  fprintf(fid,'pause(max([0 10-etime(clock,zzz)]));StimEndSound;\n');
+%  fprintf(fid,'pause(max([0 10-etime(clock,zzz)]));StimEndSound;\n');
+  fprintf(fid,'StimEndSound;\n');
   % generally acqusition continues a few seconds longer than the stimulus presentation
   % to make sure all is acquired, so we pause here so the user cannot
   % start another stimulus before acquisition is done.
