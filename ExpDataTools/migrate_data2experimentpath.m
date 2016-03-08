@@ -1,5 +1,5 @@
 function migrate_data2experimentpath( experiments, datatypes, cmode, apply )
-%MIGRARE_DATA2EXPERIMENTPATH restructures InVivo data
+%MIGRATE_DATA2EXPERIMENTPATH restructures InVivo data
 %
 % 2015, Alexander Heimel
 

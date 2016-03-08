@@ -52,7 +52,7 @@ angles = [0:pspar.angle:360-pspar.angle];
 
 for i = 1:n_x*n_y
     if i == 1
-    retinotopy_script(i) = StimScript(0);
+    retinotopy_script(i) = stimscript(0);
     
     row=floor( (i-1)/n_x);
     col=i-1-row*n_x;
@@ -73,7 +73,7 @@ for i = 1:n_x*n_y
     retinotopy_script(i) = loadStimScript(retinotopy_script(i));
     end
         if i == 2
-    retinotopy_script(i) = StimScript(0);
+    retinotopy_script(i) = stimscript(0);
     
     row=floor( (i-1)/n_x);
     col=i-1-row*n_x;
@@ -94,7 +94,7 @@ for i = 1:n_x*n_y
     retinotopy_script(i) = loadStimScript(retinotopy_script(i));
         end
         if i == 3
-    retinotopy_script(i) = StimScript(0);
+    retinotopy_script(i) = stimscript(0);
     
     row=floor( (i-1)/n_x);
     col=i-1-row*n_x;
@@ -115,7 +115,7 @@ for i = 1:n_x*n_y
     retinotopy_script(i) = loadStimScript(retinotopy_script(i));
         end
         if i == 4
-    retinotopy_script(i) = StimScript(0);
+    retinotopy_script(i) = stimscript(0);
     
     row=floor( (i-1)/n_x);
     col=i-1-row*n_x;
@@ -168,7 +168,7 @@ stim=bi2de(stim1(1:2));
             ready=0;
         end
         pause(0.01);
-           if kbcheck
+           if KbCheck
             CloseStimScreen;
             return
         end

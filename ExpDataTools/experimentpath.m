@@ -15,6 +15,12 @@ end
 
 if nargin<4 || isempty(vers)
     vers = '2004';
+    if isfield(record,'setup')
+        switch record.setup
+            case 'jander'
+                vers = '2015';
+        end
+    end
 end
 if nargin<3 || isempty(create)
     create = false;

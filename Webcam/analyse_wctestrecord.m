@@ -3,13 +3,10 @@ function record = analyse_wctestrecord( record, verbose )
 %
 %  RECORD = ANALYSE_WCTESTRECORD( RECORD, VERBOSE=true )
 %
-% 2015, Alexander Heimel
+% 2015-2016, Alexander Heimel
 %
 
-if nargin<2
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<2 || isempty(verbose)
     verbose = true;
 end
 
@@ -26,30 +23,28 @@ if length(stims)>1
 end
 
 stimparams = getparameters(stims{1});
-startside = stimparams.start_position;
+if isfield(stimparams,'start_position')
+    startside = stimparams.start_position;
+else
+    startside = NaN;
+end
 rec = 1;
-% stimStart = (wcinfo(rec).stimstart-par.wc_playbackpretime) * 1.015
 
-stimStart = wcinfo(rec).stimstart * 1.015;%*100)/100 ;%-1.2;
-%Factor for fixing delay (1/015) -0.8 correction %1.01445 more precisely %(stimstart*1.01445);
+stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
 
+[pk_frRall, pk_frLall] = search_stim_onset(filename, stimStart);
+
+record.measures.ActStimFrameR = pk_frRall;
+record.measures.ActStimFrameL = pk_frLall;
 
 [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
     averageMovement,minimalMovement,difTreshold,deriv2Tresh,fig_n, freeze_duration] = ...
-    trackmouseblack_pi(filename,false,stimStart,startside);
+    trackmouseblack_pi(filename,false,stimStart,startside,pk_frRall,pk_frLall);
 
 record.measures = [];
-%
-% if isfield(record,'measures') && isfield(record.measures,'freezeTimes')
-%     if ~isfield(record.measures,'freezetimes')
-%         record.measures.freezetimes = record.measures.freezeTimes;
-%     end
-%     record.measures = rmfield(record.measures,'freezeTimes');
-% end
 
 record.measures.stimstart = stimStart;
 record.measures.freezetimes = freezeTimes;
-% record.measures.flightTimes = flightTimes;
 record.measures.nose = nose;
 record.measures.arse = arse;
 record.measures.stim = stim;
@@ -62,7 +57,6 @@ record.measures.diftreshold = difTreshold;
 record.measures.deriv2tresh = deriv2Tresh;
 record.measures.fign = fig_n;
 record.measures.freeze_duration = freeze_duration;
-
 record.measures.freezing_computed = ~isempty(freezeTimes);
 
 manualoverride=regexp(record.comment,'freezing=(\s*\d+)','tokens');

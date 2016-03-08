@@ -1,6 +1,6 @@
 function [freezeTimes, nose, arse, stim, mouse_move, move_2der,trajectory_length,...
     averageMovement,minimalMovement,difTreshold,deriv2Tresh, fig_n, freeze_duration] =...
-    trackmouseblack_pi(filename,showMovie,stimStart,startside)
+    trackmouseblack_pi(filename,showMovie,stimStart,startside,pk_frRall,pk_frLall)
 %% Trackmouseblack function tracks mouse on basis of his black color and
 %contrast with light background.
 % 09-03-2015 Sven van der Burg Azadeh Tafreshiha Dec 2015, added mouse and
@@ -30,13 +30,16 @@ stimFrame = stimStart*frameRate; %round(stimStart*frameRate);
 % Range of frames that need to be analyzed
 frameRange = (stimFrame - framesBeforeAfter):(stimFrame + framesBeforeAfter);
 
-[pk_frR,pk_frL] = search_stim_onset(filename, stimStart);
-
-ActStimFrame = min([pk_frR;pk_frL]);
+ActStimFrame = min([pk_frRall, pk_frLall]);
 ActStartTime = ActStimFrame/30;
-ActEndFrame = max([pk_frR;pk_frL]);
+ActEndFrame = max([pk_frRall, pk_frLall]);
 ActEndTime = ActEndFrame/30;
-
+if isempty(ActStartTime) 
+    ActStartTime = stimStart;
+end
+if isempty(ActEndTime) 
+    ActEndTime = stimStart+90;
+end
 makeVideo = 0; % Make 1 if you want to record
 
 blackThreshold = 0.20; % Treshold for amount of blackness to be treated as mouse %was 0.30
@@ -520,9 +523,9 @@ for i = target_frames
                         p = 1; framesforward = 0;
                         message1 =sprintf('Click first on nose then on arse');
                         if k==1
-                        uiwait(msgbox(message1));
-                        else 
-                        logmsg(message1);
+                            uiwait(msgbox(message1));
+                        else
+                            logmsg(message1);
                         end
                         [xn, yn] = ginput(2);
                         %                                         while p<3   %Alexander's looking
@@ -560,6 +563,7 @@ for i = target_frames
                         arse(k, 1:2) = [xn(2), yn(2)];
                         plot([nose(k,1),arse(k,1)],[nose(k,2),arse(k,2)], 'linewidth', 2); %head line
                         hold on;
+                        
                         if startTime<ActStartTime || startTime>ActEndTime+0.2
                             logmsg('Stimulus not in view');
                             stim(k, :) = [NaN NaN];
@@ -570,8 +574,8 @@ for i = target_frames
                             if eq(button,110)
                                 while p<2   % looking at frames and checking
                                     message3 = ('use left and right arrow keys');
-%                                     uiwait(msgbox(message3));
-logmsg(message3);
+                                    %                                     uiwait(msgbox(message3));
+                                    logmsg(message3);
                                     [xs(p), ys(p), button] = ginput(1);
                                     switch button
                                         case 28 % left arrow
@@ -671,15 +675,15 @@ if makeVideo
     close(writerObj); %#ok<UNRCH>
 end
 
-function [frameHour,frameMinute,frameSec,frameMSec] = getFrameTime(frameNr,frameRate)
-totalSecs = floor(frameNr/(frameRate));
-totalMinutes = floor(totalSecs/60);
-frameSec = round((totalSecs/60 - totalMinutes)*60);
-frameMSec = round((frameNr /frameRate -totalSecs) *100);
-frameHour = floor(totalMinutes/60);
-frameMinute = totalMinutes - frameHour * 60;
-if frameHour == 0
-    frameHour = [];
-end
-end
+    function [frameHour,frameMinute,frameSec,frameMSec] = getFrameTime(frameNr,frameRate)
+        totalSecs = floor(frameNr/(frameRate));
+        totalMinutes = floor(totalSecs/60);
+        frameSec = round((totalSecs/60 - totalMinutes)*60);
+        frameMSec = round((frameNr /frameRate -totalSecs) *100);
+        frameHour = floor(totalMinutes/60);
+        frameMinute = totalMinutes - frameHour * 60;
+        if frameHour == 0
+            frameHour = [];
+        end
+    end
 end

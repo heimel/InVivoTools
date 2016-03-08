@@ -52,8 +52,10 @@ end
 
 real_stimstart = [];
 for i=1:length(wcinfo)
-    real_stimstart(i) = (wcinfo(i).stimstart)*1.0133;
+    real_stimstart(i) = (wcinfo(i).stimstart)*par.wc_timemultiplier  + par.wc_timeshift ;
     logmsg(['Recorded in ' fullfile(parpath,wcinfo(i).filename)]);
-    logmsg(['Stimulus started: ' num2str(real_stimstart) ' s = '...
+    logmsg(['Stimulus started original: ' num2str(wcinfo(i).stimstart) ' s = '...
+        num2str(floor(wcinfo(i).stimstart/60)) ':' num2str(wcinfo(i).stimstart-60*floor(wcinfo(i).stimstart/60),'%02.2f')   ]);
+    logmsg(['Stimulus started corrected: ' num2str(real_stimstart) ' s = '...
         num2str(floor(real_stimstart/60)) ':' num2str(real_stimstart-60*floor(real_stimstart/60),'%02.2f')   ]);
 end
