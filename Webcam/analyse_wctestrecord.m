@@ -39,7 +39,7 @@ record.measures.ActStimFrameL = pk_frLall;
 
 [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
     averageMovement,minimalMovement,difTreshold,deriv2Tresh,fig_n, freeze_duration] = ...
-    trackmouseblack_pi(filename,false,stimStart,startside);
+    trackmouseblack_pi(filename,false,stimStart,startside,pk_frRall,pk_frLall);
 
 record.measures = [];
 
