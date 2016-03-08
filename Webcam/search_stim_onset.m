@@ -1,19 +1,9 @@
 function [pk_frRall, pk_frLall] = search_stim_onset(filename, stimStart)
 %search the roi for the _actual_ stimulus onset
 % Azadeh Tafreshiha, feb 2016
-
 %%
-global measures global_record
 
-global_record = record;
 
-experimentpath(record);
-
-measures = record.measures;
-
-evalin('base','global measures');
-evalin('base','global global_record');
-logmsg('Measures available in workspace as ''measures'',, record as ''global_record''.');
 
 %% get the frame and roi
 v = VideoReader(filename);
