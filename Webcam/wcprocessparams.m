@@ -37,8 +37,8 @@ else
         par.wc_mp4wrappercommand =  '"C:\Program Files\GPAC\mp4box.exe" -fps 30 -add ';
     elseif exist('C:\Toolbox\ffmpeg\bin\ffmpeg.exe','file')
         par.wc_mp4wrappercommand = 'C:\Toolbox\ffmpeg\bin\ffmpeg.exe  -c:v copy -f mp4 -i ';
-    else        warning('INSTALL_FFMPEG','Install ffmpeg (https://ffmpeg.org) in C:\Toolbox\ffmpeg or install mp4box');
-        warning('off','INSTALL_FFMPEG');
+    else        warning('WCPROCESSPARAMS:INSTALL_FFMPEG','Install ffmpeg (https://ffmpeg.org) in C:\Toolbox\ffmpeg or install mp4box');
+        warning('off','WCPROCESSPARAMS:INSTALL_FFMPEG');
     end
 end
 
