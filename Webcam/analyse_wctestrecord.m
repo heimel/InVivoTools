@@ -33,6 +33,10 @@ rec = 1;
 stimStart = wcinfo(rec).stimstart * 1.015;%*100)/100 ;%-1.2;
 %Factor for fixing delay (1/015) -0.8 correction %1.01445 more precisely %(stimstart*1.01445);
 
+[pk_frRall, pk_frLall] = search_stim_onset(filename, stimStart);
+
+record.measures.ActStimFrameR = pk_frRall;
+record.measures.ActStimFrameL = pk_frLall;
 
 [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
     averageMovement,minimalMovement,difTreshold,deriv2Tresh,fig_n, freeze_duration] = ...
