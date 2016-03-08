@@ -47,11 +47,7 @@ end
 
 rec = 1;
 
-timemultiplier = 1.015;
-timeshift = 0;
-wc_playbackpretime = par.wc_playbackpretime;
-%wc_playbackpretime  = 0;
-starttime = (wcinfo(rec).stimstart-wc_playbackpretime) * timemultiplier + timeshift;
+starttime = (wcinfo(rec).stimstart-par.wc_playbackpretime) * par.wc_timemultiplier + par.wc_timeshift;
 cmd = par.wc_playercommand;
 switch par.wc_player
     case 'vlc'

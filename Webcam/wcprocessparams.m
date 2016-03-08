@@ -43,5 +43,6 @@ else
 end
 
 par.wc_playbackpretime = 1; % s to show before stim onset
-
+par.wc_timemultiplier = 1.01445;
+par.wc_timeshift = 0;
 
