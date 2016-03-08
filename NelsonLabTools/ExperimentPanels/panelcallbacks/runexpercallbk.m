@@ -140,6 +140,7 @@ switch action
         if saveWaves % if acquiring, make new record
             add_record( 'TP', get(h.savedir,'string'), scriptName );
             add_record( 'Wc', get(h.savedir,'string'), scriptName );
+            add_record( 'oi', get(h.savedir,'string'), scriptName );
         end
     case 'add_aq',
         aqdata = get(h.list_aq,'UserData');
@@ -335,8 +336,12 @@ if ~isempty(h_db)
         pause(0.1);
         ud = new_testrecord(ud);
         record = ud.db(ud.current_record);
-        record.epoch = epoch;
-        record.stim_type = scriptName;
+        if isfield(record,'epoch')
+            record.epoch = epoch;
+        end
+        if isfield(record,'stim_type')
+            record.stim_type = scriptName;
+        end
         ud.db(ud.current_record) = record;
         set(h_db,'Userdata',ud);
         control_db_callback(ud.h.current_record);
