@@ -121,11 +121,6 @@ else
                 ready=1;
             end
             if go && ready
-                if i<1
-                    disp('DISPLAYSTIMSCRIPT: Stim 0 requested. Assuming bit 5 is missing and showing stim 16');
-                    i = l; % changed on 2013-07-01 (changed by Mehran 2013-08-10)
-                end
-          %      Rush('DisplayStimulus(MTI{i},[],trigger(i),capture_movie);',prioritylevel);
                 Rush('DisplayStimulus(MTI{i},get(stimScript,MTI{i}.stimid),trigger(i),capture_movie);',prioritylevel);
                 ready=0;
             end
