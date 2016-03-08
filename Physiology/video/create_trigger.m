@@ -1,4 +1,4 @@
-function [trigger]=create_trigger(recording_time)
+function [trigger_vid]=create_trigger(recording_time)
 %CREATE_TRIGGER.m creates an analog input object called trigger, which is 
 %used to trigger open_grab() via main_getvideo().
 %-------------------------------------------------------------------------%
@@ -15,10 +15,10 @@ function [trigger]=create_trigger(recording_time)
 %       analoginput()
 %       addchannel()
 %
-%   Last edited 7-3-2016. SL
+%   Last edited 8-3-2016. SL
 %
 %   *** REVISION:
-%           -> Check if addchannel() is needed to run AI (line 49)
+%           -> 
 %
 %
 %
@@ -30,22 +30,24 @@ function [trigger]=create_trigger(recording_time)
 
 % Pre Settings
 trigger_type     = 'HwDigital';
-trigger_cond     = 'TrigPosEdge';
+trigger_cond     = 'PositiveEdge';
 trigger_repeat   = 0;
-sample_rate      = 5000;
+sample_rate      = 1000;
 required_samples = floor(sample_rate * recording_time);
 
+
 % Create Analog Input object
-trigger = analoginput('nidaq','0');
+trigger_vid = analoginput('nidaq','Dev1');
 
 % Setup AI parameters
-set(trigger, 'TriggerType',       trigger_type);
-set(trigger, 'TriggerCondition',  trigger_cond);
-set(trigger, 'TriggerRepeat',     trigger_repeat)
-set(trigger, 'SamplesPerTrigger', required_samples);
+set(trigger_vid, 'SampleRate',        sample_rate);
+set(trigger_vid, 'TriggerType',       trigger_type);
+set(trigger_vid, 'TriggerCondition',  trigger_cond);
+set(trigger_vid, 'TriggerRepeat',     trigger_repeat)
+set(trigger_vid, 'SamplesPerTrigger', required_samples);
 
-% Add channel to run AI (is this needed?)
-addchannel(trigger,1)  % <- check HW channel!
+% Add channel to run AI (mandatory)
+addchannel(trigger_vid,0);  
 
 
 end

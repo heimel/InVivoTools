@@ -1,4 +1,4 @@
-function check_video()
+function check_video(file_path_and_name)
 %CHECK_VIDEO.m
 %
 %-------------------------------------------------------------------------%
@@ -9,9 +9,10 @@ function check_video()
 %
 %   - contains analysing code.
 %
-%   - getfourcc()
+%   Used scripts:
+%       getfourcc()
 %
-%   Last edited 7-3-2016. SL
+%   Last edited 8-3-2016. SL
 %
 %   *** REVISION:
 %           -> 
@@ -23,20 +24,34 @@ function check_video()
 %
 %-------------------------------------------------------------------------%
 
+%-------------------------------------------------------------------------%
+% Initialisation
+close all       % Close all current windows with figures (plots)
+clc             % Clear Command window
+%-------------------------------------------------------------------------%
+
+% for debugging purpose
+% show installed codec on system
+logmsg('Show all installed codecs on system');disp(' ');disp(' ');
 getfourcc;
 
-file_open = fullfile(save_to);
+% make sure file path and file are in correct syntax
+file_open = fullfile(file_path_and_name);
 
-mmfileinfo(file_open);
+% retrieve and show video meta-data
+mmfileinfo(file_open)
+
+% open video container
 vid = VideoReader(file_open)
-
 info_on_vid = get(vid);
-info_on_vid.NumberOfFrames;
+
+% example
+info_on_vid
 
 % video = read(vid,[1 info_on_vid.NumberOfFrames]); % first 10 frames
 video = read(vid,[1 10]); % first 10 frames
 
-[X,Y,~,frames]=size(video)
+% % [X,Y,~,frames]=size(video)
 % 4-D container (X,Y,Z,frame) Z = 1 or : 
 
 % test = video(:,:,:); % 3D container

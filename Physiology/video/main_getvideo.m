@@ -21,14 +21,15 @@ function main_getvideo()
 %   
 %   Used scripts:
 %       load_reference()
+%       remotecommglobals()
 %       create_trigger()
 %       open_grab()
 %
-%   Last edited 7-3-2016. SL
+%   Last edited 8-3-2016. SL
 %
 %   *** REVISION:
-%           -> Replace script variable with correct directory (line 59).
-%           -> Check script for bugs.
+%           -> Remove line 49, 50 and 66.
+%           -> Uncomment line 58 and 78.
 %
 %
 %
@@ -36,13 +37,30 @@ function main_getvideo()
 %
 %-------------------------------------------------------------------------%
 
+% initialize main_getvideo script
+clc
+disp(' ');
+logmsg('Initialize main_getvideo.m script :');
+logmsg(' - Video acquisition loop');
+logmsg(' - Used in InVivoTool toolbox');
+logmsg(' - Frame grabbing at 20 Hz.');
+logmsg(' - Compression');
+logmsg('    - Microsoft - Video 1(msvidc32.dll) fourCC -> MSVC.');
+logmsg('    - compression ratio 75%.'); 
+disp(' ');disp(' ');
+logmsg(' *** Wait for trigger to be ready ... ***');
+disp(' ');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   Load Stim. References  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[ block_number, data_dir] = load_reference;
+% [ block_number, data_dir] = load_reference;
+remotecommglobals;
 
+% *** Beta ***
+data_dir     = 'c:\temp';   % <- REMOVE
+block_number = 2;           % <- REMOVE
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%         Set Time         %%%
@@ -56,13 +74,9 @@ recording_time = (block_number * 10) + 1; % recording time in seconds
 %%%  Set Save Path and Name  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% replace later with correct directory
-% *** Beta ***
-% data_dir  = 'D:\Software\temp';
-
-% replace with acqReady
-% *** Beta ***
-read_data = fullfile(data_dir,'acqReady_tmp');
+% set acqReady path
+% read_data = fullfile(Remote_Comm_dir,'acqReady'); 
+read_data = fullfile(data_dir,'acqReady');      % <- REMOVE when done
 
 % set file output name
 file_str = 'pupil_mouse.avi';
@@ -104,21 +118,25 @@ output_reference = [save_to file_str];
 %%%  Set and Initiate Trigger  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% creates Analog Object called trigger (pre-set for NI DAQ 6008 USB)
-trigger = create_trigger(recording_time);
+% creates Analog Object called trigger_vid (pre-set for NI DAQ 6008 USB)
+trigger_vid = create_trigger(recording_time);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Setup Video Acquisition Loop %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-start(trigger);
+% executes start command for Analog Input Object, and waits for a trigger
+start(trigger_vid);
+
+logmsg(' *** Waiting for trigger ***');disp(' ');
 
 % main while loop -> optimized for video acquisition via open_grab()
 counter = 1;
 while true  
  
     % *** when acquisition is triggered ***
-    if (trigger(1).TriggersExecuted == 1 && counter == 1);
+    if (trigger_vid.TriggersExecuted == 1 && counter == 1);
+        
         logmsg(' *** Acquisition Started ***')
         counter = counter + 1;
         
@@ -129,7 +147,7 @@ while true
     
     % *** when acquisition time ends ***
     % breaks from loop if daq is inactive (i.e. waiting for start command)
-    if strcmp(ai.Running,'Off')
+    if strcmp(trigger_vid.Running,'Off')
         logmsg(' *** Acquisition ended, returning to init_getvideo() ***');
         break
     end
@@ -139,9 +157,9 @@ end
 
 % Destroy trigger (Analog Input object) to prevent faulty results when
 % runned in a script
-stop(trigger);       % Stops (all active processes on) analog input object
-delete(trigger);     % Deletes analog input object
-clear trigger        % Removes analog input object from workspace
+stop(trigger_vid);       % Stops (all active processes on) analog input object
+delete(trigger_vid);     % Deletes analog input object
+clear trigger            % Removes analog input object from workspace
 
 
 end
