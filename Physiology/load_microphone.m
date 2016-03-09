@@ -50,7 +50,8 @@ set(ai_mic, 'TriggerFcn', {@run_trigger_mic,settings});
 
 % Set bit rate, max 32.
 set(ai_mic, 'Bits', 32);
-set(ai_mic, 'SampleRate', 96000);
+% set(ai_mic, 'SampleRate', 96000);
+set(ai_mic, 'SampleRate', 250000);
 
 end
 

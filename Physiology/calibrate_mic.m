@@ -16,7 +16,8 @@ function calibrate_mic()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Set Sample Rate (Hz). max 96 kHz, min 5 kHz.
-SampleRate = 96000;
+% SampleRate = 96000;
+SampleRate = 250000
 
 % Set Bit Rate per Sample, max 32 bits.
 BitRate = 32;
