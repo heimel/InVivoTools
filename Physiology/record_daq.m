@@ -1,12 +1,12 @@
-function record_daq()
+function [time,data]=record_daq()
 %RECORD_DAQ.m stand-alone data acquisition with MCC DAQ. open file for
 %acquisition settings
 %-------------------------------------------------------------------------%
 %     
 %   This script is written for stand-alone data acquistion with the MCC
-%   DAQ. The script contains pre-settings, as well as the acquistion it
-%   self. All settings are set within the script and no InVivoTools toolbox
-%   functions are used.
+%   DAQ. The script contains pre-settings such as acquisition duration and
+%   sample rate, as well as the acquistion it self. All settings are set 
+%   within the script and no InVivoTools toolbox functions are used.
 %
 %   Use calibrate_mic() to check the channel input and sensor range.
 %
@@ -15,10 +15,9 @@ function record_daq()
 %       addchannel()
 %
 %   *** REVISION:
-%           -> Run for bugs.
 %           -> Needs input from function (in line).
 %
-%   Last edited 9-3-2016. SL
+%   Last edited 10-3-2016. SL
 %
 %
 %   (c) 2016, Simon Lansbergen.
@@ -38,18 +37,19 @@ clc             % Clear Command window
 
 % pre-settings: change these variables 
 % for individual acquistion needs.
-duration = 10;                   % Acquisition time, in seconds.
+duration = 15;                   % Acquisition time, in seconds.
 sample_rate = 5000;              % Set sample rate (Hz), max = 200000Hz, min = 1Hz.
-hwchannels = [0];                % DAQ channel input Sinks
-sensor_range_channel = 2.5;      % Sensor range +/-   
-input_range_channel = 5;         % Input range +/-
+hwchannels = [1 0];                % DAQ differential analog inputs channel(s)
+sensor_range_channel = 2.5;      % Sensor range +/- (Volts)  
+input_range_channel = 5;         % Input range +/- (Volts)
+units_range_channel = 5;         % Units Range +/- (Volts)
+allinfo = false;                 % Display Summary of Analog Input (AI) Object Using 'PCI-DAS6025'
 
 % fixed variables (hardware etc.)
 daq_type = 'mcc';                % Set adapter type
 daq_hw_id = '1';                 % Hardware ID
 trigger_type = 'Immediate';      % Set trigger type -> Triggerd immediate when start is executed
 required_samples = floor(sample_rate * duration);
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Acquisition Part - Do not change! %%%
@@ -67,8 +67,9 @@ set(AI, 'TriggerType', trigger_type);
 addchannel(AI,hwchannels);
 
 % set input and sensor range
-AI.InputRange = [-input_range_channel, input_range_channel];
-AI.SensorRange = [-sensor_range_channel, sensor_range_channel];
+AI.Channel.InputRange  = [-input_range_channel, input_range_channel];
+AI.Channel.SensorRange = [-sensor_range_channel, sensor_range_channel];
+AI.Channel.UnitsRange  = [-units_range_channel, units_range_channel];
 
 % output acquisition settings
 str=['Acquisition time (seconds): ' num2str(duration)];
@@ -79,14 +80,22 @@ str=['Hardware channel(s) -> [' num2str(hwchannels) ']'];
 logmsg(str)
 str=['Sensor range (V): ' num2str(sensor_range_channel)];
 logmsg(str)
+str=['Units range (V): ' num2str(units_range_channel)];
+logmsg(str)
 str=['Input range (V): ' num2str(input_range_channel)];
-logmsg(str);disp(' ');disp(' ');
+logmsg(str)
+if allinfo
+    disp(' ');disp(AI);
+end
+disp(' ');disp(' ');
 logmsg(' *** Hit key to continue to start Acquisition ***')
 disp(' ');
 pause;
 
 % start acquisition
 start(AI)
+logmsg(' *** Acquisition Started ***')
+disp(' ');
 
 % wait to block Matlab during acquisition time, with an additional 0.5
 % seconds for safety.
@@ -97,7 +106,7 @@ wait(AI,(duration + 0.5));
 
 % output acquisition done
 logmsg(' *** Acquisition done ***')
-logmsg(' *** Data in in workspace ***')
+logmsg(' *** Data available in in workspace ***')
 disp(' ')
 
 % stop and delete analog object

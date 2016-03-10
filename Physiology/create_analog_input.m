@@ -10,6 +10,7 @@ function [ ai, ai_channel_setting ] = create_analog_input( settings )
 %   Includes addition of runtrigger callback function, executed/called back
 %   when triggered by TTL.
 %
+%   Last edited: 10-3-2016. SL
 %
 %   (c) 2016, Simon Lansbergen.
 %
@@ -48,10 +49,9 @@ ai_channel_setting = addchannel(ai,settings.hwchannels,settings.hwnames);
 [~,size_inputsensor]=size(settings.sensor_range_channel);
 [~,size_unitsrange]=size(settings.units_range_channel);
 
-switch settings.daq_type
-    case 'mcc'  % for MCC the hw channel index is 0
-if size_hwchannels == (size_inputrange && size_inputsensor && size_unitsrange)    % Loop that adds proper channel configuration to channels.
-    for i = 1: (max(settings.hwchannels)+1)
+% Loop that adds proper channel configuration to channels.
+if size_hwchannels == size_inputrange && size_inputsensor && size_unitsrange    
+    for i = 1: size_hwchannels
         ai.Channel(i).InputRange = [-settings.input_range_channel(i), settings.input_range_channel(i)];
         ai.Channel(i).SensorRange = [-settings.sensor_range_channel(i), settings.sensor_range_channel(i)];
         ai.Channel(i).UnitsRange = [-settings.units_range_channel(i), settings.units_range_channel(i)];
@@ -59,20 +59,6 @@ if size_hwchannels == (size_inputrange && size_inputsensor && size_unitsrange)  
 else
     logmsg('Channels not properly configured, see daq_parameters config-file');
     logmsg(' -> default vendor settings are applied');
-end
-
-    otherwise 
-if size_hwchannels == (size_inputrange && size_inputsensor && size_unitsrange)    % Loop that adds proper channel configuration to channels.
-    for i = 1: max(settings.hwchannels)
-        ai.Channel(i).InputRange = [-settings.input_range_channel(i), settings.input_range_channel(i)];
-        ai.Channel(i).SensorRange = [-settings.sensor_range_channel(i), settings.sensor_range_channel(i)];
-        ai.Channel(i).UnitsRange = [-settings.units_range_channel(i), settings.units_range_channel(i)];
-    end 
-else
-    logmsg('Channels not properly configured, see daq_parameters config-file');
-    logmsg(' -> default vendor settings are applied');
-end
-     
 end
 
 % add run_trigger callback function, executed when triggered by TTL pulse

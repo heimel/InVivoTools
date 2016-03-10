@@ -15,6 +15,9 @@ function [ ai_vec, settings ] = daq_parameters_mcc( input_arg )
 %
 %   -> to be completed: add more about functionallity in header
 %                      
+%   Last edited:
+%       9-3-2016, SL
+%   
 %    
 %   (c) feb-2016, Simon Lansbergen.
 %   
@@ -97,8 +100,8 @@ end
 % With the use of {'name_channel_1','name_channel_2'} in the [] array,
 % multiple names can be added to analog data object ai
 
-settings.hwchannels = [0];                 % DAQ channel input Sinks
-settings.hwnames = [{'Heart_Rate'}];           % Give name to channels
+settings.hwchannels = [0 1];                 % DAQ channel input Sinks
+settings.hwnames = [{'Heart_Rate','EMG'}];           % Give name to channels
 
 % settings.hwchannels = [0 1];                 % DAQ channel input Sinks
 % settings.hwnames = [{'EMG','EKG'}];          % Give name to channels
@@ -111,21 +114,21 @@ settings.hwnames = [{'Heart_Rate'}];           % Give name to channels
 % Input Range can be set at either -5 and 5 -> enter 5, or -10 and 10 
 % (default) -> enter 10. 
 settings.input_range_channel(1) = 5;
-settings.input_range_channel(2) = 10;
+settings.input_range_channel(2) = 5;
 % settings.input_range_channel(3) = 5;
 
 % Input sensor can have any value, although it is not possible (within this
 % script) to set both values to different values (e.g. -1 and 1.5). Any
 % value can be entered (e.g. for the range -1.5 to 1.5 enter 1.5).  
 settings.sensor_range_channel(1) = 2.5;
-settings.sensor_range_channel(2) = 5;
+settings.sensor_range_channel(2) = 2.5;
 % settings.sensor_range_channel(3) = 10;
 
 % Unit Range can be any value, although it is not possible (within this
 % script) to set both values to different values (e.g. -1 and 1.5). Any
 % value can be entered(e.g. for the range -1.5 to 1.5 enter 1.5).
 settings.units_range_channel(1) = 2.5;
-settings.units_range_channel(2) = 5;
+settings.units_range_channel(2) = 2.5;
 % settings.units_range_channel(3) = 10;
 
 
