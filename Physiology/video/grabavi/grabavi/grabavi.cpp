@@ -249,6 +249,9 @@ int main(int argc, char* argv[]) {
 		// This smart pointer will receive the grab result data.
 		CGrabResultPtr ptrGrabResult;
 
+
+		int counter = 0;
+
 		// Camera.StopGrabbing() is called automatically by the RetrieveResult() method
 		// when c_countOfImagesToGrab images have been retrieved.
 		while (camera.IsGrabbing())
@@ -271,7 +274,7 @@ int main(int argc, char* argv[]) {
 			// 	<< "; Image has been converted = " << !aviWriter.CanAddWithoutConversion(ptrGrabResult)
 			// 	<< std::endl;
 			
-			int counter = 0;
+			
 			
 			if (counter == (frames / 2)) { 
 				cout << "Acquiring Data ... 50%" << endl;

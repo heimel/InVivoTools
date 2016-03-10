@@ -12,6 +12,9 @@ function init_getvideo
 %   The script gets the according dirtectories by running remotecommglobals()
 %   from the InVivoTools toolbox, which setups communication between 
 %   stimulation, acquisition and triggering systems.
+%	
+%	Always check for the latest grabavi.exe with the date of grabavi.cpp, 
+%	otherwise complile grabavi.exe from latest cpp version.
 %
 %   Used scripts:
 %       remotecommglobals()
