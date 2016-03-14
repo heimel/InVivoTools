@@ -6,10 +6,7 @@ function record = track_wctestrecord( record, verbose )
 % 2015, Alexander Heimel
 %
 
-if nargin<2
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<2 || isempty(verbose)
     verbose = true;
 end
 
@@ -26,30 +23,39 @@ if length(stims)>1
 end
 
 stimparams = getparameters(stims{1});
-startside = stimparams.start_position;
-rec = 1;
-% stimStart = (wcinfo(rec).stimstart-par.wc_playbackpretime) * 1.015
-
-stimStart = round(wcinfo(rec).stimstart * 1.015);%*100)/100 ;%-1.2;
-%Factor for fixing delay (1/015) -0.8 correction %1.01445 more precisely %(stimstart*1.01445);
-
-
-[freezeTimes, nose, arse, stim, mouse_move, mouse_2der] = ...
-    trackmouseblack_pi(filename,false,stimStart,startside);
-
-record.measures.stimstart = stimStart;
-record.measures.freezetimes = freezeTimes;
-% record.measures.flightTimes = flightTimes;
-record.measures.nose = nose;
-record.measures.arse = arse;
-record.measures.stim = stim;
-record.measures.mouse_move = mouse_move;
-
-record.measures.freezing_computed = ~isempty(freezeTimes);
-
-manualoverride=regexp(record.comment,'freezing=(\s*\d+)','tokens');
-if ~isempty(manualoverride)
-    record.measures.freezing = manualoverride{1};
+if isfield(stimparams,'start_position')
+    startside = stimparams.start_position;
 else
-    record.measures.freezing = record.measures.freezing_computed;
+    startside = NaN;
 end
+rec = 1;
+
+stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
+
+record.measures = [];
+record.measures.stimstart = stimStart;
+
+[frameRate, frame1, arena] = get_arena(filename, stimStart);
+
+record.measures.frameRate = frameRate;
+record.measures.frame1 = frame1;
+record.measures.arena = arena;
+
+% record.measures = [];
+
+[brightness, thresholdsStimOnset, peakPoints] = ...
+    search_stim_onset(filename, stimStart, arena, frameRate);
+
+record.measures.brightness = brightness;
+record.measures.thresholdsStimOnset = thresholdsStimOnset;
+record.measures.peakPoints = peakPoints;
+
+
+% % record.measures.freezing_computed = ~isempty(freezeTimes);
+% 
+% manualoverride=regexp(record.comment,'freezing=(\s*\d+)','tokens');
+% if ~isempty(manualoverride)
+%     record.measures.freezing = manualoverride{1};
+% else
+%     record.measures.freezing = record.measures.freezing_computed;
+% end

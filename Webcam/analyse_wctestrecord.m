@@ -32,18 +32,13 @@ rec = 1;
 
 stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
 
-[pk_frRall, pk_frLall] = search_stim_onset(filename, stimStart);
-
-record.measures.ActStimFrameR = pk_frRall;
-record.measures.ActStimFrameL = pk_frLall;
+peakPoints = record.measures.peakPoints;
 
 [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
-    averageMovement,minimalMovement,difTreshold,deriv2Tresh,fig_n, freeze_duration] = ...
-    trackmouseblack_pi(filename,false,stimStart,startside,pk_frRall,pk_frLall);
+    averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] = ...
+    trackmouseblack_pi(filename,false,stimStart,startside,peakPoints);
 
-record.measures = [];
 
-record.measures.stimstart = stimStart;
 record.measures.freezetimes = freezeTimes;
 record.measures.nose = nose;
 record.measures.arse = arse;
@@ -55,7 +50,7 @@ record.measures.averagemovement = averageMovement;
 record.measures.minimalmovement = minimalMovement;
 record.measures.diftreshold = difTreshold;
 record.measures.deriv2tresh = deriv2Tresh;
-record.measures.fign = fig_n;
+
 record.measures.freeze_duration = freeze_duration;
 record.measures.freezing_computed = ~isempty(freezeTimes);
 
@@ -74,4 +69,5 @@ if ~isempty(freezeTimes)
 else
     record.measures.head_theta = [];
     record.measures.pos_theta = [];
+end
 end

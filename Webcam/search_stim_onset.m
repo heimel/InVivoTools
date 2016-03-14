@@ -1,56 +1,21 @@
-function [pk_frRall, pk_frLall] = search_stim_onset(filename, stimStart)
+function [brightness, thresholdsStimOnset, peakPoints] = ...
+    search_stim_onset(filename, stimStart, arena, frameRate)
 %search the roi for the _actual_ stimulus onset
 % Azadeh Tafreshiha, feb 2016
-%%
-
-
 
 %% get the frame and roi
 v = VideoReader(filename);
-frameRate = get(v, 'FrameRate');
 stimFrame = stimStart*frameRate;
 start_frame = stimFrame-30-10; %30:length of the stim, 10:for interval
 end_frame = stimFrame+90+30;
 num_frames  = numel(start_frame:end_frame);%;v.NumberofFrames;
-fontSize = 14;
-frame1 = read(v,stimFrame); % read a frame at the beginning. I chose 5550 for now
-figure(3);
-imshow(frame1, []); % just show it
-axis on;
-set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
-message1 = sprintf('Select the chamber arena region.');
-message2 = sprintf('Left click and hold to begin drawing.\nSimply lift the mouse button to finish');
-% message1=msgbox('Select the chamber arena region.');
-% set(message1, 'Position', [100 100 100 100])
-uiwait(msgbox(message1));
-% roiR = getrect; % this is a classical methid. which is also ok but the one bellow is better
-h = imrect; % select a ROI in the frame
-binaryImage = h.createMask();
-arena = getPosition(h);
+
 W = 15; H = 30;
 Xmin = arena(1)+arena(3)-W;
 Ymin = arena(2)+arena(4)/2-H/2;
 roiR = [Xmin, Ymin, W, H];
 Xmin = arena(1);
 roiL = [Xmin, Ymin, W, H];
-
-m = 2; n = 3;
-h2 = imrect(gca, roiR);
-h3 = imrect(gca, roiL);
-binaryImage2 = h2.createMask();
-binaryImage3 = h3.createMask();
-
-subplot(m,n,1);
-imshow(frame1,[]); axis on; title('Sample Frame');
-subplot(m,n,2);
-burned_frame = frame1;
-burned_frame(binaryImage) = 0;
-imshow(burned_frame,[]); axis on; title('Selection of arena');
-
-subplot(m,n,3);
-burned_frame = frame1;
-burned_frame(binaryImage2 | binaryImage3) = 255;
-imshow(burned_frame,[]); axis on; title('ROI');
 
 brightness = zeros(2,num_frames); j = 0; % vector of all averaged brightness (lft and right) values for the ROI
 for i = start_frame:end_frame
@@ -88,6 +53,7 @@ threshMinR = low_passR - 6 * sigmaR; % define a threshold value for brightness c
 threshMaxR = low_passR - 2 * sigmaR; % To avoid getting a mouse.
 threshMinL = low_passL - 6 * sigmaL; % define a threshold value for brightness crossing
 threshMaxL = low_passL - 2 * sigmaL; % To avoid getting a mouse.
+thresholdsStimOnset = [threshMinR; threshMaxR; threshMinL; threshMaxL];
 
 noise_std_detect_ref_r = median(abs(brightness(1,:)))/0.6745;
 noise_std_detect_ref_l = median(abs(brightness(2,:)))/0.6745;
@@ -126,44 +92,35 @@ pk_frR = frames(indexR);
 pk_frL = frames(indexL);
 %     detectR = cross_indR(valid_crossR);
 
-%% plots the brightness fluctuations
-figure(3);
-subplot(m,n,4:6);
-plot(frames,brightness(1,:),'color',[0 2/3 1]); hold on;
-plot(frames,brightness(2,:),'color',[1 2/3 0]); hold on;
-plot(frames,threshMinR,'--','color',[0 1/3 1]);
-plot(frames,threshMaxR,'--','color',[0 1/3 1]);
-plot(frames,threshMinL,'--','color',[1 1/3 0]);
-plot(frames,threshMaxL,'--','color',[1 1/3 0]);
-plot(pk_frR,peaksR,'k^','markerfacecolor','k'); axis tight;
-plot(pk_frL,peaksL,'k^','markerfacecolor','m'); axis tight;
-
 pk_frRall = [pk_frRall, pk_frR];
 pk_frLall = [pk_frLall, pk_frL];
 peaksRAll = [peaksRAll, peaksR];
 peaksLAll = [peaksLAll, peaksL];
-%%
-% % L/R validation of crossings
-% min_isi = 1000; % min number of frames between trials
-% plot(pk_frRall,peaksRAll,'o'); hold on; plot(pk_frLall,peaksLAll,'o');
-% 
-% pk_frRall2 = [pk_frRall; ones(size(pk_frRall))];
-% pk_frLall2 = [pk_frLall; zeros(size(pk_frLall))];
-% pks = [pk_frRall2, pk_frLall2];
-% if ~isempty(pks)
-%     [~, i]=sort(pks(1,:));
-% pks_sorted = pks(:,i);
-% min_dif = 70;
-% max_dif = 120;
-% v_inx = diff(pks_sorted(1,:))<max_dif & diff(pks_sorted(1,:))>min_dif;
-% v_inx_alt = xor(pks_sorted(2,v_inx), pks_sorted(2,[false, v_inx(1:end-1)])); % return only those that were detected in sequence of left/right
-% det_fs = pks_sorted(1,v_inx); % detected frames
-% det_fs = det_fs(v_inx_alt); % sequential left/right correction
-% figure(3); set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
-% for i = 1:numel(det_fs)
-%     subplot(ceil(numel(det_fs)/3),3,i);
-%     imshow(read(v,det_fs(i)),[]); axis on; title(['Frame: ' num2str(det_fs(i)-2)]);
-% end
-% figure(3);subplot(m,n,4:6);
-% plot([det_fs; det_fs], [repmat(-50,1,length(det_fs)); repmat(130,1,length(det_fs))],'-k');
-% end
+
+peakPoints = [pk_frRall pk_frR peaksR; pk_frLall pk_frL peaksL];
+
+% %%
+% % % L/R validation of crossings
+% % min_isi = 1000; % min number of frames between trials
+% % plot(pk_frRall,peaksRAll,'o'); hold on; plot(pk_frLall,peaksLAll,'o');
+% % 
+% % pk_frRall2 = [pk_frRall; ones(size(pk_frRall))];
+% % pk_frLall2 = [pk_frLall; zeros(size(pk_frLall))];
+% % pks = [pk_frRall2, pk_frLall2];
+% % if ~isempty(pks)
+% %     [~, i]=sort(pks(1,:));
+% % pks_sorted = pks(:,i);
+% % min_dif = 70;
+% % max_dif = 120;
+% % v_inx = diff(pks_sorted(1,:))<max_dif & diff(pks_sorted(1,:))>min_dif;
+% % v_inx_alt = xor(pks_sorted(2,v_inx), pks_sorted(2,[false, v_inx(1:end-1)])); % return only those that were detected in sequence of left/right
+% % det_fs = pks_sorted(1,v_inx); % detected frames
+% % det_fs = det_fs(v_inx_alt); % sequential left/right correction
+% % figure(3); set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+% % for i = 1:numel(det_fs)
+% %     subplot(ceil(numel(det_fs)/3),3,i);
+% %     imshow(read(v,det_fs(i)),[]); axis on; title(['Frame: ' num2str(det_fs(i)-2)]);
+% % end
+% % figure(3);subplot(m,n,4:6);
+% % plot([det_fs; det_fs], [repmat(-50,1,length(det_fs)); repmat(130,1,length(det_fs))],'-k');
+% % end

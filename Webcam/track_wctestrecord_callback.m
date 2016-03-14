@@ -8,4 +8,4 @@ function newud=track_wctestrecord_callback( ud)
 newud=ud;
 
 
-track_wctestrecord(ud.db(ud.current_record));
+newud.db(ud.current_record) = track_wctestrecord(ud.db(ud.current_record));

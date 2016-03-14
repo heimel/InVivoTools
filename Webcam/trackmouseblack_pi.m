@@ -1,6 +1,6 @@
 function [freezeTimes, nose, arse, stim, mouse_move, move_2der,trajectory_length,...
-    averageMovement,minimalMovement,difTreshold,deriv2Tresh, fig_n, freeze_duration] =...
-    trackmouseblack_pi(filename,showMovie,stimStart,startside,pk_frRall,pk_frLall)
+    averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] =...
+    trackmouseblack_pi(filename,showMovie,stimStart,startside,peakPoints)
 %% Trackmouseblack function tracks mouse on basis of his black color and
 %contrast with light background.
 % 09-03-2015 Sven van der Burg Azadeh Tafreshiha Dec 2015, added mouse and
@@ -30,16 +30,21 @@ stimFrame = stimStart*frameRate; %round(stimStart*frameRate);
 % Range of frames that need to be analyzed
 frameRange = (stimFrame - framesBeforeAfter):(stimFrame + framesBeforeAfter);
 
-ActStimFrame = min([pk_frRall, pk_frLall]);
-ActStartTime = ActStimFrame/30;
-ActEndFrame = max([pk_frRall, pk_frLall]);
-ActEndTime = ActEndFrame/30;
-if isempty(ActStartTime) 
+peakPointR = peakPoints(1,:);
+peakPointL = peakPoints(2,:);
+ActStimFrame = []; ActStartTime = []; ActEndFrame = []; ActEndTime = [];
+
+if ~isempty(peakPoints)
+    ActStimFrame = min([peakPointR(1), peakPointL(1)]);
+    ActStartTime = ActStimFrame/30;
+    ActEndFrame = max([peakPointR(1), peakPointL(1)]);
+    ActEndTime = ActEndFrame/30;
+else
+    logmsg('stimulus not detected');
     ActStartTime = stimStart;
-end
-if isempty(ActEndTime) 
     ActEndTime = stimStart+90;
 end
+
 makeVideo = 0; % Make 1 if you want to record
 
 blackThreshold = 0.20; % Treshold for amount of blackness to be treated as mouse %was 0.30
