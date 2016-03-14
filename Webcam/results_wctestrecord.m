@@ -66,7 +66,6 @@ roiR = [Xmin, Ymin, W, H];
 Xmin = arena(1);
 roiL = [Xmin, Ymin, W, H];
 
-m = 2; n = 3;
 h2 = imrect(gca, roiR);
 h3 = imrect(gca, roiL);
 h_arena = imrect(gca, arena);
@@ -74,6 +73,7 @@ binaryImage = h_arena.createMask();
 binaryImage2 = h2.createMask();
 binaryImage3 = h3.createMask();
 
+m = 2; n = 3;
 subplot(m,n,1);
 imshow(frame1,[]); axis on; title('Sample Frame');
 subplot(m,n,2);
@@ -197,13 +197,14 @@ pos_theta = measures.pos_theta;
 L = size(nose,1);
 
 figHandles = findall(0,'Type','figure');
-fig_n = max(figHandles);
-
+fig_n = max(figHandles)+1;
+figure(fig_n)
 for k = 1:L;
     arse_a(k, :) = arse(k,:) - nose(k,:);  %THE COORDINATES ALIGNED TO NOSE
     nose_a(k, :) = nose(k,:) - nose(k,:);
     if ~isempty(nose) && ~isempty(arse)
-        figure(k+(fig_n));
+%         figure(k+(fig_n)); 
+subplot(L, L,k);
         plot([0, nose_a(k,1)], [0, nose_a(k,2)],'v','MarkerSize',8,...
             'MarkerFaceColor', my_blue); hold on;
         grid on; extent1 = abs(arse_a)+50; ax1= max(max(extent1));
@@ -216,7 +217,8 @@ for k = 1:L;
         if ~isempty(stim);
             stim_present = any(stim,2);
             if stim_present(k)== 1
-                figure(k+(fig_n));
+%                 figure(k+(fig_n));
+                subplot(L, L ,k);
                 stim_a(k, :) = stim(k,:) - nose(k,:);
                 plot([0, stim_a(k,1)], [0, stim_a(k,2)], 'linewidth',3,...
                     'color',my_purple); hold on;
@@ -233,6 +235,7 @@ for k = 1:L;
                 %                         (hor,stim_a(k)))],'-','b',2);
             end
         end
+        set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
     else
         disp('No mouse coordinates available');
     end
