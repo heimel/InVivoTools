@@ -1,6 +1,6 @@
 function [freezeTimes, nose, arse, stim, mouse_move, move_2der,trajectory_length,...
     averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] =...
-    trackmouseblack_pi(filename,showMovie,stimStart,startside,peakPoints)
+    trackmouseblack_pi(filename,showMovie,stimStart,startside,peakPoints, frameRate)
 %% Trackmouseblack function tracks mouse on basis of his black color and
 %contrast with light background.
 % 09-03-2015 Sven van der Burg Azadeh Tafreshiha Dec 2015, added mouse and
@@ -20,7 +20,12 @@ function [freezeTimes, nose, arse, stim, mouse_move, move_2der,trajectory_length
 vid=VideoReader(filename);
 %Get paramters of video
 numFrames = get(vid, 'NumberOfFrames');
-frameRate = get(vid, 'FrameRate'); %30 frames/sec
+if isfield(measures,'frameRate') && ~isempty(measures.frameRate)
+    frameRate = measures.frameRate;
+else
+    frameRate = get(vid, 'FrameRate'); %30 frames/sec
+    
+end
 vidFrames = read(vid, 1);
 Frame=vidFrames(:,:,:,1);
 s=size(Frame);
