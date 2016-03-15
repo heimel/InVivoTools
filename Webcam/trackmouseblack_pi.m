@@ -50,6 +50,9 @@ else
     ActEndTime = stimStart+90;
 end
 
+figHandles = findall(0,'Type','figure');
+fig_n = max(figHandles)+1;
+
 makeVideo = 0; % Make 1 if you want to record
 
 blackThreshold = 0.20; % Treshold for amount of blackness to be treated as mouse %was 0.30
@@ -66,7 +69,7 @@ deriv2Tresh = 0.05; % Treshold for 2nd derivative of vidDif %was 0.05
 noNest = 1;
 discDetection = 0; %Makes script very slow, don't run on average computer
 if showMovie
-    figure;
+    figure(fig_n);
 end
 
 trajectory = [];
@@ -490,7 +493,11 @@ minimalMovement = min(smoothVidDif(target_frames));
 %stim to be visible in the picture
 
 snapframe = []; sfr= []; nose = []; arse = []; stim = []; freezeTimes = [];
-k = []; freeze_duration = []; fig_n = 0;
+k = []; freeze_duration = []; fig_n = [];
+
+figHandles = findall(0,'Type','figure');
+fig_n = max(figHandles)+1;
+
 for i = target_frames
     %    logmsg(['First frame of freezing episode: '
     %    numstr((freezeSmoother(1)+1)]); logmsg(['List frame of freezing
@@ -522,7 +529,7 @@ for i = target_frames
             
             %show the snapshot and get the coordinates
             if isempty(snapframe)==0;
-                snapfig = figure();
+                snapfig = figure(fig_n);
                 snapaxes = axes('parent', snapfig);
                 image(snapframe, 'Parent', snapaxes); hold on;
                 title(snapaxes,sprintf('Frame #%d,StartTime %g:%02.2f,StimStart %g:%02.2f',...
@@ -537,38 +544,9 @@ for i = target_frames
                         else
                             logmsg(message1);
                         end
+                        
                         [xn, yn] = ginput(2);
-                        %                                         while p<3   %Alexander's looking
-                        %                                         at frames and checking
-                        %                                             [xs(p), ys(p), button] =
-                        %                                             ginput(1); switch button
-                        %                                                 case 28 % left arrow
-                        %                                                     framesforward =
-                        %                                                     framesforward - 1;
-                        %                                                     framenr =
-                        %                                                     round(startTime*frameRate)
-                        %                                                     +vidlag+framesforward;
-                        %                                                     snapframe = read(vid,
-                        %                                                     framenr);
-                        %                                                     image(snapframe,
-                        %                                                     'Parent', snapaxes);
-                        %                                                 case 29 % right arrow
-                        %                                                     framesforward =
-                        %                                                     framesforward + 1;
-                        %                                                     framenr =
-                        %                                                     round(startTime*frameRate)
-                        %                                                     +vidlag+framesforward;
-                        %                                                     snapframe =
-                        %                                                     read(vid,framenr );
-                        %                                                     image(snapframe,
-                        %                                                     'Parent', snapaxes);
-                        %                                                 otherwise
-                        %                                                     p = p + 1; if p==2
-                        %                                                         logmsg('Click on
-                        %                                                         arse');
-                        %                                                     end
-                        %                                             end
-                        %                                         end
+                        
                         nose(k, 1:2) = [xn(1), yn(1)];
                         arse(k, 1:2) = [xn(2), yn(2)];
                         plot([nose(k,1),arse(k,1)],[nose(k,2),arse(k,2)], 'linewidth', 2); %head line
@@ -617,9 +595,7 @@ for i = target_frames
                                             end
                                     end
                                 end
-                                
-                                %                             logmsg('Not taking stimulus position');
-                                %                             stim(k, :) = [NaN NaN];
+
                             else
                                 plot([nose(k,1),stim(k,1)],[nose(k,2),stim(k,2)], 'linewidth', 2);%position line
                                 hold on;
@@ -629,12 +605,12 @@ for i = target_frames
                             end
                         end
                         k = k+1;
-                        fig_n = k;
+                        
                     end
                 else
                     
                     logmsg('no freezing');
-                    fig_n = 0;
+                   
                 end
             else
                 logmsg('no freezing frames captured');
@@ -650,33 +626,10 @@ end
 if isempty(freezeTimes);
     logmsg('no freezing');
 end
-% fig_n = k;
+
 mouse_move = (smoothVidDif(target_frames));
 move_2der = (deriv2(target_frames));
 trajectory_length = length(target_frames);
-% % figure %moved to result_wctestrecord.m %
-% plot(deriv2(frameRange(freezeSmoother(1)+1:end-freezeSmoother(2)))); if 1
-%     figure(k+1); subplot(2,1,1); title('Mouse movement trajectory');
-%     mouse_move =
-%     (smoothVidDif(frameRange(freezeSmoother(1)+1:end-freezeSmoother(2))));
-%     plot(mouse_move); hold on; set(gca, 'xtick', 0:30:600); set(gca,
-%     'XTickLabel', (-10:10)); set(gca,'xgrid','on'); plot([0,0],[0,5]);
-%     hold on;
-%     plot(1:length(frameRange(freezeSmoother(1)+1:end-freezeSmoother(2))),averageMovement);
-%     plot(1:length(frameRange(freezeSmoother(1)+1:end-freezeSmoother(2))),...
-%         minimalMovement+difTreshold);
-%
-%     subplot(2,1,2); title('2nd derivative of the trajectory');
-%     plot([1,length(frameRange(freezeSmoother(1)+1:end-freezeSmoother(2)))],...
-%         [deriv2Tresh,deriv2Tresh], 'black'); hold on;
-%     plot([1,length(frameRange(freezeSmoother(1)+1:end-freezeSmoother(2)))],...
-%         [-deriv2Tresh,-deriv2Tresh], 'black');
-%     move_2der =
-%     (deriv2(frameRange(freezeSmoother(1)+1:end-freezeSmoother(2))));
-%     plot(move_2der); xlabel('seconds') set(gca, 'xtick', 0:30:600);
-%     set(gca, 'XTickLabel', (-10:10)); set(gca,'xminorgrid','off');
-%
-% end
 
 logmsg('Freeze detection complete');
 
