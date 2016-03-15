@@ -99,6 +99,10 @@ peaksRAll = [peaksRAll, peaksR];
 peaksLAll = [peaksLAll, peaksL];
 
 peakPoints = [pk_frRall pk_frR peaksR; pk_frLall pk_frL peaksL];
+if size(peakPoints) < 4
+    peakPoints = [];
+end
+logmsg('done!')
 
 %%
 % % L/R validation of crossings

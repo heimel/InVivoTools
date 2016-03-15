@@ -553,7 +553,11 @@ for i = target_frames
                          
                         if startTime<ActStartTime || startTime>ActEndTime+0.2
                             message3 = sprintf('press "space" for manual input, OK to continue');
-                           uiwait(msgbox(message3));
+%                            if k==1
+                            uiwait(msgbox(message3));
+%                         else
+%                             logmsg(message3);
+%                         end
                            [ keyIsDown, seconds, keyCode ] = KbCheck;
 %                            WaitSecs(1);
                             m = find(keyCode);

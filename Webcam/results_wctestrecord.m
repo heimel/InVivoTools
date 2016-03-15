@@ -121,7 +121,7 @@ plot(frames,thresholdsStimOnset(4,:),'--','color',[1 1/3 0]);
 
 if ~isempty(measures.peakPoints)
 plot(peakPointR(1,2),peakPointR(1,3),'k^','markerfacecolor','k'); axis tight;
-plot(peakPointL(1,2),peakPointL(1,3),'k^','markerfacecolor','m'); axis tight;
+plot(peakPointL(2,2),peakPointL(2,3),'k^','markerfacecolor','m'); axis tight;
 end
 %% plots movement trajectory
 if isfield(measures,'mousemove') && ~isempty(measures.mousemove)
