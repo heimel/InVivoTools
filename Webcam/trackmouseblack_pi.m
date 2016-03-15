@@ -44,7 +44,7 @@ if ~isempty(peakPoints)
 else
     logmsg('stimulus not detected');
     ActStartTime = stimStart;
-    ActEndTime = stimStart+90;
+    ActEndTime = stimStart+3;
 end
 
 fig_n = [];
@@ -552,7 +552,7 @@ for i = target_frames
                         hold on;
                          
                         if startTime<ActStartTime || startTime>ActEndTime+0.2
-                            message3 = sprintf('press "space" for manual input, othe keys to continue');
+                            message3 = sprintf('press "space" for manual input, OK to continue');
                            uiwait(msgbox(message3));
                            [ keyIsDown, seconds, keyCode ] = KbCheck;
 %                            WaitSecs(1);
@@ -594,7 +594,7 @@ for i = target_frames
                                                plot(xsfr, ysfr, '--', 'color',[.5 .5 .5]); %stim line
                                            end
                                    end
-                               end
+                               end 
                                
                            else
                                stim(k, :) = [NaN NaN];
