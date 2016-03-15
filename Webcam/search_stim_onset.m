@@ -98,7 +98,25 @@ pk_frLall = [pk_frLall, pk_frL];
 peaksRAll = [peaksRAll, peaksR];
 peaksLAll = [peaksLAll, peaksL];
 
+% m = 2; n = 3;
+% figure(8);
+% subplot(m,n,4:6);
+% plot(frames,brightness(1,:),'color',[0 2/3 1]); hold on;
+% plot(frames,brightness(2,:),'color',[1 2/3 0]); hold on;
+% plot(frames,thresholdsStimOnset(1,:),'--','color',[0 1/3 1]);
+% plot(frames,thresholdsStimOnset(2,:),'--','color',[0 1/3 1]);
+% plot(frames,thresholdsStimOnset(3,:),'--','color',[1 1/3 0]);
+% plot(frames,thresholdsStimOnset(4,:),'--','color',[1 1/3 0]);
+% 
+% if ~isempty(measures.peakPoints)
+% plot(peakPointR(1,2),peakPointR(1,3),'k^','markerfacecolor','k'); axis tight;
+% plot(peakPointL(2,2),peakPointL(2,3),'k^','markerfacecolor','m'); axis tight;
+% end
+if size(pk_frRall) ~= size(pk_frLall)
+peakPoints = [];
+else
 peakPoints = [pk_frRall pk_frR peaksR; pk_frLall pk_frL peaksL];
+end
 if size(peakPoints) < 4
     peakPoints = [];
 end
