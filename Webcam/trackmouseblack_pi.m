@@ -493,9 +493,6 @@ minimalMovement = min(smoothVidDif(target_frames));
 snapframe = []; sfr= []; nose = []; arse = []; stim = []; freezeTimes = [];
 k = []; freeze_duration = [];
 
-figHandles = findall(0,'Type','figure');
-fig_n = max(figHandles)+1;
-
 for i = target_frames
     %    logmsg(['First frame of freezing episode: '
     %    numstr((freezeSmoother(1)+1)]); logmsg(['List frame of freezing
@@ -550,12 +547,58 @@ for i = target_frames
                         
                         nose(k, 1:2) = [xn(1), yn(1)];
                         arse(k, 1:2) = [xn(2), yn(2)];
+                        figure(fig_n);
                         plot([nose(k,1),arse(k,1)],[nose(k,2),arse(k,2)], 'linewidth', 2); %head line
                         hold on;
-                        
+                         
                         if startTime<ActStartTime || startTime>ActEndTime+0.2
-                            logmsg('Stimulus not in view');
-                            stim(k, :) = [NaN NaN];
+                            message3 = sprintf('press "space" for manual input, othe keys to continue');
+                           uiwait(msgbox(message3));
+                           [ keyIsDown, seconds, keyCode ] = KbCheck;
+%                            WaitSecs(1);
+                            m = find(keyCode);
+                           if keyIsDown && m==32
+                               
+                               while p<2   % looking at frames and checking
+                                   message4 = ('use left and right arrow keys');
+                                   %                                     uiwait(msgbox(message3));
+                                   logmsg(message4);
+                                   [xs(p), ys(p), button] = ginput(1);
+                                   switch button
+                                       case 28 % left arrow
+                                           framesforward = framesforward - 1;
+                                           framenr = round(startTime*frameRate)...
+                                               +framesforward;
+                                           snapframe = read(vid,framenr);image...
+                                               (snapframe, 'Parent', snapaxes);
+                                           
+                                       case 29 % right arrow
+                                           framesforward = framesforward + 1;
+                                           framenr = round(startTime*frameRate)...
+                                               +framesforward;
+                                           snapframe = read(vid,framenr );
+                                           image(snapframe,'Parent', snapaxes);
+                                           
+                                       otherwise
+                                           p = p + 1;
+                                           if p==2
+                                               message5 = ('Click on stim');
+                                               uiwait(msgbox(message5));
+                                               [xs(p), ys(p)] = ginput(1);
+                                               stim(k,:) = [xs(p) ys(p)]; hold on;
+                                               figure(fig_n);
+                                               plot([nose(k,1),stim(k,1)],[nose(k,2),stim(k,2)], 'linewidth', 2);%position line
+                                               hold on;
+                                               xsfr = 1:(sfr(1)+600);
+                                               ysfr = stim(k,2)*ones(1,(sfr(1)+600));
+                                               plot(xsfr, ysfr, '--', 'color',[.5 .5 .5]); %stim line
+                                           end
+                                   end
+                               end
+                               
+                           else
+                               stim(k, :) = [NaN NaN];
+                           end
                         else
                             message2 = sprintf('Click on stimulus center or press ''n'' for absent stimulus');
                             uiwait(msgbox(message2));
