@@ -1,6 +1,6 @@
 function [freezeTimes, nose, arse, stim, mouse_move, move_2der,trajectory_length,...
     averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] =...
-    trackmouseblack_pi(filename,showMovie,stimStart,startside,peakPoints, frameRate)
+    trackmouseblack_pi(filename,showMovie,stimStart,startside,peakPoints)
 %% Trackmouseblack function tracks mouse on basis of his black color and
 %contrast with light background.
 % 09-03-2015 Sven van der Burg Azadeh Tafreshiha Dec 2015, added mouse and
@@ -20,12 +20,9 @@ function [freezeTimes, nose, arse, stim, mouse_move, move_2der,trajectory_length
 vid=VideoReader(filename);
 %Get paramters of video
 numFrames = get(vid, 'NumberOfFrames');
-if isfield(measures,'frameRate') && ~isempty(measures.frameRate)
-    frameRate = measures.frameRate;
-else
-    frameRate = get(vid, 'FrameRate'); %30 frames/sec
-    
-end
+
+frameRate = get(vid, 'FrameRate'); %30 frames/sec
+
 vidFrames = read(vid, 1);
 Frame=vidFrames(:,:,:,1);
 s=size(Frame);
@@ -35,11 +32,11 @@ stimFrame = stimStart*frameRate; %round(stimStart*frameRate);
 % Range of frames that need to be analyzed
 frameRange = (stimFrame - framesBeforeAfter):(stimFrame + framesBeforeAfter);
 
-peakPointR = peakPoints(1,:);
-peakPointL = peakPoints(2,:);
 ActStimFrame = []; ActStartTime = []; ActEndFrame = []; ActEndTime = [];
 
 if ~isempty(peakPoints)
+    peakPointR = peakPoints(1,:);
+    peakPointL = peakPoints(2,:);
     ActStimFrame = min([peakPointR(1), peakPointL(1)]);
     ActStartTime = ActStimFrame/30;
     ActEndFrame = max([peakPointR(1), peakPointL(1)]);
@@ -50,6 +47,7 @@ else
     ActEndTime = stimStart+90;
 end
 
+fig_n = [];
 figHandles = findall(0,'Type','figure');
 fig_n = max(figHandles)+1;
 
@@ -493,7 +491,7 @@ minimalMovement = min(smoothVidDif(target_frames));
 %stim to be visible in the picture
 
 snapframe = []; sfr= []; nose = []; arse = []; stim = []; freezeTimes = [];
-k = []; freeze_duration = []; fig_n = [];
+k = []; freeze_duration = [];
 
 figHandles = findall(0,'Type','figure');
 fig_n = max(figHandles)+1;
@@ -529,6 +527,9 @@ for i = target_frames
             
             %show the snapshot and get the coordinates
             if isempty(snapframe)==0;
+                figHandles = findall(0,'Type','figure');
+                fig_n = max(figHandles)+1;
+                
                 snapfig = figure(fig_n);
                 snapaxes = axes('parent', snapfig);
                 image(snapframe, 'Parent', snapaxes); hold on;
@@ -595,7 +596,7 @@ for i = target_frames
                                             end
                                     end
                                 end
-
+                                
                             else
                                 plot([nose(k,1),stim(k,1)],[nose(k,2),stim(k,2)], 'linewidth', 2);%position line
                                 hold on;
@@ -610,7 +611,7 @@ for i = target_frames
                 else
                     
                     logmsg('no freezing');
-                   
+                    
                 end
             else
                 logmsg('no freezing frames captured');

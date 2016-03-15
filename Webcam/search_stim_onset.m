@@ -17,6 +17,7 @@ roiR = [Xmin, Ymin, W, H];
 Xmin = arena(1);
 roiL = [Xmin, Ymin, W, H];
 
+%% calculate the brightness changes in rois
 brightness = zeros(2,num_frames); j = 0; % vector of all averaged brightness (lft and right) values for the ROI
 for i = start_frame:end_frame
     j = j+1;
@@ -99,28 +100,28 @@ peaksLAll = [peaksLAll, peaksL];
 
 peakPoints = [pk_frRall pk_frR peaksR; pk_frLall pk_frL peaksL];
 
-% %%
-% % % L/R validation of crossings
-% % min_isi = 1000; % min number of frames between trials
-% % plot(pk_frRall,peaksRAll,'o'); hold on; plot(pk_frLall,peaksLAll,'o');
-% % 
-% % pk_frRall2 = [pk_frRall; ones(size(pk_frRall))];
-% % pk_frLall2 = [pk_frLall; zeros(size(pk_frLall))];
-% % pks = [pk_frRall2, pk_frLall2];
-% % if ~isempty(pks)
-% %     [~, i]=sort(pks(1,:));
-% % pks_sorted = pks(:,i);
-% % min_dif = 70;
-% % max_dif = 120;
-% % v_inx = diff(pks_sorted(1,:))<max_dif & diff(pks_sorted(1,:))>min_dif;
-% % v_inx_alt = xor(pks_sorted(2,v_inx), pks_sorted(2,[false, v_inx(1:end-1)])); % return only those that were detected in sequence of left/right
-% % det_fs = pks_sorted(1,v_inx); % detected frames
-% % det_fs = det_fs(v_inx_alt); % sequential left/right correction
-% % figure(3); set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
-% % for i = 1:numel(det_fs)
-% %     subplot(ceil(numel(det_fs)/3),3,i);
-% %     imshow(read(v,det_fs(i)),[]); axis on; title(['Frame: ' num2str(det_fs(i)-2)]);
-% % end
-% % figure(3);subplot(m,n,4:6);
-% % plot([det_fs; det_fs], [repmat(-50,1,length(det_fs)); repmat(130,1,length(det_fs))],'-k');
-% % end
+%%
+% % L/R validation of crossings
+% min_isi = 1000; % min number of frames between trials
+% plot(pk_frRall,peaksRAll,'o'); hold on; plot(pk_frLall,peaksLAll,'o');
+%
+% pk_frRall2 = [pk_frRall; ones(size(pk_frRall))];
+% pk_frLall2 = [pk_frLall; zeros(size(pk_frLall))];
+% pks = [pk_frRall2, pk_frLall2];
+% if ~isempty(pks)
+%     [~, i]=sort(pks(1,:));
+% pks_sorted = pks(:,i);
+% min_dif = 70;
+% max_dif = 120;
+% v_inx = diff(pks_sorted(1,:))<max_dif & diff(pks_sorted(1,:))>min_dif;
+% v_inx_alt = xor(pks_sorted(2,v_inx), pks_sorted(2,[false, v_inx(1:end-1)])); % return only those that were detected in sequence of left/right
+% det_fs = pks_sorted(1,v_inx); % detected frames
+% det_fs = det_fs(v_inx_alt); % sequential left/right correction
+% figure(3); set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+% for i = 1:numel(det_fs)
+%     subplot(ceil(numel(det_fs)/3),3,i);
+%     imshow(read(v,det_fs(i)),[]); axis on; title(['Frame: ' num2str(det_fs(i)-2)]);
+% end
+% figure(3);subplot(m,n,4:6);
+% plot([det_fs; det_fs], [repmat(-50,1,length(det_fs)); repmat(130,1,length(det_fs))],'-k');
+% end

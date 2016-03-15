@@ -94,15 +94,18 @@ else
     error('thresholdsStimOnset is not determined. use "track" button')
     
 end
-if isfield(measures,'peakPoints') && ~isempty(measures.peakPoints)
+if isfield(measures,'peakPoints')
     peakPoints = measures.peakPoints;
 else
     error('Peaks are not determined. use "track" button')
     
 end
 
+if ~isempty(measures.peakPoints)
 peakPointR = peakPoints(1,:);
 peakPointL = peakPoints(2,:);
+end
+
 stimFrame = stimstart*frameRate;
 start_frame = stimFrame-30-10; %30:length of the stim, 10:for interval
 end_frame = stimFrame+90+30;
@@ -115,9 +118,11 @@ plot(frames,thresholdsStimOnset(1,:),'--','color',[0 1/3 1]);
 plot(frames,thresholdsStimOnset(2,:),'--','color',[0 1/3 1]);
 plot(frames,thresholdsStimOnset(3,:),'--','color',[1 1/3 0]);
 plot(frames,thresholdsStimOnset(4,:),'--','color',[1 1/3 0]);
+
+if ~isempty(measures.peakPoints)
 plot(peakPointR(1,2),peakPointR(1,3),'k^','markerfacecolor','k'); axis tight;
 plot(peakPointL(1,2),peakPointL(1,3),'k^','markerfacecolor','m'); axis tight;
-
+end
 %% plots movement trajectory
 if isfield(measures,'mousemove') && ~isempty(measures.mousemove)
     mousemove = measures.mousemove ;
@@ -199,6 +204,7 @@ L = size(nose,1);
 figHandles = findall(0,'Type','figure');
 fig_n = max(figHandles)+1;
 figure(fig_n)
+
 for k = 1:L;
     arse_a(k, :) = arse(k,:) - nose(k,:);  %THE COORDINATES ALIGNED TO NOSE
     nose_a(k, :) = nose(k,:) - nose(k,:);
