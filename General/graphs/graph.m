@@ -740,6 +740,12 @@ switch style
                     if rescale_to_1
                         fitx = fitx*100;
                     end
+                case 'dog'
+                    for i=1:length(ry)
+                        par = dog_fit(rx{i},ry{i});
+                        fity{i} = dog(par,fitx);
+                        logmsg([' fit: dog par = ' num2str(par)  ]);
+                    end
                 otherwise
                     logmsg([' Fit type ' fit ' is not implemented.']);
                     fit='';
