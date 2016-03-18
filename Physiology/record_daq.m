@@ -37,13 +37,20 @@ clc             % Clear Command window
 
 % pre-settings: change these variables 
 % for individual acquistion needs.
-duration = 15;                   % Acquisition time, in seconds.
+duration = 10;                   % Acquisition time, in seconds.
 sample_rate = 5000;              % Set sample rate (Hz), max = 200000Hz, min = 1Hz.
-hwchannels = [1 0];                % DAQ differential analog inputs channel(s)
-sensor_range_channel = 2.5;      % Sensor range +/- (Volts)  
-input_range_channel = 5;         % Input range +/- (Volts)
-units_range_channel = 5;         % Units Range +/- (Volts)
-allinfo = false;                 % Display Summary of Analog Input (AI) Object Using 'PCI-DAS6025'
+hwchannels = [2];                % DAQ differential analog inputs channel(s)
+
+% use for precision
+% input_range_channel = 10;   % Input range +/- (Volts) <- less sensitive
+input_range_channel = 5;    % Input range +/- (Volts)
+% input_range_channel = 0.5;  % Input range +/- (Volts)
+% input_range_channel = 0.05; % Input range +/- (Volts) <- more sensitive
+
+% use for scaling -> Usually both 10 (and units range = sensor range)
+sensor_range_channel = 10;      % Sensor range +/- (Volts)  
+units_range_channel = 10;       % Units Range +/- (Volts)
+allinfo = true;                 % Display Summary of Analog Input (AI) Object Using 'PCI-DAS6025'
 
 % fixed variables (hardware etc.)
 daq_type = 'mcc';                % Set adapter type
@@ -80,8 +87,8 @@ str=['Hardware channel(s) -> [' num2str(hwchannels) ']'];
 logmsg(str)
 str=['Sensor range (V): ' num2str(sensor_range_channel)];
 logmsg(str)
-str=['Units range (V): ' num2str(units_range_channel)];
-logmsg(str)
+% str=['Units range (V): ' num2str(units_range_channel)];
+% logmsg(str)
 str=['Input range (V): ' num2str(input_range_channel)];
 logmsg(str)
 if allinfo
@@ -113,5 +120,8 @@ disp(' ')
 stop(AI);
 close all;
 delete(AI);
+
+plot(time,data)
+ylim([-input_range_channel input_range_channel])
 
 end

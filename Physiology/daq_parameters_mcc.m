@@ -114,21 +114,21 @@ settings.hwnames = [{'Heart_Rate','EMG'}];           % Give name to channels
 % Input Range can be set at either -5 and 5 -> enter 5, or -10 and 10 
 % (default) -> enter 10. 
 settings.input_range_channel(1) = 5;
-settings.input_range_channel(2) = 5;
-% settings.input_range_channel(3) = 5;
+settings.input_range_channel(2) = 1;
+% settings.input_range_channel(3) = 10;
 
 % Input sensor can have any value, although it is not possible (within this
 % script) to set both values to different values (e.g. -1 and 1.5). Any
 % value can be entered (e.g. for the range -1.5 to 1.5 enter 1.5).  
 settings.sensor_range_channel(1) = 2.5;
-settings.sensor_range_channel(2) = 2.5;
+settings.sensor_range_channel(2) = 1.5;
 % settings.sensor_range_channel(3) = 10;
 
 % Unit Range can be any value, although it is not possible (within this
 % script) to set both values to different values (e.g. -1 and 1.5). Any
 % value can be entered(e.g. for the range -1.5 to 1.5 enter 1.5).
 settings.units_range_channel(1) = 2.5;
-settings.units_range_channel(2) = 2.5;
+settings.units_range_channel(2) = 1.5;
 % settings.units_range_channel(3) = 10;
 
 
