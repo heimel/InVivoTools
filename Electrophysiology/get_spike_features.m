@@ -22,6 +22,12 @@ for c=1:length(cells)
         cells(c).spike_peak_trough_ratio = [];
         cells(c).spike_prepeak_trough_ratio = [];
         cells(c).spike_lateslope = [];
+        cells(c).spike_peak_height = [];
+        cells(c).spike_trough_depth = [];
+        cells(c).spike_prepeak_ind = [];
+        cells(c).spike_trough_ind = [];
+        cells(c).spike_peak_ind = [];
+        continue
     end
     
     n_spikes = size(spikes,1);
@@ -39,7 +45,7 @@ for c=1:length(cells)
         trigger_ind = postrigger_ind;
     end
     [negtrigger,negtrigger_ind]=min(max(spikes,[],1));
-    if negtrigger<0 && isempty(trigger_ind)
+    if ~isempty(negtrigger) && negtrigger<0 && isempty(trigger_ind)
         trigger_ind = negtrigger_ind;
     end
     if isfield(params,'sort_trigger_ind') && isempty(trigger_ind)

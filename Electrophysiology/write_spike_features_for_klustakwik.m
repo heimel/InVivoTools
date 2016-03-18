@@ -43,7 +43,13 @@ for ch=channels
     cells = allcells([allcells.channel]==ch);
     n_cells = length(cells);
     
-    filenamef = fullfile(datapath,record.test,[ 'klustakwik.fet.' num2str(ch)]);
+    if isfield(record,'test')
+        test = record.test;
+    else
+        test = record.epoch;
+    end
+    
+    filenamef = fullfile(datapath,test,[ 'klustakwik.fet.' num2str(ch)]);
     fidf = fopen(filenamef,'W');
     if fidf==-1
         errormsg(['Cannot open ' filenamef ' for writing']);
@@ -53,7 +59,7 @@ for ch=channels
     end
     
     
-    filenamet = fullfile(datapath,record.test,[ 'klustakwik.tim.' num2str(ch)]);
+    filenamet = fullfile(datapath,test,[ 'klustakwik.tim.' num2str(ch)]);
     fidt = fopen(filenamet,'W');
     if fidt==-1
         fclose(fidf);
@@ -79,9 +85,9 @@ for ch=channels
     st = [st ');'];
 
     
-    for c=1:n_cells
-        n_spikes = length(cells(c).data);
-            fprintf(fidt,['%f' lineend],cells(c).data); % spike time
+     for c=1:n_cells
+         n_spikes = length(cells(c).data);
+             fprintf(fidt,['%f' lineend],cells(c).data); % spike time
         for i=1:n_spikes
         %    fprintf(fidt,['%f' lineend],cells(c).data(i)); % spike time
              

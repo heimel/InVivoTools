@@ -46,7 +46,9 @@ switch processparams.ec_spike_smoothing
         end
     case 'sgolay'
         for c=1:length(cells)
-            cells(c).spikes = sgolayfilt(double(cells(c).spikes)',3,11)';
+            if ~isempty(cells(c).spikes)
+                cells(c).spikes = sgolayfilt(double(cells(c).spikes)',3,11)';
+            end
         end
 end
 

@@ -21,6 +21,16 @@ filename = fullfile( experimentpath(record),params.ec_axon_default_filename );
 [data,sample_interval_us] = abfload(filename,'verbose',0);
 %[data,sample_interval_us] = abfload(filename,'machineF','ieee-be');
 
+if 0 % high pass filter
+    [z,p] = butter(9,0.009,'high');
+    dataf = filter(z,p,data(:,1));
+    
+    figure;
+    plot(data(:,1))
+    hold on
+    plot(max(data(:,1))*2+dataf);
+end
+
 ind_spikes = detect_spikes( data(:,1),sample_interval_us);
 spiketimes = ind_spikes * sample_interval_us * 1e-6; % spike times in seconds
 
@@ -38,6 +48,9 @@ if verbose
     hold on
     plot(t,data(:,1),'-k');
     plot(t(ind_spikes),data(ind_spikes,1),'or');
+
+    plot_stimulus_timeline(record);
+
 end
 
 [stims,stimsfilename] = getstimsfile( record );
