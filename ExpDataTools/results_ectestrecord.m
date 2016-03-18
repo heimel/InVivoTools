@@ -53,10 +53,12 @@ switch data_type
         end
 end
 
-switch record.analysis
-    case 'movie'
-        results_ecmovie(record);
-        return
+if isfield(record,'analysis')
+    switch record.analysis
+        case 'movie'
+            results_ecmovie(record);
+            return
+    end
 end
 
 switch data_type
