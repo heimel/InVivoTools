@@ -513,7 +513,14 @@ if isfield(measure,'psth_tbins') && ~isempty(measure.psth_tbins) && ~isempty(mea
                 numel(measure.psth_tbins{t})/length(measure.range{t}),n_stimuli);
             response = reshape(measure.psth_response{t},...
                 numel(measure.psth_response{t})/length(measure.range{t}),n_stimuli);
+            htemp=plot(0,0,'w');
+            co = get(gca,'colororder');
+            if n_stimuli>size(co,1)
+                co = periodic_colormap(n_stimuli);
+                set(gca,'colororder',co);
+            end
             plot(tbins,response);
+            delete(htemp);
         end
         first_timepoint = min(tbins(:));
         last_timepoint = max(tbins(:));
