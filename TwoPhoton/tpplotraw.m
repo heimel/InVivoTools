@@ -34,7 +34,7 @@ switch process_params.method
         stack_lines = 0;
         marker='none';
         linestyle = '-';
-        ylab = 'F';
+        ylab = 'F (a.u.)';
         n_panelrows = 1;
 end
 
@@ -47,9 +47,22 @@ h_traces  = subplot(n_panelrows,1,1);
 hold on;
 for i=1:length(record.measures)
     ind=mod(i-1,length(colors))+1;
-    plot(record.measures(i).raw_t, ...
-        record.measures(i).raw_data + stack_lines * (i-1) * 0.2 ,...
+    
+
+    
+    
+    t = record.measures(i).raw_t;
+    y = record.measures(i).raw_data;
+
+    if process_params.tp_raw_dynamic_zero
+        [ymin,tmin]  = slidingwindowfunc(t,y,[],[],[],8,'min');
+        ymt = interp1(tmin,ymin,t);
+        y = y - smoothen(ymt,10);
+    end
+    
+    plot(t, y + stack_lines * (i-1) * 0.2 ,...
         'linestyle',linestyle,'color',colors{ind},'marker',marker);
+   
 end
 ylabel(ylab);
 xlabel('Time (s)');

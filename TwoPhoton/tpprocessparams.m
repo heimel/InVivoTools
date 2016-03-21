@@ -88,6 +88,8 @@ switch record.experiment
        params.detect_events_threshold = 2.5;% (std) 
 end
 
+params.tp_raw_dynamic_zero = false;
+
 % wave detection
 params.wave_criterium = -1.163; % z-scores below which events are considered waves
                                 % with z<-1.163, only 1 in 10 is false positive
