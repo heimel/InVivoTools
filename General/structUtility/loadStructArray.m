@@ -16,8 +16,8 @@ end
 
 [fid,msg] = fopen(fname, 'rt');
 if fid == -1
-	disp(msg);
-	return;
+	disp(['LOADSTRUCTARRAY: ' msg ' for file ' fname]);
+	return
 end
 
 if isempty(fields)

@@ -16,7 +16,11 @@ cells = [];
 if isunix
     kkexecutable = 'KlustaKwik';
 else
-    kkexecutable = which('KlustaKwik.exe');
+    [r,kkexecutable]=system('where klustakwik.exe');
+    kkexecutable = ['"' strtrim(kkexecutable) '"'];
+    if r~=0
+        kkexecutable = which('KlustaKwik.exe');
+    end
 end
 
 status = system(kkexecutable);
@@ -64,6 +68,7 @@ if isempty(cells) %|| 1
         logmsg(cmd);
         [status,result] = system(cmd);
         if status == 1
+            logmsg(['Check if Klustakwik is installed as ' kkexecutable '. Otherwise download and install from https://github.com/klusta-team/example']);
             errormsg(result(max(1,end-100):end),true);
         else
             logmsg(result(max(1,end-100):end));

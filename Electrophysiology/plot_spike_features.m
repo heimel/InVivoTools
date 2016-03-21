@@ -116,7 +116,8 @@ for ch=channels
             [n,x]=hist(cells(cl).(features{i}),300);
             clr = colors( mod(cl-1,n_colors)+1);
             h=bar(x,n,clr);
-            xlabel(features{i});
+            xlabel(features{i}(min(7:end):end));
+            set(gca,'ytick',[]);
         end
     end
     

@@ -19,10 +19,16 @@ trial = [record.test filesep 'data.smr'];
 datapath = experimentpath(record,false);
 unitchannelname = 'Spikes'; % was 'units'
 ttlchannelname = 'TTL';
-warning('IMPORTSPIKE2:TIMING','IMPORTSPIKE2: Alexander: improve and generalize timing correction, joint for ec and lfp');
-warning('off', 'IMPORTSPIKE2:TIMING');
-secondsmultiplier = 1.000032; % daneel 2012-09-18
-ttl_delay = 0.0115;
+
+params = ecprocessparams( record );
+if isfield(params,'secondsmultiplier')
+    secondsmultiplier = params.secondsmultiplier;
+    ttl_delay = params.trial_ttl_delay;
+else
+    secondsmultiplier = 1.000032; % daneel 2012-09-18
+    ttl_delay = 0.0115;
+end
+
 if ~isfield(record,'amplification') || isempty(record.amplification) 
     amplification = 5000;
 else
@@ -178,7 +184,7 @@ for cl=1:n_classes
          %    XX=[cll.spike_amplitude,cll.spike_peak_trough_ratio,cll.spike_prepeak_trough_ratio,cll.spike_trough2peak_time,cll.spike_lateslope];
       XX=[cll.spike_amplitude,cll.spike_peak_trough_ratio/range(cll.spike_peak_trough_ratio),cll.spike_prepeak_trough_ratio/range(cll.spike_prepeak_trough_ratio),cll.spike_trough2peak_time/range(cll.spike_trough2peak_time),cll.spike_lateslope/range(cll.spike_lateslope)]; %spikes(:,2:4:end)
          
-     if  1 % add replace features by PCs
+     if  0 % add replace features by PCs
          
          [pc,score,latent,tsquare] = princomp(XX);
          score = score( randperm(size(score,1)),:);

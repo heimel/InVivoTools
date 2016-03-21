@@ -52,6 +52,7 @@ if trigger
     StimSerialGlobals
     disp('trigger');
     StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+
     WaitSecs(0.001);
     StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
     
@@ -176,8 +177,8 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
         end;
         if StimWindowUseCLUTMapping, Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1); end;
         switch host
-            case 'barney'
-                % dont flip to background gray
+%             case 'barney'
+%                 % dont flip to background gray
             otherwise
                 Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(end)-0.5)/StimWindowRefresh);
         end
@@ -207,7 +208,7 @@ elseif strcmp(MTI.ds.displayProc,'customdraw'), % calls the stim's 'customdraw' 
             StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,stampNum);
         end
     end
-    
+    frameTimes
 elseif strcmpi(MTI.ds.displayType,'QUICKTIME'),   % note, quicktime play only supported in PTB-3
     Screen('LoadNormalizedGammaTable',StimWindow,StimWindowPreviousCLUT);
     Screen('SetMovieTimeIndex', MTI.ds.userfield.movie, 0); % play from beginning, regardless of where we played last time

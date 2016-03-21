@@ -50,6 +50,7 @@ params.compute_f1f0 = false;
 % 20ms taken as lead time for first responses to appear
 params.rc_interval = [0.0205 0.4205];
 params.rc_timeres = 0.2; % time resolution
+params.rc_gain = 1; % image gain
 % params.rc_peak_interval_number = 1; % which interval to use for peak computation
 switch protocol
     case '13.20'
@@ -75,7 +76,10 @@ params.cluster_overlap_threshold = 0.5;
 params.compute_isi = false;
 params.show_isi = false;
 
-params.plot_spike_features = false;
+params.plot_spike_features = true;
+params.plot_spike_shapes = true;
+params.plot_spike_shapes_max_spikes = 500;
+
 
 % entropy analysis
 switch record.mouse(1:min(end,5))
@@ -85,7 +89,7 @@ switch record.mouse(1:min(end,5))
         params.entropy_analysis = false;
 end
 
-params.ec_wavelet_smoothing = false;
+params.ec_spike_smoothing = ''; % '', 'wavelet', or 'sgolay' 
 
 switch lower(record.setup)
     case {'antigua','daneel','nin380'}
@@ -139,10 +143,20 @@ params.sort_klustakwik_arguments = [ ...
 
 % time calibration
 switch lower(record.setup)
-    case 'antigua'
+    case 'antigua' % tdt data on nin380
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
-        params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time
+        params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time 
+        % calibrated on 4-2-2016 (experiment 14.14), should be 1.0000190, but kept at 1.000017
+        % to not change previous analysis
     case 'wall-e'
+        params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
+        params.secondsmultiplier = 1; % multiplification factor of electrophysical signal time
+        warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
+        warning('off', 'ECPROCESSPARAMS:TIMING');
+    case 'daneel'
+        params.trial_ttl_delay = 0.0115;
+        params.secondsmultiplier = 1.000032; % aligned on 2012-09-18
+    case 'nin380' % spike2 data on nin380
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
         params.secondsmultiplier = 1; % multiplification factor of electrophysical signal time
         warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');

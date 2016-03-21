@@ -40,6 +40,7 @@ channels_enabled = 0;
 average_tests_enabled=0;
 export_tests_enabled=0;
 play_data_enable = 0;
+track_data_enable = 0;
 
 switch type
     case 'ec'
@@ -50,8 +51,9 @@ switch type
         blind_data_enabled = 1;
         reverse_data_enabled = 1; % for reversing database
     case 'wc' 
-        color = [0.8 0.6 0];
+        color = [1 0.6 0.4];
         play_data_enable = 1;
+        track_data_enable = 1;
 end
 
 
@@ -240,6 +242,19 @@ if play_data_enable
         'ListboxTop',0, ...
         'Position',[left top buttonwidth buttonheight], ...
         'String','Play','Tag','play_wctestrecord_callback');
+    left=left+buttonwidth+colsep;
+    maxleft=max(maxleft,left);
+end
+
+if track_data_enable
+    h.track = ...
+        uicontrol('Parent',h_fig, ...
+        'Units','pixels', ...
+        'BackgroundColor',0.8*[1 1 1],...
+        'Callback','genercallback', ...
+        'ListboxTop',0, ...
+        'Position',[left top buttonwidth buttonheight], ...
+        'String','Track','Tag','track_wctestrecord_callback');
     left=left+buttonwidth+colsep;
     maxleft=max(maxleft,left);
 end

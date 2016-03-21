@@ -24,7 +24,7 @@ delimiter = ',';
 mdbsql='/home/heimel/Software/mdbtools/mdbtools/src/util/mdb-sql';
 %options=' -p -d , '; % version 0.6
 options = [' -P -d ' delimiter]; % version 0.7
-defaultfilename = '/mnt/orange/group\ folders/MuizenlijstLeveltLab/Mice.mdb';
+defaultfilename = '~/Dropbox (NIN)/Documents/Mice/Mice.mdb';
 
 if nargin<3
   crit=[];
@@ -42,9 +42,16 @@ end
 if isempty(filename)
   filename = defaultfilename;
   if ~exist(filename,'file')
-    filename='~/Documents/Mice/Mice.mdb';
+      if isunix
+         filename='~/Documents/Mice/Mice.mdb';
+      end
+      if ~exist(filename,'file')
+          filename = fullfile(getdesktopfolder,'Mice.mdb');
+      end
     logmsg(['Using offline database ' filename ]);
   end
+  filename = regexprep(filename,'([\\ ()])','\\$1');
+  
 end
 if isempty(crit)
   crit='Muisnummer\>15000';
@@ -58,13 +65,17 @@ if ~isempty(crit)
   sql=[sql ' where ' crit ];
 end
 
-disp(['IMPORT_MDB: Parsing: ' sql ]);
+logmsg(['Parsing: ' sql ]);
 
 [s,w]=system(['echo ' sql  ]); %#ok<ASGLU>
 disp(w);
 
 [s,w]=system(['echo ' sql ' | ' mdbsql ' ' options ' ' filename] ); %#ok<ASGLU>
 
+if s
+    errormsg([w ': ' mdbsql]);
+    return
+end
 
 %w=w(1:1000);
 w=split(w,10); % splits at CR

@@ -24,10 +24,16 @@ switch vers
         end
     case '2015'
         base = fullfile(userhome,'Dropbox (NIN)');
+        if ~exist(base,'dir')
+            params = processparams_local;
+            if isfield(params,'experimentpath_localroot')
+                base = params.experimentpath_localroot;
+            end
+        end
 end
     
 if ~exist(base,'dir')
-    logmsg(['Folder ' base ' does not exist.']);
+    logmsg(['Folder ' base ' does not exist. Perhaps set params.experimentpath_localroot in processparams_local.m']);
 end
 
   

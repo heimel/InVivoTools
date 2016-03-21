@@ -54,6 +54,9 @@ h=[];
 if nargin<2
     x=[];
 end
+if ~iscell(y)
+    y = {y};
+end
 
 % to avoid all nonsense warnings in matlab
 signif_y = 0;
@@ -223,7 +226,6 @@ end
 if iscell(y{1})
     orgy=y;
     n_measures=length(y);
-    n_groups=length(y{1});
     y={};
     for i=1:n_measures
         y={y{:},orgy{i}{:}};
@@ -423,6 +425,9 @@ switch style
                 means=zeros(1,length(y));
                 for i=1:length(y)
                     means(i)=nanmedian(y{i});
+                end
+                if isempty(errorbars)
+                    errorbars = 'bootstrapmedian';
                 end
         end
         
@@ -735,6 +740,12 @@ switch style
                     if rescale_to_1
                         fitx = fitx*100;
                     end
+                case 'dog'
+                    for i=1:length(ry)
+                        par = dog_fit(rx{i},ry{i});
+                        fity{i} = dog(par,fitx);
+                        logmsg([' fit: dog par = ' num2str(par)  ]);
+                    end
                 otherwise
                     logmsg([' Fit type ' fit ' is not implemented.']);
                     fit='';
@@ -943,7 +954,7 @@ end
 h={};
 switch errorbars
     case 'none'
-    case {'std','sem'}
+    otherwise
         dy = cell(length(y),1);
         switch errorbars
             case 'sem'
@@ -968,11 +979,32 @@ switch errorbars
                 else
                     dy=ystd;
                 end
+            case 'bootstrapmean'
+                for i=1:length(y)
+                    if ~isempty(y{i})
+                        n = ceil(100000/length(y{i}));
+                        dy{i}=std(bootstrp(n,@mean,y{i}));
+                    else
+                        dy{i} = [];
+                    end
+                end
+            case 'bootstrapmedian'
+                for i=1:length(y)
+                    if ~isempty(y{i})
+                        n = ceil(100000/length(y{i}));
+                        dy{i}=std(bootstrp(n,@median,y{i}));
+                    else
+                        dy{i} = [];
+                    end
+                end
+            otherwise
+                errormsg(['Errorbars ' errorbars ' is not implemented']);
+                return
         end
         dyeb=[dy{:}];
         
         if any(size(x)~=size(means))
-            logmsg('GRAPH: X and MEANS are of unequal sizes. Cannot draw errorbars.');
+            logmsg('X and MEANS are of unequal sizes. Cannot draw errorbars.');
             h = nan;
             return
         end

@@ -49,18 +49,37 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
     cinterval = zeros(length(ind),2);  
     for j=ind(:)' % over stimuli
         ps = getparameters(get(I.st(i).stimscript,j));
-        curve_x(s) = ps.(I.paramname); %#ok<*AGROW>
-        condnames{s} = [I.paramname '=' num2str(curve_x(s))];
+        if isfield(ps,I.paramname)
+            curve_x(s) = ps.(I.paramname); %#ok<*AGROW>
+            condnames{s} = [I.paramname '=' num2str(curve_x(s))];
+        else % contigency plan
+            curve_x(s) = j; % stim number
+            condnames{s} = ['stimnumber = ' num2str(j)];
+        end
         stimlist = find(o==j);
         for k=1:length(stimlist),
-            trigs{s}(k)=I.st(i).mti{stimlist(k)}.frameTimes(1);
+            if ~isempty(I.st(i).mti{stimlist(k)}.frameTimes)
+                trigs{s}(k)=I.st(i).mti{stimlist(k)}.frameTimes(1);
+            else
+                trigs{s}(k)=I.st(i).mti{stimlist(k)}.startStopTimes(1);
+            end
             spon{s}(k)=trigs{s}(k);
         end
         
+        
         df = mean(diff(I.st(1).mti{1}.frameTimes));
+        if isnan(df) % for instance if only a single frame was shown
+            df = 1/60; % hard coded 60 Hz monitor framerate
+        end
         dp = struct(getdisplayprefs(get(I.st(1).stimscript,j)));
-        Cinterval(s,:) = ...
-            [0 I.st(1).mti{stimlist(1)}.frameTimes(end)-I.st(1).mti{stimlist(1)}.frameTimes(1)+df];
+        if length(I.st(1).mti{stimlist(1)}.frameTimes)>1
+            Cinterval(s,:) = ...
+                [0 I.st(1).mti{stimlist(1)}.frameTimes(end)-I.st(1).mti{stimlist(1)}.frameTimes(1)+df];
+        else
+            logmsg('No frametimes recorded. Using startStopTimes');
+            Cinterval(s,:) = [0 I.st(1).mti{stimlist(1)}.startStopTimes(3)-I.st(1).mti{stimlist(1)}.startStopTimes(2)]; % for optostim
+        end
+        
         if length(I.st(1).mti)>=2,
             if dp.BGpretime - processparams.separation_from_prev_stim_off >= processparams.minimum_spontaneous_time
                 % use BGpretime
@@ -89,7 +108,7 @@ elseif pst==0 && pre>0  % BGpretime used
     spontlabel='spontaneous / stimulus';
     scint = [ min(interval(:,1))+processparams.separation_from_prev_stim_off min(Cinterval(:,1)) ];
 else
-    logmsg('No or too short spontaneous period. Consider changing separation_from_prev_stim_off or minimum_spontaneous_time in processparams_local');
+    errormsg('No or too short spontaneous period. Consider changing separation_from_prev_stim_off or minimum_spontaneous_time in processparams_local');
     spontlabel='trials';
     scint = sint;
 end

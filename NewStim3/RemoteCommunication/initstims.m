@@ -59,18 +59,21 @@ end
 switch Remote_Comm_method
     case 'filesystem'
         try 
+            logmsg('Waiting for remote commands...press Ctrl-C to interrupt.');
+
             while 1  % needs control-C to exit
-                pause(2);
+                pause(0.05);
                 if KbCheck && ~StimDisplayOrderRemote && ~gNewStim.StimWindow.debug
                     CloseStimScreen
                     return
                 end
                 cd(theDir); % refresh file directory
-                logmsg('Waiting for remote commands...press Ctrl-C to interrupt.');
                 
                 errorflag = 0;
                 txt = checkscript('runit.m');
                 if ~isempty(txt),
+                    pause(0.05); % to make sure runit is fully written
+                    txt = checkscript('runit.m');
                     try
                         eval(txt)
                         disp(txt);
@@ -89,6 +92,8 @@ switch Remote_Comm_method
                     if exist('toremote','file')
                         delete('toremote');
                     end
+                    logmsg('Waiting for remote commands...press Ctrl-C to interrupt.');
+                    pause(1);
                 end
             end
         catch me

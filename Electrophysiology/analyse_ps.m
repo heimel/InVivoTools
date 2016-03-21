@@ -125,8 +125,14 @@ for i = 1:length(triggers)
 
     % add spontaneous raster
     spontrast =  getoutput(out(i).spontrast);
-    rastcount_all = [spontrast.counts{1}/spontrast.N rastcount_all];
     tbins_all = [spontrast.bins{1} tbins];
+    if length(unique(tbins_all))~=length(tbins_all)
+        rastcount_all = [ rastcount_all];
+        tbins_all = [ tbins];
+    else
+        rastcount_all = [spontrast.counts{1}/spontrast.N rastcount_all];
+    end
+    
     
     measures.psth_tbins{i} = tbins;
     measures.psth_count{i} = rastcount_max;

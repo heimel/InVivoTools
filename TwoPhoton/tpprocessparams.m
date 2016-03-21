@@ -309,7 +309,7 @@ switch lower(record.experiment)
         params.blind_fields = {'date','slice','laser','location','comment','mouse'};
         params.blind_shuffle = true;
 end
-
+params.blind_stacks_with_specific_shuffle = {};
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

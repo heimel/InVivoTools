@@ -9,11 +9,17 @@ function p = getdesktopfolder
 %
 
 if ispc
-    userdir= getenv('USERPROFILE');
+    try
+        p = winqueryreg('HKEY_CURRENT_USER','Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders','Desktop');
+    catch me
+        logmsg(me.message);
+        userdir= getenv('USERPROFILE');
+        p = fullfile( userdir,'Desktop');
+    end
 else
     userdir= getenv('HOME');
+    p = fullfile( userdir,'Desktop');
 end
-p = fullfile( userdir,'Desktop');
 if ~exist(p,'dir')
     p = '.';
     warning('GETDESKTOPFOLDER:NONE_FOUND','Could not find user Desktop folder');

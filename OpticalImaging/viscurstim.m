@@ -116,8 +116,18 @@ while 1
             
             if status~=frequency
                 fwrite(s, frequency, 'uint8', 'sync');
-                
-                readasync(s,1);
+                readbyte = false;
+                tries = 0;
+                while ~readbyte && tries < 100
+                    try
+                        readasync(s,1);
+                        readbyte = true;
+                    end
+                    tries = tries+1;
+                end
+                if tries==100
+                    logmsg('Time out in reading byte from arduino');
+                end
                 status = fread(s,1,'uint8');
                 logmsg(['Req = ' num2str(frequency) ', Set = ' num2str(status)]);
             end

@@ -9,6 +9,12 @@ function nrcgs = setparameters(rcgs,p)
 %
 %  See also:  RCGRATINGSTIM, GETPARAMETERS, STIMULUS/SETPARAMETERS
 
+if ~exist('rng','file') % for backwards compatibility with R2009
+    rs = rand('state');
+else
+    rs = rng;
+end
+
 default_p.baseps = periodicstim('default');
 default_p.reps = 1;
 default_p.order = 1;
@@ -17,7 +23,7 @@ default_p.dur = 0.1;
 default_p.orientations = (0:22.5:180-22.5);
 default_p.spatialfrequencies = [ 0.025 0.05 0.1 0.2 0.4 0.8];
 default_p.spatialphases = ( 0:pi/4:2*pi-pi/4 );
-default_p.randState = rng; % rand('state');
+default_p.randState = rs;
 default_p.dispprefs = {};
 
 if isstruct(p)

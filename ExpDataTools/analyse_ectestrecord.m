@@ -35,7 +35,7 @@ if isempty(channels2analyze)
     channels2analyze = recorded_channels;
 end
 
-cells = import_spikes( record, channels2analyze ); %
+cells = import_spikes( record, channels2analyze, verbose ); %
 
 if isempty(cells)
     return
@@ -91,9 +91,9 @@ for i=1:length(g) % for all cells
         try
             n_spikes=n_spikes+length(get_data(inp.spikes,...
                 [ssts.mti{k}.startStopTimes(1),...
-                ssts.mti{k}.startStopTimes(end)]));
-        catch
-            logmsg('An error is caught. I do not know why. Tell Alexander to check');
+                ssts.mti{k}.startStopTimes(end)],1));
+        catch me
+            logmsg(['An error is caught. I do not know why. Tell Alexander to check. ' me.message]);
             n_spikes=n_spikes+length(get_data(inp.spikes,...
                 [ssts.mti{k}.startStopTimes(1),...
                 ssts.mti{k}.startStopTimes(end-1)]));
@@ -113,18 +113,23 @@ for i=1:length(g) % for all cells
                     stim_type = 'sg';
             end
         end
+    catch me
+        logmsg(['Warning: ' me.message]);
     end
     
-    switch stim_type
-        case {'sg','sg_adaptation'}
-            cellmeasures = analyse_sg(inp,n_spikes,record);
-        case {'hupe','border','lammemotion','lammetexture'}
-            cellmeasures = analyse_ectest_by_typenumber(inp,record);
-        otherwise
-            cellmeasures = analyse_ps(inp,record,verbose);
+    if ~isempty(inp.st) && ~isempty(inp.st.stimscript)
+        switch stim_type
+            case {'sg','sg_adaptation'}
+                cellmeasures = analyse_sg(inp,n_spikes,record,verbose);
+            case {'hupe','border','lammemotion','lammetexture'}
+                cellmeasures = analyse_ectest_by_typenumber(inp,record);
+            otherwise
+                cellmeasures = analyse_ps(inp,record,verbose);
+        end
+        cellmeasures.usable = 1;
+    else
+        cellmeasures.usable = 0;
     end
-    
-    cellmeasures.usable = 1;
     
     if ~isempty(find_record(record,['comment=*' num2str(i) ':axon*']))
         cellmeasures.usable=0;

@@ -15,7 +15,6 @@ wp = getparameters(warmupps);
 wp.contrast = 0;
 wp.windowShape=0;
 
-
 StimWindowGlobals
 r = StimWindowRect; % screen size
 
@@ -24,12 +23,13 @@ r = StimWindowRect; % screen size
 % wp.rect = [r(3)/2-200 r(4)/2-200 r(3)/2+200 r(4)/2+200];
 wp.rect = [0 0 1920 1080];
 %wp.background = (0:0.1:1)';
-wp.backdrop = 0.5;
+wp.backdrop = 1;
 wp.dispprefs={'BGpretime',1,'BGposttime',1};
 wp.tf = 4;
 wp.nCycles = 5*wp.tf;
 
-warmup = StimScript(0);
+
+warmup = stimscript(0);
 backgrounds = (0:0.1:1);
 for i = 1:length(backgrounds);
     wp.background = backgrounds(i);
@@ -43,7 +43,9 @@ warmup=loadStimScript(warmup);
 MTI=DisplayTiming(warmup);
 DisplayStimScript(warmup,MTI,0,0);
 
-
+while ~KbCheck
+   pause(0.1);
+end
 
 CloseStimScreen
 

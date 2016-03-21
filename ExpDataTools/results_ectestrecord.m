@@ -6,7 +6,22 @@ function results_ectestrecord( record )
 %  2007-2014, Alexander Heimel
 %
 
-global measures analysed_script
+global measures analysed_script global_record
+
+global_record = record;
+
+evalin('base','global measures');
+evalin('base','global analysed_script');
+evalin('base','global global_record');
+analysed_stimulus = getstimsfile(record);
+if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
+    analysed_script = analysed_stimulus.saveScript; 
+else
+    logmsg('No savedscript');
+end
+
+
+
 
 if isfield(record,'electrode') % i.e. ecdata
     data_type = 'ec';
@@ -20,6 +35,34 @@ end
 switch data_type
     case 'ec'
         params = ecprocessparams;
+        if params.plot_spike_features || params.plot_spike_shapes
+            spikesfile = fullfile(experimentpath(record),'_spikes.mat');
+            if exist(spikesfile,'file')
+                cells = [];
+                load(spikesfile);
+                if params.plot_spike_features
+                    plot_spike_features(cells, record);
+                end
+                if params.plot_spike_shapes
+                    plot_spike_shapes(cells, record);
+                end
+                if exist('isi','var') && params.show_isi
+                    plot_spike_isi(isi,record);
+                end
+            end
+        end
+end
+
+if isfield(record,'analysis')
+    switch record.analysis
+        case 'movie'
+            results_ecmovie(record);
+            return
+    end
+end
+
+switch data_type
+    case 'ec'
         tit=[record.test ', ' record.mouse ', ' record.date ', ' ...
             ' depth=' num2str(record.depth-record.surface) ' um, ' ...
             record.eye ', ' ...
@@ -406,31 +449,8 @@ if isfield(record,'eye') && strcmp(record.eye,'ipsi') && isfield(measures,'odi')
     end % c
 end
 
-% if 0
-switch data_type
-    case 'ec'
-        if params.plot_spike_features
-            spikesfile = fullfile(experimentpath(record),'_spikes.mat');
-            if exist(spikesfile,'file')
-                cells = [];
-                load(spikesfile);
-                plot_spike_features(cells, record);
-                if exist('isi','var') && params.show_isi
-                    plot_spike_isi(isi,record);
-                end
-            end
-        end
-end
+logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_script'', record as ''global_record''.');
 
-evalin('base','global measures');
-evalin('base','global analysed_script');
-analysed_stimulus = getstimsfile(record);
-if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
-    analysed_script = analysed_stimulus.saveScript; 
-else
-    logmsg('No savedscript');
-end
-logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_script''.');
 
 return
 

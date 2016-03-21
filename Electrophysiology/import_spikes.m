@@ -1,8 +1,12 @@
-function cells = import_spikes( record, channels2analyze )
+function cells = import_spikes( record, channels2analyze, verbose )
 %IMPORT_SPIKES
 %
-% 2015, Alexander Heimel
+% 2015-2016, Alexander Heimel
 %
+
+if nargin<3 || isempty(verbose)
+    verbose = true;
+end
 
 processparams = ecprocessparams(record);
 
@@ -30,16 +34,22 @@ else
     logmsg(['Imported ' num2str(length(cells)) ' cells with ' num2str(n_spikes ) ' spikes.']);
 end
 
-% wavelet smoothing
-if processparams.ec_wavelet_smoothing
-    for c=1:length(cells)
-        n_spikes = size(cells(c).spikes,1);
-        n_samples = size(cells(c).spikes,2);
-        for i=1:n_spikes
-            A = wavelet_decompose(cells(c).spikes(i,:),3,'db4');
-            cells(c).spikes(i,:) = A(1:n_samples,1);
+switch processparams.ec_spike_smoothing
+    case 'wavelet'
+        for c=1:length(cells)
+            n_spikes = size(cells(c).spikes,1);
+            n_samples = size(cells(c).spikes,2);
+            for i=1:n_spikes
+                A = wavelet_decompose(cells(c).spikes(i,:),3,'db4');
+                cells(c).spikes(i,:) = A(1:n_samples,1);
+            end
         end
-    end
+    case 'sgolay'
+        for c=1:length(cells)
+            if ~isempty(cells(c).spikes)
+                cells(c).spikes = sgolayfilt(double(cells(c).spikes)',3,11)';
+            end
+        end
 end
 
 % feature extraction
@@ -49,7 +59,7 @@ switch processparams.spike_sorting_routine
     case 'klustakwik'
         cells = sort_with_klustakwik(cells,record);
     case 'wpca'
-        cells = sort_with_wpca(cells,record);
+        cells = sort_with_wpca(cells,record,verbose);
     case '';
         % don't sort
     otherwise

@@ -30,24 +30,25 @@ NewStimGlobals;
 StimWindowGlobals;
 StimTriggerOpen;
 
-if nargin<5; capture_movie = []; end;
-if isempty(capture_movie); capture_movie = false; end
+if nargin<5 || isempty(capture_movie); 
+    capture_movie = false; 
+end
 
-if nargin<2, MTI = DisplayTiming(stimScript); end;
-
-if isempty(MTI), MTI = DisplayTiming(stimScript); end;
+if nargin<2 || isempty(MTI)
+    MTI = DisplayTiming(stimScript); 
+end
 
 prioritylevel = MaxPriority(StimWindowMonitor,'WaitBlanking','SetClut','GetSecs'); % PD
 
-if nargin>=3,
+if nargin>=3
     if ~isempty(priorit),
         prioritylevel = priorit;
     else % set priority level more carefully if sound is going to be played
         for i=1:length(MTI),
             if strcmp(MTI{i}.ds.displayType,'Sound'),prioritylevel=0; end;
-        end;
-    end;
-end;
+        end
+    end
+end
 
 abortable = 1;
 
@@ -120,11 +121,6 @@ else
                 ready=1;
             end
             if go && ready
-                if i<1
-                    disp('DISPLAYSTIMSCRIPT: Stim 0 requested. Assuming bit 5 is missing and showing stim 16');
-                    i = l; % changed on 2013-07-01 (changed by Mehran 2013-08-10)
-                end
-          %      Rush('DisplayStimulus(MTI{i},[],trigger(i),capture_movie);',prioritylevel);
                 Rush('DisplayStimulus(MTI{i},get(stimScript,MTI{i}.stimid),trigger(i),capture_movie);',prioritylevel);
                 ready=0;
             end
