@@ -18,10 +18,26 @@ for ch = channels(:)'
         cells(i).index = [];
         cells(i).name = '';
         cells(i).desc_long = experimentpath(record);
-        cells(i).desc_brief = record.test;
+        if isfield(record,'test')
+            cells(i).desc_brief = record.test;
+        elseif isfield(record,'epoch')
+            cells(i).desc_brief = record.epoch;
+        else
+            cells(i).desc_brief = '';
+        end
         cells(i).detector_params = [];
-        cells(i).trial = record.test;
-        cells(i).mean_amplitude = mean(cells(i).spike_amplitude);
+        if isfield(record,'test')
+            cells(i).trial = record.test;
+        elseif isfield(record,'epoch')
+            cells(i).trial = record.epoch;
+        else
+            cells(i).trial = '';
+        end
+        if isfield(cells,'spike_amplitude')
+            cells(i).mean_amplitude = mean(cells(i).spike_amplitude);
+        else
+            cells(i).mean_amplitude = NaN;
+        end
         cells(i).snr = (max(cells(i).wave)-min(cells(i).wave))/mean(cells(i).std);
         if ~isfield(cells,'type') || isempty(cells(i).type)
             cells(i).type = 'mu'; % just call everything mu by default
@@ -36,6 +52,6 @@ for ch = channels(:)'
         cells(i).index = channels_new_index(ch); 
         channels_new_index(ch) = channels_new_index(ch) + 1;
         cells(i).name = sprintf('cell_%s_%.3d',...
-            subst_specialchars(record.test),cells(i).index);
+            subst_specialchars(cells(i).trial),cells(i).index);
     end
 end % ch

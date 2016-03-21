@@ -192,7 +192,9 @@ for i=1:length(g) % for all cells
     flds = fields(cells);
     spike_flds = flds(strncmp('spike_',flds,6));
     for field = spike_flds
-        cellmeasures.(field{1}) = median( cells(i).(field{1}));
+        if ~isempty(field) && isfield(cells(i),field{1})
+            cellmeasures.(field{1}) = median( cells(i).(field{1}));
+        end
     end
     
     if ~all(isnan(cellmeasures.wave)) || isempty(cellmeasures.wave)

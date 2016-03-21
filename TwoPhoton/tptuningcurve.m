@@ -84,8 +84,7 @@ else
     paramname = paramname{ind};
 end
 
-
-if isempty(paramname) && ...
+if (isempty(paramname) || strcmp(paramname,'location')) && ...
         (~isempty(strfind(lower(record.stim_type),'til')) ||...
         ~isempty(strfind(lower(record.stim_type),'position')))
     variable = 'position';

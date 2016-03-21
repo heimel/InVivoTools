@@ -59,7 +59,7 @@ switch record.experiment
     case {'12.76','12.76_GCaMP6'}
         labels = {'','CR','CCK','SST','PV','VIP','Astrocyte'};
     case {'13.29'}
-        labels = {'','CR','Tom'};
+        labels = {'','CR','Tom','Nogcamp'};
     case {'14.87'}
         labels = {'','CR','Tom','YFP'};
     otherwise

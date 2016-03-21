@@ -328,6 +328,10 @@ switch command,
         [ud.previewim,mx,mn,gamma] = tp_image(im,channels,mx,mn,gamma,tp_channel2rgb(ud.record),ft(fig,'tpaxes'));
         % set(get(ud.previewim,'parent'),'tag','tpaxes');
         set(ud.previewim,'Tag','preview');
+       
+        % for dani
+        %imwrite(ud.previewim.CData,fullfile(getdesktopfolder,'preview.tiff'))
+        
         set(fig,'userdata',ud);
         
         if sum(ax)~=2 % no preview image yet before call
