@@ -285,6 +285,7 @@ for p=1:size(data,2) % roi p
     record.measures(p).response = {curve(2,:)};
     [m,ind] = max(record.measures(p).response{1});
     record.measures(p).preferred_stimulus = {record.measures(p).range{1}(ind)};
+    record.measures(p).relative_range = { (1:length(curve(1,:)))-ind}; 
     record.measures(p).response_normalized ={curve(2,:) / m};
     record.measures(p).curve = curve;
     record.measures(p).ind = {ind};
