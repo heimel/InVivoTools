@@ -52,7 +52,7 @@ for i=1:length(record.measures)
     
     
     t = record.measures(i).raw_t;
-    y = record.measures(i).raw_data;
+    y = smoothen(record.measures(i).raw_data,0.8);
 
     if process_params.tp_raw_dynamic_zero
         [ymin,tmin]  = slidingwindowfunc(t,y,[],[],[],8,'min');

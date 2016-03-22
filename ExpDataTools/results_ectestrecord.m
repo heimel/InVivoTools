@@ -683,7 +683,7 @@ for i=1:length(curves) % over triggers
     end
     
     switch measure.variable
-        case 'contrast'
+        case {'contrast','sFrequency','tFrequency'}
             % fit curve, so don't show line
             linestyle = '.';
     end
@@ -725,7 +725,18 @@ if yl(2)>0
     ylim([0 yl(2)]);
 end
 switch measure.variable
-
+    case 'sFrequency'
+        fitx = 0.01:0.01:0.5;
+        par = dog_fit(curve(1,:),curve(2,:));
+        fity = dog(par,fitx);
+        hold on
+        plot(fitx,fity,'k')
+    case 'tFrequency'
+        fitx = 1:0.1:40;
+        par = dog_fit(curve(1,:),curve(2,:));
+        fity = dog(par,fitx);
+        hold on
+        plot(fitx,fity,'k')
     case 'contrast'
         xlim([-0.02 1]);
         set(gca,'XTick',[0 0.2 0.4 0.6 0.8 1]);
