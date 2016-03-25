@@ -10,7 +10,12 @@ function [stims,filename] = getstimsfile( record )
 stimsname = 'stims.mat';
 filename = fullfile( experimentpath(record),stimsname);
 if exist( filename, 'file')
-    stims = load( filename, '-mat');
+    try 
+        stims = load( filename, '-mat');
+    catch me
+        errormsg(me.message);
+        stims = [];
+    end
 else
     logmsg(['Stimulus file ' filename ' does not exist.']);
     stims = [];
