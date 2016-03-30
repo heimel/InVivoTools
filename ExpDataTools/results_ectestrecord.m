@@ -593,7 +593,7 @@ set(gca,'YTick',[]);
 
 if max(rf)>2 % i.e. luminance and not df/f
     colormap hot
-    set(gca,'CLim',[256/35 40 ])
+%    set(gca,'CLim',[256/35 40 ])
 else % df/d 
     set(gca,'ydir','reverse');
     colormap gray
