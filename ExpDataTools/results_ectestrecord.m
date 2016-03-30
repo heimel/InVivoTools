@@ -683,7 +683,7 @@ for i=1:length(curves) % over triggers
     end
     
     switch measure.variable
-        case {'contrast','sFrequency','tFrequency'}
+        case {'contrast','sFrequency','tFrequency','size'}
             % fit curve, so don't show line
             linestyle = '.';
     end
