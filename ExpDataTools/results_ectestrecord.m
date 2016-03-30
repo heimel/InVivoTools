@@ -737,6 +737,12 @@ switch measure.variable
         fity = dog(par,fitx);
         hold on
         plot(fitx,fity,'k')
+    case 'size'
+        fitx = 1:1:120;
+        par = dog_fit(curve(1,:),curve(2,:));
+        fity = dog(par,fitx);
+        hold on
+        plot(fitx,fity,'k')
     case 'contrast'
         xlim([-0.02 1]);
         set(gca,'XTick',[0 0.2 0.4 0.6 0.8 1]);
