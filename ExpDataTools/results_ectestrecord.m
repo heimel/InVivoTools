@@ -753,7 +753,11 @@ switch measure.variable
             for t=1:length(curves) % over triggers
                 ind_blank = find(measure.range{t}==0);
                 if isempty(ind_blank)
-                    response0 = measure.rate_spont{t};
+                    if isfield(measure,'rate_spont')
+                        response0 = measure.rate_spont{t};
+                    else
+                        response0 = 0;
+                    end
                 else
                     response0 = mean(measure.rate{t}(ind_blank));
                 end

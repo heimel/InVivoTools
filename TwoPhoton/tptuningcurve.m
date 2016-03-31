@@ -310,6 +310,12 @@ for p=1:size(data,2) % roi p
                 record.measures = structconvert(record.measures,newmeasures);
             end
             record.measures(p) = newmeasures;
+        case 'contrast'
+            newmeasures = compute_contrast_measures(record.measures(p));
+             if ~isempty(newmeasures)
+                record.measures = structconvert(record.measures,newmeasures);
+            end
+            record.measures(p) = newmeasures;
         case 'size'
             record.measures(p).suppression_index = compute_suppression_index( curve(1,:), curve(2,:) );
         case 'position'

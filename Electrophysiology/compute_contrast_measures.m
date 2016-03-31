@@ -24,7 +24,11 @@ for t = 1:n_triggers
     
     ind_blank = find(measures.range{t}==0);
     if isempty(ind_blank)
-        response = measures.curve{t}(2,:)-measures.rate_spont{t};
+        if isfield(measures,'rate_spont')
+            response = measures.curve{t}(2,:)-measures.rate_spont{t};
+        else
+            response = measures.curve{t}(2,:);
+        end
     else
         response = measures.curve{t}(2,:)-mean(measures.curve{t}(2,ind_blank));
     end
