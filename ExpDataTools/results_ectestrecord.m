@@ -721,6 +721,9 @@ for i=1:length(curves) % over triggers
             if isfield(measure,'sf_fit_halfheight_high') && ~isnan(measure.sf_fit_halfheight_high{i})
                 plot([measure.sf_fit_halfheight_high{i} measure.sf_fit_halfheight_high{i}],ylim,'y-');
             end
+            if isfield(measure,'sf_fit_optimal') && ~isnan(measure.sf_fit_optimal{i})
+                plot([measure.sf_fit_optimal{i} measure.sf_fit_optimal{i}],ylim,'g-');
+            end
             y = curve(2,:);
             par = dog_fit(curve(1,:)  ,y );
             fitx = 0.01:0.01:0.5;
@@ -735,13 +738,18 @@ for i=1:length(curves) % over triggers
             if isfield(measure,'tf_fit_halfheight_high') && ~isnan(measure.tf_fit_halfheight_high{i})
                 plot([measure.tf_fit_halfheight_high{i} measure.tf_fit_halfheight_high{i}],ylim,'y-');
             end
-            
+            if isfield(measure,'tf_fit_optimal') && ~isnan(measure.tf_fit_optimal{i})
+                plot([measure.tf_fit_optimal{i} measure.tf_fit_optimal{i}],ylim,'g-');
+            end
             fitx = 0:0.1:40;
             par = dog_fit(curve(1,:),curve(2,:));
             fity = dog(par,fitx);
             hold on
             plot(fitx,fity,'k');
         case 'size'
+            if isfield(measure,'size_fit_optimal') && ~isnan(measure.size_fit_optimal{i})
+                plot([measure.size_fit_optimal{i} measure.size_fit_optimal{i}],ylim,'g-');
+            end
             fitx = 1:1:120;
             par = dog_fit(curve(1,:),curve(2,:));
             fity = dog(par,fitx);

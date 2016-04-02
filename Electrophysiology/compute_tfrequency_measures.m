@@ -47,36 +47,43 @@ for t = 1:n_triggers
 
     response = response - baseline;
 
-    fitx = 0.005:0.001:0.5;
     par = dog_fit(measures.range{t} ,response );
     par(1) = par(1) + baseline;
-    
     if any(isnan(par))
         logmsg('Could not fit DOG to tf curve');
         return;
     end
-    
 
+    
+    fitx = min(measures.range{t}):0.001:max(measures.range{t});
     fity = dog(par,fitx);
     [m,indm] = max(fity);
-    measures.tf_fit_optimal{t} = fitx(indm);
-    
+    fit_optimal = fitx(indm);
+    fitx = 1:0.1:40;
+    fity = dog(par,fitx);
+    indm = find(fitx>fit_optimal,1);
     indh = find(fity>m/2,1,'last');
     if ~isempty(indh) && indh>indm && fitx(indh)<max(measures.range{t})
-        measures.tf_fit_halfheight_high{t} = fitx(indh);
-    else
-        logmsg('Could not fit DOG to tf curve');
-        return;
+        fit_halfheight_high = fitx(indh);
     end
     indl = find(fity>m/2,1,'first');
     if ~isempty(indl) && indl<indm && fitx(indl)>min(measures.range{t}) 
-        measures.tf_fit_halfheight_low{t} = fitx(indl); 
+        fit_halfheight_low = fitx(indl); 
     end
-    if ~isnan(measures.tf_fit_halfheight_high{t}) && ~isnan(measures.tf_fit_halfheight_low{t})
-        measures.tf_fit_bandwidth{t} = measures.tf_fit_halfheight_high{t} / measures.tf_fit_halfheight_high{t};
-        measures.tf_fit_lowpass{t} = false;
-    elseif ~isnan(measures.tf_fit_halfheight_high{t})
-        measures.tf_fit_lowpass{t} = true;
+    fit_bandwidth = fit_halfheight_high / fit_halfheight_low;
+    if ~isnan(fit_halfheight_high) && ~isnan(fit_halfheight_low)
+        fit_lowpass = false;
+    elseif ~isnan(fit_halfheight_high)
+        fit_lowpass = true;
     end
+    
+    
+    measures.tf_fit_halfheight_low{t} = fit_halfheight_low;
+    measures.tf_fit_halfheight_high{t} = fit_halfheight_high;
+    measures.tf_fit_optimal{t} = fit_optimal;
+    measures.tf_fit_bandwidth{t} = fit_bandwidth;
+    measures.tf_fit_lowpass{t} = fit_lowpass;
 end
+
+
 

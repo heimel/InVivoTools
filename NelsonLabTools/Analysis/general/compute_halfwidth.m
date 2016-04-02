@@ -15,11 +15,10 @@ if length(x)<500
   step=(x(end)-x(1))/500;  % not that many steps, consider taking log first
   finex=(x(1):step:x(end));
 else
-  finex=x
+  finex=x;
 end
 
 intfunction=interp1(x,y,finex,'linear');
-
 
 [maxvalue,max]=max(intfunction);
 halfheight=maxvalue/2;

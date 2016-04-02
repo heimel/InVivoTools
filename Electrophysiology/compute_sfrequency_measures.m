@@ -33,7 +33,7 @@ for t = 1:n_triggers
         if isfield(measures,'rate_spont')
             baseline = measures.rate_spont{t};
         elseif min(response)<0
-                baseline = min(response);
+            baseline = min(response);
         else
             baseline = 0;
         end
@@ -47,7 +47,6 @@ for t = 1:n_triggers
     measures.sf_fit_bandwidth{t} = NaN;
     measures.sf_fit_lowpass{t} = NaN;
     
-    fitx = 0.005:0.001:0.5;
     response = response - baseline;
         
     par = dog_fit(measures.range{t} ,response );
@@ -57,27 +56,33 @@ for t = 1:n_triggers
         return;
     end
     
+    fitx = min(measures.range{t}):0.001:max(measures.range{t}); % only get optimum in tested range
     fity = dog(par,fitx);
-    
     [m,indm] = max(fity);
-    measures.sf_fit_optimal{t} = fitx(indm);
-    
+    fit_optimal = fitx(indm);
+    fitx = 0.005:0.001:0.6;
+    fity = dog(par,fitx);
+    indm = find(fitx>fit_optimal,1);
     indh = find(fity>m/2,1,'last');
     if ~isempty(indh) && indh>indm && fitx(indh)<max(measures.range{t})
-        measures.sf_fit_halfheight_high{t} = fitx(indh);
-    else
-        logmsg('Could not fit DOG to sf curve');
-        return;
+        fit_halfheight_high = fitx(indh);
     end
     indl = find(fity>m/2,1,'first');
     if ~isempty(indl) && indl<indm && fitx(indl)>min(measures.range{t}) 
-        measures.sf_fit_halfheight_low{t} = fitx(indl); 
+        fit_halfheight_low = fitx(indl); 
     end
-    if ~isnan(measures.sf_fit_halfheight_high{t}) && ~isnan(measures.sf_fit_halfheight_low{t})
-        measures.sf_fit_bandwidth{t} = measures.sf_fit_halfheight_high{t} / measures.sf_fit_halfheight_high{t};
-        measures.sf_fit_lowpass{t} = false;
-    elseif ~isnan(measures.sf_fit_halfheight_high{t})
-        measures.sf_fit_lowpass{t} = true;
+    fit_bandwidth = fit_halfheight_high / fit_halfheight_low;
+    if ~isnan(fit_halfheight_high) && ~isnan(fit_halfheight_low)
+        fit_lowpass = false;
+    elseif ~isnan(fit_halfheight_high)
+        fit_lowpass = true;
     end
+    
+    
+    measures.sf_fit_halfheight_low{t} = fit_halfheight_low;
+    measures.sf_fit_halfheight_high{t} = fit_halfheight_high;
+    measures.sf_fit_optimal{t} = fit_optimal;
+    measures.sf_fit_bandwidth{t} = fit_bandwidth;
+    measures.sf_fit_lowpass{t} = fit_lowpass;
 end
 

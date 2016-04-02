@@ -64,7 +64,6 @@ else
     theblankid = -1;
 end
 
-
 s = getstimsfile( record );
 if isempty(s)
     errormsg(['No stimulus file present for ' recordfilter(record) ', Skipping analysis.']);
@@ -88,17 +87,17 @@ if (isempty(paramname) || strcmp(paramname,'location')) && ...
         (~isempty(strfind(lower(record.stim_type),'til')) ||...
         ~isempty(strfind(lower(record.stim_type),'position')))
     variable = 'position';
-    stimparams = cellfun(@getparameters,get(s.saveScript));
-    rects = cat(1,stimparams(:).rect);
-    left = uniq(sort(rects(:,1)));
-    right = uniq(sort(rects(:,3)));
-    top = uniq(sort(rects(:,2)));
-    bottom = uniq(sort(rects(:,4)));
-    center_x = (left+right)/2;
-    center_y = (top+bottom)/2;
-    n_x = length(center_x);
-    n_y = length(center_y);
-    stimrect = [min(left) min(top) max(right) max(bottom)];
+%     stimparams = cellfun(@getparameters,get(s.saveScript));
+%     rects = cat(1,stimparams(:).rect);
+%     left = uniq(sort(rects(:,1)));
+%     right = uniq(sort(rects(:,3)));
+%     top = uniq(sort(rects(:,2)));
+%     bottom = uniq(sort(rects(:,4)));
+%     center_x = (left+right)/2;
+%     center_y = (top+bottom)/2;
+%     n_x = length(center_x);
+%     n_y = length(center_y);
+%     stimrect = [min(left) min(top) max(right) max(bottom)];
 else
     variable = paramname;
 end
@@ -215,7 +214,7 @@ for p=1:size(data,2) % roi p
     
     myind = 1;
     for i=1:numStims(s.saveScript)
-        if theblankid~=i,
+        if theblankid~=i
             li = find(do(do_analyze_i)==i);
             if ~isempty(li) % make sure the stim was actually shown
                 ind{myind} = [];  %#ok<AGROW>
@@ -229,7 +228,7 @@ for p=1:size(data,2) % roi p
                     curve(1,myind) = myind; %#ok<AGROW>
                 else
                     curve(1,myind) = getfield( getparameters(get(s.saveScript,i)),paramname); %#ok<GFLD>
-                end;
+                end
                 curve(2,myind) = nanmean(ind{myind}); %#ok<AGROW>
                 curve(3,myind) = nanstd(ind{myind}); %#ok<AGROW>
                 curve(4,myind) = nanstderr(ind{myind}); %#ok<AGROW>
@@ -291,10 +290,10 @@ for p=1:size(data,2) % roi p
     record.measures(p).ind = {ind};
     record.measures(p).spont = spont;
     record.measures(p).channel = channel;
-    if exist('blankresp','var')==1,
+    if exist('blankresp','var')==1
         record.measures(p).blankresp = blankresp;
         record.measures(p).blankind = blankind;
-    end;
+    end
     record.measures(p).response_max = {max(curve(2,:))};
     
     for trigger = 1:length(record.measures(p).response_max) % selectivity index
@@ -302,41 +301,26 @@ for p=1:size(data,2) % roi p
             (max(record.measures(p).response{trigger})-(min(record.measures(p).response{trigger}))) / ...
             max(record.measures(p).response{trigger});
     end % trigger
-    
+
+    newmeasures = [];
     switch lower(record.measures(p).variable)
         case 'angle'
             newmeasures = compute_angle_measures(record.measures(p));
-            if ~isempty(newmeasures)
-                record.measures = structconvert(record.measures,newmeasures);
-            end
-            record.measures(p) = newmeasures;
         case 'contrast'
             newmeasures = compute_contrast_measures(record.measures(p));
-             if ~isempty(newmeasures)
-                record.measures = structconvert(record.measures,newmeasures);
-            end
-            record.measures(p) = newmeasures;
         case 'sfrequency'
             newmeasures = compute_sfrequency_measures(record.measures(p));
-             if ~isempty(newmeasures)
-                record.measures = structconvert(record.measures,newmeasures);
-            end
-            record.measures(p) = newmeasures;
         case 'size'
-            record.measures(p).suppression_index = compute_suppression_index( curve(1,:), curve(2,:) );
+            newmeasures = compute_size_measures(record.measures(p));
         case 'position'
-            record.measures(p).rect = stimrect;
-            resp_by_pos = reshape(curve(2,:),n_x,n_y)';
-            resp_by_pos = thresholdlinear(resp_by_pos);
-            record.measures(p).rf{1} = resp_by_pos;
-            center_of_mass_x = center_x(:)'*  sum(resp_by_pos,1)'/sum(resp_by_pos(:));
-            center_of_mass_y = center_y(:)'*sum(resp_by_pos,2)/sum(resp_by_pos(:));
-            record.measures(p).rf_center{1} = round([center_of_mass_x center_of_mass_y]);            
+            newmeasures = compute_position_measures(record.measures(p),s);
     end
-    
+    if ~isempty(newmeasures)
+        record.measures = structconvert(record.measures,newmeasures);
+    end
+    record.measures(p) = newmeasures;
+
     record.measures(p).responsive = any(curve(2,:)-2*curve(4,:)>0);
-    
-%    resp(p) = record.measures(p); %#ok<AGROW>
 end % roi p
 resp = record.measures;
 
