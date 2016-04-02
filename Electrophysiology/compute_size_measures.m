@@ -17,6 +17,9 @@ end
 
 
 for t=1:length(measures.triggers)
+    measures.suppression_index{t} = ...
+        compute_suppression_index( measures.range{t}, measures.response{t} );
+
     response = measures.curve{t}(2,:);
     
     ind_blank = find(measures.range{t}==0);
@@ -46,8 +49,6 @@ for t=1:length(measures.triggers)
     [m,indm] = max(fity); %#ok<ASGLU>
     
     measures.size_fit_optimal{t} = fitx(indm);
-    measures.suppression_index{t} = ...
-        compute_suppression_index( measures.range{t}, measures.response{t} );
     measures.size_fit_suppression_index{t} = ...
         compute_suppression_index( fitx, fity );
 end

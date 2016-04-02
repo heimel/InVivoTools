@@ -113,7 +113,7 @@ measures.rf_n_off=sum(rf_off(:));
 [x,y,rect]=getgrid(inp.stimtime.stim);
 
 % find rf center
-[m,xy] = max(rf(:));
+[m,xy] = max(rf(:)); %#ok<ASGLU>
 rfx=ceil(xy/y);
 rfy=rem(xy-1,y)+1;
 measures.rf_center = [rfx rfy];

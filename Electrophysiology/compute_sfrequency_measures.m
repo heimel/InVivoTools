@@ -66,18 +66,23 @@ for t = 1:n_triggers
     indh = find(fity>m/2,1,'last');
     if ~isempty(indh) && indh>indm && fitx(indh)<max(measures.range{t})
         fit_halfheight_high = fitx(indh);
+    else
+        fit_halfheight_high = NaN;
     end
     indl = find(fity>m/2,1,'first');
     if ~isempty(indl) && indl<indm && fitx(indl)>min(measures.range{t}) 
         fit_halfheight_low = fitx(indl); 
+    else
+        fit_halfheight_low = NaN;
     end
     fit_bandwidth = fit_halfheight_high / fit_halfheight_low;
     if ~isnan(fit_halfheight_high) && ~isnan(fit_halfheight_low)
         fit_lowpass = false;
     elseif ~isnan(fit_halfheight_high)
         fit_lowpass = true;
+    else
+        fit_lowpass = NaN;
     end
-    
     
     measures.sf_fit_halfheight_low{t} = fit_halfheight_low;
     measures.sf_fit_halfheight_high{t} = fit_halfheight_high;
