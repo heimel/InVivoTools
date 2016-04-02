@@ -1,10 +1,10 @@
 function measures = compute_contrast_measures( measures )
 %COMPUTE_CONTRAST_MEASURES compute some specific contrast measures
 %
-%  RECORD = COMPUTE_CONTRAST_MEASURES( RECORD )
+%  MEASURES = COMPUTE_CONTRAST_MEASURES( MEASURES )
 %
 %
-% 2013 Alexander Heimel
+% 2013-2016 Alexander Heimel
 %
 
 measures.usable=1;

@@ -15,7 +15,7 @@ evalin('base','global analysed_script');
 evalin('base','global global_record');
 analysed_stimulus = getstimsfile(record);
 if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
-    analysed_script = analysed_stimulus.saveScript; 
+    analysed_script = analysed_stimulus.saveScript;
 else
     logmsg('No savedscript');
 end
@@ -142,7 +142,7 @@ for c=1:n_cells
         [ 0 reltitlepos-row*relsubheight relsubwidth relsubheight]);
     axis off
     if isfield(measure,'index')
-        y = printtext(subst_ctlchars(['Index: ' num2str(measure.index)]),1);
+        y = printtext(subst_ctlchars(['Index: ' num2str(measure.index)]),1); %#ok<*NASGU>
     else
         y =  printtext(subst_ctlchars(['Number: ' num2str(c)]),1);
     end
@@ -162,7 +162,7 @@ for c=1:n_cells
         case {'sg','sg_adaptation'}
             if iscell(measure.rf) % deprecated on 2014-11-26
                 n_intervals = length(measure.rf);
-            elseif ndims(measure.rf)==2
+            elseif ndims(measure.rf)==2 %#ok<ISMAT>
                 n_intervals = 1;
             else
                 n_intervals = size(measure.rf,1);
@@ -202,7 +202,7 @@ for c=1:n_cells
             plot_psth(measure,record);
         case {'hupe','lammemotion','lammetexture'}
             color = 'bgrcmybgrcmy';
-                
+            
             y = printfield(measure,'lamme_modulation',y,0.5);
             y = printfield(measure,'hupe_modulation',y);
             y = printfield(measure,'start_stim_difference',y);
@@ -293,7 +293,7 @@ for c=1:n_cells
                     y = printfield(measure,'orientation_selectivity_index',y);
                     %y = printfield(measure,'tuningwidth',y);
                     y = printfield(measure,'direction_selectivity_index',y);
-                case 'size' 
+                case 'size'
                     y = printfield(measure,'suppression_index',y);
                 case 'contrast'
                     printfield(measure,'c50',y);
@@ -316,7 +316,7 @@ for c=1:n_cells
             if c==n_cells  && numel(measure.range{1})>1
                 xlabel(capitalize(measure.variable));
             end
-
+            
             switch measure.variable
                 case {'angle', 'figdirection','gnddirection'}
                     col = 3;
@@ -326,9 +326,9 @@ for c=1:n_cells
                     switch lower(record.setup)
                         case {'nin380','nori001','antigua'}
                             % do nothing for backprojection screen
-                            %set(gca,'ydir','reverse' ); 
+                            %set(gca,'ydir','reverse' );
                         otherwise
-                            set(gca,'ydir','reverse' ); 
+                            set(gca,'ydir','reverse' );
                             
                     end
                     
@@ -339,13 +339,13 @@ for c=1:n_cells
                     subplot('position',...
                         [relsubwidth*(col-1) reltitlepos-(row-0.2)*relsubheight relsubwidth*0.8 relsubheight*0.8]);
                     hold on;
-
+                    
                     plot_rf( measure , 1)
                     
-%                     resp_by_pos = reshape(measure.curve(2,:),measure.n_x,measure.n_y)';
-%                     resp_by_pos = resp_by_pos-min(resp_by_pos(:));
-%                     %figure('Name',['Cell ' num2str(resps(i).index) ' RF'],'NumberTitle','off');
-%                     imagesc(resp_by_pos);colormap gray;axis off
+                    %                     resp_by_pos = reshape(measure.curve(2,:),measure.n_x,measure.n_y)';
+                    %                     resp_by_pos = resp_by_pos-min(resp_by_pos(:));
+                    %                     %figure('Name',['Cell ' num2str(resps(i).index) ' RF'],'NumberTitle','off');
+                    %                     imagesc(resp_by_pos);colormap gray;axis off
             end
             
             % psth
@@ -393,7 +393,7 @@ if isfield(record,'eye') && strcmp(record.eye,'ipsi') && isfield(measures,'odi')
             continue
         end
         if row==1 % new figure
-
+            
             if isfield(measures,'contains_data')
                 n_cells_with_data = sum([measures(c:n_cells).contains_data]);
             else
@@ -404,9 +404,9 @@ if isfield(record,'eye') && strcmp(record.eye,'ipsi') && isfield(measures,'odi')
             end
             max_rows = min(n_cells_with_data,max_rows);
             height = max_rows*subheight;
-
             
-                      
+            
+            
             figpos = [ fix( [figleft  (screensize(4)-height-titleheight)/2]) ...
                 width height+titleheight];
             figure('Name',tit,'NumberTitle','off','units','pixels','Position',figpos);
@@ -461,7 +461,7 @@ if isempty(tests)
 end
 txt = tests{1};
 for t=2:length(tests)
-    txt = [txt ',' num2str(str2double(tests{t}(2:end)))];
+    txt = [txt ',' num2str(str2double(tests{t}(2:end)))]; %#ok<AGROW>
 end
 
 
@@ -502,8 +502,8 @@ if isfield(measure,'psth_tbins') && ~isempty(measure.psth_tbins) && ~isempty(mea
             end
             
             if length(measure.psth_tbins)>1
-%               plot(tbins,count,clr(t));
-               plot(tbins,smoothen(count,3),clr(t));
+                %               plot(tbins,count,clr(t));
+                plot(tbins,smoothen(count,3),clr(t));
             else
                 bar(tbins,count,clr(t));
             end
@@ -524,9 +524,9 @@ if isfield(measure,'psth_tbins') && ~isempty(measure.psth_tbins) && ~isempty(mea
         end
         first_timepoint = min(tbins(:));
         last_timepoint = max(tbins(:));
-%         if measure.psth_tbins{t}(end)>last_timepoint
-%             last_timepoint = measure.psth_tbins{t}(end);
-%         end
+        %         if measure.psth_tbins{t}(end)>last_timepoint
+        %             last_timepoint = measure.psth_tbins{t}(end);
+        %         end
     end
 elseif isfield(measure,'psth')
     bar(measure.psth.tbins,measure.psth.data);
@@ -580,7 +580,7 @@ function plot_rf( measure , i)
 if iscell(measure.rf)
     rf=measure.rf{i}; % deprecated on 2014-11-26
 else
-    if ndims(measure.rf)==2
+    if ndims(measure.rf)==2 %#ok<ISMAT>
         rf = measure.rf;
     else
         rf = squeeze(measure.rf(i,:,:));
@@ -593,8 +593,8 @@ set(gca,'YTick',[]);
 
 if max(rf)>2 % i.e. luminance and not df/f
     colormap hot
-%    set(gca,'CLim',[256/35 40 ])
-else % df/d 
+    %    set(gca,'CLim',[256/35 40 ])
+else % df/d
     set(gca,'ydir','reverse');
     colormap gray
 end
@@ -608,7 +608,7 @@ if isfield(measure,'rect')
     rf_center(2) = (rf_center(2) - measure.rect(2))/(measure.rect(4)-measure.rect(2)) * size(rf,1)+0.5;
 end
 if max(rf)>2 % i.e. luminance and not df/f
-bordersquare(rf_center,[0 1 0]);
+    bordersquare(rf_center,[0 1 0]);
 else
     plot(rf_center(1),rf_center(2),'r*');
 end
@@ -668,13 +668,12 @@ end
 clr = 'kbry';
 for i=1:length(curves) % over triggers
     curve = curves{i};
-    
     if strcmp(measure.variable,'angle') && length(measure.range{1})>1
         curve(:,end+1) = curve(:,1); %#ok<AGROW>
         curve(1,end) =curve(1,end)+360; % complete circle
-
+        
         if 0  % show orientation rather than direction
-            new_curve(1,:) = curve(1,1:end/2);
+            new_curve(1,:) = curve(1,1:end/2); %#ok<UNRCH>
             new_curve(2,:) = (curve(2,1:end/2) + curve(2,end/2+1:end))/2 ;
             new_curve(3,:) = (curve(3,1:end/2) + curve(3,end/2+1:end))/sqrt(2) ;
             new_curve(4,:) = (curve(4,1:end/2) + curve(4,end/2+1:end))/sqrt(2);
@@ -687,7 +686,7 @@ for i=1:length(curves) % over triggers
             % fit curve, so don't show line
             linestyle = '.';
     end
-
+    
     switch measure.variable
         case {'typenumber','position'}
             x = 1:size(curve,2);
@@ -696,7 +695,7 @@ for i=1:length(curves) % over triggers
             set(gca,'XTick',1:size(curve,2));
             set(gca,'XTickLabel',curve(1,:));
         otherwise
-            if size(curve,2)==1 
+            if size(curve,2)==1
                 x = curve(1,1)+(i-1)/length(curves);
                 bar(x,curve(2,1),1/length(curves),clr(i));
                 set(gca,'Xtick',[]);
@@ -706,43 +705,64 @@ for i=1:length(curves) % over triggers
                 plot(curve(1,:),curve(2,:),[ linestyle clr(i)]);
             end
     end
-        hold on
+    
+    
+    
+    hold on
     errorbar(x,curve(2,:),curve(4,:),[clr(i) '.']);
     
     ylabel(rate_label);
     
+    switch measure.variable
+        case 'sFrequency'
+            if isfield(measure,'sf_fit_halfheight_low') && ~isnan(measure.sf_fit_halfheight_low{i})
+                plot([measure.sf_fit_halfheight_low{i} measure.sf_fit_halfheight_low{i}],ylim,'y-');
+            end
+            if isfield(measure,'sf_fit_halfheight_high') && ~isnan(measure.sf_fit_halfheight_high{i})
+                plot([measure.sf_fit_halfheight_high{i} measure.sf_fit_halfheight_high{i}],ylim,'y-');
+            end
+            y = curve(2,:);
+            par = dog_fit(curve(1,:)  ,y );
+            fitx = 0.01:0.01:0.5;
+            fity = dog(par,fitx);
+            hold on
+            plot(fitx,fity,'k');
+            set(gca,'xscale','log')
+        case 'tFrequency'
+            if isfield(measure,'tf_fit_halfheight_low') && ~isnan(measure.tf_fit_halfheight_low{i})
+                plot([measure.tf_fit_halfheight_low{i} measure.tf_fit_halfheight_low{i}],ylim,'y-');
+            end
+            if isfield(measure,'tf_fit_halfheight_high') && ~isnan(measure.tf_fit_halfheight_high{i})
+                plot([measure.tf_fit_halfheight_high{i} measure.tf_fit_halfheight_high{i}],ylim,'y-');
+            end
+            
+            fitx = 0:0.1:40;
+            par = dog_fit(curve(1,:),curve(2,:));
+            fity = dog(par,fitx);
+            hold on
+            plot(fitx,fity,'k');
+        case 'size'
+            fitx = 1:1:120;
+            par = dog_fit(curve(1,:),curve(2,:));
+            fity = dog(par,fitx);
+            hold on
+            plot(fitx,fity,'k')
+    end
+    
 end
 
 for i=1:length(curves) % over triggers, separate to have axis right
-
+    
     ax=axis;
     if isfield(measure,'rate_spont')
         plot([ax(1) ax(2)],[measure.rate_spont{i} measure.rate_spont{i}],[clr(i) '--']);
     end
 end
 yl = ylim;
-if yl(2)>0
-    ylim([0 yl(2)]);
-end
+%if yl(2)>0
+%    ylim([0 yl(2)]);
+%end
 switch measure.variable
-    case 'sFrequency'
-        fitx = 0.01:0.01:0.5;
-        par = dog_fit(curve(1,:),curve(2,:));
-        fity = dog(par,fitx);
-        hold on
-        plot(fitx,fity,'k')
-    case 'tFrequency'
-        fitx = 1:0.1:40;
-        par = dog_fit(curve(1,:),curve(2,:));
-        fity = dog(par,fitx);
-        hold on
-        plot(fitx,fity,'k')
-    case 'size'
-        fitx = 1:1:120;
-        par = dog_fit(curve(1,:),curve(2,:));
-        fity = dog(par,fitx);
-        hold on
-        plot(fitx,fity,'k')
     case 'contrast'
         xlim([-0.02 1]);
         set(gca,'XTick',[0 0.2 0.4 0.6 0.8 1]);
@@ -799,17 +819,17 @@ for i=1:length(measure.response)
     polar(0,m,'w');
     hold on
     switch measure.variable
-        case 'angle' 
-    
-%    curve = curves{i};
-%     polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:)
-%     curve(2,1)]),[ linestyle clr(i)]);
-%        polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
-        polar([measure.range{i}+measure.preferred_stimulus{1} ...
-            measure.range{i}(1)+measure.preferred_stimulus{1}]/180*pi,...
-            thresholdlinear([measure.response{i} measure.response{i}(1)]),...
-            [ linestyle clr(i)]);
-    set(gca,'view',[-90 90]);
+        case 'angle'
+            
+            %    curve = curves{i};
+            %     polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:)
+            %     curve(2,1)]),[ linestyle clr(i)]);
+            %        polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
+            polar([measure.range{i}+measure.preferred_stimulus{1} ...
+                measure.range{i}(1)+measure.preferred_stimulus{1}]/180*pi,...
+                thresholdlinear([measure.response{i} measure.response{i}(1)]),...
+                [ linestyle clr(i)]);
+            set(gca,'view',[-90 90]);
         otherwise % figdirection or so
             if iscell(measure.curve)
                 curve = measure.curve{i};

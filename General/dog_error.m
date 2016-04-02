@@ -10,7 +10,7 @@ function err=dog_error( params, x, y, ste)
 %
 %     Extra error is given for negative values at 0
 %  
-%  2003, Alexander Heimel, (heimel@brandeis.edu)
+%  2003-2016, Alexander Heimel
 %
  
 yfit=dog(params,x);
@@ -22,5 +22,14 @@ if nargin==4
 end
 err=err*err';
 
-yfit=dog(params,[0]);
-err=err +  err*(abs(yfit)-yfit); %+ 0.1*err*sum(abs(params)-params );
+[minx,ind] = min(x);
+err = err + (y(ind)-dog(params,min(x)))^2; % put extra emphasis on lowest x
+
+yfit=dog(params,0);
+err=err +  err*(abs(yfit)-yfit); % punish negative y(0)
+
+err=err + (yfit-dog(params,minx))^2; % punish explosions close to 0 
+
+maxx = max(x);
+err=err + (dog(params,maxx*10)-dog(params,maxx))^2; % punish explosions after max(x)
+

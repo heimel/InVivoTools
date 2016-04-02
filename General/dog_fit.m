@@ -12,23 +12,23 @@ function par = dog_fit(x,y)
 %    SI is standard deviation of negative gaussian
 
 search_options=optimset('fminsearch');
-%	search_options.TolFun=1e-3;
-%	search_options.TolX=1e-3;
-%	search_options.MaxFunEvals='300*numberOfVariables';
-%	search_options.Display='off';
+	search_options.TolFun=1e-3;
+	search_options.TolX=1e-3;
+	search_options.MaxFunEvals=6*300;%'300*numberOfVariables';
+	search_options.Display='off';
 
 % starting values
-r0=min(y);
-re=max(y)-r0;
-se=max(x)/2;
-ri=re;
-si=max(x)/4;
-xo=[r0 re se ri si];
+[m,ind] = max(x);
+r0 = y(ind); %min(y);
+re = max(y)-r0;
+se = max(x)/2;
+ri = re;
+si = max(x)/4;
+xo = [r0 re se ri si];
 
-% search
-options=optimset;
-options.MaxFunEvals=4000;
-options.MaxIter=4000;
-%eval('[par,fval,exitflag] = fminsearch(@(par) dog_error(par,x,y),xo,options);');
-[par,fval,exitflag] = fminsearch(@(par) dog_error(par,x,y),xo,options);
+par = fminsearch(@(par) dog_error(par,x,y),xo,search_options);
+
+
+
+
 

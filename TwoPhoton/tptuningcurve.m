@@ -303,7 +303,7 @@ for p=1:size(data,2) % roi p
             max(record.measures(p).response{trigger});
     end % trigger
     
-    switch record.measures(p).variable
+    switch lower(record.measures(p).variable)
         case 'angle'
             newmeasures = compute_angle_measures(record.measures(p));
             if ~isempty(newmeasures)
@@ -312,6 +312,12 @@ for p=1:size(data,2) % roi p
             record.measures(p) = newmeasures;
         case 'contrast'
             newmeasures = compute_contrast_measures(record.measures(p));
+             if ~isempty(newmeasures)
+                record.measures = structconvert(record.measures,newmeasures);
+            end
+            record.measures(p) = newmeasures;
+        case 'sfrequency'
+            newmeasures = compute_sfrequency_measures(record.measures(p));
              if ~isempty(newmeasures)
                 record.measures = structconvert(record.measures,newmeasures);
             end
@@ -330,8 +336,9 @@ for p=1:size(data,2) % roi p
     
     record.measures(p).responsive = any(curve(2,:)-2*curve(4,:)>0);
     
-    resp(p) = record.measures(p); %#ok<AGROW>
+%    resp(p) = record.measures(p); %#ok<AGROW>
 end % roi p
+resp = record.measures;
 
 try
     responsedata = cellfun(@mean,data(1:end/2,:)); % mean F over interval
