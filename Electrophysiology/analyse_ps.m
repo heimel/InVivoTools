@@ -4,8 +4,7 @@ function measures=analyse_ps( inp , record, verbose)
 %
 %  MEASURES = ANALYSE_PS( INP, RECORD, VERBOSE)
 %
-%
-% 2007-2014 Alexander Heimel
+% 2007-2016, Alexander Heimel
 %
 
 if nargin<3
@@ -25,7 +24,7 @@ if isempty(paramname)
     paramname = {'imageType'}; % or 'angle'
 end
 
-ind = find(strcmp(record.stim_type,paramname));  % notice: changed from record.stim_parameters 2013-03-29!
+ind = find(strcmp(record.stim_type,paramname));  
 if isempty(ind)
     paramname = paramname{1};
 else
@@ -127,12 +126,10 @@ for i = 1:length(triggers)
     spontrast =  getoutput(out(i).spontrast);
     tbins_all = [spontrast.bins{1} tbins];
     if length(unique(tbins_all))~=length(tbins_all)
-        rastcount_all = [ rastcount_all];
-        tbins_all = [ tbins];
+        tbins_all = tbins;
     else
-        rastcount_all = [spontrast.counts{1}/spontrast.N rastcount_all];
+        rastcount_all = [spontrast.counts{1}/spontrast.N rastcount_all]; %#ok<AGROW>
     end
-    
     
     measures.psth_tbins{i} = tbins;
     measures.psth_count{i} = rastcount_max;
@@ -146,7 +143,6 @@ for i = 1:length(triggers)
     rastcount_max = spatialfilter(rastcount_max,filterwidth);
     [ind_max_label,ind_max] = max(rastcount_max); %#ok<ASGLU>
     measures.time_peak{i} = ind_max*binsize;
-  
 end % trigger i
 
 if length(inps)==1
@@ -189,27 +185,9 @@ switch measures.variable
     case 'gnddirection'
         measures = compute_angle_measures(measures);
     case 'size'
-        measures = compute_size_measures(measures);
+        measures = compute_size_measures(measures,inp.st);
     case 'location'
-        stimparams = cellfun(@getparameters,get(inp.st.stimscript));
-        rects = cat(1,stimparams(:).rect);
-        left = uniq(sort(rects(:,1)));
-        right = uniq(sort(rects(:,3)));
-        top = uniq(sort(rects(:,2)));
-        bottom = uniq(sort(rects(:,4)));
-        center_x = (left+right)/2;
-        center_y = (top+bottom)/2;
-        n_x = length(center_x);
-        n_y = length(center_y);
-        measures.rect = [min(left) min(top) max(right) max(bottom)];
-        for t = 1:length(triggers) 
-            resp_by_pos = reshape(measures.response{t},n_x,n_y)';
-            %resp_by_pos = thresholdlinear(resp_by_pos);
-            measures.rf{t} = resp_by_pos;
-            center_of_mass_x = center_x(:)' * sum(resp_by_pos,1)'/sum(resp_by_pos(:));
-            center_of_mass_y = center_y(:)' * sum(resp_by_pos,2)/sum(resp_by_pos(:));
-            measures.rf_center{t} = round([center_of_mass_x center_of_mass_y]);
-        end
+        measures = compute_position_measures(measures,inp.st);
 end
 
 

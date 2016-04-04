@@ -22,7 +22,6 @@ img_colorized = cat(3,rescale(img,[-1 1],[colors.low_rgb(1) colors.high_rgb(1)])
 	rescale(img,[-1 1],[colors.low_rgb(2) colors.high_rgb(2)]),...
 	rescale(img,[-1 1],[colors.low_rgb(3) colors.high_rgb(3)]));
    
-
 gratingtex = Screen('MakeTexture',StimWindow,img_colorized);
 
 clut_bg = ones(256,1)*colors.backdropRGB;
@@ -52,7 +51,7 @@ if isfield(PSstim.PSparams,'ps_add') && ~isempty(PSstim.PSparams.ps_add)
 	DP_add = displayprefs(dp_add);
 	moviefields_add = MovieParams2MTI(DS_add,DP_add);
 	ds_userfield = MovieParamsCat(ds_userfield,moviefields_add);
-end;
+end
 
 clip_tex = [];
 
@@ -88,7 +87,7 @@ if isfield(PSstim.PSparams,'ps_mask'),
 	DP_mask = displayprefs(dp_mask);
 	moviefields_mask = MovieParams2MTI(DS_mask,DP_mask);
 	ds_userfield = MovieParamsCat(ds_userfield,moviefields_mask);
-end;
+end
 
 dS = { 'displayType', 'Movie', 'displayProc', 'standard', ...
          'offscreen', [gratingtex ps_add_tex clip_tex ps_mask_tex], 'frames', frames, 'clut_usage', clut_usage, 'depth', 8, ...

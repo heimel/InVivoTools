@@ -1,8 +1,7 @@
-function measures = compute_position_measures( measures, stimfile )
+function measures = compute_position_measures( measures, st )
 %COMPUTE_POSITION_MEASURES compute some specific tiling measures
 %
-%  MEASURES = COMPUTE_SIZE_MEASURES( MEASURES )
-%
+%  MEASURES = COMPUTE_POSITION_MEASURES( MEASURES, STIMSFILE )
 %
 % 2016 Alexander Heimel
 %
@@ -11,7 +10,14 @@ if ~strcmp(measures.variable,'position')
     return
 end
 
-stimparams = cellfun(@getparameters,get(stimfile.saveScript));
+if isfield(st,'saveScript')
+    stimscriptfield = 'saveScript';
+else
+    stimscriptfield = 'stimscript';
+end
+sscript = st.(stimscriptfield);
+
+stimparams = cellfun(@getparameters,get(sscript));
 rects = cat(1,stimparams(:).rect);
 left = uniq(sort(rects(:,1)));
 right = uniq(sort(rects(:,3)));

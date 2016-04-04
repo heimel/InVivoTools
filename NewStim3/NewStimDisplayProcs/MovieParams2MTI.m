@@ -1,5 +1,4 @@
 function [moviefields] = MovieParams2MTI(ds, df)
-
 % MOVIEPARAMS2MTI - Set up Movie fields for DisplayTiming/DisplayStimulus
 %
 %   This function allow our standard 'Movie' dislay type in NewStim to take
@@ -49,9 +48,6 @@ function [moviefields] = MovieParams2MTI(ds, df)
 %                              for CreateProceduralSineGrating.
 %                              Default is [].
 %
-
-
-%
 %   This function should only be called when stimuli are loaded (and, in PTB-3, when
 %   the stimulus screen is showing).
 
@@ -96,45 +92,19 @@ if strcmp(ds.displayType,'Movie'),
     end;
     if isfield(ds.userfield,'Movie_textures'),
         moviefields.Movie_textures = ds.userfield.Movie_textures;
-    else,
+    else
         for i=1:length(df.frames), moviefields.Movie_textures{i} = df.frames(i); end;
     end;
     if isfield(ds.userfield,'Movie_auxparameters'),
         moviefields.Movie_auxparameters = ds.userfield.Movie_auxparameters;
     else
         moviefields.Movie_auxparameters = zeros(4,length(df.frames),length(ds.offscreen));
-    end;
-
+    end
     if exist('NewStimTilt','var') && ~isempty(NewStimTilt) && NewStimTilt~=0
         moviefields.Movie_angles = moviefields.Movie_angles + NewStimTilt/2;
-%         moviefields.Movie_angles(1,:) = moviefields.Movie_angles(1,:) + NewStimTilt/2;
-%         moviefields.Movie_angles(2,:) = moviefields.Movie_angles(2,:) + NewStimTilt/2;
-%         cent_scr=[df.rect(1)+df.rect(3)/2,df.rect(2)+df.rect(4)/2];
-%         disp('MOVIEPARAMS2MTI: NewStimTilt center of rect rotation around screen center is not yet implemented.');
-        % next line not finished. Should be rotated around screen center
-%         moviefields.Movie_destrects=moviefields.Movie_destrects-moviefields.Movie_sourcerects
-%         moviefields.Movie_destrects = moviefields.Movie_destrects + mean(moviefields.Movie_sourcerects(:,1,1),1) - mean(moviefields.Movie_destrects(:,1,1),1);
-%         moviefields.Movie_destrects(:,:,2) = moviefields.Movie_destrects(:,:,2) + mean(moviefields.Movie_sourcerects(:,1,2),1) - mean(moviefields.Movie_destrects(:,1,2),1);
-% xx1=mean(moviefields.Movie_sourcerects(:,1,1),1) - mean(moviefields.Movie_destrects(:,1,1),1);
-% xx2=mean(moviefields.Movie_sourcerects(:,1,2),1) - mean(moviefields.Movie_destrects(:,1,2),1);
-% center_source=(moviefields.Movie_sourcerects(:,1)+moviefields.Movie_sourcerects(:,end))/2;
-% % shift_center=center_source-moviefields.Movie_destrects(:,1);
-% df.rect
-% shift_center=[10;10;10;10];
-% moviefields.Movie_destrects=moviefields.Movie_destrects+repmat(shift_center,1,length(moviefields.Movie_destrects));
-% moviefields.Movie_destrects(1,:)=moviefields.Movie_destrects(1,:)+0;
-% moviefields.Movie_destrects(2,:)=moviefields.Movie_destrects(2,:)+0;
-% moviefields.Movie_destrects(3,:)=moviefields.Movie_destrects(3,:)+0;
-% moviefields.Movie_destrects(4,:)=moviefields.Movie_destrects(4,:)+0;
-% CenterRectOnPointd(moviefields.Movie_destrects(1:4),400,400);
-moviefields.Movie_destrects=moviefields.Movie_destrects+0;
-% moviefields.Movie_destrects(1,:)=moviefields.Movie_destrects(1,:)-df.rect(1)+960;
-% moviefields.Movie_destrects(2,:)=moviefields.Movie_destrects(2,:)-df.rect(2)+540;
-% df.rect
-% moviefields.Movie_destrects(3,:)=moviefields.Movie_destrects(3,:)-df.rect(3);
-% moviefields.Movie_destrects(4,:)=moviefields.Movie_destrects(4,:)-df.rect(4);
+        moviefields.Movie_destrects=moviefields.Movie_destrects+0;
     end
 else
     moviefields = [];
-end;
+end
 

@@ -10,12 +10,12 @@ function [img, frames, ds_userfield, destination_rect] = animate(PSstim)
 
 PSparams = PSstim.PSparams;
 
-% SPATIAL PARAMETERS %%%%%%%%%
+% SPATIAL PARAMETERS 
 %rect = PSparams.rect;  % this is the size requested by the user
 %width=rect(3)-rect(1); height=rect(4)-rect(2);
 [spatialphase, pixelIncrement, wLeng, destination_rect, width_offscreen, height_offscreen] = spatial_phase(PSstim);
 
-% calculate TEMPORAL PARAMETERS %%%%%%%%%%%
+% calculate TEMPORAL PARAMETERS 
 tphase = temporal_phase(PSstim);
 
 ds_userfield = [];
@@ -46,8 +46,8 @@ switch PSparams.animType,
         ds_userfield.Movie_sourcerects = cat(3,(repmat(sourcerect_base,length(rectshift),1) + [rectshift' zeros(length(rectshift),1) rectshift' zeros(length(rectshift),1)])');
         frames = ones(size(tphase));
     case {2,3}, % sin wave, ramp
-        if 0, % this is solution that involves multiple images for each contrast step needed; let's not use this one
-            tphase = round(tphase * 10000)/10000; % round small differences
+        if 0 % this is solution that involves multiple images for each contrast step needed; let's not use this one
+            tphase = round(tphase * 10000)/10000; %#ok<UNRCH> % round small differences
             unique_tphase = unique(tphase);
             if PSparams.animType==2
                 tphase_contrast = cos(unique_tphase);
