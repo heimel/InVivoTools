@@ -33,13 +33,13 @@ if p.normalize==0,
     %     if length(tsteps2)==1
     %         tsteps2= [p.interval(1) p.interval(2)];
     %     end;
-    rc_reshape = reshape(fix(rc_avg_s),xx*yy,3); 
+    rc_reshape = reshape(fix(rc_avg_s),xx*yy,3);
     sz_ = size(rc_reshape,1);
-    rctreshape = reshape(fix(rc_avg_t),xx*yy,3); 
+    rctreshape = reshape(fix(rc_avg_t),xx*yy,3);
     szt = size(rctreshape,1);
-    rcxreshape = reshape(fix(rc_avg_x),yy*tt,3); 
+    rcxreshape = reshape(fix(rc_avg_x),yy*tt,3);
     szx = size(rcxreshape,1);
-    rcyreshape = reshape(fix(rc_avg_y),xx*tt,3); 
+    rcyreshape = reshape(fix(rc_avg_y),xx*tt,3);
     [ctab,dum,inds]=unique([rc_reshape;rctreshape;rcxreshape;rcyreshape;],'rows'); %#ok<ASGLU>
     colormap(ctab/255);
     rc_avg_2    = reshape(inds(1:sz_),yy,xx);
@@ -53,7 +53,7 @@ if p.normalize==0,
     Ytsteps = repmat(tint(2),length(ysteps),length(xsteps))';
     Ztsteps = repmat(ysteps,length(xsteps),1);
     hold off;
-    s1 = surf(Xtsteps,Ytsteps,Ztsteps,rc_avg_t2'); 
+    s1 = surf(Xtsteps,Ytsteps,Ztsteps,rc_avg_t2');
     hold on;
     Xysteps = repmat(xsteps,length(tsteps),1);
     Yysteps = repmat(tsteps',1,length(xsteps));
@@ -77,34 +77,34 @@ if p.normalize==0,
         'userdata','cubeaxes');  % use cubeaxes reference later
     ylabel('Time (s)');
     a = axis;
-%     a(2) = rect(3);
-     a(6) = rect(4);
-%     a(3) = p.interval(1);
-%     a(4) = p.interval(2);
-     axis(a);
+    %     a(2) = rect(3);
+    a(6) = rect(4);
+    %     a(3) = p.interval(1);
+    %     a(4) = p.interval(2);
+    axis(a);
 elseif p.normalize==1, % normalize by difference from mean assuming two choices
-    p2 = getparameters(I.stimtime(1).stim); 
+    p2 = getparameters(I.stimtime(1).stim);
     rect = p2.rect;
-%    z1 = norm(p2.values(1,:)); 
-%    z2 = norm(p2.values(2,:)); % pick brighter stim
-%     if z1>=z2
-%         z=0; 
-%     else
-%         z=1; 
-%     end
+    %    z1 = norm(p2.values(1,:));
+    %    z2 = norm(p2.values(2,:)); % pick brighter stim
+    %     if z1>=z2
+    %         z=0;
+    %     else
+    %         z=1;
+    %     end
     meanvec = mean(p2.values);
-%    step = (p2.values(z+1,:)-meanvec)/sum(c.reverse_corr.norms);
-    z = zeros(size(rc_avg)); 
-%    z2=z;
-    z(:,:,:,:,1) = meanvec(1); 
-%    z2(:,:,:,:,1) = step(1);
-    z(:,:,:,:,2) = meanvec(2); 
-%    z2(:,:,:,:,2) = step(2);
-    z(:,:,:,:,3) = meanvec(3); 
-%    z2(:,:,:,:,3) = step(3);
+    %    step = (p2.values(z+1,:)-meanvec)/sum(c.reverse_corr.norms);
+    z = zeros(size(rc_avg));
+    %    z2=z;
+    z(:,:,:,:,1) = meanvec(1);
+    %    z2(:,:,:,:,1) = step(1);
+    z(:,:,:,:,2) = meanvec(2);
+    %    z2(:,:,:,:,2) = step(2);
+    z(:,:,:,:,3) = meanvec(3);
+    %    z2(:,:,:,:,3) = step(3);
     rc_avg = (c.reverse_corr.rc_avg(p.datatoview(1),:,:,:,:)-z(p.datatoview(1),:,:,:,:));
-%    sig = sum(c.reverse_corr.norms)/length(c.reverse_corr.norms);
-%     p_rc_avg = 1/(sqrt(2*pi)*sig)*exp(-(rc_avg(:,:,:,:,1).^2)/(2*sig^2));
+    %    sig = sum(c.reverse_corr.norms)/length(c.reverse_corr.norms);
+    %     p_rc_avg = 1/(sqrt(2*pi)*sig)*exp(-(rc_avg(:,:,:,:,1).^2)/(2*sig^2));
     rc_avg(rc_avg>255) = 255;
     rc_avg(rc_avg<0) = 0;
     rc_avg_t = mean(rc_avg(1,:,:,:,:),2);
