@@ -1,7 +1,7 @@
-function measures=analyse_sg( inp , n_spikes,record,verbose)
+function measures=analyse_sg(inp,n_spikes,record,verbose)
 %ANALYSE_SG analyses stochastic grid stimulus ecdata
 %
-%  MEASURES=ANALYSE_SG( INP , N_SPIKES, RECORD)
+%  MEASURES=ANALYSE_SG(INP,N_SPIKES,RECORD)
 %
 % n_spikes used for calculating feature mean, should be dropped and spont
 % rate should be used instead for doing RF patch size calculation.
@@ -17,6 +17,9 @@ processparams = ecprocessparams(record);
 
 saved_stims = getstimsfile( record ); % to get monitorinfo
 
+% calc feature mean
+para_stim = getparameters(inp.stimtime(1).stim);
+
 measures.usable=1;
 
 if verbose
@@ -30,7 +33,7 @@ end
 para_rc.interval = processparams.rc_interval;
 para_rc.timeres = processparams.rc_timeres;
 para_rc.gain = processparams.rc_gain;
-para_rc.bgcolor=2;
+%para_rc.bgcolor=2;
 
 rc = reverse_corr(inp,para_rc,where);
 if isempty(rc)
@@ -39,12 +42,21 @@ if isempty(rc)
 end
 
 para_rc = getparameters(rc);
+%rc = setparameters(rc,para_rc);
 rcs = getoutput(rc);
+
+measures.rc_transience = rcs.crc.transience;
+measures.rc_onoff = rcs.crc.onoff;
+measures.rc_tmax = rcs.crc.tmax;
+measures.rc_onset = rcs.crc.onset;
+measures.rc_pixelcenter = rcs.crc.pixelcenter;
+
 rcs = rcs.reverse_corr;
 
 % store normalized receptive field plots
-
 measures.rf(:,:,:) = max(rcs.rc_avg(1,:,:,:,end),[],5);  
+
+
 
 if ndims(measures.rf)>2  %#ok<ISMAT>  % i.e. multiple intervals
     rf(:,:) = max(measures.rf,[],1); % take max over all intervals
@@ -52,12 +64,6 @@ else
     rf = measures.rf;
 end
 
-% calc feature mean
-para_stim = getparameters(inp.stimtime(1).stim);
-% feamean is RGB-vector
-feamean=sum(repmat(para_stim.dist,1,3).*para_stim.values,1)/sum(para_stim.dist);
-%flatten feature mean and sem, only works for gray levels
-feamean=mean(feamean);
 
 %below assume enough spikes or stimuli for multinomial distribution to
 %resemble gaussian distribution
@@ -67,28 +73,29 @@ feamean=mean(feamean);
 % poisson-spiking (not accurate in case of periodic bursts)
 % and deduct the number of samples which were probably not
 % sampled by spikes)
-spikes_per_sample=n_spikes/para_stim.N;
-prob_notsampled=exp(-spikes_per_sample);
+spikes_per_sample = n_spikes/para_stim.N;
+prob_notsampled = exp(-spikes_per_sample);
 % from poisson-dist: p_l(m)=l^m exp(-l)/m!
 n_samples=para_stim.N*(1 - prob_notsampled); %
 
-feamean_std=sqrt(sum(repmat(para_stim.dist,1,3).*(para_stim.values.^2),1)/sum(para_stim.dist)...
-    -feamean.^2);
-feamean_sem=feamean_std/sqrt(n_samples);
+feamean_std = ...
+    sqrt(sum(repmat(para_stim.dist,1,3).*(para_stim.values.^2),1)/sum(para_stim.dist)...
+    -para_rc.feamean.^2);
+feamean_sem = feamean_std/sqrt(n_samples);
 
 %flatten feature mean and sem, only works for gray levels
-feamean_sem=mean(feamean_sem);
+feamean_sem = mean(feamean_sem);
 
 % take all point within first and third quartile
 topbox=prctile(rf(:),75);
 minbox=prctile(rf(:),25);
 mrf=mean(rf(  rf(:)<topbox & rf(:)>minbox  ));
 
-if mrf<feamean-feamean_sem || mrf>feamean+feamean_sem
+if mrf<para_rc.feamean-feamean_sem || mrf>para_rc.feamean+feamean_sem
     logmsg('Not sampled long enough. Feature mean too far from data mean');
 end
 
-rf_on=(rf> (feamean+3*feamean_sem));
+rf_on=(rf> (para_rc.feamean+3*feamean_sem));
 measures.rf_n_on=sum(rf_on(:));
 measures.rf_onsize_sqdeg=compute_rf_size_sqdeg( rf_on,record.monitorpos, para_stim, saved_stims,record);
 
@@ -97,7 +104,7 @@ if rf_on==0
     measures.usable=0;
 end
 
-rf_off=(rf< (feamean-3*feamean_sem));
+rf_off=(rf< (para_rc.feamean-3*feamean_sem));
 measures.rf_n_off=sum(rf_off(:));
 
 [x,y,rect]=getgrid(inp.stimtime.stim);

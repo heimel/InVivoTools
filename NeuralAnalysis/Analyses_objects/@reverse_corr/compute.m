@@ -9,8 +9,6 @@ function newrc = compute(rc)
 %
 %  See also:  REVERSE_CORR, GETOUTPUT
 
-% fix for multiple cells
-
 I = getinputs(rc); 
 p = getparameters(rc);
 in = rc.internal; 
@@ -47,8 +45,6 @@ if td % timing data difference
             end
         end
     end
-    
-    
     [x,y,rect]=getgrid(I.stimtime(1).stim);
     fea = cell(length(I.spikes),length(offsets));
     rc_avg = zeros(length(I.spikes),n_bins,y,x,3);
@@ -103,6 +99,13 @@ if td % timing data difference
 else
     r_c = rc.computations.reverse_corr;
 end;
+
+if p.crcpixel==-1
+    rr = max(r_c.rc_avg(1,:,:,:,end),[],5);  % take max color
+    rr = squeeze(max(abs(rr - p.feamean),[],2));
+    [dum,p.crcpixel] = max(rr(:));
+    in.selectedbin = p.crcpixel;
+end
 
 crcmethod = 1;
 
@@ -188,19 +191,27 @@ if centchanged && (p.crcpixel>0),
     tmax=calclags(ii);
     
     % split timecourse in before and after peak
-    before=cc(1:ii);
-    after=cc(ii:end);
+    before = cc(1:ii);
+    after = cc(ii:end);
     
-    %onset=calclags(ii+find(after<3*stddev,1));
-    
+    onset = calclags(ii+find(after<3*stddev,1));
     try
-        if cc(ii)>0, % positive going peak
-            g1 = find(before<2*stddev); if isempty(g1), g1 = 1; end;
-            g2 = find(after<0); if isempty(g2), g2 = length(cc)-ii; end;
+        if cc(ii)>0 % positive going peak
+            g1 = find(before<2*stddev); 
+            if isempty(g1)
+                g1 = 1; 
+            end
+            g2 = find(after<0); 
+            if isempty(g2)
+                g2 = length(cc)-ii; 
+            end;
             rb = cc( g2(1)+ii-1:end);
-            [rbpk,iii]=min(rb); %#ok<ASGLU> % find [end of? AH] peak
+            [rbpk,iii] = min(rb); %#ok<ASGLU> % find [end of? AH] peak
             rbrest = cc(g2(1)+ii-1+iii-1:end);
-            g3 = find(rbrest>-2*stddev); if isempty(g3), g3 = length(cc)-(g2(1)+ii-1+iii); end;
+            g3 = find(rbrest>-2*stddev); 
+            if isempty(g3)
+                g3 = length(cc)-(g2(1)+ii-1+iii); 
+            end
             pk = sum(cc(g1(end):ii-1+g2(1)));
             rb = -sum(cc((g2(1)+ii-1):(g3(1)+g2(1)+ii-1+iii-1)));
             transience= rb/pk;
@@ -212,39 +223,41 @@ if centchanged && (p.crcpixel>0),
             g2 = find(after>0); 
             if isempty(g2), 
                 g2 = length(cc); 
-            end;
+            end
             rb = cc(g2(1)+ii-1:end); 
             [rbpk,iii]=max(rb); %#ok<ASGLU> % find peak
             rbrest = cc(g2(1)+ii-1+iii-1:end);
             g3 = find(rbrest<2*stddev);
             if isempty(g3), 
                 g3 = length(cc);
-            end;
+            end
             pk = -sum(cc(g1(end):ii-1+g2(1)));
             rb = sum(cc(g2(1)+ii-1:g2(1)+ii-1+g3(1)+iii-1));
-            transience= rb/pk;
+            transience = rb/pk;
         end;
     catch
         transience = NaN;
         warning('Could not calculate transience.');
-    end;
+    end
     xcent = round(rect(1)+(x_-0.5)/x * (rect(3)-rect(1)));
     ycent = round(rect(2)+(y_-0.5)/y * (rect(4)-rect(2)));
-    crc = struct('lags',lags,'crc',c,'tmax',tmax,'transience',transience,...
-        'onoff',cc(ii)>0,'pixel',p.crcpixel,'pixelcenter',[xcent ycent]);
-    in.crctimeres=p.crctimeres; 
+    crc = struct('lags',lags,'crc',c,'tmax',tmax,...
+        'transience',transience,'onoff',cc(ii)>0,...
+        'pixel',p.crcpixel,'pixelcenter',[xcent ycent],'onset',onset);
+    in.crctimeres = p.crctimeres; 
     in.crcproj = p.crcproj;
     in.crctimeint = p.crctimeint;
-    in.datatoview = p.datatoview(1); in.crcpixel=p.crcpixel;
+    in.datatoview = p.datatoview(1); 
+    in.crcpixel = p.crcpixel;
 elseif p.crcpixel<=0
     crc = [];
 else
     crc = rc.computations.crc;
 end
 
-thecenter=0;
-thecenterrect=0;
+thecenter = 0;
+thecenterrect = 0;
 rc.internal = in;
-rc.computations=struct('reverse_corr',r_c,...
+rc.computations = struct('reverse_corr',r_c,...
     'center',thecenter,'center_rect',thecenterrect,'crc',crc);
 newrc = rc;

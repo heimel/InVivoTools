@@ -20,12 +20,18 @@ try
     for i=1:length(p.values),
         if eqlen(p.BG,p.values(1,:)),
             bg = i;
-            break;
-        end;
-    end;
+            break
+        end
+    end
 catch
     bg = 1;
-end;
+end
+
+feamean = sum(repmat(p.dist,1,3).*p.values,1)/sum(p.dist);
+%flatten feature mean and sem, only works for gray levels
+feamean = mean(feamean);
+
+
 default_p = struct(...
     'interval',[0.000 0.080],...
     'timeres',0.040,...
@@ -43,7 +49,7 @@ default_p = struct(...
     'feature',0,...
     'gain',1,...
     'immean',128,...
-    'feamean',128,...
+    'feamean',feamean,...
     'crcpixel',-1,...
     'crctimeres',0.001,...
     'crcproj',[(255/2)*[1 1 1];[1 1 1]/(3*255/2)],...
@@ -60,14 +66,6 @@ if ~isempty(parameters) && isstruct(parameters)
     end
 end
 
-% if isempty(parameters)||(ischar(parameters)&&strcmp(parameters,'default')),
-%     parameters = default_p; 
-% end;
-
-
-%[good,err]=verifyparameters(parameters,getinputs(rc));
-% parameters.crctimeres=0.001;
-%rc.RCparams = parameters;
 configuremenu(rc);
 rc = compute(rc); 
 draw(rc);

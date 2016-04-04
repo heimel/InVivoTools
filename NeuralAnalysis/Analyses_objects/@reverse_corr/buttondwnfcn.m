@@ -1,16 +1,18 @@
 function nrc = buttondwnfcn(rc)
 %BUTTONDWNFCN
+
 ax = gca;
 ud = get(ax,'userdata');
-if ischar(ud),
-    %disp(['userdata is ' ud '.']);
+if ischar(ud)
     pt = get(gca,'CurrentPoint');
     p = getparameters(rc);
     switch ud,
         case 'cubeaxes'
             offsets = p.interval(1):p.timeres:p.interval(2);
-            if length(offsets)==1, offsets= [p.interval(1) p.interval(2)]; end;
-            ind=find(pt(2,2)>=offsets(1:end-1)&pt(2,2)<offsets(2:end));
+            if length(offsets)==1
+                offsets= [p.interval(1) p.interval(2)]; 
+            end
+            ind = find(pt(2,2)>=offsets(1:end-1)&pt(2,2)<offsets(2:end));
             if ~isempty(ind)&&(p.datatoview(2)~=ind),
                 p = getparameters(rc);
                 p.datatoview(2) = ind;
