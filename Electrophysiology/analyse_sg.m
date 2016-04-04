@@ -27,35 +27,26 @@ else
     where = [];
 end
 
-rc = reverse_corr(inp,'default',where);
+para_rc.interval = processparams.rc_interval;
+para_rc.timeres = processparams.rc_timeres;
+para_rc.gain = processparams.rc_gain;
+para_rc.bgcolor=2;
+
+rc = reverse_corr(inp,para_rc,where);
 if isempty(rc)
     errormsg( ['Could not compute reverse correlation for ' recordfilter(record)]);
     return
 end
 
-para_rc=getparameters(rc);
-
-% after 0.4 s there is generally little response
-% I realize that 0.4 s already includes 2 frames if run at 5 Hz
-% 20ms taken as lead time for first responses to appear
-% para_rc.interval=[0.0205 0.2205];   %% for OFF RF : [0.0205 0.2205], Mehran
-para_rc.interval = processparams.rc_interval;
-para_rc.timeres = processparams.rc_timeres;
-para_rc.gain = processparams.rc_gain;
-para_rc.bgcolor=2;
-rc=setparameters(rc,para_rc);
-rcs=getoutput(rc);
-rcs=rcs.reverse_corr;
+para_rc = getparameters(rc);
+rcs = getoutput(rc);
+rcs = rcs.reverse_corr;
 
 % store normalized receptive field plots
-% rf={};
-% for i=1:size(rcs.rc_avg,2)
-%     rf{i} = squeeze(max(rcs.rc_avg(1,i,:,:,end),[],5));   % rcs.rc_avg(1 cell,n_intervals,n_y,n_x, 3 colors    )
-% end
 
-measures.rf(:,:,:) = max(rcs.rc_avg(1,:,:,:,end),[],5);  % rcs.rc_avg(1 cell,n_intervals,n_y,n_x, 3 colors    )
+measures.rf(:,:,:) = max(rcs.rc_avg(1,:,:,:,end),[],5);  
 
-if ndims(measures.rf)>2  %~ismatrix(measures.rf) % i.e. multiple intervals
+if ndims(measures.rf)>2  %#ok<ISMAT>  % i.e. multiple intervals
     rf(:,:) = max(measures.rf,[],1); % take max over all intervals
 else
     rf = measures.rf;
@@ -108,7 +99,6 @@ end
 
 rf_off=(rf< (feamean-3*feamean_sem));
 measures.rf_n_off=sum(rf_off(:));
-%measures.rf_offsize_sqdeg=compute_rf_size_sqdeg( rf_off,record.monitorpos, para_stim);
 
 [x,y,rect]=getgrid(inp.stimtime.stim);
 
@@ -156,7 +146,7 @@ for i=1:length(onframetimes)
         spiketimes_afterthisframe=...
             get_data(inp.spikes,[onframetimes(i)+hist_start onframetimes(i)+hist_end]) - onframetimes(i);
         % for peristimulus histogram:
-        spiketimes_afterframe=[spiketimes_afterframe; spiketimes_afterthisframe];
+        spiketimes_afterframe=[spiketimes_afterframe; spiketimes_afterthisframe]; %#ok<AGROW>
         % for ROC analysis and rate change during stimulation
         n_spikes_per_onframe(i)=length(spiketimes_afterthisframe);
     catch
@@ -182,18 +172,19 @@ for i=1:length(onframetimes)
     end
 end
 
-m=max(n_spikes_per_onframe);
-x=(0:m);
-rocdata1(:,1)=n_spikes_per_no_onframe;
-rocdata1(:,2)=1;
-rocdata2(:,1)=n_spikes_per_onframe;
-rocdata2(:,2)=0;
-rocdata=[rocdata1;rocdata2];
-rocoutput=roc(rocdata,0.05,0);
-measures.roc_auc=rocoutput.AUC;
-measures.roc_auc_se=rocoutput.SE;
+rocdata1(:,1) = n_spikes_per_no_onframe;
+rocdata1(:,2) = 1;
+rocdata2(:,1) = n_spikes_per_onframe;
+rocdata2(:,2) = 0;
+rocdata = [rocdata1;rocdata2];
+rocoutput = roc(rocdata,0.05,0);
+measures.roc_auc = rocoutput.AUC;
+measures.roc_auc_se = rocoutput.SE;
+
 if 0 % show histograms & roc
-    figure;
+    figure; %#ok<UNRCH>
+    m = max(n_spikes_per_onframe);
+    x = (0:m);
     subplot(1,2,1);
     if 1% not-normalized
         dist1=hist(n_spikes_per_no_onframe,x);
@@ -212,9 +203,7 @@ if 0 % show histograms & roc
     xlabel(['# spikes ' num2str(hist_start) '-' num2str(hist_end) 's after frame' ]);
     set(gca,'YScale','log');
     logmsg(['Number of no onframes: ' num2str(length(no_onframetimes))]);
-    
     logmsg(['Number of onframes   : ' num2str(length(onframetimes))]);
-    
     
     % manually calculate roc curve from normalized data
     false_positive=[];
@@ -279,7 +268,7 @@ for i=1:length(onframetimes)
         spiketimes_around_thispeak=...
             get_data(inp.spikes,[onframetimes(i)+x(ind)-binwidth onframetimes(i)+x(ind)+binwidth]) - onframetimes(i);
         spiketimes_around_peak= [spiketimes_around_peak ;...
-            spiketimes_around_thispeak];
+            spiketimes_around_thispeak]; %#ok<AGROW>
     catch
         % probable only happens for first or last frame
         warning(['data not sampled over entire requested interval around onframe ' num2str(i)]);
@@ -330,7 +319,7 @@ if length(inp.st.mti)==1
         measures.rate_spont=nan;
     end
 else
-    logmsg('spontaneous rate calculation not suitable for multiple repetitions');
+    logmsg('Spontaneous rate calculation not suitable for multiple repetitions');
     measures.rate_spont=nan;
 end
 

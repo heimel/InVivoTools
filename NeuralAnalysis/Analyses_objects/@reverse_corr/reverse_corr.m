@@ -95,11 +95,13 @@ if ~good,
     return
 end
 
-nag = analysis_generic([],[],where); delete(nag);
+nag = analysis_generic([],[],where); 
+delete(nag);
 ag = analysis_generic([],[],[]);
 rc = class(struct('inputs',inputs,'RCparams',[],'computations',computations,...
 	'internal',internal),'reverse_corr',ag);
 rc = setparameters(rc,parameters);
-delete(contextmenu(rc)); rc = newcontextmenu(rc);
+delete(contextmenu(rc)); 
+rc = newcontextmenu(rc);
 rc = compute(rc);
 rc = setlocation(rc,where);
