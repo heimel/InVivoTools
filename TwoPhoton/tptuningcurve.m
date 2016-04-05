@@ -310,6 +310,8 @@ for p=1:size(data,2) % roi p
             newmeasures = compute_contrast_measures(record.measures(p));
         case 'sfrequency'
             newmeasures = compute_sfrequency_measures(record.measures(p));
+        case 'tfrequency'
+            newmeasures = compute_tfrequency_measures(record.measures(p));
         case 'size'
             newmeasures = compute_size_measures(record.measures(p),s,record);
         case 'position'
