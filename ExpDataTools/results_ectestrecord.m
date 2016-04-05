@@ -769,7 +769,7 @@ end
 yl = ylim;
 %if yl(2)>0
 %    ylim([0 yl(2)]);
-%end
+%end0
 switch measure.variable
     case 'contrast'
         xlim([-0.02 1]);
@@ -786,10 +786,11 @@ switch measure.variable
                     else
                         response0 = 0;
                     end
-                else
+                elseif isfield(measure,'rate')
                     response0 = mean(measure.rate{t}(ind_blank));
+                else
+                    response0 = mean(measure.response{t}(ind_blank));
                 end
-                
                 
                 r=measure.nk_rm{t}* (cn.^measure.nk_n{t})./ ...
                     (measure.nk_b{t}^measure.nk_n{t}+cn.^measure.nk_n{t}) + ...
