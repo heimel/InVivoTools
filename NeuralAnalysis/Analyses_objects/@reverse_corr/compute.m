@@ -206,8 +206,8 @@ if centchanged && (p.crcpixel>0),
                 g2 = length(cc)-ii; 
             end;
             rb = cc( g2(1)+ii-1:end);
-            [rbpk,iii] = min(rb); %#ok<ASGLU> % find [end of? AH] peak
-            rbrest = cc(g2(1)+ii-1+iii-1:end);
+            [rbpk,iii] = min(rb); %#ok<ASGLU> % find end of peak
+            rbrest = cc(g2(1)+ii-1+iii-1:end); % after peak ended
             g3 = find(rbrest>-2*stddev); 
             if isempty(g3)
                 g3 = length(cc)-(g2(1)+ii-1+iii); 

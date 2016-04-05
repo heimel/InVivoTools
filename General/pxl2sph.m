@@ -10,7 +10,8 @@ function [azimuth_rad,elevation_rad,r_cm] = pxl2sph( x_pxl,y_pxl,monitor)
 %          x is right relative to nose  (positive is right)
 %          y is height relative to nose (positive is up)
 %          z is depth relative to nose (positive is in front of nose)
-%   tilt_deg, is 0 by default
+%   tilt_deg, is 0 by default. Positive values are right-side up, as seen
+%          by the mouse
 %   slant_deg, is 0 by default. Positive values are left towards the mouse
 %
 % 2016, Alexander Heimel
@@ -25,7 +26,7 @@ if nargin<3 || isempty(monitor)
 end
     
 if ~isfield(monitor,'tilt_deg')
-    monitor.tilt_deg = 0;
+    monitor.tilt_deg = 40;
 end
 
 if ~isfield(monitor,'slant_deg')
