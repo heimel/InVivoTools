@@ -236,7 +236,7 @@ for k = 1:L;
     nose_a(k, :) = nose(k,:) - nose(k,:);
     if ~isempty(nose) && ~isempty(arse)
         %         figure(k+(fig_n));
-        subplot(L, L,k);
+        subplot(round(L/2)+1, round(L/2)+1,k);
         plot([0, nose_a(k,1)], [0, nose_a(k,2)],'v','MarkerSize',8,...
             'MarkerFaceColor', my_blue); hold on;
         grid on; extent1 = abs(arse_a)+50; ax1= max(max(extent1));
@@ -250,7 +250,7 @@ for k = 1:L;
             stim_present = any(stim,2);
             if stim_present(k)== 1
                 %                 figure(k+(fig_n));
-                subplot(L, L ,k);
+                subplot(round(L/2)+1, round(L/2)+1 ,k);
                 stim_a(k, :) = stim(k,:) - nose(k,:);
                 plot([0, stim_a(k,1)], [0, stim_a(k,2)], 'linewidth',3,...
                     'color',my_purple); hold on;
