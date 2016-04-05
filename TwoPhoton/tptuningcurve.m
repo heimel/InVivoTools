@@ -311,7 +311,7 @@ for p=1:size(data,2) % roi p
         case 'sfrequency'
             newmeasures = compute_sfrequency_measures(record.measures(p));
         case 'size'
-            newmeasures = compute_size_measures(record.measures(p),s);
+            newmeasures = compute_size_measures(record.measures(p),s,record);
         case 'position'
             newmeasures = compute_position_measures(record.measures(p),s);
     end

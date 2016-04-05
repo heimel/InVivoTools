@@ -185,7 +185,7 @@ switch measures.variable
     case 'gnddirection'
         measures = compute_angle_measures(measures);
     case 'size'
-        measures = compute_size_measures(measures,inp.st);
+        measures = compute_size_measures(measures,inp.st,record);
     case 'location'
         measures = compute_position_measures(measures,inp.st);
 end

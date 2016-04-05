@@ -1,4 +1,4 @@
-function measures = compute_size_measures( measures, st )
+function measures = compute_size_measures( measures, st, record )
 %COMPUTE_SIZE_MEASURES compute some specific size tuning measures
 %
 %  MEASURES = COMPUTE_SIZE_MEASURES( MEASURES, STIMSFILE )
@@ -58,29 +58,7 @@ for t=1:length(measures.triggers)
     measures.size_fit_suppression_index{t} = ...
         compute_suppression_index( fitx, fity );
     
-    % recompute stimulus sizes
-    monitor.size_cm = [51 29];
-    monitor.size_pxl = [1920 1080];
-    monitor.slant_deg = 0;
-    monitor.center_rel2nose_cm = [0 0 st.NewStimViewingDistance];
-    monitor.tilt_deg = 0;
-    % first get monitor info
-    switch st.NewStimPixelsPerCm
-        case 1920/51 % wall-e, dani's settings measured 5-4-2016, don't change
-            monitor.size_cm = [51 29];
-            monitor.size_pxl = [1920 1080];
-            monitor.slant_deg = 45; % left towards mouse
-            monitor.center_rel2nose_cm = [10 0 7];
-            monitor.tilt_deg = 20;
-        case 800/70.5 % robbie
-            monitor.size_cm = [70.5 70.5/800*600];
-            monitor.size_pxl = [800 600];
-            monitor.slant_deg = 0;
-        otherwise
-            logmsg('Cannot recognize monitor settings. Defaulting');
-    end
-
-    
+    monitor = monitor_configuration(record);
     
     do = cellfun(@(x) x.stimid,st.MTI2);
     stims = get(sscript);
