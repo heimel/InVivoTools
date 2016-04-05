@@ -18,7 +18,7 @@ Xmin = arena(1);
 roiL = [Xmin, Ymin, W, H];
 
 %% calculate the brightness changes in rois
-brightness = zeros(2,num_frames); j = 0; % vector of all averaged brightness (lft and right) values for the ROI
+brightness = zeros(2,num_frames); j = 0; % vector of all averaged brightness (left and right) values for the ROI
 for i = start_frame:end_frame
     j = j+1;
     frame = read(v,i);
@@ -74,7 +74,11 @@ cross_indL0 = 0; pkdl = 0; indexL = []; peaksL = []; peaksLI=[];
 for i = 1:length(cross_indR)
     if cross_indR(i) >= cross_indR0 + ref
         pkdr = pkdr + 1; % number of peaks detected + 1
-        [peaksR(pkdr), peaksRI(pkdr)] = min(brightness(1,cross_indR(i):cross_indR(i)+ref));
+        if cross_indR(i)+ref <= max(cross_indR)
+            [peaksR(pkdr), peaksRI(pkdr)] = min(brightness(1,cross_indR(i):cross_indR(i)+ref));
+        else
+            [peaksR(pkdr), peaksRI(pkdr)] = min(brightness(1,cross_indR(i):max(cross_indR)));
+        end
         indexR(pkdr) = cross_indR(i) + peaksRI(pkdr)-2; %index of the peak within "spike"
         cross_indR0 = indexR(pkdr);
     end
@@ -87,7 +91,7 @@ for i = 1:length(cross_indL)
         cross_indL0 = indexL(pkdl);
     end
 end
-pk_frRall = []; pk_frLall = []; peaksRAll = []; peaksLAll = [];
+pk_frRall = []; pk_frLall = []; peaksRAll = []; peaksLAll = []; peakPoints = [];
 
 pk_frR = frames(indexR);
 pk_frL = frames(indexL);
@@ -107,26 +111,27 @@ peaksLAll = [peaksLAll, peaksL];
 % plot(frames,thresholdsStimOnset(2,:),'--','color',[0 1/3 1]);
 % plot(frames,thresholdsStimOnset(3,:),'--','color',[1 1/3 0]);
 % plot(frames,thresholdsStimOnset(4,:),'--','color',[1 1/3 0]);
-% 
-% if ~isempty(measures.peakPoints)
-% plot(peakPointR(1,2),peakPointR(1,3),'k^','markerfacecolor','k'); axis tight;
-% plot(peakPointL(2,2),peakPointL(2,3),'k^','markerfacecolor','m'); axis tight;
-% end
-if size(pk_frRall) ~= size(pk_frLall)
-peakPoints = [];
-else
-peakPoints = [pk_frRall pk_frR peaksR; pk_frLall pk_frL peaksL];
+
+
+if size(pk_frRall) == size(pk_frLall)
+    peakPoints = [pk_frRall pk_frR peaksR; pk_frLall pk_frL peaksL];
+%     if ~isfiled(peakPoints) && ~isempty(peakPoints)
+%         plot(peakPointR(1,2),peakPointR(1,3),'k^','markerfacecolor','k'); axis tight;
+%         plot(peakPointL(2,2),peakPointL(2,3),'k^','markerfacecolor','m'); axis tight;
+%     end
 end
-if size(peakPoints) < 4
-    peakPoints = [];
+if ~isempty(peakPoints)
+    if length(peakPoints(1,:)) ~= length(peakPoints(2,:))
+        peakPoints = [];
+    end
 end
 logmsg('done!')
 
 %%
-% % L/R validation of crossings
-% min_isi = 1000; % min number of frames between trials
+% L/R validation of crossings
+% min_iti = 1000; % min number of frames between trials
 % plot(pk_frRall,peaksRAll,'o'); hold on; plot(pk_frLall,peaksLAll,'o');
-%
+% 
 % pk_frRall2 = [pk_frRall; ones(size(pk_frRall))];
 % pk_frLall2 = [pk_frLall; zeros(size(pk_frLall))];
 % pks = [pk_frRall2, pk_frLall2];
@@ -134,16 +139,16 @@ logmsg('done!')
 %     [~, i]=sort(pks(1,:));
 % pks_sorted = pks(:,i);
 % min_dif = 70;
-% max_dif = 120;
+% max_dif = 90;
 % v_inx = diff(pks_sorted(1,:))<max_dif & diff(pks_sorted(1,:))>min_dif;
 % v_inx_alt = xor(pks_sorted(2,v_inx), pks_sorted(2,[false, v_inx(1:end-1)])); % return only those that were detected in sequence of left/right
 % det_fs = pks_sorted(1,v_inx); % detected frames
 % det_fs = det_fs(v_inx_alt); % sequential left/right correction
-% figure(3); set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+% figure(9); set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
 % for i = 1:numel(det_fs)
 %     subplot(ceil(numel(det_fs)/3),3,i);
 %     imshow(read(v,det_fs(i)),[]); axis on; title(['Frame: ' num2str(det_fs(i)-2)]);
 % end
-% figure(3);subplot(m,n,4:6);
+% figure(10);subplot(m,n,4:6);
 % plot([det_fs; det_fs], [repmat(-50,1,length(det_fs)); repmat(130,1,length(det_fs))],'-k');
 % end
