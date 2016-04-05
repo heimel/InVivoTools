@@ -32,7 +32,12 @@ rec = 1;
 
 stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
 
-peakPoints = record.measures.peakPoints;
+if isfield(record.measures,'peakPoints')
+    peakPoints = record.measures.peakPoints;
+else
+    error('Stimulus onset is not determined. use "track" button')
+end
+% peakPoints = record.measures.peakPoints;
 
 [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
     averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] = ...

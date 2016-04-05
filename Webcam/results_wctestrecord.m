@@ -112,16 +112,17 @@ end_frame = stimFrame+90+30;
 frames = start_frame:end_frame;
 figure(fig_n);
 subplot(m,n,4:6);
-plot(frames,brightness(1,:),'color',[0 2/3 1]); hold on;
-plot(frames,brightness(2,:),'color',[1 2/3 0]); hold on;
+plot(frames,brightness(1,:),'color',[0 2/3 1], 'LineWidth',2); hold on;
+plot(frames,brightness(2,:),'color',[1 2/3 0], 'LineWidth',2); hold on;
 plot(frames,thresholdsStimOnset(1,:),'--','color',[0 1/3 1]);
 plot(frames,thresholdsStimOnset(2,:),'--','color',[0 1/3 1]);
 plot(frames,thresholdsStimOnset(3,:),'--','color',[1 1/3 0]);
 plot(frames,thresholdsStimOnset(4,:),'--','color',[1 1/3 0]);
+legend('Right ROI','Left ROI','Location',[.705,.46,.2,.1]);
 
 if ~isempty(measures.peakPoints)
 plot(peakPointR(1,2),peakPointR(1,3),'k^','markerfacecolor','k'); axis tight;
-plot(peakPointL(2,2),peakPointL(2,3),'k^','markerfacecolor','m'); axis tight;
+plot(peakPointL(1,2),peakPointL(1,3),'k^','markerfacecolor','m'); axis tight;
 end
 %% plots movement trajectory
 if isfield(measures,'mousemove') && ~isempty(measures.mousemove)
@@ -194,11 +195,36 @@ else
     disp('No trajectory data available');
 end
 %% plots angles
-nose = measures.nose;
-arse = measures.arse;
-stim = measures.stim;
-head_theta = measures.head_theta;
-pos_theta = measures.pos_theta;
+if isfield(measures,'nose') && ~isempty(measures.nose)
+    nose = measures.nose;
+else
+    error('nose coordinate is not available. Likely no freezing was detected. Use "analyse" button')
+    
+end
+if isfield(measures,'arse') && ~isempty(measures.arse)
+    arse = measures.arse;
+else
+    error('arse coordinate is not determined. use "analyse" button')
+    
+end
+if isfield(measures,'stim') && ~isempty(measures.stim)
+    stim = measures.stim;
+else
+    error('stim coordinate is not determined. use "analyse" button')
+    
+end
+if isfield(measures,'head_theta') && ~isempty(measures.head_theta)
+    head_theta = measures.head_theta;
+else
+    error('head_theta is not determined. use "analyse" button')
+    
+end
+if isfield(measures,'pos_theta') && ~isempty(measures.pos_theta)
+    pos_theta = measures.pos_theta;
+else
+    error('pos_theta is not determined. use "analyse" button')
+    
+end
 L = size(nose,1);
 
 figHandles = findall(0,'Type','figure');
@@ -209,8 +235,8 @@ for k = 1:L;
     arse_a(k, :) = arse(k,:) - nose(k,:);  %THE COORDINATES ALIGNED TO NOSE
     nose_a(k, :) = nose(k,:) - nose(k,:);
     if ~isempty(nose) && ~isempty(arse)
-%         figure(k+(fig_n)); 
-subplot(L, L,k);
+        %         figure(k+(fig_n));
+        subplot(round(L/2)+1, round(L/2)+1,k);
         plot([0, nose_a(k,1)], [0, nose_a(k,2)],'v','MarkerSize',8,...
             'MarkerFaceColor', my_blue); hold on;
         grid on; extent1 = abs(arse_a)+50; ax1= max(max(extent1));
@@ -223,8 +249,8 @@ subplot(L, L,k);
         if ~isempty(stim);
             stim_present = any(stim,2);
             if stim_present(k)== 1
-%                 figure(k+(fig_n));
-                subplot(L, L ,k);
+                %                 figure(k+(fig_n));
+                subplot(round(L/2)+1, round(L/2)+1 ,k);
                 stim_a(k, :) = stim(k,:) - nose(k,:);
                 plot([0, stim_a(k,1)], [0, stim_a(k,2)], 'linewidth',3,...
                     'color',my_purple); hold on;
