@@ -477,7 +477,7 @@ if exist('reliable','var') && eval(reliable)==1 && length(testrecord.reliable)==
     end
 end
 
-if ~exist('reliable','var') && length(testrecord.reliable)==1 && testrecord.reliable==0
+if ~exist('reliable','var') && length(testrecord.reliable)==1 
     if isnumeric(testrecord.reliable)
         if testrecord.reliable==0
             return % no need to check individual cells
@@ -486,8 +486,6 @@ if ~exist('reliable','var') && length(testrecord.reliable)==1 && testrecord.reli
         return % no need to check individual cells
     end
 end
-
-
 
 if exist('min_blocks','var')
     if ischar(min_blocks) %#ok<NODEF>

@@ -10,7 +10,7 @@ if nargin<4
 end
 
 celltype = 'all'; % can be overwritten by extra_options
-reliable = 1; % by default don't use records with reliable field set to 0.
+reliable = '1'; % by default don't use records with reliable field set to 0.
 
 val = [];
 val_sem = [];
@@ -36,7 +36,9 @@ if exist('verbose','var')
 else
     verbose = 0;
 end
-
+if exist('reliable','var')
+    reliable = eval(reliable);
+end
 if exist('limit','var')
     try
         limit = strtrim(limit); %#ok<NODEF>
