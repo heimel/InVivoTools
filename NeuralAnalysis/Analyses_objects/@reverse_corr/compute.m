@@ -103,7 +103,7 @@ end;
 if p.crcpixel==-1
     rr = max(r_c.rc_avg(1,:,:,:,end),[],5);  % take max color
     rr = squeeze(max(abs(rr - p.feamean),[],2));
-    [dum,p.crcpixel] = max(rr(:));
+    [dum,p.crcpixel] = max(rr(:)); %#ok<ASGLU>
     in.selectedbin = p.crcpixel;
 end
 
@@ -126,7 +126,7 @@ if centchanged && (p.crcpixel>0)
         y_ = y;
     end
     fts = I.stimtime(p.datatoview(1)).mti{1}.frameTimes;
-    if crcmethod==1,
+    if crcmethod==1
         F = reshape(f(y_,x_,:,:),[size(v,2) 3])-repmat(p.crcproj(1,:),size(v,2),1);
         % F has all RGB values of all frames for pixel [y_ x_] minus crcproj(1) color
         stats = F * p.crcproj(2,:)'; % apply projection of RGB to 1-D value
@@ -155,7 +155,7 @@ if centchanged && (p.crcpixel>0)
             d(pos(i)) = d(pos(i))+1;
         end
         
-        maxlags = ceil(max(abs(p.crctimeint))/p.crctimeres);
+        maxlags = ceil(max(abs(p.crctimeint))/p.crctimeres)*3;% times 3 to get more stdddev
         
         % compute cross-correlation between stimuli and spikes
         c1= xcorr(X,d,maxlags);
@@ -185,12 +185,18 @@ if centchanged && (p.crcpixel>0)
     end;
     [overlap,stddevinds] = setxor(lags,calclags); %#ok<ASGLU>
     [ov,otherinds] = intersect(lags,calclags); %#ok<ASGLU>
-    stddev = std(c(stddevinds));
+    %stddev = std(c(stddevinds));
     cc = c(otherinds);
    
     % find peak
+%    stddev = std(c(stddevinds));
+    stddev = sqrt(c(stddevinds)*c(stddevinds)'/length(stddevinds));
+    
     [mm,peakind] = max(abs(cc)); %#ok<ASGLU> % location of peak
-    onoff = cc(peakind)>0; % 1 = oncell, 0 = offcell
+    onoff = cc(peakind)>0 ;    % 1 = oncell, 0 = offcell, NaN = no signif STA
+    if abs(cc(peakind))<3*stddev
+        onoff = NaN;
+    end
     [mm,prepeakind] = max( (1-2*onoff)*cc(1:peakind-1)); %#ok<ASGLU>
     transience = -cc(prepeakind)/cc(peakind);
     
@@ -198,7 +204,7 @@ if centchanged && (p.crcpixel>0)
     ycent = round(rect(2)+(y_-0.5)/y * (rect(4)-rect(2)));
     crc = struct('lags',lags,'crc',c,...
         'transience',transience,'onoff',onoff,...
-        'pixel',p.crcpixel,'pixelcenter',[xcent ycent],'onset',onset);
+        'pixel',p.crcpixel,'pixelcenter',[xcent ycent]);
     in.crctimeres = p.crctimeres;
     in.crcproj = p.crcproj;
     in.crctimeint = p.crctimeint;

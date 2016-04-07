@@ -126,7 +126,9 @@ for i=1:length(g) % for all cells
             otherwise
                 cellmeasures = analyse_ps(inp,record,verbose);
         end
-        cellmeasures.usable = 1;
+        if ~isfield(cellmeasures,'usable')
+            cellmeasures.usable = 1;
+        end
     else
         cellmeasures.usable = 0;
     end

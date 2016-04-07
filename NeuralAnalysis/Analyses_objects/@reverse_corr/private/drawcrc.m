@@ -7,7 +7,7 @@ c = rc.computations.crc;
 if ~isempty(c)
   a = axes('units',w.units,'position',r4);
   plot(c.lags,c.crc);
-  title(['1D CRC for pixel ' int2str(p.crcpixel) '.']);
+  title(['Spike triggered avg. of pixel ' int2str(c.pixel) '.']);
   xlabel('Time stim. - Time spike (s)'); 
   ylabel('Rate (Hz)');
   set(a,'uicontextmenu',contextmenu(rc), 'tag','analysis_generic',...

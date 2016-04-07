@@ -167,10 +167,14 @@ for c=1:n_cells
             else
                 n_intervals = size(measure.rf,1);
             end
-            n_graphs = 3+n_intervals;
-            printtext(subst_ctlchars(['rf_n_on: ' num2str(measure.rf_n_on) ]),y);
-            y=printtext(subst_ctlchars(['halfmax: ' num2str(measure.halfmax_deg,2) '^o']),y,0.5);
-            y=printtext(subst_ctlchars(['onsize : ' num2str(fix(measure.rf_onsize_sqdeg)) ' deg^2']),y);
+            n_graphs = 4+n_intervals;
+%             printtext(subst_ctlchars(['rf_n_on: ' num2str(measure.rf_n_on) ]),y);
+%             y=printtext(subst_ctlchars(['halfmax: ' num2str(measure.halfmax_deg,2) '^o']),y,0.5);
+            if isfield(measure,'rf_size')
+                y = printfield(measure,'rf_size',y,0.5);
+            else
+                y=printtext(subst_ctlchars(['onsize : ' num2str(fix(measure.rf_onsize_sqdeg)) ' deg^2']),y);
+            end
             printtext(subst_ctlchars(['rate   : ' num2str(measure.rate_peak,2) ' Hz']),y);
             y=printtext(subst_ctlchars(['spont  : ' num2str(measure.rate_spont,2) ' Hz']),y,0.5);
             printtext(subst_ctlchars(['early  : ' num2str(measure.rate_early,2) ' Hz']),y);
@@ -182,10 +186,14 @@ for c=1:n_cells
             printtext(subst_ctlchars(['half life: ' num2str(measure.response_halflife*1000,'%2.f') ' ms' ]),y);
             y=printtext(subst_ctlchars(['roc auc: ' num2str(measure.roc_auc,2) ]),y,0.5);
             
+            printfield(measure,'rc_onoff',y,0);
+            y = printfield(measure,'rc_transience',y,0.5);
+                        
+            
             % rf graphs
             for i=1:n_intervals
                 subplot('position',...
-                    [ (1+i)/(n_graphs)+0.01 reltitlepos-row*relsubheight 1/(n_graphs)*0.96 relsubheight]);
+                    [ (2+i)/(n_graphs)+0.01 reltitlepos-row*relsubheight 1/(n_graphs)*0.96 relsubheight]);
                 plot_rf( measure,i );
             end
             i=i+1;
@@ -193,13 +201,21 @@ for c=1:n_cells
                 i=1;
             end
             subplot('position',...
-                [ (1+i)/(n_graphs)+0.01 reltitlepos-row*relsubheight 1/(n_graphs)*0.96 relsubheight]);
+                [ (2+i)/(n_graphs)+0.01 reltitlepos-row*relsubheight 1/(n_graphs)*0.96 relsubheight]);
             plot_waveform( measure,record,params.cell_colors(c) )
             
             % PSTH graph
             subplot('position',...
-                [ (1.1)/(n_graphs) reltitlepos-(row-0.3)*relsubheight 1/(n_graphs)*0.8 relsubheight*0.7]);
+                [ (1.5)/(n_graphs) reltitlepos-(row-0.3)*relsubheight 1/(n_graphs)*0.75 relsubheight*0.7]);
             plot_psth(measure,record);
+            
+            
+            % plot STA
+            if isfield(measure,'rc_crc')
+                subplot('position',...
+                    [ (2.45)/(n_graphs) reltitlepos-(row-0.3)*relsubheight 1/(n_graphs)*0.5 relsubheight*0.7]);
+                plot_crc(measure,record);
+            end
         case {'hupe','lammemotion','lammetexture'}
             color = 'bgrcmybgrcmy';
             
@@ -592,11 +608,25 @@ set(gca,'XTick',[]);
 set(gca,'YTick',[]);
 
 if max(rf)>2 % i.e. luminance and not df/f
-    colormap hot
+        clmp=repmat([0.5 0.5 0.5],64,1);
+        clmp(1:32,3)=linspace(1,0.5,32);
+        clmp(1:32,1)=linspace(0,0.5,32);
+        clmp(1:32,2)=linspace(0,0.5,32);
+        clmp(1,:) = [0 0 0];
+        clmp(33:64,1)=linspace(0.5,1,32);
+        clmp(33:64,2)=linspace(0.5,0.6,32);
+        clmp(33:64,3)=linspace(0.5,0.6,32);
+                clmp(64,:) = [1 0.7 0.7];
+
+    colormap(clmp)
+    if isfield(measure,'rc_feamean')
+        set(gca,'CLim',[measure.rc_feamean-20 measure.rc_feamean+20]);
+    end
+%    colormap hot
     %    set(gca,'CLim',[256/35 40 ])
 else % df/d
     set(gca,'ydir','reverse');
-    colormap gray
+    colormap default
 end
 if iscell(measure.rf_center)
     rf_center = measure.rf_center{i};
@@ -829,11 +859,6 @@ for i=1:length(measure.response)
     hold on
     switch measure.variable
         case 'angle'
-            
-            %    curve = curves{i};
-            %     polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:)
-            %     curve(2,1)]),[ linestyle clr(i)]);
-            %        polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
             polar([measure.range{i}+measure.preferred_stimulus{1} ...
                 measure.range{i}(1)+measure.preferred_stimulus{1}]/180*pi,...
                 thresholdlinear([measure.response{i} measure.response{i}(1)]),...
@@ -847,11 +872,8 @@ for i=1:length(measure.response)
             end
             polar([curve(1,:) curve(1,1)]/180*pi,...
                 thresholdlinear([curve(2,:) curve(2,1)]),[ linestyle clr(i)]);
-            %polar([curve(1,:) curve(1,1)]/180*pi,thresholdlinear([curve(2,:) curve(2,1)]-measure.rate_spont{i}),[ linestyle clr(i)]);
             set(gca,'view',[-90 90]);
     end
-    %phi =linspace(0,2*pi,100);
-    %polar(phi,measure.rate_spont(i)*ones(size(phi)),[clr(i) '--']);
 end
 return
 
@@ -886,6 +908,12 @@ xlabel(xlab);
 ylabel(ylab);
 
 
+function  plot_crc(measure,record)
+hold on
+xlim([-0.7 0.2])
+plot(xlim,[0 0],'k-');
+plot(measure.rc_lags,measure.rc_crc);
+box off
 
 
 function y = printfield(measure,field,y,x)

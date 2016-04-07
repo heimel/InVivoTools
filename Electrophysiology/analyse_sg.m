@@ -22,7 +22,7 @@ para_stim = getparameters(inp.stimtime(1).stim);
 
 measures.usable=1;
 
-if verbose
+if 0 && verbose
     where.figure=figure;
     where.rect=[0 0 1 1];
     where.units='normalized';
@@ -46,24 +46,38 @@ para_rc = getparameters(rc);
 rcs = getoutput(rc);
 
 measures.rc_transience = rcs.crc.transience;
-measures.rc_onoff = rcs.crc.onoff;
-measures.rc_tmax = rcs.crc.tmax;
-measures.rc_onset = rcs.crc.onset;
-measures.rc_pixelcenter = rcs.crc.pixelcenter;
-
-rcs = rcs.reverse_corr;
+measures.rc_onoff = rcs.crc.onoff;  % 1 is on, 0 is off
+%measures.rc_pixelcenter = rcs.crc.pixelcenter;
+measures.rc_crc = rcs.crc.crc; % spike triggered average
+measures.rc_lags = rcs.crc.lags; % stimulus time - spike time
+measures.rc_feamean = para_rc.feamean;
 
 % store normalized receptive field plots
-measures.rf(:,:,:) = max(rcs.rc_avg(1,:,:,:,end),[],5);  
+measures.rf(:,:,:) = max(rcs.reverse_corr.rc_avg(1,:,:,:,end),[],5);  
 
 
+% find rf center
+rff = squeeze(max(abs(measures.rf - para_rc.feamean),[],1));
+[m,xy] = max(rff(:));
+maxtimeint_ind = find(abs(measures.rf(:,xy)-para_rc.feamean)==m,1); 
+[x,y,rect]=getgrid(inp.stimtime.stim);
+rfx = ceil(xy/y);
+rfy = rem(xy-1,y)+1;
+measures.rf_center = [rfx rfy];
+measures.rf_center_pixel = rect([1 2]) + [ (rfx-0.5)*para_stim.pixSize(1) (rfy-0.5)*para_stim.pixSize(2)];
+logmsg(['Center pixel = ' mat2str( measures.rf_center_pixel ) ]);
+if rfx<=1 || rfx>=x || rfy<=1 || rfy>=y
+    logmsg('RF center is on edge of screen.');
+    measures.usable=0;
+end
 
+
+rcs = rcs.reverse_corr;
 if ndims(measures.rf)>2  %#ok<ISMAT>  % i.e. multiple intervals
-    rf(:,:) = max(measures.rf,[],1); % take max over all intervals
+    rf = squeeze(measures.rf(maxtimeint_ind,:,:)); % take max over all intervals
 else
     rf = measures.rf;
 end
-
 
 %below assume enough spikes or stimuli for multinomial distribution to
 %resemble gaussian distribution
@@ -76,7 +90,7 @@ end
 spikes_per_sample = n_spikes/para_stim.N;
 prob_notsampled = exp(-spikes_per_sample);
 % from poisson-dist: p_l(m)=l^m exp(-l)/m!
-n_samples=para_stim.N*(1 - prob_notsampled); %
+n_samples = para_stim.N*(1 - prob_notsampled); %
 
 feamean_std = ...
     sqrt(sum(repmat(para_stim.dist,1,3).*(para_stim.values.^2),1)/sum(para_stim.dist)...
@@ -87,54 +101,67 @@ feamean_sem = feamean_std/sqrt(n_samples);
 feamean_sem = mean(feamean_sem);
 
 % take all point within first and third quartile
-topbox=prctile(rf(:),75);
-minbox=prctile(rf(:),25);
+topbox = prctile(rf(:),75);
+minbox = prctile(rf(:),25);
 mrf=mean(rf(  rf(:)<topbox & rf(:)>minbox  ));
 
 if mrf<para_rc.feamean-feamean_sem || mrf>para_rc.feamean+feamean_sem
     logmsg('Not sampled long enough. Feature mean too far from data mean');
 end
 
-rf_on=(rf> (para_rc.feamean+3*feamean_sem));
+rf_on = (rf> (para_rc.feamean+3*feamean_sem));
+rf_off = (rf< (para_rc.feamean-3*feamean_sem));
 measures.rf_n_on=sum(rf_on(:));
 measures.rf_onsize_sqdeg=compute_rf_size_sqdeg( rf_on,record.monitorpos, para_stim, saved_stims,record);
-
-if rf_on==0
-    logmsg('No rf on-patches');
-    measures.usable=0;
-end
-
-rf_off=(rf< (para_rc.feamean-3*feamean_sem));
 measures.rf_n_off=sum(rf_off(:));
+measures.rf_offsize_sqdeg=compute_rf_size_sqdeg( rf_off,record.monitorpos, para_stim, saved_stims,record);
 
-[x,y,rect]=getgrid(inp.stimtime.stim);
-
-% find rf center
-[m,xy] = max(rf(:)); %#ok<ASGLU>
-rfx=ceil(xy/y);
-rfy=rem(xy-1,y)+1;
-measures.rf_center = [rfx rfy];
-measures.rf_center_pixel = rect([1 2]) + [ (rfx-0.5)*para_stim.pixSize(1) (rfy-0.5)*para_stim.pixSize(2)];
-logmsg(['Center pixel = ' mat2str( measures.rf_center_pixel ) ]);
-
-% mean stimulus
-para_rc.crcproj(1,:)=para_stim.dist'*para_stim.values /sum(para_stim.dist);
-para_rc.crcproj(2,:)= 1/3 ./ (255*[1 1 1]-para_rc.crcproj(1,:));
-
-if rfx<=1 || rfx>=x || rfy<=1 || rfy>=y
-    logmsg('RF center is on edge of screen.');
-    measures.usable=0;
-end
 
 bins=rcs.bins{1}{1};
 
+switch measures.rc_onoff
+    case 1 %on
+        measures.rf_size = sqrt(measures.rf_onsize_sqdeg);
+    case 0 % off
+        measures.rf_size = sqrt(measures.rf_offsize_sqdeg);
+    otherwise
+        measures.rf_size = NaN;
+end
+
+if (rf_on+rf_off)==0
+    logmsg('No rf ON or OFF-patches');
+    measures.usable = 0;
+end
+
+
+% in the remaining onframes is also used for offframes
 v = getgridvalues(inp.stimtime.stim);
-p.feature=3 ; % to separate on from off changes (use 4 if interested in all changes)
-f=getstimfeatures(v,inp.stimtime.stim,p,x,y,rect);
+p.feature = 3;
+f = getstimfeatures(v,inp.stimtime.stim,p,x,y,rect);
 % f contains *changes* in the frames!
 
 % calculate rate for stim on in rf center
-onframes=find(f(rfy,rfx,:,1)>0);
+switch p.feature
+    case 3 % feature difference
+        
+        switch measures.rc_onoff
+            case 1 %on
+                onframes = find(f(rfy,rfx,:,1)>0);
+            case 0 % off
+                onframes = find(f(rfy,rfx,:,1)<0);
+            otherwise
+                onframes = find(f(rfy,rfx,:,1)>0);
+        end
+    case 1
+        switch measures.rc_onoff
+            case 1 %on
+                onframes = find(f(rfy,rfx,:,1)>para_rc.feamean+1);
+            case 0 % off
+                onframes = find(f(rfy,rfx,:,1)<para_rc.feamean-1);
+            otherwise
+                onframes = find(f(rfy,rfx,:,1)>0);
+        end
+end
 measures.rate_early=sum(bins(1,onframes))/length(onframes)/para_rc.timeres;
 measures.rate_late=sum(bins(end,onframes))/length(onframes)/para_rc.timeres;
 intervals = para_rc.interval(1):para_rc.timeres:para_rc.interval(2);
@@ -235,12 +262,12 @@ pfit=polyfit((1:length(n_spikes_per_onframe)),norm_n_spikes_per_onframe,1);
 % p(1) is fractional change in rate per presented center frame;
 measures.rate_change_rf_center=pfit(1);
 
-binwidth=0.01; %s
-bintimes=(hist_start:binwidth:hist_end);
-[psth,x]=hist(spiketimes_afterframe,bintimes);
-psth=smoothen(psth,2);
-psth_before=psth(x<0);
-after_ind=find(x>0);
+binwidth = 0.01; %s
+bintimes = (hist_start:binwidth:hist_end);
+[psth,x] = hist(spiketimes_afterframe,bintimes);
+psth = smoothen(psth,2);
+psth_before = psth(x<0);
+after_ind = find(x>0);
 spont_mean=mean(psth_before);
 % is not really spontaneous rate as there were other stimuli on the screen
 % before
@@ -299,10 +326,10 @@ rate=rate-temp_spont_rate;
 [rc, offset]=fit_thresholdlinear([dist sqrt(sum(size(rf).^2))*10],[rate 0]);
 fitdist=(0:0.01:2*sqrt(sum(size(rf).^2)));
 fitrate=thresholdlinear(rc*fitdist+ offset);
-halfmax_ind=findclosest(fitrate,max(fitrate)/2);
-halfmax_dist=fitdist(halfmax_ind); % in number of patches
+halfmax_ind = findclosest(fitrate,max(fitrate)/2);
+halfmax_dist = fitdist(halfmax_ind); % in number of patches
 
-rf=zeros(size(rf));
+rf = zeros(size(rf));
 rf(rfy,rfx)=1;
 
 centerpatch_area_sqdeg=compute_rf_size_sqdeg( rf ,record.monitorpos, para_stim, saved_stims, record);

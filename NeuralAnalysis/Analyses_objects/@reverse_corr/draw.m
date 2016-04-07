@@ -15,11 +15,11 @@ if ~isempty(w)
     z = getgraphicshandles(rc);
     for i=1:length(z)
         delete(z(i));
-    end;
+    end
     figure(w.figure);
     
     p = getparameters(rc);
-    in = rc.internal;
+   % in = rc.internal;
     I = getinputs(rc);
     
     [r1,r2,r3,r4] = getdrawrects(rc);
@@ -29,8 +29,9 @@ if ~isempty(w)
     drawnow
     a = axes('units',w.units,'position',r3,'tag','analysis_generic',...
         'uicontextmenu',contextmenu(rc),'userdata','revaxes');
-    xx = repmat(xsteps,length(ysteps),1); yy=repmat(ysteps,length(xsteps),1);
-    zz = zeros(length(xsteps),length(ysteps));
+ %  xx = repmat(xsteps,length(ysteps),1); 
+   %yy=repmat(ysteps,length(xsteps),1);
+   % zz = zeros(length(xsteps),length(ysteps));
     
     IM = surf(repmat(xsteps,length(ysteps),1)',repmat(ysteps,length(xsteps),1),...
         zeros(length(xsteps),length(ysteps)),rc_avg');
@@ -45,7 +46,7 @@ if ~isempty(w)
         offsets= [p.interval(1) p.interval(2)]; 
     end
     title([I.cellnames{p.datatoview(1)} ...
-        ' x stim over [' num2str(offsets(p.datatoview(2))) 's, ' ...
+        ' over [' num2str(offsets(p.datatoview(2))) 's, ' ...
         num2str(offsets(p.datatoview(2)+1)) 's]'],'Interpreter','none');
     
     drawselectedbin(rc,a);
