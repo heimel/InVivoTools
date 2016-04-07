@@ -81,6 +81,13 @@ for t=1:length(measures.triggers)
     measures.range_corrected{t} = angle_mean/pi*180;
     
     
+    fitx = min(measures.range_corrected{t}):0.5:max(measures.range_corrected{t}); % only get optimal within tested range
+    fity = dog(par,fitx);
+    [m,indm] = max(fity); %#ok<ASGLU>
+    
+    measures.size_fit_optimal_corrected{t} = fitx(indm);
+    
+    
 end
 
 function hrect = halfrect(rect)

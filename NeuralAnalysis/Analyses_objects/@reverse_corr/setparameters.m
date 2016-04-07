@@ -54,9 +54,11 @@ default_p = struct(...
     'crctimeres',0.001,...
     'crcproj',[(255/2)*[1 1 1];[1 1 1]/(3*255/2)],...
     'crccalcint',[-0.5 0.5],'crctimeint',[-1 1]);
-if size(p.values,1)==2
-    default_p.crcproj(1,:)=mean(p.values); 
-end
+% if size(p.values,1)==2
+%     default_p.crcproj(1,:)=mean(p.values); 
+% end
+
+default_p.crcproj(1,:) = feamean;
 
 rc.RCparams = default_p;
 if ~isempty(parameters) && isstruct(parameters)

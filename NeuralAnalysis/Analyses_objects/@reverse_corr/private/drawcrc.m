@@ -8,7 +8,7 @@ if ~isempty(c)
   a = axes('units',w.units,'position',r4);
   plot(c.lags,c.crc);
   title(['1D CRC for pixel ' int2str(p.crcpixel) '.']);
-  xlabel('Time (s)'); 
+  xlabel('Time stim. - Time spike (s)'); 
   ylabel('Rate (Hz)');
   set(a,'uicontextmenu',contextmenu(rc), 'tag','analysis_generic',...
           'userdata','crcaxes');
