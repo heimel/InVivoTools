@@ -25,11 +25,10 @@ function main_getvideo()
 %       create_trigger()
 %       open_grab()
 %
-%   Last edited 8-3-2016. SL
+%   Last edited 15-4-2016. SL
 %
 %   *** REVISION:
-%           -> Remove line 49, 50 and 66.
-%           -> Uncomment line 58 and 78.
+%           - REVISE INFO
 %
 %
 %
@@ -43,10 +42,7 @@ disp(' ');
 logmsg('Initialize main_getvideo.m script :');
 logmsg(' - Video acquisition loop');
 logmsg(' - Used in InVivoTool toolbox');
-logmsg(' - Frame grabbing at 20 Hz.');
-logmsg(' - Compression');
-logmsg('    - Microsoft - Video 1(msvidc32.dll) fourCC -> MSVC.');
-logmsg('    - compression ratio 75%.'); 
+logmsg(' - Using grabpupilsize.exe for video acquisition and analysis');
 disp(' ');disp(' ');
 logmsg(' *** Wait for trigger to be ready ... ***');
 disp(' ');
@@ -78,8 +74,11 @@ recording_time = (block_number * 10) + 1; % recording time in seconds
 % read_data = fullfile(Remote_Comm_dir,'acqReady'); 
 read_data = fullfile(data_dir,'acqReady');      % <- REMOVE when done
 
-% set file output name
+% set file output name for video output
 file_str = 'pupil_mouse.avi';
+
+% set file output name for numerical output
+file_str_num = 'pupil_mouse.txt';
 
 % read data from acqReady
 tmp = importdata(read_data);
@@ -93,13 +92,15 @@ save_path_cell = save_path_cell{1};
 % get number of directories incl drive
 [ind, ~] = size(save_path_cell);
 
-% loop to reconstruct save directory with \\ instead of \
-% mandatory for running the grabavi executable
+% loop to reconstruct save directory delimiter can be set
+% by changing the sep variable (could be necessary when
+% executable is updated).
 for i = 1:ind
 
-    save_path = char(save_path_cell(i));
-    sep = '\\';
+    % sep = '\\';
+    sep = '/';
     
+    save_path = char(save_path_cell(i));
     if i == 1 && i <= ind
     save_to = strcat(save_path,sep);
     elseif i >= 1 &&  i <= ind
@@ -111,8 +112,10 @@ for i = 1:ind
 end
 
 % add the output name to the save directory
+% for video output
 output_reference = [save_to file_str];
-
+% for numerical output
+output_reference_num = [save_to file_str_num];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%  Set and Initiate Trigger  %%%
@@ -141,7 +144,7 @@ while true
         counter = counter + 1;
         
         % Start Video executable run script.
-        open_grab(recording_time,output_reference);
+        open_grab(recording_time,output_reference,output_reference_num);
                                
     end
     
