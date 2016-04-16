@@ -107,9 +107,17 @@ int main(int argc, char* argv[])
 	int heigth_blur = 3;
 	int width_blur = 3;
 	Size blur_dimensions = Size(width_SE, heigth_SE);
+	
+	int itterations_close = 3;
+	
 	int threshold1_canny = 100;
 	int	threshold2_canny = 50;
 	int aperture_canny = 3;
+	
+	double pupil_aspect_ratio = 1.5;
+	int pupil_min = 15;
+	int pupil_max = 55;
+	
 	bool original_image = 0;
 	bool blurred_image = 0;
 	bool thresholded_image = 0;
@@ -117,6 +125,9 @@ int main(int argc, char* argv[])
 	bool canny_image = 0;
 	bool end_result_image = 1;
 	bool show_ost = 0;
+	
+	double size_text = 0.5;
+	
 	uint32_t time, frames;
 
 	//---------------------//
@@ -247,16 +258,32 @@ int main(int argc, char* argv[])
 				thres_type = THRESH_TOZERO;
 				thres_name = "THRESH_TOZERO";
 				break;
+			case 4:
+				thres_type = THRESH_TOZERO_INV;
+				thres_name = "THRESH_TOZERO_INV";
+				break;
 			default:
 				thres_type = THRESH_BINARY;
 				thres_name = "THRESH_BINARY";
 			}
+		}
+		if (cfg.keyExists("itterations_close") == true) { // get number of itterations for closing operation
+			itterations_close = cfg.getValueOfKey<int>("itterations_close");
 		}
 		if (cfg.keyExists("threshold1_canny") == true && cfg.keyExists("threshold2_canny") == true
 			&& cfg.keyExists("aperture_canny") == true) { // get parameters Canny filter algorithm
 			threshold1_canny = cfg.getValueOfKey<int>("threshold1_canny");
 			threshold2_canny = cfg.getValueOfKey<int>("threshold2_canny");
 			aperture_canny = cfg.getValueOfKey<int>("aperture_canny");
+		}
+		if (cfg.keyExists("pupil_aspect_ratio") == true) { // get aspect ratio threshold accepted ellipse
+			pupil_aspect_ratio = cfg.getValueOfKey<double>("pupil_aspect_ratio");
+		}
+		if (cfg.keyExists("pupil_min") == true) {  // get minimal accepted pupil radius
+			pupil_min = cfg.getValueOfKey<int>("pupil_min");
+		}
+		if (cfg.keyExists("pupil_max") == true) {  // get maximal accepted pupil radius
+			pupil_max = cfg.getValueOfKey<int>("pupil_max");
 		}
 		if (cfg.keyExists("original_image") == true) { // info: stream original stream to display
 			original_image = cfg.getValueOfKey<bool>("original_image");
@@ -278,6 +305,9 @@ int main(int argc, char* argv[])
 		}
 		if(cfg.keyExists("show_ost") == true) {	// put text on screen info
 			show_ost = cfg.getValueOfKey<bool>("show_ost");
+		}
+		if (cfg.keyExists("size_text") == true) { // get text size for on screen text
+			size_text = cfg.getValueOfKey<double>("size_text");
 		}
 
 
@@ -307,7 +337,7 @@ int main(int argc, char* argv[])
 		save_radius = false;
 		// amount of frames to grab
 		frames = 60 * cFramesPerSecond;	
-		cout << endl << endl << " *** Callibration mode *** " << endl << endl;
+		cout << endl << endl << " *** Calibration mode *** " << endl << endl;
 		cout << " - No recording of video or numerical output" << endl;
 		cout << " - 30 seconds of video stream" << endl << endl;
 		cout << " - Hit [ESC] in video window to quit the program" << endl;
@@ -460,9 +490,13 @@ int main(int argc, char* argv[])
 		cout << "* Threshold mode                      : (" << thres_mode << ") " << thres_name << endl;
 		cout << "* Size Gaussian blur filter           : " << blur_dimensions << endl;
 		cout << "* Size structuring element \n  for morphological closing           : " << SE_morph << endl;
+		cout << "* Total itterations closing operation : " << itterations_close << endl;
 		cout << "* First threshold canny filter        : " << threshold1_canny << endl;
 		cout << "* Second threshold canny filter       : " << threshold2_canny << endl;
 		cout << "* Size aperture kernel canny filter   : " << aperture_canny << endl;
+		cout << "* Threshold aspect ratio ellipse      : " << pupil_aspect_ratio << endl;
+		cout << "* Minimum radius accepted ellipse     : " << pupil_min << endl;
+		cout << "* Maximum radius accepted ellipse     : " << pupil_max << endl;
 		cout << endl;
 		cout << "* Show original stream on display     : " << original_image << endl;
 		cout << "* Show blurred stream on display      : " << blurred_image << endl;
@@ -472,6 +506,7 @@ int main(int argc, char* argv[])
 		cout << "* Show end result stream on display   : " << end_result_image << endl;
 		cout << endl;
 		cout << "* Show text on end result stream      : " << show_ost << endl;
+		cout << "* Size text on screen                 : " << size_text << endl;
 		cout << "*" << endl;
 		cout << "*------------------------------------------------------*" << endl;
 		cout << "*******     Program by S.E Lansbergen, 2016     ******** " << endl;
@@ -640,7 +675,7 @@ int main(int argc, char* argv[])
 				// Step 5
 				//
 				// Morphological closing (erosion and dilation)
-				morphologyEx(thres, close, MORPH_CLOSE, SE, Point(-1, -1), 3);
+				morphologyEx(thres, close, MORPH_CLOSE, SE, Point(-1, -1), itterations_close);
 
 				// Step 6
 				//
@@ -653,8 +688,8 @@ int main(int argc, char* argv[])
 				findContours(canny, contours, RETR_LIST, CHAIN_APPROX_NONE);
 
 				// Step 8
-				//
-				// create video image and determine radius and area
+				// 
+				// Fit ellipse and draw on image
 				double test_width(0), test_height(0);
 				int flag(0), radius_output;
 
@@ -668,18 +703,19 @@ int main(int argc, char* argv[])
 					Mat pointsf;
 					Mat(contours[i]).convertTo(pointsf, CV_32F);
 					RotatedRect box = fitEllipse(pointsf);
-					if (MAX(box.size.width, box.size.height) > MIN(box.size.width, box.size.height) * 1.5)
+					if (MAX(box.size.width, box.size.height) > MIN(box.size.width, box.size.height) * pupil_aspect_ratio)
 						continue;
 
 					// sets min and max width and heigth of the box in which the ellipse is fitted
-					if (MAX(box.size.width, box.size.height) > 15 && MAX(box.size.width, box.size.height) < 55) {
+					// only these are used in the video and numerical output
+					if (MAX(box.size.width, box.size.height) > pupil_min && MAX(box.size.width, box.size.height) < pupil_max) {
 
 						flag++;  // counts 1 at first itteration
 
 								 // adds found all width and height in all itterations
 						test_width = test_width + box.size.width;
 						test_height = test_height + box.size.height;
-
+							
 						//drawContours(roi_eye_rgb, contours, (int)i, Scalar::all(255), 1, 8);
 						ellipse(roi_eye_rgb, box, Scalar(0, 0, 255), 1, LINE_AA);
 						ellipse(roi_eye_rgb, box.center, box.size*0.5f, box.angle, 0, 360, Scalar(0, 255, 255), 1, LINE_AA);
@@ -715,13 +751,13 @@ int main(int argc, char* argv[])
 				if (show_ost == true) {
 								
 					putText(roi_eye_rgb, frame_rate, cvPoint(30, 20),
-					FONT_HERSHEY_COMPLEX_SMALL, 0.5, cvScalar(0, 0, 255), 1, CV_AA);
+					FONT_HERSHEY_COMPLEX_SMALL, size_text, cvScalar(0, 0, 255), 1, CV_AA);
 																	
 					putText(roi_eye_rgb, size_roi, cvPoint(30, 35),
-					FONT_HERSHEY_COMPLEX_SMALL, 0.5, cvScalar(0, 0, 255), 1, CV_AA);
+					FONT_HERSHEY_COMPLEX_SMALL, size_text, cvScalar(0, 0, 255), 1, CV_AA);
 
 					putText(roi_eye_rgb, output_file, cvPoint(30, 55),
-					FONT_HERSHEY_COMPLEX_SMALL, 0.6, cvScalar(0, 0, 255), 1, CV_AA);
+					FONT_HERSHEY_COMPLEX_SMALL, (size_text + 0.1), cvScalar(0, 0, 255), 1, CV_AA);
 				}
 
 
