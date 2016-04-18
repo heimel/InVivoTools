@@ -13,12 +13,17 @@ if nargin<5 || isempty(recurse)
     recurse = false;
 end
 
-if nargin<4 || isempty(vers)
+
+if nargin<4 || isempty(vers) 
     vers = '2004';
     if isfield(record,'setup')
         switch record.setup
             case 'jander'
                 vers = '2015';
+            case 'daneel'
+                if isfield(record,'experiment') && strcmpi(record.experiment,'examples')
+                    vers = '2015';
+                end
         end
     end
 end
@@ -89,7 +94,7 @@ switch vers
         if isfield(record,'experiment')
             experiment = record.experiment;
         else
-            % oi database
+            % oi database or ec database
             p = find(record.mouse=='.',2);
             if length(p)==2
                 experiment = record.mouse(1:p(2)-1);

@@ -76,6 +76,13 @@ end
 axes(handle);
 patch([xl xr xr xl],[yb yb yt yt],color);
 %disp(['scale bar = ' num2str(width_scalebar_in_um) ' um']); 
+hxlab = get(gca,'xlabel');
+if ~isempty(hxlab)
+    xlab = get(hxlab,'String');
+    if isempty(xlab)
+        xlabel([num2str(width_scalebar_in_um) ' um']);
+    end
+end
 
 return
 
