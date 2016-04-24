@@ -36,10 +36,13 @@ r = r.*repmat([params.x_step params.y_step params.z_step],size(r,1),1);
 
 ind_mito_present = ind_mito([roilist(ind_mito).present]==1);
 
-for i = ind_no_mito(:)'
+for i = 1:length(record.measures) %ind_no_mito(:)'
     record.measures(i).mito_close = false;
     record.measures(i).distance2mito = inf;
     for j = ind_mito_present(:)'
+        if j==i 
+            continue
+        end
        if roilist(j).neurite(1)==roilist(i).neurite(1)
            record.measures(i).distance2mito  = ...
                min(record.measures(i).distance2mito, norm(r(i,:)-r(j,:)) );
@@ -55,8 +58,9 @@ end
 
 % set mito close true for mito's themselves
 for i = ind_mito(:)' 
-    record.measures(i).mito_close = true;
-    record.measures(i).distance2mito = 0;
+%    record.measures(i).mito_close = true;
+%    record.measures(i).distance2mito = 0;
+% no longer setting distance2mito to zero, 2016-04-24
 end
 
 
