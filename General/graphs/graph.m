@@ -540,7 +540,10 @@ switch style
                 uniqystd=zeros(1,length(uniqx));
                 
                 if ~isempty(merge_x)
-                    dx = diff(uniqx)./uniqx(1:end-1);
+                    
+%                    dx = diff(uniqx)./uniqx(1:end-1);
+                    dx = diff(uniqx)/(uniqx(end)-uniqx(1));
+                    
                     ind = find(dx<merge_x);
                     for j = ind
                         x{i}(x{i}==uniqx(j)) = uniqx(j+1);
@@ -781,7 +784,7 @@ switch style
         end
         % plot points
         for i=1:length(y)
-            if ~ishandle(h.points(i)) && isnan(h.points(i))
+            if ~ishandle(h.points(i)) %&& isnan(h.points(i))
                 continue
             end
             delete(h.points(i))

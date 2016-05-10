@@ -60,7 +60,12 @@ for t=1:length(measures.triggers)
     
     monitor = monitor_configuration(record);
     
+    if ~isfield(st,'MTI2')
+        st.MTI2 = st.mti;
+    end
     do = cellfun(@(x) x.stimid,st.MTI2);
+    
+    
     stims = get(sscript);
     stimind = NaN(length(measures.range{t}),1);
     for i=1:length(measures.range{t})
