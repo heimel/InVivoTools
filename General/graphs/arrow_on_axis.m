@@ -6,18 +6,18 @@ function h = arrow_on_axis(data,which_axis,which_handle,which_function,location)
 %   all arguments are optional
 %          WHICH_AXIS could be 'x', 'y', 'both' (default)
 %          WHICH_HANDLE will default to GCA
-%          WHICH_FUNCTION will default to @MEAN
-%          LOCATION could be 'inside', 'outside' (default)
+%          WHICH_FUNCTION will default to @NANMEAN
+%          LOCATION could be 'inside' (default), 'outside'
 %
 % 2016, Alexander Heimel
 %
 
 if nargin<5 || isempty(location)
-    location = 'outside';
+    location = 'inside';
 end
 
 if nargin<4 || isempty(which_function)
-    which_function = @mean;
+    which_function = @nanmean;
 end
 
 if nargin<3 || isempty(which_handle)
@@ -35,49 +35,73 @@ if nargin<1 || isempty(data)
         xdata = g.XData;
         ydata = g.YData;
     else
-        g = get(get(which_handle,'children')); 
-        if ~isfield(g,'XData')
+        xdata = [];
+        c = get(which_handle,'children');
+        while ~isempty(c)
+            g = get(c(1));
+            c(1) = [];
+            if isfield(g,'XData')
+                xdata = g.XData;
+                ydata = g.YData;
+            end
+        end
+        if isempty(xdata)
             h = [];
             return
         end
-        xdata = g.XData;
-        ydata = g.YData;
-    end        
+    end
 else
-    xdata = data;
-    ydata = data;
+    if size(data,2)==2
+        xdata = data(:,1);
+        ydata = data(:,2);
+    else
+        xdata = data;
+        ydata = data;
+    end
 end
 
 switch location
-    case 'inside' 
+    case 'inside'
         side = 1;
-    case 'outside' 
+    case 'outside'
         side = -1;
 end
 
+
 switch which_axis
-    case 'both' 
-        h = arrow_on_axis(data,'x',which_handle,which_function,location);
-        h = [h arrow_on_axis(data,'y',which_handle,which_function,location)];
+    case 'both'
+        h = arrow_on_axis(xdata,'x',which_handle,which_function,location);
+        h = [h arrow_on_axis(ydata,'y',which_handle,which_function,location)];
+        return
     case 'x'
+        axis(which_handle);
+        ax = axis;
+        l = (ax(4)-ax(3))*0.1;
         data = xdata;
         m = which_function(data);
-        p = get(which_handle,'position');
-        y = p(2);
-        l = p(3)*0.1;
-        ax = axis;
-        m = m - ax(1);
-        m = m / (ax(2)-ax(1));
-        h = annotation('arrow',[p(1)+m*p(3) p(1)+m*p(3)],[y+l*side y]);
+        start = [m ax(3)+side*l];
+        stop = [m ax(3)];
     case 'y'
+        axis(which_handle);
+        ax = axis;
+        l = (ax(2)-ax(1))*0.1;
         data = ydata;
         m = which_function(data);
-        p = get(which_handle,'position');
-        x = p(1);
-        l = p(4)*0.1;
-        ax = axis;
-        m = m - ax(3);
-        m = m / (ax(4)-ax(3));
-        h = annotation('arrow',[x+l*side x],[p(2)+m*p(4) p(2)+m*p(4)]);
+        start = [ax(1)+side*l m];
+        stop = [ax(1) m];
 end
+h = arrow( start,stop);
+axis(ax);
+
+
+function h = drawArrow(x,y,varargin)
+np = get(gca,'NextPlot');
+hold on
+h = line( [x(1) x(2)],[y(1) y(2)],'clipping','off',...
+    'linewidth',3,'color','k',varargin{:});
+
+
+
+set(gca,'NextPlot',np);
+%quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),0 ,varargin{:})
 

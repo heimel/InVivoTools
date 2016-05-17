@@ -95,7 +95,7 @@ pos_args={...
     'fontsize',20,...
     'fontname','arial',...
     'linestyles','',...
-    'linewidth',3,...
+    'linewidth',2,...
     'ystd',[],...
     'ny',[],...
     'bins',[],... % for (cumulative) histogram and rose
@@ -802,8 +802,10 @@ switch style
                     linestyle = linestyle{i};
                 end
                 set(h.points(i),'linestyle',linestyle);
+
             end
             set(h.points(i),'linewidth',linewidth);
+
             if exist('markers','var')
                 if ~iscell(markers)
                     marker = markers;
@@ -820,8 +822,15 @@ switch style
                         set(h.points(i),'marker','^');
                         set(h.points(i),'markerfacecolor',color{i});
                     case 'open_circle'
-                        set(h.points(i),'markerfacecolor',[1 1 1]);
+                        set(h.points(i),'marker','o');
+
+                       % set(h.points(i),'markerfacecolor',[1 1 1]);
+                        hm = h.points(i).MarkerHandle;
+                        if ~isempty(hm)
+                        hm.FaceColorData=uint8([255; 255; 255; 255])
+                        end
                     case 'closed_circle'
+                        set(h.points(i),'marker','o');
                         set(h.points(i),'markerfacecolor',color{i});
                     otherwise
                         logmsg(['Unknown marker ' marker]);
