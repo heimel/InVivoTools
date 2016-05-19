@@ -12,15 +12,12 @@ function open_grab(recording_time,output_reference,output_reference_num)
 %   
 %   The executable grabavi.exe takes the following syntax, when used in the
 %   InVivoTools toolbox: grabavi.exe 'seconds->numeric' 'save directory'.
-%   The seconds and save directory are translated to the prefered spacing
-%   and are suited with \\ to separate directories (eg. c:\\dir\\dir2\\).
-%
-%
 %
 %   ADD INFO
 %
-%   Last edited 15-4-2016. SL
+%   Last edited 19-5-2016. SL
 %
+%   Tested up to acquisistion trigger - no simulation except triggering
 %
 %   (c) 2016, Simon Lansbergen.
 %
@@ -29,6 +26,9 @@ function open_grab(recording_time,output_reference,output_reference_num)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%        Set Paths etc.        %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% open_grab() needs to be in the video acquisition directory 
+cd c:\software\invivotools\physiology\video;
 
 % set executable name
 run_exe = 'grabpupilsize ';

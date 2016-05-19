@@ -21,11 +21,10 @@ function init_getvideo
 %       main_getvideo()
 %
 %
-%   *** REVISION:
-%           -> Remove line 43 Remote_Comm_dir variable
 %
-%   Last edited 7-3-2016. SL
+%   Last edited 19-5-2016. SL
 %
+%   Tested up to acquisistion trigger - no simulation except triggering
 %
 %   (c) 2016, Simon Lansbergen.
 %
@@ -38,12 +37,12 @@ close all       % Close all current windows with figures (plots)
 clc             % Clear Command window
 %-------------------------------------------------------------------------%
 
-
 % get global communication variables.
+NewStimConfiguration;
 remotecommglobals;
 
-% SIMULATION -> REMOVE
-Remote_Comm_dir = fullfile('c:\temp');     % <- REMOVE
+% SIMULATION -> REMOVE WHEN USING
+% Remote_Comm_dir = fullfile('c:\temp');     % <- REMOVE
 
 acqready = fullfile(Remote_Comm_dir,'acqReady');
 

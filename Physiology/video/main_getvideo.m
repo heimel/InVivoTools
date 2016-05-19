@@ -25,12 +25,13 @@ function main_getvideo()
 %       create_trigger()
 %       open_grab()
 %
-%   Last edited 15-4-2016. SL
+%   Last edited 19-5-2016. SL
 %
 %   *** REVISION:
 %           - REVISE INFO
 %
 %
+%   Tested up to acquisistion trigger - no simulation except triggering
 %
 %   (c) 2016, Simon Lansbergen.
 %
@@ -51,12 +52,12 @@ disp(' ');
 %%%   Load Stim. References  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% [ block_number, data_dir] = load_reference;
+[ block_number, data_dir] = load_reference;
 remotecommglobals;
 
-% *** Beta ***
-data_dir     = 'c:\temp';   % <- REMOVE
-block_number = 2;           % <- REMOVE
+% % *** Beta ***
+% data_dir     = 'c:\temp';   % <- REMOVE
+% block_number = 2;           % <- REMOVE
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%         Set Time         %%%
@@ -71,8 +72,8 @@ recording_time = (block_number * 10) + 1; % recording time in seconds
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % set acqReady path
-% read_data = fullfile(Remote_Comm_dir,'acqReady'); 
-read_data = fullfile(data_dir,'acqReady');      % <- REMOVE when done
+read_data = fullfile(Remote_Comm_dir,'acqReady'); 
+% read_data = fullfile(data_dir,'acqReady');      % <- REMOVE when done
 
 % set file output name for video output
 file_str = 'pupil_mouse.avi';
@@ -99,6 +100,7 @@ for i = 1:ind
 
     % sep = '\\';
     sep = '/';
+    % sep = '\';
     
     save_path = char(save_path_cell(i));
     if i == 1 && i <= ind
