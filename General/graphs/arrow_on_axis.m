@@ -9,6 +9,8 @@ function h = arrow_on_axis(data,which_axis,which_handle,which_function,location)
 %          WHICH_FUNCTION will default to @NANMEAN
 %          LOCATION could be 'inside' (default), 'outside'
 %
+%   DATA is [Mx2] array, with x-values in first column, y-values in second
+%
 % 2016, Alexander Heimel
 %
 
