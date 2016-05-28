@@ -1,4 +1,4 @@
-function [analysed] = analysis(heart_rate_data,settings,stim_par)
+function [analysed] = analysis_hr(heart_rate_data,settings,stim_par)
 
 
 % Clean data with Savitzky-Golayfilter
