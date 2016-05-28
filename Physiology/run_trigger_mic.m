@@ -27,6 +27,10 @@ save_to = fullfile(settings.data_dir,file_str);
 channel_settings = ai_mic.Channel;
 save(save_to,'data','time','settings','-v7');
 
+% beta: write directly as wav to save space
+Fs = 250000; % sample rate mic -> get automatically!
+audiowrite(save_to,data,Fs);
+
 % Done acquiring and saving session data
 done_msg = sprintf('\n \n Done acquiring and saving microphone recordings \n \n');
 logmsg(done_msg);
