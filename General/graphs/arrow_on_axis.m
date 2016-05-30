@@ -105,18 +105,7 @@ switch which_axis
         start = [ax(axind+axindp)+side*l m];
         stop = [ax(axind+axindp) m];
 end
-h = arrow( start,stop);
+h = arrow( start,stop,7);
 axis(ax);
 
-
-function h = drawArrow(x,y,varargin)
-np = get(gca,'NextPlot');
-hold on
-h = line( [x(1) x(2)],[y(1) y(2)],'clipping','off',...
-    'linewidth',3,'color','k',varargin{:});
-
-
-
-set(gca,'NextPlot',np);
-%quiver( x(1),y(1),x(2)-x(1),y(2)-y(1),0 ,varargin{:})
 
