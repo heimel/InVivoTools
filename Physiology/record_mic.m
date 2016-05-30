@@ -1,23 +1,24 @@
-function [time,data]=record_daq()
+%function [time,data]=record_mic()
 %RECORD_DAQ.m stand-alone data acquisition with MCC DAQ. open file for
 %acquisition settings
 %-------------------------------------------------------------------------%
 %     
-%   This script is written for stand-alone data acquistion with the MCC
-%   DAQ. The script contains pre-settings such as acquisition duration and
-%   sample rate, as well as the acquistion it self. All settings are set 
-%   within the script and no InVivoTools toolbox functions are used.
+%   This script is written for stand-alone data acquistion with the USB
+%   Dodotronic mic. The script contains pre-settings such as acquisition 
+%   duration and sample rate, as well as the acquistion it self. All 
+%   settings are set within the script and no InVivoTools toolbox functions 
+%   are used.
 %
-%   Use calibrate_daq() to check the channel input and sensor range.
+%   Use calibrate_mic() to check the channel input and sensor range.
 %
 %   Used scripts:
 %       analoginput()
 %       addchannel()
 %
 %   *** REVISION:
-%           -> Needs input from function (in line).
+%           -> 
 %
-%   Last edited 10-24-2016. SL
+%   Last edited 24-3-2016. SL
 %
 %
 %   (c) 2016, Simon Lansbergen.
@@ -31,34 +32,34 @@ close all       % Close all current windows with figures (plots)
 clc             % Clear Command window
 %-------------------------------------------------------------------------%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Acquisition Settings MCC Hardware %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % pre-settings: change these variables 
 % for individual acquistion needs.
-duration = 30;                   % Acquisition time, in seconds.
-sample_rate = 5000;              % Set sample rate (Hz), max = 200000Hz, min = 1Hz.
-hwchannels = [1];                % DAQ differential analog inputs channel(s)
+duration = 10;                   % Acquisition time, in seconds.
 
-% use for precision
-% input_range_channel = 10;   % Input range +/- (Volts) <- less sensitive
-% input_range_channel = 5;    % Input range +/- (Volts)
-input_range_channel = 0.5;  % Input range +/- (Volts)
-% input_range_channel = 0.05; % Input range +/- (Volts) <- more sensitive
+% overwrite current settings
+daq_hw_id = '0';
+daq_type = 'winsound';
+hwchannels = 1;
+0
+hwnames = 'UltraSonic Mic';
+trigger_type = 'Immediate';      % Set trigger type -> Triggerd immediate when start is executed
 
-% can only be as large as input_range_channel
-sensor_range_channel = 0.1;      % Sensor range +/- (Volts)  
 
-% use for scaling -> units range = sensor range
-units_range_channel = sensor_range_channel;  % Units Range +/- (Volts)
+% *** Extended range to 250kHZ ***
+% Set sample rate (Hz), max = 250kHz, min = 5 kHz.
+sample_rate = 250000;
+required_samples = floor(sample_rate * duration);
+
+% use for precision <- only 1V supported
+input_range_channel = 1;   % Input range +/- (Volts) <- less sensitive
+
+% use for scaling -> Usually both 10 (and units range = sensor range)
+sensor_range_channel = 10;      % Sensor range +/- (Volts)  
+units_range_channel = 10;       % Units Range +/- (Volts)
 allinfo = true;                 % Display Summary of Analog Input (AI) Object Using 'PCI-DAS6025'
 
-% fixed variables (hardware etc.)
-daq_type = 'mcc';                % Set adapter type
-daq_hw_id = '1';                 % Hardware ID
-trigger_type = 'Immediate';      % Set trigger type -> Triggerd immediate when start is executed
-required_samples = floor(sample_rate * duration);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Acquisition Part - Do not change! %%%
@@ -73,7 +74,7 @@ set(AI, 'SampleRate', sample_rate);
 set(AI, 'TriggerType', trigger_type);
 
 % create channels
-addchannel(AI,hwchannels);
+addchannel(AI,hwchannels,hwnames);
 
 % set input and sensor range
 AI.Channel.InputRange  = [-input_range_channel, input_range_channel];
@@ -125,6 +126,5 @@ delete(AI);
 
 plot(time,data)
 ylim([-input_range_channel input_range_channel])
-grid on
 
-end
+

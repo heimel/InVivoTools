@@ -22,14 +22,17 @@ wait(ai_mic,(settings.duration + 0.5));
 [data, time] = getdata(ai_mic);
 
 % save both time and data, as well as hardware and c
-file_str = 'ultra_sound_data';
-save_to = fullfile(settings.data_dir,file_str);
+% file_str = 'ultra_sound_data';
+file_str_wav = 'ultra_sound_data.wav';
+% save_to = fullfile(settings.data_dir,file_str);
+save_to_wav = fullfile(settings.data_dir,file_str_wav);
+
 channel_settings = ai_mic.Channel;
-save(save_to,'data','time','settings','-v7');
+% save(save_to,'data','time','settings','-v7');
 
 % beta: write directly as wav to save space
 Fs = 250000; % sample rate mic -> get automatically!
-audiowrite(save_to,data,Fs);
+audiowrite(save_to_wav,data,Fs);
 
 % Done acquiring and saving session data
 done_msg = sprintf('\n \n Done acquiring and saving microphone recordings \n \n');

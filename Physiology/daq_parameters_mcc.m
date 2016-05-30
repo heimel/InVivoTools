@@ -16,7 +16,7 @@ function [ ai_vec, settings ] = daq_parameters_mcc( input_arg )
 %   -> to be completed: add more about functionallity in header
 %                      
 %   Last edited:
-%       9-3-2016, SL
+%       25-5-2016, SL
 %   
 %    
 %   (c) feb-2016, Simon Lansbergen.
@@ -54,7 +54,7 @@ settings.daq_hw_id = '1';                 % Hardware ID
 % see also propinfo(ai) and help propinfo for detailed information on 
 % parameter settings.
 
-settings.sample_rate = 10000;             % Set sample rate (Hz), max = 200000Hz, min = 1Hz.
+settings.sample_rate = 5000;              % Set sample rate (Hz), max = 200000Hz, min = 1Hz.
 settings.trigger_type = 'Immediate';      % Set trigger type -> Triggerd immediate when start is executed
 settings.trigger_type = 'HwDigital';      % Set trigger type -> Triggerd from hardware (digital channel) TTL
 settings.trigger_cond = 'TrigPosEdge';    % Set trigger condition -> Triggered when a positive edge is detected
@@ -112,24 +112,27 @@ settings.hwnames = [{'Heart_Rate','EMG'}];           % Give name to channels
 % configured (and added if not present) separately.
 
 % Input Range can be set at either -5 and 5 -> enter 5, or -10 and 10 
-% (default) -> enter 10. 
+% (default) -> enter 10.
+%
+% range can be 10, 5, 0.5 and 0.05 (Volts)
 settings.input_range_channel(1) = 5;
-settings.input_range_channel(2) = 1;
+settings.input_range_channel(2) = 0.5;
 % settings.input_range_channel(3) = 10;
 
 % Input sensor can have any value, although it is not possible (within this
 % script) to set both values to different values (e.g. -1 and 1.5). Any
 % value can be entered (e.g. for the range -1.5 to 1.5 enter 1.5).  
-settings.sensor_range_channel(1) = 2.5;
-settings.sensor_range_channel(2) = 1.5;
+settings.sensor_range_channel(1) = 5;
+settings.sensor_range_channel(2) = 0.1;
 % settings.sensor_range_channel(3) = 10;
 
+% use for scaling -> units range = sensor range
 % Unit Range can be any value, although it is not possible (within this
 % script) to set both values to different values (e.g. -1 and 1.5). Any
 % value can be entered(e.g. for the range -1.5 to 1.5 enter 1.5).
-settings.units_range_channel(1) = 2.5;
-settings.units_range_channel(2) = 1.5;
-% settings.units_range_channel(3) = 10;
+settings.units_range_channel(1) = settings.sensor_range_channel(1);
+settings.units_range_channel(2) = settings.sensor_range_channel(2);
+% settings.units_range_channel(3) = settings.sensor_range_channel(3);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

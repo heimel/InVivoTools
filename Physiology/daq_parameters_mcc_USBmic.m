@@ -1,4 +1,4 @@
-function [ ai_vec, settings ] = daq_parameters_mcc( input_arg )
+function [ ai_vec, settings ] = daq_parameters_mcc_USBmic( input_arg )
 %daq_parameters_mcc(input_arg) gives acquisition pre-set parameters to main 
 %script.
 %   
@@ -6,15 +6,17 @@ function [ ai_vec, settings ] = daq_parameters_mcc( input_arg )
 %
 %   In this function all relevant parameters can be set for the physiology
 %   data acquisition main script. The function is specifically written for
-%   the DAQ PCI DAS-6025 acquisition card.
+%   the DAQ PCI DAS-6025 acquisition card and the Dodotronic USB mic.
 %
 %   MCC DAQ PCI DAS-6025 has a fixed 12 bits per sample and 8 analog 
 %   differential inputs.
 %
 %   Returns the vector ai_vec which contains multiple Analog Input objects.
+%       - EMG & Heart rate recording via MCC DAQ
+%       - Ultrasound recordings via Dodotronic USB mic.
 %
-%   -> to be completed: add more about functionallity in header
-%                       add check code to check if mic is connected to usb
+%   Revision:
+%       -> add check code to check if mic is connected to usb
 %    
 %   (c) 2016, Simon Lansbergen.
 %   
@@ -51,7 +53,7 @@ settings.daq_hw_id = '1';                 % Hardware ID
 % see also propinfo(ai) and help propinfo for detailed information on 
 % parameter settings.
 
-settings.sample_rate = 10000;             % Set sample rate (Hz), max = 200000Hz, min = 1Hz.
+settings.sample_rate = 5000;              % Set sample rate (Hz), max = 200000Hz, min = 1Hz.
 settings.trigger_type = 'Immediate';      % Set trigger type -> Triggerd immediate when start is executed
 settings.trigger_type = 'HwDigital';      % Set trigger type -> Triggerd from hardware (digital channel) TTL
 settings.trigger_cond = 'TrigPosEdge';    % Set trigger condition -> Triggered when a positive edge is detected
@@ -97,8 +99,8 @@ end
 % With the use of {'name_channel_1','name_channel_2'} in the [] array,
 % multiple names can be added to analog data object ai
 
-settings.hwchannels = [0];                 % DAQ channel input Sinks
-settings.hwnames = [{'Heart_Rate'}];           % Give name to channels
+settings.hwchannels = [0 1];                 % DAQ channel input Sinks
+settings.hwnames = [{'Heart_Rate','EMG'}];           % Give name to channels
 
 % settings.hwchannels = [0 1];                 % DAQ channel input Sinks
 % settings.hwnames = [{'EMG','EKG'}];          % Give name to channels
@@ -109,24 +111,27 @@ settings.hwnames = [{'Heart_Rate'}];           % Give name to channels
 % configured (and added if not present) separately.
 
 % Input Range can be set at either -5 and 5 -> enter 5, or -10 and 10 
-% (default) -> enter 10. 
+% (default) -> enter 10.
+%
+% range can be 10, 5, 0.5 and 0.05 (Volts)
 settings.input_range_channel(1) = 5;
-settings.input_range_channel(2) = 10;
-% settings.input_range_channel(3) = 5;
+settings.input_range_channel(2) = 0.5;
+% settings.input_range_channel(3) = 10;
 
 % Input sensor can have any value, although it is not possible (within this
 % script) to set both values to different values (e.g. -1 and 1.5). Any
 % value can be entered (e.g. for the range -1.5 to 1.5 enter 1.5).  
-settings.sensor_range_channel(1) = 2.5;
-settings.sensor_range_channel(2) = 5;
+settings.sensor_range_channel(1) = 5;
+settings.sensor_range_channel(2) = 0.1;
 % settings.sensor_range_channel(3) = 10;
 
+% use for scaling -> units range = sensor range
 % Unit Range can be any value, although it is not possible (within this
 % script) to set both values to different values (e.g. -1 and 1.5). Any
 % value can be entered(e.g. for the range -1.5 to 1.5 enter 1.5).
-settings.units_range_channel(1) = 2.5;
-settings.units_range_channel(2) = 5;
-% settings.units_range_channel(3) = 10;
+settings.units_range_channel(1) = settings.sensor_range_channel(1);
+settings.units_range_channel(2) = settings.sensor_range_channel(2);
+% settings.units_range_channel(3) = settings.sensor_range_channel(3);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
