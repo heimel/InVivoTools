@@ -24,13 +24,14 @@ settings_mic.trigger_type = 'Manual';
 
 % *** Extended range to 250kHZ ***
 % Set sample rate (Hz), max = 250kHz, min = 5 kHz.
-settings_mic.sample_rate = 250000;
+% settings_mic.sample_rate = 250000;
 % settings_mic.sample_rate = 96000;
+settings_mic.sample_rate = 40000;
 
 % copy relevant information from daq_parameters
 settings_mic.duration = settings.duration;
-settings_mic.samples_per_trigger = settings.samples_per_trigger;
-
+required_samples = floor(settings_mic.sample_rate * settings.duration);    
+settings_mic.samples_per_trigger = required_samples;
 settings_mic.trigger_cond = settings.trigger_cond;
 settings_mic.trigger_repeat = settings.trigger_repeat;
 

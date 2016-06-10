@@ -1,4 +1,4 @@
-%function [time,data]=record_mic()
+function [time,data]=record_mic()
 %RECORD_DAQ.m stand-alone data acquisition with MCC DAQ. open file for
 %acquisition settings
 %-------------------------------------------------------------------------%
@@ -35,20 +35,22 @@ clc             % Clear Command window
 
 % pre-settings: change these variables 
 % for individual acquistion needs.
-duration = 10;                   % Acquisition time, in seconds.
+duration = 2;                   % Acquisition time, in seconds.
+
 
 % overwrite current settings
 daq_hw_id = '0';
 daq_type = 'winsound';
 hwchannels = 1;
-0
 hwnames = 'UltraSonic Mic';
 trigger_type = 'Immediate';      % Set trigger type -> Triggerd immediate when start is executed
 
 
+
 % *** Extended range to 250kHZ ***
 % Set sample rate (Hz), max = 250kHz, min = 5 kHz.
-sample_rate = 250000;
+% sample_rate = 250000;
+sample_rate = 40000;
 required_samples = floor(sample_rate * duration);
 
 % use for precision <- only 1V supported
@@ -128,3 +130,4 @@ plot(time,data)
 ylim([-input_range_channel input_range_channel])
 
 
+end

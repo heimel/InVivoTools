@@ -99,11 +99,11 @@ end
 % With the use of {'name_channel_1','name_channel_2'} in the [] array,
 % multiple names can be added to analog data object ai
 
-settings.hwchannels = [0 1];                 % DAQ channel input Sinks
-settings.hwnames = [{'Heart_Rate','EMG'}];           % Give name to channels
-
 % settings.hwchannels = [0 1];                 % DAQ channel input Sinks
-% settings.hwnames = [{'EMG','EKG'}];          % Give name to channels
+% settings.hwnames = [{'Heart_Rate','EMG'}];           % Give name to channels
+
+settings.hwchannels = [1];                 % DAQ channel input Sinks
+settings.hwnames = [{'EMG'}];          % Give name to channels
 
 
 % For each channel the InputRange, SensorRange, UnitsRange and Units can be
@@ -114,14 +114,14 @@ settings.hwnames = [{'Heart_Rate','EMG'}];           % Give name to channels
 % (default) -> enter 10.
 %
 % range can be 10, 5, 0.5 and 0.05 (Volts)
-settings.input_range_channel(1) = 5;
+settings.input_range_channel(1) = 10;
 settings.input_range_channel(2) = 0.5;
 % settings.input_range_channel(3) = 10;
 
 % Input sensor can have any value, although it is not possible (within this
 % script) to set both values to different values (e.g. -1 and 1.5). Any
 % value can be entered (e.g. for the range -1.5 to 1.5 enter 1.5).  
-settings.sensor_range_channel(1) = 5;
+settings.sensor_range_channel(1) = 10;
 settings.sensor_range_channel(2) = 0.1;
 % settings.sensor_range_channel(3) = 10;
 

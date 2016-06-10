@@ -37,9 +37,9 @@ clc             % Clear Command window
 
 % pre-settings: change these variables 
 % for individual acquistion needs.
-duration = 30;                   % Acquisition time, in seconds.
+duration = 60;                   % Acquisition time, in seconds.
 sample_rate = 5000;              % Set sample rate (Hz), max = 200000Hz, min = 1Hz.
-hwchannels = [1];                % DAQ differential analog inputs channel(s)
+hwchannels = [1];                % DAQ differential analog inputs channel(s) <- array input [1 2 3]
 
 % use for precision
 % input_range_channel = 10;   % Input range +/- (Volts) <- less sensitive
@@ -48,7 +48,7 @@ input_range_channel = 0.5;  % Input range +/- (Volts)
 % input_range_channel = 0.05; % Input range +/- (Volts) <- more sensitive
 
 % can only be as large as input_range_channel
-sensor_range_channel = 0.1;      % Sensor range +/- (Volts)  
+sensor_range_channel = 0.5;      % Sensor range +/- (Volts)  
 
 % use for scaling -> units range = sensor range
 units_range_channel = sensor_range_channel;  % Units Range +/- (Volts)
