@@ -1,4 +1,4 @@
-function [data,stim_par]=load_data(date)
+function [data,stim_par]=load_hr_data(date,variable_name)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%                Load DATA                 %%%%%%            
@@ -16,7 +16,7 @@ counter         = 1;
 for i = 3:length(file_index)
 % Set paths to look for data variables
 file_name            = files(file_index(i)).name;
-file_path_name_data  = fullfile(directory_name,file_name, 'Heart_Rate.mat');
+file_path_name_data  = fullfile(directory_name,file_name, variable_name);
 file_path_name_stim  = fullfile(directory_name,file_name, 'stims.mat');
 
 file_info       = exist(file_path_name_data,'file');
@@ -45,6 +45,9 @@ end
 end
 
 disp(' ');logmsg(' *** Loading variables *** ');
-logmsg(location);disp(' ');
+str = [' *** ' location ' ***'];
+logmsg(str);
+str = [' *** Used variable: ' variable_name ' ***'];
+logmsg(str);
 
 end

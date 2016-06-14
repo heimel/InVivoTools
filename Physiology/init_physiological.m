@@ -1,12 +1,12 @@
-function init_physiological_measurement(parameter_file_name)
-%init_physiological_measurement enter_parameter_file_name_here  
+function init_physiological(parameter_file_name)
+%init_physiological enter_parameter_file_name_here  
 % 
 %   Initialization for Physiological measurements using a Data-acquisition
 %   card in MatLab. This function waits for an update in the file acqReady,
 %   which triggers the program. There is a pop-up window with a push-button
 %   to escape the while loop.
 % 
-%   If no value is added to init_physiological_measurement to load the
+%   If no value is added to init_physiological to load the
 %   according measurent and vendor specific configuration, a default
 %   configuration will be used -> daq_parameters_mcc_USBmic.m
 %
@@ -35,10 +35,10 @@ echo off        % No echoing of commands lines in script/function files
 
 
 % Checks whether there is an input, otherwise sets parameter file to
-% current setup -> daq_parameters_mcc. Default configuration can be found
+% current setup -> daq_parameters_mcc_USBmic. Default configuration can be found
 % in daq_parameters.
 if nargin<1
-    parameter_file_name = 'daq_parameters_mcc';
+    parameter_file_name = 'daq_parameters_mcc_USBmic';
 end
 
 %
@@ -48,6 +48,7 @@ host('jander');
 experiment test;
 
 % get global communication variables.
+NewStimConfiguration;
 remotecommglobals;
 acqready = fullfile(Remote_Comm_dir,'acqReady');
 

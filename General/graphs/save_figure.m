@@ -36,7 +36,7 @@ if  isunix && ~ismac
     % imwrite(frame.cdata,[filename '.png']);
 else % windows or max (assume absence of ghostscript)
     saveas(h,[filename '.png'],'png');
-    saveas(h,[filename '.eps'],'eps');
+    saveas(h,[filename '.eps'],'epsc');
 end
 filename = fullfile(path,filename);
 cd(savewd);

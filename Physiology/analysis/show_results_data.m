@@ -1,4 +1,7 @@
-function [avg,avg_br]=show_results_data(analysed,analysed_br,time,settings,data_name,show_all)
+function [avg,avg_br]=show_results_data(analysed,analysed_br,time,settings,baseline,stim_time,data_name,show_all)
+
+settings.pre_time  = baseline;
+settings.stim_time = stim_time;
 
 close all;
 logmsg(' *** showing graphs ***');
@@ -112,8 +115,10 @@ title(data_name)
 % show found peaks      
 figure
 hold on
-plot(1:numel(time),analysed.clean);
-plot(analysed.locsThr,analysed.clean(analysed.locsThr),'rv','MarkerFaceColor','r');
+% plot(1:numel(time),analysed.clean);
+% plot(analysed.locsThr,analysed.clean(analysed.locsThr),'rv','MarkerFaceColor','r');
+plot(1:numel(time),analysed.detrend);
+plot(analysed.locsThr,analysed.detrend(analysed.locsThr),'rv','MarkerFaceColor','r');
 hold off
 xlabel('Seconds')
 title(data_name)

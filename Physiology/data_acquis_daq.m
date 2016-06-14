@@ -85,7 +85,7 @@ disp(' ');
 % activate Analog Input Object -> either waits for trigger or starts immediatly
 start (ai);                               
 
-% main while loop -> now fixed for mic and mcc input *** NEED REVISION ***
+% main while loop -> now fixed for mic and mcc input 
 counter = 1;
 while true  
    
