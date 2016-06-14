@@ -15,7 +15,7 @@ function main_getvideo()
 %   named pupil_mouse.avi.
 %
 %   A trigger is created with create_trigger() and executed, while the 
-%   trigger is executedthe the script is waiting for a TTL trigger on the 
+%   trigger is executed the the script is waiting for a TTL trigger on the 
 %   NI DAQ to start acquisition. During acquistion the DAQ cannot handle 
 %   follow-up TTL pulses.
 %   
@@ -25,13 +25,12 @@ function main_getvideo()
 %       create_trigger()
 %       open_grab()
 %
-%   Last edited 19-5-2016. SL
+%   Last edited 14-6-2016. SL
 %
 %   *** REVISION:
 %           - REVISE INFO
 %
 %
-%   Tested up to acquisistion trigger - no simulation except triggering
 %
 %   (c) 2016, Simon Lansbergen.
 %
@@ -78,8 +77,9 @@ read_data = fullfile(Remote_Comm_dir,'acqReady');
 % set file output name for video output
 file_str = 'pupil_mouse.avi';
 
-% set file output name for numerical output
-file_str_num = 'pupil_mouse.txt';
+% set file output name for numerical output, both area and xy position
+file_str_num    = 'pupil_area.txt';    % pupil area
+file_str_num_xy = 'pupil_xy.txt';   % xy position
 
 % read data from acqReady
 tmp = importdata(read_data);
@@ -115,9 +115,10 @@ end
 
 % add the output name to the save directory
 % for video output
-output_reference = [save_to file_str];
+output.reference = [save_to file_str];
 % for numerical output
-output_reference_num = [save_to file_str_num];
+output.reference_num = [save_to file_str_num];
+output.reference_num_xy = [save_to file_str_num_xy];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%  Set and Initiate Trigger  %%%
@@ -146,7 +147,7 @@ while true
         counter = counter + 1;
         
         % Start Video executable run script.
-        open_grab(recording_time,output_reference,output_reference_num);
+        open_grab(recording_time,output);
                                
     end
     
