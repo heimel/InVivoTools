@@ -29,8 +29,7 @@ function open_grab(recording_time,output)
 cd c:\software\invivotools\physiology\video;
 
 % set executable name
-% run_exe = 'grabpupilsize ';
-run_exe = 'grabpupilsize_beta ';
+run_exe = 'grabpupilsize ';
 
 % set recording time
 rec_time = num2str(recording_time);
