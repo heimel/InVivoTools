@@ -30,8 +30,8 @@ settings_mic.sample_rate = 40000;
 
 % copy relevant information from daq_parameters
 settings_mic.duration = settings.duration;
-required_samples = floor(settings_mic.sample_rate * settings.duration);    
-settings_mic.samples_per_trigger = required_samples;
+settings_mic.required_samples = floor(settings_mic.sample_rate * settings.duration);    
+settings_mic.samples_per_trigger = settings_mic.required_samples;
 settings_mic.trigger_cond = settings.trigger_cond;
 settings_mic.trigger_repeat = settings.trigger_repeat;
 
@@ -52,7 +52,8 @@ set(ai_mic, 'TriggerFcn', {@run_trigger_mic,settings});
 % Set bit rate, max 32.
 set(ai_mic, 'Bits', 32);
 % set(ai_mic, 'SampleRate', 96000);
-set(ai_mic, 'SampleRate', 250000);
+% set(ai_mic, 'SampleRate', 250000);
+set(ai_mic, 'SampleRate', 40000);
 
 end
 
