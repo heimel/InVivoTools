@@ -86,7 +86,7 @@ end
 for i = 1:length(cross_indL)
     if cross_indL(i) >= cross_indL0 + ref
         pkdl = pkdl + 1; % number of peaks detected + 1
-        [peaksL(pkdl), peaksLI(pkdl)] = min(brightness(2,cross_indL(i):cross_indL(i)+ref));
+        [peaksL(pkdl), peaksLI(pkdl)] = min(brightness(2,cross_indL(i):cross_indL(i)+(length(cross_indL)-i)));
         indexL(pkdl) = cross_indL(i) + peaksLI(pkdl)-2; %index of the peak
         cross_indL0 = indexL(pkdl);
     end

@@ -559,12 +559,14 @@ for i = target_frames
                             %                             logmsg(message3);
                             %                         end
                             [ keyIsDown, seconds, keyCode ] = KbCheck;
-                            %                            WaitSecs(1);
+                            %                            WaitSecs(1); %for
+                            %                            finding the
+                            %                            keycode
                             m = find(keyCode);
                             if keyIsDown && m==32
                                 
                                 while p<2   % looking at frames and checking
-                                    message4 = ('use left and right arrow keys');
+                                    message4 = ('use left and right arrow keys or n');
                                     %                                     uiwait(msgbox(message3));
                                     logmsg(message4);
                                     [xs(p), ys(p), button] = ginput(1);
@@ -582,10 +584,14 @@ for i = target_frames
                                                 +framesforward;
                                             snapframe = read(vid,framenr );
                                             image(snapframe,'Parent', snapaxes);
-                                            
+                                        case 110
+                                            logmessage('no stim visible')
+                                            stim(k,:) = [NaN NaN];
+                                            p = p + 1;
                                         otherwise
                                             p = p + 1;
                                             if p==2
+                                                %                                                 if ~isempty(stim(k,:));
                                                 message5 = ('Click on stim');
                                                 uiwait(msgbox(message5));
                                                 [xs(p), ys(p)] = ginput(1);
@@ -596,6 +602,9 @@ for i = target_frames
                                                 xsfr = 1:(sfr(1)+600);
                                                 ysfr = stim(k,2)*ones(1,(sfr(1)+600));
                                                 plot(xsfr, ysfr, '--', 'color',[.5 .5 .5]); %stim line
+                                                %                                                 else
+                                                %                                                  logmessage('no stim visible')
+                                                %                                                 end
                                             end
                                     end
                                 end
@@ -614,6 +623,10 @@ for i = target_frames
                                     logmsg(message3);
                                     [xs(p), ys(p), button] = ginput(1);
                                     switch button
+                                        case 110 % n
+                                            logmsg('no stim visible')
+                                            stim(k,:) = [NaN NaN];
+                                            p = p + 1;
                                         case 28 % left arrow
                                             framesforward = framesforward - 1;
                                             framenr = round(startTime*frameRate)...

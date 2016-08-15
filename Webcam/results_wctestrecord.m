@@ -17,7 +17,7 @@ evalin('base','global measures');
 evalin('base','global global_record');
 logmsg('Measures available in workspace as ''measures'',, record as ''global_record''.');
 
-%% plots the arena 
+%% plots the arena
 figHandles = findall(0,'Type','figure');
 fig_n = max(figHandles)+1;
 
@@ -102,8 +102,8 @@ else
 end
 
 if ~isempty(measures.peakPoints)
-peakPointR = peakPoints(1,:);
-peakPointL = peakPoints(2,:);
+    peakPointR = peakPoints(1,:);
+    peakPointL = peakPoints(2,:);
 end
 
 stimFrame = stimstart*frameRate;
@@ -121,8 +121,8 @@ plot(frames,thresholdsStimOnset(4,:),'--','color',[1 1/3 0]);
 legend('Right ROI','Left ROI','Location',[.705,.46,.2,.1]);
 
 if ~isempty(measures.peakPoints)
-plot(peakPointR(1,2),peakPointR(1,3),'k^','markerfacecolor','k'); axis tight;
-plot(peakPointL(1,2),peakPointL(1,3),'k^','markerfacecolor','m'); axis tight;
+    plot(peakPointR(1,2),peakPointR(1,3),'k^','markerfacecolor','k'); axis tight;
+    plot(peakPointL(1,2),peakPointL(1,3),'k^','markerfacecolor','m'); axis tight;
 end
 %% plots movement trajectory
 if isfield(measures,'mousemove') && ~isempty(measures.mousemove)
@@ -226,7 +226,7 @@ else
     
 end
 L = size(nose,1);
-
+sbrange=round(L/2);
 figHandles = findall(0,'Type','figure');
 fig_n = max(figHandles)+1;
 figure(fig_n)
@@ -236,7 +236,11 @@ for k = 1:L;
     nose_a(k, :) = nose(k,:) - nose(k,:);
     if ~isempty(nose) && ~isempty(arse)
         %         figure(k+(fig_n));
-        subplot(round(L/2)+1, round(L/2)+1,k);
+        if sbrange ~= 1
+            subplot((round(L/2)),(round(L/2)),k);
+        else
+            subplot(L,L,k);
+        end
         plot([0, nose_a(k,1)], [0, nose_a(k,2)],'v','MarkerSize',8,...
             'MarkerFaceColor', my_blue); hold on;
         grid on; extent1 = abs(arse_a)+50; ax1= max(max(extent1));
@@ -250,7 +254,11 @@ for k = 1:L;
             stim_present = any(stim,2);
             if stim_present(k)== 1
                 %                 figure(k+(fig_n));
-                subplot(round(L/2)+1, round(L/2)+1 ,k);
+                if sbrange ~= 1
+                    subplot((round(L/2)),(round(L/2)),k);
+                else
+                    subplot(L,L,k);
+                end
                 stim_a(k, :) = stim(k,:) - nose(k,:);
                 plot([0, stim_a(k,1)], [0, stim_a(k,2)], 'linewidth',3,...
                     'color',my_purple); hold on;
@@ -267,7 +275,7 @@ for k = 1:L;
                 %                         (hor,stim_a(k)))],'-','b',2);
             end
         end
-        set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+%         set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
     else
         disp('No mouse coordinates available');
     end

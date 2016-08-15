@@ -20,7 +20,7 @@ end
 starttime = (wcinfo(1).stimstart-par.wc_playbackpretime) * par.wc_timemultiplier + par.wc_timeshift;
 
 filename = fullfile(wcinfo.path,wcinfo.mp4name);
-try 
+try
     logmsg('Running video in matlab');
     vid=VideoReader(filename);
     
@@ -41,8 +41,10 @@ try
             logmsg(['Frame = ' num2str(frame) ', Time = ' num2str(frame/frameRate)]);
             drawnow
             WaitSecs(1/frameRate);
+        else
+            WaitSecs(0.01);
         end
-
+        
         [keyIsDown, secs, keyCode, deltaSecs] = KbCheck;
         if ~keyIsDown && ~prevnokey
             prevnokey = true;
@@ -54,30 +56,28 @@ try
                         frame = frame - 1;
                         changed = true;
                         prevnokey = false;
-                else
+                    else
                         logmsg('Reached start of movie');
                     end
                 case 39 % arrow right
                     if frame<numFrames
-                        frame = frame +1;  
+                        frame = frame +1;
                         changed = true;
                         prevnokey = false;
                     else
                         logmsg('Reached end of movie');
                     end
+                case 81 % q 
+                    break
             end
         end
     end
-    %             snapframe = read(vid, i);%+vidlag
-
-    
-    
+    %snapframe = read(vid, i);%+vidlag
 catch me
     logmsg(['Some problem: ' me.message]);
-    keyboard
 end
 
-
+return
 
 
 cmd = par.wc_playercommand;
