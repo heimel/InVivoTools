@@ -1,12 +1,12 @@
-function savefig(fname, varargin)	
-%savefig(filename, varargin)
+function savefig_gs(fname, varargin)	
+%savefig_gs(filename, varargin)
 %
 % Saves a pdf, eps, png, jpeg, and/or tiff of the contents of the fighandle's (or current) figure.
 % It saves an eps of the figure and the uses Ghostscript to convert to the other formats.
 % The result is a cropped, clean picture. There are options for using rgb or cmyk colours,
 % or grayscale. You can also choose the resolution.
 %
-% The advantage of savefig is that there is very little empty space around the figure in the
+% The advantage of savefig_gs is that there is very little empty space around the figure in the
 % resulting files, you can export to more than one format at once, and Ghostscript generates
 % trouble-free files.
 %
@@ -39,7 +39,7 @@ function savefig(fname, varargin)
 % '-dbg':  Displays gs command line(s).
 %
 % EXAMPLE:
-% savefig('nicefig', 'pdf', 'jpeg', '-cmyk', '-c0.1', '-r250');
+% savefig_gs('nicefig', 'pdf', 'jpeg', '-cmyk', '-c0.1', '-r250');
 % Saves the current figure to nicefig.pdf and nicefig.png, both in cmyk and at 250 dpi,
 %          with high quality lossy compression.
 %
@@ -133,11 +133,11 @@ function savefig(fname, varargin)
 			otherwise
 				if(regexp(varargin{n}, '^\-r[0-9]+$')), 	 res=  varargin{n};
 				elseif(regexp(varargin{n}, '^\-c[0-9.]+$')), comp= str2double(varargin{n}(3:end));
-				else	warning('pax:savefig:inputError', 'Unknown option in argument: ''%s''.', varargin{n});
+				else	warning('pax:savefig_gs:inputError', 'Unknown option in argument: ''%s''.', varargin{n});
 				end
 			end
 		else
-			warning('pax:savefig:inputError', 'Wrong type of argument: ''%s''.', class(varargin{n}));
+			warning('pax:savefig_gs:inputError', 'Wrong type of argument: ''%s''.', class(varargin{n}));
 		end
 	end
 	types=		unique(types);
@@ -191,7 +191,7 @@ function savefig(fname, varargin)
 		else
 			cmd=		device.(types{n}).rgb;							% Use alternative.
 			if(~strcmp(types{n}, 'eps'))	% It works anyways for eps (VERY SHAKY!).
-				warning('pax:savefig:deviceError', ...
+				warning('pax:savefig_gs:deviceError', ...
 						'No device for %s using %s. Using rgb instead.', types{n}, color);
 			end
 		end
