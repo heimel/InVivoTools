@@ -49,7 +49,8 @@ pos_args={...  %  'reliable',1,...  % 1 to only use reliable records, 0 to use a
     'depth',[],...
     'add2graph_handle','',...
     'limit','',...
-    };
+    'empty_group_spacing',1,...
+};
 
 if nargin<3
     logmsg('Using default arguments:');
@@ -114,6 +115,11 @@ for i=1:2:length(extra_options)
         end
         rethrow(me);
     end
+end
+
+
+if ischar(empty_group_spacing)
+  empty_group_spacing = str2double(empty_group_spacing);
 end
 
 logmsg(['Collecting data for figure ' name ]);
@@ -634,7 +640,7 @@ switch style
                     barcount=barcount+1;
                     xt=xt+inc_xt_group;
                 elseif isempty(strtrim(grouplabels(g,:))) || n_measures>1
-                    xt=xt+inc_xt_group;
+                    xt=xt+inc_xt_group*empty_group_spacing;
                 else
                     logmsg(['Less than ' num2str(min_n) ...
                         ' points in group [' grouplabels(g,:) ']']);
