@@ -28,7 +28,12 @@ try
     %Get paramters of video
     numFrames = get(vid, 'NumberOfFrames');
     frameRate = get(vid, 'FrameRate'); %30 frames/sec
-    frame = round(starttime*frameRate);
+    
+    if ~isempty(record.stimstartframe)
+        frame = record.stimstartframe;
+    else
+        frame = round(starttime*frameRate);
+    end
     
     figure
     changed = true;
@@ -67,7 +72,7 @@ try
                     else
                         logmsg('Reached end of movie');
                     end
-                case 81 % q 
+                case 81 % q
                     break
             end
         end
