@@ -41,7 +41,7 @@ end
 
 [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
     averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] = ...
-    trackmouseblack_pi(filename,false,stimStart,startside,peakPoints);
+    trackmouseblack_pi(filename,false,stimStart,startside,peakPoints, record);
 
 
 record.measures.freezetimes = freezeTimes;
