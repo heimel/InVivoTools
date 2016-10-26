@@ -1,4 +1,4 @@
-%clear all
+clear all
 experiment(14.13)
 host('tinyhat')
 
@@ -27,6 +27,8 @@ mice = {...
     '14.13.1.09',...
     '14.13.1.10',...
     '14.13.1.11',...
+    '14.13.1.12',...
+    'unspecified-1',...
     'unspecified-2',...
     'unspecified-3',...
     '14.14.1.39',...
@@ -38,10 +40,10 @@ mice = {...
     '14.14.1.37',...
     };
 
-%mice = [mice(1:4) mice(6) mice(8:9)]; % to get sig
+% mice = [mice(1:4) mice(6) mice(8:9)]; % to get sig
 % mice = [mice(1:4) mice(8:9)];
-mice = mice(1:9);
-
+mice = mice(1:13);
+% mice = mice(1);
 n_mice = length(mice);
 
 fracfreezing = NaN(n_mice,5,1);
@@ -101,9 +103,15 @@ for m=1:n_mice
                 else
                     cfs =  measures.freezetimes(:,1) - measures.stimstart;
                     cft = measures.freezetimes(:,2) - measures.freezetimes(:,1);
-                    froze(r) = any(cfs>=-0.5 & cfs<4 & (measures.freeze_duration)'>=0.6);
-                    freeze_index = find(cfs>=-0.5 & cfs<4 & (measures.freeze_duration)'>=0.6);
+
+                    max_freezing_starttime = 4; % 4 s
+                    min_freezing_starttime = -0.5; %-0.5; %s
+                    min_freezing_duration = 0.6;%0;%0.6; %
                     
+                    freeze_index = find(cfs>=min_freezing_starttime & ...
+                        cfs<max_freezing_starttime & ...
+                        measures.freeze_duration'>=min_freezing_duration);
+                    froze(r) = ~isempty(freeze_index);
                 end
                 
                 if froze(r) == 1
@@ -169,11 +177,19 @@ for m=1:n_mice
                 ft = [ft; cft];
                 
                 r = r+1;
+                
+                
             end % date d
+%                  if d==1 && s==1
+%                      figure;
+%                      plot(freezing_comment,'o-');
+%                  end
         end % stim s
         
         for d=1:2
             for s=1:2
+               % freezing_time(freezing_time>=1)=100;
+                
                 fracfreezing(m,d,s) = nanmean(froze(day==d & stimtype==s));
                 fracfreezing_manual(m,d,s) = nanmean(freezing_comment(day==d & stimtype==s));
                 duration_all_mice_av(m,d,s) = nanmean(freeze_duration(day==d & stimtype==s));
@@ -220,20 +236,28 @@ end
 %     end
 % end
 
+% computer freeze rate result
 frzsd1_indiv = fracfreezing(:,(1:2),1);
 frzsd2_indiv = fracfreezing(:,2,2);
 allfrzs_indiv = [frzsd1_indiv frzsd2_indiv];
-allfrzs_av = mean(allfrzs_indiv)
+allfrzs_av = nanmean(allfrzs_indiv)
 allfrzs_std = std(allfrzs_indiv);
 allfrzs_sem = allfrzs_std/sqrt(n_mice);
 
+% manual freeze rate result
 frzsmand1_indiv = fracfreezing_manual(:,(1:2),1);
 frzsmand2_indiv = fracfreezing_manual(:,2,2);
 allfrzsman_indiv = [frzsmand1_indiv frzsmand2_indiv];
-allfrzsman_av = mean(allfrzsman_indiv)
-allfrzsman_std = std(allfrzsman_indiv);
-allfrzsman_sem = allfrzsman_std/sqrt(n_mice);
 
+% ind = allfrzsman_indiv(:,1)<0.4
+%  allfrzsman_indiv(ind,:) = [];
+
+allfrzsman_av = nanmean(allfrzsman_indiv)
+allfrzsman_std = std(allfrzsman_indiv);
+allfrzsman_sem = sem(allfrzsman_indiv);
+
+
+% computer freeze durations
 frzsdurd1_indiv = duration_all_mice_av(:,(1:2),1);
 frzsdurd2_indiv = duration_all_mice_av(:,2,2);
 allduration_indiv = [frzsdurd1_indiv frzsdurd2_indiv];
@@ -241,20 +265,13 @@ allduration_av = mean(allduration_indiv);
 allduration_std = std(allduration_indiv);
 allduration_sem = sem(allduration_indiv);
 
-freezing_time_av = [nanmean(freezing_time(day==1 & stimtype==1)),...
-    nanmean(freezing_time(day==2 & stimtype==1)),...
-    nanmean(freezing_time(day==2 & stimtype==2))];
-% freezing_time_std = std([(freezing_time(day==1 & stimtype==1)),...
-%     (freezing_time(day==2 & stimtype==1)), (freezing_time(day==2 & stimtype==1))])
-% freezing_time_sem = freezing_time_std/sqrt(n_mice)
-
-% figHandles = findall(0,'Type','figure');
-% if isempty(figHandles)
-%     fig_n = 0;
-% else
-%     fig_n = max(figHandles);
-% end
-
+% manual freeze duration
+frzstimed1_indiv = freezetime_all_av(:,(1:2),1);
+frzstimed2_indiv = freezetime_all_av(:,2,2);
+alldurationman_indiv = [frzstimed1_indiv frzstimed2_indiv];
+alldurationman_av = nanmean(alldurationman_indiv);
+alldurationman_std = std(alldurationman_indiv);
+alldurationman_sem = sem(alldurationman_indiv);
 
 % return
 
@@ -266,7 +283,8 @@ set(ax1, 'xlim', [0 (n_mice)+1], 'ylim', [0 1]);
 ax2 = subplot(1,2,2);
 bar(ax2, allfrzs_av);
 hold on;
-errorbar(ax2, allfrzs_av, allfrzs_sem, '.', 'linewidth', 2, 'color', [0.3 0.3 0.3])
+errorbar(ax2, allfrzs_av, allfrzs_sem, '.', 'linewidth',...
+    2, 'color', [0.3 0.3 0.3])
 colormap(pink)
 title(ax2,'computer, average');
 set(ax2, 'XTickLabel', {'d1 s1' 'd2 s1' 'd2 s2'});
@@ -277,50 +295,38 @@ ax3 = subplot(1,2,1); bar(ax3, allfrzsman_indiv);
 title(ax3,'manual, individual mice');
 set(ax3, 'xlim', [0 (n_mice)+1], 'ylim', [0 1]);
 ax4 = subplot(1,2,2); bar(ax4, allfrzsman_av); hold on;
-errorbar(ax4, allfrzsman_av, allfrzsman_sem, '.', 'linewidth', 2, 'color', [0.3 0.3 0.3])
+errorbar(ax4, allfrzsman_av, allfrzsman_sem, '.', 'linewidth',...
+    2, 'color', [0.3 0.3 0.3])
 colormap(copper)
 title(ax4,'manual, average');
 set(ax4, 'XTickLabel', {'d1 s1' 'd2 s1' 'd2 s2'});
 set(ax4, 'ylim', [0 1]);
 
-% return
 
 figure;
 ax7 = subplot(1,2,1);
 bar(allduration_av);
 hold on;
-errorbar(allduration_av, allduration_sem, '.', 'linewidth', 2, 'color', [0.3 0.3 0.3]);
+errorbar(allduration_av, allduration_sem, '.', 'linewidth',...
+    2, 'color', [0.3 0.3 0.3]);
 title('mean computer freezing durations');
 set(ax7, 'XTickLabel', {'d1 s1' 'd2 s1' 'd2 s2'});
 set(ax7, 'ylim', [0 2]);
 ylabel(ax7, 'sec');
 ax8 = subplot(1,2,2);
-bar(freezing_time_av);
-% errorbar(freezing_time_av, freezing_time_sem, '.', 'linewidth', 2, 'color', [0.3 0.3 0.3])
+bar(alldurationman_av);
+hold on;
+errorbar(alldurationman_av, alldurationman_sem, '.', 'linewidth',...
+    2, 'color', [0.3 0.3 0.3])
 title('mean manual freezing durations');
 set(ax8, 'XTickLabel', {'d1 s1' 'd2 s1' 'd2 s2'});
 set(ax8, 'ylim', [0 2]);
 ylabel(ax8, 'sec');
 
-% figure;
-% bar([(freeze_duration(day==1 & stimtype==1)),freezing_time(day==1 & stimtype==1)]);
-% legend('computer', 'manual'); title('all freezing durations d1 s1');
-% figure;
-% bar([(freeze_duration(day==2 & stimtype==1)), (freezing_time(day==2 & stimtype==1))]);
-% legend('computer', 'manual'); title('all freezing durations d2 s1');
-% figure;
-% bar([(freeze_duration(day==2 & stimtype==2)), (freezing_time(day==2 & stimtype==2))]);
-% legend('computer', 'manual'); title('all freezing durations d2 s2');
-%
-% figure; title('freezing duration');
-% ax5 = subplot(1,2,1);
-% hist(ax5, freeze_duration, 10);
-% title(ax5, 'freezing duration, computer');
-% ax6 = subplot(1,2,2);
-% hist(ax6, freezing_time, 10);
-% title(ax6, 'freezing duration, manual');
 
-bins = 0:60:360;
+%  return
+
+bins = 0:30:360;
 
 figure;
 subplot(1,2,1);
@@ -340,7 +346,8 @@ set(ax10, 'xlim', [-180 180])
 
 
 if 0
-    figure;plot(froze,'or');hold on;plot(freezing+0.1,'ob');plot(freezing_computed+0.2,'og');
+    figure;plot(froze,'or');hold on;plot(freezing+0.1,'ob');
+    plot(freezing_computed+0.2,'og');
     
     figure
     hist(fs,-12:0.1:10);

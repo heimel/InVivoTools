@@ -13,13 +13,16 @@ experimentpath(record)
 
 measures = record.measures
 
+filename = fullfile(experimentpath(record),'firstframe.mat');
+load(filename);
+
 evalin('base','global measures');
 evalin('base','global global_record');
 logmsg('Measures available in workspace as ''measures'',, record as ''global_record''.');
 
 %% plots the arena
-figHandles = findall(0,'Type','figure');
-fig_n = max(figHandles)+1;
+% figHandles = findall(0,'Type','figure');
+% fig_n = max(figHandles)+1;
 
 if isfield(measures,'stimstart') && ~isempty(measures.stimstart)
     stimstart = measures.stimstart;
@@ -49,15 +52,15 @@ else
     
 end
 
-if isfield(measures,'frame1') && ~isempty(measures.frame1)
-    frame1 = measures.frame1;
+if exist('firstframe') && ~isempty(firstframe)
+    frame1 = firstframe;
 else
-    error('Brightness is not calculated. use "track" button')
+    error('First frame is not calculated. use "track" button')
     
 end
 
 
-figure(fig_n); imshow(frame1, []); % just show it
+figure; imshow(frame1, []); % just show it
 
 W = 15; H = 30;
 Xmin = arena(1)+arena(3)-W;
@@ -110,7 +113,7 @@ stimFrame = stimstart*frameRate;
 start_frame = stimFrame-30-10; %30:length of the stim, 10:for interval
 end_frame = stimFrame+90+30;
 frames = start_frame:end_frame;
-figure(fig_n);
+% figure;
 subplot(m,n,4:6);
 plot(frames,brightness(1,:),'color',[0 2/3 1], 'LineWidth',2); hold on;
 plot(frames,brightness(2,:),'color',[1 2/3 0], 'LineWidth',2); hold on;
@@ -172,11 +175,11 @@ end
 my_blue = [0 0.2 0.6];
 my_purple = [0.6 0.2 0.6];
 
-figHandles = findall(0,'Type','figure');
-fig_n = max(figHandles)+1;
+% figHandles = findall(0,'Type','figure');
+% fig_n = max(figHandles)+1;
 
 if ~isempty(mousemove)
-    figure((fig_n));
+    figure;
     subplot(2,1,1);
     plot((1:trajectorylength),averagemovement,'--k');hold on;
     plot((1:trajectorylength),minimalmovement+diftreshold,'linestyle' ,'--');
@@ -227,9 +230,9 @@ else
 end
 L = size(nose,1);
 sbrange=round(L/2);
-figHandles = findall(0,'Type','figure');
-fig_n = max(figHandles)+1;
-figure(fig_n)
+% figHandles = findall(0,'Type','figure');
+% fig_n = max(figHandles)+1;
+figure
 
 for k = 1:L;
     arse_a(k, :) = arse(k,:) - nose(k,:);  %THE COORDINATES ALIGNED TO NOSE
