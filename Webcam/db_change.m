@@ -10,5 +10,5 @@ for i=1:length(db)
         end
     end
 end
-% path('\\vs01\mvp\Shared\InVivo\Databases');
+
 save_db(db, 'wctestdb_tinyhat')
