@@ -196,9 +196,11 @@ if centchanged && (p.crcpixel>0)
     onoff = cc(peakind)>0 ;    % 1 = oncell, 0 = offcell, NaN = no signif STA
     if abs(cc(peakind))<3*stddev
         onoff = NaN;
+        transience = NaN;
+    else
+        [mm,prepeakind] = max( (1-2*onoff)*cc(1:peakind-1));  %#ok<ASGLU>
+       transience = -cc(prepeakind)/cc(peakind);
     end
-    [mm,prepeakind] = max( (1-2*onoff)*cc(1:peakind-1)); %#ok<ASGLU>
-    transience = -cc(prepeakind)/cc(peakind);
     
     xcent = round(rect(1)+(x_-0.5)/x * (rect(3)-rect(1)));
     ycent = round(rect(2)+(y_-0.5)/y * (rect(4)-rect(2)));

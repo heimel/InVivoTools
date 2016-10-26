@@ -8,7 +8,13 @@ function check_duplicates(record,db,curnum)
 filt = recordfilter(record);
 ind = setdiff(find_record(db,filt), curnum);
 for i = ind
-    [c,flds] = structdiff(record,db(i));
+    try
+        [c,flds] = structdiff(record,db(i));
+    catch
+        c = false;
+        continue
+        logmsg( ['Could not compare current record ' num2str(curnum) ' and record ' num2str(i) ','  recordfilter(record)]);
+    end
     if c
         errormsg( ['Current record ' num2str(curnum) ' and record ' num2str(i) ' appear identical. ' recordfilter(record)]);
         continue
