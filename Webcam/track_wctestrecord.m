@@ -35,10 +35,10 @@ stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
 record.measures = [];
 record.measures.stimstart = stimStart;
 
-[frameRate, frame1, arena] = get_arena(filename, stimStart);
+[frameRate, arena] = get_arena(filename, stimStart, record);
 
 record.measures.frameRate = frameRate;
-record.measures.frame1 = frame1;
+% record.measures.frame1 = frame1;
 record.measures.arena = arena;
 
 % record.measures = [];
