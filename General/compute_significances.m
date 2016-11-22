@@ -160,7 +160,7 @@ if length(y)>2 % multigroup comparison
         end
     end
     if h.p_groupkruskalwallis<0.05
-        comparison = multcompare(stats,'ctype','bonferroni','display','off');
+        comparison = multcompare(kwstats,'ctype','bonferroni','display','off');
         try
             for i=1:size(comparison,1) % over all tests
                 logmsg(['Post-hoc bonferroni corrected Mann-Whitney U test, groups ' num2str(comparison(i,1)) ...
