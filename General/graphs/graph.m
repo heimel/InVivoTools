@@ -109,6 +109,7 @@ pos_args={...
     'showpairing',false,...
     'barwidth',[],...
     'correction',[],...
+    'outlierremoval',false,...
     };
 
 assign(pos_args{:});
@@ -299,6 +300,13 @@ if iscell(y{1})
     end
 end
 
+
+if outlierremoval
+    logmsg('Removing outliers');
+    for i=1:length(y)
+        y{i} = remove_outliers(y{i});
+    end
+end
 
 
 switch style
