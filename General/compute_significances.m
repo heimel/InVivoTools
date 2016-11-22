@@ -1,11 +1,23 @@
-function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transform, h)
+function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transform, h, correction)
 %COMPUTE_SIGNIFICANCES performs standard set of tests on data, and plots stars
 %
-% H = COMPUTE_SIGNIFICANCES(X,Y,TEST,SIGNIF_Y,YSTD,NY,TAIL,TRANSFORM,H)
+% H = COMPUTE_SIGNIFICANCES(X,Y,TEST,SIGNIF_Y,YSTD,NY,TAIL,TRANSFORM,H,CORRECTION)
 %
 %    H is result struct
 %
-% 2014, Alexander Heimel
+%    CORRECTION can be 'bonferroni','holm'
+%
+% 2014-2016, Alexander Heimel
+
+if nargin<10 || isempty(correction)
+    correction = '';
+end
+if nargin<9
+    h = [];
+end
+if nargin<8
+    transform = '';
+end
 
 if nargin<3
     test = '';
@@ -21,9 +33,6 @@ if nargin<6
 end
 if nargin<7
     tail = '';
-end
-if nargin<8
-    transform = '';
 end
 
 
@@ -92,10 +101,10 @@ switch test
         nonparametric = 1;
 end
 
-    
-    
+
+
 if notnormal
-    logmsg('Detected a not normal group. Do a transform or use Kruskal-Wallis, unless n is high (>30)');   
+    logmsg('Detected a not normal group. Do a transform or use Kruskal-Wallis, unless n is high (>30)');
 end
 
 if nonparametric || notnormal
@@ -162,6 +171,17 @@ if length(y)>2 % multigroup comparison
     if h.p_groupkruskalwallis<0.05
         comparison = multcompare(kwstats,'ctype','bonferroni','display','off');
         try
+            n_all_comparisons = length(y)*(length(y)-1)/2;
+            if isempty(signif_y)
+                n_relevant_comparisons = n_all_comparisons;
+            elseif size(signif_y,2)==1 % i.e. one column, specifying which to do
+                n_relevant_comparisons = length(signif_y);
+            else
+                n_relevant_comparisons = n_all_comparisons - length(find(isnan(signif_y)));
+            end
+            comparison(:,6) = comparison(:,6) /  n_all_comparisons * n_relevant_comparisons;
+            
+            
             for i=1:size(comparison,1) % over all tests
                 logmsg(['Post-hoc bonferroni corrected Mann-Whitney U test, groups ' num2str(comparison(i,1)) ...
                     ' vs ' num2str(comparison(i,2)) ': p = ' num2str(comparison(i,6),2)]);
@@ -174,13 +194,16 @@ if length(y)>2 % multigroup comparison
                     rethrow(me)
             end
         end
+        
+        
+        
     end
     
 end % multigroup comparison
 
 
-if ~( length(signif_y)==1 && signif_y==0)
-    for i=1:length(y)
+if ~( length(signif_y)==1 && signif_y==0) % compute pairwise stats
+    for i=1:length(y) % compute normality
         switch test
             case 'ttest'
                 % check normality
@@ -200,6 +223,9 @@ if ~( length(signif_y)==1 && signif_y==0)
                 end
         end
     end
+    
+    % compute pairwise stats
+    y_star = [];
     for i=1:length(y)
         for j=i+1:length(y)
             nsig=(i-1)*length(y)+j;
@@ -220,9 +246,9 @@ if ~( length(signif_y)==1 && signif_y==0)
             end
             
             if isempty(ind_y) % no mention in signif_y list
-                y_star=ax(4)+height*(j-i-1);
+                y_star(nsig) = ax(4)+height*(j-i-1);
             else
-                y_star=signif_y(ind_y(1),2);
+                y_star(nsig) = signif_y(ind_y(1),2);
             end
             
             % matlab significance test using sample data
@@ -236,14 +262,57 @@ if ~( length(signif_y)==1 && signif_y==0)
                     [],[],[],[],tail);
                 
             end
-            plot_significance(x(i),x(j),y_star,h.p_sig{i,j},height,w)
-            if h.p_sig{i,j}<1
-                if length(y)>2
-                    outstat = 'Uncorrected ';
-                else
-                    outstat = '';
+        end
+    end
+    
+    if length(y)>2
+        n_comparisons = length(flatten(h.p_sig));
+        switch lower(correction)
+            case 'bonferroni'
+                correctionstr = 'Post-hoc Bonferroni corrected ';
+                h.p_sig = cellfun(@(x) min(0.999,x*n_comparisons),h.p_sig,'uniformoutput',false);
+            case {'holm','holm-bonferroni'}
+                correctionstr = 'Post-hoc Holm-Bonferroni corrected ';
+                pvals = flatten(h.p_sig);
+                [pvals,ind]=sort(pvals);
+                for i=1:size(h.p_sig,1)
+                    for j =1:size(h.p_sig,2)
+                        if ~isempty(h.p_sig{i,j})
+                            h.p_sig{i,j} = h.p_sig{i,j} * (n_comparisons+1-find(pvals==h.p_sig{i,j},1));
+                        end
+                    end
                 end
-                outstat = [outstat testperformed ', ' num2str(nsig)...
+            otherwise
+                correctionstr = 'Uncorrected ';
+        end
+    else
+        correctionstr = '';
+    end
+    
+    % plot stars
+    for i=1:length(y)
+        for j=i+1:length(y)
+            nsig=(i-1)*length(y)+j;
+            
+            ind_y=[];
+            
+            if ~isempty(signif_y)
+                if size(signif_y,2)==1 % single column, specify which to do
+                    if isempty(find(signif_y==nsig,1))
+                        continue
+                    end
+                else % double column, specify height or which not to do
+                    ind_y = find(signif_y(:,1)==nsig);
+                    if ~isempty(ind_y) && isnan(signif_y(ind_y,2))
+                        continue
+                    end
+                end
+            end
+            
+            plot_significance(x(i),x(j),y_star(nsig),h.p_sig{i,j},height,w)
+            if h.p_sig{i,j}<1
+                
+                outstat = [correctionstr testperformed ', ' num2str(nsig)...
                     ' = grp ' num2str(i) ' vs grp ' num2str(j) ...
                     ', p = ' num2str(h.p_sig{i,j},2)  ]; %#ok<AGROW>
                 if ~isempty(statistic_name)

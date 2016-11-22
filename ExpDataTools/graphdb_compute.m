@@ -7,7 +7,7 @@ function newud=graphdb_compute( ud)
 
 newud = ud;
 
-if get(ud.h.filter,'value') % i.e. filter on
+if get(ud.h.filter,'value') && length(ud.ind)>1 % i.e. filter on and more than 1 record
     answer = questdlg('Compute entire selection?','Compute selection','Yes','No','No');
 else
     answer = 'No';
