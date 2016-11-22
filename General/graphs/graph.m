@@ -178,7 +178,7 @@ else
     smoothing = 0;
 end
 
-if exist('outlierremoval','var')
+if exist('outlierremoval','var') && ischar(outlierremoval)
     outlierremoval = str2double(outlierremoval);
 else
     outlierremoval = 0;
