@@ -74,7 +74,7 @@ if ~isempty(transform)
     logmsg(['Applying ' transform ' transform']);
 end
 
-normality_test = 'lilliefors';
+normality_test = 'shapiro-wilk';
 
 switch normality_test
     case {'anderson-darling','ad'}

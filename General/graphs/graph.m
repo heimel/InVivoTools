@@ -178,6 +178,13 @@ else
     smoothing = 0;
 end
 
+if exist('outlierremoval','var')
+    outlierremoval = str2double(outlierremoval);
+else
+    outlierremoval = 0;
+end
+
+
 if exist('linewidth','var')
     if ischar(linewidth) && ~isempty(linewidth)
         linewidth = str2double(linewidth);
