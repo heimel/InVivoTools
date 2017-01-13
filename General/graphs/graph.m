@@ -108,6 +108,8 @@ pos_args={...
     'transform','',... % for statistics, not implemented yet
     'showpairing',false,...
     'barwidth',[],...
+    'correction',[],...
+    'outlierremoval',false,...
     };
 
 assign(pos_args{:});
@@ -175,6 +177,13 @@ if exist('smoothing','var')
 else
     smoothing = 0;
 end
+
+if exist('outlierremoval','var') && ischar(outlierremoval)
+    outlierremoval = str2double(outlierremoval);
+else
+    outlierremoval = 0;
+end
+
 
 if exist('linewidth','var')
     if ischar(linewidth) && ~isempty(linewidth)
@@ -298,6 +307,13 @@ if iscell(y{1})
     end
 end
 
+
+if outlierremoval
+    logmsg('Removing outliers');
+    for i=1:length(y)
+        y{i} = remove_outliers(y{i});
+    end
+end
 
 
 switch style
@@ -508,8 +524,7 @@ switch style
                         set(hp,'marker','none');
                     case 'closed_circle'
                         set(hp,'marker','o');
-                        set(hp,'markerfacecolor',color{i});                        set(hp,'markerfacecolor',color{i});
-%                        set(hp,'markeredgecolor',color{i});
+                        set(hp,'markerfacecolor',color{i});   
                     case 'open_circle'
                         set(hp,'marker','o');
                 end
@@ -521,7 +536,7 @@ switch style
         end
         
         % compute and plot significances
-        h = compute_significances( y,x, test, signif_y, ystd, ny, tail,transform, h );
+        h = compute_significances( y,x, test, signif_y, ystd, ny, tail,transform, h,correction );
         
         % tighten x-axis
         ax = axis;
@@ -652,7 +667,7 @@ switch style
                         try
                             [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,test]=...
                                 compute_significance(pointsy{i}{k},...
-                                pointsy{j}{k},test,[],[],[],[],tail,transform);
+                                pointsy{j}{k},test,[],[],[],[],tail,transform,[],correction);
                             
                             
                             plot_significance(  x{i}(k),...
