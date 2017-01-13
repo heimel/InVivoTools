@@ -1,6 +1,7 @@
 function play_wctestrecord(record)
 %PLAY_WCTESTRECORD plays webcam movie
-%
+%Press down arrow key for normal play, up arrow to halt, right and left arrow keys to go
+%forward and back a frame respectively, and q to quit play
 % 2015, Alexander Heimel
 
 par = wcprocessparams( record );
@@ -20,31 +21,20 @@ end
 starttime = (wcinfo(1).stimstart-par.wc_playbackpretime) * par.wc_timemultiplier + par.wc_timeshift;
 
 filename = fullfile(wcinfo.path,wcinfo.mp4name);
-% try
-    logmsg('Running video in matlab');
-    vid=VideoReader(filename);
-  
-    %Get paramters of video
-    numFrames = get(vid, 'NumberOfFrames');
-    frameRate = get(vid, 'FrameRate'); %30 frames/sec
-%     vidHeight = vid.Height;
-%     vidWidth = vid.Width;
-    
-    if ~isempty(record.stimstartframe)
-        frame = record.stimstartframe;
-    else
-        frame = round(starttime*frameRate);
-    end
 
-%     mov(1:numFrames) = struct('cdata',zeros(vidHeight,vidWidth, 3,'uint8'),...
-%            'colormap',[]);
-%     for k = frame : frame+100
-%     mov(k).cdata = read(vid,k);
-%     end
-%     
-%     hf = figure;
-%     set(hf, 'position', [150 150 vidWidth vidHeight])
-%     movie(hf, mov, 1, frameRate);
+logmsg('Running video in matlab');
+vid=VideoReader(filename);
+
+%Get paramters of video
+numFrames = get(vid, 'NumberOfFrames');
+frameRate = get(vid, 'FrameRate'); %30 frames/sec
+
+if ~isempty(record.stimstartframe)
+    frame = record.stimstartframe;
+else
+    frame = round(starttime*frameRate);
+end
+
 figure;
 changed = true;
 prevnokey = true;
@@ -66,8 +56,7 @@ while 1
     end
     if keyIsDown && prevnokey
         switch find(keyCode,1)
-            case 70 %f
-                
+            case 40 %arrow down
                 while 1
                     vidFrame = read(vid, frame);
                     image(vidFrame);
@@ -75,12 +64,12 @@ while 1
                     pause(1/frameRate);
                     frame = frame+1;
                     [keyIsDown, secs, keyCode, deltaSecs] = KbCheck;
-                    if keyIsDown && find(keyCode,1)==81
+                    if keyIsDown && find(keyCode,1)==38 % arrow up
                         break
                     end
                 end
-                    changed = false;
-                    prevnokey = false;
+                changed = false;
+                prevnokey = false;
             case 37 % arrow left
                 if frame>1
                     frame = frame - 1;
