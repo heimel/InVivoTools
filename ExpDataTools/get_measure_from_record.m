@@ -337,7 +337,7 @@ for c=1:length(record.measures) % over all cells or ROIs
                 if isfield(measures,'psth') && isfield(measures.psth,'data')
                     tempval = measures.psth.data;
                 end
-            case 'depth'
+            case {'depth','depthfromsurface'}
                 tempval = record.depth-record.surface;
             case {'range','parameter'} % parameter is deprecated
                 if isfield(measures,'curve')

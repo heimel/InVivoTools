@@ -23,7 +23,7 @@ else
     end
 end
 
-status = system(kkexecutable);
+[status,result] = system(kkexecutable);
 
 if status~=1
     if isunix
@@ -31,7 +31,7 @@ if status~=1
     else
         kkexecutable = which('MaskedKlustaKwik.exe');
     end
-    status = system(kkexecutable);
+    [status,result] = system(kkexecutable);
 end
 
 if status~=1
