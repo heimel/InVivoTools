@@ -1,4 +1,4 @@
-function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transform, h, correction)
+function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transform, h, correction, normality_test)
 %COMPUTE_SIGNIFICANCES performs standard set of tests on data, and plots stars
 %
 % H = COMPUTE_SIGNIFICANCES(X,Y,TEST,SIGNIF_Y,YSTD,NY,TAIL,TRANSFORM,H,CORRECTION)
@@ -8,6 +8,10 @@ function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transfo
 %    CORRECTION can be 'bonferroni','holm','tukey-kramer','none'
 %
 % 2014-2016, Alexander Heimel
+
+if nargin<11 || isempty(normality_test)
+    normality_test = 'shapiro-wilk';
+end
 
 if nargin<10 || isempty(correction)
     correction = '';
@@ -73,8 +77,6 @@ if ~isempty(transform)
     y = cellfun(str2func(transform),y,'UniformOutput',false);
     logmsg(['Applying ' transform ' transform']);
 end
-
-normality_test = 'shapiro-wilk';
 
 switch normality_test
     case {'anderson-darling','ad'}
