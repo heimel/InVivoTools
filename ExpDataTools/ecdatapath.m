@@ -40,16 +40,17 @@ switch record.setup
 end
 
 if ~exist(datapath,'dir') || length(dir(datapath))==3
-    if ispc
-        switch record.setup
-            case 'antigua'
-                root = 'Z:\InVivo\';
-            case 'nin380'
-                root = 'V:\InVivo\';
-        end
-    else
-        root = networkpathbase;
-    end
+    %     if ispc
+    %         switch record.setup
+    %             case 'antigua'
+    %                 root = 'Z:\InVivo\';
+    %             case 'nin380'
+    %                 root = 'V:\InVivo\';
+    %         end
+    %     else
+    %         root = networkpathbase;
+    %     end
+    root = networkpathbase;
     switch record.setup
         case 'antigua'
             datapath=fullfile(root,'Electrophys',capitalize(record.setup),...

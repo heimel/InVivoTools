@@ -25,6 +25,9 @@ if isunix
 else % assume windows
   base = 'Z:\InVivo';
   if ~exist(base,'dir')
+      base = 'V:\InVivo'; % on nin380
+  end
+  if ~exist(base,'dir')
       base = '\\vs01.herseninstituut.knaw.nl\MVP\Shared\InVivo';
   end
   if ~exist(base,'dir')

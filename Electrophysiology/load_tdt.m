@@ -1,7 +1,7 @@
-function EVENT = load_tdt(EVENT, use_matlab_tdt)
+function EVENT = load_tdt(EVENT, use_matlab_tdt, allowchanges)
 %LOAD_TDT
 %
-%   EVENT = LOAD_TDT( EVENT, [USE_MATLAB_TDT] ) 
+%   EVENT = LOAD_TDT( EVENT, USE_MATLAB_TDT=isunix, ALLOWCHANGES=true ) 
 %
 %called by Tdt2ml to retrieve info about events and
 %the timing data of strobe events from a TDT Tank
@@ -22,12 +22,16 @@ function EVENT = load_tdt(EVENT, use_matlab_tdt)
 if nargin<2 || isempty(use_matlab_tdt)
     use_matlab_tdt = isunix;
 end
-
 if use_matlab_tdt
     logmsg('Using TDTREAD matlab routines.');
     EVENT = load_tdt_linux(EVENT);
     return
 end
+if nargin<3 || isempty(allowchanges)
+    allowchanges = true;
+end
+
+
 
 F = figure('Visible', 'off');
 try
@@ -182,8 +186,10 @@ H.CloseTank;
 H.ReleaseServer;
 close(F)
 
-MatFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
-save(MatFile, 'EVENT')
+if allowchanges
+    MatFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
+    save(MatFile, 'EVENT')
+end
 
 % % % keyboard
 % EVENT.Myevent = 'Snip';

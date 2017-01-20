@@ -438,14 +438,16 @@ switch style
         
         % figure positioning and size
         set(gcf,'PaperPositionMode','auto');
-        if length(x)>5
-            p=get(gcf,'position');
-            p(3)=p(3)*(length(x)/6)^0.5;
-            set(gcf,'position',p);
+        if isempty(axishandle)
+            if length(x)>5
+                p=get(gcf,'position');
+                p(3)=p(3)*(length(x)/6)^0.5;
+                set(gcf,'position',p);
+            end
+            width=min(0.6,0.2*length(x));
+            left=0.5-width/2;
+            subplot('position',[left 0.20 width 0.7]);
         end
-        width=min(0.6,0.2*length(x));
-        left=0.5-width/2;
-        subplot('position',[left 0.20 width 0.7]);
         hold on;
         if length(x)>5 % broad graph, show horizontal lines
             set(gca,'YGrid','on')

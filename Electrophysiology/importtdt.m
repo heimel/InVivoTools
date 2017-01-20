@@ -1,10 +1,14 @@
-function cells = importtdt(record, channels2analyze)
+function cells = importtdt(record, channels2analyze, allowchanges)
 %IMPORTTDT
 %
-% CELLS = IMPORTTDT( RECORD, CHANNELS2ANALYZE )
+% CELLS = IMPORTTDT( RECORD, CHANNELS2ANALYZE, ALLOWCHANGES=true )
 %
-% 2015, Alexander Heimel
+% 2015-2017, Alexander Heimel
 %
+
+if nargin<3 || isempty(allowchanges)
+    allowchanges = true;
+end
 
 processparams = ecprocessparams(record);
 
@@ -27,7 +31,7 @@ datapath=experimentpath(record,false);
 
 EVENT.Mytank = datapath;
 EVENT.Myblock = record.test;
-EVENT = load_tdt(EVENT, use_matlab_tdt);
+EVENT = load_tdt(EVENT, use_matlab_tdt,allowchanges);
 if ~isfield(EVENT,'strons')
     errormsg(['No triggers present in ' recordfilter(record)]);
     cells = [];
@@ -100,7 +104,6 @@ n_cells = length(WaveTime_Spikes);
 
 % load stimulus starttime
 stimsfile = getstimsfile( record );
-
 
 if isempty(stimsfile) 
     errormsg(['No stimsfile for record ' recordfilter(record) '. Use ''stiminterview(global_record)'' to generate stimsfile. Now no analysis']);

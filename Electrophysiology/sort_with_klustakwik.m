@@ -10,7 +10,6 @@ params = ecprocessparams(record);
 
 orgcells = pool_cells( orgcells );
 
-
 cells = [];
 
 if isunix
@@ -61,7 +60,6 @@ if isempty(cells) %|| 1
     cd(experimentpath(record));
     arguments = params.sort_klustakwik_arguments;
     
-
     for ch=channels
     %    cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments ' -StartCluFile klustakwik.clu.7'];
        cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments];

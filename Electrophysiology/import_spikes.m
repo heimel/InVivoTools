@@ -1,19 +1,23 @@
-function cells = import_spikes( record, channels2analyze, verbose )
-%IMPORT_SPIKES
+function cells = import_spikes( record, channels2analyze, verbose, allowchanges )
+%IMPORT_SPIKES loads spikes specified in electrophysiology testrecord
 %
-% 2015-2016, Alexander Heimel
+%  CELLS = IMPORT_SPIKES( RECORD, CHANNELS2ANALYZE, VERBOSE=true, allowchanges=true)
+%
+% 2015-2017, Alexander Heimel
 %
 
 if nargin<3 || isempty(verbose)
     verbose = true;
 end
+if nargin<4 || isempty(allowchanges)
+    allowchanges = true;
+end
 
 processparams = ecprocessparams(record);
 
-
 switch lower(record.setup)
     case 'antigua'
-        cells = importtdt( record, channels2analyze); 
+        cells = importtdt( record, channels2analyze, allowchanges);
     case 'wall-e'
         channels2analyze = 1;
         cells = importaxon(record,true);
@@ -25,7 +29,6 @@ n_spikes = 0;
 for i=1:length(cells);
     n_spikes = n_spikes + length(cells(i).data);
 end
-
 
 if isempty(cells)
     logmsg('Imported no cells.');
@@ -57,7 +60,11 @@ cells = get_spike_features(cells, record);
 
 switch processparams.spike_sorting_routine
     case 'klustakwik'
-        cells = sort_with_klustakwik(cells,record);
+        if allowchanges
+            cells = sort_with_klustakwik(cells,record);
+        else
+            logmsg('Klustakwik sorting cannot be done without changing data on disk. Change ALLOWCHANGES option if necessary.');
+        end
     case 'wpca'
         cells = sort_with_wpca(cells,record,verbose);
     case '';
@@ -66,7 +73,6 @@ switch processparams.spike_sorting_routine
         logmsg(['Unknown spike sorting routine ' processparams.spike_sorting_routine]);
 end
 
-
 if processparams.compare_with_klustakwik
     kkcells = sort_with_klustakwik(cells,record);
     if ~isempty(kkcells)
@@ -74,12 +80,16 @@ if processparams.compare_with_klustakwik
     end
 end
 
-
 logmsg(['After sorting ' num2str(length(cells)) ' cells.']);
 
 cells = ec_assign_cell_info( cells, record ); % sort cells by descending amplitude
-transfer2cksdirstruct(cells,experimentpath(record,false));
 
+if allowchanges
+    transfer2cksdirstruct(cells,experimentpath(record,false));
+else
+    logmsg('Imported cells not saved to experiment file because of ALLOWCHANGES setting.');
+end
+    
 spikesfile = fullfile(experimentpath(record), '_spikes.mat');
 
 isi = [];
@@ -109,12 +119,13 @@ else
     isi = []; %#ok<NASGU>
 end
 
-if exist('allcells','var')
-    orgcells = cells;
-    cells = allcells; %#ok<NASGU>
-    save(spikesfile,'cells','isi');
-    cells = orgcells;
-else
-    save(spikesfile,'cells','isi');
+if allowchanges
+    if exist('allcells','var')
+        orgcells = cells;
+        cells = allcells; %#ok<NASGU>
+        save(spikesfile,'cells','isi');
+        cells = orgcells;
+    else
+        save(spikesfile,'cells','isi');
+    end
 end
-
