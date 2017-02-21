@@ -24,6 +24,8 @@ if nargin<4 || isempty(vers)
                 if isfield(record,'experiment') && strcmpi(record.experiment,'examples')
                     vers = '2015';
                 end
+            case 'gaia'
+                vers = '2015';
         end
     end
 end

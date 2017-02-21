@@ -9,7 +9,7 @@ end
 
 
 switch hostname
-    case  {'nin380','nori001','daneel','antigua','wall-e','nin343','andrew','jander'}
+    case  {'nin380','nori001','daneel','antigua','wall-e','nin343','andrew','jander','helero2p'}
         experimental_pc = true;
     otherwise
         experimental_pc = false;
