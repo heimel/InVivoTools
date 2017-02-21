@@ -141,6 +141,25 @@ switch action
             add_record( 'TP', get(h.savedir,'string'), scriptName );
             add_record( 'Wc', get(h.savedir,'string'), scriptName );
             add_record( 'oi', get(h.savedir,'string'), scriptName );
+
+            switch host
+                case 'helero2p'
+                    f = findall(0,'Tag','dirname');
+                    global datadir
+                    datadir = datapath;
+                    f.String = datadir;
+                    
+                    udport = udp('localhost','RemotePort',7000);
+                    fopen(udport);
+                    fprintf(udport,['A' get(h.savedir,'string')]);
+                    fprintf(udport,'U0');
+                    fprintf(udport,'E0');
+                    pause(0.1);
+                    fprintf(udport,'G'); % start grabbing
+                    fprintf(udport,['MStarting ' scriptName]);
+                    %fprintf(udport,'G'); % stop grabbing
+                    fclose(udport);
+            end
         end
     case 'add_aq',
         aqdata = get(h.list_aq,'UserData');
