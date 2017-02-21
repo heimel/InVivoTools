@@ -24,7 +24,9 @@ function [MTI,startTrig] = DisplayStimScript(stimScript, MTI, priorit,abtable,ca
 %  I do not know why this happens.
 %
 %  Sound sometimes has errors if it is not run at priority 0.
-
+%
+%  200X, Steve Van Hooser
+%  200X-20017adapted by Alexander Heimel 200X-20017
 
 NewStimGlobals;
 StimWindowGlobals;
@@ -89,7 +91,6 @@ end
 
 Screen(StimWindow,'WaitBlanking');
 startTrig = StimTriggerAct('Script_Start_trigger');
-Screen(StimWindow,'WaitBlanking');
 
 if NSUseInitialSerialTrigger
     disp('DISPLAYSTIMSCRIPT: Temporarily hard coded StimSerial trigger for LeveltLab');
@@ -112,11 +113,11 @@ if ~abortable,
 else
     if StimDisplayOrderRemote
         abort = 0;
-        lpt=open_parallelport;
-        ready=0;
-        while ~abort,
+        lpt = open_parallelport;
+        ready = 0;
+        while ~abort
             %	[thetime,i] = StimTriggerAct('WaitActionCode');
-            [go,i]=get_gostim(lpt);
+            [go,i] = get_gostim(lpt); %#ok<ASGLU>
             if ~go    % go has to be off, before another stimulus is shown
                 ready=1;
             end
@@ -125,9 +126,9 @@ else
                 ready=0;
             end
             abort = KbCheck;
-        end;
+        end
     else
-        for i=1:l,
+        for i=1:l
             disp(['current stimID:      ',num2str(i),''])
             Rush('[MTI{i}.startStopTimes,ft]=DisplayStimulus(MTI{i},get(stimScript,MTI{i}.stimid),trigger(i),capture_movie);MTI{i}.frameTimes=ft;',prioritylevel);
             if KbCheck % abort if keyboard press
@@ -135,10 +136,10 @@ else
             end
             if mod(i,20)==0,
                 fprintf(['Just finished stim ' int2str(i) ' of ' int2str(l) '.\n']);
-            end;
+            end
             if mod(i,numstims)==0,
                 fprintf(['Just finished trial ' int2str(i/numstims) ' of ' int2str(l/numstims) '.\n']);
-            end;
+            end
         end
     end
 end

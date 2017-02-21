@@ -21,20 +21,29 @@ function [thetimes,thecodes]=StimTriggerAct(theaction, code, code2)
 
 StimTriggerGlobals;
 
-thetimes = []; 
+thetimes = [];
 thecodes = [];
 
-if nargin<2, code = []; end;
-if nargin<3, code2 = []; end;
+if nargin<2
+    code = []; %#ok<NASGU>
+end
+if nargin<3
+    code2 = []; %#ok<NASGU>
+end
 
 for i=1:length(StimTriggerList),
-        try,
-                eval(['[mytimes,mycodes]=' StimTriggerList(i).TriggerType '_StimTriggerAct(StimTriggerList(i),theaction,code,code2);']);
-				thetimes = cat(1,thetimes,mytimes);
-				thecodes = cat(1,thecodes,mycodes);
-        catch,
-                warning(['Driver ' StimTriggerList(i).TriggerType ' did not activate successfully:' lasterr]);
-        end;
-end;
+    try 
+        trgcmd = ['[mytimes,mycodes]=' StimTriggerList(i).TriggerType '_StimTriggerAct(StimTriggerList(i),theaction,code,code2);'];
+        eval(trgcmd);
+        thetimes = cat(1,thetimes,mytimes);
+        thecodes = cat(1,thecodes,mycodes);
+    catch
+        logmsg(['Driver ' StimTriggerList(i).TriggerType ' did not activate successfully:' lasterr]);
+        logmsg(trgcmd)
+    end
+end
 
-if isempty(StimTriggerList), thetimes = GetSecs; end;
+if isempty(StimTriggerList)
+    thetimes = GetSecs;
+end
+
