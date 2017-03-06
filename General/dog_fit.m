@@ -1,15 +1,20 @@
-function par = dog_fit(x,y)
+function par = dog_fit(x,y,options)
 %DOG_FIT fits difference of gaussians
 %
-%    PAR=DOG_FIT(X,Y)
+%    PAR=DOG_FIT(X,Y,[OPTIONS])
 %
 %    PAR = [ R0 RE SE RI SI ]
+%    OPTIONS can be 'zerobaseline', in which case for x->inf, y->0
 %
 %    R0 is baseline response
 %    RE is maximum response of positive gaussian
 %    SE is standard deviation of positive gaussian
 %    RI is maximum response of negative gaussian
 %    SI is standard deviation of negative gaussian
+
+if nargin<3 || isempty(options)
+    options = '';
+end
 
 search_options=optimset('fminsearch');
 	search_options.TolFun=1e-4;
@@ -26,7 +31,14 @@ ri = re+r0;
 si = min(x)/2;
 xo = [r0 re se ri si];
 
-par = fminsearch(@(par) dog_error(par,x,y),xo,search_options);
+switch lower(options)
+    case 'zerobaseline'
+        xo(1)= 0;
+        par = fminsearch(@(par) dog_error([0 par(2:5)],x,y),xo,search_options);
+    otherwise
+        par = fminsearch(@(par) dog_error(par,x,y),xo,search_options);
+end
+
 
 
 

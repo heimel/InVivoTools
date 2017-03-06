@@ -801,6 +801,12 @@ switch style
                         fity{i} = dog(par,fitx);
                         logmsg([' fit: dog par = ' num2str(par)  ]);
                     end
+                case 'dog_zerobaseline'
+                    for i=1:length(ry)
+                        par = dog_fit(rx{i},ry{i},'zerobaseline');
+                        fity{i} = dog(par,fitx);
+                        logmsg([' fit: dog par = ' num2str(par)  ]);
+                    end
                 otherwise
                     logmsg([' Fit type ' fit ' is not implemented.']);
                     fit='';

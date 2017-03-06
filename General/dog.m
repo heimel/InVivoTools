@@ -16,4 +16,4 @@ function r=dog(par,x)
 %r= par(1)+ par(2).*exp( -x.^2/2./par(3)^2) - par(4) .* exp( -x.^2/2./par(5)^2);
 
 par=abs(par);
-r= par(1)+ par(2).*exp( -x.^2/2./par(3)^2) - par(4) .* exp( -x.^2/2./par(5)^2);
+r = par(1)+ par(2).*exp( -x.^2/2./par(3)^2) - par(4) .* exp( -x.^2/2./par(5)^2);

@@ -293,7 +293,7 @@ if isempty(roifile) ||  ~exist(roifile,'file')
 end
 
 % if no ROR defined, let user draw one
-if isempty(record.rorfile)||  ~exist(rorfile,'file')
+if isempty(record.rorfile)||  (~exist(rorfile,'file') && ~exist(fullfile(analysispath,rorfile),'file'))
     %data=imread(imagepath);
     h_ror=figure;
     image(data); axis image;
