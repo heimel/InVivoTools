@@ -33,6 +33,8 @@ switch lower(setup)
         setup = 'ScanImage';
     case 'imagej'
         setup = 'ImageJ';
+    case 'helero2p'
+        setup = 'Scanbox';
     otherwise
         setup = 'FluoView';
 end

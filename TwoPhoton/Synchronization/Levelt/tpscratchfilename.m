@@ -39,4 +39,4 @@ if ~isempty(channel)
     channel=['_ch' int2str(channel)];
 end
 epochs = [records(:).epoch];
-sfname = fullfile(scratchdir, [record.experiment record.stack record.mouse record.slice epochs channel '_' stype ext]);
+sfname = fullfile(scratchdir, subst_filechars([record.experiment record.stack record.mouse record.slice epochs channel '_' stype ext]));

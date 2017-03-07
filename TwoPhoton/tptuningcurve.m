@@ -319,8 +319,8 @@ for p=1:size(data,2) % roi p
     end
     if ~isempty(newmeasures)
         record.measures = structconvert(record.measures,newmeasures);
+        record.measures(p) = newmeasures;
     end
-    record.measures(p) = newmeasures;
 
     record.measures(p).responsive = any(curve(2,:)-2*curve(4,:)>0);
 end % roi p

@@ -292,10 +292,12 @@ switch command,
         processparams = tpprocessparams( ud.record );
         
         iminf = tpreadconfig(ud.record);
-        if isfield(processparams,'pixelshift_um') && ~isempty(processparams.pixelshift_um)
+        if isfield(processparams,'pixelshift_um') && ~isempty(processparams.pixelshift_um) && isfield(iminf,'x_step')
             pixelshift = ceil(processparams.pixelshift_um / iminf.x_step);
-        else
+        elseif isfield(processparams,'pixelshift_pixel')
             pixelshift = processparams.pixelshift_pixel;
+        else
+            pixelshift = 0;
         end
         
         

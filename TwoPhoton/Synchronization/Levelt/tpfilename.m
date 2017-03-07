@@ -48,12 +48,12 @@ else
     record.stack = 'Live_0000'; % default Fluoview name
     fname = getfname( record,processed,fmiddle,optcode,ext);
     if exist(fname,'file')
-        disp('TPFILENAME: Using default fluoview name Live_0000.tif');
+        logmsg('Using default fluoview name Live_0000.tif');
     else
         record.stack = 'Live_0001'; % default Fluoview name
         fname = getfname( record,processed,fmiddle,optcode,ext);
         if exist(fname,'file')
-            disp('TPFILENAME: Using default fluoview name Live_0001.tif');
+            logmsg('Using default fluoview name Live_0001.tif');
         else 
             record.stack = '';
             fname = getfname( record,processed,fmiddle,optcode,ext);
