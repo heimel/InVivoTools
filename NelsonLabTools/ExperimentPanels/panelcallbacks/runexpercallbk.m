@@ -143,22 +143,40 @@ switch action
             add_record( 'oi', get(h.savedir,'string'), scriptName );
 
             switch host
-                case 'helero2p'
-                    f = findall(0,'Tag','dirname');
-                    global datadir
-                    datadir = datapath;
-                    f.String = datadir;
+                case 'helero2p' % scanbox 2photon computer
+                    f = findall(0,'Name','scanbox');
+                    if isempty(f)
+                        logmsg('Cannot find Scanbox window. Not setting Scanbox folder');
+                    else
+                        % make scanbox window persistent
+                        % should be elsewhere
+                        ud = get(f,'UserData');
+                        if isempty(ud)
+                            ud = [];
+                            ud.persistent = 1;
+                            set(f,'UserData',ud);
+                        end
+                        
+                        f = findall(0,'Tag','dirname');
+                        global datadir
+                        datadir = datapath;
+                        f.String = datadir;
+                        mkdir(fullfile(datadir,h.savedir.String)); % make nested folder for scanbox
+                    end
                     
                     udport = udp('localhost','RemotePort',7000);
                     fopen(udport);
                     fprintf(udport,['A' get(h.savedir,'string')]);
-                    fprintf(udport,'U0');
-                    fprintf(udport,'E0');
+                    fprintf(udport,'U0'); % 
+                    fprintf(udport,'E0'); % set experiment nr
                     pause(0.1);
-                    fprintf(udport,'G'); % start grabbing
                     fprintf(udport,['MStarting ' scriptName]);
-                    %fprintf(udport,'G'); % stop grabbing
-                    fclose(udport);
+                    fprintf(udport,'G'); % start grabbing
+                    % Now scanbox takes over if in same matlab instance
+                    logmsg('Back in runexpercallbk');
+                    %pause(0.1);
+                    %fclose(udport);
+                       %fprintf(udport,'G'); % stop grabbing
             end
         end
     case 'add_aq',
