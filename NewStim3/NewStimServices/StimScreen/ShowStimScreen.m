@@ -31,8 +31,8 @@ if A
     screens = Screen('screens');
     if ~any(StimWindowMonitor==screens),
         error(['Available screens are ' ...
-            mat2str(screen) ' but StimWindowMonitor is ' ...
-            int2str(StimWindowMonitor) '.']);
+            mat2str(screens) ' but StimWindowMonitor is ' ...
+            int2str(StimWindowMonitor) '. Perhaps the stimulus monitor is not on?']);
     end
     if NS_PTBv<3,
         StimWindow = Screen(StimWindowMonitor,'OpenWindow',0);
