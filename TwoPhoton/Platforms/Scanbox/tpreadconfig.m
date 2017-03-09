@@ -105,7 +105,8 @@ params.frame_period__us = params.frame_period * 1e6; % frame period in us
 
 logmsg('Still need to set frame timestamps correctly using info.frame(1) and info.line(1)')
 
-params.frame_timestamp = (0:(params.number_of_frames-1))*params.frame_period;
+params.frame_timestamp = ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period;
+%params.frame_timestamp = ((0:(params.number_of_frames-1)) ) *params.frame_period;
 params.frame_timestamp__us = params.frame_timestamp * 1E6; % list of all frame timestamps in s
 
 params.third_axis_name = 't'; % to treat is as a movie

@@ -47,12 +47,10 @@ h_traces  = subplot(n_panelrows,1,1);
 hold on;
 for i=1:length(record.measures)
     ind=mod(i-1,length(colors))+1;
-    
-
-    
-    
+      
     t = record.measures(i).raw_t;
-    y = smoothen(record.measures(i).raw_data,0.8);
+%    y = smoothen(record.measures(i).raw_data,0.8);
+    y = record.measures(i).raw_data;
 
     if process_params.tp_raw_dynamic_zero
         [ymin,tmin]  = slidingwindowfunc(t,y,[],[],[],8,'min');
