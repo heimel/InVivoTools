@@ -34,7 +34,6 @@ if isempty(variable)
     end
 end
 
-
 starttime = 0;
 stoptime = stimsfile.MTI2{end}.startStopTimes(end)-stimsfile.start;
 do  = getDisplayOrder(stimsfile.saveScript);

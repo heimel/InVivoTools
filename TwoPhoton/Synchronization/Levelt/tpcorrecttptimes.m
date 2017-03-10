@@ -44,6 +44,7 @@ for i = 1:length(records)
     %    starttime = stims.start;
     %end
     newtimes{i} = params.frame_timestamp; %#ok<AGROW> % +starttime ;
+    
     frame2dirnum{i} = ones(size(newtimes{i})); %#ok<AGROW>
     %starttime = newtimes{i}(end) + (newtimes{i}(end)-newtimes{i}(end)); 
 end
