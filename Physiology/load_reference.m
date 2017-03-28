@@ -20,25 +20,16 @@ function [ block_number, data_dir] = load_reference
 %   and should be at least more than a minute.
 %
 %    
-%   (c) 2016, Simon Lansbergen.
-%   
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Get Global_Comm varaiables %%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   2016, Simon Lansbergen.
+%   2017, Alexander Heimel
 
 % get global variables
 remotecommglobals;
 acqready = fullfile(Remote_Comm_dir,'acqReady');
 
-delimiterIn = '	';
-
-
 % import data
+delimiterIn = '	';
 path_data = importdata(acqready,delimiterIn);
-
-
 
 % convert cell to string
 temp = cell2mat(path_data(2));
@@ -47,26 +38,37 @@ temp = cell2mat(path_data(2));
 % directory used for both reading the trigger parameter as storing the
 % session data.
 
-
+if strcmpi(host,'lansbergen')
+    logmsg('Temporarily removing mnt');
+    temp = strrep(temp,'mnt','');
+end
 
 data_dir_file = fullfile(temp,'acqParams_in');
-
-
 data_dir = fullfile(temp);
-
 
 % retrieve total amount of blocks to time each acquisition session. the
 % loop is needed because there is a short delay between the systems
+
+logmsg(['wait for ' data_dir_file ' to be ready']);
+c = 0;
 while exist(data_dir_file,'file') == 0
-logmsg('wait for acqParams_in to be ready')
+    pause(0.1);
+    if mod(c,40)==0
+        fprintf('\n');
+        logmsg(['wait for ' data_dir_file ' to be ready']);
+        c = 0;
+    end
+    if mod(c,10)==0
+        fprintf('.');
+    end        
+    c = c + 1;
 end
+fprintf('\n');
 
 % import block and stimulus duration information.
 % fixed settings
 stimulus_data = importdata(data_dir_file);
 block_number = stimulus_data.data(2);
-
-% when fully loaded, output ok message to screen
-disp(' '); logmsg(' *** Loaded reference data from Stimulus-PC correctly ***');
+logmsg('Loaded reference data from Stimulus-PC');
 
 end

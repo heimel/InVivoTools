@@ -31,8 +31,12 @@ function [trigger_vid]=create_trigger(recording_time)
 % Pre Settings
 trigger_type     = 'HwDigital';
 trigger_cond     = 'PositiveEdge';
+logmsg('Changed to NegativeEdge for Robbie');
+trigger_cond     = 'NegativeEdge'; % 
 trigger_repeat   = 0;
 sample_rate      = 1000;
+sample_rate      = 10000;
+logmsg('Changed to 10000 for Robbie');
 required_samples = floor(sample_rate * recording_time);
 
 
