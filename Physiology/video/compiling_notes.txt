@@ -1,0 +1,24 @@
+Install OpenCV
+Install Basler Pylon
+
+Set environment variables:
+   OPENCV_DIR = C:\Software\opencv\build\x64\vc14
+   PYLON_DEV_DIR = C:\Progra~1\Basler\Pylon 5\development
+
+
+In Visual Studio
+
+
+For Project property pages: Active (Release) x64
+
+C/C++ > Additional Include Directories
+$(OPENCV_DIR)\..\..\include;$(PYLON_DEV_DIR)\include;C:\simon\Dropbox\NIN\Video_software
+
+
+VC++ Directories > Library Directories :
+    C:\software\opencv\build\x64\vc14\bin;C:\software\opencv\build\x64\vc14;C:\software\opencv\build\x64\vc14\lib;$(LibraryPath)
+
+
+Linker > Input > Additional Dependencies: opencv_world320.lb;%(AdditionalDependencies)
+
+Linker > General > Additional Library Directories: $(PYLON_DEV_DIR)\lib\x64;$(OPENCV_DIR)\lib;%(AdditionalLibraryDirectories)
