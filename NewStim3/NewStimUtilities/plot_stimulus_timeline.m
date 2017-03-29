@@ -14,14 +14,17 @@ if nargin<2
     xlims = [];
 end
 
-stimsfile = getstimsfile(record);
-if isempty(stimsfile)
-    return
+if isfield(record,'MTI2') % record is stimsfile struct
+	stimsfile = record;
+else
+	stimsfile = getstimsfile(record);
 end
-
+if isempty(stimsfile)
+	return
+end
 stims = get(stimsfile.saveScript);
 
-if isempty(variable) && isfield(record.measures(1),'variable')
+if isempty(variable) && isfield(record,'measures') && isfield(record.measures(1),'variable')
     variable = record.measures(1).variable;
 end
 if isempty(variable)
