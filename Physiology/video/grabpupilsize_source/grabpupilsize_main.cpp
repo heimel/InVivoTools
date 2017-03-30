@@ -1,16 +1,8 @@
 //grabpupilsize.cpp (compile x64)
-//-----------------------------------------------------------------------//
 //																		 
 // * updated 12-7-2016 * FULLY FUNCTIONING END VERSION!
 //
-// Software written by Simon Lansbergen, 
-// 
-//	(c) July 2016. SL
-//
-//
-//
-//------------------------------------------------------------------------//
-
+// 2016, Simon Lansbergen
 
 // Include files to use the PYLON API.
 #include <pylon/PylonIncludes.h>
@@ -30,13 +22,9 @@
 #include <fstream>
 #include <iostream>
 
-
-
-
 using namespace Pylon; // Namespace for using pylon objects.
 using namespace cv;    // Namespace for using openCV objects.
 using namespace std;   // Namespace for using cout.
-
 
 					   // Global variables - used outside Main{}
 int drag = 0;
@@ -79,7 +67,6 @@ static void onMouse(int event, int x, int y, int, void*) {
 
 	}
 	if (drag == 1) {}
-
 
 	// user release left button
 	if (event == CV_EVENT_LBUTTONUP && drag)
@@ -180,7 +167,7 @@ int main(int argc, char* argv[])
 	}
 
 	//-------------------//
-	// Defualt variables //
+	// Default variables //
 	//-------------------//
 
 	// default hard coded settings if Config.cfg file is not present or in-complete/commented
@@ -757,7 +744,7 @@ int main(int argc, char* argv[])
 			if (ptrGrabResult->GrabSucceeded())
 			{
 				camera_timestamp = ptrGrabResult->GetTimeStamp();
-				printf("Frame number %lld\n", ptrGrabResult->GetImageNumber());
+				// printf("Frame number %lld\n", ptrGrabResult->GetImageNumber());
 
 				if (ptrGrabResult->GetNumberOfSkippedImages() > 0)
 					printf("Skipped %lld frames\n", ptrGrabResult->GetNumberOfSkippedImages());

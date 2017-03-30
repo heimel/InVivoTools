@@ -82,8 +82,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\software\grabpupilsize\grabpupilsize;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\software\opencv\build\x64\vc14\bin;C:\software\opencv\build\x64\vc14;C:\software\opencv\build\x64\vc14\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\software\InVivoTools\Physiology\video\grabpupilsize_source;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\software\opencv\build\x64\vc14\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\..\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -146,7 +147,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(OPENCV_DIR)\..\..\include;$(PYLON_DEV_DIR)\include;C:\simon\Dropbox\NIN\Video_software</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\software\InVivoTools\Physiology\video\grabpupilsize_source;$(OPENCV_DIR)\..\..\include;$(PYLON_DEV_DIR)\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,7 +159,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="grabpupilsize_main.cpp" />
+    <ClCompile Include="grabpupilsize_main.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OPENCV_DIR)\..\..\include;$(PYLON_DEV_DIR)\include;</AdditionalIncludeDirectories>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.10.25017\include\cerrno" />
