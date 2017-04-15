@@ -5,7 +5,7 @@ function base=networkpathbase
 %
 %  LEVELTLAB dependent, returns path to levelt storage share 
 %
-% 2009, Alexander
+% 2009-2017, Alexander Heimel
 %
 
 persistent base_persistent
@@ -13,6 +13,15 @@ persistent base_persistent
 if ~isempty(base_persistent)
     base = base_persistent;
     return
+end
+
+address = java.net.InetAddress.getLocalHost;
+IPaddress = char(address.getHostAddress);
+if ~strcmp(IPaddress,'192.87') % at the NIN?
+    logmsg('Not at the NIN, thus no networkpath');
+    base = '.';
+    base_persistent = base;
+	return
 end
 
 if isunix
