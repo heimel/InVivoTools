@@ -17,7 +17,7 @@ end
 
 address = java.net.InetAddress.getLocalHost;
 IPaddress = char(address.getHostAddress);
-if ~strcmp(IPaddress,'192.87') % at the NIN?
+if ~strcmp(IPaddress(1:6),'192.87') % at the NIN?
     logmsg('Not at the NIN, thus no networkpath');
     base = '.';
     base_persistent = base;
