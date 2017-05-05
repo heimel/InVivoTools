@@ -97,7 +97,7 @@ end % g
 
 linehead = '';
 switch measuress.datatype
-    case {'oi','ec','lfp','tp','ls','fret','fp'}
+    case {'oi','ec','lfp','tp','ls','fret','fp','pupil'}
         reload = false;
         if isempty(expdb_cache) || ...
                 ~isfield(expdb_cache,measuress.datatype) || ...

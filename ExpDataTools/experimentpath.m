@@ -50,7 +50,7 @@ switch vers
             switch record.datatype
                 case {'tp','fret','ls'}
                     datapath = tpdatapath(record,include_test);
-                case {'ec','lfp'}
+                case {'ec','lfp','pupil'}
                     datapath = ecdatapath(record);
                     if include_test
                         if isfield(record,'test')
@@ -123,6 +123,8 @@ switch vers
                 end
             case {'wc'}
                 datatype = 'Webcam';
+            case {'pupil'}
+                datatype = 'Electrophys';
             otherwise
                 errormsg(['Unknown datatype ' record.datatype],true);
         end

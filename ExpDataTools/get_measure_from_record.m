@@ -3,8 +3,11 @@ function [val,val_sem]=get_measure_from_record(record,measure,criteria,extra_opt
 %
 %  [val,val_sem] = get_measure_from_record(record,measure,criteria,extra_options)
 %
-% 2007-2014, Alexander Heimel
+% 2007-2017, Alexander Heimel
 
+if nargin<3
+    criteria = [];
+end
 if nargin<4
     extra_options = {};
 end
@@ -388,7 +391,7 @@ for c=1:length(record.measures) % over all cells or ROIs
             case 'time_peak_highcontrast'
                 logmsg('TIME_PEAK_HIGHCONTRAST IS DEPRECATED AND RETURNS PREFERRED STIMULUS');
                 time_peak = measures.time_peak;
-                if iscell(time_peak);
+                if iscell(time_peak)
                     time_peak = time_peak{1};
                 end
                 tempval = time_peak;

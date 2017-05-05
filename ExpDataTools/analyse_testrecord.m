@@ -27,6 +27,8 @@ switch record.datatype
         record = analyse_lstestrecord( record );
     case 'wc' % webcam
         record = analyse_wctestrecord( record, verbose );
+    case 'pupil' % pupil
+        record = analyse_pupiltestrecord( record, verbose );
     otherwise
         errormsg(['Unknown datatype ' record.datatype ]);
         return

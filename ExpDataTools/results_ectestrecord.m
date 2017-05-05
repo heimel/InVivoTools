@@ -20,9 +20,6 @@ else
     logmsg('No savedscript');
 end
 
-
-
-
 if isfield(record,'electrode') % i.e. ecdata
     data_type = 'ec';
 elseif isfield(record,'laser') % i.e. tpdata
