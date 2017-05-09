@@ -7,11 +7,15 @@ function [MTI,MTI2] = NSCaptureMovie(stimclass)
 MTI = [];
 MTI2 = [];
 
-if usejava('jvm')
+if usejava('jvm') && ispc
     disp('Recording a movie while JAVA capabilities is turned on is not supported by');
     disp('Psychtoolbox and gstreamer. Start matlab without java by typing matlab -nojvm');
     disp('in a command window. Then load your script (e.g. ps) and at the matlab prompt');
     disp('type NSCaptureMovie(ps) to write a movie to your current folder.');
+    disp('I am now attempting to do this for you. Might not work.');
+    save('tempscript.mat','stimclass');
+    system('matlab -nojvm -r "load(''tempscript.mat'');NSCaptureMovie(stimclass);quit"')
+    % s
     return
 end
 

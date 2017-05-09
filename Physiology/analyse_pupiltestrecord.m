@@ -14,6 +14,7 @@ par = pupilprocessparams( record );
 
 % load pupil data
 datapath = experimentpath( record );
+logmsg(['Loading data from ' datapath]);
 pupil_xy = load(fullfile(datapath,'pupil_xy.txt'),'-ascii');
 pupil_area = load(fullfile(datapath,'pupil_area.txt'),'-ascii');
 pupil_t = (pupil_area(:,1)-pupil_area(1,1))/1e9 + par.pupil_timeshift;
@@ -72,7 +73,7 @@ if verbose
     yyaxis left
     plot(pupil_t,pupil_xyrs(:,3));
     hold on
-    plot_stimulus_timeline(stims)
+    plot_stimulus_timeline(stims);
     yyaxis right
     plot(pupil_t,pupil_xyrs(:,4));
     plot(pupil_t,pupil_xyrs(:,1));

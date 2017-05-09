@@ -56,7 +56,9 @@ end
 
 abortable = 1;
 
-if nargin>=4, abortable = abtable; end;
+if nargin>=4
+    abortable = abtable; 
+end
 
 numstims = numStims(stimScript);
 
@@ -72,7 +74,7 @@ StimTriggerAct('Trigger_Initialize');
 HideCursor;
 ShowStimScreen;  % make sure screen is up
 
-if capture_movie && usejava('jvm')
+if capture_movie && usejava('jvm') && ispc
     disp('Recording a movie while JAVA capabilities is turned on is not supported by');
     disp('Psychtoolbox and gstreamer. Start matlab without java by typing matlab -nojvm');
     disp('in a command window. Then load your script (e.g. ps) and at the matlab prompt');
@@ -88,6 +90,7 @@ if capture_movie
        % movieOptions =   ':CodecType=VideoCodec=x264enc speed-preset=1 noise-reduction=100000 ::: AudioCodec=faac ::: AudioSource=pulsesrc ::: Muxer=avimux';
         movieOptions =   '';
         moviePtr = Screen('CreateMovie', StimWindow, moviefilename,[],[],StimWindowRefresh);
+        disp(['DISPLAYSTIMULUS: Writing stimulus movie in ' fullfile(pwd,moviefilename)]);
     catch
         disp('DISPLAYSTIMULUS: If codec missing on linux, run: sudo apt-get install ubuntu-restricted-extras gstreamer-tools');
         disp('DISPLAYSTIMULUS: Use gst-inspect to check which codecs are installed');
