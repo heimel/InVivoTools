@@ -22,6 +22,11 @@ end
 
 measures = merge_measures_from_disk( record );
 
+if isempty(measures)
+	logmsg('Measures are empty. Perhaps no analysis done yet?');
+	return
+end
+
 par = pupilprocessparams( record );
 
 vars = {'pupil_x','pupil_y','pupil_r','pupil_s','pupil_d'};

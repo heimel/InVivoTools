@@ -1,4 +1,4 @@
-function h=graph(y,x,varargin)
+function h=ivt_graph(y,x,varargin)
 %GRAPH produces scientific plots
 %
 %  H = GRAPH(Y,X,VARARG)
