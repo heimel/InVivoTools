@@ -66,7 +66,7 @@ Remote_Comm_remoteprefix = '/mnt/THISHOSTNAME/data';
 StimWindowGlobals;
 StimWindowMonitor = 2;  % use the given monitor, 0 is full screen, 1 is first monitor
 StimComputer = 1;       % is this a stimulus computer?
-StimDebug = true;      % do you want to show stimuli in 640x480 window
+StimDebug = false;      % do you want to show stimuli in 640x480 window
 
 StimWindowUseCLUTMapping = 0; % most users will say 0
 
@@ -97,8 +97,9 @@ NewStimStimDelay = 6; % delay to give acquisition computers time to start
 %  Gamma correction settings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 GammaCorrectionTableGlobals;
-GammaCorrectionEnable = 0;
-LoadGammaCorrectionTable('gct_linear.txt');
+GammaCorrectionEnable = 1;
+LoadGammaCorrectionTable('gct_lastim.txt'); % set on 2017-05-12
+%LoadGammaCorrectionTable('gct_linear.txt');
 %LoadGammaCorrectionTable('gct_HOSTNAME.txt');
 
 
