@@ -113,15 +113,25 @@ if exist(driftfilename,'file'),
     dr.x = [dr.x; drfile.drift.x];
     dr.y = [dr.y; drfile.drift.y];
     logmsg(['Drift correction using ',drfile.method]);
-elseif strcmpi(params.third_axis_name,'t') 
+elseif strcmpi(params.third_axis_name,'t')
     logmsg(['No driftcorrect file named ' driftfilename]);
 end
-
-% these variables will be used to calculate the time of each pixel within a frame
-currScanline_period__us_ = 0;
-currLines_per_frame = 0;
-currDwell_time__us_ = 0;
-currPixels_per_line = 0;
+  
+if params.scanline_period > 0
+    %update pixeltimes, time within each frame that each pixel was recorded
+    pixeltimes =  params.scanline_period * ...
+        repmat( (0:(params.lines_per_frame-1) )',1,params.pixels_per_line);
+    pixeltimes = pixeltimes + params.dwell_time * ...
+        repmat( 0 : ((params.pixels_per_line-1)), ...
+        params.lines_per_frame,1);
+else
+    pixeltimes = 0;
+end
+if isfield(params,'bidirectional') && params.bidirectional
+    warning('TPREADDATA_SINGLECHANNEL:BIDIRECTIONAL_TIMES',...
+        'TPREADDATA_SINGLECHANNEL: TIMES SHOULD BE RECOMPUTED FOR BIDIRECTIONAL SCANNING');
+    warning('off','TPREADDATA_SINGLECHANNEL:BIDIRECTIONAL_TIMES');
+end
 
 ims = cell(1,length(frametimes));
 imsinmem = zeros(1,length(frametimes));
@@ -129,7 +139,8 @@ imsinmem = zeros(1,length(frametimes));
 [~,intervalorder] = sort(intervals(:,1));  % do intervals in order to reduce re-reading of frames
 
 data = cell(size(intervals,1),length(pixelinds));
-t= cell(size(intervals,1),length(pixelinds));
+t = cell(size(intervals,1),length(pixelinds));
+
 if mode==21
     accum = cell(1,length(pixelinds));
     taccum = cell(1,length(pixelinds));
@@ -140,23 +151,26 @@ if mode==21
         numb(i)=0;
     end;
     data = cell(1,length(pixelinds));
-    t= cell(1,length(pixelinds));
-end;
+    t = cell(1,length(pixelinds));
+end
+
+n_rois = length(pixelinds);
+
 for j=1:size(intervals,1) % loop over requested intervals
-    if mode==3,
-        for i=1:length(pixelinds),
+    if mode==3
+        for i=1:length(pixelinds)
             accum{i}=zeros(size(pixelinds{i}));
             taccum{i}=zeros(size(pixelinds{i}));
             numb(i)=0;
-        end;
-    end;
+        end
+    end
     % compute first frame number of current interval j
     if (intervals(intervalorder(j),1)<frametimes(1)) && (intervals(intervalorder(j),2)>frametimes(1)),
         f0 = 1;
     else
-        f0=find(frametimes(1:end-1)<=intervals(intervalorder(j),1)& ...
+        f0 = find(frametimes(1:end-1)<=intervals(intervalorder(j),1)& ...
             frametimes(2:end)>intervals(intervalorder(j),1));
-    end;
+    end
     % compute last frame number of current interval j
     if intervals(intervalorder(j),2)>frametimes(end) && ...
             intervals(intervalorder(j),1)<frametimes(end),
@@ -165,57 +179,39 @@ for j=1:size(intervals,1) % loop over requested intervals
         f1=find(  frametimes(1:end-1)<=intervals(intervalorder(j),2) & ...
             frametimes(2:end)>intervals(intervalorder(j),2) );
     end
+
+    
+    if mode==1 % preallocate memory
+        counter = zeros( n_rois,1 );
+        data{intervalorder(j),i} = NaN(f1-f0,1);
+        t{intervalorder(j),i} = NaN(f1-f0,1);
+    end
+
     
     if verbose
         hwaitbar = waitbar(0,'Reading frames...');
     end
     warning('off','MATLAB:intMathOverflow')
     
-    for f=f0:f1 % loop over frames in interval
-        if verbose
+    waitbarstep = max(1,round(f1-f0/100)); % only maximum 100 updates
+    
+    for f = f0:f1 % loop over frames in interval
+        if verbose && mod(f,waitbarstep)==0
             hwaitbar = waitbar(f/(f1-f0));
         end
         %dirid = frame2dirnum(f);  % find the directory where frame number f resides
         if sum(imsinmem)>299,  % limit 300 frames in memory at any one time
             inmem = find(imsinmem);
-          %  ims{inmem(1)} = [];
+            %  ims{inmem(1)} = [];
             imsinmem(inmem(1)) = 0;
         end;
         if ~imsinmem(f),
             ims{f} = tpreadframe(record,channel,f,options,verbose) - darklevel(channel);
             imsinmem(f) = 1;
         end;
-        if (currScanline_period__us_ ~= params.scanline_period__us) || ...
-                (currLines_per_frame ~= params.lines_per_frame) ||...
-                (currDwell_time__us_ ~= params.dwell_time__us)|| ...
-                (currPixels_per_line ~= params.pixels_per_line)
-            
-            if isfield(params,'bidirectional') && params.bidirectional
-                warning('TPREADDATA_SINGLECHANNEL:BIDIRECTIONAL_TIMES',...
-                    'TPREADDATA_SINGLECHANNEL: TIMES SHOULD BE RECOMPUTED FOR BIDIRECTIONAL SCANNING');
-                warning('off','TPREADDATA_SINGLECHANNEL:BIDIRECTIONAL_TIMES');
-            end
-            
-            if params.scanline_period > 0
-                %update pixeltimes, time within each frame that each pixel was recorded
-                pixeltimes = + params.scanline_period * ...
-                    repmat( (0 : (params.lines_per_frame-1) )', ...
-                    1,params.pixels_per_line);
-                
-                pixeltimes = pixeltimes + params.dwell_time * ...
-                    repmat( 0 : ((params.pixels_per_line-1)), ...
-                    params.lines_per_frame,1);
-            else
-                pixeltimes = 0;
-            end
-            currScanline_period__us_ = params.scanline_period__us;
-            currLines_per_frame = params.lines_per_frame;
-            currDwell_time__us_=params.dwell_time__us;
-            currPixels_per_line=params.pixels_per_line;
-        end;
-        t_ = frametimes(f)+pixeltimes;
+        %           t_ = frametimes(f); % correct only later for needed pixels, +pixeltimes;
         
-        for i=1:length(pixelinds)
+        for i=1:length(pixelinds) % loop over ROIs
             if ~isempty(dr) % driftcorrection
                 [ii,jj]=ind2sub(size(ims{f}),pixelinds{i});
                 switch drfile.method
@@ -255,62 +251,76 @@ for j=1:size(intervals,1) % loop over requested intervals
             else
                 thepixelinds = pixelinds{i};
                 ind_outofbounds=[];
-            end;
+            end
+            
             thisdata = double(ims{f}(thepixelinds));
             thisdata(ind_outofbounds)=nan;
-            if numel(t_)>1
-                thistime = t_(thepixelinds);
-            else
-                thistime = t_ * ones(size(thepixelinds));
+            
+            thistime = frametimes(f) + pixeltimes(thepixelinds); % correct for time in frame
+            newtinds = find(thistime>=intervals(intervalorder(j),1) & thistime<=intervals(intervalorder(j),2)); % trim out-of-bounds points
+            
+            
+            switch mode
+                case 1 % Mean data and time for each frame is returned.
+                    if length(newtinds)==length(thepixelinds)
+                        thistime = nanmean(thistime(newtinds));
+                        thisdata = nanmean(thisdata(newtinds));
+                    else
+                        thistime = [];
+                        thisdata = [];
+                    end
+                case 0 % Individidual pixel values are returned.
+                    if length(newtinds)==length(thepixelinds),
+                        thistime = thistime(newtinds);
+                        thisdata = thisdata(newtinds);
+                    else
+                        thistime = [];
+                        thisdata = [];
+                    end
+                case {3,21}
+                    if length(newtinds)==length(thepixelinds)
+                        thistime = thistime(newtinds);
+                        thisdata = thisdata(newtinds);
+                    else
+                        thistime = [];
+                        thisdata = [];
+                    end
+                    if ~isempty(thistime),
+                        accum{i} = nansum(cat(3,accum{i},thisdata),3);
+                        taccum{i} = nansum(cat(3,taccum{i},thistime),3);
+                        numb(i) = numb(i)+1;
+                    end
+                case 11
+                    thistime = thistime(newtinds);
+                    thisdata = thisdata(newtinds);
+                    if ~isempty(newtinds)
+                        thistime = nanmean(thistime);
+                        thisdata = nanmean(thisdata);
+                    else
+                        thistime = [];
+                        thisdata = [];
+                    end;
+                case 10
+                    thistime = thistime(newtinds);
+                    thisdata = thisdata(newtinds);
+                case 2
+                    badinds = setdiff(1:length(thepixelinds),newtinds);
+                    thisdata(badinds) = NaN;
             end
-            newtinds = find(thistime>=intervals(intervalorder(j),1)&thistime<=intervals(intervalorder(j),2)); % trim out-of-bounds points
+            
             if mode==1
-                if length(newtinds)==length(thepixelinds)
-                    thistime = thistime(newtinds);
-                    thistime = nanmean(thistime);
-                    thisdata = thisdata(newtinds);
-                    thisdata = nanmean(thisdata);
-                else
-                    thistime = []; thisdata = [];
+                if ~isempty(thisdata)
+                    counter(i) = counter(i) + 1;
+                    data{intervalorder(j),i}(counter(i)) = thisdata;
+                    t{intervalorder(j),i}(counter(i)) = thistime;
                 end
-            elseif mode==0
-                if length(newtinds)==length(thepixelinds),
-                    thistime = thistime(newtinds);
-                    thisdata = thisdata(newtinds);
-                else
-                    thistime = []; thisdata = [];
-                end
-            elseif mode==3 || mode==21
-                if length(newtinds)==length(thepixelinds),
-                    thistime = thistime(newtinds);
-                    thisdata = thisdata(newtinds);
-                else
-                    thistime = []; thisdata = [];
-                end
-                if ~isempty(thistime),
-                    accum{i}=nansum(cat(3,accum{i},thisdata),3);
-                    taccum{i}=nansum(cat(3,taccum{i},thistime),3);
-                    numb(i)=numb(i)+1;
-                end
-            elseif mode==11
-                thistime = thistime(newtinds); thisdata = thisdata(newtinds);
-                if ~isempty(newtinds),
-                    thistime = nanmean(thistime); thisdata = nanmean(thisdata);
-                else
-                    thistime = []; thisdata = [];
-                end;
-            elseif mode==10
-                thistime = thistime(newtinds); thisdata = thisdata(newtinds);
-            elseif mode==2
-                badinds = setdiff(1:length(thepixelinds),newtinds);
-                thisdata(badinds) = NaN;
-            end
-            if (mode~=3)&&(mode~=21)
+            elseif (mode~=3)&&(mode~=21)
                 data{intervalorder(j),i} = cat(1,data{intervalorder(j),i},reshape(thisdata,numel(thisdata),1));
                 t{intervalorder(j),i} = cat(1,t{intervalorder(j),i},reshape(thistime,numel(thisdata),1));
             end
-        end
-    end
+        end % ROI i
+    end % frame f
+    
     warning('on','MATLAB:intMathOverflow')
     if verbose
         close(hwaitbar);
@@ -326,7 +336,19 @@ for j=1:size(intervals,1) % loop over requested intervals
             end
         end
     end
-end
+    
+    if mode==1
+        for i=1:n_rois
+            data{intervalorder(j),i} = data{intervalorder(j),i}(1:counter);
+            t{intervalorder(j),i} = t{intervalorder(j),i}(1:counter);
+        end
+    end
+    
+    
+end %interval j
+
+
+
 if mode==21
     for i=1:length(pixelinds)
         if numb(i)>0
@@ -339,4 +361,9 @@ if mode==21
     end
 end
 
-for i=1:length(ims), ims{i} = []; end; clear ims; %pack;
+% clearing memory.
+% should be superfluous, but apparently this was once necessary
+for i=1:length(ims)
+    ims{i} = [];
+end
+clear ims; %pack;

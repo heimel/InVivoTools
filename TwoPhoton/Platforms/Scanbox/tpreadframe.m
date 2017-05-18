@@ -70,8 +70,6 @@ if strcmp(readfname,fname)==0 % not read in yet
         % i.e. (processed) image file already exists
         for ch = 1:iminf.NumberOfChannels
             for fr = 1:iminf.NumberOfFrames
-                
-                
                 images(:,:,fr,ch) = sbxread(fname,fr-1,1);
 %                imread(fname,(ch-1)*iminf.NumberOfFrames+fr);
                 
@@ -146,10 +144,15 @@ end
 % return selected images
 switch multiple_frames_mode
     case 0
-        im=images(:,:,frame,channel);
+        im = images(:,:,frame,channel);
     case 1 % sum
-        im=sum(double(images(:,:,frame,channel)),3);
+        if ndims(images)==3 && length(frame)==size(images,3)
+            % assume only 1 channel, and want all frames
+            im = sum(images,3); % much faster
+        else
+            im = sum(double(images(:,:,frame,channel)),3);
+        end
     case 2 % max
-        im=max(double(images(:,:,frame,channel)),[],3);
+        im = max(double(images(:,:,frame,channel)),[],3);
 end
 

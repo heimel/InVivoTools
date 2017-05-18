@@ -91,17 +91,21 @@ params.Width = params.pixels_per_line;
 params.number_of_frames = d.bytes / info.nsamples;
 params.NumberOfFrames = params.number_of_frames;
 
-params.scanline_period = 0.002; % scanline period in s
-params.scanline_period__us = params.scanline_period *1e6; %scanline period in us
-
-params.dwell_time = params.scanline_period / params.pixels_per_line; % pixel dwell time in us
-params.dwell_time__us =  params.dwell_time*1e6;
 
 frame_rate = info.resfreq/params.lines_per_frame*(2-info.scanmode); %% use actual resonant freq...
 
 
 params.frame_period = 1/frame_rate; % s
+
+params.scanline_period = params.frame_period / params.lines_per_frame; % scanline period in s
+params.scanline_period__us = params.scanline_period *1e6; %scanline period in us
+
+params.dwell_time = params.scanline_period / params.pixels_per_line; % pixel dwell time in us
+params.dwell_time__us =  params.dwell_time*1e6;
+
+params.frame_period = params.frame_period * info.Slices; % adhoc
 params.frame_period__us = params.frame_period * 1e6; % frame period in us
+
 
 logmsg('Still need to set frame timestamps correctly using info.frame(1) and info.line(1)')
 

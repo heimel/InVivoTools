@@ -122,16 +122,16 @@ for j=1:length(stimcodes), % different uniq stimuli
     theinds = find(masterintind==j); % all intervals with data for stimulus j
     for k=1:n_selected_rois
         totalspont = [];
-        for i=1:length(theindssp),
+        for i=1:length(theindssp)
             totalspont = cat(1,totalspont,data{length(masterintind)+theindssp(i),k});
         end
         if params.psth_baselinemethod==3
-            if theblankid>0,
+            if theblankid>0
                 li = find(masterintind==theblankid);
                 baseline = [];
-                for jj=1:length(li),
+                for jj=1:length(li)
                     baseline(end+1) = nanmean(data{li(jj),k});
-                end;
+                end
                 baseline = nanmean(baseline);
             else
                 baseline = meanforbaselines(k);
@@ -163,7 +163,7 @@ for j=1:length(stimcodes), % different uniq stimuli
                     baseline = nanmean(data{length(masterintind)+theindssp(i),k});
             end
             if isnan(baseline)
-                logmsg('baseline is NaN (perhaps no spontaneous data). Taking mean baseline');
+                logmsg('Baseline is NaN (perhaps no spontaneous data). Taking mean baseline');
                 baseline = nanmean(data{theinds(i),k});
             end
             newdata{i,2}= (data{length(masterintind)+theindssp(i),k}-baseline)/baseline;

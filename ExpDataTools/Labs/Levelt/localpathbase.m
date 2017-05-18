@@ -3,12 +3,19 @@ function base=localpathbase(vers)
 %
 % BASE = LOCALPATHBASE(VERS='2004')
 %
-% 2012-2015, Alexander Heimel
+% 2012-2017, Alexander Heimel
 %
+
+persistent vers_pers base_pers
 
 if nargin<1 || isempty(vers)
     vers = '2004';
 end
+
+if strcmp(vers_pers,vers)
+    base = base_pers;
+    return
+end   
 
 switch vers
     case '2004'
@@ -36,4 +43,5 @@ if ~exist(base,'dir')
     logmsg(['Folder ' base ' does not exist. Perhaps set params.experimentpath_localroot in processparams_local.m']);
 end
 
-  
+base_pers = base;
+vers_pers = vers;
