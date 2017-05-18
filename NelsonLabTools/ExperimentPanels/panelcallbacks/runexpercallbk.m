@@ -143,7 +143,7 @@ switch action
             add_record( 'oi', get(h.savedir,'string'), scriptName );
 
             switch host
-                case 'helero2p' % scanbox 2photon computer
+                case {'helero2p','G2P'} % scanbox 2photon computer
                     f = findall(0,'Name','scanbox');
                     if isempty(f)
                         logmsg('Cannot find Scanbox window. Not setting Scanbox folder');

@@ -86,10 +86,12 @@ else                          % set the current monitor dimensions for remote co
 end;
 
  % pixels_per_cm of the monitor in use
-pixels_per_cm = 800/70.5; % projector of Robbie 2012-08-17
+%pixels_per_cm = 800/70.5; % projector of Robbie 2012-08-17
+pixels_per_cm = 1152/75; % changed at some point. 
 
 % distance of eye to screen, necessary for Alexander
-NewStimViewingDistance = 24; %cm, projector screen of Robbie 2012-08-17
+%NewStimViewingDistance = 24; %cm, projector screen of Robbie 2012-08-17
+NewStimViewingDistance = 15; %cm, projector screen of Robbie. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  Gamma correction settings

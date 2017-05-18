@@ -44,13 +44,17 @@ pupil_xyrs(:,2) = pupil_xyrs(:,2) - nanmedian(pupil_xyrs(:,2));
 
 % median filtering
 span = round(par.averaging_window/sampletime);
-pupil_xyrs(:,3) = movmedian( pupil_xyrs(:,3),span,'omitnan','Endpoints','fill');
-pupil_xyrs(:,1) = movmedian( pupil_xyrs(:,1),span,'omitnan','Endpoints','fill');
-pupil_xyrs(:,2) = movmedian( pupil_xyrs(:,2),span,'omitnan','Endpoints','fill');
+if span>0
+    pupil_xyrs(:,3) = movmedian( pupil_xyrs(:,3),span,'omitnan','Endpoints','fill');
+    pupil_xyrs(:,1) = movmedian( pupil_xyrs(:,1),span,'omitnan','Endpoints','fill');
+    pupil_xyrs(:,2) = movmedian( pupil_xyrs(:,2),span,'omitnan','Endpoints','fill');
+end
 
 % smoothing
-for i = 1:3
-    pupil_xyrs(:,i) =  smooth(pupil_xyrs(:,i),span,'sgolay');
+if span>0
+    for i = 1:3
+        pupil_xyrs(:,i) =  smooth(pupil_xyrs(:,i),span,'sgolay');
+    end
 end
 
 % change to degrees
@@ -60,7 +64,9 @@ end
 
 % compute speed
 pupil_xyrs(2:end,4) =  sqrt(diff(pupil_xyrs(:,1)).^2 + diff(pupil_xyrs(:,2)).^2) / sampletime; % degrees per second
-pupil_xyrs(:,4) =  smooth(pupil_xyrs(:,4),span,'sgolay');
+if span>0
+    pupil_xyrs(:,4) =  smooth(pupil_xyrs(:,4),span,'sgolay');
+end
 
 % displacement from average position
 pupil_xyrs(:,5) =  sqrt(pupil_xyrs(:,1).^2 + pupil_xyrs(:,2).^2); % pixels 
@@ -70,14 +76,42 @@ stims = getstimsfile(record);
 % plot raw data
 if verbose
     figure
-    yyaxis left
+    period = [0 40]; % s to show
+    
+    subplot(2,2,1) % whole period
     plot(pupil_t,pupil_xyrs(:,3));
+    box off
     hold on
-    plot_stimulus_timeline(stims);
-    yyaxis right
-    plot(pupil_t,pupil_xyrs(:,4));
+    ylabel('Pupil radius (deg)');
+    xlim([pupil_t(1) pupil_t(end)]);
+        
+    subplot(2,2,2) % first period
+    plot(pupil_t,pupil_xyrs(:,3));
+    box off
+    xlim(period);
+    hold on
+    plot_stimulus_timeline(stims,period,[],true,false);
+    
+    subplot(2,2,3) % whole period
     plot(pupil_t,pupil_xyrs(:,1));
+    box off
+    hold on
     plot(pupil_t,pupil_xyrs(:,2));
+    xlabel('Time (s)');
+    ylabel('Pupil position (deg)');
+    legend('x','y');
+    legend boxoff
+    xlim([pupil_t(1) pupil_t(end)]);
+    
+    subplot(2,2,4) % first period
+    plot(pupil_t,pupil_xyrs(:,1));
+    box off
+    xlim(period);
+    hold on
+    plot(pupil_t,pupil_xyrs(:,2));
+    plot_stimulus_timeline(stims,period,[],true,false);
+    xlabel('Time (s)');
+    
 end
 
 scriptpars = getparameters(stims.saveScript);
