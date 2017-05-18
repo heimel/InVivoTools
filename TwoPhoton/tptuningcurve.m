@@ -176,7 +176,7 @@ for p=1:size(data,2) % roi p
     blankd = []; blankt = []; blankdm = []; blanktm = [];
     
     for i=(size(interval,1)+1):(size(interval,1)+size(spinterval,1)),
-        indspont = cat(1,indspont,data{i,p});
+        indspont = cat(1,indspont,data{i,p} );
         indspontt = cat(1,indspontt,t{i,p});
         indspontm = cat(1,indspontm,nanmean(data{i,p}));
         indsponttm = cat(1,indsponttm,nanmean(t{i,p}));

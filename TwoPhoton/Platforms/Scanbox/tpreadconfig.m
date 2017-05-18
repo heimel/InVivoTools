@@ -93,9 +93,10 @@ params.NumberOfFrames = params.number_of_frames;
 
 
 frame_rate = info.resfreq/params.lines_per_frame*(2-info.scanmode); %% use actual resonant freq...
-
-
 params.frame_period = 1/frame_rate; % s
+
+logmsg(['Computed from resonance frame period = ' num2str(params.frame_period)]);
+
 
 params.scanline_period = params.frame_period / params.lines_per_frame; % scanline period in s
 params.scanline_period__us = params.scanline_period *1e6; %scanline period in us
@@ -103,13 +104,34 @@ params.scanline_period__us = params.scanline_period *1e6; %scanline period in us
 params.dwell_time = params.scanline_period / params.pixels_per_line; % pixel dwell time in us
 params.dwell_time__us =  params.dwell_time*1e6;
 
-params.frame_period = params.frame_period * info.Slices; % adhoc
+
+stims = getstimsfile(record);
+if ~isempty(stims)
+    time_between_triggers = (stims.MTI2{end}.startStopTimes(1)-stims.MTI2{1}.startStopTimes(1));
+    frames_between_triggers =  info.frame(end)-info.frame(2) +...
+        (info.line(end)-info.line(1))/params.lines_per_frame;
+    params.frame_period = time_between_triggers/frames_between_triggers;
+else
+    logmsg('Could not find stimulus file. Frame period may be wrong');
+end
+
 params.frame_period__us = params.frame_period * 1e6; % frame period in us
 
+logmsg(['Computed from stim file frame period = ' num2str(params.frame_period)]);
 
-logmsg('Still need to set frame timestamps correctly using info.frame(1) and info.line(1)')
+%logmsg('Still need to set frame timestamps correctly using info.frame(1) and info.line(1)')
 
-params.frame_timestamp = ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ;
+if ~isempty(stims)
+    params.frame_timestamp = ((0:(params.number_of_frames-1)) - info.frame(2) ) *params.frame_period + ...
+       - stims.start + stims.MTI2{1}.startStopTimes(1);
+else
+    params.frame_timestamp = ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ;
+end
+
+if isfield(info,'Slices')
+    params.frame_timestamp = params.frame_timestamp * info.Slices; % not correct yet
+end
+
 %params.frame_timestamp = ((0:(params.number_of_frames-1)) ) *params.frame_period;
 params.frame_timestamp__us = params.frame_timestamp * 1E6; % list of all frame timestamps in s
 

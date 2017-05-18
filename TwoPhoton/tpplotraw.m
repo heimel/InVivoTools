@@ -32,7 +32,7 @@ switch process_params.method
         n_panelrows = 1;
     case 'none'
         stack_lines = 0;
-        marker='none';
+        marker='.' ;%'none';
         linestyle = '-';
         ylab = 'F (a.u.)';
         n_panelrows = 1;

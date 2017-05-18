@@ -181,11 +181,11 @@ for j=1:size(intervals,1) % loop over requested intervals
     end
 
     
-    if mode==1 % preallocate memory
-        counter = zeros( n_rois,1 );
-        data{intervalorder(j),i} = NaN(f1-f0,1);
-        t{intervalorder(j),i} = NaN(f1-f0,1);
-    end
+%     if mode==1 % preallocate memory
+%         counter = zeros( n_rois,1 );
+%         data{intervalorder(j),i} = NaN(1,f1-f0);
+%         t{intervalorder(j),i} = NaN(1,f1-f0);
+%     end
 
     
     if verbose
@@ -308,13 +308,14 @@ for j=1:size(intervals,1) % loop over requested intervals
                     thisdata(badinds) = NaN;
             end
             
-            if mode==1
-                if ~isempty(thisdata)
-                    counter(i) = counter(i) + 1;
-                    data{intervalorder(j),i}(counter(i)) = thisdata;
-                    t{intervalorder(j),i}(counter(i)) = thistime;
-                end
-            elseif (mode~=3)&&(mode~=21)
+%             if mode==1
+%                 if ~isempty(thisdata)
+%                     counter(i) = counter(i) + 1;
+%                     data{intervalorder(j),i}(counter(i)) = thisdata;
+%                     t{intervalorder(j),i}(counter(i)) = thistime;
+%                 end
+%             else
+                if (mode~=3)&&(mode~=21)
                 data{intervalorder(j),i} = cat(1,data{intervalorder(j),i},reshape(thisdata,numel(thisdata),1));
                 t{intervalorder(j),i} = cat(1,t{intervalorder(j),i},reshape(thistime,numel(thisdata),1));
             end
@@ -336,13 +337,14 @@ for j=1:size(intervals,1) % loop over requested intervals
             end
         end
     end
+
     
-    if mode==1
-        for i=1:n_rois
-            data{intervalorder(j),i} = data{intervalorder(j),i}(1:counter);
-            t{intervalorder(j),i} = t{intervalorder(j),i}(1:counter);
-        end
-    end
+%     if mode==1
+%         for i=1:n_rois
+%             data{intervalorder(j),i} = data{intervalorder(j),i}(1,1:counter);
+%             t{intervalorder(j),i} = t{intervalorder(j),i}(1,1:counter);
+%         end
+%     end
     
     
 end %interval j

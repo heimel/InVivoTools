@@ -42,7 +42,7 @@ end
 if strcmp(readfname,fname)==0 % not read in yet
     org_fname = tpfilename( record, frame, channel); % no options
     iminf = tpreadconfig(record);
-     
+    
     if iminf.BitsPerSample~=16
         warning('TPREADFRAME:not_16bits','TPREADFRAME: Bits per samples is unequal to 16');
     end
@@ -56,10 +56,10 @@ if strcmp(readfname,fname)==0 % not read in yet
             warning('TPREADFRAME:MEM',['TPREADFRAME: Array size to large. ' ...
                 num2str(fix(required)) ' Mb required, ' num2str(fix(available)) ' Mb available.']);
             warning('OFF','TPREADFRAME:MEM');
-%            im = imread(fname,(channel-1)*iminf.NumberOfFrames+frame);
-
+            %            im = imread(fname,(channel-1)*iminf.NumberOfFrames+frame);
+            
             im = sbxread(fname,frame-1,1);
-
+            
             return
         else
             rethrow me
@@ -71,23 +71,19 @@ if strcmp(readfname,fname)==0 % not read in yet
         for ch = 1:iminf.NumberOfChannels
             for fr = 1:iminf.NumberOfFrames
                 images(:,:,fr,ch) = sbxread(fname,fr-1,1);
-%                imread(fname,(ch-1)*iminf.NumberOfFrames+fr);
+                %                imread(fname,(ch-1)*iminf.NumberOfFrames+fr);
                 
             end
         end
     else % i.e. no right processed file exist
-        try
-             images = fasttifread(org_fname,iminf);
-        catch me
-            logmsg(['PLEASE TELL ALEXANDER: ' me.message]);
-            for ch = 1:iminf.NumberOfChannels
-                for fr = 1:iminf.NumberOfFrames
-                    images(:,:,fr,ch) = sbxread(fname,fr-1,1);
-
-%                    images(:,:,fr,ch)=imread(org_fname,(ch-1)*iminf.NumberOfFrames+fr);
-                end
+        for ch = 1:iminf.NumberOfChannels
+            for fr = 1:iminf.NumberOfFrames
+                images(:,:,fr,ch) = sbxread(fname,fr-1,1);
+                
+                %                    images(:,:,fr,ch)=imread(org_fname,(ch-1)*iminf.NumberOfFrames+fr);
             end
         end
+        
         % shift bidirectional scanned image
         if isfield(iminf,'bidirectional') && iminf.bidirectional
             % determine optimal shift
@@ -133,8 +129,8 @@ if strcmp(readfname,fname)==0 % not read in yet
             if ~exist(writepath,'dir')
                 mkdir(writepath);
             end
-            logmsg('Not implementd writing processed image'); 
-%            fluoviewtiffwrite(images,fname,iminf)
+            logmsg('Not implemented writing processed image');
+            %            fluoviewtiffwrite(images,fname,iminf)
         end
     end
     logmsg('Finished reading')
