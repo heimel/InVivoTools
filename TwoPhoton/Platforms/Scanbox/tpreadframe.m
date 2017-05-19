@@ -55,7 +55,7 @@ if strcmp(readfname,fname)==0 % not read in yet
             warning('TPREADFRAME:MEM',['TPREADFRAME: Array size to large. ' ...
                 num2str(fix(required)) ' Mb required, ' num2str(fix(available)) ' Mb available.']);
             warning('OFF','TPREADFRAME:MEM');
-            if isempty(iminf.slice)
+            if ~isfield(iminf,'slice') || isempty(iminf.slice)
                 im = sbxread(fname,frame-1,1);
             else
                 im = sbxread(fname,(frame-1)*iminf.slices + iminf.slice,1);
@@ -73,11 +73,15 @@ if strcmp(readfname,fname)==0 % not read in yet
         already_processed = false;
     end
     
-    for ch = 1:iminf.NumberOfChannels
-        for fr = 1:iminf.NumberOfFrames
-            if isempty(iminf.slice)
+    if ~isfield(iminf,'slice') || isempty(iminf.slice)
+        for ch = 1:iminf.NumberOfChannels
+            for fr = 1:iminf.NumberOfFrames
                 images(:,:,fr,ch) = sbxread(fname,fr-1,1);
-            else
+            end
+        end
+    else
+        for ch = 1:iminf.NumberOfChannels
+            for fr = 1:iminf.NumberOfFrames
                 images(:,:,fr,ch) = sbxread(fname,(fr-1)*iminf.slices + iminf.slice-1,1);
             end
         end

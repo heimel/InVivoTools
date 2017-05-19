@@ -95,6 +95,9 @@ elseif isfield(info,'Section')
     params.slice = info.Section;
 end
 
+if params.slices>1 && ~isfield(params,'slice')
+    logmsg([ num2str(params.slices) ' slices present in file. Loading all. Specify in slice field']);
+end
 
 params.lines_per_frame = info.sz(1);
 params.Height = params.lines_per_frame;
@@ -104,22 +107,17 @@ params.number_of_frames = d.bytes / info.nsamples;
 if isfield(params,'slice') && ~isfield(info,'Section')
     params.number_of_frames = floor(params.number_of_frames/params.slices);
 end
-
 params.NumberOfFrames = params.number_of_frames;
-
 
 frame_rate = info.resfreq/params.lines_per_frame*(2-info.scanmode); %% use actual resonant freq...
 params.frame_period = 1/frame_rate; % s
-
 logmsg(['Computed from resonance frame period = ' num2str(params.frame_period)]);
-
 
 params.scanline_period = params.frame_period / params.lines_per_frame; % scanline period in s
 params.scanline_period__us = params.scanline_period *1e6; %scanline period in us
 
 params.dwell_time = params.scanline_period / params.pixels_per_line; % pixel dwell time in us
 params.dwell_time__us =  params.dwell_time*1e6;
-
 
 stims = getstimsfile(record);
 if ~isempty(stims)
@@ -139,22 +137,21 @@ if ~isempty(stims)
     params.frame_timestamp = ...
         ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ...
         -info.line(1)/params.lines_per_frame*params.frame_period;
-%     + ...
-%        - stims.start + stims.MTI2{1}.startStopTimes(1);
 else
     params.frame_timestamp = ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ;
 end
 
-
 if isfield(params,'slice')
     params.frame_timestamp = params.frame_timestamp(1)  + ...
         (params.frame_timestamp-params.frame_timestamp(1))* params.slices  + ...
-        (params.slice-1)*params.frame_period + ...
-        (params.slices)*params.frame_period ; % first frame of each slice thrown out
+        (params.slice-1)*params.frame_period;
+        
+    if isfield(info,'Section') % result from sbxsplit
+        params.frame_timestamp = params.frame_timestamp + ...
+            (params.slices)*params.frame_period ; % first frame of each slice thrown out
+    end
 end
 
-
-%params.frame_timestamp = ((0:(params.number_of_frames-1)) ) *params.frame_period;
 params.frame_timestamp__us = params.frame_timestamp * 1E6; % list of all frame timestamps in s
 
 params.third_axis_name = 't'; % to treat is as a movie
