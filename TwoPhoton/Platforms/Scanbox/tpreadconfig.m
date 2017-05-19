@@ -119,17 +119,21 @@ params.frame_period__us = params.frame_period * 1e6; % frame period in us
 
 logmsg(['Computed from stim file frame period = ' num2str(params.frame_period)]);
 
-%logmsg('Still need to set frame timestamps correctly using info.frame(1) and info.line(1)')
-
 if ~isempty(stims)
-    params.frame_timestamp = ((0:(params.number_of_frames-1)) - info.frame(2) ) *params.frame_period + ...
-       - stims.start + stims.MTI2{1}.startStopTimes(1);
+    params.frame_timestamp = ...
+        ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ...
+        -info.line(1)/params.lines_per_frame*params.frame_period;
+%     + ...
+%        - stims.start + stims.MTI2{1}.startStopTimes(1);
 else
     params.frame_timestamp = ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ;
 end
 
-if isfield(info,'Slices')
-    params.frame_timestamp = params.frame_timestamp * info.Slices; % not correct yet
+if isfield(info,'Section')
+    params.frame_timestamp = params.frame_timestamp(1)  + ...
+        (params.frame_timestamp-params.frame_timestamp(1))* info.Slices  + ...
+        (info.Section-1)*params.frame_period + ...
+        (info.Slices)*params.frame_period ; % first frame of each slice thrown out
 end
 
 %params.frame_timestamp = ((0:(params.number_of_frames-1)) ) *params.frame_period;

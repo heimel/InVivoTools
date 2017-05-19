@@ -239,7 +239,17 @@ params.psth_baselinemethod = 0; % the baseline used to identify F in dF/F.
 %    for baseline.
 
 params.psth_align_stim_onset = false; % to align df/f at t = 0
-params.mti_timeshift = 0.058; % ms for Fluoview scope
+
+switch record.setup
+    case {'helero2p','G2P'} % Gaia
+        params.mti_timeshift = 0.00; % s
+    case {'olympus','wall-e'} % Fluoview scope
+        params.mti_timeshift = 0.058; % s 
+    otherwise
+        %logmsg('Unknown setup. Defaulting MTI timeshift');
+        %dbstack
+        params.mti_timeshift = 0.058; % s
+end
 
 switch record.datatype
     case 'tp'

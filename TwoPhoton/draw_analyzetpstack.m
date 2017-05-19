@@ -364,43 +364,21 @@ if ~ud.zstack
     guicreate(edit,'string',num2str(ud.channel),'width',40,'Tag','stimChannelEdit','callback','genercallback','move','down','parent',ha);
     guicreate(txt,'string','Trials:','width','auto','left','left','move','right','parent',ha);
     guicreate(edit,'string','','Tag','trialsEdit','width',40,'tooltipstring','blank for default','parent',ha,'move','right');
-%     guicreate(txt,'string','Epochs:','width','auto','move','right','parent',ha);
-%     guicreate(edit,'string','','Tag','epochsEdit','width',45,'tooltipstring','blank for default','parent',ha,'move','down');
-    
     guicreate(txt,'string','Intervals:','width','auto','move','right','parent',ha);
     guicreate(edit,'string','     ','Tag','timeintEdit','tooltipstring','[time int]','width','auto','move','right','parent',ha);
     guicreate(edit,'string','     ','Tag','sptimeintEdit','tooltipstring','[spont int]','width','auto','move','down','parent',ha);
-%     guicreate(txt,'string','Blank:','width','auto','move','right','parent',ha);
-%     guicreate(edit,'string','   ','Tag','BlankIDEdit','tooltipstring','empty for default','width','auto','parent',ha);
-    %    guicreate(txt,'string','Process:','width','auto','move','right','parent',ha);
-    %    guicreate(popup, 'String',tpsignalprocess('?'),'Tag','signalprocessPopup','width',100,'callback','genercallback','parent',ha);
-    %    guicreate(txt,'string','Filter:','left','left','width','auto','move','right','parent',ha);
-    %    guicreate(edit,'string',' 0 ','Tag','filterEdit','tooltipstring','number of frames to average, 0 for no filtering','width','auto','move','right','parent',ha);
-    %    guicreate(txt,'string','f ','width','auto','move','right','parent',ha);
-%     guicreate(cb,'string','Recompute','Tag','recomputeCB','left','left','width','auto','value',0,'parent',ha);
-%    guicreate(button,'string','Raw','Tag','AnalyzeRawBt','move','right','width','auto','parent',ha);
     guicreate(button,'string','Analyse','Tag','AnalyzeParamBt','left','left','width','auto','move','right','parent',ha);
     guicreate(button,'string','Results','Tag','ResultsBt','width','auto','move','right','parent',ha);
     guicreate(button,'string','Export','Tag','ExportRawBt','move','down','width','auto','parent',ha);
-%     guicreate(txt,'string','Variable','Tag','variableTxt','width','auto','left','left','move','right','parent',ha);
-%     guicreate(edit,'string','     ','Tag','stimparamnameEdit','tooltipstring','Variable to analyse, e.g. angle. Empty for default','width','auto','parent',ha,'move','down');
-    %    guicreate(txt,'string','PSTH','Tag','QuickPSTHBt','width','auto','move','right','parent',ha);
-    %    guicreate(button,'string','PSTH','Tag','QuickPSTHBt','width','auto','left','left','move','right','parent',ha);
-    %    guicreate(edit,'string','  1','Tag','QuickPSTHEdit','tooltipstring','Bin width (s)','width','auto','move','right','parent',ha);
-    %    guicreate(txt,'string','s ','width','auto','move','down','parent',ha);
-    %    guicreate(cb,'string','Traces   ','Tag','QuickPSTHCB','width','auto','value',0,'parent',ha);
     guicreate(button,'string','ImageMath','Tag','ImageMathBt','left','left','width','auto','move','right','parent',ha);
     guicreate(edit,'string','1 - 5','Tag','ImageMathEdit','width','auto','parent',ha);
     guicreate(button,'string','Single conditions','Tag','singleCondBt','width','auto','left','left','move','right','parent',ha);
     guicreate(button,'string','Map','Tag','QuickMapBt','width','auto','move','down','tooltipstring','Color map based on tuning curve output','parent',ha);
-    %    guicreate(edit,'string','0.05','Tag','mapthreshEdit','width','auto','tooltipstring','Map threshold','parent',ha);
     guicreate(button,'string','Movie','Tag','movieBt','width','auto','left','left','move','right','parent',ha);
     guicreate(edit,'string','     ','Tag','movieStimsEdit','width','auto','tooltipstring','Stims','move','right','parent',ha);
     guicreate(edit,'string','movie.avi','Tag','movieFileEdit','width','auto','tooltipstring','Movie filename','move','right','parent',ha);
     guicreate(cb,'string','dF','Tag','moviedFCB','tooltipstring','Show delta F','width','auto','value',0,'move','right','parent',ha);
     guicreate(cb,'string','Sort','Tag','movieSortCB','tooltipstring','Sorted','width','auto','value',0,'parent',ha);
-%     guicreate(button,'string','Analysis','Tag','AnalyzePatternsBt','width','auto','left','left','move','right','parent',ha);
-%     guicreate(popup, 'String',analyze_tppatterns('?'),'Tag','patternanalysisPopup','width',100,'callback','genercallback','parent',ha,'move','down');
     guicreate(button,'string','Stimulus','Tag','StimulusBt','width','auto','left','left','move','right','parent',ha);
 end
 
@@ -416,7 +394,6 @@ guicreate(cb,'String','Verbose','value',0,...
 
 ud.persistent=1;
 set_normalized_units( hi );
-%set_normalized_units( fig );
 
 
 function icon = iconread(fname,bgcolor)

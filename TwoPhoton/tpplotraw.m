@@ -66,25 +66,6 @@ ylabel(ylab);
 xlabel('Time (s)');
 xlims = xlim;
 
-% show data as color image
-% subplot(n_panelrows,2,2);
-%
-% imgdata = [];
-% markers = [];
-% marker_labels = {};
-% marker_index = 1;
-%
-% for i = 1:length(record.measures)
-%     imgdata = [imgdata; record.measures(i).data];
-% end
-% imagesc(imgdata);
-% set(gca,'YDir','normal')
-% set(gca,'Xtick',markers);
-% set(gca,'Xticklabel',marker_labels);
-% ylabel('Cell');
-% xlabel('Time (ks)');
-% colormap jet
-
 % global events
 switch process_params.method
     case 'event_detection'

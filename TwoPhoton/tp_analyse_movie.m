@@ -22,8 +22,7 @@ end
 record = tptuningcurve(record,pixelarg);
 record = tppsth(record,pixelarg);
 
-process_params = tpprocessparams(record);
-[pixelarg.data,pixelarg.t] = tpsignalprocess(process_params, pixelarg.data, pixelarg.t);
+[pixelarg.data,pixelarg.t] = tpsignalprocess(record, pixelarg.data, pixelarg.t);
 
 record = tpraw(record,pixelarg);
 

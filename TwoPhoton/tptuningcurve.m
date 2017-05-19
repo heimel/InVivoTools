@@ -87,17 +87,6 @@ if (isempty(paramname) || strcmp(paramname,'location')) && ...
         (~isempty(strfind(lower(record.stim_type),'til')) ||...
         ~isempty(strfind(lower(record.stim_type),'position')))
     variable = 'position';
-%     stimparams = cellfun(@getparameters,get(s.saveScript));
-%     rects = cat(1,stimparams(:).rect);
-%     left = uniq(sort(rects(:,1)));
-%     right = uniq(sort(rects(:,3)));
-%     top = uniq(sort(rects(:,2)));
-%     bottom = uniq(sort(rects(:,4)));
-%     center_x = (left+right)/2;
-%     center_y = (top+bottom)/2;
-%     n_x = length(center_x);
-%     n_y = length(center_y);
-%     stimrect = [min(left) min(top) max(right) max(bottom)];
 else
     variable = paramname;
 end
