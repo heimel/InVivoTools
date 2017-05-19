@@ -112,11 +112,11 @@ if exist(driftfilename,'file'),
     dr=struct('x',[],'y',[]);
     dr.x = [dr.x; drfile.drift.x];
     dr.y = [dr.y; drfile.drift.y];
-    logmsg(['Drift correction using ',drfile.method]);
+    logmsg(['Drift correction using ' drfile.method ' from ' driftfilename]);
 elseif strcmpi(params.third_axis_name,'t')
     logmsg(['No driftcorrect file named ' driftfilename]);
 end
-  
+
 if params.scanline_period > 0
     %update pixeltimes, time within each frame that each pixel was recorded
     pixeltimes =  params.scanline_period * ...
@@ -132,9 +132,6 @@ if isfield(params,'bidirectional') && params.bidirectional
         'TPREADDATA_SINGLECHANNEL: TIMES SHOULD BE RECOMPUTED FOR BIDIRECTIONAL SCANNING');
     warning('off','TPREADDATA_SINGLECHANNEL:BIDIRECTIONAL_TIMES');
 end
-
-ims = cell(1,length(frametimes));
-imsinmem = zeros(1,length(frametimes));
 
 [~,intervalorder] = sort(intervals(:,1));  % do intervals in order to reduce re-reading of frames
 
@@ -179,14 +176,12 @@ for j=1:size(intervals,1) % loop over requested intervals
         f1=find(  frametimes(1:end-1)<=intervals(intervalorder(j),2) & ...
             frametimes(2:end)>intervals(intervalorder(j),2) );
     end
-
     
-%     if mode==1 % preallocate memory
-%         counter = zeros( n_rois,1 );
-%         data{intervalorder(j),i} = NaN(1,f1-f0);
-%         t{intervalorder(j),i} = NaN(1,f1-f0);
-%     end
-
+    if mode==1 % preallocate memory
+        counter = zeros( n_rois,1 );
+        data{intervalorder(j),i} = NaN(f1-f0+1,1);
+        t{intervalorder(j),i} = NaN(f1-f0+1,1);
+    end
     
     if verbose
         hwaitbar = waitbar(0,'Reading frames...');
@@ -199,30 +194,24 @@ for j=1:size(intervals,1) % loop over requested intervals
         if verbose && mod(f,waitbarstep)==0
             hwaitbar = waitbar(f/(f1-f0));
         end
-        %dirid = frame2dirnum(f);  % find the directory where frame number f resides
-        if sum(imsinmem)>299,  % limit 300 frames in memory at any one time
-            inmem = find(imsinmem);
-            %  ims{inmem(1)} = [];
-            imsinmem(inmem(1)) = 0;
-        end;
-        if ~imsinmem(f),
-            ims{f} = tpreadframe(record,channel,f,options,verbose) - darklevel(channel);
-            imsinmem(f) = 1;
-        end;
-        %           t_ = frametimes(f); % correct only later for needed pixels, +pixeltimes;
+        
+        ims = tpreadframe(record,channel,f,options,verbose) - darklevel(channel);
         
         for i=1:length(pixelinds) % loop over ROIs
-            if ~isempty(dr) % driftcorrection
-                [ii,jj]=ind2sub(size(ims{f}),pixelinds{i});
+            if isempty(dr) % no driftcorrection
+                thepixelinds = pixelinds{i};
+                ind_outofbounds = [];
+            else % driftcorrection
+                [ii,jj]=ind2sub(size(ims),pixelinds{i});
                 switch drfile.method
                     case 'fullframeshift'
                         [thepixelinds, ind_outofbounds] = ...
-                            sub2ind_silent_bounds(size(ims{f}),ii-dr.y(f),jj-dr.x(f));
+                            sub2ind_silent_bounds(size(ims),ii-dr.y(f),jj-dr.x(f));
                     case 'greenberg'
                         if length(pixelinds{i})>2000 % too many points
                             disp('greenberg: doing only full frame shifts');
                             [thepixelinds, ind_outofbounds] = ...
-                                sub2ind_silent_bounds(size(ims{f}),ii-dr.y(f),jj-dr.x(f));
+                                sub2ind_silent_bounds(size(ims),ii-dr.y(f),jj-dr.x(f));
                         else
                             %disp('greenberg: doing only individual pixel shifts');
                             % using sub2ind and viceversa is slower than they should be
@@ -243,22 +232,18 @@ for j=1:size(intervals,1) % loop over requested intervals
                                 
                                 ii(pind)=ii(pind)+shift_ii+min(driftrange.y)-1;
                                 jj(pind)=jj(pind)+shift_jj+min(driftrange.x)-1;
-                                thepixelinds(pind)=sub2ind(size(ims{f}),ii(pind),jj(pind));
+                                thepixelinds(pind)=sub2ind(size(ims),ii(pind),jj(pind));
                                 ind_outofbounds=[];
                             end
                         end
-                end
-            else
-                thepixelinds = pixelinds{i};
-                ind_outofbounds=[];
-            end
+                end 
+            end % drift correction
             
-            thisdata = double(ims{f}(thepixelinds));
+            thisdata = double(ims(thepixelinds));
             thisdata(ind_outofbounds)=nan;
             
             thistime = frametimes(f) + pixeltimes(thepixelinds); % correct for time in frame
             newtinds = find(thistime>=intervals(intervalorder(j),1) & thistime<=intervals(intervalorder(j),2)); % trim out-of-bounds points
-            
             
             switch mode
                 case 1 % Mean data and time for each frame is returned.
@@ -308,14 +293,15 @@ for j=1:size(intervals,1) % loop over requested intervals
                     thisdata(badinds) = NaN;
             end
             
-%             if mode==1
-%                 if ~isempty(thisdata)
-%                     counter(i) = counter(i) + 1;
-%                     data{intervalorder(j),i}(counter(i)) = thisdata;
-%                     t{intervalorder(j),i}(counter(i)) = thistime;
-%                 end
-%             else
-                if (mode~=3)&&(mode~=21)
+            if mode==1
+                if ~isempty(thisdata)
+                    counter(i) = counter(i) + 1;
+                    data{intervalorder(j),i}(counter(i),1) = thisdata;
+                    t{intervalorder(j),i}(counter(i),1) = thistime;
+                end
+            end
+            
+            if (mode~=3)&&(mode~=21) && (mode~=1)
                 data{intervalorder(j),i} = cat(1,data{intervalorder(j),i},reshape(thisdata,numel(thisdata),1));
                 t{intervalorder(j),i} = cat(1,t{intervalorder(j),i},reshape(thistime,numel(thisdata),1));
             end
@@ -337,19 +323,15 @@ for j=1:size(intervals,1) % loop over requested intervals
             end
         end
     end
-
     
-%     if mode==1
-%         for i=1:n_rois
-%             data{intervalorder(j),i} = data{intervalorder(j),i}(1,1:counter);
-%             t{intervalorder(j),i} = t{intervalorder(j),i}(1,1:counter);
-%         end
-%     end
-    
+    if mode==1
+        for i=1:n_rois
+            data{intervalorder(j),i} = data{intervalorder(j),i}(1:counter,1);
+            t{intervalorder(j),i} = t{intervalorder(j),i}(1:counter,1);
+        end
+    end
     
 end %interval j
-
-
 
 if mode==21
     for i=1:length(pixelinds)
@@ -363,9 +345,4 @@ if mode==21
     end
 end
 
-% clearing memory.
-% should be superfluous, but apparently this was once necessary
-for i=1:length(ims)
-    ims{i} = [];
-end
-clear ims; %pack;
+

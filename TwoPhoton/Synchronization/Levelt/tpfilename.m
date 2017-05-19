@@ -69,7 +69,13 @@ if strcmpi(stack(end-length(ext)+1:end),ext)
     stack = stack(1:end-length(ext));
 end
 
-fname = fullfile(experimentpath( record ),processed,...
-    [stack fmiddle optcode ext]);
+f = filesep; % faster than fullfile
+if ~isempty(processed)
+    fname = [ experimentpath( record ) f processed f stack fmiddle optcode ext];
+else
+    fname = [ experimentpath( record ) f stack fmiddle optcode ext];
+end
+% fname = fullfile(experimentpath( record ),processed,...
+%     [stack fmiddle optcode ext]);
 
 

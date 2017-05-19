@@ -12,17 +12,12 @@ function [im,fname] = tpreadframe(record,channel,frame,opt,verbose, fname,multip
 if nargin<7 || isempty( multiple_frames_mode )
     multiple_frames_mode = 0;
 end
-if nargin<5
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<5 || isempty(verbose)
     verbose = true;
 end
-
 if length(channel)>1
     warning('TPREADFRAME:MULTIPLE_CHANNELS','TPREADFRAME:TPREADFRAME WILL IN FUTURE ONLY ACCEPT SINGLE CHANNEL');
 end
-
 if nargin<4
     opt = [];
 end

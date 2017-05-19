@@ -59,24 +59,17 @@ function [data, t] = tpreaddata(records, intervals, pixelinds, mode, channels, o
 %  Tested:  only tested for T-series records, not other types
 %
 % 200X-200X Steve Hooser, Danielle van Versendaal.
-% 200X-2015 Alexander Heimel
+% 200X-2017 Alexander Heimel
 
 params = tpprocessparams( records(1) ); 
 
-
-if nargin<7
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<7 || isempty(verbose)
     verbose = true;
 end
 if nargin<6
     options = [];
 end
-if nargin<5
-    channels = [];
-end
-if isempty(channels)
+if nargin<5 || isempty(channels)
     channels = params.response_channel;
 end
 
@@ -85,14 +78,14 @@ switch length(channels)
         [data,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels, options, verbose);
     case 2 % ratiometric
         [data_enum,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(1), options, verbose );
-        [data_denom,t] = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(2), options, verbose );
+        data_denom = tpreaddata_singlechannel(records, intervals, pixelinds, mode, channels(2), options, verbose );
+        data = cell(size(data_enum));
         for i = 1:numel(data_enum)
             if any(data_denom{i}==0)
                 logmsg('Measurement on denominator channel contains 0 value');
             end
             data{i} = (data_enum{i})./(data_denom{i});
         end
-        data = reshape(data,size(data_enum));
     otherwise
         logmsg('Expects only one or two channels.')
 end
