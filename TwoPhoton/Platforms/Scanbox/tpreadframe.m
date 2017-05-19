@@ -12,7 +12,6 @@ function [im,fname] = tpreadframe(record,channel,frame,opt,verbose, fname,multip
 if nargin<7 || isempty( multiple_frames_mode )
     multiple_frames_mode = 0;
 end
-
 if nargin<5
     verbose = [];
 end
@@ -56,10 +55,11 @@ if strcmp(readfname,fname)==0 % not read in yet
             warning('TPREADFRAME:MEM',['TPREADFRAME: Array size to large. ' ...
                 num2str(fix(required)) ' Mb required, ' num2str(fix(available)) ' Mb available.']);
             warning('OFF','TPREADFRAME:MEM');
-            %            im = imread(fname,(channel-1)*iminf.NumberOfFrames+frame);
-            
-            im = sbxread(fname,frame-1,1);
-            
+            if isempty(iminf.slice)
+                im = sbxread(fname,frame-1,1);
+            else
+                im = sbxread(fname,(frame-1)*iminf.slices + iminf.slice,1);
+            end
             return
         else
             rethrow me
@@ -68,28 +68,27 @@ if strcmp(readfname,fname)==0 % not read in yet
     logmsg(['Loading ' fname]);
     if exist(fname,'file') && ~strcmp(org_fname,fname)
         % i.e. (processed) image file already exists
-        for ch = 1:iminf.NumberOfChannels
-            for fr = 1:iminf.NumberOfFrames
+        already_processed = true;
+    else
+        already_processed = false;
+    end
+    
+    for ch = 1:iminf.NumberOfChannels
+        for fr = 1:iminf.NumberOfFrames
+            if isempty(iminf.slice)
                 images(:,:,fr,ch) = sbxread(fname,fr-1,1);
-                %                imread(fname,(ch-1)*iminf.NumberOfFrames+fr);
-                
+            else
+                images(:,:,fr,ch) = sbxread(fname,(fr-1)*iminf.slices + iminf.slice-1,1);
             end
         end
-    else % i.e. no right processed file exist
-        for ch = 1:iminf.NumberOfChannels
-            for fr = 1:iminf.NumberOfFrames
-                images(:,:,fr,ch) = sbxread(fname,fr-1,1);
-                
-                %                    images(:,:,fr,ch)=imread(org_fname,(ch-1)*iminf.NumberOfFrames+fr);
-            end
-        end
-        
+    end
+    
+    if ~already_processed
         % shift bidirectional scanned image
         if isfield(iminf,'bidirectional') && iminf.bidirectional
             % determine optimal shift
             
             mean_image = mean(mean(images,3),4);
-            
             shift_range = [ 2 3 4 5 6 7 8 9 10 11 ];
             max_correl = -inf;
             shift = 0;
@@ -124,11 +123,11 @@ if strcmp(readfname,fname)==0 % not read in yet
         images = tp_image_processing( images, opt,verbose );
         if ~strcmp(fname,org_fname)
             % save processed file for later use
-            logmsg(['Writing processed image stack as ' fname]);
-            writepath = fileparts(fname);
-            if ~exist(writepath,'dir')
-                mkdir(writepath);
-            end
+            %             logmsg(['Writing processed image stack as ' fname]);
+            %             writepath = fileparts(fname);
+            %             if ~exist(writepath,'dir')
+            %                 mkdir(writepath);
+            %             end
             logmsg('Not implemented writing processed image');
             %            fluoviewtiffwrite(images,fname,iminf)
         end

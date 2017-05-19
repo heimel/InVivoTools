@@ -84,11 +84,27 @@ d = dir(fname);
 params.BitsPerSample = 16;
 %x = sbxread(fname,1,2)
 
+params.slices = length(info.otwave);
+if ~isempty(record.slice)
+    if ischar(record.slice)
+        params.slice = str2double(record.slice);
+    else
+        params.slice = record.slice;
+    end
+elseif isfield(info,'Section')
+    params.slice = info.Section;
+end
+
+
 params.lines_per_frame = info.sz(1);
 params.Height = params.lines_per_frame;
 params.pixels_per_line = info.sz(2);
 params.Width = params.pixels_per_line;
 params.number_of_frames = d.bytes / info.nsamples;
+if isfield(params,'slice') && ~isfield(info,'Section')
+    params.number_of_frames = floor(params.number_of_frames/params.slices);
+end
+
 params.NumberOfFrames = params.number_of_frames;
 
 
@@ -129,12 +145,14 @@ else
     params.frame_timestamp = ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ;
 end
 
-if isfield(info,'Section')
+
+if isfield(params,'slice')
     params.frame_timestamp = params.frame_timestamp(1)  + ...
-        (params.frame_timestamp-params.frame_timestamp(1))* info.Slices  + ...
-        (info.Section-1)*params.frame_period + ...
-        (info.Slices)*params.frame_period ; % first frame of each slice thrown out
+        (params.frame_timestamp-params.frame_timestamp(1))* params.slices  + ...
+        (params.slice-1)*params.frame_period + ...
+        (params.slices)*params.frame_period ; % first frame of each slice thrown out
 end
+
 
 %params.frame_timestamp = ((0:(params.number_of_frames-1)) ) *params.frame_period;
 params.frame_timestamp__us = params.frame_timestamp * 1E6; % list of all frame timestamps in s
