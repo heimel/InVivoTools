@@ -33,7 +33,7 @@ switch lower(setup)
         setup = 'ScanImage';
     case 'imagej'
         setup = 'ImageJ';
-    case {'helero2p','G2P'}
+    case {'helero2p','g2p'}
         setup = 'Scanbox';
     otherwise
         setup = 'FluoView';

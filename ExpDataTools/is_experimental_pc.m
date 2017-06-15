@@ -8,8 +8,8 @@ if nargin<1 || isempty(hostname)
 end
 
 
-switch hostname
-    case  {'nin380','nori001','daneel','antigua','wall-e','nin343','andrew','jander','helero2p','G2P'}
+switch lower(hostname)
+    case  {'nin380','nori001','daneel','antigua','wall-e','nin343','andrew','jander','helero2p','g2p'}
         experimental_pc = true;
     otherwise
         experimental_pc = false;

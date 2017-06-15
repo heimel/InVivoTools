@@ -240,8 +240,8 @@ params.psth_baselinemethod = 0; % the baseline used to identify F in dF/F.
 
 params.psth_align_stim_onset = false; % to align df/f at t = 0
 
-switch record.setup
-    case {'helero2p','G2P'} % Gaia
+switch lower(record.setup)
+    case {'helero2p','g2p'} % Gaia
         params.mti_timeshift = 0.00; % s
     case {'olympus','wall-e'} % Fluoview scope
         params.mti_timeshift = 0.058; % s 

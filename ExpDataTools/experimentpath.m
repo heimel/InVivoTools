@@ -17,14 +17,14 @@ end
 if nargin<4 || isempty(vers) 
     vers = '2004';
     if isfield(record,'setup')
-        switch record.setup
+        switch lower(record.setup)
             case 'jander'
                 vers = '2015';
             case 'daneel'
                 if isfield(record,'experiment') && strcmpi(record.experiment,'examples')
                     vers = '2015';
                 end
-            case {'gaia','helero2p','G2P'}
+            case {'gaia','helero2p','g2p'}
                 vers = '2015';
         end
     end

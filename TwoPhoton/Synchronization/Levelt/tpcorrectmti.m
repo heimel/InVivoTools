@@ -10,8 +10,8 @@ function [mti2,starttime] = tpcorrectmti(mti2, record)
 % ?-2017, Alexander Heimel
 
 params = tpprocessparams( record );
-switch record.setup
-    case {'helero2p','G2P'}
+switch lower(record.setup)
+    case {'helero2p','g2p'}
         stims = getstimsfile(record);
         starttime = stims.start - params.mti_timeshift;
     case {'olympus','wall-e'}
