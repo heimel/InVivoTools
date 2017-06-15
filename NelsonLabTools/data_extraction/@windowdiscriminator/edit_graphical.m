@@ -115,7 +115,7 @@ else, % manage the command (arg3)
                                                      'ListString',cellstr(int2str((1:acq(sr).reps)')));
                                          if ~isempty(sn),
                                            fname = [ getpathname(ud.cksds) str{s} filesep 'r' sprintf('%.3d',sn) ...
-                                                    '_'acq(fi(sr)).fname];
+                                                    '_' acq(fi(sr)).fname];
                                            pathname = '';
                                          end;
                                       end;
