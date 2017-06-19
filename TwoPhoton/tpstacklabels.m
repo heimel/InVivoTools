@@ -63,7 +63,7 @@ switch record.experiment
     case {'14.87'}
         labels = {'','CR','Tom','YFP'};
     otherwise
-        labels = {'GFP','RFP'};
+        labels = {'GFP','RFP','DRD1','Gad2'};
 end
 
 if isfield(record,'comment')

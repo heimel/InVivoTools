@@ -31,6 +31,8 @@ switch vers
         end
     case '2015'
         base = fullfile(userhome,'Dropbox (NIN)');
+        base = 'temporarily_disabled';
+        logmsg('turned off dropbox');
         if ~exist(base,'dir')
             params = processparams_local;
             if isfield(params,'experimentpath_localroot')

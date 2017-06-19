@@ -120,7 +120,7 @@ params.dwell_time = params.scanline_period / params.pixels_per_line; % pixel dwe
 params.dwell_time__us =  params.dwell_time*1e6;
 
 stims = getstimsfile(record);
-if ~isempty(stims)
+if ~isempty(stims) && isfield(info,'frame')
     time_between_triggers = (stims.MTI2{end}.startStopTimes(1)-stims.MTI2{1}.startStopTimes(1));
     frames_between_triggers =  info.frame(end)-info.frame(2) +...
         (info.line(end)-info.line(1))/params.lines_per_frame;
@@ -133,19 +133,24 @@ params.frame_period__us = params.frame_period * 1e6; % frame period in us
 
 logmsg(['Computed from stim file frame period = ' num2str(params.frame_period)]);
 
-if ~isempty(stims)
-    params.frame_timestamp = ...
-        ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ...
-        -info.line(1)/params.lines_per_frame*params.frame_period;
+if isfield(info,'frame')
+    if ~isempty(stims)
+        params.frame_timestamp = ...
+            ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ...
+            -info.line(1)/params.lines_per_frame*params.frame_period;
+    else
+        params.frame_timestamp = ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ;
+    end
 else
-    params.frame_timestamp = ((0:(params.number_of_frames-1)) - info.frame(1) ) *params.frame_period ;
+    params.frame_timestamp = ((0:(params.number_of_frames-1))  ) *params.frame_period ;
+    logmsg('Do not have trigger frames. Frame timestamps start at 0s');
 end
 
 if isfield(params,'slice')
     params.frame_timestamp = params.frame_timestamp(1)  + ...
         (params.frame_timestamp-params.frame_timestamp(1))* params.slices  + ...
         (params.slice-1)*params.frame_period;
-        
+    
     if isfield(info,'Section') % result from sbxsplit
         params.frame_timestamp = params.frame_timestamp + ...
             (params.slices)*params.frame_period ; % first frame of each slice thrown out

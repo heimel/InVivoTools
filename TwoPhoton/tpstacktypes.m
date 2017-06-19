@@ -28,5 +28,5 @@ switch record.experiment
     case {'14.24'}
         stacktypes = {'axon','bouton','Npil','Pyr','PV','shaft','spine','SST','unknown'};
     otherwise 
-        stacktypes = {'aggregate','axon','bouton','cell','dendrite','glia','mito','pia','shaft','spine','unknown'};
+        stacktypes = {'aggregate','axon','bouton','cell','dendrite','glia','mito','neurite','pia','shaft','soma','spine','unknown'};
 end
