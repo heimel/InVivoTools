@@ -41,10 +41,10 @@ Remote_Comm_port = 1205;
 Remote_Comm_remotearchitecture = 'PC'; % options are 'PC', 'Mac' (MacOS9), or 'unix' (Linux, MacOSX)
 % the computer type of the remote machine you are talking to (not of THIS computer, necessarily)
 
-Remote_Comm_localprefix = 'D:\2pdata'; % for example, 'Z:', 'z:', '/Users/Shared/myexperimentdir'
+Remote_Comm_localprefix = 'D:'; % for example, 'Z:', 'z:', '/Users/Shared/myexperimentdir'
 % the prefix to the shared directory on THIS computer
 
-Remote_Comm_remoteprefix = '\\G2P\2pdata';
+Remote_Comm_remoteprefix = '\\g2p\Data';
 % the prefix to the same directory as viewed by the OTHER computer
 
 % Example, suppose your "master" computer is a PC running Windows, and you
@@ -75,21 +75,20 @@ MonitorWindowMonitor = 0;  % use the given monitor, 0 is first
 MonitorComputer = 0;       % does this computer have a monitor window?
 
 
-if StimComputer&&haspsychtbox==2  % set up timing and monitor settings
+if StimComputer&&haspsychtbox==2,  % set up timing and monitor settings
     Screen('Preference','SecondsMultiplier',1.0);
     Screen('Preference','Backgrounding',1); 
 else
     % set the current monitor dimensions for remote comm
     StimWindowRefresh = 60;
     StimWindowDepth = 8;
-    StimWindowRect = [ 0 0 1920 1080 ];
+    StimWindowRect = [ 0 0 800 600 ];
 end;
 
 % pixels_per_cm of the monitor in use
+pixels_per_cm = 200/9.5;
 
-pixels_per_cm = 1920/52.7;
-
-NewStimViewingDistance = 15; % cm
+NewStimViewingDistance = 15; %cm, 
 
 NewStimTilt = 0; % degree tilt of screen on monitor
 
