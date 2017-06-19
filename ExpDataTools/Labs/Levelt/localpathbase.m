@@ -34,7 +34,7 @@ switch vers
         base = 'temporarily_disabled';
         logmsg('turned off dropbox');
         if ~exist(base,'dir')
-            params = processparams_local;
+            params = processparams_local([]);
             if isfield(params,'experimentpath_localroot')
                 base = params.experimentpath_localroot;
             end
