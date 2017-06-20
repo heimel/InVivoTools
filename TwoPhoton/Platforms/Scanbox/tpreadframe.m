@@ -4,10 +4,13 @@ function [im,fname] = tpreadframe(record,channel,frame,opt,verbose, fname,multip
 %  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE, FNAME, multiple_frames_mode )
 %
 %    if multiple_frames_mode == 0, output individual frames, if
-%    multiple_frames_mode ==1, output sum
+%    multiple_frames_mode ==1, output avg
+%    multiple_frames_mode ==2, output max
 %
 % 2017, Alexander Heimel
 %
+
+persistent readfname images
 
 if nargin<7 || isempty( multiple_frames_mode )
     multiple_frames_mode = 0;
@@ -21,9 +24,6 @@ end
 if nargin<4
     opt = [];
 end
-
-persistent readfname images
-
 if nargin<6 || isempty(fname)
     fname = tpfilename( record, frame, channel, opt);
 end
@@ -68,20 +68,48 @@ if strcmp(readfname,fname)==0 % not read in yet
         already_processed = false;
     end
     
+    if verbose
+        hwaitbar = waitbar(0,'Loading frames...');
+    end
+    waitbarstep = max(1,round(iminf.NumberOfFrames/100)); % only maximum 100 updates
+
+    
     if ~isfield(iminf,'slice') || isempty(iminf.slice)
-        for ch = 1:iminf.NumberOfChannels
+        if iminf.NumberOfChannels>1
             for fr = 1:iminf.NumberOfFrames
-                images(:,:,fr,ch) = sbxread(fname,fr-1,1);
+                images(:,:,fr,:) = permute(sbxread(fname,fr-1,1),[2 3 4 1]);
+                if verbose && mod(fr,waitbarstep)==0
+                    hwaitbar = waitbar(fr/iminf.NumberOfFrames);
+                end
+            end
+        else
+            for fr = 1:iminf.NumberOfFrames
+                images(:,:,fr,1) = sbxread(fname,fr-1,1);
+                if verbose && mod(fr,waitbarstep)==0
+                    hwaitbar = waitbar(fr/iminf.NumberOfFrames);
+                end
             end
         end
     else
-        for ch = 1:iminf.NumberOfChannels
+        if iminf.NumberOfChannels>1
             for fr = 1:iminf.NumberOfFrames
-                images(:,:,fr,ch) = sbxread(fname,(fr-1)*iminf.slices + iminf.slice-1,1);
+                images(:,:,fr,:) =permute( sbxread(fname,(fr-1)*iminf.slices + iminf.slice-1,1),[2 3 4 1]);
+                if verbose && mod(fr,waitbarstep)==0
+                    hwaitbar = waitbar(fr/iminf.NumberOfFrames);
+                end
+            end
+        else
+            for fr = 1:iminf.NumberOfFrames
+                images(:,:,fr,1) = sbxread(fname,(fr-1)*iminf.slices + iminf.slice-1,1);
+                if verbose && mod(fr,waitbarstep)==0
+                    hwaitbar = waitbar(fr/iminf.NumberOfFrames);
+                end
             end
         end
     end
-    
+    if verbose
+        close(hwaitbar);
+    end
     if ~already_processed
         % shift bidirectional scanned image
         if isfield(iminf,'bidirectional') && iminf.bidirectional
@@ -135,17 +163,17 @@ if strcmp(readfname,fname)==0 % not read in yet
     readfname = fname; % when completely loaded set readfname
 end
 
-% return selected images
 switch multiple_frames_mode
-    case 0
+    case 0 % return individual images
         im = images(:,:,frame,channel);
-    case 1 % sum
+    case 1 % avg
         if ndims(images)==3 && length(frame)==size(images,3)
             % assume only 1 channel, and want all frames
             im = sum(images,3); % much faster
         else
             im = sum(double(images(:,:,frame,channel)),3);
         end
+        im = im/length(frame);
     case 2 % max
         im = max(double(images(:,:,frame,channel)),[],3);
 end

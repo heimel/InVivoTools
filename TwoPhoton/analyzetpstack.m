@@ -104,7 +104,7 @@ switch command
         ud.previewdir = [];
         ud.previewim = [];
         ud.previewchannel = 1;
-        ud.recompute_preview = true;
+        ud.recompute_preview = false;
         ud.ztproject = true;
         ud.celldrawinfo.dirname = [];
         ud.celldrawinfo.h = [];
@@ -125,30 +125,32 @@ switch command
             selDir = strtrim(currstr_{v_});  % currently selected
         else
             selDir = {};
-        end;
+        end
         inds = [];
         newlist = {};
         currInds = 1:length(ud.slicelist);
         while ~isempty(currInds)
             parentdir = '.';
             if strcmp(parentdir,ud.slicelist(currInds(1)).dirname)  % if it is a parent directory, find all its kids
-                newlist{end+1} = parentdir;
-                inds(end+1) = currInds(1);
+                newlist{end+1} = parentdir; %#ok<AGROW>
+                inds(end+1) = currInds(1); %#ok<AGROW>
                 currInds = setdiff(currInds,currInds(1));  % we will include this as a parent
                 kids = [];
                 for j=currInds
                     myparent = '.';
                     if strcmp(parentdir,myparent)
-                        kids(end+1) = j;
-                        newlist{end+1} = ['    ' ud.slicelist(j).dirname];
-                        inds(end+1) = j;
-                    end;
-                end;
+                        kids(end+1) = j; %#ok<AGROW>
+                        newlist{end+1} = ['    ' ud.slicelist(j).dirname]; %#ok<AGROW>
+                        inds(end+1) = j; %#ok<AGROW>
+                    end
+                end
                 currInds = setdiff(currInds,kids);
             end;
         end;
-        littlelist = {};
-        for i=1:length(newlist), littlelist{i} = strtrim(newlist{i}); end;
+        littlelist = cell(1,length(newlist));
+        for i=1:length(newlist)
+            littlelist{i} = strtrim(newlist{i});
+        end
         [c,ia]=intersect(littlelist,selDir);
         if ~isempty(c)
             v = ia(1); 
@@ -180,7 +182,7 @@ switch command
         analyzetpstack('UpdateCellLabels',[],fig);
     case 'UpdateCellList'
         v_ = get(ft(fig,'celllist'),'value');
-        strlist = {};
+        strlist = cell(1,length(ud.celllist));
         for i=1:length(ud.celllist)
             if ud.celllist(i).present
                 present = '+';
@@ -239,7 +241,7 @@ switch command
         channels = [];
         for ch=1:9
             if get(ft(fig,['channel' num2str(ch) 'Tg']),'value')
-                channels = [channels ch];
+                channels = [channels ch]; %#ok<AGROW>
             end
         end
         for ch = channels
@@ -250,13 +252,13 @@ switch command
         end
         
         shift_channels = [];
-        if isfield(ud.record,'comment') && ~isempty(findstr(lower(ud.record.comment),'pixelshift'))
-            ind = findstr(lower(ud.record.comment),'[');
+        if isfield(ud.record,'comment') && ~isempty(strfind(lower(ud.record.comment),'pixelshift'))
+            ind = strfind(lower(ud.record.comment),'[');
             if isempty(ind)
                 iminf = tpreadconfig(ud.record);
                 shift_channels = iminf.NumberOfChannels;
             else
-                ind2 = findstr(lower(ud.record.comment),']');
+                ind2 = strfind(lower(ud.record.comment),']');
                 if isempty(ind2)
                     errormsg('Missing closing ] after pixelshift.');
                     return
@@ -270,7 +272,17 @@ switch command
         
         switch ud.ztproject
             case true % z-projection
-                if  ud.recompute_preview  % we need to update
+                if ~ud.recompute_preview && isempty(ud.previewimage)
+                    pvfilename = tpscratchfilename( ud.record, 1, 'preview');
+                    if exist(pvfilename,'file')
+                        pvimg = load(pvfilename);
+                        ud.previewimage{1} = pvimg.pvimg; 
+                    else
+                        ud.recompute_preview = true;
+                    end
+                end
+                
+                if  ud.recompute_preview  
                     % compute preview image
                     first = str2double(get(ft(fig,'FirstFrameEdit'),'String'));
                     last = str2double(get(ft(fig,'LastFrameEdit'),'String'));
@@ -279,10 +291,11 @@ switch command
                     save(pvfilename,'pvimg');
                     im = pvimg;
                     ud.previewimage{1} = im;
+                    ud.recompute_preview = false;
                 else
                     im = ud.previewimage{1};
                     compute_pixelshift = false;
-                end;
+                end
             case false % no zt-project, i.e. single slice
                 frame = round(get(ft(fig,'FrameSlid'),'value'));
                 set(ft(fig,'frameTxt'),'String',num2str(frame));
@@ -303,8 +316,7 @@ switch command
         else
             pixelshift = 0;
         end
-        
-        
+                
         if compute_pixelshift
             logmsg(['Shifting channel(s) ' mat2str(shift_channels(shift_channels>0)) ' up by ' num2str(pixelshift) ' pixels'])
             for ch=intersect(shift_channels(shift_channels>0),channels)
@@ -365,7 +377,7 @@ switch command
         set(gca,'tag','tpaxes');
         ch = get(gca,'children');
         ind = find(ch==ud.previewim);
-        if length(ch)>1 && ~isempty(ind),% make on bottom
+        if length(ch)>1 && ~isempty(ind) % make on bottom
             ch = cat(1,ch(1:ind-1),ch(ind+1:end),ch(ind));
             set(gca,'children',ch);
             
@@ -395,7 +407,7 @@ switch command
             % we do when we are drawing for first time
             % or if we are adding a cell
             drift = getcurrentdirdrift(ud,NUMPREVIEWFRAMES);
-            if 1+length(ud.celldrawinfo.h)<=length(ud.celllist),
+            if 1+length(ud.celldrawinfo.h)<=length(ud.celllist)
                 start = 1+length(ud.celllist)-(-length(ud.celldrawinfo.h)+length(ud.celllist));
             elseif isempty(ud.celldrawinfo.h)
                 start = 1;
@@ -411,13 +423,13 @@ switch command
                 start = 1;
             end;
             slicelistlookup.test = [];
-            for j=1:length(ud.slicelist),
+            for j=1:length(ud.slicelist)
                 slicelistlookup.(dir2fieldname(ud.slicelist(j).dirname)) = j;
             end;
             
-            axes(ft(fig,'tpaxes')); %#ok<MAXES> necessary for following text
+            axes(ft(fig,'tpaxes')); % necessary for following text
             hold on
-            for i=start:length(ud.celllist),
+            for i=start:length(ud.celllist)
                 xi = ud.celllist(i).xi;
                 yi = ud.celllist(i).yi;
                 zi = median(ud.celllist(i).zi);
@@ -425,8 +437,8 @@ switch command
                         (ud.celllist(i).dimensions>1)) && ...
                         ~is_linearroi(ud.celllist(i).type)
                     % close ROI
-                    xi(end+1) = xi(1);
-                    yi(end+1) = yi(1);
+                    xi(end+1) = xi(1); %#ok<AGROW>
+                    yi(end+1) = yi(1); %#ok<AGROW>
                 end
                 ud.celldrawinfo.h(end+1) = plot(xi-drift(1),yi-drift(2),'linewidth',1);
                 set(ud.celldrawinfo.h(end),'tag',num2str(zi)); % set slice
@@ -456,7 +468,7 @@ switch command
         color_rois( ud.celllist, ud.celldrawinfo,fig);
         set(fig,'userdata',ud);
     case 'UpdateCellLabels'
-        if ~isempty(ud.celllist),
+        if ~isempty(ud.celllist)
             items = get(ft(fig,'celllist'),'value');
             if isempty(items)
                 return
@@ -496,13 +508,13 @@ switch command
         ud.record.ROIs.celllist = ud.celllist;
         record = ud.record;
         tp_export_rois(record)
-    case 'DrawROIsCB',
+    case 'DrawROIsCB'
         sv = get(ft(fig,'sliceList'),'value');
         ud.slicelist(sv).drawcells = 1-ud.slicelist(sv).drawcells;
         ud.celldrawinfo.dirname = '';
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellImage',[],fig);
-    case 'DrawROINosCB',
+    case 'DrawROINosCB'
         sv = get(ft(fig,'sliceList'),'value');
         ud.slicelist(sv).drawroinos = 1-ud.slicelist(sv).drawroinos;
         ud.celldrawinfo.dirname = '';
@@ -516,7 +528,7 @@ switch command
         analyzetpstack('UpdateCellImage',[],fig);
         
         % sync with others
-        if ~isempty(ud.celllist),
+        if ~isempty(ud.celllist)
             items = get(ft(fig,'celllist'),'value');
             if get(ft(fig,'syncCB'),'value')
                 sync2otherslices(ud.record,ud.celllist(items(1)).index);
@@ -556,7 +568,7 @@ switch command
         sz = size(get(ud.previewim,'CData'));
         [blankprev_x,blankprev_y] = meshgrid(1:sz(2),1:sz(1));
         drift = getcurrentdirdrift(ud,  NUMPREVIEWFRAMES);
-        if cellisactualcell,
+        if cellisactualcell
             cr = ud.celllist(v);
             cr.xi = ud.celllist(v).xi - mean(ud.celllist(v).xi) + x + drift(1) ;
             cr.yi = ud.celllist(v).yi - mean(ud.celllist(v).yi) + y + drift(2);
@@ -582,14 +594,13 @@ switch command
         ud.cell_indices_changed = true;
         ud.celldrawinfo.dirname = '';
         set(fig,'userdata',ud);
-        
         analyzetpstack('UpdateCellImage',[],fig);
     case 'newcellindexEdit'
         v = fix(str2double(get(ft(fig,'newcellindexEdit'),'String')));
         ud.record.ROIs.new_cell_index = next_available_cell_index(v-1,ud.celllist );
         set(fig,'userdata',ud);
         set(ft(fig,'newcellindexEdit'),'String',num2str(ud.record.ROIs.new_cell_index));
-    case 'redrawCellBt',
+    case 'redrawCellBt'
         v = get(ft(fig,'celllist'),'value');
         if length(v)>1
             errormsg('Only single ROI can be redrawn at the time.');
@@ -601,7 +612,7 @@ switch command
         ancestors={'.'};%getallparents(ud,currdir);
         cellisinthisimage = ~isempty(intersect(ud.celllist(v).dirname,ancestors));
         cellisactualcell = strcmp(ud.celllist(v).dirname,currdir);
-        if ~cellisinthisimage,
+        if ~cellisinthisimage
             errormsg('Cannot redraw cell whose preview image is not being viewed.');
             return;
         end;
@@ -633,7 +644,6 @@ switch command
         ud.celldrawinfo.dirname = '';
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellImage',[],fig);
-        
     case 'maxzBt'
         % take z-frame with maximum intensity as z-component
         % for neurites this is done on a pixel by pixel basis
@@ -694,11 +704,11 @@ switch command
         end
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellList',[],fig);
-    case 'addsliceBt',
+    case 'addsliceBt'
         dirlist = {'.'};
         s = 1;
         ok = 1;
-        if ok==1,
+        if ok==1
             newslice = emptyslicerec;
             newslice.dirname = dirlist{s};
             pvfilename = tpscratchfilename( ud.record, 1, 'preview');
@@ -706,7 +716,6 @@ switch command
             if exist(pvfilename,'file')
                 load(pvfilename);
             else
-                
                 record = ud.record;
                 if newslice.dirname~='.'
                     record.slice = newslice.dirname;
@@ -715,7 +724,7 @@ switch command
             ud.slicelist = [ud.slicelist newslice];
         end;
         set(fig,'userdata',ud);
-    case 'autoDrawCellsBt',
+    case 'autoDrawCellsBt'
         if ud.zstack  % for  puncta analysis
             method = 'detect_puncta';
         else
@@ -735,7 +744,7 @@ switch command
         end
         typestr = get(ft(fig,'cellTypePopup'),'string');
         labelstr = get(ft(fig,'labelList'),'string');
-        for i=1:length(cell_list),
+        for i=1:length(cell_list)
             newcell = tp_emptyroirec;
             newcell.dirname = dirname;
             newcell.pixelinds = cell_list(i).pixelinds;
@@ -757,7 +766,7 @@ switch command
         set(ft(fig,'newcellindexEdit'),'String',num2str(ud.record.ROIs.new_cell_index));
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellList',[],fig);
-    case 'drawnewBt',
+    case 'drawnewBt'
         if ud.zstack && ud.ztproject
             uiwait(warndlg('Note that you are drawing ROIs in z-projection.','Z-Projection','modal'));
         end
@@ -803,7 +812,7 @@ switch command
         set(ft(fig,'celllist'),'value',length(ud.celllist)); % select new ROI
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellList',[],fig);
-    case 'drawnewballBt',
+    case 'drawnewballBt'
         logmsg('Click on Enter to stop drawing.');
         
         if ud.zstack && ud.ztproject
@@ -816,7 +825,7 @@ switch command
         sz = size(get(ud.previewim,'CData'));
         [blankprev_x,blankprev_y] = meshgrid(1:sz(2),1:sz(1));
         newballdiastr = get(ft(fig,'newballdiameterEdit'),'string');
-        if ~isempty(newballdiastr),
+        if ~isempty(newballdiastr)
             newballdia = str2double(newballdiastr);
             if isnan(newballdia)
                 newballdia = 12;
@@ -908,7 +917,7 @@ switch command
             figure(fig);
             [x,y,button]=ginput(1);
         end;
-    case 'drawNeuriteBt',
+    case 'drawNeuriteBt'
         logmsg('Click on Enter to stop drawing. Right click removes last point. Middle click doesn''t snap.');
         logmsg('Default neurite type can be set in tpprocessparams.');
         
@@ -924,7 +933,7 @@ switch command
         [blankprev_x,blankprev_y] = meshgrid(1:sz(2),1:sz(1));
         
         newballdiastr = get(ft(fig,'newballdiameterEdit'),'string'); % used for snapping to local max
-        if ~isempty(newballdiastr),
+        if ~isempty(newballdiastr)
             newballdia = str2double(newballdiastr);
             if isnan(newballdia)
                 newballdia = 6;
@@ -955,7 +964,7 @@ switch command
             x = []; % i.e. do not enter next loop
         end
         
-        while ~isempty(x),
+        while ~isempty(x)
             switch button
                 case {1,2}
                     xi = [xi_ xi_(end:-1:1)]+x+dr(1);
@@ -1051,7 +1060,7 @@ switch command
         set(fig,'userdata',ud);
         set(ft(fig,'celllist'),'value',length(ud.celllist)); % select new ROI
         analyzetpstack('UpdateCellList',[],fig);
-    case 'deletecellBt',
+    case 'deletecellBt'
         if ~isempty(ud.celllist)
             items = get(ft(fig,'celllist'),'value');
             items = sort(items,2,'descend');
@@ -1062,8 +1071,8 @@ switch command
                 ud.celllist = [ud.celllist(1:(v-1)) ud.celllist((v+1):end)];
                 delete(ud.celldrawinfo.h(v));
                 delete(ud.celldrawinfo.t(v));
-                if isfield(ud.celldrawinfo,'changes'),
-                    if length(ud.celldrawinfo.changes)>=v,
+                if isfield(ud.celldrawinfo,'changes')
+                    if length(ud.celldrawinfo.changes)>=v
                         ud.celldrawinfo.changes = ud.celldrawinfo.changes([1:(v-1) (v+1):length(ud.celldrawinfo.changes)]);
                     end;
                 end;
@@ -1089,7 +1098,7 @@ switch command
         getparameters(savedscript)
         logmsg([ num2str(length(do)) ' stimuli. Script available as ''savedscript''']);
         evalin('base','global savedscript');
-    case 'sliceOffsetEdit',
+    case 'sliceOffsetEdit'
         v = get(ft(fig,'sliceList'),'value');
         xyoffset = str2num(get(ft(fig,'sliceOffsetEdit'),'string')); %#ok<ST2NM>
         if ~eqlen(size(xyoffset),[1 2]), error('xyoffset wrong size.'); end;
@@ -1114,7 +1123,7 @@ switch command
         results_tptestrecord(temprecord);
     case 'infoBt'
         tpstackinfo(ud.record);
-    case 'checkDriftBt',
+    case 'checkDriftBt'
         dirname = experimentpath(ud.record);
         val = get(ft(fig,'celllist'),'value');
         ancestors = {'.'};%getallparents(ud,dirname);
@@ -1168,7 +1177,7 @@ switch command
         drift2 = getcurrentdirdrift(ud,NUMPREVIEWFRAMES);
         plottpcellalignment(listofcellnames1(thelistinds1),listofcellnames2(thelistinds2),changes1(thelistinds1),changes2(thelistinds2),...
             pvimg1,pvimg2,dirname1,dirname2,drift1,drift2,3);
-    case 'movieBt',
+    case 'movieBt'
         trialsstr = strtrim(get(ft(fig,'trialsEdit'),'string'));
         if ~isempty(trialsstr)
             trialslist = eval(trialsstr);
@@ -1213,18 +1222,33 @@ switch command
         imagedisplay(im2,'Title',int2str(stim2)); axis image
     case 'singleCondBt'
         trialsstr = strtrim(get(ft(fig,'trialsEdit'),'string'));
-        if ~isempty(trialsstr), trialslist = eval(trialsstr); else trialslist = []; end;
+        if ~isempty(trialsstr)
+            trialslist = eval(trialsstr); 
+        else
+            trialslist = [];
+        end;
         timeintstr = strtrim(get(ft(fig,'timeintEdit'),'string'));
-        if ~isempty(timeintstr), timeint= eval(timeintstr); else timeint= []; end;
+        if ~isempty(timeintstr)
+            timeint= eval(timeintstr);
+        else
+            timeint= [];
+        end;
         sptimeintstr = strtrim(get(ft(fig,'sptimeintEdit'),'string'));
-        if ~isempty(sptimeintstr), sptimeint= eval(sptimeintstr); else sptimeint= []; end;
+        if ~isempty(sptimeintstr)
+            sptimeint= eval(sptimeintstr); 
+        else
+            sptimeint= []; 
+        end
         fprintf('Analyzing...will take a few seconds...\n');
-        [r,indimages] = tpsinglecondition(ud.record,ud.channel,trialslist,timeint,sptimeint,1);  %#ok<NASGU>
+        [r,indimages] = tpsinglecondition(ud.record,ud.channel,trialslist,timeint,sptimeint,1);  %#ok<ASGLU>
         scratchfilename = tpscratchfilename(ud.record,[],'single_condition');
         save(scratchfilename,'r','indimages','-mat');
     case 'clearScratchBt'
         scratchfilename = tpscratchfilename(ud.record,[],'*');
         delete(scratchfilename);
+        
+        pvfilename = tpscratchfilename( ud.record, 1, 'preview');
+        delete(pvfilename);
         
         image_processing.unmixing = 1;
         image_processing.spatial_filter = 1;
@@ -1303,17 +1327,17 @@ switch command
         if ud.verbose
             disp(record);
         end
-    case 'loadBt',
+    case 'loadBt'
         scratchfilename = tpscratchfilename( ud.record,[],'stack');
         if exist(scratchfilename,'file')
             g = load( scratchfilename,'-mat');
             % update slicelist version if necessary
-            if length(g.slicelist)>=1,
-                if ~isfield(g.slicelist(1),'xyoffset'),
+            if length(g.slicelist)>=1
+                if ~isfield(g.slicelist(1),'xyoffset')
                     newlist = g.slicelist(1);
                     newlist.xyoffset = [0 0];
                     newlist=newlist([]);
-                    for i=1:length(g.slicelist),
+                    for i=1:length(g.slicelist)
                         newentry = g.slicelist(i);
                         newentry.xyoffset = [0 0];
                         newlist(i) = newentry;
@@ -1357,7 +1381,7 @@ switch command
         ud.previewdir = '';
         set(fig,'userdata',ud);
         analyzetpstack('UpdatePreviewImage',[],fig);
-    case 'ref_epochEdit',
+    case 'ref_epochEdit'
         ud.record.ref_epoch=get(ft(fig,'ref_epochEdit'),'string');
         ud.ref_record = tp_get_refrecord( ud.record.ref_epoch);
         %ud.ref_record.ref_epoch = ud.record.ref_epoch;
@@ -1373,7 +1397,7 @@ switch command
     case 'zoomBt'
         if get(ft(fig,'zoomBt'),'value')
             set(ft(fig,'panBt'),'value',0)
-            axes(ft(fig,'tpaxes')); %#ok<MAXES>
+            axes(ft(fig,'tpaxes')); 
             if isempty(ud.zoom_object)
                 ud.zoom_object = zoom;
                 set(ud.zoom_object,'ActionPostCallback',@zoom_callback);
@@ -1387,13 +1411,13 @@ switch command
         set(fig,'userdata',ud);
         zoom_callback(fig, ft(fig,'tpaxes') );
     case 'zoomOutBt'
-        axes(ft(gcf,'tpaxes')); %#ok<MAXES>
+        axes(ft(gcf,'tpaxes'));
         zoom out;
         zoom_callback(fig, ft(fig,'tpaxes') );
     case 'panBt'
         if get(ft(fig,'panBt'),'value')
             set(ft(fig,'zoomBt'),'value',0)
-            axes(ft(fig,'tpaxes')); %#ok<MAXES>
+            axes(ft(fig,'tpaxes')); 
             set(ud.zoom_object,'Enable','off');
             pan;
         else
@@ -1709,8 +1733,8 @@ function [listofcells,listofcellnames,cellstructs,thechanges] = getcurrentcellsc
 listofcells = {}; listofcellnames = {}; thechanges = {};
 cellstructs = tp_emptyroirec;
 cellstructs = cellstructs([]);
-for i=1:length(ud.celllist),
-    if ~isempty(intersect(ud.celllist(i).dirname,ancestors)),
+for i=1:length(ud.celllist)
+    if ~isempty(intersect(ud.celllist(i).dirname,ancestors))
         changes = getChanges(ud,i,currdirname,ancestors);
         if changes.present  % if the cell exists in this recording, go ahead and add it to the list
             listofcells{end+1} = changes.pixelinds;
@@ -1724,21 +1748,21 @@ end;
 % these functions deal with setting the 'changes' field in the celllist
 function [changes,gotChanges] = getChanges(ud,i,newdir,ancestors)  % cell id is i
 gotChanges = 0;
-if isfield(ud.celldrawinfo,'changes'),
-    if length(ud.celldrawinfo.changes)>=i,
+if isfield(ud.celldrawinfo,'changes')
+    if length(ud.celldrawinfo.changes)>=i
         changes = ud.celldrawinfo.changes{i};
-        if ~isempty(changes),
+        if ~isempty(changes)
             changedirs = {changes.dirname};
             [ch,temp,ib]=intersect(ancestors,changedirs); %#ok<ASGLU>
-            if ~isempty(ch),
+            if ~isempty(ch)
                 changes = changes(ib(end)); gotChanges = 1;
             end;
         end;
     end;
 end;
 % if no changes have been specified, return the default
-if ~gotChanges,
-    if ~isempty(i) && i<=length(ud.celllist),
+if ~gotChanges
+    if ~isempty(i) && i<=length(ud.celllist)
         changes = struct('present',1,'dirname',newdir,...
             'xi',ud.celllist(i).xi,'yi',ud.celllist(i).yi,...
             'pixelinds',ud.celllist(i).pixelinds);
@@ -1751,19 +1775,23 @@ if ~gotChanges,
 end;
 
 function setChanges(ud,fig,i,newchanges)
-if ~isfield(ud.celldrawinfo,'changes'), ud.celldrawinfo.changes = {}; end;
+if ~isfield(ud.celldrawinfo,'changes')
+    ud.celldrawinfo.changes = {};
+end
 gotChanges = 0;
-if length(ud.celldrawinfo.changes)<i, ud.celldrawinfo.changes{i} = []; end;
+if length(ud.celldrawinfo.changes)<i
+    ud.celldrawinfo.changes{i} = []; 
+end
 changes = ud.celldrawinfo.changes{i};
 currChanges = {};
-for j=1:length(changes),   % if there are already changes, we have to overwrite them
+for j=1:length(changes)  % if there are already changes, we have to overwrite them
     if strcmp(changes(j).dirname,newchanges.dirname)
         gotChanges = j;
-        break;
+        break
     else
-        currChanges{end+1} = changes(j).dirname;
-    end;
-end;
+        currChanges{end+1} = changes(j).dirname; %#ok<AGROW>
+    end
+end
 if gotChanges == 0
     if isempty(changes)
         ud.celldrawinfo.changes{i} = newchanges;
@@ -1802,8 +1830,8 @@ dr = dr + getxyoffset(ud);
 function xyoffset = getxyoffset(ud)
 myparent = '.';% getrefdirname(ud,dirname);
 xyoffset = [0 0];
-for j=1:length(ud.slicelist),
-    if strcmp(myparent,strtrim(ud.slicelist(j).dirname)),
+for j=1:length(ud.slicelist)
+    if strcmp(myparent,strtrim(ud.slicelist(j).dirname))
         xyoffset = ud.slicelist(j).xyoffset;
     end;
 end;

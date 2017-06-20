@@ -3,21 +3,18 @@ function [im,fname] = tpreadframe(record,channel,frame,opt,verbose, fname,multip
 %
 %  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE, FNAME, multiple_frames_mode )
 %
-%
 %    if multiple_frames_mode == 0, output individual frames, if
-%    multiple_frames_mode ==1, output sum
+%    multiple_frames_mode ==1, output avg
+%    multiple_frames_mode ==2, output max
 %
-% 2008-2015, Alexander Heimel
+% 2008-2017, Alexander Heimel
 %
 
 if nargin<7 || isempty( multiple_frames_mode )
     multiple_frames_mode = 0;
 end
 
-if nargin<5
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<5 || isempty(verbose)
     verbose = true;
 end
 
@@ -133,11 +130,12 @@ end
 
 % return selected images
 switch multiple_frames_mode
-    case 0
-        im=images(:,:,frame,channel);
-    case 1 % sum
-        im=sum(double(images(:,:,frame,channel)),3);
+    case 0 % return individual images
+        im = images(:,:,frame,channel);
+    case 1 % avg
+        im = sum(double(images(:,:,frame,channel)),3);
+        im = im/length(frame);
     case 2 % max
-        im=max(double(images(:,:,frame,channel)),[],3);
+        im = max(double(images(:,:,frame,channel)),[],3);
 end
 

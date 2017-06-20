@@ -107,7 +107,7 @@ for i=1:1 % used to loop over cycles
     initind = initind + numFrames;
 end;
 driftfilename = tpscratchfilename(record,[],'drift');
-if exist(driftfilename,'file'),
+if exist(driftfilename,'file')
     drfile = load(driftfilename,'-mat');
     dr=struct('x',[],'y',[]);
     dr.x = [dr.x; drfile.drift.x];
@@ -162,7 +162,7 @@ for j=1:size(intervals,1) % loop over requested intervals
         end
     end
     % compute first frame number of current interval j
-    if (intervals(intervalorder(j),1)<frametimes(1)) && (intervals(intervalorder(j),2)>frametimes(1)),
+    if (intervals(intervalorder(j),1)<frametimes(1)) && (intervals(intervalorder(j),2)>frametimes(1))
         f0 = 1;
     else
         f0 = find(frametimes(1:end-1)<=intervals(intervalorder(j),1)& ...
@@ -170,7 +170,7 @@ for j=1:size(intervals,1) % loop over requested intervals
     end
     % compute last frame number of current interval j
     if intervals(intervalorder(j),2)>frametimes(end) && ...
-            intervals(intervalorder(j),1)<frametimes(end),
+            intervals(intervalorder(j),1)<frametimes(end)
         f1 = length(frametimes);
     else
         f1=find(  frametimes(1:end-1)<=intervals(intervalorder(j),2) & ...
@@ -255,7 +255,7 @@ for j=1:size(intervals,1) % loop over requested intervals
                         thisdata = [];
                     end
                 case 0 % Individidual pixel values are returned.
-                    if length(newtinds)==length(thepixelinds),
+                    if length(newtinds)==length(thepixelinds)
                         thistime = thistime(newtinds);
                         thisdata = thisdata(newtinds);
                     else
@@ -270,7 +270,7 @@ for j=1:size(intervals,1) % loop over requested intervals
                         thistime = [];
                         thisdata = [];
                     end
-                    if ~isempty(thistime),
+                    if ~isempty(thistime)
                         accum{i} = nansum(cat(3,accum{i},thisdata),3);
                         taccum{i} = nansum(cat(3,taccum{i},thistime),3);
                         numb(i) = numb(i)+1;
@@ -302,8 +302,15 @@ for j=1:size(intervals,1) % loop over requested intervals
             end
             
             if (mode~=3)&&(mode~=21) && (mode~=1)
-                data{intervalorder(j),i} = cat(1,data{intervalorder(j),i},reshape(thisdata,numel(thisdata),1));
-                t{intervalorder(j),i} = cat(1,t{intervalorder(j),i},reshape(thistime,numel(thisdata),1));
+                %                 data{intervalorder(j),i} = cat(1,data{intervalorder(j),i},reshape(thisdata,numel(thisdata),1));
+                %                 t{intervalorder(j),i} = cat(1,t{intervalorder(j),i},reshape(thistime,numel(thisdata),1));
+                % if ~isempty(thisdata)
+                %     keyboard
+                % end
+                
+
+                data{intervalorder(j),i} = cat(1,data{intervalorder(j),i},thisdata(:));
+                t{intervalorder(j),i} = cat(1,t{intervalorder(j),i},thistime(:));
             end
         end % ROI i
     end % frame f
@@ -313,8 +320,8 @@ for j=1:size(intervals,1) % loop over requested intervals
         close(hwaitbar);
     end
     if mode==3
-        for i=1:length(pixelinds),
-            if numb(i)>0,
+        for i=1:length(pixelinds)
+            if numb(i)>0
                 data{intervalorder(j),i} = accum{i}/numb(i);
                 t{intervalorder(j),i} = taccum{i}/numb(i);
             else

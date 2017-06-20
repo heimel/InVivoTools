@@ -62,6 +62,8 @@ switch record.experiment
         labels = {'','CR','Tom','Nogcamp'};
     case {'14.87'}
         labels = {'','CR','Tom','YFP'};
+    case {'14.90'}
+        labels = {'','SOM'};
     otherwise
         labels = {'GFP','RFP','DRD1','Gad2'};
 end

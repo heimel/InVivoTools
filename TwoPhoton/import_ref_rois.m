@@ -3,13 +3,11 @@ function [celllist,new_roi_index] = import_ref_rois(record)
 %
 %  [CELLLIST, NEW_ROI_INDEX] = IMPORT_REF_ROIS(RECORD);
 %
-% 2011, Alexander Heimel
+% 2011-2017, Alexander Heimel
 %
-
 
 % check if cells can be loaded from reference epoch
 ref_record = tp_get_refrecord( record );
-
 
 if isempty(ref_record) % i.e. no reference record can be produced
     celllist = tp_emptyroirec;
@@ -70,18 +68,16 @@ if ~isempty(ref_record.ROIs)
         
         ti = tpreadconfig(record);
         [blankprev_x,blankprev_y] = meshgrid(1:ti.Width,1:ti.Height);
-        disp('IMPORT_REF_ROIS: POSSIBLE AXIS SWAP. CHECK THIS CODE');
         bw = inpolygon(blankprev_x,blankprev_y,celllist(i).xi,celllist(i).yi);
         celllist(i).pixelinds = find(bw);
-
         
         if any(celllist(i).zi < min_frame)
-            disp(['ANALYZETPSTACK: clipping z-value of ROI ' ...
+            logmsg(['Clipping z-value of ROI ' ...
                 num2str(celllist(i).index) ' to minimum frame in this stack.']);
             celllist(i).zi( celllist(i).zi < min_frame ) = min_frame;
         end
         if any(celllist(i).zi > max_frame)
-            disp(['ANALYZETPSTACK: clipping z-value of ROI ' ...
+            logmsg(['Clipping z-value of ROI ' ...
                 num2str(celllist(i).index) ' to maximum frame in this stack.']);
             celllist(i).zi( celllist(i).zi > max_frame ) = max_frame;
         end
@@ -93,7 +89,7 @@ else
     if exist(refscratchfilename,'file')
         refg = load( refscratchfilename,'-mat');
         if isfield(refg,'celllist') && ~isempty(refg.celllist)
-            disp('Using cells from reference epoch');
+            logmsg('Using cells from reference epoch');
             if isfield(refg,'celllist')
                 celllist = refg.celllist;
             end
