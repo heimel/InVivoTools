@@ -52,8 +52,8 @@ if exist('ud','var') && isfield(ud,'verbose') && ud.verbose
     end
 end
 
-switch command,
-    case 'NewWindow',
+switch command
+    case 'NewWindow'
         if ~isfield(record,'ROIs')
             record.ROIs = [];
         end
@@ -118,7 +118,7 @@ switch command,
         analyzetpstack('UpdateSliceDisplay',[],fig);
         analyzetpstack('UpdateCellList',[],fig);
         set(fig,'ResizeFcn',@figure_resize);
-    case 'UpdateSliceDisplay',
+    case 'UpdateSliceDisplay'
         v_ = get(ft(fig,'sliceList'),'value');
         currstr_ = get(ft(fig,'sliceList'),'string');
         if iscell(currstr_) && ~isempty(currstr_)
@@ -129,14 +129,14 @@ switch command,
         inds = [];
         newlist = {};
         currInds = 1:length(ud.slicelist);
-        while ~isempty(currInds),
+        while ~isempty(currInds)
             parentdir = '.';
-            if strcmp(parentdir,ud.slicelist(currInds(1)).dirname),  % if it is a parent directory, find all its kids
+            if strcmp(parentdir,ud.slicelist(currInds(1)).dirname)  % if it is a parent directory, find all its kids
                 newlist{end+1} = parentdir;
                 inds(end+1) = currInds(1);
                 currInds = setdiff(currInds,currInds(1));  % we will include this as a parent
                 kids = [];
-                for j=currInds,
+                for j=currInds
                     myparent = '.';
                     if strcmp(parentdir,myparent)
                         kids(end+1) = j;
@@ -150,7 +150,11 @@ switch command,
         littlelist = {};
         for i=1:length(newlist), littlelist{i} = strtrim(newlist{i}); end;
         [c,ia]=intersect(littlelist,selDir);
-        if ~isempty(c), v = ia(1); else v = 1; end;
+        if ~isempty(c)
+            v = ia(1); 
+        else
+            v = 1;
+        end
         % now to reshuffle the slicelists
         ud.slicelist = ud.slicelist(inds);
         set(fig,'userdata',ud);
@@ -163,7 +167,7 @@ switch command,
             set(ft(fig,'DrawROINosCB'),'value',ud.slicelist(v).drawroinos);
             set(ft(fig,'sliceOffsetEdit'),'string',['[' num2str(ud.slicelist(v).xyoffset) ']']);
             parentdir = '.';
-            if ~strcmp(parentdir,strtrim(ud.slicelist(v).dirname)),
+            if ~strcmp(parentdir,strtrim(ud.slicelist(v).dirname))
                 set(ft(fig,'sliceOffsetEdit'),'visible','off');
                 set(ft(fig,'sliceOffsetText'),'visible','off');
             else
@@ -174,7 +178,7 @@ switch command,
         analyzetpstack('UpdatePreviewImage',[],fig);
         analyzetpstack('UpdateCellImage',[],fig);
         analyzetpstack('UpdateCellLabels',[],fig);
-    case 'UpdateCellList',
+    case 'UpdateCellList'
         v_ = get(ft(fig,'celllist'),'value');
         strlist = {};
         for i=1:length(ud.celllist)
