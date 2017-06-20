@@ -20,6 +20,10 @@ function [dr] = tpdriftcheck(record, channel, refrecord,  method, writeit, doplo
 %  If PLOTIT is 1, the results are plotted in a new figure.
 %
 % wrapper around drift or motion correction algorithms
+%
+% 200X, Steve Van Hooser
+% 200X-2017, Alexander Heimel
+
 
 switch method
     case '?'
@@ -30,11 +34,11 @@ switch method
         % set default method
         method = 'fullframeshift';
 end
-disp(['Drift correction method: ' method]);
+logmsg(['Drift correction method: ' method]);
 driftfilename = tpscratchfilename( record, [], 'drift');
 
-howoften=10;
-avgframes=5; % only implemented for tpdriftcheck_steve
+howoften = 10;
+avgframes = 5; % only implemented for tpdriftcheck_steve
 
 params = tpreadconfig(record);
 total_n_frames = params.number_of_frames;
@@ -61,11 +65,12 @@ switch method
     [p, iter_used, corr, failed, settings, xpixelposition, ypixelposition] ...
       = tpdriftcheck_greenberg(data,base_image);
   
-    data=[];clear('data');
+    data=[];
+    clear('data');
 end
-disp('Computed drift correction');
+logmsg('Computed drift correction');
 
-if writeit,
+if writeit
 
   % first interpolate values
   newframeind = 1:total_n_frames;
@@ -81,14 +86,11 @@ if writeit,
       drift.x=round(mean(mean(drift.xpixelpos,3),2)-(params.pixels_per_line+1)/2);
       drift.y=round(mean(mean(drift.ypixelpos,3),2)-(params.lines_per_frame+1)/2);
   end
-  %drift((end-30:end),:)=repmat([-20 -20],31,1); % for debugging
   save(driftfilename,'method','drift','-mat');
 end;
 clear('dr');
 dr(:,1)=drift.x;
 dr(:,2)=drift.y;
-
-%first_image = tppreview(refdirname,avgframes,1,channel);
 
 intervals = [ params.frame_timestamp(1) params.frame_timestamp(2)];
 first_image = tpreaddata(record,intervals, {(1:params.lines_per_frame * params.pixels_per_line)}, 3, channel);
@@ -97,13 +99,11 @@ first_image = reshape( first_image{1}, params.lines_per_frame, params.pixels_per
 intervals = [ params.frame_timestamp(end-1) inf];% params.frame_timestamp(end)];
 last_image = tpreaddata( record,intervals, {(1:numel(first_image))}, 3, channel);
 if isempty(last_image{1})
-  disp('Lost last image');
+  logmsg('Lost last image');
 end
 last_image=reshape(last_image{1},size(first_image,1),size(first_image,2));
 
-
-
-if doplotit,
+if doplotit
   load(driftfilename,'-mat');
   figure;
   subplot(2,2,1);

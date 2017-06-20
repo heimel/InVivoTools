@@ -188,10 +188,10 @@ for j=1:size(intervals,1) % loop over requested intervals
     end
     warning('off','MATLAB:intMathOverflow')
     
-    waitbarstep = max(1,round(f1-f0/100)); % only maximum 100 updates
+    waitbarstep = max(1,round((f1-f0)/100)); % only maximum 100 updates
     
     for f = f0:f1 % loop over frames in interval
-        if verbose && mod(f,waitbarstep)==0
+        if verbose && mod(f-f0,waitbarstep)==0
             hwaitbar = waitbar(f/(f1-f0));
         end
         
@@ -308,7 +308,7 @@ for j=1:size(intervals,1) % loop over requested intervals
                 %     keyboard
                 % end
                 
-
+                logmsg('THIS SHOULD BE PREALLOCATED!');
                 data{intervalorder(j),i} = cat(1,data{intervalorder(j),i},thisdata(:));
                 t{intervalorder(j),i} = cat(1,t{intervalorder(j),i},thistime(:));
             end

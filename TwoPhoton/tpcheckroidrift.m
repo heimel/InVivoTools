@@ -49,23 +49,24 @@ t_ = reshape(t_,rctx*rcty,length(data{1,1})/(rctx*rcty));
 ims = reshape(data{1,2},length(roiinds),length(data{1,2})/length(roiinds));
 t2 = reshape(t{1,2},length(roiinds),length(t{1,2})/length(roiinds));
 
-numframes = size(im,3); i = 1;
+numframes = size(im,3); 
+i = 1;
 
 im1 = mean(im(:,:,1:min(5,numframes)));
 
 drt = [0 0 mean(t_(:,1))];
 
-if plotit,
-    while i<numframes,
+if plotit
+    while i<numframes
         framestart = i;
         im_ = zeros(10*size(im,1),10*size(im,2));
         ctr = [ ];
-        for j=1:10,
-            for k=1:10,
-                if i<numframes,
+        for j=1:10
+            for k=1:10
+                if i<numframes
                     im_(1+(j-1)*size(im,1):j*size(im,1),1+(k-1)*size(im,2):k*size(im,2))=im(:,:,i);
                     ctr(end+1,1:2)=[median(1+(j-1)*size(im,1):j*size(im,1)) median(1+(k-1)*size(im,2):k*size(im,2))];
-                    if mod(i,3)==0,
+                    if mod(i,3)==0
                         im2 = mean(im(:,:,i:min(i+5,numframes)));
                         drt(end+1,:) = [driftcheck(im1, im2, -10:2:10, -10:2:10 ,1) mean(t_(:,i))];
                     end;
@@ -75,8 +76,8 @@ if plotit,
         end;
         frameend = i;
         imagedisplay(im_); hold on;
-        if ~isempty(roix),
-            for j=1:size(ctr,1),
+        if ~isempty(roix)
+            for j=1:size(ctr,1)
                 plot(roix+ctr(j,2),roiy+ctr(j,1),'b-');
             end;
         end;
@@ -101,5 +102,6 @@ if plotit,
     subplot(4,1,4);
     plot(mean(t_,1)',1:numframes,'k-o');
     title('Relationship between time and frames');
-    xlabel('Time (s)'); ylabel('Frame (#)');
+    xlabel('Time (s)'); 
+    ylabel('Frame (#)');
 end;

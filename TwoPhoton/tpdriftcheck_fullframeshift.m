@@ -39,41 +39,45 @@ end
 
 im0 = tppreview(refrecord,avgframes,1,channel);  % the first image
 params = tpreadconfig(record);
-n_timestamps=length(params.frame_timestamp);
+n_timestamps = length(params.frame_timestamp);
 
 dr = [];
 drlast = [0 0];
 
 refisdifferent = 0;
-if refrecord==record, % this is reference data
-    xrange = searchx; yrange = searchy;
+if refrecord==record % this is reference data
+    xrange = searchx; 
+    yrange = searchy;
 else
     xrange = refsearchx; 
     yrange = refsearchy; 
     refisdifferent = 1;
+    logmsg(['Searching range from ref ' int2str(refsearchx) ' for x.']);
+    logmsg(['Searching range from ref ' int2str(refsearchy) ' for y.']);
 end;
+
+logmsg(['Searching range ' int2str(searchx) ' for x.']);
+logmsg(['Searching range ' int2str(searchy) ' for y.']);
 
 t = [];
 hwaitbar = waitbar(0,'Checking frames...');
 for f=1:howoften:(n_timestamps-avgframes)
     hwaitbar = waitbar(f/(n_timestamps-avgframes));
-    %fprintf(['Checking frame ' int2str(f) ' of ' int2str(n_timestamps) '.\n']);
     t(end+1) = 1;
     im1 = zeros(params.lines_per_frame,params.pixels_per_line);
-    for j=0:avgframes-1,
-        im1(:,:,j+1)=tpreadframe(record,channel,f+j);
-    end;
+    for j=0:avgframes-1
+        im1(:,:,j+1) = tpreadframe(record,channel,f+j);
+    end
     im1 = mean(im1,3);
     dr(length(t),[1 2]) = driftcheck(im0,im1,drlast(1,1)+xrange,drlast(1,2)+yrange,1);
-    if refisdifferent,
+    if refisdifferent
         % refine search of first frame
         dr(length(t),[1 2]) = driftcheck(im0,im1,dr(length(t),1)+searchx,dr(length(t),2)+searchy,1);
         refisdifferent = 0;
-    end;
+    end
     drlast = dr(length(t),[1 2]);
-    disp(['Shift is ' int2str(dr(end,:))]);
-    disp(['Searching ' int2str(dr(end,1)+xrange) ' in x.']);
-    disp(['Searching ' int2str(dr(end,2)+yrange) ' in y.']);
-    xrange = searchx; yrange = searchy;
-end;
+    logmsg(['Frame ' num2str(f) ' shift is ' int2str(dr(end,:))]);
+    xrange = searchx; 
+    yrange = searchy;
+end
 close(hwaitbar);
