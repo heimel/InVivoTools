@@ -1,8 +1,9 @@
 function [cksds] = cksdirstruct(pathname)
-
+%  CKSDIRSTRUCT returns a CKSDIRSTRUCT object. 
+%
 %  [CKSDS] = CKSDIRSTRUCT(PATHNAME)
 %
-%  Returns a CKSDIRSTRUCT object.  This class is intended to manage data
+%  This class is intended to manage data
 %  recorded from the Nelson lab at Brandeis University.  Our data are organized
 %  into separate directories, with each directory containing one epoch of
 %  recording.  Each such directory has a file called acq_params_out, which
