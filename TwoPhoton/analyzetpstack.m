@@ -297,7 +297,15 @@ switch command
                     compute_pixelshift = false;
                 end
             case false % no zt-project, i.e. single slice
-                frame = round(get(ft(fig,'FrameSlid'),'value'));
+                val = get(ft(fig,'FrameSlid'),'value');
+                if val<get(ft(fig,'FrameSlid'),'min')
+                    val = get(ft(fig,'FrameSlid'),'min');
+                end
+                if val>get(ft(fig,'FrameSlid'),'max')
+                    val = get(ft(fig,'FrameSlid'),'max');
+                end
+                frame = round(val);
+                set(ft(fig,'FrameSlid'),'value',frame);
                 set(ft(fig,'frameTxt'),'String',num2str(frame));
                 % read frame
                 for ch = channels

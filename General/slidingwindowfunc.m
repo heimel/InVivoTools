@@ -29,6 +29,15 @@ function [Yn,Xn,Yerr] = slidingwindowfunc(X, Y, start, stepsize, stop, windowsiz
 %
 % 200X, Steve Van Hooser (?), 2016 Alexander Heimel
 
+if nargin<8 || isempty(zeropad)
+    zeropad = 0;
+end
+if nargin<7 || isempty(func)
+    func = 'mean';
+end
+if nargin<6 || isempty(zeropad)
+    zeropad = 0;
+end
 if nargin<3 || isempty(start)
     start = min(X);
 end
@@ -38,9 +47,7 @@ end
 if nargin<4 || isempty(stepsize)
     stepsize = (stop-start)/100;
 end
-if nargin<8 || isempty(zeropad)
-    zeropad = 0;
-end
+
 
 Xn = []; 
 Yn = []; 
@@ -48,10 +55,10 @@ Yerr = [];
 for i=start:stepsize:stop-windowsize
 	INDs = find(X>=i&X<i+windowsize);
 	
-	if zeropad||~isempty(INDs),
+	if zeropad||~isempty(INDs)
 		Xn(end+1) = mean([i i+windowsize]);
 	end;
-	if ~isempty(INDs),
+	if ~isempty(INDs)
 		eval(['Yn(end+1)=' func ' (Y(INDs));']);
         y = Y(INDs)';
         if nargout==3&&nargin==8
