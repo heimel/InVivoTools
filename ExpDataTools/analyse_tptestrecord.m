@@ -86,7 +86,7 @@ end
 
 % create measure fields for labels and types
 labels = {};
-for i=1:length(record.ROIs.celllist);
+for i=1:length(record.ROIs.celllist)
     labels = [labels{:},record.ROIs.celllist(i).labels'];
 end
 labels = uniq(sort(labels));
@@ -311,7 +311,7 @@ else
 end
 
 if is_movie
-    record = tp_analyse_movie( record );
+    record = tp_analyse_movie( record, verbose);
     record = add_distance2preferred_stimulus( record );
 end
 

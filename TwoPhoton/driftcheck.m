@@ -19,7 +19,7 @@ function [dr,y] = driftcheck(im1,im2,searchX, searchY,brightnesscorrect)
 %
 %
 
-bestavgcorr = [-Inf];
+bestavgcorr = -Inf;
 dr = [NaN NaN];
 y = NaN;
 

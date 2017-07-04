@@ -1,4 +1,4 @@
-function [im] = tpcheckroidrift(record, channel, roirect, roiinds, roix,roiy,roiname, plotit)
+function [im] = tpcheckroidrift(record, channel, roirect, roiinds, roix,roiy,roiname)
 
 %  TPCHECKROIDRIFTNAME - Checks twophoton drift correction performance
 %
@@ -15,12 +15,14 @@ function [im] = tpcheckroidrift(record, channel, roirect, roiinds, roix,roiy,roi
 %
 %  CHANNEL is the channel to be read.
 
+tpdriftplot(record,channel);
+
 pv = tppreview(record,1,1,channel);
 im0 = zeros(size(pv));
 try
     im0(roirect(2):roirect(4),roirect(1):roirect(3)) = 1;
 catch
-    disp('ROI has (partially) drifted out of field of view.');
+    logmsg('ROI has (partially) drifted out of field of view.');
 end
 rectinds = find(im0);
 rctx= roirect(3)-roirect(1)+1;
@@ -49,59 +51,58 @@ t_ = reshape(t_,rctx*rcty,length(data{1,1})/(rctx*rcty));
 ims = reshape(data{1,2},length(roiinds),length(data{1,2})/length(roiinds));
 t2 = reshape(t{1,2},length(roiinds),length(t{1,2})/length(roiinds));
 
-numframes = size(im,3); 
+numframes = size(im,3);
 i = 1;
 
 im1 = mean(im(:,:,1:min(5,numframes)));
 
 drt = [0 0 mean(t_(:,1))];
 
-if plotit
-    while i<numframes
-        framestart = i;
-        im_ = zeros(10*size(im,1),10*size(im,2));
-        ctr = [ ];
-        for j=1:10
-            for k=1:10
-                if i<numframes
-                    im_(1+(j-1)*size(im,1):j*size(im,1),1+(k-1)*size(im,2):k*size(im,2))=im(:,:,i);
-                    ctr(end+1,1:2)=[median(1+(j-1)*size(im,1):j*size(im,1)) median(1+(k-1)*size(im,2):k*size(im,2))];
-                    if mod(i,3)==0
-                        im2 = mean(im(:,:,i:min(i+5,numframes)));
-                        drt(end+1,:) = [driftcheck(im1, im2, -10:2:10, -10:2:10 ,1) mean(t_(:,i))];
-                    end;
-                    i = i + 1;
+while i<numframes
+    framestart = i;
+    im_ = zeros(10*size(im,1),10*size(im,2));
+    ctr = [ ];
+    for j=1:10
+        for k=1:10
+            if i<numframes
+                im_(1+(j-1)*size(im,1):j*size(im,1),1+(k-1)*size(im,2):k*size(im,2))=im(:,:,i);
+                ctr(end+1,1:2)=[median(1+(j-1)*size(im,1):j*size(im,1)) median(1+(k-1)*size(im,2):k*size(im,2))];
+                if mod(i,3)==0
+                    im2 = mean(im(:,:,i:min(i+5,numframes)));
+                    drt(end+1,:) = [driftcheck(im1, im2, -10:2:10, -10:2:10 ,1) mean(t_(:,i))];
                 end;
+                i = i + 1;
             end;
         end;
-        frameend = i;
-        imagedisplay(im_); hold on;
-        if ~isempty(roix)
-            for j=1:size(ctr,1)
-                plot(roix+ctr(j,2),roiy+ctr(j,1),'b-');
-            end;
-        end;
-        title(['Extracted frame ' int2str(framestart) ' to ' int2str(frameend) ' of ' roiname '.']);
     end;
-    figure;
-    subplot(4,1,1);
-    plot(drt(:,3),drt(:,1),'r'); hold on; plot(drt(:,3),drt(:,2),'b');
-    title(['Drift statistics for ' roiname ' : red is x, blue is y.']);
+    frameend = i;
+    imagedisplay(im_); hold on;
+    if ~isempty(roix)
+        for j=1:size(ctr,1)
+            plot(roix+ctr(j,2),roiy+ctr(j,1),'b-');
+        end;
+    end;
+    title(['Extracted frame ' int2str(framestart) ' to ' int2str(frameend) ' of ' roiname '.']);
+end
 
-    subplot(4,1,2);
-    plot(mean(t2,1),mean(ims,1),'k-o');
-    title('Value at each time point.');
-    A = axis;
+figure;
+subplot(4,1,1);
+plot(drt(:,3),drt(:,1),'r'); hold on; plot(drt(:,3),drt(:,2),'b');
+title(['Drift statistics for ' roiname ' : red is x, blue is y.']);
 
-    subplot(4,1,3);
-    plot(mean(t2,1),mean(ims,1)/max(mean(ims,1)),'k-o');
-    hold on;
-    if havestims, stimscriptgraph(record,1); end;
-    axis([A(1:2) 0 3]);
+subplot(4,1,2);
+plot(mean(t2,1),mean(ims,1),'k-o');
+title('Value at each time point.');
+A = axis;
 
-    subplot(4,1,4);
-    plot(mean(t_,1)',1:numframes,'k-o');
-    title('Relationship between time and frames');
-    xlabel('Time (s)'); 
-    ylabel('Frame (#)');
-end;
+subplot(4,1,3);
+plot(mean(t2,1),mean(ims,1)/max(mean(ims,1)),'k-o');
+hold on;
+if havestims, stimscriptgraph(record,1); end;
+axis([A(1:2) 0 3]);
+
+subplot(4,1,4);
+plot(mean(t_,1)',1:numframes,'k-o');
+title('Relationship between time and frames');
+xlabel('Time (s)');
+ylabel('Frame (#)');

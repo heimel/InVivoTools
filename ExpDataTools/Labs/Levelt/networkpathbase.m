@@ -15,13 +15,15 @@ if ~isempty(base_persistent)
     return
 end
 
-address = java.net.InetAddress.getLocalHost;
-IPaddress = char(address.getHostAddress);
-if ~strcmp(IPaddress(1:6),'192.87') && ~strcmp(IPaddress,'169.254.112.74') % at the NIN or G2P
-    logmsg('Not at the NIN, thus no networkpath');
-    base = '.';
-    base_persistent = base;
-	return
+if usejava('jvm')
+    address = java.net.InetAddress.getLocalHost;
+    IPaddress = char(address.getHostAddress);
+    if ~strcmp(IPaddress(1:6),'192.87') && ~strcmp(IPaddress,'169.254.112.74') % at the NIN or G2P
+        logmsg('Not at the NIN, thus no networkpath');
+        base = '.';
+        base_persistent = base;
+        return
+    end
 end
 
 if isunix

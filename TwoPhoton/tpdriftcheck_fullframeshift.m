@@ -1,10 +1,8 @@
-function [dr] = tpdriftcheck_fullframeshift(record, channel, searchx, searchy, refrecord, refsearchx, refsearchy, howoften, avgframes)
-
+function dr = tpdriftcheck_fullframeshift(record, channel, searchx, searchy, refrecord, refsearchx, refsearchy, howoften, avgframes, verbose)
 %  TPDRIFTCHECK - Checks two-photon data for drift
 %
-%    [DR,IM3] = TPDRIFTCHECK(DIRNAME,CHANNEL,SEARCHX, SEARCHY,
-%       REFDIRNAME,REFSEARCHX, REFSEARCHY, ...
-%	HOWOFTEN,AVGFRAMES, WRITEIT, PLOTIT)
+%    DR = TPDRIFTCHECK(DIRNAME,CHANNEL,SEARCHX, SEARCHY,
+%       REFDIRNAME,REFSEARCHX, REFSEARCHY, HOWOFTEN, AVGFRAMES, VERBOSE)
 %
 %  Reports drift across a twophoton time-series record.  Drift is
 %  calculated by computing the correlation for pixel shifts within
@@ -13,9 +11,8 @@ function [dr] = tpdriftcheck_fullframeshift(record, channel, searchx, searchy, r
 %  REFSEARCHY are the offsets to check during the initial
 %  effort to find a match between frames acquired in different
 %  directories.
-%
-%  DIRNAME is the directory in which to check for drift
-%  relative to image IM0.  CHANNEL is the channel to be read.
+%  
+%  CHANNEL is the channel to be read.
 %
 %  The fraction of frames to be searched is specified in HOWOFTEN.  If
 %  HOWOFTEN is 1, all frames are searched; if HOWOFTEN is 10, only one
@@ -23,21 +20,29 @@ function [dr] = tpdriftcheck_fullframeshift(record, channel, searchx, searchy, r
 %
 %  AVGFRAMES specifies the number of frames to average together.
 %
-%  If WRITEIT is 1, then a 'driftcorrect.mat' file is written to the
-%  directory, detailing shifted frames.
-%
 %  DR is a two-dimensional vector that contains the X and Y shifts for
 %  each frame.
 %
-%  If PLOTIT is 1, the results are plotted in a new figure.
-%
+% 200X, Steve Van Hooser
+% 200X-2017, Alexander Heimel
 
-
+if nargin<10 || isempty(verbose)
+    verbose = true;
+end
+if nargin<9 || isempty(avgframes)
+    avgframes = 5;
+end
+if nargin<8 || isempty(howoften)
+    howoften = 10;
+end
+if isempty(channel)
+    channel = 1;
+end
 if isempty(refrecord)
     refrecord = record;
 end
 
-im0 = tppreview(refrecord,avgframes,1,channel);  % the first image
+im0 = tppreview(refrecord,avgframes,1,channel,[],[],verbose);  % the first image
 params = tpreadconfig(record);
 n_timestamps = length(params.frame_timestamp);
 
@@ -60,9 +65,13 @@ logmsg(['Searching range ' int2str(searchx) ' for x.']);
 logmsg(['Searching range ' int2str(searchy) ' for y.']);
 
 t = [];
-hwaitbar = waitbar(0,'Checking frames...');
+if verbose
+    hwaitbar = waitbar(0,'Checking frames...');
+end
 for f=1:howoften:(n_timestamps-avgframes)
-    hwaitbar = waitbar(f/(n_timestamps-avgframes));
+    if verbose
+        hwaitbar = waitbar(f/(n_timestamps-avgframes));
+    end
     t(end+1) = 1;
     im1 = zeros(params.lines_per_frame,params.pixels_per_line);
     for j=0:avgframes-1
@@ -76,8 +85,12 @@ for f=1:howoften:(n_timestamps-avgframes)
         refisdifferent = 0;
     end
     drlast = dr(length(t),[1 2]);
-    logmsg(['Frame ' num2str(f) ' shift is ' int2str(dr(end,:))]);
+    if verbose
+        logmsg(['Frame ' num2str(f) ' shift is ' int2str(dr(end,:))]);
+    end
     xrange = searchx; 
     yrange = searchy;
 end
-close(hwaitbar);
+if verbose
+    close(hwaitbar);
+end

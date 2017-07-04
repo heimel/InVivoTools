@@ -1131,10 +1131,13 @@ switch command
         results_tptestrecord(temprecord);
     case 'infoBt'
         tpstackinfo(ud.record);
+    case 'correctDriftBt'
+        tpdriftcheck(ud.record,ud.channel,ud.ref_record,ud.driftcorrectionmethod,true,true);
+        tpdriftplot(ud.record,ud.channel);
     case 'checkDriftBt'
         dirname = experimentpath(ud.record);
         val = get(ft(fig,'celllist'),'value');
-        ancestors = {'.'};%getallparents(ud,dirname);
+        ancestors = {'.'};
         changes = getChanges(ud,val,dirname,ancestors);
         if ~changes.present
             errormsg('Cell is not ''present'' in this recording.');
@@ -1144,7 +1147,7 @@ switch command
         roirect = round([ -20 -20 20 20] + [centerloc centerloc]);
         roiname=['cell ' int2str(ud.celllist(val).index) ' ref ' ud.celllist(val).dirname];
         tpcheckroidrift(ud.record,ud.channel,roirect,changes.pixelinds,changes.xi-centerloc(1),...
-            changes.yi-centerloc(2),roiname,1);
+            changes.yi-centerloc(2),roiname);
     case 'closeFiguresBt'
         close_figs;
     case 'checkAlignmentBt'
@@ -1154,16 +1157,16 @@ switch command
             dirname1 = strtrim(currstr_{sliceind1});  % currently selected
         else
             logmsg('No directories in list to examine.');
-            return;
+            return
         end;
         sliceind2 = listdlg('ListString',currstr_,'PromptString','Select dir to compare','SelectionMode','single');
         if isempty(sliceind2)
-            return;
+            return
         else
             dirname2 = strtrim(currstr_{sliceind2});
         end;
-        ancestors2 = {'.'};%getallparents(ud,dirname2);
-        ancestors1 = {'.'};%getallparents(ud,dirname1);
+        ancestors2 = {'.'};
+        ancestors1 = {'.'};
         if isempty(intersect(dirname1,ancestors2))
             errormsg(['Error checking alignment: ' dirname1 ' and ' dirname2 ' are not recordings at the same place.']);
             return
@@ -1207,8 +1210,6 @@ switch command
         thresh = str2double(get(ft(fig,'mapthreshEdit'),'string'));
         listofcells = getpresentcells(ud,fig);
         tpquickmap(ud.record,ud.channel,ud.record.measures,listofcells,1,'threshold',thresh);
-    case 'correctDriftBt'
-        tpdriftcheck(ud.record,ud.channel,ud.ref_record,ud.driftcorrectionmethod,1,1);
     case 'ImageMathBt'
         str = get(ft(fig,'ImageMathEdit'),'string');
         op_minus = find(str=='-');

@@ -10,7 +10,7 @@ db = getdb( record.datatype );
 curr_record_crit = recordfilter( record,db);
 curr_ind = find_record(db,curr_record_crit);
 if length(curr_ind)~=1
-    disp('ADD_DISTANCE2PREFERRED_STIMULUS: Could not uniquely identify current record.');
+    logmsg('Could not uniquely identify current record.');
     return
 end
 switch record.datatype
@@ -32,7 +32,7 @@ switch record.datatype
         ind = setdiff(  find_record(db,similar_record_crit),curr_ind);
         
         if isempty(ind)
-            disp(['ADD_DISTANCE2PREFERRED_STIMULUS: No other reliable records matching: ' similar_record_crit]);
+            logmsg(['No other reliable records matching: ' similar_record_crit]);
             return
         end
     case 'ec'
@@ -49,11 +49,11 @@ switch record.datatype
         ind = setdiff(  find_record(db,similar_record_crit),curr_ind);
         
         if isempty(ind)
-            disp(['ADD_DISTANCE2PREFERRED_STIMULUS: No other reliable records matching: ' similar_record_crit]);
+            logmsg(['No other reliable records matching: ' similar_record_crit]);
             return
         end
     otherwise
-        disp(['ADD_DISTANCE2PREFERRED_STIMULUS: Datatype ' record.datatype ' is not implemented.']);
+        logmsg(['Datatype ' record.datatype ' is not implemented.']);
         return
 end
 
@@ -69,7 +69,7 @@ end
 stimparams = getparameters(stims.saveScript);
 
 if isempty(stimparams)
-    disp('ADD_DISTANCE2PREFERRED_STIMULUS: No stimulus parameters found.');
+    logmsg('No stimulus parameters found.');
     return
 end
 
@@ -125,13 +125,11 @@ for i=ind
         continue % i.e. not varied in prevrec
     end
     if ~isfield(record.measures,'index')
-        disp(['ADD_DISTANCE2PREFERRED: Measures lacks index field. ' recordfilter(record)]);
-        errordlg(['ADD_DISTANCE2PREFERRED: Measures lacks index field. ' recordfilter(record)],'Add distance2preferred');
+        errormsg(['Measures lacks index field. ' recordfilter(record)]);
         continue
     end
     if ~isfield(prevrec.measures,'index')
-        disp(['ADD_DISTANCE2PREFERRED: Measures lacks index field. ' recordfilter(prevrec)]);
-        errordlg(['ADD_DISTANCE2PREFERRED: Measures lacks index field. ' recordfilter(prevrec)],'Add distance2preferred');
+        errormsg(['Measures lacks index field. ' recordfilter(prevrec)]);
         continue
     end
     if (isfield(stimparams,prevvariable) && length(stimparams.(prevvariable))==1)...
@@ -186,5 +184,5 @@ if isempty( h_db ) % not open, load from disk
     db = load_testdb(datatype);
 else
     ud = get(h_db,'userdata');
-    db=ud.db;
+    db = ud.db;
 end

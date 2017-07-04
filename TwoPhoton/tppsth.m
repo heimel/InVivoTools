@@ -1,7 +1,7 @@
-function record = tppsth(record, pixels)
+function record = tppsth(record, pixels, verbose)
 % TPPSTH - Gives a peristimulus time histogram
 %
-%  RECORD = TPPSTH(RECORD, PIXELS_OR_DATA)
+%  RECORD = TPPSTH(RECORD, PIXELS_OR_DATA, VERBOSE)
 %
 %  RECORD is contains a struct describing the data.
 %  PIXELS_OR_DATA can be a cell list of pixel indices that specifies
@@ -14,7 +14,8 @@ function record = tppsth(record, pixels)
 %   RECORD.measures(i).psth_response{1}  % response for ROI i
 %
 %  200X-200X Steve VanHooser
-%  200X-2014 Alexander Heimel
+%  200X-2017 Alexander Heimel
+
 
 
 %  DATA is a cell list of the individual responses, T are the time points for
@@ -29,6 +30,10 @@ function record = tppsth(record, pixels)
 %
 %  AVG is the average response in each time window.  AVG is a cell
 %  matrix; AVG{i}{j} is the average response for cell i for stimulus j.
+
+if nargin<3 || isempty(verbose)
+    verbose = true;
+end
 
 params = tpprocessparams(record ); 
 
@@ -54,8 +59,8 @@ else
 end
 
 if theblankid==-1 % get blank id stim
-    for i=1:numStims(s.saveScript),
-        if isfield(getparameters(get(s.saveScript,i)),'isblank'),
+    for i=1:numStims(s.saveScript)
+        if isfield(getparameters(get(s.saveScript,i)),'isblank')
             theblankid = i;
             break
         end
@@ -65,13 +70,15 @@ end
 
 mydata = {}; myt = {};
 masterint = []; masterspint = []; masterintind = []; masterspintind = [];
-hwait = waitbar(0,'Calculating PSTH');
+if verbose
+    hwait = waitbar(0,'Calculating PSTH');
+end
 for j=1:length(stimcodes)
     stimcodelocs = find(do==stimcodes(j));
     interval = [];
     spinterval = [];
     
-    for i=1:length(stimcodelocs),
+    for i=1:length(stimcodelocs)
         dp = struct(getdisplayprefs(get(s.saveScript,do(stimcodelocs(i)))));
         BGpretime = dp.BGpretime;
         if isnan(BGpretime) 
@@ -117,7 +124,7 @@ window_start = min(0,min(masterspint(:,1)-masterint(:,1)))-params.psth_windowsiz
 window_end = max(max(masterint(:,2)-masterint(:,1)),max(masterspint(:,2)-masterint(:,1)))+params.psth_windowsize/2;
 
 n_selected_rois = size(data,2); 
-for j=1:length(stimcodes), % different uniq stimuli
+for j=1:length(stimcodes) % different uniq stimuli
     theindssp = find(masterspintind==j); % all intervals with spont. data for stimulus j
     theinds = find(masterintind==j); % all intervals with data for stimulus j
     for k=1:n_selected_rois
@@ -187,9 +194,13 @@ for j=1:length(stimcodes), % different uniq stimuli
         
         warning(warns);
     end % roi k
-    waitbar(j/length(stimcodes));
+    if verbose
+        waitbar(j/length(stimcodes));
+    end
 end % stim j
-close(hwait); 
+if verbose
+    close(hwait);
+end
 
 for i=1:n_selected_rois
      record.measures(i).psth_tbins{1} = cat(1,bins{:,i});
