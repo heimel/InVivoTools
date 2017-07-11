@@ -323,6 +323,22 @@ switch lower(record.experiment)
 end
 params.blind_stacks_with_specific_shuffle = {};
 
+% drift correction
+
+% SEARCHX and SEARCHY are vectors containing offsets from 0 (no drift).  REFSEARCHX and
+%  REFSEARCHY are the offsets to check during the initial
+%  effort to find a match between frames acquired for a different
+%  record.
+params.drift_correction_searchx = -6:2:6; % search x range in pixels
+params.drift_correction_searchy = -6:2:6; % search y range in pixels
+params.drift_correction_refsearchx = -100:10:100; % search x range in pixels wrt reference
+params.drift_correction_refsearchy = -100:10:100; % search y range in pixels wrt reference
+params.drift_correction_howoften = 10; % skip N-1 frames for each corrected frame
+params.drift_correction_avgframes = 5; % average frames before drift correcting
+params.drift_field_of_view_margins = [10 10 10 10]; % margins in pixels, left, right, top, bottom
+params.drift_correction_skip_firstframes = 5; % skip frames at start
+% use 0 for no margins
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % keep at bottom

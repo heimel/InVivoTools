@@ -7,7 +7,8 @@ function im = tppreview(record, selFrames, firstFrames, channel,opt, mode, verbo
 %  directory name to be opened, and NUMFRAMES is the number of
 %  frames to read.  If FIRSTFRAMES is 1, then the first SELFRAMES
 %  frames will be read; If FIRSTFRAMES is 0, the frames will be taken
-%  randomly from those available.
+%  randomly from those available. If FIRSTFRAMES > 1 then start at
+%  FIRSTFRAMES (i.e. skip FIRSTFRAMES-1 frames at start)
 %
 %  CHANNEL is the channel to be read.  If it is empty, then
 %  all channels will be read and third dimension of im will
@@ -18,7 +19,8 @@ function im = tppreview(record, selFrames, firstFrames, channel,opt, mode, verbo
 %  maximum projection is used. For MODE is 3 an maximum projection across
 %  the X-axis is taken, for MODE 4 the same through the Y-axis
 %
-%  2008, Steve Van Hooser, 2010-2015 adapted by Alexander Heimel
+%  2008, Steve Van Hooser
+%  2010-2017, Alexander Heimel
 %
 
 if nargin<7 || isempty(verbose) 
@@ -75,13 +77,15 @@ else
     first = 1;
 end
 
-switch firstFrames
-    case 0
-        N = randperm(total_nFrames);
+if firstFrames == 0
+    N = randperm(total_nFrames);
         frame_selection = sort(N(1:numFrames));
-    case 1
+elseif firstFrames == 1
         frame_selection = first:numFrames;
-end;
+else % skip some
+    frame_selection = firstFrames:(firstFrames+numFrames);
+end
+
 
 warning('ON','TPREADFRAME:MEM');
 

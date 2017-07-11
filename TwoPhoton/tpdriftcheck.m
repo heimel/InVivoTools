@@ -49,25 +49,18 @@ if ~recompute && exist(driftfilename,'file')
     return
 end
 
-howoften = 10;
-avgframes = 5; % only implemented for tpdriftcheck_steve
-
 params = tpreadconfig(record);
-total_n_frames = params.number_of_frames;
 
 switch method
     case 'fullframeshift'
-        searchx = -6:2:6;
-        searchy = -6:2:6;
-        refsearchx = -100:10:100;
-        refsearchy = -100:10:100;
-        dr = tpdriftcheck_fullframeshift(record, channel, searchx, searchy, ...
-            refrecord, refsearchx, refsearchy, howoften, avgframes, verbose);
+        [dr,howoften,avgframes] = ...
+            tpdriftcheck_fullframeshift(record, channel, refrecord, verbose);
     case 'greenberg'
-        analysed_n_frames = fix( (total_n_frames-1)/howoften+1);
+        howoften = 10;
+        analysed_n_frames = fix( (params.number_of_frames-1)/howoften+1);
         data = zeros(params.lines_per_frame,params.pixels_per_line,analysed_n_frames,'uint8');
         cfr = 1;
-        for fr = 1:howoften:total_n_frames
+        for fr = 1:howoften:params.number_of_frames
             data(:,:,cfr) = tpreadframe(record,channel,fr);
             cfr = cfr+1;
         end
@@ -79,8 +72,8 @@ end
 logmsg(['Computed drift correction for ' recordfilter(record)]);
 
 % interpolate values
-newframeind = 1:total_n_frames;
-frameind = 1:howoften:total_n_frames-avgframes;
+newframeind = 1:params.number_of_frames;
+frameind = 1:howoften:params.number_of_frames-avgframes;
 switch method
     case 'fullframeshift'
         drift.x = round(interp1(frameind,dr(:,1),newframeind,'linear','extrap')');

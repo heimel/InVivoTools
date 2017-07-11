@@ -23,7 +23,6 @@ bestavgcorr = -Inf;
 dr = [NaN NaN];
 y = NaN;
 
-
 % reduce from RGB to single value
 if length(size(im1))==3 % i.e. rgb
     im1=nanmean(im1,3);
@@ -57,15 +56,17 @@ end
 sz = size(im1);
 
 if exist('xcorr2dlag','file')
-    % new method with mex file
+    % using mex file
     norm = repmat(sz(1)-abs(searchY)',1,length(searchX)).* ...
         repmat(sz(2)-abs(searchX),length(searchY),1);
     
     avgcorr = xcorr2dlag(im1,im2,searchX,searchY)./norm;
-    [y]=max(max(avgcorr));
+    [y] = max(max(avgcorr));
     [i,j] = ind2sub(size(avgcorr),find(avgcorr==y));
     dr = [searchX(j(1)) searchY(i(1))];
 else % lacking compiled mex-file for xcorr2dlag
+    warning('DRIFTCHECK:NO_MEX','Not using mex file. Will be slow. Compile xcorr2dlag.');
+    warning('off','DRIFTCHECK:NO_MEX');
     for x=searchX
         for y=searchY
             if x>=0
