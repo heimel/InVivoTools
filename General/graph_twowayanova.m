@@ -43,7 +43,7 @@ logmsg(['Source 2   : p = ' num2str(p(2),2)]);
 logmsg(['Interaction: p = ' num2str(p(3),2)]);
 
 ctype = 'tukey-kramer';
-results = multcompare(stats,'Dimension',[1 2],'ctype' ,ctype);
+results = multcompare(stats,'Dimension',[1 2],'ctype' ,ctype,'display','off');
 for i=1:size(results,1)
     logmsg(['group ' num2str(results(i,1)) ' vs group ' num2str(results(i,2)) ': p = ' num2str(results(i,6),2) ' posthoc ' ctype  ]);
 end

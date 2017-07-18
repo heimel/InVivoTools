@@ -3,13 +3,17 @@ function [record,hgraph] = compute_graphrecord(record,db,hgraph)
 %
 %   [record,hgraph] = compute_graphrecord(record,db,hgraph)
 %
-% 2015, Alexander Heimel
+% 2015-2017, Alexander Heimel
 
 if nargin<3 
     hgraph = [];
 end
 if nargin<2
     db = [];
+end
+
+if isempty(record)
+	return
 end
 
 if ~isempty(record.add2graph)
