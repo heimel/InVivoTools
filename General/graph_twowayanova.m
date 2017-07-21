@@ -38,9 +38,9 @@ for v1 = 1:levels(1)
 end % v1
 
 [p,tbl,stats] = anovan( flatten(values)',{g1,g2},'model','interaction','display','off' );
-logmsg(['Source 1   : p = ' num2str(p(1),2)]);
-logmsg(['Source 2   : p = ' num2str(p(2),2)]);
-logmsg(['Interaction: p = ' num2str(p(3),2)]);
+logmsg(['Source 1   : p = ' num2str(p(1),2) ', F = ' num2str(tbl{2,6},2)]);
+logmsg(['Source 2   : p = ' num2str(p(2),2) ', F = ' num2str(tbl{3,6},2)]);
+logmsg(['Interaction: p = ' num2str(p(3),2) ', F = ' num2str(tbl{4,6},2)]);
 
 ctype = 'tukey-kramer';
 results = multcompare(stats,'Dimension',[1 2],'ctype' ,ctype,'display','off');
