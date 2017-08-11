@@ -396,6 +396,9 @@ switch style
             bins=eval(bins);
         end
         for i=1:length(y)
+            % remove NaNs
+            y{i} = y{i}(~isnan(y{i}));
+            
             [cf_mean,histbin_centers,h.cumul(i)]=plot_cumulative( y{i},bins,color{i},1,prefax,1);
             set(h.cumul(i),'linewidth',linewidth);
         end

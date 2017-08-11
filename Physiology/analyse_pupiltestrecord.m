@@ -29,10 +29,7 @@ pupil_xyrs(:,1) = pupil_xy(:,2);
 pupil_xyrs(:,2) = pupil_xy(:,3);
 pupil_xyrs(:,3) = sqrt(pupil_area(:,2));
 
-% ind_nanstart = find(pupil_xyrs(:,3)==0,1);
-% while ~isempty(ind)
-%     ind
-
+% replace 0's by NaN
 ind_nan = pupil_xyrs(:,3)==0;
 for v = 1:n_vars
     pupil_xyrs(ind_nan,v) = NaN;
@@ -42,8 +39,50 @@ end
 pupil_xyrs(:,1) = pupil_xyrs(:,1) - nanmedian(pupil_xyrs(:,1));
 pupil_xyrs(:,2) = pupil_xyrs(:,2) - nanmedian(pupil_xyrs(:,2));
 
+% flip y-axis
+pupil_xyrs(:,2) = -pupil_xyrs(:,2);
+
+% jitter to remove discretization artefact
+%  figure;
+%  subplot(2,1,1);
+%  plot(pupil_xyrs(:,1),pupil_xyrs(:,2),'.');
+
+scatter = 1; %pixel
+if scatter>0
+    pupil_xyrs(:,1) = pupil_xyrs(:,1) + scatter*(rand(size(pupil_xyrs(:,1)))-0.5);
+    pupil_xyrs(:,2) = pupil_xyrs(:,2) + scatter*(rand(size(pupil_xyrs(:,2)))-0.5);
+end
+
+%    pupil_xyrs(:,1) = 2*(rand(size(pupil_xyrs(:,1)))-0.5);
+%   pupil_xyrs(:,2) =  2*(rand(size(pupil_xyrs(:,2)))-0.5);
+
+
+%  subplot(2,1,2);
+%  plot(pupil_xyrs(:,1),pupil_xyrs(:,2),'.');
+%pupil_xyrs(:,1) = pupil_xyrs(:,1) + normrnd(0,1,size(pupil_xyrs(:,1)));
+%pupil_xyrs(:,2) = pupil_xyrs(:,2) + normrnd(0,1,size(pupil_xyrs(:,2)));
+
+% pupil_xyrs(:,1) =  normrnd(0,1,size(pupil_xyrs(:,1)));
+% pupil_xyrs(:,2) = normrnd(0,1,size(pupil_xyrs(:,2)));
+
+
+% remove outlying detection errors
+% figure;
+% subplot(2,1,1);
+% plot(pupil_xyrs(:,1),pupil_xyrs(:,2),'.');
+remove_outliers = true;
+if remove_outliers
+    r = sqrt(pupil_xyrs(:,1).^2 + pupil_xyrs(:,2).^2);
+    ind  = r>4*nanstd(r);
+    pupil_xyrs(ind,1) = NaN;
+    pupil_xyrs(ind,2) = NaN;
+end
+% subplot(2,1,2);
+% plot(pupil_xyrs(:,1),pupil_xyrs(:,2),'.');
+
 % median filtering
 span = round(par.averaging_window/sampletime);
+span = 0; % remove this line if interested in speed
 if span>0
     pupil_xyrs(:,3) = movmedian( pupil_xyrs(:,3),span,'omitnan','Endpoints','fill');
     pupil_xyrs(:,1) = movmedian( pupil_xyrs(:,1),span,'omitnan','Endpoints','fill');
@@ -57,6 +96,10 @@ if span>0
     end
 end
 
+% figure;
+% plot(pupil_xyrs(:,1),pupil_xyrs(:,2),'.');
+
+
 % change to degrees
 for i = 1:3
     pupil_xyrs(:,i) =  asin(pupil_xyrs(:,i)/par.eye_radius_pxl)/pi*180;
@@ -69,7 +112,7 @@ if span>0
 end
 
 % displacement from average position
-pupil_xyrs(:,5) =  sqrt(pupil_xyrs(:,1).^2 + pupil_xyrs(:,2).^2); % pixels 
+pupil_xyrs(:,5) =  sqrt(pupil_xyrs(:,1).^2 + pupil_xyrs(:,2).^2); % deg
 
 stims = getstimsfile(record);
 
@@ -84,7 +127,7 @@ if verbose
     hold on
     ylabel('Pupil radius (deg)');
     xlim([pupil_t(1) pupil_t(end)]);
-        
+    
     subplot(2,2,2) % first period
     plot(pupil_t,pupil_xyrs(:,3));
     box off
@@ -111,6 +154,7 @@ if verbose
     plot(pupil_t,pupil_xyrs(:,2));
     plot_stimulus_timeline(stims,period,[],true,false);
     xlabel('Time (s)');
+    
     
 end
 
@@ -158,6 +202,7 @@ ind_pretime = (t<0  & t>t(1)+par.separation_from_prev_stim_off );
 measures.variable = paramname;
 measures.range = range;
 
+
 % mean response
 measures.adaptation_pupil_r = nanmean(xyrs_all(:,ind_stimtime,3),2);
 measures.psth_t = t;
@@ -180,13 +225,17 @@ for i = 1:length(range)
     % xyr_response is mean over time post stimulus onset minus
     %      mean over time pre stimulus onset
     % xyr_response(n_stimuli,{x,y,r})
-    xyrs_pretime = nanmean(xyrs_all(:,ind_pretime,:),2) ;
-
+    
+    xyrs_pretime = nanmedian(xyrs_all(:,ind_pretime,:),2) ;
+    %    xyrs_pretime = nanmean(xyrs_all(:,ind_pretime,:),2) ;
     
     xyrs_response = nanmean(xyrs_all(:,ind_stimtime,:),2) - ...
         xyrs_pretime;
     
-   
+    xyrs_stim = xyrs_all;
+    
+    xyrs_stim = xyrs_stim - repmat(xyrs_pretime,1,41,1); % subtract baseline
+    xyrs_stim = xyrs_stim(:,ind_stimtime,:);
     
     for v = 1:n_vars
         measures.(vars{v})(i) = nanmean(xyrs_response(ind,v)); % mean over stims
@@ -194,11 +243,32 @@ for i = 1:length(range)
         measures.(['psth_' vars{v}])(i,:) = nanmean(xyrs_all(ind,:,v)); % mean over stims
         measures.(['psth_' vars{v} '_sem'])(i,:) = nanstd(xyrs_all(ind,:,v))/sqrt(length(ind));
         measures.([vars{v} '_baseline'])(i) =  nanmean(xyrs_pretime(ind,v)); % mean over stims
+        
+        measures.([vars{v} '_stim'])(i,:) = flatten(xyrs_stim(ind,:,v)'); % large, as it contains all points
     end % var v
 end % range i
 for v = 1:n_vars
     measures.([vars{v} '_baseline']) = nanmean(measures.([vars{v} '_baseline']));
 end
+
+
+% rotate to horizontal and vertical depending on camera angle
+phi = record.eye_angle_deg / 180 *pi;
+x = measures.pupil_x_stim;
+y = measures.pupil_y_stim;
+measures.pupil_hor_stim =  x * cos(phi) + y * sin(phi);
+measures.pupil_ver_stim =  -x * sin(phi) + y * cos(phi);
+
+% compute speed
+dh = NaN(size(measures.pupil_hor_stim));
+dv = NaN(size(measures.pupil_hor_stim));
+dh(:,2:end) = diff(measures.pupil_hor_stim,[],2)/ sampletime; % deg/s
+dv(:,2:end) = diff(measures.pupil_ver_stim,[],2)/ sampletime; % deg/s
+dh(1:21:end) = NaN; % speeds between stimuli
+dv(1:21:end) = NaN; % speeds between stimuli
+measures.pupil_horspeed_stim = dh;
+measures.pupil_verspeed_stim = dv;
+
 record.measures = measures;
 
 

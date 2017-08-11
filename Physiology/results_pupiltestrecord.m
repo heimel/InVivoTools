@@ -58,5 +58,16 @@ for v = 1:n_vars
     ylabel(['Change ' labels{v}]);
 end % var v
 
+figure('Name',['Scatter-' tit] ,'NumberTitle','off')
+ for i = 1:length(measures.range)
+     subplot(2,ceil(length(measures.range)/2),i);
+     co = get(gca,'colororder');
+     plot(measures.pupil_x_stim(i,:),measures.pupil_y_stim(i,:),'.',...
+         'MarkerEdgeColor',co(i,:))
+     xlim([-30 30]);
+     ylim([-30 30]);
+ end
+ 
+
 logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_script'', record as ''global_record''.');
 
