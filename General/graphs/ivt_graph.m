@@ -13,7 +13,7 @@ function h=ivt_graph(y,x,varargin)
 %     'axishandle',[]
 %     'showpoints',{0,[1],2}
 %     'test',{['ttest'],'kruskal_wallis_test','none'}
-%     'spaced',{[0],1}    % spacing points in bar plot
+%     'spaced',{[0],1,2,3}    % spacing points in bar plot
 %     'color',0.7*[1 1 1]
 %     'errorbars',''
 %     'style',{['bar'],'xy','box','hist','cumul','rose'}
@@ -496,8 +496,6 @@ switch style
         end
         h.errorbar=plot_errorbars(y,x,ystd,ny,means,...
             errorbars,errorbars_sides,errorbars_tick,color); %#ok<*NODEF>
-
-
         
         % plot bars
         if ~exist('nobars','var')
