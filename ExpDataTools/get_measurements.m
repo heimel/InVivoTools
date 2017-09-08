@@ -71,6 +71,11 @@ end
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
 end
+if exist('collect_records','var')
+    collect_records = eval(collect_records); %#ok<NODEF>
+else
+    collect_records = false;
+end
 
 if ischar(measure)
     measuress=get_measures(measure,measuredb);
@@ -82,6 +87,10 @@ if isempty(measuress)
     return
 end
 measurelabel=measuress.label;
+
+if collect_records
+	collect_record(measuress,'measure');
+end
 
 if ischar(groups)
     groupss=get_groups(groups,groupdb);
@@ -245,8 +254,7 @@ for i_mouse=indmice
             end
         case 'group'
             logmsg('Changed behavior from group on 2013-04-27');
-    end
-    
+	end
     
     if ~isempty(res) && numel(res)==length(res)
         results=[results(:)' res(:)'];
@@ -284,6 +292,12 @@ end
 isolation='';
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
+end
+
+if exist('collect_records','var')
+    collect_records = eval(collect_records); %#ok<NODEF>
+else
+    collect_records = false;
 end
 
 if strcmpi(measure.datatype,'genenetwork')
@@ -455,6 +469,11 @@ for i_test=indtests
         logmsg('Sizes of RESULTS and DRESULTS are not equal');
     end
 end % test records
+
+if ~isempty(results) && collect_records
+	collect_record( mouse ,'mouse');
+end
+	    
 
 
 function [results, dresults, rawdata]=get_measurements_for_test(testrecord, mouse, measure, criteria,value_per,extra_options,linehead)

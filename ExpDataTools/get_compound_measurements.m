@@ -3,7 +3,7 @@ function [results,dresults,measurelabels,wordtypes]=get_compound_measurements(gr
 %
 %    [results,dresults,measurelabels,wordtypes] = get_compound_measurements(groups,measures,varargin)
 %
-% 2007-2014, Alexander Heimel
+% 2007-2017, Alexander Heimel
 %
 
 pos_args={...
@@ -298,7 +298,7 @@ switch operator
         operator = '&&';
 end
 
-switch [wordtypes{w-1} ',' wordtypes{w+1}];
+switch [wordtypes{w-1} ',' wordtypes{w+1}]
     case 'scalar,scalar'
         eval(['new_results=results_list{w-1}' operator 'results_list{w+1};']);
         warning('GET_COMPOUND_MEASUREMENTS:UNRELIABLE_DRESULTS',...

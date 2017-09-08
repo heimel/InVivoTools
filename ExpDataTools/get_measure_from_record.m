@@ -108,6 +108,12 @@ if exist('depth','var') && ~isempty(depth) && depth~=0 %#ok<NODEF>
         get = 0;
     end
 end
+if exist('collect_records','var')
+    collect_records = eval(collect_records); %#ok<NODEF>
+else
+    collect_records = false;
+end
+
 if ~isempty(layer)
     if isfield(record,'depth')
         depth=record.depth-record.surface;
@@ -142,6 +148,11 @@ if isfield(record,measure)
         val = double(val);
     end
     val_sem = NaN(size(val));
+    
+    if collect_records
+        collect_record(record,'test');
+    end
+    
     return
 end
 
@@ -453,6 +464,12 @@ end % next cell c
 
 if any(size(val)~=size(val_sem))
     logmsg('Sizes of VAL and VAL_SEM are not equal');
+end
+
+if collect_records
+    if collect_records
+        collect_record(record,'test');
+    end
 end
 
 

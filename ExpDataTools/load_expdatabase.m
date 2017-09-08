@@ -40,8 +40,11 @@ end
 
 whichexpdb = whichdb;
 if ~isempty(experiment) && ~strcmp(whichexpdb(max(1,end-length(experiment)):end),['_' experiment])
-    whichexpdb = [whichexpdb '_' experiment];
-    
+    if ~isempty(whichexpdb) && whichexpdb(end)=='*'
+        whichexpdb = [whichexpdb experiment];
+    else
+        whichexpdb = [whichexpdb '_' experiment];
+    end    
 end
 
 whichexpdb=[whichexpdb '.mat'];
