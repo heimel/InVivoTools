@@ -8,7 +8,7 @@ function fig=experiment_db( type, hostname )
 %     TYPE can be 'oi','ec','tp','wc'
 %     FIG returns handle to the database control figure
 %
-% 2005-2014, Alexander Heimel
+% 2005-2017, Alexander Heimel
 %
 
 if nargout==1
@@ -17,10 +17,7 @@ end
 
 color = 0.7*[1 1 1];
 
-if nargin < 1
-    type=[];
-end
-if isempty(type)
+if nargin < 1 || isempty(type)
     type='oi';
 end
 
@@ -32,7 +29,7 @@ if nargin<2
 end
 
 %defaults
-select_all_of_name_enabled=0;
+select_all_of_name_enabled = 0;
 blind_data_enabled = 0;
 reverse_data_enabled = 0;
 open_data_enable = 0;
@@ -56,10 +53,8 @@ switch type
         track_data_enable = 1;
 end
 
-
 % load database
 [db,filename]=load_testdb(type, hostname);
-
 
 if isempty(db)
     return
@@ -133,7 +128,7 @@ if isfield(db,'comment')
             multiline = true;
         end
     end
-    if multiline
+    if multiline && ~iscell(filename)
         logmsg('Flattened multiline comments');
         stat = checklock(filename);
         if stat~=1
@@ -259,7 +254,6 @@ if track_data_enable
     maxleft=max(maxleft,left);
 end
 
-
 h.analyse = ...
     uicontrol('Parent',h_fig, ...
     'Units','pixels', ...
@@ -304,7 +298,7 @@ if average_tests_enabled
         'ListboxTop',0, ...
         'Position',[left top buttonwidth buttonheight], ...
         'Tag','average_tests',...
-        'String','Average');
+        'String','Average'); %#ok<UNRCH>
     left=left+buttonwidth+colsep;
     maxleft=max(maxleft,left);
 end
@@ -318,7 +312,7 @@ if export_tests_enabled
         'ListboxTop',0, ...
         'Position',[left top buttonwidth buttonheight], ...
         'Tag','export_tests',...
-        'String','Export');
+        'String','Export'); %#ok<UNRCH>
     left=left+buttonwidth+colsep;
     maxleft=max(maxleft,left);
 end
@@ -407,7 +401,7 @@ set(h_fig,'UserData',ud);
 set(h.analyse,'Tag','analyse_testrecord_callback');
 
 set(h.results,'Enable','on');
-set(h.results,'Tag',['results_testrecord_callback']);
+set(h.results,'Tag','results_testrecord_callback');
 set(h.new,'Callback',...
     ['ud=get(gcf,''userdata'');ud=new_' type 'testrecord(ud);' ...
     'set(gcf,''userdata'',ud);control_db_callback(ud.h.current_record);']);
