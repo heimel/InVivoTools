@@ -137,5 +137,10 @@ switch multiple_frames_mode
         im = im/length(frame);
     case 2 % max
         im = max(double(images(:,:,frame,channel)),[],3);
+    case 3 % all
+        im = images;
+    otherwise
+        errormsg(['Invalid multiple_frames_mode ' num2str(multiple_frames_mode)]);
+        im = [];
 end
 
