@@ -201,33 +201,35 @@ end
 if isfield(measures,'nose') && ~isempty(measures.nose)
     nose = measures.nose;
 else
-    error('nose coordinate is not available. Likely no freezing was detected. Use "analyse" button')
-    
+    warning('nose coordinate is not available. Likely no freezing was detected. Use "analyse" button')
+    nose = NaN;
 end
 if isfield(measures,'arse') && ~isempty(measures.arse)
     arse = measures.arse;
 else
-    error('arse coordinate is not determined. use "analyse" button')
+    warning('arse coordinate is not determined. use "analyse" button')
     
 end
 if isfield(measures,'stim') && ~isempty(measures.stim)
     stim = measures.stim;
 else
-    error('stim coordinate is not determined. use "analyse" button')
+    warning('stim coordinate is not determined. use "analyse" button')
     
 end
 if isfield(measures,'head_theta') && ~isempty(measures.head_theta)
     head_theta = measures.head_theta;
 else
-    error('head_theta is not determined. use "analyse" button')
+    warning('head_theta is not determined. use "analyse" button')
     
 end
 if isfield(measures,'pos_theta') && ~isempty(measures.pos_theta)
     pos_theta = measures.pos_theta;
 else
-    error('pos_theta is not determined. use "analyse" button')
+    warning('pos_theta is not determined. use "analyse" button')
+    
     
 end
+if ~isnan(nose)
 L = size(nose,1);
 sbrange=round(L/2);
 % figHandles = findall(0,'Type','figure');
@@ -246,11 +248,13 @@ for k = 1:L;
         end
         plot([0, nose_a(k,1)], [0, nose_a(k,2)],'v','MarkerSize',8,...
             'MarkerFaceColor', my_blue); hold on;
-        grid on; extent1 = abs(arse_a)+50; ax1= max(max(extent1));
+        grid on; 
+        extent1 = abs(arse_a)+50; ax1= max(max(extent1));
         plot([-ax1 ax1],[0 0],'--k',[0 0],[-ax1 ax1],'--k');hold on;
         text(-15,-30,'nose','color',my_blue, 'fontweight', 'b', 'BackgroundColor','w');
-        plot([0, arse_a(k,1)], [0, arse_a(k,2)], 'linewidth',3,'color',my_blue); hold on;
-        
+        plot([0, arse_a(k,1)], [0, arse_a(k,2)], 'linewidth',3,'color',my_blue); 
+        hold on;
+%         line([nose_a(k,1), arse_a(k,1)], [[nose_a(k,1), arse_a(k,2)], 'r');
         head_txt = text(50,(ax1-10),sprintf('head \\theta = %.1f%c',head_theta(k),...
             char(176)),'color',my_blue, 'fontweight', 'b', 'BackgroundColor','w'); %char(176) is deg
         if ~isempty(stim);
@@ -282,4 +286,5 @@ for k = 1:L;
     else
         disp('No mouse coordinates available');
     end
+end
 end

@@ -53,9 +53,9 @@ else
     ActEndTime = stimStart+3;
 end
 
-fig_n = [];
-figHandles = findall(0,'Type','figure');
-fig_n = max(figHandles)+1;
+% fig_n = [];
+% figHandles = findall(0,'Type','figure');
+% fig_n = max(figHandles)+1;
 
 makeVideo = 0; % Make 1 if you want to record
 
@@ -69,11 +69,11 @@ freezeSmoother = [5,5]; % Amount of frames that freeze analysis is averaging
 difTreshold = 0.3; % treshold + minimum movement for difference between frames
 % to be considered as no difference, fraction of average movement %was 0.3
 freezeTreshold = 0.5; % in seconds, treshold for %was 1
-deriv2Tresh = 0.05; % Treshold for 2nd derivative of vidDif %was 0.05
+deriv2Tresh = 0.08; % Treshold for 2nd derivative of vidDif %was 0.05
 noNest = 1;
 discDetection = 0; %Makes script very slow, don't run on average computer
 if showMovie
-    figure(fig_n);
+    figure;
 end
 
 trajectory = [];
@@ -530,10 +530,10 @@ for i = target_frames
             
             %show the snapshot and get the coordinates
             if isempty(snapframe)==0;
-                figHandles = findall(0,'Type','figure');
-                fig_n = max(figHandles)+1;
+%                 figHandles = findall(0,'Type','figure');
+%                 fig_n = max(figHandles)+1;
                 
-                snapfig = figure(fig_n);
+                snapfig = figure;
                 snapaxes = axes('parent', snapfig);
                 image(snapframe, 'Parent', snapaxes); hold on;
                 title(snapaxes,sprintf('Frame #%d,StartTime %g:%02.2f,StimStart %g:%02.2f',...
@@ -553,7 +553,7 @@ for i = target_frames
                         
                         nose(k, 1:2) = [xn(1), yn(1)];
                         arse(k, 1:2) = [xn(2), yn(2)];
-                        figure(fig_n);
+%                         figure;
                         plot([nose(k,1),arse(k,1)],[nose(k,2),arse(k,2)], 'linewidth', 2); %head line
                         hold on;
                         
@@ -564,7 +564,7 @@ for i = target_frames
                             %                         else
                             %                             logmsg(message3);
                             %                         end
-                            [ keyIsDown, seconds, keyCode ] = KbCheck;
+                            [ keyIsDown, ~, keyCode ] = KbCheck;
                             %                            WaitSecs(1); %for
                             %                            finding the
                             %                            keycode
@@ -602,7 +602,7 @@ for i = target_frames
                                                 uiwait(msgbox(message5));
                                                 [xs(p), ys(p)] = ginput(1);
                                                 stim(k,:) = [xs(p) ys(p)]; hold on;
-                                                figure(fig_n);
+%                                                 figure;
                                                 plot([nose(k,1),stim(k,1)],[nose(k,2),stim(k,2)], 'linewidth', 2);%position line
                                                 hold on;
                                                 xsfr = 1:(sfr(1)+600);

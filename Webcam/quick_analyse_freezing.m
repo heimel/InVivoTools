@@ -26,7 +26,7 @@ mice = {...
     '14.13.1.08',...
     '14.13.1.09',...
     '14.13.1.10',...
-    '14.13.1.11',...
+    '14.13.1.11,date<2016-09-15',...
     '14.13.1.12',...
     'unspecified-1',...
     'unspecified-2',...
@@ -38,12 +38,16 @@ mice = {...
     '14.13.1.07,date>2015-09-21',...
     '14.14.1.38',...
     '14.14.1.37',...
+    '14.13.2.01',...
+    '14.13.2.02',...
     };
 
 % mice = [mice(1:4) mice(6) mice(8:9)]; % to get sig
 % mice = [mice(1:4) mice(8:9)];
-mice = mice(1:13);
+% mice = [mice(1:4) mice(6:11) mice(13)]; %LM nov2016
+% mice = mice(1:13);
 % mice = mice(1);
+mice = mice(16:17);
 n_mice = length(mice);
 
 fracfreezing = NaN(n_mice,5,1);
@@ -88,7 +92,7 @@ for m=1:n_mice
                 dbs = db(find_record(db, 'stim_type!*hawk*'));
         end
         
-        for d = 1:n_dates
+        for d = 1:2
             dbday = dbs(find_record(dbs,['date=' dates{d}]));
             
             for i=1:length(dbday)
@@ -185,8 +189,8 @@ for m=1:n_mice
 %                      plot(freezing_comment,'o-');
 %                  end
         end % stim s
-        
-        for d=1:2
+           for d=1:n_dates
+%         for d=1:2
             for s=1:2
                % freezing_time(freezing_time>=1)=100;
                 
@@ -292,13 +296,13 @@ set(ax2, 'ylim', [0 1]);
 
 figure;
 ax3 = subplot(1,2,1); bar(ax3, allfrzsman_indiv);
-title(ax3,'manual, individual mice');
+title(ax3,'individual mice');
 set(ax3, 'xlim', [0 (n_mice)+1], 'ylim', [0 1]);
 ax4 = subplot(1,2,2); bar(ax4, allfrzsman_av); hold on;
 errorbar(ax4, allfrzsman_av, allfrzsman_sem, '.', 'linewidth',...
     2, 'color', [0.3 0.3 0.3])
 colormap(copper)
-title(ax4,'manual, average');
+title(ax4,'average');
 set(ax4, 'XTickLabel', {'d1 s1' 'd2 s1' 'd2 s2'});
 set(ax4, 'ylim', [0 1]);
 

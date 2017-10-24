@@ -68,11 +68,15 @@ end
 
 if ~isempty(freezeTimes)
     [head_theta, pos_theta] = angle_cal(record);
-    
-    record.measures.head_theta = head_theta;
-    record.measures.pos_theta = pos_theta;
+    if ~isempty(head_theta)
+        record.measures.head_theta = head_theta;
+        record.measures.pos_theta = pos_theta;
+    else
+        record.measures.head_theta = {[NaN]};
+        record.measures.pos_theta = {[NaN]};
+    end
 else
-    record.measures.head_theta = [];
-    record.measures.pos_theta = [];
+    record.measures.head_theta = NaN;
+    record.measures.pos_theta = NaN;
 end
 end
