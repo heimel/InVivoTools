@@ -539,6 +539,9 @@ switch measure.measure
         results = get_mouse_weight( mouse);
         return
     case 'age'
+        if isempty(mouse.birthdate) || strcmpi(mouse.birthdate,'unknown')
+            logmsg(['Birthdate unknown for ' recordfilter(mouse)]);
+        end
         results = age(mouse.birthdate,testrecord.date);
         dresults = NaN;
         return
