@@ -1,13 +1,12 @@
 function im = tp_image_processing( im, opt, verbose )
 %TP_IMAGE_PROCESSING 
 %
-% 2011-2015, Alexander Heimel
+%  TP_IMAGE_PROCESSING(IM,OPT,VERBOSE)
+%
+% 2011-2017, Alexander Heimel
 %
 
-if nargin<3
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<3 || isempty(verbose)
     verbose = true;
 end
 
@@ -21,7 +20,11 @@ if isfield(opt,'unmixing') && ~isempty(opt.unmixing) && opt.unmixing
 end
 
 if isfield(opt,'spatial_filter') && ~isempty(opt.spatial_filter) && opt.spatial_filter
-    im = tp_spatial_filter( im, 'medfilt2','',verbose);
+    if isfield(opt,'spatial_filterhandle')
+        im = tp_spatial_filter( im, func2str(opt.spatial_filterhandle),'',verbose);
+    else
+        im = tp_spatial_filter( im, '','',verbose);
+    end
 end
 
 

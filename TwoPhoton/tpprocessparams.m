@@ -109,15 +109,19 @@ switch lower(record.experiment)
     case 'holtmaat'
         params.unmixing = false; % channel unmixing
         params.spatial_filter = false;
+        params.spatial_filterhandle = @medfilt2;
     case {'10.24','11.12'}
         params.unmixing = true; % channel unmixing
         params.spatial_filter = true;
+        params.spatial_filterhandle = @medfilt2;
     case {'11.74'}
         params.unmixing = true; % channel unmixing
         params.spatial_filter = true;
+        params.spatial_filterhandle = @medfilt2;
     otherwise
         params.unmixing = false; % channel unmixing
         params.spatial_filter = false;
+        params.spatial_filterhandle = @medfilt3;
 end
 
 % unmixing parameters

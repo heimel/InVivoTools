@@ -9,7 +9,7 @@ function fig = analyzetpstack(command, record, thefig, analysis_parameters)
 %   check HELP TP_ORGANIZATION for organization of data
 %
 % 2007 - 2008, Steve Van Hooser
-% 2008 - 2015, Alexander Heimel
+% 2008 - 2017, Alexander Heimel
 %
 
 global shift_state control_state % for short-cut key detection
@@ -63,7 +63,9 @@ switch command
         
         tpsetup(record);
         
-        [fig,ud] = draw_analyzetpstack( record, analysis_parameters, tpprocessparams(record) );
+        processparams = tpprocessparams(record);
+        [fig,ud] = draw_analyzetpstack( record, analysis_parameters, processparams);
+        
         if isempty(fig)
             return
         end
@@ -80,6 +82,9 @@ switch command
         ud.ref_record = tp_get_refrecord(ud.record);
         ud.image_processing.unmixing = get(ft(fig,'unmixingBt'),'value');
         ud.image_processing.spatial_filter = get(ft(fig,'spatialFilterBt'),'value');
+        
+        ud.image_processing.spatial_filterfunctionhandle = processparams.spatial_filterhandle;
+        
         % now make data structures
         slicelist = emptyslicerec;
         ud.slicelist = slicelist([]);
@@ -145,8 +150,8 @@ switch command
                     end
                 end
                 currInds = setdiff(currInds,kids);
-            end;
-        end;
+            end
+        end
         littlelist = cell(1,length(newlist));
         for i=1:length(newlist)
             littlelist{i} = strtrim(newlist{i});
@@ -175,8 +180,8 @@ switch command
             else
                 set(ft(fig,'sliceOffsetEdit'),'visible','on');
                 set(ft(fig,'sliceOffsetText'),'visible','on');
-            end;
-        end;
+            end
+        end
         analyzetpstack('UpdatePreviewImage',[],fig);
         analyzetpstack('UpdateCellImage',[],fig);
         analyzetpstack('UpdateCellLabels',[],fig);
@@ -203,7 +208,7 @@ switch command
                 cell2str(ud.celllist(i).labels,false,false) ' ' ...
                 num2str(fix(ud.celllist(i).intensity_mean),' %04d') ' ' ...
                 ];
-        end;
+        end
         set(ft(fig,'celllist'),'string',strlist);
         if isempty(v_)
             v_ = 1;
@@ -401,10 +406,10 @@ switch command
             for i = 1:length(ud.celldrawinfo.h)
                 if ishandle(ud.celldrawinfo.h)
                     delete(ud.celldrawinfo.h);
-                end;
+                end
                 if ishandle(ud.celldrawinfo.t)
                     delete(ud.celldrawinfo.t);
-                end;
+                end
                 ud.celldrawinfo.h = [];
                 ud.celldrawinfo.t = [];
             end
@@ -422,18 +427,18 @@ switch command
             else  % maybe we removed some cells, start over
                 if ishandle(ud.celldrawinfo.h)
                     delete(ud.celldrawinfo.h);
-                end;
+                end
                 if ishandle(ud.celldrawinfo.t)
                     delete(ud.celldrawinfo.t);
-                end;
+                end
                 ud.celldrawinfo.h = [];
                 ud.celldrawinfo.t = [];
                 start = 1;
-            end;
+            end
             slicelistlookup.test = [];
             for j=1:length(ud.slicelist)
                 slicelistlookup.(dir2fieldname(ud.slicelist(j).dirname)) = j;
-            end;
+            end
             
             axes(ft(fig,'tpaxes')); % necessary for following text
             hold on
@@ -460,7 +465,7 @@ switch command
                     visstr_rois = 'on';
                 else
                     visstr_rois = 'off';
-                end;
+                end
                 if ~isfield(ud.slicelist( slicelistlookup.(dir2fieldname(ud.celllist(i).dirname)) ),'drawroinos')
                     ud.slicelist( slicelistlookup.(dir2fieldname(ud.celllist(i).dirname)) ).('drawroinos') = 0;
                 end
@@ -468,11 +473,11 @@ switch command
                     visstr_roinos = 'on';
                 else
                     visstr_roinos = 'off';
-                end;
+                end
                 set(ud.celldrawinfo.h(end),'visible',visstr_rois);
                 set(ud.celldrawinfo.t(end),'visible',visstr_roinos);
-            end;
-        end;
+            end
+        end
         color_rois( ud.celllist, ud.celldrawinfo,fig);
         set(fig,'userdata',ud);
     case 'UpdateCellLabels'
@@ -503,7 +508,7 @@ switch command
             newtypev = 1;
             newpresent = 1;
             multiple_presence_states = false;
-        end;
+        end
         set(ft(fig,'labelList'),'value',newvals);
         set(ft(fig,'cellTypePopup'),'value',newtypev);
         set(ft(fig,'presentCB'),'value',newpresent);
@@ -569,7 +574,7 @@ switch command
         if ~cellisinthisimage
             errormsg('Cannot move cell whose preview image is not being viewed.');
             return;
-        end;
+        end
         % at this point, we are going to make a move so let's get the coordinate
         logmsg('Click new center location.');
         [x,y] = ginput(1);
@@ -598,7 +603,7 @@ switch command
             changes.dirname = currdir;
             setChanges(ud,fig,v,changes);
             ud = get(fig,'userdata');
-        end;
+        end
         ud.cell_indices_changed = true;
         ud.celldrawinfo.dirname = '';
         set(fig,'userdata',ud);
@@ -623,7 +628,7 @@ switch command
         if ~cellisinthisimage
             errormsg('Cannot redraw cell whose preview image is not being viewed.');
             return;
-        end;
+        end
         % at this point, we are going to redraw so let's have the user redraw
         logmsg('Draw new ROI for cell.');
         axes(ft(fig,'tpaxes')); % necessary for following roipoly
@@ -648,7 +653,7 @@ switch command
             changes.dirname = currdir;
             setChanges(ud,fig,v,changes);
             ud = get(fig,'userdata');
-        end;
+        end
         ud.celldrawinfo.dirname = '';
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellImage',[],fig);
@@ -694,14 +699,18 @@ switch command
         strs = get(ft(fig,'labelList'),'string');
         vals = get(ft(fig,'labelList'),'value');
         v = get(ft(fig,'celllist'),'value');
-        for i=1:length(v), ud.celllist(v(i)).labels = strs(vals); end;
+        for i=1:length(v)
+            ud.celllist(v(i)).labels = strs(vals);
+        end
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellList',[],fig);
     case 'cellTypePopup'
         strs = get(ft(fig,'cellTypePopup'),'string');
         val = get(ft(fig,'cellTypePopup'),'value');
         v = get(ft(fig,'celllist'),'value');
-        for i=1:length(v), ud.celllist(v(i)).type= strs{val}; end;
+        for i=1:length(v)
+            ud.celllist(v(i)).type= strs{val}; 
+        end
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellList',[],fig);
     case 'presentCB'
@@ -728,9 +737,9 @@ switch command
                 if newslice.dirname~='.'
                     record.slice = newslice.dirname;
                 end
-            end;
+            end
             ud.slicelist = [ud.slicelist newslice];
-        end;
+        end
         set(fig,'userdata',ud);
     case 'autoDrawCellsBt'
         if ud.zstack  % for  puncta analysis
@@ -770,7 +779,7 @@ switch command
             newcell.index = ud.record.ROIs.new_cell_index;
             ud.celllist = [ud.celllist newcell];
             ud.record.ROIs.new_cell_index = next_available_cell_index( ud.record.ROIs.new_cell_index,ud.celllist);
-        end;
+        end
         set(ft(fig,'newcellindexEdit'),'String',num2str(ud.record.ROIs.new_cell_index));
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellList',[],fig);
@@ -805,7 +814,7 @@ switch command
                 newcell.intensity_mean(ch) = mean( imc(newcell.pixelinds) );
                 newcell.intensity_max(ch) = max( imc(newcell.pixelinds) );
             end
-            disp(['Mean intensity: ' num2str(fix(newcell.intensity_mean)) ]);
+            logmsg(['Mean intensity: ' num2str(fix(newcell.intensity_mean)) ]);
         end
         
         typestr = get(ft(fig,'cellTypePopup'),'string');
@@ -837,10 +846,10 @@ switch command
             newballdia = str2double(newballdiastr);
             if isnan(newballdia)
                 newballdia = 12;
-            end;
+            end
         else
             newballdia = 12;
-        end;
+        end
         set(ft(fig,'newballdiameterEdit'),'string',num2str(newballdia));
         rad = round(newballdia/2);
         xi_ = ((-rad):1:(rad));
@@ -924,7 +933,7 @@ switch command
             ud=get(fig,'userdata');
             figure(fig);
             [x,y,button]=ginput(1);
-        end;
+        end
     case 'drawNeuriteBt'
         logmsg('Click on Enter to stop drawing. Right click removes last point. Middle click doesn''t snap.');
         logmsg('Default neurite type can be set in tpprocessparams.');
@@ -945,10 +954,10 @@ switch command
             newballdia = str2double(newballdiastr);
             if isnan(newballdia)
                 newballdia = 6;
-            end;
+            end
         else
             newballdia = 6;
-        end;
+        end
         
         newneurite = tp_emptyroirec(ud.record);
         newneurite.dirname = dirname;
@@ -1045,7 +1054,7 @@ switch command
             end
             figure(fig);
             [x,y,button] = ginput(1);
-        end;
+        end
         delete(h_temp_line);
         processparams = tpprocessparams( ud.record );
         newneurite.type = processparams.newneuritetype;
@@ -1082,8 +1091,8 @@ switch command
                 if isfield(ud.celldrawinfo,'changes')
                     if length(ud.celldrawinfo.changes)>=v
                         ud.celldrawinfo.changes = ud.celldrawinfo.changes([1:(v-1) (v+1):length(ud.celldrawinfo.changes)]);
-                    end;
-                end;
+                    end
+                end
                 ud.celldrawinfo.h= [ud.celldrawinfo.h(1:(v-1)) ud.celldrawinfo.h((v+1):end)];
                 ud.celldrawinfo.t= [ud.celldrawinfo.t(1:(v-1)) ud.celldrawinfo.t((v+1):end)];
             end
@@ -1099,7 +1108,7 @@ switch command
             % create stims file
             stiminterview(record);
             stims = getstimsfile( record );
-        end;
+        end
         savedscript = stims.saveScript;
         %[s.mti,starttime]=tpcorrectmti(s.mti,record);
         do = getDisplayOrder(savedscript);
@@ -1109,7 +1118,9 @@ switch command
     case 'sliceOffsetEdit'
         v = get(ft(fig,'sliceList'),'value');
         xyoffset = str2num(get(ft(fig,'sliceOffsetEdit'),'string')); %#ok<ST2NM>
-        if ~eqlen(size(xyoffset),[1 2]), error('xyoffset wrong size.'); end;
+        if ~eqlen(size(xyoffset),[1 2])
+            error('xyoffset wrong size.');
+        end
         ud.slicelist(v).xyoffset = xyoffset;
         ud.previewdir = '';
         ud.celldrawinfo.dirname = '';
@@ -1158,13 +1169,13 @@ switch command
         else
             logmsg('No directories in list to examine.');
             return
-        end;
+        end
         sliceind2 = listdlg('ListString',currstr_,'PromptString','Select dir to compare','SelectionMode','single');
         if isempty(sliceind2)
             return
         else
             dirname2 = strtrim(currstr_{sliceind2});
-        end;
+        end
         ancestors2 = {'.'};
         ancestors1 = {'.'};
         if isempty(intersect(dirname1,ancestors2))
@@ -1194,7 +1205,7 @@ switch command
             trialslist = eval(trialsstr);
         else
             trialslist = 1;
-        end;
+        end
         stimstr = strtrim(get(ft(fig,'movieStimsEdit'),'string'));
         if ~isempty(stimstr)
             stimlist = eval(stimstr);
@@ -1235,13 +1246,13 @@ switch command
             trialslist = eval(trialsstr); 
         else
             trialslist = [];
-        end;
+        end
         timeintstr = strtrim(get(ft(fig,'timeintEdit'),'string'));
         if ~isempty(timeintstr)
             timeint= eval(timeintstr);
         else
             timeint= [];
-        end;
+        end
         sptimeintstr = strtrim(get(ft(fig,'sptimeintEdit'),'string'));
         if ~isempty(sptimeintstr)
             sptimeint= eval(sptimeintstr); 
@@ -1294,7 +1305,7 @@ switch command
         changes = {}; %#ok<NASGU>
         if isfield(ud.celldrawinfo,'changes')
             changes = ud.celldrawinfo.changes; %#ok<NASGU>
-        end;
+        end
         save(scratchfilename,'slicelist','changes','record','-mat');
         
         % check to see if TP database is open
@@ -1350,10 +1361,10 @@ switch command
                         newentry = g.slicelist(i);
                         newentry.xyoffset = [0 0];
                         newlist(i) = newentry;
-                    end;
+                    end
                     g.slicelist = newlist;
-                end;
-            end;
+                end
+            end
             if isfield(g,'record') && isempty(ud.record.ROIs)
                 % if no ROIs in current record, use saved record, necessary
                 % when database is not used
@@ -1372,8 +1383,10 @@ switch command
                 set(ft(fig,'newcellindexEdit'),'String',num2str(ud.record.ROIs.new_cell_index));
             end
             ud.slicelist=g.slicelist;
-            if isfield(g,'changes'), ud.celldrawinfo.changes = g.changes; end;
-        end;
+            if isfield(g,'changes')
+                ud.celldrawinfo.changes = g.changes;
+            end
+        end
         set(ft(fig,'newcellindexEdit'),'String',num2str(ud.record.ROIs.new_cell_index));
         
         if ud.verbose
@@ -1710,8 +1723,6 @@ switch command
 end
 
 
-
-
 % speciality functions
 
 function sr = emptyslicerec
@@ -1750,9 +1761,9 @@ for i=1:length(ud.celllist)
             listofcellnames{end+1}=['cell ' int2str(ud.celllist(i).index) ' ref ' ud.celllist(i).dirname];
             cellstructs = [cellstructs ud.celllist(i)];
             thechanges{end+1} = changes;
-        end;
-    end;
-end;
+        end
+    end
+end
 
 % these functions deal with setting the 'changes' field in the celllist
 function [changes,gotChanges] = getChanges(ud,i,newdir,ancestors)  % cell id is i
@@ -1765,10 +1776,10 @@ if isfield(ud.celldrawinfo,'changes')
             [ch,temp,ib]=intersect(ancestors,changedirs); %#ok<ASGLU>
             if ~isempty(ch)
                 changes = changes(ib(end)); gotChanges = 1;
-            end;
-        end;
-    end;
-end;
+            end
+        end
+    end
+end
 % if no changes have been specified, return the default
 if ~gotChanges
     if ~isempty(i) && i<=length(ud.celllist)
@@ -1780,8 +1791,8 @@ if ~gotChanges
         end
     else
         changes = struct('present',1,'dirname',newdir,'xi',[],'yi',[],'zi',[],'pixelinds',[]);
-    end;
-end;
+    end
+end
 
 function setChanges(ud,fig,i,newchanges)
 if ~isfield(ud.celldrawinfo,'changes')
@@ -1809,10 +1820,10 @@ if gotChanges == 0
         currChanges{end+1} = newchanges.dirname;
         [dummy,inds]=sort(currChanges); %#ok<ASGLU>
         ud.celldrawinfo.changes{i} = ud.celldrawinfo.changes{i}(inds);
-    end;
+    end
 else
     ud.celldrawinfo.changes{i}(gotChanges) = newchanges;
-end;
+end
 set(fig,'userdata',ud);
 
 
@@ -1829,7 +1840,7 @@ else
     if isstruct(drift)
         dr = [mean(drift.x(1: min(numpreviewframes,end) ,:)) mean(drift.y(1:min(numpreviewframes,end),:))]; % get the mean initial drift
     else
-        disp(['Driftcorrect file ' df ' not in right format; shift information will change after drift correction.']);
+        logmsg(['Driftcorrect file ' df ' not in right format; shift information will change after drift correction.']);
         dr = [0 0];
     end
 end
@@ -1842,8 +1853,8 @@ xyoffset = [0 0];
 for j=1:length(ud.slicelist)
     if strcmp(myparent,strtrim(ud.slicelist(j).dirname))
         xyoffset = ud.slicelist(j).xyoffset;
-    end;
-end;
+    end
+end
 
 function fieldname = dir2fieldname(dirname)
 fieldname = strtrim(dirname);
