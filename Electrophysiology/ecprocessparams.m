@@ -148,6 +148,11 @@ switch lower(record.setup)
         params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time 
         % calibrated on 4-2-2016 (experiment 14.14), should be 1.0000190, but kept at 1.000017
         % to not change previous analysis
+    case 'intan' % 
+        params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
+        params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time 
+        warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
+        warning('off', 'ECPROCESSPARAMS:TIMING');
     case 'wall-e'
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
         params.secondsmultiplier = 1; % multiplification factor of electrophysical signal time

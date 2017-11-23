@@ -18,6 +18,8 @@ processparams = ecprocessparams(record);
 switch lower(record.setup)
     case 'antigua'
         cells = importtdt( record, channels2analyze, allowchanges);
+    case 'intan'
+        cells = importintan( record, channels2analyze);
     case 'wall-e'
         channels2analyze = 1;
         cells = importaxon(record,true);
