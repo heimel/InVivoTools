@@ -6,7 +6,7 @@ function params = tpprocessparams(  record )
 %  Local changes to settings should be made in processparams_local.m
 %  This should be an edited copy of processparams_local_org.m
 %
-% 2009-2015, Alexander Heimel
+% 2009-2017, Alexander Heimel
 %
 
 if nargin<1
@@ -163,9 +163,7 @@ switch lower(record.experiment)
         params.viewing_default_max = -0.1*ones(1,n_channels);% for n_channels channels, i.e. saturate 0.1%
 end
 
-
 params.tp_monitor_threshold_level = 0.01;
-
 
 % alignment parameters
 switch lower(record.experiment)
@@ -176,7 +174,7 @@ end
 % maximum distance for linking ROI to neurite
 switch record.experiment
     case '11.21'
-        if isempty(findstr(record.stack,'overview'))
+        if isempty(strfind(record.stack,'overview'))
             params.max_roi_linking_distance_um = 4;
         else
             params.max_roi_linking_distance_um = 500; 

@@ -25,6 +25,8 @@ Remote_Comm_method = 'filesystem';  % 'sockets' or 'filesystem'
 % settings for Remote_Comm_method = 'filesystem'
 Remote_Comm_dir = '/mnt/nin380/Data/stims';   % the local directory in which to write
                                            %   files for the remote computer
+                                           
+                                           '\\nin380\Data\stims' 
 
 % settings for Remote_Comm_method = 'sockets'
 Remote_Comm_host = '152.16.225.216';
@@ -122,9 +124,9 @@ LoadGammaCorrectionTable('gct_robbie.txt');
 
 StimSerialGlobals; % see help file for description
 StimSerialSerialPort = 1;          % do you want to enable this feature?
-StimSerialScriptIn = '/dev/ttyS0';       % NewStim flips ScriptOutPin on this port when trial starts
+StimSerialScriptIn = 'COM1';       % NewStim flips ScriptOutPin on this port when trial starts
 StimSerialScriptInPin = 'dtr';       % flips this pin when trial starts
-StimSerialScriptOut = '/dev/ttyS0';     % same
+StimSerialScriptOut = 'COM1';     % same
 StimSerialScriptOutPin = 'dtr';       %
 StimSerialStimIn = '/dev/ttyS0';  % NewStim flips DTR on this this port when individual stimuli start
 StimSerialStimInPin = 'dtr';  % NewStim flips this pin when individual stimuli start

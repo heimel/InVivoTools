@@ -45,7 +45,11 @@ end
 record.ROIs.celllist = structconvert(record.ROIs.celllist,tp_emptyroirec);
 
 % clean all measures, but save some in case we don't have the tiffs locally
-storedmeasures = record.measures;
+if isfield(record,'measures')
+    storedmeasures = record.measures;
+else
+    storedmeasures = [];
+end
 record.measures = [];
 
 if isfield(record,'ROIs') && isfield(record.ROIs,'celllist')

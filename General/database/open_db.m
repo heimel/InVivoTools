@@ -10,12 +10,11 @@ function [db,filename,perm,lockfile]=open_db( filename, loadpath, filter)
 % for Windows novell network connections
 warning('off','MATLAB:dispatcher:pathWarning');
 
-
 if nargin<3; filter=''; end
 if nargin<2; loadpath='';end
 if nargin<1; filename='';end
 
-if isempty(filter);
+if isempty(filter)
 	filter={'*.mdb;*.mat','All databases (*.mat, *.mdb)';...
         '*.mat','MATLAB databases (*.mat)';...
         '*.mdb','MS Access databases (*.mdb)'};

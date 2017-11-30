@@ -38,13 +38,14 @@ Remote_Comm_port = 1205;
 % this section is important
 % if this computer IS the remote computer, then this section is unimportant
 
-Remote_Comm_remotearchitecture = 'unix'; % options are 'PC', 'Mac' (MacOS9), or 'unix' (Linux, MacOSX)
+Remote_Comm_remotearchitecture = 'PC'; % options are 'PC', 'Mac' (MacOS9), or 'unix' (Linux, MacOSX)
  % the computer type of the remote machine you are talking to (not of THIS computer, necessarily)
 
 Remote_Comm_localprefix = 'C:\Data'; % for example, 'Z:', 'z:', '/Users/Shared/myexperimentdir'
  % the prefix to the shared directory on THIS computer
 
 Remote_Comm_remoteprefix = '/mnt/nin380/Data';
+'\\nin380\Data' 
  % the prefix to the same directory as viewed by the OTHER computer
 
  % Example, suppose your "master" computer is a PC running Windows, and you 
