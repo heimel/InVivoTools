@@ -44,7 +44,7 @@ pspar.prestim_time = 2;
 angles = [45 135]; 
 
 for i = 1:length(angles)
-    iss_script(i) = StimScript(0);
+    iss_script(i) = stimscript(0);
    
     % location
     row=0;%floor( (1-1)/n_x);
@@ -87,7 +87,7 @@ try
             ready=0;
         end
         pause(0.01);
-        if kbcheck
+        if KbCheck
             CloseStimScreen;
             return
         end
