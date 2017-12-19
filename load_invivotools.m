@@ -10,7 +10,7 @@ function load_invivotools
 % 2014-2017, Alexander Heimel
 %
 
-if exist ("OCTAVE_VERSION", "builtin") 
+if exist ('OCTAVE_VERSION', 'builtin') 
     isoctave = true;
 else
     isoctave = false;
