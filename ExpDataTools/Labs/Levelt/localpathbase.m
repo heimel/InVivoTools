@@ -30,9 +30,7 @@ switch vers
             base = '/home/data/InVivo';
         end
     case '2015'
-        base = fullfile(userhome,'Dropbox (NIN)');
-        base = 'temporarily_disabled';
-        logmsg('turned off dropbox');
+        base = 'C:\Data\InVivo';
         if ~exist(base,'dir')
             params = processparams_local([]);
             if isfield(params,'experimentpath_localroot')

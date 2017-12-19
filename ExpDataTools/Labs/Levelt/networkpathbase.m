@@ -15,7 +15,9 @@ if ~isempty(base_persistent)
     return
 end
 
-params = processparams_local;
+params = processparams_local([]);
+
+% check if networkpathbase is set in processparams_local
 if isfield(params,'networkpathbase') && ...
       ~isempty(params.networkpathbase) && ...
       exist(params.networkpathbase,'file')

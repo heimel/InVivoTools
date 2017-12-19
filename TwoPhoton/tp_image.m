@@ -1,7 +1,7 @@
 function [img,mx,mn,gamma] = tp_image(im,channel,mx,mn,gamma,channel2rgb,fighandle)
 %TP_IMAGE 
 %
-% 200X-2014 Alexander Heimel
+% 200X-2017 Alexander Heimel
 %
 
 if nargin<7
@@ -12,15 +12,15 @@ end
 edge = 10; % avoid edge when determining max and min because of filtering artefacts
 
 if isempty(channel)
-    if ndims(im)>2
-        channel = [1:size(im,3)];
+    if ndims(im)>2 %#ok<ISMAT>
+        channel = 1:size(im,3);
     else
         channel = 1;
     end
 end
 
 if size(im,1)<=(2*edge) || size(im,2)<=(2*edge)
-    logmsg('image size smaller than safety edge size used for filtering. Not using edge. Filtered data unreliable');
+    logmsg('Image size smaller than safety edge size used for filtering. Not using edge. Filtered data unreliable');
     edge = 0;
 end
 
@@ -49,7 +49,7 @@ for ch = channel
     if  isnan(mn(ch))
         mn(ch) = 0;
     end
-    if mn(ch)==-1
+    if mn(ch)==-1 % take mode
         vals = round(im((1+edge):(end-edge),(1+edge):(end-edge),ch));
         mn(ch) = mode(vals(:));
         if mn(ch) == max(vals(:))
@@ -57,6 +57,9 @@ for ch = channel
                 ' is equal to the maximum. Taking minimum intensity instead of mode.']);
             mn(ch) = min(vals(:));
         end
+    elseif mn(ch)<0 % i.e. percentile that is thresholded
+        vals = im((1+edge):(end-edge),(1+edge):(end-edge),ch);
+        mn(ch) = prctile(vals(:),-mn(ch));
     end
     if  isnan(gamma(ch))
         gamma(ch) = 1;
@@ -74,7 +77,6 @@ for ch = channel
         gamma(ch) = log(params.tp_monitor_threshold_level)/log(mode_v);
     end
 end
-
 
 % rescale channel to viewing parameters
 % and make rgb image

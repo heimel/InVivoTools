@@ -257,7 +257,7 @@ switch command
         end
         
         shift_channels = [];
-        if isfield(ud.record,'comment') && ~isempty(strfind(lower(ud.record.comment),'pixelshift'))
+        if isfield(ud.record,'comment') && ~isempty(strfind(lower(ud.record.comment),'pixelshift')) %#ok<STREMP>
             ind = strfind(lower(ud.record.comment),'[');
             if isempty(ind)
                 iminf = tpreadconfig(ud.record);
