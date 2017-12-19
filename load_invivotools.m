@@ -10,7 +10,16 @@ function load_invivotools
 % 2014, Alexander Heimel
 %
 
-more off
+if exist ("OCTAVE_VERSION", "builtin") 
+    isoctave = true;
+else
+    isoctave = false;
+end
+
+if isoctave
+    more off
+    warning('off','Octave:shadowed-function');
+end
 
 disp([ upper(mfilename) ': Manual available at https://github.com/heimel/InVivoTools/wiki']);
 
@@ -208,6 +217,10 @@ if isunix % bug workaround for Matlab R2012b and more recent
     try 
         com.mathworks.mlwidgets.html.HtmlComponentFactory.setDefaultType('HTMLRENDERER')
     end
+end
+
+if isoctave
+    warning('on','Octave:shadowed-function');
 end
 
 clear
