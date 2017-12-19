@@ -7,7 +7,7 @@ function load_invivotools
 %    check https://github.com/heimel/InVivoTools for most recent version
 %    and documentation. In Manual folder
 %
-% 2014, Alexander Heimel
+% 2014-2017, Alexander Heimel
 %
 
 if exist ("OCTAVE_VERSION", "builtin") 
@@ -24,7 +24,7 @@ end
 disp([ upper(mfilename) ': Manual available at https://github.com/heimel/InVivoTools/wiki']);
 
 if isunix
-    updatestr = ['To update InVivoTools: update_invivotools'];
+    updatestr = 'To update InVivoTools: update_invivotools';
 else
     updatestr = 'To update InVivoTools: open github and click on Sync.';
 end
@@ -43,7 +43,6 @@ elseif ~isempty(processparams_local([]))
     disp(processparams_local([]));
 end
 disp([ upper(mfilename) ': To override InVivoTools settings: edit processparams_local']);
-
 
 % defaults, put overrides in processparams_local.m file
 params.load_general = 1; % necessary for host function
@@ -66,8 +65,7 @@ params.lab='Levelt';
 
 params = processparams_local(params); % load local overrides
 
-
-if params.load_general, % general
+if params.load_general % general
     % some generally useful tools not associated with any particular package
     path2general=fullfile(majorprefix,'General');
     addpath(path2general, ...
@@ -87,7 +85,6 @@ if params.load_general, % general
         fullfile(path2general,'CircStat'), ... % circular statistics toolbox
         fullfile(path2general,'database','matlab_7'));
 end
-
 
 path2invivotools = majorprefix;
 
@@ -114,7 +111,6 @@ if params.load_twophoton
         case 'Fitzpatrick'
             twophoton_microscope_type='PrairieView';
     end
-
     
     addpath(twophoton_path, ...
         fullfile(twophoton_path, 'Reid_cell_finder' ),...
@@ -144,7 +140,6 @@ if params.load_electrophys
         fullfile(path2invivotools,'Electrophysiology','Axon'),... % for importing Axon abf files
         genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5')));    % for MClust spike sorter
 end
-
 
 % Physiology analyses
 if params.load_physiology

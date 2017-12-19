@@ -4,30 +4,35 @@ function params = processparams_local(params) %#ok<FNDEF>
 %  Do not edit processparams_local_org.m but make a copy
 %  processparams_local.m and edit this instead. 
 %
-% 2014, Alexander Heimel
+%  Check out specific processparams files for the default settings of 
+%  all parameters: 
+%     intrinsic signal imaging: oiprocessparams.m 
+%     two photon imaging: tpprocessparams.m
+%     electrophysiology: ecprocessparams.m
+%     behavior imaging: wcprocessparams.m
+%     pupil recording: pupilprocessparams.m
+%
+%  Specific InVivoTools packages can also be deselected for loading in
+%  load_invivotools, e.g. to deselect ERG tools for loading add
+%       params.load_erg =0; 
+%
+%
+% 2014-2017, Alexander Heimel
 %
 
+% UNCOMMENT AND CHANGE AS NECESSARY
 
-% Changes here
-%
-% e.g.
-% params.tpdatapath_localroot = ''
-% params.tpdatapath_networkroot = ''
-% params.ecdatapath_localroot = '';  
-%
-% params.pre_window = [-Inf 0];
-%
+% params.databasepath_localroot = 'C:\Users\heimel\Dropbox (NIN)\InVivo';
 
-% 
-% params.load_general = 0; % necessary for host function
-% params.load_nelsonlabtools = 0; % needed for analysis, should be phased out
-% params.load_newstim = 0; % needed for visual stimulation NewStim package
-% params.load_neuralanalysis = 0; % needed for electrophysiology analysis
-% params.load_twophoton = 0; % needed for twophoton analysis
-% params.load_intrinsicsignal = 0; % needed for optical imaging analysis
-% params.load_erg =0; % need for ERG stimulation and analysis
-% params.load_electrophys = 0; % needed for electrophysiology recording and analysis
-% params.load_expdatatools = 0; % needed for InVivoTools analysis
-% params.load_studies = {}; % folders of Studies to load
+% params.experimentpath_localroot = 'C:\Users\heimel\Dropbox (NIN)\InVivo';
 
-%
+% params.tpdatapath_localroot = 'E:\Data\InVivo\Microscopy\Helerop2p';
+
+% params.tpdatapath_networkroot= '\\vs01\MVP\Shared\InVivo\Twophoton';
+
+% params.experimentpath_localroot = 'C:\Users\heimel\Dropbox (NIN)';
+
+% params.networkpathbase = 'V:\Shared\InVivo';
+
+% params.ecdatapath_localroot = 'V:\Shared\InVivo\Electrophys\Antigua';
+
