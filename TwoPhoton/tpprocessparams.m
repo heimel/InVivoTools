@@ -105,6 +105,7 @@ params.output_show_figures = true;
 params.output_show_waves = true;
 
 % image processing (for z-stack)
+params.spatial_filteroptions = '';
 switch lower(record.experiment)
     case 'holtmaat'
         params.unmixing = false; % channel unmixing

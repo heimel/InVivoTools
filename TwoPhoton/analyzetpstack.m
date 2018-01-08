@@ -83,7 +83,8 @@ switch command
         ud.image_processing.unmixing = get(ft(fig,'unmixingBt'),'value');
         ud.image_processing.spatial_filter = get(ft(fig,'spatialFilterBt'),'value');
         
-        ud.image_processing.spatial_filterfunctionhandle = processparams.spatial_filterhandle;
+        ud.image_processing.spatial_filterhandle = processparams.spatial_filterhandle;
+        ud.image_processing.spatial_filteroptions = processparams.spatial_filteroptions;
         
         % now make data structures
         slicelist = emptyslicerec;

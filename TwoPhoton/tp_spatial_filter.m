@@ -17,7 +17,7 @@ if nargin<3
     options = '';
 end
 
-if ~isempty(options)
+if ~isempty(options) && options(1)~=','
     options = [',' options];
 end
 
