@@ -78,7 +78,7 @@ if saveWaves, % save the stimulus timings;
   % write NewStimPixelsPerCm = pixels_per_cm
   fprintf(fid,'NewStimGlobals;if ~exist(''NewStimPixelsPerCm'');NewStimPixelsPerCm=pixels_per_cm;end;');
   
-  fprintf(fid,'save stims MTI2 start saveScript StimWindowRefresh NewStimViewingDistance NewStimPixelsPerCm;\n');
+  fprintf(fid,'save(''stims.mat'',''-mat7-binary'',''MTI2'',''start'',''saveScript'',''StimWindowRefresh'',''NewStimViewingDistance'',''NewStimPixelsPerCm'');\n');
   fprintf(fid,'disp(''saved stimulus'');cd(gggg);\n');
 %  fprintf(fid,'pause(max([0 10-etime(clock,zzz)]));StimEndSound;\n');
 %  fprintf(fid,'StimEndSound;\n');
