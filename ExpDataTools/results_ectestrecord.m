@@ -31,7 +31,7 @@ end
 
 switch data_type
     case 'ec'
-        params = ecprocessparams;
+        params = ecprocessparams(record);
         if params.plot_spike_features || params.plot_spike_shapes
             spikesfile = fullfile(experimentpath(record),'_spikes.mat');
             if exist(spikesfile,'file')

@@ -105,6 +105,7 @@ params.output_show_figures = true;
 params.output_show_waves = true;
 
 % image processing (for z-stack)
+params.spatial_filteroptions = '';
 switch lower(record.experiment)
     case 'holtmaat'
         params.unmixing = false; % channel unmixing
@@ -138,9 +139,21 @@ params.which_frac_ch2_in_ch1 = 'firstmax'; % used since 2012-01-27
 
 % image viewing parameters 
 n_channels = 10;
-params.viewing_default_min = -1*ones(1,n_channels); % for n_channels channels, i.e. set to minimum intensity
-params.viewing_default_max = -0.1*ones(1,n_channels);% for n_channels channels, i.e. saturate 0.1%
-params.viewing_default_gamma = 1*ones(1,n_channels);% for n_channels channels
+
+% viewing_default_min used for thresholding minimum intensity, 
+% positive numbers set the absolute threshold to that intensity
+% -1 will use the mode of the image, 
+% other negative numbers set the threshold to that percentile level
+params.viewing_default_min = -1*ones(1,n_channels); 
+
+% viewing_default_max used for thresholding maximum intensity, 
+% positive numbers set the absolute threshold to that intensity
+% negative numbers set the threshold to that percentile level, 
+% i.e. -0.1 means saturate 0.1% of channels
+params.viewing_default_max = -0.1*ones(1,n_channels);
+
+params.viewing_default_gamma = 1*ones(1,n_channels);
+
 switch lower(record.experiment)
     case '10.24'
         params.viewing_default_min = -1*ones(1,n_channels); % for ten channels, i.e. set to minimum intensity
@@ -186,7 +199,6 @@ switch record.experiment
 end
 
 params.cell_colors = repmat('kbgrcmy',1,50);
-
 
 % measures to compute time xz for
 params.series_measures = ['present','lost','gained','timepoint',tpstacktypes(record),tpstacklabels(record)];
@@ -248,18 +260,14 @@ switch lower(record.setup)
     case {'olympus','wall-e'} % Fluoview scope
         params.mti_timeshift = 0.058; % s 
     otherwise
-        %logmsg('Unknown setup. Defaulting MTI timeshift');
-        %dbstack
         params.mti_timeshift = 0.058; % s
 end
 
 switch record.datatype
-    case 'tp'
-        params.response_channel = 1; % assuming OGB, GCaMP on first channel
     case 'fret'
         params.response_channel = [1 2];
     otherwise
-        params.response_channel = 1;
+        params.response_channel = 1; % assuming OGB, GCaMP on first channel
 end
 
 params.response_projection_method = 'max';  
@@ -276,9 +284,6 @@ params.response_baselinemethod = 0;
 %     1  - Use the closest blank stimulus
 %     2  - Use a 20s window of ISI and blank values.
 %     3  - Filter data with 240s highpass and use mean
-
-
-
 
 % if datenumber(record.date)<datenumber('2014-07-01') % time when introduced new pixelshift
 %     params.pixelshift_pixel = 14;

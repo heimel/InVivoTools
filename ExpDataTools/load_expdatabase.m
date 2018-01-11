@@ -54,10 +54,15 @@ filename = fullfile(expdatabasepath(where),capitalize(experiment),whichexpdb);
 if exist(filename,'file')==0
 	d = dir(filename);
 	if ~isempty(d) % i.e. multiple files
+        filepath = fileparts(filename);
 		filename = {};
 		for i=1:length(d)
 			%            [sdb,fname] = load_single_expdatabase( fullfile( expdatabasepath(where),capitalize(experiment),d(i).name));
-			[sdb,fname] = load_single_expdatabase( fullfile(d(i).folder,d(i).name) );
+			if isfield(d,'folder')
+                [sdb,fname] = load_single_expdatabase( fullfile(d(i).folder,d(i).name) );
+            else
+                [sdb,fname] = load_single_expdatabase( fullfile(filepath,d(i).name) );
+            end
 			if ~isempty(fname) && ~isempty(sdb)
 				filename{end+1} = fname; %#ok<AGROW>
 			end
@@ -85,7 +90,8 @@ end
 
 function [db, filename] = load_single_expdatabase( filename)
 logmsg(['Loading ' filename ]);
-file = load(filename,'-mat');
+%file = load(filename,'-mat');
+file = load(filename);
 if isfield(file,'db')
 	db = file.db;
 else

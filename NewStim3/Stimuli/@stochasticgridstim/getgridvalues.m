@@ -17,8 +17,11 @@ probs = cumsum(SGSparams.dist(1:end))'; probs = probs ./ probs(end);
 phs = ones(XY,1) * probs;
 pls = [ zeros(XY,1) phs(:,1:end-1)];
 
-%  rand('state',SGSparams.randState);
-rng(SGSparams.randState(1),'v5uniform'); % Changed on 2015-06-23
+try
+    rng(SGSparams.randState(1),'v5uniform'); % Changed on 2015-06-23
+catch me % on octave rng is not implemented yet
+    rand('state',SGSparams.randState);
+end
 
 % zero the output
 V = zeros(XY,SGSparams.N);

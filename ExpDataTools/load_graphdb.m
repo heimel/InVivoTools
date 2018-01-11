@@ -11,7 +11,7 @@ if nargin<1
     create = false;
 end
 
-[db,filename]=load_expdatabase('graphdb',[],create);
+[db,filename] = load_expdatabase('graphdb',[],create);
 
 if isempty(db)
     return
@@ -21,5 +21,5 @@ db_empty = load(fullfile(fileparts(which('graph_db')), 'graphdb_empty'));
 db_empty = db_empty.db;
 [db,changed] = structconvert(db,db_empty);
 if changed
-    save(filename,'db');
+    save(filename,'db','-V7');
 end

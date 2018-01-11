@@ -21,7 +21,7 @@ end
 
 if isfield(opt,'spatial_filter') && ~isempty(opt.spatial_filter) && opt.spatial_filter
     if isfield(opt,'spatial_filterhandle')
-        im = tp_spatial_filter( im, func2str(opt.spatial_filterhandle),'',verbose);
+        im = tp_spatial_filter( im, func2str(opt.spatial_filterhandle),opt.spatial_filteroptions,verbose);
     else
         im = tp_spatial_filter( im, '','',verbose);
     end

@@ -1,4 +1,4 @@
-function h = arrow_on_axis(data,which_axis,which_handle,which_function,location)
+function h = arrow_on_axis(data,which_axis,which_handle,which_function,location,clr)
 %ARROW_ON_AXIS add descriptive arrow on figure axis
 %
 % H = ARROW_ON_AXIS(DATA,WHICH_AXIS,WHICH_HANDLE,WHICH_FUNCTION,LOCATION)
@@ -14,6 +14,10 @@ function h = arrow_on_axis(data,which_axis,which_handle,which_function,location)
 %
 % 2016, Alexander Heimel
 %
+
+if nargin<6 || isempty(clr)
+    clr = [0 0 0];
+end
 
 if nargin<5 || isempty(location)
     location = 'inside';
@@ -81,8 +85,8 @@ end
 
 switch which_axis
     case 'both'
-        h = arrow_on_axis(xdata,'x',which_handle,which_function,location);
-        h = [h arrow_on_axis(ydata,'y',which_handle,which_function,location)];
+        h = arrow_on_axis(xdata,'x',which_handle,which_function,location,clr);
+        h = [h arrow_on_axis(ydata,'y',which_handle,which_function,location,clr)];
         return
     case 'x'
         axind = 3;
@@ -106,6 +110,8 @@ switch which_axis
         stop = [ax(axind+axindp) m];
 end
 h = arrow( start,stop,7);
+set(h,'Edgecolor',clr);
+set(h,'Facecolor',clr);
 axis(ax);
 
 
