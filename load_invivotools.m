@@ -218,4 +218,4 @@ if isoctave
     warning('on','Octave:shadowed-function');
 end
 
-clear
+%clear 
