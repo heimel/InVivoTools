@@ -4,15 +4,26 @@
 %
 % 2018, Alexander Heimel
 
+experiment('14.13');
+host('tinyhat');
+
 db = load_testdb('wc');
+
+nose = [];
+arse = [];
+stim = [];
 
 for i=1:length(db)
     if ~isempty(db(i).measures) && isfield(db(i).measures,'nose') && ~isempty(db(i).measures.nose)
         [stim_azimuth,stim_elevation] = ...
-                        compute_overheadstim_angles(db(i).measures.nose,db(i).measures.arse,db(i).measures.stim);
+                        wc_compute_overheadstim_angles(db(i).measures.nose,db(i).measures.arse,db(i).measures.stim);
         
         db(i).measures.stim_azimuth = stim_azimuth(find(~isnan(stim_azimuth),1));
         db(i).measures.stim_elevation = stim_elevation(find(~isnan(stim_azimuth),1));
+        
+        nose = [nose;db(i).measures.nose];
+        arse = [arse;db(i).measures.arse];
+        stim = [stim;db(i).measures.stim];
     end
 end
 

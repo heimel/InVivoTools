@@ -15,10 +15,21 @@ function [azimuth,elevation,r] = compute_overheadstim_angles( nose_pxl,arse_pxl,
 monitorheight_cm = 35;
 floor_pxl_per_cm = 640/47;
 monitor_pxl_per_cm = 490/47;
+camera_width = 640;
+camera_height = 480;
 
 % nose_pxl = [n x 2], n rows of x,y coordinates of nose in camera pixels
 % arse_pxl = [n x 2], n rows of x,y coordinates of arse in camera pixels
 % stim_pxl = [n x 2], n rows of x,y coordinates of stim center in camera pixels
+
+% switch to center camera coordinates (necessary to do before scaling to cm)
+nose_pxl(:,1) = nose_pxl(:,1) - camera_width/2;
+nose_pxl(:,2) = nose_pxl(:,2) - camera_height/2;
+arse_pxl(:,1) = arse_pxl(:,1) - camera_width/2;
+arse_pxl(:,2) = arse_pxl(:,2) - camera_height/2;
+stim_pxl(:,1) = stim_pxl(:,1) - camera_width/2;
+stim_pxl(:,2) = stim_pxl(:,2) - camera_height/2;
+
 
 % switch to (uncorrected) centimeters (full widths of floor and monitor)
     nose_cm = nose_pxl / floor_pxl_per_cm;
