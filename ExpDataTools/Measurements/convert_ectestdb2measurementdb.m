@@ -27,7 +27,7 @@ for i=1:n_records
     if isempty(measures)
         continue
     end
-    flds = fields(measures);
+    flds = fieldnames(measures);
     for j=1:length(measures)
         object = [db(i).mouse ':' num2str(j,'%03d')];
         for k=1:length(flds)

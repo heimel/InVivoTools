@@ -19,7 +19,7 @@ if isempty(db)
 end
 
 data = transpose(squeeze(struct2cell(db)));
-colnames = fields(db);
+colnames = fieldnames(db);
   
 for i=1:numel(data)
     switch class(data{i})

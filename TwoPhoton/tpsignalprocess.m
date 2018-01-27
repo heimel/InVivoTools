@@ -48,7 +48,7 @@ sampletime = (t{1,1}(end) - t{1,1}(1)) / (length(t{1,1})-1);
 
 
 % fill in params struct by default
-for f = fields(default)'
+for f = fieldnames(default)'
     if ~isfield(params,f{1})
         params.(f{1}) = default.(f{1});
     end

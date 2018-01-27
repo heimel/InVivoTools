@@ -76,7 +76,7 @@ end
 switch answer
     case 'Yes'
         
-        flds = fields(used_records);
+        flds = fieldnames(used_records);
         for i=1:length(flds)
             recordtype = flds{i};
             db = used_records.(recordtype);

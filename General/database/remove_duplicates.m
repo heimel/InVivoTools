@@ -13,7 +13,7 @@ function db = remove_duplicates(db,flds,keep,keep_criterium)
 %
 
 if nargin<2 || isempty(flds)
-    flds = fields(db);
+    flds = fieldnames(db);
 end
 if nargin<3 || isempty(keep)
     keep = 'all';

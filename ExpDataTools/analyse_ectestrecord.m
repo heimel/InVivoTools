@@ -202,7 +202,7 @@ for i=1:length(g) % for all cells
         cellmeasures.p_subunit = cells(i).p_subunit;
     end
     
-    flds = fields(cells);
+    flds = fieldnames(cells);
     spike_flds = flds(strncmp('spike_',flds,6));
     for field = spike_flds
         if ~isempty(field) && isfield(cells(i),field{1})

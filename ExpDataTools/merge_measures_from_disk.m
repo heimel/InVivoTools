@@ -22,12 +22,12 @@ end
 measures = record.measures;
 if ~isempty(measures_on_disk) && length(measures_on_disk)==length(measures)
     if isstruct(measures)
-        f = fields(measures);
+        f = fieldnames(measures);
     else
         f = {};
     end
     if isstruct(measures_on_disk)
-        f_on_disk = fields(measures_on_disk);
+        f_on_disk = fieldnames(measures_on_disk);
     else
         f_on_disk = {};
     end

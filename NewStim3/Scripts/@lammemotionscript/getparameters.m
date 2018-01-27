@@ -11,7 +11,7 @@ P = S.params;
 
 pars = cellfun(@getparameters,get(S));
 pars = squeeze(struct2cell(pars));
-flds = fields(S.params);
+flds = fieldnames(S.params);
 for i=1:size(pars,1)
     c = cat(1,pars{i,:});
     if iscell(c)

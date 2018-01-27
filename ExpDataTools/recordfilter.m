@@ -23,7 +23,7 @@ if isempty(db) % very leveltlab specific
     end
     return
 end
-flds = fields(record);
+flds = fieldnames(record);
 s = [flds{1} '=' record.(flds{1})];
 
 ind = find_record(db,s);

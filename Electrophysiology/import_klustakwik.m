@@ -32,7 +32,7 @@ end
 
 count = 1;
 
-flds = fields(orgcells);
+flds = fieldnames(orgcells);
 features = flds(strncmp('spike_',flds,6));
 if ~any(isnan(flatten({orgcells(:).spike_lateslope})))
     use_lateslope = true;

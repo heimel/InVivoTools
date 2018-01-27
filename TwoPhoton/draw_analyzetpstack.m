@@ -192,9 +192,7 @@ hroilabelspanel = uipanel('Title','ROIs','Position',[panel_left panel_top-panel_
 guicreate(tb,'String','(S)how','Tag','DrawROIsCB','left','left','top','top','move','right','width','auto','parent',hroilabelspanel);
 guicreate(tb,'String','Nos','Tag','DrawROINosCB','move','right','width','auto','parent',hroilabelspanel);
 
-
-
-fr=fields(tp_emptyroirec);
+fr = fieldnames(tp_emptyroirec);
 guicreate(txt,'String','Sort','Enable','on','width','auto','parent',hroilabelspanel,'move','right','fontsize',9);
 guicreate(popup,'String',{fr{[1:5 7]}},'Tag','sortROIsBt','Enable','on','width',80,'parent',hroilabelspanel,'move','down','fontsize',9,'callback','genercallback');
 

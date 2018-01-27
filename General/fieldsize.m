@@ -3,14 +3,12 @@ function sizes = fieldsize( db )
 %
 % 2013, Alexander Heimel
 
-
-st=whos('db');
+st = whos('db');
 disp(['Total: ' num2str(st.bytes)]);
-flds=fields(db);
+flds = fieldnames(db);
 for i=1:length(flds)
-
-    dbn=rmfield(db,flds{i});
-    s=whos('dbn');
+    dbn = rmfield(db,flds{i});
+    s = whos('dbn');
     sizes(i) = st.bytes-s.bytes;
     try
         x = [db.(flds{i})];

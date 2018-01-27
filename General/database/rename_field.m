@@ -43,7 +43,7 @@ end
 
 
 % to keep order, get field nummber
-flds = fields(db);
+flds = fieldnames(db);
 ind = strmatch(field,flds,'exact');
 
 [db.(newfield)] = db.(field);
