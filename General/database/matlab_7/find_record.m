@@ -72,9 +72,9 @@ if crit(1)=='('
     while br_open>0 && p<length(crit)
         p=p+1;
         switch crit(p)
-            case ')', % bracket closed
+            case ')' % bracket closed
                 br_open=br_open-1;
-            case '(', % bracket opened
+            case '(' % bracket opened
                 br_open=br_open+1;
         end
     end
@@ -129,8 +129,8 @@ end
 
 % apply criteria
 ind=[];
-pos=sort([findstr(crit,'=') findstr(crit,'!') ...
-    findstr(crit,'>') findstr(crit,'<') findstr(crit,'~')]);
+pos=sort([strfind(crit,'=') strfind(crit,'!') ...
+    strfind(crit,'>') strfind(crit,'<') strfind(crit,'~')]);
 if length(pos)>1
     logmsg(['Only uses first comparison in ' crit ]);
     pos=pos(1);
@@ -179,35 +179,35 @@ if ~isempty(pos)
     if isnumeric(content)
         expn=str2double(expr);
         switch comp
-            case '=',
+            case '='
                 for i=1:length(db)
-                    if entries{i}==expn;
-                        ind(end+1)=i;
+                    if entries{i}==expn
+                        ind(end+1)=i; %#ok<AGROW>
                     end
                 end
-            case '!',
+            case '!'
                 for i=1:length(db)
                     if entries{i}~=expn
-                        ind(end+1)=i;
+                        ind(end+1)=i; %#ok<AGROW>
                     elseif isempty(entries{i})
-                        ind(end+1)=i;
+                        ind(end+1)=i; %#ok<AGROW>
                     end
                 end
-            case '>',
+            case '>'
                 for i=1:length(db)
                     if entries{i}>expn
-                        ind(end+1)=i;
+                        ind(end+1) = i; %#ok<AGROW>
                     end
                 end
-            case '<',
+            case '<'
                 for i=1:length(db)
                     if entries{i}<expn
-                        ind(end+1)=i;
+                        ind(end+1) = i; %#ok<AGROW>
                     end
                 end
             otherwise
                 logmsg(['comparison type ' comp ...
-                    ' is not implemented for numbers.'])
+                    ' is not implemented for numbers.']);
         end
     else
         % check if there are wildcards in comparison and replace = by ~
@@ -217,7 +217,7 @@ if ~isempty(pos)
             end
         end
         switch comp
-            case '~', % with wildcard
+            case '~' % with wildcard
                 if length(expr)>1 &&  expr(1)=='"' && expr(end)=='"'
                     expr = expr(2:end-1);
                 end
@@ -225,13 +225,13 @@ if ~isempty(pos)
                     if numel(entries{i})~=length(entries{i})
                         ent = '';
                         for j=1:size(entries{i},1)
-                            ent = [ ent ' ' strtrim(entries{i}(j,:))];
+                            ent = [ ent ' ' strtrim(entries{i}(j,:))]; %#ok<AGROW>
                         end
                         entries{i} = ent;
                     end
                     
                     if streq( entries{i}, expr,'*')==1
-                        ind(end+1)=i;
+                        ind(end+1)=i; %#ok<AGROW>
                     end
                 end
             case '='
@@ -239,7 +239,7 @@ if ~isempty(pos)
                     expr = expr(2:end-1);
                 end
                 ind = strmatch(expr,entries,'exact');
-            case '!',
+            case '!'
                 for i=1:length(db)
                     content = entries{i};
                     if iscell(content)
@@ -249,12 +249,12 @@ if ~isempty(pos)
                         content = flatten(content')';
                     end
                     if streq(content, expr)==0
-                        ind(end+1)=i;
+                        ind(end+1) = i; %#ok<AGROW>
                     elseif isempty(content)
-                        ind(end+1)=i;
+                        ind(end+1) = i; %#ok<AGROW>
                     end
                 end
-            case {'>','<'},
+            case {'>','<'}
                 for i=1:length(db)
                     content=entries{i};
                     if ~isempty(content)
@@ -268,13 +268,13 @@ if ~isempty(pos)
                         if ~isempty(first_nz)
                             first_nz=first_nz(1);
                             switch comp
-                                case '>',
+                                case '>'
                                     if diff(first_nz)>0
-                                        ind(end+1)=i;
+                                        ind(end+1)=i; %#ok<AGROW>
                                     end
-                                case '<',
+                                case '<'
                                     if diff(first_nz)<0
-                                        ind(end+1)=i;
+                                        ind(end+1)=i; %#ok<AGROW>
                                     end
                             end
                         end
