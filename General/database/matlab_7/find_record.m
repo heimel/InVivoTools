@@ -238,7 +238,9 @@ if ~isempty(pos)
                 if length(expr)>1 && expr(1)=='"' && expr(end)=='"'
                     expr = expr(2:end-1);
                 end
-                ind = strmatch(expr,entries,'exact');
+%                ind = strmatch(expr,entries,'exact');
+
+                ind = find(strcmp(expr,entries));
             case '!'
                 for i=1:length(db)
                     content = entries{i};
@@ -282,7 +284,7 @@ if ~isempty(pos)
                 end
             otherwise
                 disp(['comparison type ' comp ...
-                    ' is not implemented for strings.'])
+                    ' is not implemented for strings.']);
         end
     end
 end

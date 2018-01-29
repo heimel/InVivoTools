@@ -1263,7 +1263,7 @@ switch command
         fprintf('Analyzing...will take a few seconds...\n');
         [r,indimages] = tpsinglecondition(ud.record,ud.channel,trialslist,timeint,sptimeint,1);  %#ok<ASGLU>
         scratchfilename = tpscratchfilename(ud.record,[],'single_condition');
-        save(scratchfilename,'r','indimages','-mat');
+        save(scratchfilename,'r','indimages','-v7');
     case 'clearScratchBt'
         scratchfilename = tpscratchfilename(ud.record,[],'*');
         delete(scratchfilename);
@@ -1307,7 +1307,7 @@ switch command
         if isfield(ud.celldrawinfo,'changes')
             changes = ud.celldrawinfo.changes; %#ok<NASGU>
         end
-        save(scratchfilename,'slicelist','changes','record','-mat');
+        save(scratchfilename,'slicelist','changes','record','-v7');
         
         % check to see if TP database is open
         h_db = get_fighandle('TP database*');

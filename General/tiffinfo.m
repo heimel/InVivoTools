@@ -136,7 +136,7 @@ end
 inf=inf(1);
 
 if stored
-    save(infname,'inf','-mat');
+    save(infname,'inf','-v7');
 end
 return
 

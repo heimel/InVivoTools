@@ -205,7 +205,7 @@ else
     end
 end
 if stored
-    save(infname,'inf','imagenames','-mat');
+    save(infname,'inf','imagenames','-v7');
 end
 
 return

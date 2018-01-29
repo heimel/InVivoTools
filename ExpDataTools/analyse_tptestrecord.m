@@ -324,7 +324,7 @@ if exist(experimentpath(record),'dir')
     measuresfile = fullfile(experimentpath(record),'tp_measures.mat');
     measures = record.measures;
     try
-        save(measuresfile,'measures');
+        save(measuresfile,'measures','-v7');
     catch
         errormsg(['Could not write measures file ' measuresfile ]);
     end

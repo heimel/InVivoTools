@@ -54,11 +54,11 @@ for class=1:maxclass
   waveform(:,class)=mean( csp(:, find( classes(:,1)==class & classes(:,2)>=ac.ACparams.minprob)),2) ;
 end
 
-display(['Not sure about clustering ' num2str(length( find( classes(:,2)<ac.ACparams.minprob))) ...
+disp(['Not sure about clustering ' num2str(length( find( classes(:,2)<ac.ACparams.minprob))) ...
 	 ' out of ' num2str(size(csp,2))  ' waveforms.']);
 
 save([scratchout '_master'],'csp','cspn','spikeloc','thecov',....
-          'classes','maxclass','waveform','-mat');
+          'classes','maxclass','waveform','-v7');
 
 save([scratchout '_waveforms.asc'],'waveform','-ascii');
 

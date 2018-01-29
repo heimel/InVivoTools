@@ -546,7 +546,7 @@ switch command,
 		end;
 		if needtorun,
 			[data,t] = readprairieviewdata(fulldirname,[-Inf Inf],listofcells,1);
-			save(rawfilename,'data','t','listofcells','listofcellnames','-mat');
+			save(rawfilename,'data','t','listofcells','listofcellnames','-v7');
 			pixelarg = listofcells;
 		else,
 			pixelarg = load(rawfilename,'-mat');
@@ -555,7 +555,7 @@ switch command,
 		paramname,
 		resps=prairieviewtuningcurve(fulldirname,paramname,pixelarg,1,listofcellnames,trialslist,timeint,sptimeint,blankID,~isempty(blankID));
 		save([scratchname fname '_' dirname],'resps','listofcells','listofcellnames',...
-			'dirname','refdirname','paramname','-mat');
+			'dirname','refdirname','paramname','-v7');
 	case 'checkDriftBt',
 		dirname = get(ft(fig,'stimdirnameEdit'),'string');
 		refdirname = getrefdirname(ud,dirname);
@@ -619,7 +619,7 @@ switch command,
 		end;
 		if needtorun,
 			[data,t] = readprairieviewdata(fulldirname,[-Inf Inf],listofcells,1);
-			save(rawfilename,'data','t','listofcells','listofcellnames','-mat');
+			save(rawfilename,'data','t','listofcells','listofcellnames','-v7');
 			pixelarg = listofcells;
 		else,
 			pixelarg = load(rawfilename,'-mat');
@@ -697,10 +697,10 @@ switch command,
 				'File exists...overwrite?','OK','Cancel','Cancel');
 			if strcmp(answer,'OK'),
 				save([scratchname fname '.stack'],'celllist','slicelist',...
-						'previewimage','-mat');
+						'previewimage','-v7');
 			end;
 		else,
-			save([scratchname fname '.stack'],'celllist','slicelist','previewimage','-mat');
+			save([scratchname fname '.stack'],'celllist','slicelist','previewimage','-v7');
 		end;
 	case 'loadBt',
 		fname = stackname;

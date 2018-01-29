@@ -215,7 +215,7 @@ if isempty(record.imagefile) ...
                 num2str(compression) '.mat'];
             imagepath=fullfile(analysispath,imagefile);
             data=get(img,'CData');
-            save(imagepath,'ks_data','data','-mat');
+            save(imagepath,'ks_data','data','-v7');
             record.imagefile=imagefile;
         otherwise
             [late_frames,early_frames] = oi_get_framenumbers(record);

@@ -324,7 +324,7 @@ end
 
 if allowchanges
     try
-        save(measuresfile,'measures');
+        save(measuresfile,'measures','-v7');
     catch me
         errormsg(['Could not write measures file ' measuresfile '. ' me.message]);
     end

@@ -19,7 +19,7 @@ load_testdb('ls')
 if  reanalyze
     db = analyze_all(db);
     clear('datapath','reanalyze');
-    save(fullfile(expdatabasepath,expdatabases('ls')),'-mat');
+    save(fullfile(expdatabasepath,expdatabases('ls')),'-v7');
 end
 
 db=db(29:end);

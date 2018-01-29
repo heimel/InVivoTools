@@ -87,7 +87,7 @@ switch record.stim_type
             measures.curve=r;
             if ~isempty(waves) % save waves
                 wavefile=fullfile(datapath,record.test,'saved_data.mat');
-                save(wavefile,'waves','waves_time','powerm');
+                save(wavefile,'waves','waves_time','powerm','-v7');
             end
         end
         if ~isempty(measures)
@@ -171,7 +171,7 @@ switch record.stim_type
         if ~isempty(waves) % save waves
             waves{1,1}{1,1} = waves;
             wavefile=fullfile(datapath,record.test,'saved_data.mat');
-            save(wavefile,'waves','waves_time','powerm');
+            save(wavefile,'waves','waves_time','powerm','-v7');
         end
         if ~isempty(measures)
             record.measures = measures;

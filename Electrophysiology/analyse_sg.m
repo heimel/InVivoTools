@@ -53,8 +53,8 @@ measures.rc_lags = rcs.crc.lags; % stimulus time - spike time
 measures.rc_feamean = para_rc.feamean;
 
 % store normalized receptive field plots
-measures.rf(:,:,:) = max(rcs.reverse_corr.rc_avg(1,:,:,:,end),[],5);  
-
+%measures.rf(:,:,:) = max(rcs.reverse_corr.rc_avg(1,:,:,:,end),[],5);  
+measures.rf = squeeze(max(rcs.reverse_corr.rc_avg(1,:,:,:,end),[],5));
 
 % find rf center
 rff = squeeze(max(abs(measures.rf - para_rc.feamean),[],1));
@@ -232,7 +232,7 @@ if 0 % show histograms & roc
     hold on
     h=bar(x+0.15,dist2,0.3);
     set(h,'FaceColor',[1 0 0]);
-    legend('no onframe','onframe')
+    legend('no onframe','onframe');
     ylabel('Number of responses per occurence');
     xlabel(['# spikes ' num2str(hist_start) '-' num2str(hist_end) 's after frame' ]);
     set(gca,'YScale','log');
@@ -315,7 +315,7 @@ measures.time_peak=median(spiketimes_around_peak);
 
 rate=zeros(1,length(arfy));% pre-allocation
 dist=zeros(1,length(arfy));% pre-allocation
-for i=1:length(arfy);
+for i=1:length(arfy)
     onframes=find(f(arfy(i),arfx(i),:,1)>0);
     rate(i)=sum(bins(1,onframes))/length(onframes)/para_rc.timeres;
     dist(i)=sqrt( (arfy(i)-rfy)^2 + (arfx(i)-rfx)^2);

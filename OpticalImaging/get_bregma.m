@@ -49,7 +49,7 @@ if ~exist(fnamebrg,'file')
     x=round(x);
     y=round(y);
     logmsg(['Clicked on ' num2str(x) ', ' num2str(y)]);
-    save(fnamebrg,'x','y','-mat');
+    save(fnamebrg,'x','y','-v7');
     close(h);
 else
     load(fnamebrg,'-mat');

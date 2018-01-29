@@ -373,9 +373,9 @@ if nargin<1
 end
 save_str={  ...
     'NewStimGlobals;if ~exist(''NewStimPixelsPerCm'');NewStimPixelsPerCm=pixels_per_cm;end;'
-    ['save(''fromremote.mat'',' vars ',''-mat'');']
+    ['save(''fromremote.mat'',' vars ',''-v7'');']
     'try;delete(''gotit.mat'');end;'
-    'save(''gotit.mat'',''g'',''-mat'');'};
+    'save(''gotit.mat'',''g'',''-v7'');'};
 return
 
 function handleupdate(s,lbrem)

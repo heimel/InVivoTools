@@ -188,7 +188,7 @@ close(F)
 
 if allowchanges
     MatFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
-    save(MatFile, 'EVENT')
+    save(MatFile, 'EVENT','-v7')
 end
 
 % % % keyboard

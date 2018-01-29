@@ -51,5 +51,5 @@ end
 saveScript = setDisplayMethod(saveScript, 2, do);
 clear('do','i','p','ss','backupfilename');
 
-save(stimfilename);
-disp('succesfull');
+save(stimfilename,'-v7');
+logmsg('Succesfull');

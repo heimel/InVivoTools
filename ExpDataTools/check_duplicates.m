@@ -6,7 +6,8 @@ function check_duplicates(record,db,curnum)
 % 2015, Alexander Heimel
 
 filt = recordfilter(record);
-ind = setdiff(find_record(db,filt), curnum);
+ind = find_record(db,filt);
+ind = setdiff(ind, curnum);
 for i = ind
     try
         [c,flds] = structdiff(record,db(i));
@@ -28,7 +29,9 @@ for i = ind
         end
     end
 
-    if (length(flds)==1 && flds=={'ROIs'}) || (length(flds)==2 && flds=={'ROIs','measures'})
+    if (length(flds)==1 && strcmp(flds{1},'ROIs')) || ...
+      (length(flds)==2 && (strcmp(flds{1},'ROIs') && strcmp(flds{2},'measures')) ) || ...
+      (length(flds)==2 && (strcmp(flds{2},'ROIs') && strcmp(flds{1},'measures')) )
         warning('CHECK_DUPLICATES:ONLY_ROIS_DIFFER',['Record ' num2str(i) ' only differs in fields ' cell2str(flds)]);
         if isfield(record,'ROIs') && isfield(record.ROIs,'celllist')
             curroinum = length(record.ROIs.celllist);

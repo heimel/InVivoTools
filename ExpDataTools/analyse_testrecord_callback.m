@@ -5,7 +5,7 @@ function newud=analyse_testrecord_callback( ud)
 %
 % 2007-2014, Alexander Heimel
 
-warning('on','all');
+%warning('on','all');
 
 record=ud.db(ud.current_record);
 

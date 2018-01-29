@@ -103,7 +103,7 @@ else
         movefile(filename,[filename '_copy'],'f');
     end
     try
-        save(filename,'db','-mat','-v7');
+        save(filename,'db','-v7');
         if debug
             tc = toc;
             logmsg(['Saved ' filename ' in v7 format in ' num2str(round(tc)) ' s.']);
