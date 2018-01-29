@@ -33,7 +33,6 @@ end
 para_rc.interval = processparams.rc_interval;
 para_rc.timeres = processparams.rc_timeres;
 para_rc.gain = processparams.rc_gain;
-%para_rc.bgcolor=2;
 
 rc = reverse_corr(inp,para_rc,where);
 if isempty(rc)
@@ -57,9 +56,14 @@ measures.rc_feamean = para_rc.feamean;
 measures.rf = squeeze(max(rcs.reverse_corr.rc_avg(1,:,:,:,end),[],5));
 
 % find rf center
-rff = squeeze(max(abs(measures.rf - para_rc.feamean),[],1));
+if ndims(measures.rf)>2
+    rff = squeeze(max(abs(measures.rf - para_rc.feamean),[],1));
+    maxtimeint_ind = find(abs(measures.rf(:,xy)-para_rc.feamean)==m,1);
+else
+    maxtimeint_ind = 1;
+    rff = abs(measures.rf - para_rc.feamean);
+end
 [m,xy] = max(rff(:));
-maxtimeint_ind = find(abs(measures.rf(:,xy)-para_rc.feamean)==m,1); 
 [x,y,rect]=getgrid(inp.stimtime.stim);
 rfx = ceil(xy/y);
 rfy = rem(xy-1,y)+1;

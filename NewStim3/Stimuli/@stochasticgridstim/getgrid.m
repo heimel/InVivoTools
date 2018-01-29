@@ -16,15 +16,17 @@ width  = SGSparams.rect(3) - SGSparams.rect(1);
 height = SGSparams.rect(4) - SGSparams.rect(2);
 
 % set up grid
-if (SGSparams.pixSize(1)>=1),
+if (SGSparams.pixSize(1)>=1)
 	X = SGSparams.pixSize(1);
-else, X = (width*SGSparams.pixSize(1)); 
-end;
+else
+    X = (width*SGSparams.pixSize(1)); 
+end
 
-if (SGSparams.pixSize(2)>=1),
+if (SGSparams.pixSize(2)>=1)
 	Y = SGSparams.pixSize(2);
-else, Y = (height*SGSparams.pixSize(2)); 
-end;
+else
+    Y = (height*SGSparams.pixSize(2));
+end
 
 i = 1:width;
 x = fix((i-1)/X)+1;
@@ -35,7 +37,7 @@ XY = x(end)*y(end);
 Xo = x(end); Yo = y(end);
 rect = SGSparams.rect;
 
-if nargout>=6,
+if nargout>=6
   grid = ([(x-1)*y(end)]'*ones(1,length(y))+ones(1,length(x))'*y)';
   g = reshape(1:width*height,height,width);
   corner = zeros(Y,X); corner(1) = 1;
@@ -43,4 +45,4 @@ if nargout>=6,
   corners = cc(find(cc))';
   footprint = reshape(g(1:Y,1:X),X*Y,1)-1;
   inds=ones(1,X*Y)'*corners+footprint*ones(1,XY);
-end;
+end
