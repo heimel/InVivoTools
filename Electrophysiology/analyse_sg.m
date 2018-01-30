@@ -22,7 +22,7 @@ para_stim = getparameters(inp.stimtime(1).stim);
 
 measures.usable=1;
 
-if 0 && verbose
+if 0 && verbose % 1 for the RF ON/OFF
     where.figure=figure;
     where.rect=[0 0 1 1];
     where.units='normalized';
