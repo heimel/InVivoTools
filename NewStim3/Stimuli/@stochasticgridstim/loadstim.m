@@ -105,7 +105,11 @@ else % use 'Movie' mode, one CLUT and many images
                 image = imrotate(image, rotationangle,'nearest','crop');
             end
             if ~conserve_mem_custom||i==1
-                rgb = ind2rgb(image,clut);
+		try
+	                rgb = ind2rgb(image,clut);
+		catch
+	                rgb = ind2rgb(image,clut/255);
+		end
                 offscreen(i) = Screen('MakeTexture',StimWindow,rgb);
             end
         end
