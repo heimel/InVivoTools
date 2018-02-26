@@ -57,10 +57,12 @@ if trigger
     StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
     
     % turn on separate trigger channel
+    %logmsg('Turning on RTS'); 
     StimSerial('rts',StimSerialStim,1);
 else
     StimSerialGlobals
     % turn off separate trigger channel
+    % logmsg('Turning off RTS'); 
     StimSerial('rts',StimSerialStim,0);
 end
 
@@ -274,6 +276,7 @@ else
 end
 
 % hardcoded optogenetics trigger off
+%logmsg('Hard coded turning RTS off');
 StimSerialGlobals
 StimSerial('rts',StimSerialStim,0);
 

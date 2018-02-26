@@ -1,7 +1,7 @@
 StimSerialGlobals
 
 if StimSerialSerialPort
-    if isempty(StimSerialScript)
+    if ~isa(StimSerialScript,'serial') && ~isa(StimSerialScript,'octave_serial')
         try
             StimSerialScript=StimSerial('Open',StimSerialScriptIn,StimSerialScriptOut,9600);
         catch me
@@ -20,7 +20,7 @@ if StimSerialSerialPort
         end
     end
     
-    if isempty(StimSerialStim)
+    if ~isa(StimSerialStim,'serial') && ~isa(StimSerialStim,'octave_serial') 
         if strcmp(StimSerialScriptIn,StimSerialStimIn)&&...
                 strcmp(StimSerialScriptOut,StimSerialStimOut),
             StimSerialStim = StimSerialScript;
