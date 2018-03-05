@@ -86,6 +86,8 @@ switch command
         ud.image_processing.spatial_filterhandle = processparams.spatial_filterhandle;
         ud.image_processing.spatial_filteroptions = processparams.spatial_filteroptions;
         
+        ud.image_processing.apply_postfunction = processparams.apply_postfunction;
+        
         % now make data structures
         slicelist = emptyslicerec;
         ud.slicelist = slicelist([]);

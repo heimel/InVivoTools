@@ -125,6 +125,8 @@ switch lower(record.experiment)
         params.spatial_filterhandle = @medfilt3;
 end
 
+params.apply_postfunction = []; % function to apply after imageprocessing, e.g imregisterstack
+
 % unmixing parameters
 
 params.unmixing_use_pixels = 'highchan2'; % used since 2012-01-30
