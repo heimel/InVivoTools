@@ -17,16 +17,29 @@ function stack = imregisterstack(stack)
 start = tic;
 
 tform = affine2d;
+
 out = stack;
-for i = 2:size(stack,3)
+
+% start registration from the center to optimize the amount of data that is kept
+middleOfStackIndex = round(size(stack,3)/2);
+
+% second half
+for i = (middleOfStackIndex+1):size(stack,3)
     tform(i) = imregcorr(stack(:,:,i),stack(:,:,i-1),'translation');    
-    tform(i).T(3,1:2) = tform(i).T(3,1:2) + tform(i-1).T(3,1:2) ;
+    tform(i).T(3,1:2) = tform(i).T(3,1:2) + tform(i-1).T(3,1:2);
     out(:,:,i) = imwarp(stack(:,:,i), tform(i), 'OutputView', imref2d(size(stack(:,:,1))));     
-end 
+end
+
+% first half
+for i = (middleOfStackIndex-1):-1:1
+    tform(i) = imregcorr(stack(:,:,i),stack(:,:,i+1),'translation');    
+    tform(i).T(3,1:2) = tform(i).T(3,1:2) + tform(i+1).T(3,1:2);
+    out(:,:,i) = imwarp(stack(:,:,i), tform(i), 'OutputView', imref2d(size(stack(:,:,1))));     
+end
+
+logmsg(['Returned in ', num2str(round(toc(start))), ' seconds'])
+
 stack = out;
-
-disp([mfilename, ' returned in ', num2str(round(toc(start))), ' seconds'])
-
 
 
 % old version with problems
