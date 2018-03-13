@@ -78,6 +78,10 @@ else
         end
         [~,ind] = sort(hash);
         blind_db = db(ind);
+        if reverse_order('',blind_db(1))
+            logmsg('Reversing the order');
+            blind_db = blind_db(end:-1:1);
+        end
     else
         blind_db = sort_db(db);
     end
@@ -119,7 +123,14 @@ switch record.experiment
             reverse = true;
         end
     otherwise
-        reverse = false;
+        params = tpprocessparams(record);
+        if isfield(params,'blind_reverse')
+            reverse = params.blind_reverse;
+        else
+            reverse = false;
+        end
+        
+        %logmsg(['Blinding reversed = ' num2str(reverse)]);
 end
 
 function hash = compute_hash(record)
