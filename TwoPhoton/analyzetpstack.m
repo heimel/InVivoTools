@@ -1002,8 +1002,15 @@ switch command
                             % find maximum z-projection
                             proj_mode = 1; % mean data for each frame
                             data = tpreaddata(ud.record, [-inf inf], {pixelinds},proj_mode,snap_to_channel,ud.image_processing,false);
-                            [tempmax,frame] = max( data{1} ); %#ok<ASGLU>
-                            goto_frame( frame,fig );
+                            
+                            
+                            
+                            curframe = round(get(ft(fig,'FrameSlid'),'value'));
+                            start = max(1,curframe - par.max_snap_range );
+                            stop = min(length(data{1}),curframe + par.max_snap_range);
+                            [tempmax,frame] = max( data{1}(start:stop) ); %#ok<ASGLU>
+                            
+                            goto_frame( frame+start-1,fig );
                             ud=get(fig,'userdata');
                         end
                     end

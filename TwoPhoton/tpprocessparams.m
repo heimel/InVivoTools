@@ -186,6 +186,9 @@ switch lower(record.experiment)
         params.align_channel = 2; % for Daan's original stacks
 end
 
+% maximum number of frames to jump when snapping neurite
+par.max_snap_range = 2; % frames
+
 % maximum distance for linking ROI to neurite
 switch record.experiment
     case '11.21'
