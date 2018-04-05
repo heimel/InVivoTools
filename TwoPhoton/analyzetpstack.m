@@ -1003,7 +1003,7 @@ switch command
                             proj_mode = 1; % mean data for each frame
                             data = tpreaddata(ud.record, [-inf inf], {pixelinds},proj_mode,snap_to_channel,ud.image_processing,false);
                             
-                            
+                            par = tpprocessparams(ud.record);
                             
                             curframe = round(get(ft(fig,'FrameSlid'),'value'));
                             start = max(1,curframe - par.max_snap_range );

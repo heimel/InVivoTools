@@ -187,7 +187,7 @@ switch lower(record.experiment)
 end
 
 % maximum number of frames to jump when snapping neurite
-par.max_snap_range = 2; % frames
+params.max_snap_range = 2; % frames
 
 % maximum distance for linking ROI to neurite
 switch record.experiment
