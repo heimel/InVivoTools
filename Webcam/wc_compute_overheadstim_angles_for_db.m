@@ -42,18 +42,30 @@ for i=1:length(fdb)
     end
 end
 
-figure;
-subplot(2,2,1);
-plot(stim_azimuth,stim_elevation,'.');
-xlabel('Azimuth (radii)');
-ylabel('Elevation (radii)');
-axis([-pi pi 0 pi/2]);
-subplot(2,2,3);
-histogram(stim_azimuth,'binlimits',[-pi pi]);
-xlabel('Azimuth (radii)');
-ylabel('Count');
-subplot(2,2,4);
-histogram(stim_elevation,'binlimits',[0 pi/2]);
-xlabel('Elevation (radii)');
-ylabel('Count');
+my_colours;
 
+figure;
+axx1 = subplot(1,3,1);
+plot(axx1, stim_azimuth,stim_elevation,'v', 'MarkerSize', 5, 'MarkerEdgeColor', saddle_brown);
+xlabel('Azimuth (radii)', 'FontSize', 18);
+ylabel('Elevation (radii)', 'FontSize', 18);
+axis([-pi pi 0 pi/2]);
+box(axx1, 'off')
+a = get(gca,'XTickLabel');
+set(gca,'XTickLabel',a,'fontsize',18);
+
+axx2 = subplot(1,3,2);
+histogram(axx2, stim_azimuth,'binlimits',[-pi pi], 'FaceColor',light_salmon);
+xlabel('Azimuth (radii)', 'FontSize', 18);
+ylabel('Number of trials', 'FontSize', 18);
+box(axx2, 'off')
+aa = get(gca,'XTickLabel');
+set(gca,'XTickLabel',aa,'fontsize',18);
+
+axx3 = subplot(1,3,3);
+histogram(axx3,stim_elevation,'binlimits',[0 pi/2], 'FaceColor',my_pink);
+xlabel('Elevation (radii)', 'FontSize', 18);
+ylabel('Number of trials', 'FontSize', 18);
+box(axx3, 'off')
+aaa = get(gca,'XTickLabel');
+set(gca,'XTickLabel',aaa,'fontsize',18)
