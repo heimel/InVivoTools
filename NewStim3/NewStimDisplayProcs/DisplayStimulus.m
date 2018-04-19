@@ -151,7 +151,7 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
         vbl = Screen('Flip',StimWindow,0);
         frameTimes(1) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,1);
 
-        capture_image = false;
+        capture_image = true;
         if capture_image;
             imageArray = Screen('GetImage', StimWindow);
             imwrite(imageArray,fullfile(getdesktopfolder,'stimulus_frame.png'),'png')

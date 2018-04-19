@@ -84,6 +84,14 @@ for current_frame = 1:n_frames
     end
     stamp = Screen('Flip', StimWindow, stamp+0.5/StimWindowRefresh);
     
+    % save single frame
+    capture_frame = false;
+    if capture_frame
+        if current_frame == 100 %round(n_frames/2)
+            imageArray = Screen('GetImage', StimWindow);
+            imwrite(imageArray,fullfile(getdesktopfolder,'stimulus_frame.png'),'png')
+        end
+    end
 end
 if ~params.stay
     Screen(StimWindow,'FillRect',dp.clut_bg(1,:));
