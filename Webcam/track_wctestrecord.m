@@ -3,7 +3,7 @@ function record = track_wctestrecord( record, verbose )
 %
 %  RECORD = ANALYSE_WCTESTRECORD( RECORD, VERBOSE=true )
 %
-% 2015, Alexander Heimel
+% 2015-2018, Alexander Heimel
 %
 
 if nargin<2 || isempty(verbose)
@@ -38,17 +38,21 @@ record.measures.stimstart = stimStart;
 [frameRate, arena] = get_arena(filename, stimStart, record);
 
 record.measures.frameRate = frameRate;
-% record.measures.frame1 = frame1;
 record.measures.arena = arena;
 
-% record.measures = [];
-
-[brightness, thresholdsStimOnset, peakPoints] = ...
-    search_stim_onset(filename, stimStart, arena, frameRate);
+if par.use_legacy_videoreader
+    [brightness, thresholdsStimOnset, peakPoints] = ...
+        search_stim_onset_legacy(filename, stimStart, arena, frameRate);
+else
+    [brightness, thresholdsStimOnset, peakPoints] = ...
+        search_stim_onset(filename, stimStart, arena, frameRate);
+end
 
 record.measures.brightness = brightness;
 record.measures.thresholdsStimOnset = thresholdsStimOnset;
 record.measures.peakPoints = peakPoints;
+
+
 
 
 % % record.measures.freezing_computed = ~isempty(freezeTimes);

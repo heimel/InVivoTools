@@ -56,9 +56,9 @@ par.wc_timemultiplier = 1.015355;
 par.wc_timeshift = -0.5;
 
 if ismac
-    par.use_legacy_play_wctestrecord = false;
+    par.use_legacy_videoreader = false;
 else
-    par.use_legacy_play_wctestrecord = true;
+    par.use_legacy_videoreader = true;
 end
 
 if exist('processparams_local.m','file')

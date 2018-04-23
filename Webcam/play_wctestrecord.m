@@ -27,6 +27,11 @@ starttime = (wcinfo(1).stimstart-par.wc_playbackpretime) * par.wc_timemultiplier
 filename = fullfile(wcinfo.path,wcinfo.mp4name);
 
 logmsg('Running video in matlab');
+if ~exist(filename,'file')
+    errormsg([filename ' does not exist. Perhaps need to configure mp4-wrapper?']);
+    return
+end
+
 vid=VideoReader(filename);
 
 %Get paramters of video
