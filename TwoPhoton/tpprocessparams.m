@@ -356,9 +356,7 @@ params.drift_correction_skip_firstframes = 5; % skip frames at start
 % keep at bottom
 
 if exist('processparams_local.m','file')
-    oldparams = params;
     params = processparams_local( params );
-    %     changed_process_parameters(params,oldparams);
 end
 
 

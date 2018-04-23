@@ -7,5 +7,10 @@ function newud=play_wctestrecord_callback( ud)
 
 newud=ud;
 
+par = wcprocessparams;
 
-play_wctestrecord(ud.db(ud.current_record));
+if par.use_legacy_play_wctestrecord 
+    play_wctestrecord_legacy(ud.db(ud.current_record));
+else
+    play_wctestrecord(ud.db(ud.current_record));
+end    

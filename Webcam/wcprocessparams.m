@@ -1,7 +1,7 @@
 function par = wcprocessparams( record )
 %WCPROCESSPARAMS sets parameters for webcam recording
 %
-% 2015, Alexander Heimel
+% 2015-2018, Alexander Heimel
 
 % set player
 if isunix && ~ismac
@@ -18,14 +18,9 @@ if isunix && ~ismac
             par.wc_playercommand = '';
         end
     end
-    
- 
 elseif ismac
     par.wc_player = 'VLC'; 
     par.wc_playercommand = 'open -a VLC' ;
-    %par.wc_playercommand=['"' par.wc_playercommand '"'];
-
-
 else
     par.wc_player = 'vlc'; 
     par.wc_playercommand = 'C:\Program Files (x86)\VideoLAN\VLC\vlc.exe' ;
@@ -56,8 +51,17 @@ else
 end
 
 par.wc_playbackpretime = 0; % s to show before stim onset
-par.wc_timemultiplier = 1.01445;
+% par.wc_timemultiplier = 1.01445;
 par.wc_timemultiplier = 1.015355;
-%par.wc_timemultiplier = 1.015;
 par.wc_timeshift = -0.5;
+
+if ismac
+    par.use_legacy_play_wctestrecord = false;
+else
+    par.use_legacy_play_wctestrecord = true;
+end
+
+if exist('processparams_local.m','file')
+    par = processparams_local( par );
+end
 
