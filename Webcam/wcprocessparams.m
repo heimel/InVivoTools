@@ -4,7 +4,7 @@ function par = wcprocessparams( record )
 % 2015, Alexander Heimel
 
 % set player
-if isunix
+if isunix && ~ismac
     par.wc_player = 'vlc' ;
     [status,out] = system(['which ' par.wc_player]);
     if status==0
@@ -18,6 +18,14 @@ if isunix
             par.wc_playercommand = '';
         end
     end
+    
+ 
+elseif ismac
+    par.wc_player = 'VLC'; 
+    par.wc_playercommand = 'open -a VLC' ;
+    %par.wc_playercommand=['"' par.wc_playercommand '"'];
+
+
 else
     par.wc_player = 'vlc'; 
     par.wc_playercommand = 'C:\Program Files (x86)\VideoLAN\VLC\vlc.exe' ;
@@ -27,8 +35,7 @@ else
     if ~exist(par.wc_playercommand,'file')
         par.wc_playercommand = '';
     end
-    
-    if exist(par.wc_playercommand,'file');
+    if exist(par.wc_playercommand,'file')
         par.wc_playercommand=['"' par.wc_playercommand '"'];
     end
 end

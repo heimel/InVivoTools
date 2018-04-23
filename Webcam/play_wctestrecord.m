@@ -26,7 +26,7 @@ logmsg('Running video in matlab');
 vid=VideoReader(filename);
 
 %Get paramters of video
-numFrames = get(vid, 'NumberOfFrames');
+%numFrames = get(vid, 'NumberOfFrames');
 frameRate = get(vid, 'FrameRate'); %30 frames/sec
 
 if ~isempty(record.stimstartframe)
@@ -79,13 +79,13 @@ while 1
                     logmsg('Reached start of movie');
                 end
             case 39 % arrow right
-                if frame<numFrames
+%                if frame<numFrames
                     frame = frame +1;
                     changed = true;
                     prevnokey = false;
-                else
-                    logmsg('Reached end of movie');
-                end
+%                else
+%                    logmsg('Reached end of movie');
+%                end
             case 81 % q
                 break
         end
