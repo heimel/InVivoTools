@@ -38,10 +38,12 @@ else
     vid.CurrentTime = starttime;
 end
 
-disp('Keys: left = previous frame, right = next frame, down = play until up, q = quit');
+disp('Keys: left = previous frame, right = next frame, down = play until up, q = quit, + = increase gamma, - = decrease gamma');
 
-figure('Name',['Play ' recordfilter(record)],'NumberTitle','off','MenuBar','none');
+fig = figure('Name',['Play ' recordfilter(record)],'NumberTitle','off','MenuBar','none');
 changed = true;
+
+gamma = 1;
 
 while 1
     if ~hasFrame(vid)
@@ -49,7 +51,10 @@ while 1
         pause(0.01);
     elseif changed
         imframe = readFrame(vid);
-        image(imframe);
+        
+        gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
+        
+        image(gimframe);
         axis image
         changed = false;
         title([num2str(vid.CurrentTime,'%.2f') ' s - Frame ' num2str(vid.CurrentTime*frameRate) ]);
@@ -66,6 +71,19 @@ while 1
     end
     
     switch keyCode
+        case '-'
+            gamma = gamma + 0.1;
+            gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
+            image(gimframe);
+            axis image
+        case '+'
+            if gamma>0.1
+                gamma = gamma - 0.1;
+            end
+            gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
+            
+            image(gimframe);
+            axis image
         case 31 %arrow down
             while hasFrame(vid)
                 vidFrame = readFrame(vid);
@@ -89,9 +107,9 @@ while 1
             end
         case 29 % arrow right
             changed = true;
-        case 81 % q
+        case 'q'
             break
     end
 end
-
+delete(fig);
 
