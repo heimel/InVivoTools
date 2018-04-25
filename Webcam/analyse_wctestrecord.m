@@ -37,13 +37,18 @@ if isfield(record.measures,'peakPoints')
 else
     error('Stimulus onset is not determined. use "track" button')
 end
-% peakPoints = record.measures.peakPoints;
 
-[freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
-    averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] = ...
-    trackmouseblack_pi(filename,false,stimStart,startside,peakPoints, record);
-
-
+if par.use_legacy_videoreader
+    [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
+        averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] = ...
+        trackmouseblack_pi_legacy(filename,false,stimStart,startside,peakPoints, record);
+else
+    [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
+        averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] = ...
+        trackmouseblack_pi(filename,false,stimStart,startside,peakPoints, record);
+end
+    
+    
 record.measures.freezetimes = freezeTimes;
 record.measures.nose = nose;
 record.measures.arse = arse;
