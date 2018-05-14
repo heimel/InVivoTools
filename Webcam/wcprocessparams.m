@@ -51,9 +51,18 @@ else
 end
 
 par.wc_playbackpretime = 0; % s to show before stim onset
+
+
 % par.wc_timemultiplier = 1.01445;
-par.wc_timemultiplier = 1.015355;
-par.wc_timeshift = -0.5;
+
+if datenum(record.date)<=datenum('2018-04-28')
+    par.wc_timemultiplier = 1.015355;
+    par.wc_timeshift = -0.5;
+else % something was changed in the timing of the movies between 2018-04-28 and 2018-04-30
+    par.wc_timemultiplier = 1.00058;
+    par.wc_timeshift = -0.5;
+end
+
 
 if ismac
     par.use_legacy_videoreader = false;

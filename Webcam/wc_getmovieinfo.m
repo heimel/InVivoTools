@@ -21,6 +21,36 @@ for i = 1:length(d)
     wcinfo(i).filename = [wcinfo(i).filename '.h264'];
 end
 
+for i=1:length(d)
+    if isempty(wcinfo(i).stimstart)
+        logmsg(['Empty stimstart in ' recordfilter(record)]);
+        comment = record.comment;
+        comment(comment==' ')=[];
+        
+        ind = strfind(comment,'start=');
+        if isempty(ind)
+            errormsg('No stimstart in wcinfo. Add starttime to comment field, as ''start=XX:XX;''. note semicolon at end');
+            return
+        end
+        ind2 = find(comment(ind:end)==':');
+        if isempty(ind2)
+            errormsg('Missing colon in start=XX:XX;');
+            return
+        end
+        ind3 = find(comment(ind:end)==';');
+        if isempty(ind3)
+            errormsg('Missing semicolon in start=XX:XX;');
+            return
+        end
+        minutes = str2num(comment(ind+6:ind+ind2-2));
+        seconds = str2num(comment(ind+ind2:ind+ind3-2));
+        wcinfo(i).real_stimstart = minutes*60+seconds;
+        wcinfo(i).stimstart = (wcinfo(i).real_stimstart-par.wc_timeshift)/par.wc_timemultiplier ;
+        
+    end
+end
+
+
 % create mp4 wrappers   
 parpath = fullfile(experimentpath(record),'..');
 
@@ -51,7 +81,7 @@ else
 end
 
 real_stimstart = [];
-for i=1:length(wcinfo)
+for i=1:length(wcinfo)  
     real_stimstart(i) = (wcinfo(i).stimstart)*par.wc_timemultiplier  + par.wc_timeshift ;
     logmsg(['Recorded in ' fullfile(parpath,wcinfo(i).filename)]);
     logmsg(['Stimulus started original: ' num2str(wcinfo(i).stimstart) ' s = '...

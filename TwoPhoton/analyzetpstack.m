@@ -229,7 +229,7 @@ switch command
         % make sure that there is always a channel on
         channels_on = [];
         for c = 1:9
-            channels_on = [channels_on get(ft(fig,['channel' num2str(c) 'Tg']),'value')];
+            channels_on = [channels_on get(ft(fig,['channel' num2str(c) 'Tg']),'value')]; %#ok<AGROW>
         end
         if ~any(channels_on) % then turn channel 1 on
             set(ft(fig,'channel1Tg'),'value',1)
@@ -317,7 +317,7 @@ switch command
                 set(ft(fig,'frameTxt'),'String',num2str(frame));
                 % read frame
                 for ch = channels
-                    im(:,:,ch) = double(squeeze(tpreadframe(ud.record,ch,frame,ud.image_processing)));
+                    im(:,:,ch) = double(squeeze(tpreadframe(ud.record,ch,frame,ud.image_processing,ud.verbose)));
                 end
         end
         

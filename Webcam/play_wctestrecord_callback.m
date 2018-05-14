@@ -6,7 +6,7 @@ function newud = play_wctestrecord_callback( ud)
 % 2015-2018, Alexander Heimel
 
 newud = ud;
-par = wcprocessparams;
+par = wcprocessparams(ud.db(ud.current_record));
 
 if par.use_legacy_videoreader 
     play_wctestrecord_legacy(ud.db(ud.current_record));
