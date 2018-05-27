@@ -8,8 +8,8 @@ function [c,flds] = structdiff(a,b,verbose)
 %    returns C=1 if all fields of A and B are identical
 %    FLDS contains all fieldnames which differ
 %
-% Steve VanHooser, Alexander Heimel
-%
+% 200X, Steve VanHooser
+% 200X-2018, Alexander Heimel
 
 if nargin<3
     verbose = false;
@@ -26,8 +26,21 @@ fna = fieldnames(a);
 fnb = fieldnames(b);
 
 for i=1:length(fna)
-    [j,jj,ii]=intersect(fna{i},fnb);
+    [j,jj,ii] = intersect(fna{i},fnb);
     if ~isempty(j)
+        if isa(a.(fna{i}),'function_handle')
+            if ~isa(b.(fnb{ii}),'function_handle') ...
+                    || ~strcmp(func2str(a.(fna{i})),func2str(b.(fnb{ii})))
+                c = 0;
+                if verbose
+                    disp(['Fields ''' fna{i} ''' differ.']);
+                end
+                if breakout
+                    break
+                end
+            end
+            continue
+        end
         if ndims(a.(fna{i})) ~= ndims(b.(fnb{ii})) || ...
                 any(size(a.(fna{i})) ~= size(b.(fnb{ii}))) || ...
                 ~all(a.(fna{i})(:)==b.(fnb{ii})(:))
@@ -37,9 +50,9 @@ for i=1:length(fna)
             end
             c = 0;
             if breakout
-                break;
+                break
             end
-        end;
+        end
     else
         c = 0;
         flds{end+1} = fna{i};
@@ -47,8 +60,8 @@ for i=1:length(fna)
             disp(['Field name ''' fna{i} ''' not present in b.']);
         end
         if breakout
-            break;
+            break
         end
-    end;
-end;
+    end
+end
 
