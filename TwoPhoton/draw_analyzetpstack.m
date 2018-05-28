@@ -141,7 +141,7 @@ h = guicreate(slider,'Tag','FrameSlid','value',0.5,'visible','off','parent',hi,'
 set(h,'Min',1)
 set(h,'Max',ti.NumberOfFrames)
 set(h,'Value',ceil(ti.NumberOfFrames/2));
-set(h,'SliderStep',[1/ti.NumberOfFrames 0.1]);
+set(h,'SliderStep',[1/ti.NumberOfFrames max(0.1,1/ti.NumberOfFrames)]);
 
 
 axes('parent',hi,'position',[0 0.15 1 0.78],'Tag','tpaxes');

@@ -3,7 +3,7 @@ function base=localpathbase(vers)
 %
 % BASE = LOCALPATHBASE(VERS='2004')
 %
-% 2012-2017, Alexander Heimel
+% 2012-2018, Alexander Heimel
 %
 
 persistent vers_pers base_pers
@@ -17,26 +17,21 @@ if strcmp(vers_pers,vers)
     return
 end   
 
-switch vers
-    case '2004'
-        if ispc % i.e. windows
-            base = 'D:\Data\InVivo';
-            if ~exist(base,'dir')
-                base = 'C:\Data\InVivo';
-            end
-        elseif ismac
-            base = '/Users/user/Dropbox/Data';
-        else % linux
-            base = '/home/data/InVivo';
-        end
-    case '2015'
+if ispc % i.e. windows
+    base = 'D:\Data\InVivo';
+    if ~exist(base,'dir')
         base = 'C:\Data\InVivo';
-        if ~exist(base,'dir')
-            params = processparams_local([]);
-            if isfield(params,'experimentpath_localroot')
-                base = params.experimentpath_localroot;
-            end
-        end
+    end
+elseif ismac
+    base = '/Users/user/Dropbox/Data';
+else % linux
+    base = '/home/data/InVivo';
+end
+
+% override by processparams_local
+params = processparams_local([]);
+if isfield(params,'experimentpath_localroot')
+    base = params.experimentpath_localroot;
 end
     
 if ~exist(base,'dir')
