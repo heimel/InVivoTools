@@ -189,6 +189,9 @@ end
 % maximum number of frames to jump when snapping neurite
 params.max_snap_range = 2; % frames
 
+% default roi circle size
+params.default_roi_disk_radius_pxl = 12; 
+
 % maximum distance for linking ROI to neurite
 switch record.experiment
     case '11.21'

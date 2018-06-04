@@ -205,11 +205,13 @@ set(h,'Max',2); % multiple ROIs can be selected
 guicreate(button,'String','Draw','Tag','drawnewBt','Enable','on','left','left','width','auto','parent',hroilabelspanel,'move','right');
 guicreate(button,'String','Auto','Tag','autoDrawCellsBt','Enable','on','width','auto','parent',hroilabelspanel,'move','right');
 guicreate(button,'String','(C)ircles','Tag','drawnewballBt','Enable','on','width','auto','parent',hroilabelspanel,'move','right','fontsize',8);
-if ud.zstack
-    def_radius = 6;
-else
-    def_radius = 12;
-end
+
+def_radius = process_parameters.default_roi_disk_radius_pxl;
+% if ud.zstack
+%     def_radius = 6;
+% else
+%     def_radius = 12;
+% end
 guicreate(edit,'String',num2str(def_radius,'%02d'),'Tag','newballdiameterEdit','Enable','on','width','auto','parent',hroilabelspanel,'move','right');
 guicreate(txt,'String','px','Enable','on','width','auto','parent',hroilabelspanel,'move','down','fontsize',8);
 % draw neurite
@@ -224,8 +226,11 @@ end
 guicreate(popup,'String',snaptolist,...
     'Tag','snaptoPopup','Enable','on','width',35,'parent',hroilabelspanel,'move','right','callback','genercallback');
 
-% Export
-guicreate(button,'String','Export','Tag','exportROIsBt','Enable','on','tooltipstring','Export ROIs','width','auto','parent',hroilabelspanel,'move','down');
+% Export ROIs
+guicreate(button,'String','Export','Tag','exportROIsBt','Enable','on','tooltipstring','Export ROIs','width','auto','parent',hroilabelspanel,'move','right');
+
+% Import ROIs
+guicreate(button,'String','Import','Tag','importROIsBt','Enable','on','tooltipstring','Import ROIs','width','auto','parent',hroilabelspanel,'move','down');
 
 % link ROIs
 guicreate(button,'String','Link all','Tag','linkROIsBt','Enable','on','left','left','tooltipstring','Link all ROIs based on distance','width','auto','parent',hroilabelspanel,'move','right');

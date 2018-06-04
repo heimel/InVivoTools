@@ -845,19 +845,20 @@ switch command
         sz = size(get(ud.previewim,'CData'));
         [blankprev_x,blankprev_y] = meshgrid(1:sz(2),1:sz(1));
         newballdiastr = get(ft(fig,'newballdiameterEdit'),'string');
+        newballdia = [];
         if ~isempty(newballdiastr)
             newballdia = str2double(newballdiastr);
-            if isnan(newballdia)
-                newballdia = 12;
-            end
-        else
-            newballdia = 12;
+        end
+        if isempty(newballdia) || isnan(newballdia)
+            processparams = tpprocessparams(record);
+            newballdia = processparams.default_roi_disk_radius_pxl;
         end
         set(ft(fig,'newballdiameterEdit'),'string',num2str(newballdia));
         rad = round(newballdia/2);
         xi_ = ((-rad):1:(rad));
         yi_p = sqrt(rad^2-xi_.^2);
         yi_m = - sqrt(rad^2-xi_.^2);
+        
         figure(fig);
         axes(ft(fig,'tpaxes')); % % necessary for ginput
         zoom off;
@@ -1653,16 +1654,41 @@ switch command
         end
         set(fig,'userdata',ud);
     case 'importROIsBt'
+        imported_rois = false;
+        
         if 1 % importing imaris
             [imaris_celllist, ud.record.ROIs.new_cell_index] = ...
                 import_imaris_filaments( ud.record, ud.record.ROIs.new_cell_index );
             ud.celllist = [ud.celllist imaris_celllist];
+            if ~isempty(imaris_celllist)
+                imported_rois = true;
+            end
         end
         
         if 1 % not doing imagej
             [imagej_celllist, ud.record.ROIs.new_cell_index] = ...
                 import_imagej_rois( ud.record, ud.record.ROIs.new_cell_index );
             ud.celllist = [ud.celllist  imagej_celllist];
+            if ~isempty(imagej_celllist)
+                imported_rois = true;
+            end
+        end
+        
+        if ~imported_rois
+            [filename,pathname] = uigetfile('','Select ROI file');
+            filename = fullfile(pathname,filename);
+            if exist(filename,'file')
+                [~,~,ext] = fileparts(filename);
+                switch ext
+                    case '.xls'
+                        [imported_celllist, ud.record.ROIs.new_cell_index] = ...
+                            import_fiji_rois_xls( filename, ud.record, ud.record.ROIs.new_cell_index );
+                        ud.celllist = [ud.celllist  imported_celllist];
+                        imported_rois = true;
+                    otherwise
+                        errormsg(['Do not know how to import ' filename]);
+                end
+            end
         end
         
         ud.cell_indices_changed = 1;
