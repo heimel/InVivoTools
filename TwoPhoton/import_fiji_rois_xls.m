@@ -15,7 +15,17 @@ labels = xlstxt(1,:);
 indexcol = strcmp(labels,'Index');
 xcol = strcmp(labels,'X');
 ycol = strcmp(labels,'Y');
-zcol = strcmp(labels,'Z');
+
+zcol = strcmp(labels,'Position');
+if ~any(zcol)
+    zcol = strcmp(labels,'Pos');
+elseif ~any(zcol)
+    zcol = strcmp(labels,'Z');
+elseif ~any(zcol)
+    errormsg('Cannot find Z-column in excel file');
+end
+    
+
 wcol = strcmp(labels,'Width');
 hcol = strcmp(labels,'Height');
 
