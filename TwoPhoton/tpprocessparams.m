@@ -227,7 +227,7 @@ params.bouton_close_minimum_intensity_rel2dendrite = zeros(1,100); %max 100 chan
 % get intensities
 params.get_intensities = false;
 switch record.experiment
-    case {'12.81','Examples','14.26'}
+    case {'12.81','Examples','14.26','17.20.16'}
         params.get_intensities = true;
     case '13.29' % dani cr
         switch lower(record.setup)

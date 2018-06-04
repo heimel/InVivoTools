@@ -3,7 +3,8 @@ function stacktypes = tpstacktypes(record)
 %
 %  STACKTYPES = TPSTACKTYPES( RECORD ) 
 %
-% Steve Van Hooser, 2010-2012 Alexander Heimel
+% 200X, Steve Van Hooser
+% 2010-2018, Alexander Heimel
 %
 
 if nargin<1
