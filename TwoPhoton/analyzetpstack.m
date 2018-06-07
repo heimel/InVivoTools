@@ -1651,6 +1651,10 @@ switch command
     case 'importROIsBt'
         imported_rois = false;
         
+        v = fix(str2double(get(ft(fig,'newcellindexEdit'),'String')));
+        ud.record.ROIs.new_cell_index = next_available_cell_index(v-1,ud.celllist );
+
+        
         if 1 % importing imaris
             [imaris_celllist, ud.record.ROIs.new_cell_index] = ...
                 import_imaris_filaments( ud.record, ud.record.ROIs.new_cell_index );
@@ -2099,8 +2103,7 @@ global shift_state control_state
 
 if isfield(event,'Key') || isa(event,'matlab.ui.eventdata.KeyData')
     obj = get(src,'currentobject');
-    prop = get(obj);
-    if isfield(prop,'Style') && strcmp(prop.Style,'edit')
+    prop = get(obj);    if isfield(prop,'Style') && strcmp(prop.Style,'edit')
         % typing text, so do respond to key short cuts
         set(src,'WindowKeyPressFcn',@figure_keypress);
         return;
