@@ -3,7 +3,7 @@ function [val,val_sem]=get_measure_from_record(record,measure,criteria,extra_opt
 %
 %  [val,val_sem] = get_measure_from_record(record,measure,criteria,extra_options)
 %
-% 2007-2017, Alexander Heimel
+% 2007-2018, Alexander Heimel
 
 if nargin<3
     criteria = [];
@@ -99,7 +99,8 @@ end
 
 get = 1;
 if exist('anesthetic','var')
-    if isempty(strfind(lower(record.anesthetic),lower(anesthetic)))
+%    if isempty(strfind(lower(record.anesthetic),lower(anesthetic)))
+    if ~contains(lower(record.anesthetic),lower(anesthetic),'IgnoreCase',true)
         get = 0;
     end
 end
@@ -352,7 +353,21 @@ for c=1:length(record.measures) % over all cells or ROIs
                     tempval = measures.psth.data;
                 end
             case {'depth','depthfromsurface'}
-                tempval = record.depth-record.surface;
+                if isfield(record,'depth')
+                    tempval = record.depth-record.surface;
+                elseif isfield(record,'location') % twophoton
+                    loc = record.location;
+                    p = find(loc==':'); % of type area1:-X.X,Y.Y,Z.Z
+                    if ~isempty(p)
+                        loc = loc(p+1:end);
+                    end
+                    loc = str2num(loc); %#ok<ST2NM>
+                    if numel(loc)==3
+                        tempval = loc(3); 
+                    else
+                        logmsg(['Location does not have 3 coordinates for ' recordfilter(record)]);
+                    end
+                end
             case {'range','parameter'} % parameter is deprecated
                 if isfield(measures,'curve')
                     logmsg('Range should be measure already. Reanalyze test records.');

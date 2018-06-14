@@ -14,7 +14,7 @@ function [c,flds] = structdiff(a,b,verbose)
 if nargin<3
     verbose = false;
 end
-if nargout == 2
+if nargout == 2 || verbose
     breakout = false;
 else
     breakout = true;
