@@ -1005,8 +1005,9 @@ switch command
                             start = max(1,curframe - par.max_snap_range );
                             stop = min(length(data{1}),curframe + par.max_snap_range);
                             [tempmax,frame] = max( data{1}(start:stop) ); %#ok<ASGLU>
+                            frame = frame + start - 1;
                             
-                            goto_frame( frame+start-1,fig );
+                            goto_frame( frame,fig );
                             ud=get(fig,'userdata');
                         end
                     end
@@ -1034,6 +1035,8 @@ switch command
                     newneurite.xi(end+1) = x;
                     newneurite.yi(end+1) = y;
                     newneurite.zi(end+1) = frame;
+                    
+                    logmsg(['Adding z = ' num2str(frame)]);
                     
                     center_at_position([x y],fig);
                     
