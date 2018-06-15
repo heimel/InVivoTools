@@ -1036,8 +1036,6 @@ switch command
                     newneurite.yi(end+1) = y;
                     newneurite.zi(end+1) = frame;
                     
-                    logmsg(['Adding z = ' num2str(frame)]);
-                    
                     center_at_position([x y],fig);
                     
                     if ishandle(h_temp_line)
