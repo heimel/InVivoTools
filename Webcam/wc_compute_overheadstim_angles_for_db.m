@@ -42,7 +42,7 @@ for i=1:length(fdb)
     end
 end
 
-my_colours;
+%my_colours;
 
 figure;
 axx1 = subplot(1,3,1);

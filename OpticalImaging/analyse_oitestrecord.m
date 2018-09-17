@@ -3,7 +3,7 @@ function [record,avg] = analyse_oitestrecord( record)
 %
 %   [RECORD,AVG] = ANALYSE_OITESTRECORD( RECORD )
 %
-% 2005-2014, Alexander Heimel
+% 2005-2018, Alexander Heimel
 
 if isfield(record,'blocks')
     if ischar(record.blocks)
@@ -11,11 +11,10 @@ if isfield(record,'blocks')
     end
 end
 
-avg=[];
-stddev=[];
+avg = [];
 
 % get compression rate from record.comment
-compression_pos=findstr(record.comment,'compression');
+compression_pos = strfind(record.comment,'compression');
 if ~isempty(compression_pos)
     comma_pos=find(record.comment(compression_pos:end)==',');
     start_pos=comma_pos(1)+compression_pos;
@@ -51,7 +50,6 @@ tests=convert_cst2cell(record.test);
 fileinfo=imagefile_info( fullfile(datapath,...
     [ tests{1} 'B0.BLK']));
 
-
 if fileinfo.n_images==-1 || fileinfo.n_images==0
     if isempty(record.imagefile)
         errormsg('Datafile not available');
@@ -59,24 +57,22 @@ if fileinfo.n_images==-1 || fileinfo.n_images==0
     else
         logmsg('Original datafile not available');
     end
-    frame_duration=1;
 else
-    %get frame duration to calculate early and late images for analyse_retinotopy
-    frame_duration=fileinfo.frameduration;
-    n_x=floor(fileinfo.xsize/compression);
-    n_y=floor(fileinfo.ysize/compression);
+    % get frame duration to calculate early and late images for analyse_retinotopy
+    n_x = floor(fileinfo.xsize/compression);
+    n_y = floor(fileinfo.ysize/compression);
 end
 
 if ~isempty(record.imagefile)
     if record.imagefile(1)=='/' % abs path
-        imagepath=record.imagefile;
+        imagepath = record.imagefile;
     else
-        imagepath=fullfile(analysispath,record.imagefile);
+        imagepath = fullfile(analysispath,record.imagefile);
     end
     if strcmp( imagepath(end-2:end),'mat')
-        load(imagepath,'-mat');
+        load(imagepath,'-mat','data');
     else
-        data=imread(imagepath);
+        data = imread(imagepath);
     end
     
     %  h_imagefile=figure;imagesc(data);axis image off
@@ -99,95 +95,96 @@ if isempty(roifile)
     record.roifile = '';
 end
 switch roifile
-    case '', % do nothing here
-    case 'standard',
+    case ''
+        % do nothing here
+    case 'standard'
         % use circular ROI constructed around point relative to lambda
         
         % position of screen center from all adult mice
-        rel_x=2500 + 1000/sqrt(2); % L-M position rel to Lambda in micron
-        rel_y=1000 - 1000/sqrt(2);  % A-P position rel to Lambda in micron
+        rel_x = 2500 + 1000/sqrt(2); % L-M position rel to Lambda in micron
+        rel_y = 1000 - 1000/sqrt(2);  % A-P position rel to Lambda in micron
         
-        rel_x=rel_x / record.scale; % L-M rel to Lambda in pxls
-        rel_y=rel_y / record.scale; % A-P rel to Lambda in pxls
+        rel_x = rel_x / record.scale; % L-M rel to Lambda in pxls
+        rel_y = rel_y / record.scale; % A-P rel to Lambda in pxls
         
         [bregma_x,bregma_y] = get_bregma(record);
         
-        rel_x=rel_x+bregma_x; % L-M rel to top left camera in pxls
-        rel_y=rel_y+bregma_y; % A-P rel to top left camera in pxls
+        rel_x = rel_x+bregma_x; % L-M rel to top left camera in pxls
+        rel_y = rel_y+bregma_y; % A-P rel to top left camera in pxls
         
-        rel_x=rel_x-fileinfo.xoffset; % L-M rel to top left ROI in pxls
-        rel_y=rel_y-fileinfo.yoffset; % A-P rel to top left ROI in pxls
+        rel_x = rel_x-fileinfo.xoffset; % L-M rel to top left ROI in pxls
+        rel_y = rel_y-fileinfo.yoffset; % A-P rel to top left ROI in pxls
         
-        rel_x=rel_x/fileinfo.xbin; % L-M rel to top left ROI in binned pxls
-        rel_y=rel_y/fileinfo.ybin; % A-P rel to top left ROI in binned pxls
+        rel_x = rel_x/fileinfo.xbin; % L-M rel to top left ROI in binned pxls
+        rel_y = rel_y/fileinfo.ybin; % A-P rel to top left ROI in binned pxls
         
-        [dy,dx]=meshgrid(1:n_y,1:n_x);
-        dist=sqrt(  (dy-rel_y).^2 + (dx-rel_x).^2 );
+        [dy,dx] = meshgrid(1:n_y,1:n_x);
+        dist = sqrt(  (dy-rel_y).^2 + (dx-rel_x).^2 );
         % distance in binned pxls
         
-        dist=dist*fileinfo.xbin; % dist in unbinned pxls
-        dist=dist*record.scale; % dist in micron
+        dist = dist*fileinfo.xbin; % dist in unbinned pxls
+        dist = dist*record.scale; % dist in micron
         
-        roi=(1+sign( 1000-dist'))/2; % all points within 1000 um of ref. point
+        roi = (1+sign( 1000-dist'))/2; % all points within 1000 um of ref. point
         
-        roifile= [ record.test '_std_roi.png'];
-        roipath=fullfile(analysispath,roifile);
+        roifile = [ record.test '_std_roi.png'];
+        roipath = fullfile(analysispath,roifile);
         imwrite(roi,roipath);
         record.roifile=roifile;
     otherwise
         if record.roifile(1)=='/'  % abs. path
-            roifile=record.roifile;
+            roifile = record.roifile;
         else
-            roifile=fullfile(analysispath,record.roifile);
+            roifile = fullfile(analysispath,record.roifile);
         end
         if exist(roifile,'file')
-            roi=double(imread(roifile));
+            roi = double(imread(roifile));
             if ~isempty(n_x)
                 if size(roi,2)~=n_x || size(roi,1)~=n_y
-                    record.roifile=[];
+                    record.roifile = [];
                 end
             end
         end
 end
 
 % get already defined ROR
-ror=[];
-rorfile=strtrim(lower(record.rorfile));
+ror = [];
+rorfile = strtrim(lower(record.rorfile));
 if isempty(rorfile)
     rorfile = '';
     record.rorfile = '';
 end
 switch rorfile
-    case '', % do nothing here
-    case 'empty',
-        ror=0*roi;
-        rorfile= [ record.test '_empty_ror.png'];
-        rorpath=fullfile(analysispath,rorfile);
+    case '' 
+        % do nothing here
+    case 'empty'
+        ror = 0*roi;
+        rorfile = [ record.test '_empty_ror.png'];
+        rorpath = fullfile(analysispath,rorfile);
         imwrite(ror,rorpath);
-        record.rorfile=rorfile;
-    case 'full',
-        filter.width=100; % micron
-        filter.width=filter.width/record.scale; % unbinned pixels
-        filter.width=filter.width/fileinfo.xbin; % binned pixels
-        filter.width=max(1,filter.width);
-        filter.unit='pixel';
-        aroi=spatialfilter( double(roi>0.99),filter.width,filter.unit);
-        ror=1-aroi;
-        ror=double(ror>1-exp(-0.5));
+        record.rorfile = rorfile;
+    case 'full'
+        filter.width = 100; % micron
+        filter.width = filter.width/record.scale; % unbinned pixels
+        filter.width = filter.width/fileinfo.xbin; % binned pixels
+        filter.width = max(1,filter.width);
+        filter.unit = 'pixel';
+        aroi = spatialfilter( double(roi>0.99),filter.width,filter.unit);
+        ror = 1-aroi;
+        ror = double(ror>1-exp(-0.5));
         
-        rorfile= [ record.test '_full_ror.png'];
-        rorpath=fullfile(analysispath,rorfile);
+        rorfile = [ record.test '_full_ror.png'];
+        rorpath = fullfile(analysispath,rorfile);
         imwrite(ror,rorpath);
-        record.rorfile=rorfile;
+        record.rorfile = rorfile;
     otherwise
         if record.rorfile(1)=='/'  % abs. path
-            rorfile=record.rorfile;
+            rorfile = record.rorfile;
         else
-            rorfile=fullfile(analysispath,record.rorfile);
+            rorfile = fullfile(analysispath,record.rorfile);
         end
         if exist(rorfile,'file')
-            
-            ror=double(imread(rorfile));
+            ror = double(imread(rorfile));
             if ~isempty(n_x)
                 if size(ror,2)~=n_x || size(ror,1)~=n_y
                     record.rorfile=[];
@@ -207,16 +204,16 @@ if isempty(record.imagefile) ...
                 logmsg('Error: no frequency given (stim_tf)');
                 return
             end
-            [img,ks_data]=ks_analysis(...
+            [img,ks_data] = ks_analysis(...
                 fullfile(datapath,[record.test 'B0.BLK']),...
                 record.stim_tf,compression,...
                 [],[],[],[],record.stim_onset,record.stim_offset);
-            imagefile= [ record.test '_auto_ks_c' ...
+            imagefile = [ record.test '_auto_ks_c' ...
                 num2str(compression) '.mat'];
-            imagepath=fullfile(analysispath,imagefile);
-            data=get(img,'CData');
+            imagepath = fullfile(analysispath,imagefile);
+            data = get(img,'CData');
             save(imagepath,'ks_data','data','-v7');
-            record.imagefile=imagefile;
+            record.imagefile = imagefile;
         otherwise
             [late_frames,early_frames] = oi_get_framenumbers(record);
 
@@ -227,15 +224,15 @@ if isempty(record.imagefile) ...
                 end
             end
             if strcmp(record.datatype,'fp')==1
-                response_sign=-1;
+                response_sign = -1;
             else
-                response_sign=1;
+                response_sign = 1;
             end
             if strcmp(record.stim_type,'ledtest')==1
-                response_sign=-1;
-                early_frames=-1;
+                response_sign = -1;
+                early_frames = -1;
             end
-            [h,avg,stddev,blocks]=analyse_retinotopy(fullfile(datapath,tests{1}),...
+            [h,avg] = analyse_retinotopy(fullfile(datapath,tests{1}),...
                 record.blocks,early_frames,...
                 late_frames,...
                 roi,ror,[],compression,response_sign,record);
@@ -243,21 +240,17 @@ if isempty(record.imagefile) ...
             if h==-1
                 logmsg('Could not get image');
             else
-                imagefile= [ record.test '_auto_wta_c' ...
+                imagefile = [ record.test '_auto_wta_c' ...
                     num2str(compression) '.png'];
-                imagepath=fullfile(analysispath,imagefile);
-                children=get(h,'Children');
-                img=get(children(1),'Children');
-                data=get(img,'CData');
+                imagepath = fullfile(analysispath,imagefile);
+                children = get(h,'Children');
+                img = get(children(1),'Children');
+                data = get(img,'CData');
                 data = uint8(round(255*data));
                 imwrite(data,imagepath,'Software', ...
                     'analyse_record');
-                data=imread(imagepath);
-                record.imagefile=imagefile;
-                
-                
-                %keyboard
-                
+                data = imread(imagepath);
+                record.imagefile = imagefile;
                 close(h);
             end
     end
@@ -265,28 +258,29 @@ end
 
 % if no ROI present, let user draw new ROI
 if isempty(roifile) ||  ~exist(roifile,'file')
-    h_roi=figure;
-    image(data); axis image;
+    h_roi = figure;
+    image(data); 
+    axis image;
     set(gca,'XTick',[]);
     set(gca,'YTick',[]);
     logmsg('Please select ROI polygon');
-    roi=select_polygon;
+    roi = select_polygon;
     
     if ~isfield(fileinfo,'xsize') || size(roi,2)==0
-        compression=1;
+        compression = 1;
     else
-        compression=floor(fileinfo.xsize/size(roi,2));
+        compression = floor(fileinfo.xsize/size(roi,2));
     end
     if isempty(record.roifile)
-        roifile= [ record.test '_roi_c' num2str(compression) '.png'];
+        roifile = [ record.test '_roi_c' num2str(compression) '.png'];
     end
     if ~isempty(roifile==filesep)
-        [roipath,roifile,ext]=fileparts(roifile); %#ok<ASGLU>
-        roifile=[roifile  ext];
+        [roipath,roifile,ext] = fileparts(roifile); %#ok<ASGLU>
+        roifile = [roifile  ext];
     end
-    roipath=fullfile(analysispath,roifile);
+    roipath = fullfile(analysispath,roifile);
     imwrite(roi,roipath);
-    record.roifile=roifile;
+    record.roifile = roifile;
     
     close(h_roi);
     pause(0.01);
@@ -295,24 +289,23 @@ end
 % if no ROR defined, let user draw one
 if isempty(record.rorfile)||  (~exist(rorfile,'file') && ~exist(fullfile(analysispath,rorfile),'file'))
     %data=imread(imagepath);
-    h_ror=figure;
+    h_ror = figure;
     image(data); axis image;
     set(gca,'XTick',[]);
     set(gca,'YTick',[]);
     logmsg('Please select ROR polygon');
-    ror=select_polygon;
+    ror = select_polygon;
     if isempty(record.rorfile)
-        
-        rorfile= [ record.test '_ror_c' num2str(compression) '.png'];
+        rorfile = [ record.test '_ror_c' num2str(compression) '.png'];
     end
     if ~isempty(rorfile==filesep)
-        [rorpath,rorfile,ext]=fileparts(rorfile); %#ok<ASGLU>
-        rorfile=[rorfile  ext];
+        [rorpath,rorfile,ext] = fileparts(rorfile); %#ok<ASGLU>
+        rorfile = [rorfile  ext];
     end
-    rorpath=fullfile(analysispath,rorfile);
-    ror=ror & (~roi);
+    rorpath = fullfile(analysispath,rorfile);
+    ror = ror & (~roi);
     imwrite(ror,rorpath);
-    record.rorfile=rorfile;
+    record.rorfile = rorfile;
     close(h_ror);
     pause(0.01);
 end
@@ -345,7 +338,7 @@ end
 % Do analysis
 switch record.stim_type
     case {'od','od_bin','od_mon','sf','tf','contrast',...
-            'rt_response','sf_contrast','contrast_sf','sf_low_tf','ledtest'},
+            'rt_response','sf_contrast','contrast_sf','sf_low_tf','ledtest'}
         % compute timecourse
         [record.response,record.response_sem,record.response_all,...
             record.timecourse_roi,record.timecourse_ror,...
@@ -354,7 +347,7 @@ switch record.stim_type
             [],record.blocks,...
             roi,ror,compression,...
             record,0);
-    case 'retinotopy',
+    case 'retinotopy'
         % retinotopy center is asked in results_oitestrecord
         
         % search for reference image
@@ -365,30 +358,28 @@ switch record.stim_type
                 answ=questdlg(['Is ' posrefs.name ' the right image?'],...
                     'Reference image','Yes','No');
                 switch answ
-                    case 'Yes',
+                    case 'Yes'
                         record.ref_image = posrefs.name;
                 end
             else
-                posrefs=dir(fullfile(analysispath,'refred*.bmp'));
-                posrefs=[posrefs dir(fullfile(analysispath,'refred*.BMP'))];
+                posrefs = dir(fullfile(analysispath,'refred*.bmp'));
+                posrefs = [posrefs dir(fullfile(analysispath,'refred*.BMP'))];
                 logmsg('Possible reference images: ');
                 logmsg( {posrefs(:).name});
             end
         end
         
         if ~isempty(record.imagefile)
-            h_image=figure;
-            data=imread(imagepath);
+            h_image = figure;
+            data = imread(imagepath);
             image(data);
-            
             
             % lambda is in unbinned coordinates
             [lambda_x,lambda_y] = get_bregma(record);
             
-            
             % ask for monitor center if necessary and store in record.response
             if isempty(record.response)
-                record=get_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
+                record = get_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y);
             end
             
             close(h_image);
@@ -413,9 +404,8 @@ switch record.stim_type
             or_angs(roi_edge'==1) = 0;
         end
         
-        or_ang = angle(polavg);
         if processparams.wta_show_roi
-            or_ang(roi_edge'==1) = 0;
+            or_angs(roi_edge'==1) = 0;
         end
          
         figure
@@ -440,9 +430,9 @@ switch record.stim_type
                 
                 osi_map =  zeros(size(polavg));
                 dsi_map =  zeros(size(polavg));
-                for i=1:size(avg,1)
-                    for j=1:size(avg,2)
-                        [osi_map(i,j) dsi_map(i,j)]= ...
+                for i = 1:size(avg,1)
+                    for j = 1:size(avg,2)
+                        [osi_map(i,j), dsi_map(i,j)]= ...
                             compute_orientation_selectivity_index(record.stim_parameters(1:size(avg,3)), ...
                             avg(i,j,:));
                     end % i
@@ -462,25 +452,24 @@ switch record.stim_type
         end
     case 'significance'
         record = oi_compute_significance(record);
-        record.response=[]; %[frac05 frac01 frac001];
-        record.response_sem=[];
-        record.response_all=[];
-        record.timecourse_roi=[];
-        record.timecourse_ror=[];
-        record.timecourse_ratio=[];
+        record.response = []; %[frac05 frac01 frac001];
+        record.response_sem = [];
+        record.response_all = [];
+        record.timecourse_roi = [];
+        record.timecourse_ror = [];
+        record.timecourse_ratio = [];
     case 'ks'
-        record.timecourse_roi=mean(abs(ks_data(roi'>0)));
-        record.timecourse_ror=mean(abs(ks_data(ror'>0)));
-        record.timecourse_ratio=record.timecourse_roi/record.timecourse_ror;
+        record.timecourse_roi = mean(abs(ks_data(roi'>0)));
+        record.timecourse_ror = mean(abs(ks_data(ror'>0)));
+        record.timecourse_ratio = record.timecourse_roi/record.timecourse_ror;
     otherwise
-        disp([ 'stim_type ' record.stim_type ' is not implemented.']);
+        logmsg([ 'stim_type ' record.stim_type ' is not implemented.']);
 end
 
-
-reliable=check_reliability(record);
+reliable = check_reliability(record);
 if ~isempty(reliable)
     if isempty(record.reliable)
-        record.reliable=reliable;
+        record.reliable = reliable;
     elseif record.reliable~=reliable
         logmsg('Discrepancy with recorded reliability');
     end
@@ -490,38 +479,34 @@ logmsg('Finished analysis');
 record.analysed=datestr(now);
 
 
-
-
-
 function record=get_monitorcenter(record,h_image,fileinfo,lambda_x,lambda_y)
-
 
 % only do analysis if not done before
 if ~isempty(record.ref_image)
-    disp('Click on pixel representing center of monitor');
+    logmsg('Click on pixel representing center of monitor');
     axis on
     figure(h_image);
-    [x,y]=ginput(1);
+    [x,y] = ginput(1);
     % in binned coordinates
     
     % transform monitor center to unbinned coordinates
-    x=round(x)*fileinfo.xbin;
-    y=round(y)*fileinfo.ybin;
+    x = round(x)*fileinfo.xbin;
+    y = round(y)*fileinfo.ybin;
     
     % and shift to absolute unbinned coordinates
-    x=x+fileinfo.xoffset;
-    y=y+fileinfo.yoffset;
+    x = x+fileinfo.xoffset;
+    y = y+fileinfo.yoffset;
     
     if ~isempty(lambda_x) && ~isempty(lambda_y)
-        x=x-lambda_x;
-        y=y-lambda_y;
+        x = x-lambda_x;
+        y = y-lambda_y;
         
         % record.scale should be in unbinned coordinates
-        record.response=[x y]*record.scale;
-        record.response=round(record.response);
+        record.response = [x y]*record.scale;
+        record.response = round(record.response);
     end
 else
-    disp('No reference image known.');
+    logmsg('No reference image known.');
 end
 
 return
