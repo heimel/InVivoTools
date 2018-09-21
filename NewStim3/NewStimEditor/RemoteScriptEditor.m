@@ -48,8 +48,7 @@ else % it is a callback
     theFig = gcbf;
     if nargin==2, 
         theFig = soefig;
-    elseif
-        isempty(theFig),
+    elseif isempty(theFig),
         theFig = gcbf;
     else
         theFig = gcf;
@@ -73,8 +72,11 @@ else % it is a callback
             if b  % we know pathname is good
                 pathn = rempath;
                 fname = [pathn 'fromremote'];
-                s=load(fname,'-mat'); s = s.s;
-                %s(1),
+                if ~exist(fname,'file')
+                    fname = [fname '.mat'];
+                end
+                s = load(fname,'-mat'); 
+                s = s.s;
                 handleupdate(s,lbrem);
                 RemoteScriptEditor('EnableDisable',theFig);
             end
@@ -172,8 +174,11 @@ else % it is a callback
                     if b
                         pathn = rempath;
                         fname = [pathn 'fromremote'];
-                        s=load(fname,'-mat'); s = s.s;
-                        %s(1),
+                        if ~exist(fname,'file')
+                            fname = [fname '.mat'];
+                        end
+                        s=load(fname,'-mat'); 
+                        s = s.s;
                         handleupdate(s,lbrem);
                         RemoteScriptEditor('EnableDisable',theFig);
                     end
