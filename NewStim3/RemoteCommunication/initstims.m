@@ -74,7 +74,7 @@ switch Remote_Comm_method
                 if ~isempty(txt),
                     prevtxt =  '';
                     while length(prevtxt)<length(txt)
-                        pause(0.05); % to make sure runit is fully written
+                        pause(0.2); % to make sure runit is fully written
                         prevtxt = txt;
                         txt = checkscript('runit.m');
                     end
