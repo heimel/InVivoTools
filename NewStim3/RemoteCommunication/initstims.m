@@ -72,8 +72,13 @@ switch Remote_Comm_method
                 errorflag = 0;
                 txt = checkscript('runit.m');
                 if ~isempty(txt),
-                    pause(0.05); % to make sure runit is fully written
-                    txt = checkscript('runit.m');
+                    prevtxt =  '';
+                    while length(prevtxt)<length(txt)
+                        pause(0.05); % to make sure runit is fully written
+                        prevtxt = txt;
+                        txt = checkscript('runit.m');
+                    end
+                        
                     try
                         eval(txt)
                         disp(txt);
