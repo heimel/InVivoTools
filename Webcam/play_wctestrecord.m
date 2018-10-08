@@ -2,7 +2,11 @@ function play_wctestrecord(record)
 %PLAY_WCTESTRECORD plays webcam movie
 %Press down arrow key for normal play, up arrow to halt, right and left arrow keys to go
 %forward and back a frame respectively, and q to quit play
-% 2015, Alexander Heimel
+%
+% Updated implementation to use readFrame instead of read
+% and switch to time dominated from frame dominated
+%
+% 2015-2018, Alexander Heimel
 
 par = wcprocessparams( record );
 
@@ -23,92 +27,94 @@ starttime = (wcinfo(1).stimstart-par.wc_playbackpretime) * par.wc_timemultiplier
 filename = fullfile(wcinfo.path,wcinfo.mp4name);
 
 logmsg('Running video in matlab');
+if ~exist(filename,'file')
+    errormsg([filename ' does not exist. Perhaps need to configure mp4-wrapper?']);
+    return
+end
+
 vid=VideoReader(filename);
 
 %Get paramters of video
-numFrames = get(vid, 'NumberOfFrames');
 frameRate = get(vid, 'FrameRate'); %30 frames/sec
 
 if ~isempty(record.stimstartframe)
-    frame = record.stimstartframe;
+    vid.CurrentTime = record.stimstartframe / frameRate;
 else
-    frame = round(starttime*frameRate);
+    vid.CurrentTime = starttime;
 end
 
-figure;
+disp('Keys: left = previous frame, right = next frame, down = play until up, q = quit, + = increase gamma, - = decrease gamma');
+
+fig = figure('Name',['Play ' recordfilter(record)],'NumberTitle','off','MenuBar','none');
 changed = true;
-prevnokey = true;
+
+gamma = 1;
 
 while 1
-    if changed
-        imframe = read(vid, frame);
-        image(imframe);
+    if ~hasFrame(vid)
+        logmsg('No more frames available');
+        pause(0.01);
+    elseif changed
+        imframe = readFrame(vid);
+        
+        gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
+        
+        image(gimframe);
+        axis image
         changed = false;
-        logmsg(['Frame = ' num2str(frame) ', Time = ' num2str(frame/frameRate)]);
+        title([num2str(vid.CurrentTime,'%.2f') ' s - Frame ' num2str(vid.CurrentTime*frameRate) ]);
         drawnow
-        WaitSecs(1/frameRate);
+        pause(1/frameRate);
     else
-        WaitSecs(0.01);
+        pause(0.01);
     end
-    [keyIsDown, secs, keyCode, deltaSecs] = KbCheck;
-    if ~keyIsDown && ~prevnokey
-        prevnokey = true;
+    keydown = waitforbuttonpress;
+    if keydown
+        keyCode = double(get(gcf,'CurrentCharacter'));
+    else
+        keyCode = 0;
     end
-    if keyIsDown && prevnokey
-        switch find(keyCode,1)
-            case 40 %arrow down
-                while 1
-                    vidFrame = read(vid, frame);
-                    image(vidFrame);
-                    drawnow
-                    pause(1/frameRate);
-                    frame = frame+1;
-                    [keyIsDown, secs, keyCode, deltaSecs] = KbCheck;
-                    if keyIsDown && find(keyCode,1)==38 % arrow up
-                        break
-                    end
+    
+    switch keyCode
+        case '-'
+            gamma = gamma + 0.1;
+            gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
+            image(gimframe);
+            axis image
+        case '+'
+            if gamma>0.1
+                gamma = gamma - 0.1;
+            end
+            gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
+            
+            image(gimframe);
+            axis image
+        case 31 %arrow down
+            while hasFrame(vid)
+                vidFrame = readFrame(vid);
+                image(vidFrame);
+                axis image
+                title([num2str(vid.CurrentTime,'%.2f') ' s - Frame ' num2str(vid.CurrentTime*frameRate) ]);
+                drawnow
+                pause(1/frameRate);
+                keyCode = double(get(gcf,'CurrentCharacter'));
+                if keyCode==30 % arrow up
+                    break
                 end
-                changed = false;
-                prevnokey = false;
-            case 37 % arrow left
-                if frame>1
-                    frame = frame - 1;
-                    changed = true;
-                    prevnokey = false;
-                else
-                    logmsg('Reached start of movie');
-                end
-            case 39 % arrow right
-                if frame<numFrames
-                    frame = frame +1;
-                    changed = true;
-                    prevnokey = false;
-                else
-                    logmsg('Reached end of movie');
-                end
-            case 81 % q
-                break
-        end
+            end
+            changed = false;
+        case 28 % arrow left
+            if vid.CurrentTime >= 2/frameRate
+                vid.CurrentTime = vid.CurrentTime - 2/frameRate;
+                changed = true;
+            else
+                logmsg('Reached start of movie');
+            end
+        case 29 % arrow right
+            changed = true;
+        case 'q'
+            break
     end
 end
+delete(fig);
 
-return
-
-
-cmd = par.wc_playercommand;
-switch par.wc_player
-    case 'vlc'
-        cmd = [ cmd ' --start-time=' num2str(starttime)];
-end
-
-cmd = [ cmd ' "' fullfile(    wcinfo(rec).path,wcinfo(rec).mp4name) '"'];
-
-switch par.wc_player
-    case 'vlc'
-        logmsg('Press ''p'' to replay.');
-end
-
-logmsg(cmd);
-[status,out] = system(cmd);
-
-out

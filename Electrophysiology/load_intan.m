@@ -473,7 +473,7 @@ end
 EVENT.ChanInfo = amplifier_channels;
 EVENT.Freq = frequency_parameters.amplifier_sample_rate;
 MatFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
-save(MatFile, 'EVENT')
+save(MatFile, 'EVENT','-v7')
 
 return
 

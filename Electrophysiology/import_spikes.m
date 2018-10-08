@@ -125,9 +125,9 @@ if allowchanges
     if exist('allcells','var')
         orgcells = cells;
         cells = allcells; %#ok<NASGU>
-        save(spikesfile,'cells','isi');
+        save(spikesfile,'cells','isi','-v7');
         cells = orgcells;
     else
-        save(spikesfile,'cells','isi');
+        save(spikesfile,'cells','isi','-v7');
     end
 end

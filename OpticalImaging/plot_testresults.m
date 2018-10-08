@@ -125,7 +125,8 @@ if ~strcmp(birthdate,'unknown')
 else
     age='unknown';
 end
-tit=[tit ', age = ' num2str(age) ' days, ' record.comment];
+
+% tit=[tit ', age = ' num2str(age) ' days, ' record.comment];
 
 show_single_condition_maps(record,fname,condnames,fileinfo,roi,ror,tit);
 

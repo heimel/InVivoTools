@@ -21,7 +21,7 @@ measures.usable=1;
 paramname = varied_parameters(inp.st.stimscript);
 if isempty(paramname)
     logmsg('No parameter varied');
-    paramname = {'imageType'}; % or 'angle'
+    paramname = {'imageType'}; % or 'angle' or 'duration'
 end
 
 ind = find(strcmp(record.stim_type,paramname));  

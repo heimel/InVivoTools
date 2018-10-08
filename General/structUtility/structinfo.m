@@ -10,7 +10,7 @@ m = whos('s');
 disp(['Number of records: ' num2str(numel(s))]);
 disp(['Memory: ' bytes2str( m.bytes )]);
 
-flds = fields(s);
+flds = fieldnames(s);
 sumofmem = zeros(length(flds),1);
 for i=1:numel(s)
     r = s(i);
@@ -31,7 +31,7 @@ if isfield(s,'measures') % very specific to leveltlab
     for i = 1:numel(s)
         for j=1:length(s(i).measures)
             measure = s(i).measures(j);
-            flds = fields(measure);
+            flds = fieldnames(measure);
             for f = 1:length(flds)
                 if ~isfield(measuremem,flds{f})
                     measuremem.(flds{f}) = 0;
@@ -42,7 +42,7 @@ if isfield(s,'measures') % very specific to leveltlab
             end
         end
     end
-    flds = fields(measuremem);
+    flds = fieldnames(measuremem);
     szs = struct2array(measuremem);
     [szs,ind] = sort(szs);
     flds = {flds{ind}};

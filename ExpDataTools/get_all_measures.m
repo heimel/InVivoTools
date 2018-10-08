@@ -47,6 +47,6 @@ end
 
 for i=1:length(db)
     if isfield(db(i),'measures') && isstruct(db(i).measures)
-        measures = uniq(sort(cat(1,measures,fields(db(i).measures))))';
+        measures = uniq(sort(cat(1,measures,fieldnames(db(i).measures))))';
     end
 end

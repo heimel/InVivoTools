@@ -1,10 +1,10 @@
 function parameters = default
 % 2012, Alexander Heimel
 
-if ~exist('rng','file') % for backwards compatibility with R2009
+if ~exist('rng_twister','file') % for backwards compatibility with R2009
     rs = rand('state');
 else
-    rs = rng;
+    rs = rng_twister;
 end
 
 parameters = struct ( ...

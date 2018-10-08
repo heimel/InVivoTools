@@ -3,7 +3,8 @@ function stacktypes = tpstacktypes(record)
 %
 %  STACKTYPES = TPSTACKTYPES( RECORD ) 
 %
-% Steve Van Hooser, 2010-2012 Alexander Heimel
+% 200X, Steve Van Hooser
+% 2010-2018, Alexander Heimel
 %
 
 if nargin<1
@@ -27,6 +28,8 @@ switch record.experiment
         stacktypes = {'cell','neuron','glia'};
     case {'14.24'}
         stacktypes = {'axon','bouton','Npil','Pyr','PV','shaft','spine','SST','unknown'};
+    case '17.20.16'
+        stacktypes = {'cell'};
     otherwise 
         stacktypes = {'aggregate','axon','bouton','cell','dendrite','glia','mito','neurite','pia','shaft','soma','spine','unknown'};
 end

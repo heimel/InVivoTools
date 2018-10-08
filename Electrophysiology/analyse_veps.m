@@ -22,7 +22,7 @@ powers = {};
 powerm = [];
 
 bands = oscillation_bands;
-band_names = fields(oscillation_bands);
+band_names = fieldnames(oscillation_bands);
 
 [stims,stimsfile] = getstimsfile(record);
 if isempty(stims)
@@ -509,7 +509,7 @@ end
 
 function  measures = entropy_analysis( waves, waves_time, Fs, ind, measures,i )
 bands = oscillation_bands;
-band_names = fields(oscillation_bands);
+band_names = fieldnames(oscillation_bands);
 
 preind = (waves_time(1,:)<0);
 postind = (waves_time(2,:)>=0);

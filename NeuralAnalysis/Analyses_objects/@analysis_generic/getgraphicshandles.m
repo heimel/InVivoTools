@@ -13,13 +13,14 @@ function z = getgraphicshandles(ag)
 
 z = [];
 w = location(ag);
-if ishandle(w.figure),
-        Z=findobj(w.figure,'tag','analysis_generic');
-	for i=1:length(Z),
-           if ishandle(Z(i))&~isempty(get(Z(i),'uicontextmenu'))&...
-                           (get(Z(i),'uicontextmenu')==contextmenu(ag)),
-                z = [z Z(i)];
-	   end;
-        end;
-end;
+if ishandle(w.figure)
+    Z=findobj(w.figure,'tag','analysis_generic');
+    for i=1:length(Z)
+        if ishandle(Z(i)) && ...
+                ~isempty(get(Z(i),'uicontextmenu')) &&...
+                (get(Z(i),'uicontextmenu')==contextmenu(ag))
+            z = [z Z(i)];
+        end
+    end
+end
 

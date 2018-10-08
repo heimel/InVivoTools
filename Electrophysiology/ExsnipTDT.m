@@ -31,18 +31,6 @@ if use_matlab_tdt
 end
 
 CSnip = [];
-% Rt = strmatch(EVENT.Myevent, {EVENT.snips.Snip.name} );
-% if isempty(Rt)
-%     errordlg([EVENT.Myevent ' is not a snip type event'])
-%     return
-% end
-
-% matfile = fullfile(EVENT.Mytank,EVENT.Myblock); %name of file used to save lfp structure
-% MatFile=fullfile(matfile,SpikesFile);
-% if exist([MatFile '.mat'], 'file')
-%     load(MatFile);
-%     return
-% end
 
 %check if start and triallength exist
 if ~isfield(EVENT, 'Start') || ~isfield(EVENT, 'Triallngth')

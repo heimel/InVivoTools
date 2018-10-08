@@ -64,15 +64,9 @@ switch record.stim_type
         axis image off
         colorbar 
     case {'orientation','direction'}
-        
-%         % WTA map
-%         figure;
-%         image(imgdata)
-%         title(['WTA ' tit]);
 
         % single conditions
         show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
-
         
         file = fullfile(experimentpath(record),[record.test '_B' ...
                 mat2str([min(record.blocks) max(record.blocks)]) ...
@@ -99,10 +93,6 @@ switch record.stim_type
             imgpic(imgpic>255) = 255;
             imgpic=uint8(imgpic);
             image(imgpic); % show retinotopy with highlights
-
-            
-            
-            
             axis image off;
             label = subst_ctlchars(['Orientation, mouse=' record.mouse ',date=' record.date ',test=' record.test]);
             title(label);
@@ -305,8 +295,6 @@ switch record.stim_type
             record.timecourse_ratio,...
             roi,ror,...
             record);
-        
-
 end
 
 

@@ -135,7 +135,7 @@ removetrace(h);
 function removetrace( h )
     if ~isempty(h)
         % delete points and lines
-        f = fields(h);
+        f = fieldnames(h);
         for i=1:length(f)
             if all(ishandle(h.(f{i})))
                 delete(h.(f{i}));

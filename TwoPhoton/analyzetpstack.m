@@ -9,7 +9,7 @@ function fig = analyzetpstack(command, record, thefig, analysis_parameters)
 %   check HELP TP_ORGANIZATION for organization of data
 %
 % 2007 - 2008, Steve Van Hooser
-% 2008 - 2017, Alexander Heimel
+% 2008 - 2018, Alexander Heimel
 %
 
 global shift_state control_state % for short-cut key detection
@@ -86,6 +86,8 @@ switch command
         ud.image_processing.spatial_filterhandle = processparams.spatial_filterhandle;
         ud.image_processing.spatial_filteroptions = processparams.spatial_filteroptions;
         
+        ud.image_processing.apply_postfunction = processparams.apply_postfunction;
+        
         % now make data structures
         slicelist = emptyslicerec;
         ud.slicelist = slicelist([]);
@@ -159,7 +161,7 @@ switch command
         end
         [c,ia]=intersect(littlelist,selDir);
         if ~isempty(c)
-            v = ia(1); 
+            v = ia(1);
         else
             v = 1;
         end
@@ -227,7 +229,7 @@ switch command
         % make sure that there is always a channel on
         channels_on = [];
         for c = 1:9
-            channels_on = [channels_on get(ft(fig,['channel' num2str(c) 'Tg']),'value')];
+            channels_on = [channels_on get(ft(fig,['channel' num2str(c) 'Tg']),'value')]; %#ok<AGROW>
         end
         if ~any(channels_on) % then turn channel 1 on
             set(ft(fig,'channel1Tg'),'value',1)
@@ -252,9 +254,9 @@ switch command
         end
         for ch = channels
             % read viewing parameters from gui
-            mn(ch) = str2double(get(ft(fig,['ColorMin' num2str(ch) 'Edit']),'string'));
-            mx(ch) = str2double(get(ft(fig,['ColorMax' num2str(ch) 'Edit']),'string'));
-            gamma(ch) = str2double(get(ft(fig,['ColorGamma' num2str(ch) 'Edit']),'string'));
+            mn(ch) = str2double(get(ft(fig,['ColorMin' num2str(ch) 'Edit']),'string')); %#ok<AGROW>
+            mx(ch) = str2double(get(ft(fig,['ColorMax' num2str(ch) 'Edit']),'string')); %#ok<AGROW>
+            gamma(ch) = str2double(get(ft(fig,['ColorGamma' num2str(ch) 'Edit']),'string')); %#ok<AGROW>
         end
         
         shift_channels = [];
@@ -282,13 +284,13 @@ switch command
                     pvfilename = tpscratchfilename( ud.record, 1, 'preview');
                     if exist(pvfilename,'file')
                         pvimg = load(pvfilename);
-                        ud.previewimage{1} = pvimg.pvimg; 
+                        ud.previewimage{1} = pvimg.pvimg;
                     else
                         ud.recompute_preview = true;
                     end
                 end
                 
-                if  ud.recompute_preview  
+                if  ud.recompute_preview
                     % compute preview image
                     first = str2double(get(ft(fig,'FirstFrameEdit'),'String'));
                     last = str2double(get(ft(fig,'LastFrameEdit'),'String'));
@@ -315,7 +317,7 @@ switch command
                 set(ft(fig,'frameTxt'),'String',num2str(frame));
                 % read frame
                 for ch = channels
-                    im(:,:,ch) = double(squeeze(tpreadframe(ud.record,ch,frame,ud.image_processing)));
+                    im(:,:,ch) = double(squeeze(tpreadframe(ud.record,ch,frame,ud.image_processing,ud.verbose)));
                 end
         end
         
@@ -330,7 +332,7 @@ switch command
         else
             pixelshift = 0;
         end
-                
+        
         if compute_pixelshift
             logmsg(['Shifting channel(s) ' mat2str(shift_channels(shift_channels>0)) ' up by ' num2str(pixelshift) ' pixels'])
             for ch=intersect(shift_channels(shift_channels>0),channels)
@@ -358,11 +360,7 @@ switch command
         
         % make image
         [ud.previewim,mx,mn,gamma] = tp_image(im,channels,mx,mn,gamma,tp_channel2rgb(ud.record),ft(fig,'tpaxes'));
-        % set(get(ud.previewim,'parent'),'tag','tpaxes');
         set(ud.previewim,'Tag','preview');
-       
-        % for dani
-        %imwrite(ud.previewim.CData,fullfile(getdesktopfolder,'preview.tiff'))
         
         set(fig,'userdata',ud);
         
@@ -377,7 +375,6 @@ switch command
             set(ft(fig,['ColorMin' num2str(ch) 'Edit']),'string',num2str(fix(mn(ch))));
             set(ft(fig,['ColorGamma' num2str(ch) 'Edit']),'string',num2str(gamma(ch),2));
         end
-        
         
         % drift correction
         xyoffset = getxyoffset(ud);
@@ -710,7 +707,7 @@ switch command
         val = get(ft(fig,'cellTypePopup'),'value');
         v = get(ft(fig,'celllist'),'value');
         for i=1:length(v)
-            ud.celllist(v(i)).type= strs{val}; 
+            ud.celllist(v(i)).type= strs{val};
         end
         set(fig,'userdata',ud);
         analyzetpstack('UpdateCellList',[],fig);
@@ -732,7 +729,7 @@ switch command
             pvfilename = tpscratchfilename( ud.record, 1, 'preview');
             % see if we have a preview image already computed, and if not, compute it and save it
             if exist(pvfilename,'file')
-                load(pvfilename);
+                load(pvfilename,'pvimg');
             else
                 record = ud.record;
                 if newslice.dirname~='.'
@@ -843,19 +840,20 @@ switch command
         sz = size(get(ud.previewim,'CData'));
         [blankprev_x,blankprev_y] = meshgrid(1:sz(2),1:sz(1));
         newballdiastr = get(ft(fig,'newballdiameterEdit'),'string');
+        newballdia = [];
         if ~isempty(newballdiastr)
             newballdia = str2double(newballdiastr);
-            if isnan(newballdia)
-                newballdia = 12;
-            end
-        else
-            newballdia = 12;
+        end
+        if isempty(newballdia) || isnan(newballdia)
+            processparams = tpprocessparams(record);
+            newballdia = processparams.default_roi_disk_radius_pxl;
         end
         set(ft(fig,'newballdiameterEdit'),'string',num2str(newballdia));
         rad = round(newballdia/2);
         xi_ = ((-rad):1:(rad));
         yi_p = sqrt(rad^2-xi_.^2);
         yi_m = - sqrt(rad^2-xi_.^2);
+        
         figure(fig);
         axes(ft(fig,'tpaxes')); % % necessary for ginput
         zoom off;
@@ -1000,7 +998,15 @@ switch command
                             % find maximum z-projection
                             proj_mode = 1; % mean data for each frame
                             data = tpreaddata(ud.record, [-inf inf], {pixelinds},proj_mode,snap_to_channel,ud.image_processing,false);
-                            [tempmax,frame] = max( data{1} ); %#ok<ASGLU>
+                            
+                            par = tpprocessparams(ud.record);
+                            
+                            curframe = round(get(ft(fig,'FrameSlid'),'value'));
+                            start = max(1,curframe - par.max_snap_range );
+                            stop = min(length(data{1}),curframe + par.max_snap_range);
+                            [tempmax,frame] = max( data{1}(start:stop) ); %#ok<ASGLU>
+                            frame = frame + start - 1;
+                            
                             goto_frame( frame,fig );
                             ud=get(fig,'userdata');
                         end
@@ -1244,7 +1250,7 @@ switch command
     case 'singleCondBt'
         trialsstr = strtrim(get(ft(fig,'trialsEdit'),'string'));
         if ~isempty(trialsstr)
-            trialslist = eval(trialsstr); 
+            trialslist = eval(trialsstr);
         else
             trialslist = [];
         end
@@ -1256,14 +1262,14 @@ switch command
         end
         sptimeintstr = strtrim(get(ft(fig,'sptimeintEdit'),'string'));
         if ~isempty(sptimeintstr)
-            sptimeint= eval(sptimeintstr); 
+            sptimeint= eval(sptimeintstr);
         else
-            sptimeint= []; 
+            sptimeint= [];
         end
         fprintf('Analyzing...will take a few seconds...\n');
         [r,indimages] = tpsinglecondition(ud.record,ud.channel,trialslist,timeint,sptimeint,1);  %#ok<ASGLU>
         scratchfilename = tpscratchfilename(ud.record,[],'single_condition');
-        save(scratchfilename,'r','indimages','-mat');
+        save(scratchfilename,'r','indimages','-v7');
     case 'clearScratchBt'
         scratchfilename = tpscratchfilename(ud.record,[],'*');
         delete(scratchfilename);
@@ -1307,7 +1313,7 @@ switch command
         if isfield(ud.celldrawinfo,'changes')
             changes = ud.celldrawinfo.changes; %#ok<NASGU>
         end
-        save(scratchfilename,'slicelist','changes','record','-mat');
+        save(scratchfilename,'slicelist','changes','record','-v7');
         
         % check to see if TP database is open
         h_db = get_fighandle('TP database*');
@@ -1322,7 +1328,7 @@ switch command
                 ',comment="' record.comment '"']);
             if isempty(ind)
                 ind = find_record( db_ud.db, ['mouse=' record.mouse ',date=' record.date ...
-                     ',datatype!ec' ...
+                    ',datatype!ec' ...
                     ',epoch=' record.epoch  ',slice=' record.slice ',comment="' record.comment '"']);
                 if length(ind)==1 && isempty(db_ud.db(ind).stack)
                     % ok, probably just defaulted to Live_0000
@@ -1420,7 +1426,7 @@ switch command
     case 'zoomBt'
         if get(ft(fig,'zoomBt'),'value')
             set(ft(fig,'panBt'),'value',0)
-            axes(ft(fig,'tpaxes')); 
+            axes(ft(fig,'tpaxes'));
             if isempty(ud.zoom_object)
                 ud.zoom_object = zoom;
                 set(ud.zoom_object,'ActionPostCallback',@zoom_callback);
@@ -1440,7 +1446,7 @@ switch command
     case 'panBt'
         if get(ft(fig,'panBt'),'value')
             set(ft(fig,'zoomBt'),'value',0)
-            axes(ft(fig,'tpaxes')); 
+            axes(ft(fig,'tpaxes'));
             set(ud.zoom_object,'Enable','off');
             pan;
         else
@@ -1543,7 +1549,7 @@ switch command
                     intersect([current_celllist(logical([current_celllist.present])).index],...
                     [imported_celllist(logical([imported_celllist.present])).index]);
                 
-                present_in_both = [];
+                present_in_both = zeros(size(present_in_both_index));
                 for i=1:length(present_in_both_index)
                     single_pres_in_both = find([imported_celllist.index]==present_in_both_index(i));
                     if length(single_pres_in_both)>1
@@ -1644,16 +1650,97 @@ switch command
         end
         set(fig,'userdata',ud);
     case 'importROIsBt'
+        imported_rois = false;
+        
+        v = fix(str2double(get(ft(fig,'newcellindexEdit'),'String')));
+        ud.record.ROIs.new_cell_index = next_available_cell_index(v-1,ud.celllist );
+
+        
         if 1 % importing imaris
             [imaris_celllist, ud.record.ROIs.new_cell_index] = ...
                 import_imaris_filaments( ud.record, ud.record.ROIs.new_cell_index );
             ud.celllist = [ud.celllist imaris_celllist];
+            if ~isempty(imaris_celllist)
+                imported_rois = true;
+            end
         end
         
-        if 1 % not doing imagej
+        if 1 % importing imagej roi files
             [imagej_celllist, ud.record.ROIs.new_cell_index] = ...
                 import_imagej_rois( ud.record, ud.record.ROIs.new_cell_index );
             ud.celllist = [ud.celllist  imagej_celllist];
+            if ~isempty(imagej_celllist)
+                imported_rois = true;
+            end
+        end
+        
+        if 1 % especially for eline 2018-06-04
+            epestr = ud.record.stack(1:6);
+            ind = strfind(ud.record.slice,'lice');
+            ind2 = find(ud.record.slice(ind:end)=='_',1);
+            slicestr = ud.record.slice(ind+4:ind+ind2-2);
+            ind = strfind(ud.record.slice,'ml');
+            mlchar = ud.record.slice(ind+2);
+            xlspath = fullfile(tpdatapath(ud.record),'quantification');
+            d = dir(fullfile(xlspath,[epestr '*']));
+            xlspath = fullfile(xlspath,d.name,'excel');
+            
+            filt = fullfile( xlspath,[ epestr '*lice' slicestr '*_ml' mlchar '*.xls']) ;
+            d = dir(filt);
+            
+            stacktypes = tpstacktypes(ud.record);
+            empty_roi = tp_emptyroirec(ud.record);
+            empty_roi.type = stacktypes{1};
+            
+            stacklabels = tpstacklabels(ud.record);
+            
+            for i=1:length(d)
+                filename = fullfile(xlspath,d(i).name);
+                
+                empty_roi.labels = {};
+                for sl = 1:length(stacklabels)
+                    if isempty(stacklabels{sl})
+                        continue
+                    end
+                    if contains(d(i).name(strfind(d(i).name,'lice'):end),stacklabels{sl},'IgnoreCase',true)
+                        empty_roi.labels{end+1} = stacklabels{sl};
+                    end
+                end
+                if contains(d(i).name,'ROR')
+                    empty_roi.present = 0;
+                else
+                    empty_roi.present = 1;
+                end
+                
+                logmsg(['Importing ' filename ' with ' cell2str(empty_roi.labels) ...
+                    ' as '  'present=' num2str(empty_roi.present)]);
+                
+                [imported_celllist, ud.record.ROIs.new_cell_index] = ...
+                    import_fiji_rois_xls( filename, ud.record, ud.record.ROIs.new_cell_index, empty_roi );
+                ud.celllist = [ud.celllist  imported_celllist];
+                imported_rois = true;
+                
+            end
+        end
+        
+        
+        if ~imported_rois
+            [filename,pathname] = uigetfile(...
+                {'*.xls','All Excel Files (*.xls)';...
+                '*.*','All Files (*.*)'},...
+                'Select ROI file');
+            filename = fullfile(pathname,filename);
+            if exist(filename,'file')
+                [~,~,ext] = fileparts(filename);
+                switch ext
+                    case '.xls'
+                        [imported_celllist, ud.record.ROIs.new_cell_index] = ...
+                            import_fiji_rois_xls( filename, ud.record, ud.record.ROIs.new_cell_index );
+                        ud.celllist = [ud.celllist  imported_celllist];
+                    otherwise
+                        errormsg(['Do not know how to import ' filename]);
+                end
+            end
         end
         
         ud.cell_indices_changed = 1;
@@ -1801,7 +1888,7 @@ if ~isfield(ud.celldrawinfo,'changes')
 end
 gotChanges = 0;
 if length(ud.celldrawinfo.changes)<i
-    ud.celldrawinfo.changes{i} = []; 
+    ud.celldrawinfo.changes{i} = [];
 end
 changes = ud.celldrawinfo.changes{i};
 currChanges = {};
@@ -1833,11 +1920,10 @@ set(fig,'userdata',ud);
 function dr = getcurrentdirdrift(ud, numpreviewframes)
 df = tpscratchfilename(ud.record,[],'drift');
 if ~exist(df, 'file')
-    %disp(['No driftcorrect file ' df '; shift information will change after drift correction.']);
     dr = [0 0];
 else
     drift=[];
-    load(df,'-mat');
+    load(df,'-mat','drift');
     if isstruct(drift)
         dr = [mean(drift.x(1: min(numpreviewframes,end) ,:)) mean(drift.y(1:min(numpreviewframes,end),:))]; % get the mean initial drift
     else
@@ -2018,8 +2104,7 @@ global shift_state control_state
 
 if isfield(event,'Key') || isa(event,'matlab.ui.eventdata.KeyData')
     obj = get(src,'currentobject');
-    prop = get(obj);
-    if isfield(prop,'Style') && strcmp(prop.Style,'edit')
+    prop = get(obj);    if isfield(prop,'Style') && strcmp(prop.Style,'edit')
         % typing text, so do respond to key short cuts
         set(src,'WindowKeyPressFcn',@figure_keypress);
         return;

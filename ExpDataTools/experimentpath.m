@@ -26,6 +26,8 @@ if nargin<4 || isempty(vers)
                 end
             case {'gaia','helero2p','g2p','intan'}
                 vers = '2015';
+            case 'lif'
+                vers = '2015';
         end
     end
 end

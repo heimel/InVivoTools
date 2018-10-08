@@ -8,32 +8,30 @@ function fsapu (arg)
 
 global rc tc pc
 
-
 z = geteditor('RunExperiment');
 if ~isempty(z)
     ud=get(z,'userdata');
     cksds = ud.cksds;
 else
     error('no runexperiment. grrrrrr!');
-end;
-if nargin==1,
+end
+if nargin==1
     if isstruct(arg)
         record = arg;
-        datapath=experimentpath(record,false);
-        cksds = cksdirstruct(datapath);
     else
-        record.date = 'Something';
-        logmsg('FSAPU not fixed for InVivoTools yet. Please ask Alexander to do so');
+        h_db = get_fighandle('ec database*');
+        ud = get(h_db,'Userdata');
+        record = ud.db(ud.current_record);
+        channels2analyze = get_channels2analyze( record );
     end
+    datapath=experimentpath(record,false);
+    cksds = cksdirstruct(datapath);
     cells = import_spikes( record, [], true );
-    
-    
-    
     
     fsapu(); % make figure
     f = 1234;
     ud = get(f,'userdata');
-    l = {'t00048'};
+    %l = {'t00048'};
     vl = get(ud.gettests,'String');
     nr = getallnamerefs(cksds);
     nv = get(ud.namerefs,'value');
@@ -43,7 +41,9 @@ if nargin==1,
     ps = get(ud.param,'String');
     pv = get(ud.param,'value');
     par = ps{pv};
-    if isstruct(arg)
+    if isfield(record,'test')
+        test = record.test;
+    elseif isstruct(arg)
         if isfield(record,'test')
             test = record.test;
         else
@@ -56,30 +56,31 @@ if nargin==1,
     try
         g = getcells(cksds,nr(nv));
     catch
-        errordlg('does not exist3.');
+        logmsg('does not exist.');
         g = getcells(cksds);
-    end;
+    end
     
     loadstr = '';
-    
     for i=1:length(g)
-        loadstr = [loadstr ',''' g{i} ''''];
-    end;
+        loadstr = [loadstr ',''' g{i} '''']; %#ok<AGROW>
+    end
     loadstr = loadstr(2:end);
     
     if isempty(loadstr)
-        errordlg('Empty data');
+        logmsg('Empty data');
         delete(f);
-        error('does not exist.');
-    end;
+        logmsg('does not exist.');
+    end
     eval(['d = load(getexperimentfile(cksds),' loadstr ',''-mat'');']);
     
-    if strcmp(par,'rev cor'),
-        for i=1:length(g),
+    if strcmp(par,'rev cor')
+        for i=1:length(g)
+            if ~ismember(cells(i).channel,channels2analyze)
+                continue
+            end
             inp.stimtime = stimtimestruct(s,1);
-            inp.spikes={}; inp.cellnames = {};
-            %for i=1:length(g), inp.spikes{i}=getfield(d,g{i});
-            %                   inp.cellnames{i} = [g{i}];               end;
+            inp.spikes={}; 
+            inp.cellnames = {};
             inp.spikes{1}=getfield(d,g{i});
             n_spikes=length(get_data(inp.spikes{1},...
                 [inp.stimtime.mti{1}.startStopTimes(1),...
@@ -89,15 +90,13 @@ if nargin==1,
                 disp([g{i} ' n_spikes=' num2str(n_spikes)]);
                 where.figure = figure;where.rect=[0 0 1 1]; where.units='normalized';
                 orient(where.figure,'landscape');
-                %set(where.figure,'inverthardcopy','off');
-                
                 
                 %%% rc = reverse_corr(inp,'default',where);
                 %%%  changed by Alexander 2006-12-13
                 rc = reverse_corr(inp,'default',[]); %where);
                 para_rc=getparameters(rc);
                 para_rc.interval=[0.050 0.350];
-                para_rc.timeres=[0.100];
+                para_rc.timeres = 0.100;
                 para_rc.bgcolor=2;
                 rc=setparameters(rc,para_rc);
                 rc = setlocation(rc,where);
@@ -118,8 +117,6 @@ if nargin==1,
                 %flatten feature mean and sem, only works for gray levels
                 feamean=mean(feamean);
                 
-                cumdist=cumsum(p2.dist)'/sum(p2.dist);
-                
                 if 0
                     %distribution is not gaussian but multinominal
                     %calculation of responsive area is done by monte carlo
@@ -128,6 +125,8 @@ if nargin==1,
                     
                     % this procedure does not take into account the possible limited
                     % number of samples
+                    
+                    cumdist=cumsum(p2.dist)'/sum(p2.dist); %#ok<UNRCH>
                     chance_higher=zeros(size(rf));
                     chance_lower=zeros(size(rf));
                     tic
@@ -173,22 +172,21 @@ if nargin==1,
                 feamean_sem=feamean_std/sqrt(n_samples);
                 
                 %flatten feature mean and sem, only works for gray levels
-                feamean_std=mean(feamean_std);
+                %feamean_std=mean(feamean_std);
                 feamean_sem=mean(feamean_sem);
                 
-                maxc=feamean+3*feamean_std;
-                minc=feamean-3*feamean_std;
+                %maxc=feamean+3*feamean_std;
+                %minc=feamean-3*feamean_std;
                 
                 % take all point within first and third quartile
                 topbox=prctile(rf(:),75);
                 minbox=prctile(rf(:),25);
-                ind_box=find( rf(:)<topbox & rf(:)>minbox);
-                mrf=mean(rf(ind_box));
+                %ind_box=find( rf(:)<topbox & rf(:)>minbox);
+                mrf = mean(rf(rf(:)<topbox & rf(:)>minbox));
                 
-                if mrf<feamean-feamean_sem | mrf>feamean+feamean_sem
+                if mrf<feamean-feamean_sem || mrf>feamean+feamean_sem
                     disp('Not sampled long enough. Feature mean too far from data mean');
                 end
-                
                 
                 rf_on=(rf> (feamean+3*feamean_sem));
                 disp(['ON-response in  ' num2str(sum(rf_on(:))) ' patches ' ]);
@@ -206,7 +204,7 @@ if nargin==1,
                 
                 if 0 % no gaussian fitting of receptive field
                     % take all point within first and third quartile
-                    topbox=prctile(rf(:),90);
+                    topbox=prctile(rf(:),90); %#ok<UNRCH>
                     minbox=prctile(rf(:),10);
                     ind_box=find( rf(:)<topbox & rf(:)>minbox);
                     mrf=mean(rf(ind_box));
@@ -234,11 +232,11 @@ if nargin==1,
                         
                         % fit 2d-gaussian to receptive field
                         switch rf_type
-                            case 'on',
+                            case 'on'
                                 [cx,cy,sx,sy,cxy,PeakOD]=...
                                     Gaussian2D( rf-feamean ,0.001,p2.rect);
                                 %                                Gaussian2D( thresholdlinear(rf-feamean)+srf/100 ,0.001,p2.rect);
-                            case 'off',
+                            case 'off'
                                 [cx,cy,sx,sy,cxy,PeakOD]=...
                                     Gaussian2D( thresholdlinear(-rf+feamean)+srf/100 ,0.001,p2.rect);
                                 PeakOD=-PeakOD;
@@ -271,10 +269,10 @@ if nargin==1,
                     end
                 end
             end
-        end;
+        end
         delete(f);
     else % not reverse correlation
-        for i=1:length(g),
+        for i=1:length(g)
             inp.st=s;
             inp.spikes=getfield(d,g{i});
             inp.paramname=par;
@@ -282,17 +280,17 @@ if nargin==1,
             where.figure=figure;where.rect=[0 0 1 1]; where.units='normalized';
             orient(where.figure,'landscape');
             %set(where.figure,'inverthardcopy','off');
-            if ~usepc,
+            if ~usepc
                 tc=tuning_curve(inp,'default',where);
             else
                 inp.paramnames={par};
                 pc=periodic_curve(inp,'default',where);
-            end;
-        end;
+            end
+        end
         delete(f);
-    end;
+    end
     nts = [vl ' : ' nts];
-    ax2 = axes('position',[0 0 1 1],'visible','off');
+    axes('position',[0 0 1 1],'visible','off');
     text(0.5,0.02,nts,'HorizontalAlignment','center','Interpreter','none');
 else % called fsapu without arguments, probably first time
     h0 = figure(1234);
@@ -303,7 +301,7 @@ else % called fsapu without arguments, probably first time
         'Tag','', ...
         'MenuBar','figure');
     settoolbar(h0,'figure');
-    h1 = uicontrol('Parent',h0, ...
+    uicontrol('Parent',h0, ...
         'Units','points', ...
         'BackgroundColor',[0.8 0.8 0.8], ...
         'FontSize',12, ...
@@ -313,7 +311,7 @@ else % called fsapu without arguments, probably first time
         'String','Fast, sloppy, analysis popper-upper', ...
         'Style','text', ...
         'Tag','StaticText1');
-    h1 = uicontrol('Parent',h0, ...
+    uicontrol('Parent',h0, ...
         'Units','points', ...
         'BackgroundColor',[0.8 0.8 0.8], ...
         'ListboxTop',0, ...
@@ -321,14 +319,14 @@ else % called fsapu without arguments, probably first time
         'String','Displays a quick and dirty tuning curve', ...
         'Style','text', ...
         'Tag','StaticText2');
-    h1 = uicontrol('Parent',h0, ...
+    uicontrol('Parent',h0, ...
         'Units','points', ...
         'BackgroundColor',[0.8 0.8 0.8], ...
         'ListboxTop',0, ...
         'Position',[268 25 91 29], ...
         'String','Do it', ...
         'Tag','Pushbutton1','Callback','fsapu doit');
-    h1 = uicontrol('Parent',h0, ...
+    uicontrol('Parent',h0, ...
         'Units','points', ...
         'BackgroundColor',[0.8 0.8 0.8], ...
         'ListboxTop',0, ...
@@ -346,7 +344,7 @@ else % called fsapu without arguments, probably first time
         'Style','popupmenu', ...
         'Tag','PopupMenu1', ...
         'Value',1);
-    h1 = uicontrol('Parent',h0, ...
+    uicontrol('Parent',h0, ...
         'Units','points', ...
         'BackgroundColor',[0.8 0.8 0.8], ...
         'ListboxTop',0, ...
@@ -364,9 +362,7 @@ else % called fsapu without arguments, probably first time
         'Style','edit', ...
         'Tag','PopupMenu1', ...
         'Value',1);
-    %	'String',gettests(cksds,'tung',4), ...
-    %	'ListboxTop',0, ...
-    h1 = uicontrol('Parent',h0, ...
+    uicontrol('Parent',h0, ...
         'Units','points', ...
         'BackgroundColor',[0.8 0.8 0.8], ...
         'ListboxTop',0, ...
@@ -376,7 +372,9 @@ else % called fsapu without arguments, probably first time
         'Tag','StaticText3');
     nrs = {'none'};
     nr = getallnamerefs(cksds);
-    for i=1:length(nr), nrs{i} = [nr(i).name ' | ' int2str(nr(i).ref) ]; end;
+    for i=1:length(nr)
+        nrs{i} = [nr(i).name ' | ' int2str(nr(i).ref) ];
+    end
     namerefs = uicontrol('Parent',h0, ...
         'Units','points', ...
         'BackgroundColor',[0.8 0.8 0.8], ...
@@ -388,13 +386,6 @@ else % called fsapu without arguments, probably first time
         'Style','popupmenu', ...
         'Tag','PopupMenu1', ...
         'Value',1);
-    notebx=uicontrol('Parent',h0,...
-        'Units','points', ...
-        'BackgroundColor',0.8*[1 1 1], ...
-        'ListboxTop',0, ...
-        'Position',[60.5 70 120 20 ], ...
-        'String','Notes:', ...
-        'Style','text');
     notes=uicontrol('Parent',h0, ...
         'Units','points', ...
         'BackgroundColor',0.8*[1 1 1], ...
@@ -405,7 +396,6 @@ else % called fsapu without arguments, probably first time
         'Style','edit', ...
         'Tag','PopupMenu1', ...
         'Value',1);
-    
     usepc=uicontrol('Parent',h0,...
         'Units','points',...
         'BackgroundColor',[0.8 0.8 0.8],...

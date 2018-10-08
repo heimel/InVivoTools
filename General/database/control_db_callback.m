@@ -150,7 +150,7 @@ switch windowname
                 init = get(ud.h.crit,'String');
                 if ~isempty(init)
                     if ~any(init=='=')
-                        f = fields(ud.db);
+                        f = fieldnames(ud.db);
                         init = [f{1} '=' init];
                     end
                 end

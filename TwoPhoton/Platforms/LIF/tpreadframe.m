@@ -1,19 +1,29 @@
-function [im,fname]=tpreadframe(record,channel,frame,opt,verbose,fname)
+function [im,fname]=tpreadframe(record,channel,frame,opt,verbose,fname,multiple_frames_mode)
 %TPREADFRAME read frame from liff (Leica Image Format File)
 %
-%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE, FNAME )
+%  [IM, FNAME] = TPREADFRAME( RECORD, CHANNEL, FRAME, OPT, VERBOSE, FNAME,MULTIPLE_FRAMES_MODE )
 %
 %    Using FNAME as an input argument can bypass constructing the filename,
 %    and speeds up calling TPREADFRAME
 %
-% 2011-2015, Alexander Heimel
+%    if multiple_frames_mode == 0, output individual frames, if
+%    multiple_frames_mode ==1, output avg
+%    multiple_frames_mode ==2, output max
 %
+%
+% 2011-2018, Alexander Heimel
+%
+
 persistent readfname images
+
+if nargin<7 || isempty(multiple_frames_mode)
+    multiple_frames_mode = 0;
+end
 
 if length(channel)>1
     warning('TPREADFRAME:MULTIPLE_CHANNELS','TPREADFRAME:TPREADFRAME WILL IN FUTURE ONLY ACCEPT SINGLE CHANNEL');
 end
-    
+
 if nargin<4
     opt = [];
 end
@@ -74,9 +84,18 @@ else
 end
 
 % return selected images
-im=images(:,:,frame,channel);
-%im = zeros([size(images,1) size(images,2) length(frame) size(images,4)],class(images));
-%im(:,:,:,channel)=images(:,:,frame,channel);
+switch multiple_frames_mode
+    case 0 % output individual frames
+        im = images(:,:,frame,channel);
+    case 1 % output avg
+        im = sum(double(images(:,:,frame,channel)),3);
+        im = im/length(frame);
+    case 2 %output max
+        im = max(images(:,:,frame,channel),[],3);
+    otherwise
+        errormsg(['Invalid multiple_frames_mode ' num2str(multiple_frames_mode)]);
+        im = [];
+end
 
 mlock
 

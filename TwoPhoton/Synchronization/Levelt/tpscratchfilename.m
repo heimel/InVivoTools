@@ -11,7 +11,7 @@ function sfname=tpscratchfilename( records, channel, stype, ext )
 %
 %     SFNAME contains full path to the image file
 %
-% 2009, Alexander Heimel
+% 2009-2018, Alexander Heimel
 
 if nargin<4
     ext = '';
@@ -39,4 +39,4 @@ if ~isempty(channel)
     channel=['_ch' int2str(channel)];
 end
 epochs = [records(:).epoch];
-sfname = fullfile(scratchdir, subst_filechars([record.experiment record.stack record.mouse record.slice epochs channel '_' stype ext]));
+sfname = fullfile(scratchdir, [subst_filechars([record.experiment record.stack record.mouse record.slice epochs channel '_']) stype ext]);

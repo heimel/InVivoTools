@@ -20,13 +20,13 @@ td = isempty(in.oldint)|(~eqlen(in.oldint,p.interval))|...
     isempty(in.oldfeature)|(~eqlen(in.oldfeature,p.feature));
 if td % timing data difference
     offsets = p.interval(1):p.timeres:p.interval(2);
-    if length(offsets)==1,
+    if length(offsets)==1
         offsets = [p.interval(1) p.interval(2)];
     end
     n_bins = length(offsets)-1;
     in.edges = {};
     in.counts = {}; % in.counts{number of stimuli}{number of cells}[number of bins,
-    for m=1:length(I.stimtime),
+    for m=1:length(I.stimtime)
         frameTimes = I.stimtime(m).mti{1}.frameTimes;
         n_frames = length(frameTimes);
         % tmpa = matrix with on each row all frametimes plus the start of the bins in the columns
@@ -52,19 +52,19 @@ if td % timing data difference
     rc_raw = zeros(length(I.spikes),n_bins,y,x,3);
     
     norms = zeros(length(I.spikes),n_bins);
-    for m=1:length(I.stimtime), % loop over stims
+    for m=1:length(I.stimtime) % loop over stims
         [x,y,rect] = getgrid(I.stimtime(m).stim);
         v = getgridvalues(I.stimtime(m).stim);
         f = getstimfeatures(v,I.stimtime(m).stim,p,x,y,rect); % features
-        for c=1:length(I.spikes), % loop over cells
+        for c=1:length(I.spikes) % loop over cells
             for o=1:n_bins
                 indx = [];
                 [B,dummy,inds] = unique(in.counts{m}{c}(o,:)); %#ok<ASGLU>
                 % i.e. in.counts{m}{c}(o,:) = B(inds)
                 inds = inds(:)'; % necessary for change in unique behavior in MatlabR2014a
                 
-                for jj=1:length(B),
-                    if B(jj)~=0,
+                for jj=1:length(B)
+                    if B(jj)~=0
                         for kk=1:B(jj)
                             indx=cat(2,indx,find(inds==jj));
                         end
@@ -78,7 +78,7 @@ if td % timing data difference
                     newrc = rc;
                     return
                 end
-            end;
+            end
         end % cell c
     end % stim m
     for c=1:length(I.spikes)
@@ -98,7 +98,7 @@ if td % timing data difference
         'bins',{in.counts},'norms',norms);
 else
     r_c = rc.computations.reverse_corr;
-end;
+end
 
 if p.crcpixel==-1
     rr = max(r_c.rc_avg(1,:,:,:,end),[],5);  % take max color
@@ -115,7 +115,7 @@ centchanged = (in.crcpixel~=p.crcpixel)|(in.datatoview~=p.datatoview(1))|...
     (~eqlen(in.crctimeint,p.crctimeint))|...
     (~eqlen(in.crcproj,p.crcproj))|((crcmethod==2)&td);
 if centchanged && (p.crcpixel>0)
-    if exist('y','var')==0,
+    if exist('y','var')==0
         [x,y,rect] = getgrid(I.stimtime(p.datatoview(1)).stim);
         v = getgridvalues(I.stimtime(p.datatoview(1)).stim);
         f = getstimfeatures(v,I.stimtime(p.datatoview(1)).stim,p,x,y,rect);
@@ -138,11 +138,11 @@ if centchanged && (p.crcpixel>0)
         T = (fts(1)+p.crctimeint(1)):p.crctimeres:(fts(end)+p.crctimeint(2));
         
         X = zeros(size(T)); % bins will be filled with stimuli
-        for i=1:length(fts)-1,
+        for i=1:length(fts)-1
             strt = round((fts(i)-T(1))/p.crctimeres)+1;
             stp  = round((fts(i+1)-T(1))/p.crctimeres)+1;
             X(strt:stp) = stats(i);
-        end;
+        end
         Stp = min([stp+round(mt/p.crctimeres)+1 length(X)]);
         X(stp:Stp) = stats(end);
         
@@ -151,7 +151,7 @@ if centchanged && (p.crcpixel>0)
         sts = get_data(I.spikes{p.datatoview(1)},[T(1) T(end)],2); % spiketimes
         pos = round((sts-T(1))/p.crctimeres)+1;
         % must use this form since bins may have more than one spike
-        for i=1:length(pos),
+        for i=1:length(pos)
             d(pos(i)) = d(pos(i))+1;
         end
         
@@ -167,7 +167,7 @@ if centchanged && (p.crcpixel>0)
         lags = (-maxlags:1:maxlags)*p.crctimeres;
         lagbegin = findclosest(lags,p.crctimeint(1));
         lagend = findclosest(lags,p.crctimeint(2));
-        c = c(lagbegin:lagend); 
+        c = c(lagbegin:lagend);
         lags = lags(lagbegin:lagend); % time stimulus - time spike (s)
         maxcalclags = ceil(max(abs(p.crccalcint))/p.crctimeres);
         calclags = (-maxcalclags:1:maxcalclags)*p.crctimeres;
@@ -182,14 +182,14 @@ if centchanged && (p.crcpixel>0)
         c = (reshape(h,[l 3])-repmat(p.crcproj(1,:),l,1))*p.crcproj(2,:)';
         c = c.*r_c.norms'/(p.timeres*length(fts));
         % if use this again need to fix calclags
-    end;
+    end
     [overlap,stddevinds] = setxor(lags,calclags); %#ok<ASGLU>
     [ov,otherinds] = intersect(lags,calclags); %#ok<ASGLU>
     %stddev = std(c(stddevinds));
     cc = c(otherinds);
-   
+    
     % find peak
-%    stddev = std(c(stddevinds));
+    %    stddev = std(c(stddevinds));
     stddev = sqrt(c(stddevinds)*c(stddevinds)'/length(stddevinds));
     
     [mm,peakind] = max(abs(cc)); %#ok<ASGLU> % location of peak
@@ -199,7 +199,7 @@ if centchanged && (p.crcpixel>0)
         transience = NaN;
     else
         [mm,prepeakind] = max( (1-2*onoff)*cc(1:peakind-1));  %#ok<ASGLU>
-       transience = -cc(prepeakind)/cc(peakind);
+        transience = -cc(prepeakind)/cc(peakind);
     end
     
     xcent = round(rect(1)+(x_-0.5)/x * (rect(3)-rect(1)));

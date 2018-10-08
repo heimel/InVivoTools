@@ -125,6 +125,8 @@ switch lower(record.experiment)
         params.spatial_filterhandle = @medfilt3;
 end
 
+params.apply_postfunction = []; % function to apply after imageprocessing, e.g imregisterstack
+
 % unmixing parameters
 
 params.unmixing_use_pixels = 'highchan2'; % used since 2012-01-30
@@ -184,6 +186,12 @@ switch lower(record.experiment)
         params.align_channel = 2; % for Daan's original stacks
 end
 
+% maximum number of frames to jump when snapping neurite
+params.max_snap_range = 2; % frames
+
+% default roi circle size
+params.default_roi_disk_radius_pxl = 12; 
+
 % maximum distance for linking ROI to neurite
 switch record.experiment
     case '11.21'
@@ -219,7 +227,7 @@ params.bouton_close_minimum_intensity_rel2dendrite = zeros(1,100); %max 100 chan
 % get intensities
 params.get_intensities = false;
 switch record.experiment
-    case {'12.81','Examples','14.26'}
+    case {'12.81','Examples','14.26','17.20.16'}
         params.get_intensities = true;
     case '13.29' % dani cr
         switch lower(record.setup)
@@ -351,9 +359,7 @@ params.drift_correction_skip_firstframes = 5; % skip frames at start
 % keep at bottom
 
 if exist('processparams_local.m','file')
-    oldparams = params;
     params = processparams_local( params );
-    %     changed_process_parameters(params,oldparams);
 end
 
 

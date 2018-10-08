@@ -22,7 +22,7 @@ if ~isempty(ref_record.ROIs)
     
     % fill in new fields
     empty_roi = tp_emptyroirec;
-    for field = fields(empty_roi)'
+    for field = fieldnames(empty_roi)'
         if ~isfield(celllist,field{1})
             for i=1:length(celllist)
                 celllist(i).(field{1}) = empty_roi.(field{1});

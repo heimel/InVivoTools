@@ -19,6 +19,9 @@ end
 if isoctave
     more off
     warning('off','Octave:shadowed-function');
+    warning('off', 'Octave:language-extension');
+    warning('off', 'Octave:mixed-string-concat');
+    pkg load all
 end
 
 disp([ upper(mfilename) ': Manual available at https://github.com/heimel/InVivoTools/wiki']);
@@ -57,6 +60,7 @@ params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_webcam = 1; % needed for InVivoTools analysis
 params.load_studies = {}; % folders of Studies to load
 params.load_physiology = 1; % needed for EXG recordings
+params.load_histology = 1; % needed for matching histology to Allen Mouse Brain Atlas
 
 % set default lab, can be overruled depending on host:
 % alternatives 'Fitzpatrick','Levelt','Lohmann'
@@ -193,6 +197,11 @@ if params.load_erg
     addpath(ergpath,fullfile(ergpath,'usbActiveWire'));
 end
 
+% Histology and Allen Atlas matching
+if params.load_histology
+    addpath(fullfile(path2invivotools,'Histology','Allenatlasmatching'));
+end
+    
 % Temp folder for work in progress
 addpath(fullfile(path2invivotools,'Working'));
 

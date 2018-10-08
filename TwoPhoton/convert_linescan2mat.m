@@ -43,7 +43,7 @@ end
 
 compressed_linescan_period = original_linescan_period * compression;
 
-save(matname,'full_image','compressed_linescan_period','original_linescan_period','-mat');
+save(matname,'full_image','compressed_linescan_period','original_linescan_period','-v7');
 imwrite(full_image / max(full_image(:)),[basename '_compressed_' num2str(compression) 'x.png'],'png');
 
 

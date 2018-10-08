@@ -100,7 +100,8 @@ if isempty(oldstim)
     pixSize_str='[50 50]';
     N_str =     '1800';
     fps_str =   '15';
-    rs_str =    'rand(''state'')';
+    %rs_str =    'rand(''state'')';
+    rs_str =    'rng_twister';
     dp_str =    '{}';
     angle_str = '0';
 else

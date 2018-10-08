@@ -85,6 +85,6 @@ switch method
         drift.x = round(mean(mean(drift.xpixelpos,3),2)-(params.pixels_per_line+1)/2);
         drift.y = round(mean(mean(drift.ypixelpos,3),2)-(params.lines_per_frame+1)/2);
 end
-save(driftfilename,'method','drift','-mat');
+save(driftfilename,'method','drift','-v7');
 
 

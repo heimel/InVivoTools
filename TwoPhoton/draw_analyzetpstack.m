@@ -141,7 +141,7 @@ h = guicreate(slider,'Tag','FrameSlid','value',0.5,'visible','off','parent',hi,'
 set(h,'Min',1)
 set(h,'Max',ti.NumberOfFrames)
 set(h,'Value',ceil(ti.NumberOfFrames/2));
-set(h,'SliderStep',[1/ti.NumberOfFrames 0.1]);
+set(h,'SliderStep',[1/ti.NumberOfFrames max(0.1,1/ti.NumberOfFrames)]);
 
 
 axes('parent',hi,'position',[0 0.15 1 0.78],'Tag','tpaxes');
@@ -192,9 +192,7 @@ hroilabelspanel = uipanel('Title','ROIs','Position',[panel_left panel_top-panel_
 guicreate(tb,'String','(S)how','Tag','DrawROIsCB','left','left','top','top','move','right','width','auto','parent',hroilabelspanel);
 guicreate(tb,'String','Nos','Tag','DrawROINosCB','move','right','width','auto','parent',hroilabelspanel);
 
-
-
-fr=fields(tp_emptyroirec);
+fr = fieldnames(tp_emptyroirec);
 guicreate(txt,'String','Sort','Enable','on','width','auto','parent',hroilabelspanel,'move','right','fontsize',9);
 guicreate(popup,'String',{fr{[1:5 7]}},'Tag','sortROIsBt','Enable','on','width',80,'parent',hroilabelspanel,'move','down','fontsize',9,'callback','genercallback');
 
@@ -207,11 +205,13 @@ set(h,'Max',2); % multiple ROIs can be selected
 guicreate(button,'String','Draw','Tag','drawnewBt','Enable','on','left','left','width','auto','parent',hroilabelspanel,'move','right');
 guicreate(button,'String','Auto','Tag','autoDrawCellsBt','Enable','on','width','auto','parent',hroilabelspanel,'move','right');
 guicreate(button,'String','(C)ircles','Tag','drawnewballBt','Enable','on','width','auto','parent',hroilabelspanel,'move','right','fontsize',8);
-if ud.zstack
-    def_radius = 6;
-else
-    def_radius = 12;
-end
+
+def_radius = process_parameters.default_roi_disk_radius_pxl;
+% if ud.zstack
+%     def_radius = 6;
+% else
+%     def_radius = 12;
+% end
 guicreate(edit,'String',num2str(def_radius,'%02d'),'Tag','newballdiameterEdit','Enable','on','width','auto','parent',hroilabelspanel,'move','right');
 guicreate(txt,'String','px','Enable','on','width','auto','parent',hroilabelspanel,'move','down','fontsize',8);
 % draw neurite
@@ -226,8 +226,11 @@ end
 guicreate(popup,'String',snaptolist,...
     'Tag','snaptoPopup','Enable','on','width',35,'parent',hroilabelspanel,'move','right','callback','genercallback');
 
-% Export
-guicreate(button,'String','Export','Tag','exportROIsBt','Enable','on','tooltipstring','Export ROIs','width','auto','parent',hroilabelspanel,'move','down');
+% Export ROIs
+guicreate(button,'String','Export','Tag','exportROIsBt','Enable','on','tooltipstring','Export ROIs','width','auto','parent',hroilabelspanel,'move','right');
+
+% Import ROIs
+guicreate(button,'String','Import','Tag','importROIsBt','Enable','on','tooltipstring','Import ROIs','width','auto','parent',hroilabelspanel,'move','down');
 
 % link ROIs
 guicreate(button,'String','Link all','Tag','linkROIsBt','Enable','on','left','left','tooltipstring','Link all ROIs based on distance','width','auto','parent',hroilabelspanel,'move','right');

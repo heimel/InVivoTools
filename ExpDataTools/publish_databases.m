@@ -76,15 +76,13 @@ end
 switch answer
     case 'Yes'
         
-        flds = fields(used_records);
+        flds = fieldnames(used_records);
         for i=1:length(flds)
             recordtype = flds{i};
             db = used_records.(recordtype);
             db = remove_duplicates(db,[],'first');
             filename = fullfile(expdatabasepath,publishname,[ recordtype 'db_' publishname '.mat']);
-            save(filename,'db');
-            
-            
+            save(filename,'db','-v7');
         end
 end
 

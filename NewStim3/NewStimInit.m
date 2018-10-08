@@ -39,7 +39,7 @@ NewStimStimScriptList = {};
 if exist('NewStimConfiguration','file')
     NewStimConfiguration;
 	%eval(['NewStimConfiguration;']);
-end;
+end
 
 if isempty(which('NewStimConfiguration')) || ~VerifyNewStimConfiguration 
 	vhlabtoolspath = fileparts(fileparts(pwd)); % 2 levels up
@@ -53,7 +53,7 @@ if isempty(which('NewStimConfiguration')) || ~VerifyNewStimConfiguration
 			'analysis only, then no action is needed, you should be all set.']);
 	zz = which('NewStimConfiguration'); % force it to look again
 	eval('NewStimConfiguration;');
-end;
+end
 
 if exist('PsychtoolboxVersion','file')
     b = PsychtoolboxVersion;

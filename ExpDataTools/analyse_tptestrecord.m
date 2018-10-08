@@ -5,12 +5,9 @@ function [record,measures]=analyse_tptestrecord( record, verbose)
 %
 %      MEASURES contains full measures (including PSTHs)
 %
-% 2013-2014, Alexander Heimel
+% 2013-2018, Alexander Heimel
 
-if nargin<2
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<2 || isempty(verbose)
     verbose = true;
 end
 
@@ -324,7 +321,7 @@ if exist(experimentpath(record),'dir')
     measuresfile = fullfile(experimentpath(record),'tp_measures.mat');
     measures = record.measures;
     try
-        save(measuresfile,'measures');
+        save(measuresfile,'measures','-v7');
     catch
         errormsg(['Could not write measures file ' measuresfile ]);
     end

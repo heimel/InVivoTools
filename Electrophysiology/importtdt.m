@@ -21,9 +21,10 @@ else
         close(F)
         use_matlab_tdt = false;
     catch me
-        if strcmp(me.identifier,'MATLAB:COM:InvalidProgid')
-            use_matlab_tdt = true;
+        if ~strcmp(me.identifier,'MATLAB:COM:InvalidProgid')
+            logmsg(me.identifier);
         end
+        use_matlab_tdt = true;
     end
 end
 

@@ -16,7 +16,7 @@ for ch = channels
     else
         cells(end+1) = orgcells(ind(1)); %#ok<AGROW>
     end
-    flds = fields(cells(end));
+    flds = fieldnames(cells(end));
     spike_fields = flds(strncmp('spike_',flds,6));
     for i=2:length(ind)
         cells(end).data = [cells(end).data; orgcells(ind(i)).data];

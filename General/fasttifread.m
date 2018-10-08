@@ -19,7 +19,12 @@ end
     
 mImage = InfoImage(1).Width;
 nImage = InfoImage(1).Height;
-NumberOfFrames = InfoImage(1).NumberOfFrames;
+if isfield(InfoImage,'NumberOfFrames')
+   NumberOfFrames = InfoImage(1).NumberOfFrames;
+else
+   NumberOfFrames = length(InfoImage); 
+end
+    
 if isfield(InfoImage,'NumberOfChannels')
     NumberOfChannels = InfoImage(1).NumberOfChannels;
 else

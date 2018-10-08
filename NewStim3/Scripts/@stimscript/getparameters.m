@@ -11,7 +11,7 @@ function P = getparameters(S)
 
 try
     parray = cellfun(@getparameters,get(S));
-    for f = fields(parray)'
+    for f = fieldnames(parray)'
         if all(isnumeric([parray.(f{1})]))
             P.(f{1}) = cat(1,parray.(f{1}));
         else

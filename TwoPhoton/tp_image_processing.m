@@ -3,7 +3,7 @@ function im = tp_image_processing( im, opt, verbose )
 %
 %  TP_IMAGE_PROCESSING(IM,OPT,VERBOSE)
 %
-% 2011-2017, Alexander Heimel
+% 2011-2018, Alexander Heimel
 %
 
 if nargin<3 || isempty(verbose)
@@ -27,5 +27,8 @@ if isfield(opt,'spatial_filter') && ~isempty(opt.spatial_filter) && opt.spatial_
     end
 end
 
+if isfield(opt,'apply_postfunction') && ~isempty(opt.apply_postfunction)
+    im = opt.apply_postfunction( im );
+end
 
 

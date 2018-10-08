@@ -31,7 +31,7 @@ else
     end
     table_measures = measures;
     % remove all nan and all zero, and series fields
-    flds = fields( table_measures );
+    flds = fieldnames( table_measures );
     for field = flds'
         if iscell(table_measures(1).(field{1}))
            table_measures = rmfield(table_measures,field{1});
