@@ -152,7 +152,7 @@ if isfield(record,'measures') && isfield(record.measures,'mito') && any([record.
     record = tp_mito_close( record );
 end
 
-if isfield(record,'measures') && isfield(record.measures,'bouton') && any([record.measures(:).bouton])
+if isfield(record,'measures') && isfield(record.measures,'bouton') && any([record.measures(:).bouton]) && isfield(record.measures,'t_bouton')
     record = tp_automated_bouton_analysis( record );
     record = tp_bouton_close( record );
 end
