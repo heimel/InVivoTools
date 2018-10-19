@@ -2,7 +2,7 @@
 %% Draws the bar plots of the data from group 2 mice 14.13 and 172002
 % with the significance stars
 % Azadeh September 2017
-switch exp
+switch exp %can be 14.13, 172002, 172005
     case 14.13
         for i = 1:14
             if exist (['performance_14.13.2.' num2str(i) '.mat'], 'file')~= 0
