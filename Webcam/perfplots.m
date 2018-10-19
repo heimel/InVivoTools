@@ -6,7 +6,7 @@ function perfplots(exp)
 
 switch exp
     case 14.13
-        mice_14.13;
+        mice_1413;
         n_mice = length(mice);
         
         mean_dur = NaN(1, 30, 2, n_mice);
