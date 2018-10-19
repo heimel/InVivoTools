@@ -268,14 +268,16 @@ switch exp
             ylim(ax2,[0 2.1]);
             ylabel('freezing duration(s)', 'FontWeight', 'bold');
             set(gca,'Ycolor', grey_30,'LineWidth',3, 'FontSize', 20,'FontWeight','bold');
-            legend([bhand_perf(1),phand_dur],'habituating', '\mu duration hab', 'FontSize', 18);
-            legend({'habituating','novel'},'FontSize',15,'FontWeight','bold', 'Textcolor', grey_30);
-            legend('boxoff');
-            
+
             if any(~isnan(mean_dur(:,:,2,i)))
                 plot(mean_dur(:,:,2,i), '-.*', 'color',my_darkturquoise, 'linewidth', 1.2);
                 legend({'habituating','novel', '\mu duration hab', '\mu duration nov'}, 'FontSize', 18);
                 legend('boxoff');
+            else
+                
+                 legend([bhand_perf(1),phand_dur],'habituating', '\mu duration hab', 'FontSize', 18);
+%             legend({'habituating','novel'},'FontSize',15,'FontWeight','bold', 'Textcolor', grey_30);
+                 legend('boxoff');
             end
         end
         
