@@ -186,7 +186,7 @@ switch exp
             subj = mice(i);
             exp = 172002.1;
             exp_type = 5;
-            manualfrzdata(subj, exp, exp_type)
+            manualfrzdata(subj, exp)
             
             if exist (['man_frz_dur_172002.1.0' num2str(i) '.mat'], 'file')~= 0
                 load(['man_frz_dur_172002.1.0' num2str(i) '.mat']);
