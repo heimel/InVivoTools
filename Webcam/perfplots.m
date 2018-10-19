@@ -3,6 +3,7 @@ function perfplots(exp)
 % Makes performance figures for mice 14.13 group 2 and 172002
 % works in 2016a
 % Azadeh October 2017
+% October 2018
 
 switch exp
     case 14.13
@@ -17,7 +18,7 @@ switch exp
             %     1:n_mice
             subj = mice(i);
             exp = 14.13;
-            manualfrzdata(subj, exp)
+            %             manualfrzdata(subj, exp)
             
             if exist (['man_frz_dur_14.13.2.0' num2str(i) '.mat'], 'file')~= 0
                 load(['man_frz_dur_14.13.2.0' num2str(i) '.mat']);
@@ -66,43 +67,44 @@ switch exp
                 'edgecolor', grey_30, 'barwidth', 0.3);
             hold on
             b = plot(mean_dur(:,1:5,1,i), '-.h', 'color',my_peru, 'linewidth', 1.2);
-%             if any(~isnan(perf_col(:,2)))
-%                 bhand_perf = bar(perf_col);
-%                 set(bhand_perf(1),'FaceColor',my_burlywood, 'edgecolor', grey_30);
-%                 set(bhand_perf(2),'FaceColor',my_turquoiseblue, 'edgecolor', grey_30);
-%             else
-%                 bhand_perf = bar(perf_col(:,1));
-%                 set(bhand_perf,'FaceColor',my_burlywood, 'edgecolor', 'none');
-%             end
-%             
+            %             if any(~isnan(perf_col(:,2)))
+            %                 bhand_perf = bar(perf_col);
+            %                 set(bhand_perf(1),'FaceColor',my_burlywood, 'edgecolor', grey_30);
+            %                 set(bhand_perf(2),'FaceColor',my_turquoiseblue, 'edgecolor', grey_30);
+            %             else
+            %                 bhand_perf = bar(perf_col(:,1));
+            %                 set(bhand_perf,'FaceColor',my_burlywood, 'edgecolor', 'none');
+            %             end
+            %
             ylim([0, 1])
             %     ax1 = gca;
             %     ax1.YTick = 0:0.05:1;
             %     ax1.YGrid = 'on';
             %     ax1.GridLineStyle = ':';
-%             xlim([0 max(ses_num)+1]);
+            %             xlim([0 max(ses_num)+1]);
             box off
             title(['Hawk vs Disc mouse 2.' num2str(i)], 'FontSize', 18);
             ylabel('Propotion freezing', 'FontSize', 18);
             xlabel('Time(sessions)', 'FontSize', 18);
             hold on
             yyaxis 'right';
-%             phand_dur = plot(mean_dur(:,:,1,i), '-.h', 'color',my_peru, 'linewidth', 1.2);
+            phand_dur = plot(mean_dur(:,:,1,i), '-.h', 'color',my_peru, 'linewidth', 1.2);
+            
             ax2 = gca;
             ax2.YColor = 'k';
             ylim(ax2,[0 1]);
             ylabel('freezing duration(s)', 'FontSize', 18);
-            legend([a(1),b],'habituating stim', 'mean freezing duration');
-%             legend([bhand_perf(1),phand_dur],'hab', 'mean dur hab');
+            legend([a(1),b],'habituating stim', 'mean freezing duration','FontSize',15,'FontWeight','bold', 'Textcolor', grey_30);
+            %             legend([bhand_perf(1),phand_dur],'hab', 'mean dur hab');
             legend('boxoff');
-%             
-%             if any(~isnan(mean_dur(:,:,2,i)))
-%                 plot(mean_dur(:,:,2,i), '-.*', 'color',my_darkturquoise, 'linewidth', 1.2);
-%                 legend('hab','novel', '\mu dur hab', '\mu dur nov');
-%                 legend('boxoff');
-%             end
+            %
+            %             if any(~isnan(mean_dur(:,:,2,i)))
+            %                 plot(mean_dur(:,:,2,i), '-.*', 'color',my_darkturquoise, 'linewidth', 1.2);
+            %                 legend('hab','novel', '\mu dur hab', '\mu dur nov');
+            %                 legend('boxoff');
+            %             end
         end
- 
+        
         
         %     frz_trial_ind = find(in_trials~=0 & isnan(in_trials)==0);
         %     tot_head_theta = head_theta((1:23),:,:);
@@ -177,14 +179,14 @@ switch exp
         % val_pos_theta = NaN(200,n_mice);
         % val_head_theta = NaN(200,n_mice);
         
-        for i = 13
-            
-%             1:n_mice
+        for i = 46
+            %             1:n_mice
             i
             %     1:n_mice
             subj = mice(i);
             exp = 172002.1;
-            manualfrzdata(subj, exp)
+            exp_type = 5;
+            manualfrzdata(subj, exp, exp_type)
             
             if exist (['man_frz_dur_172002.1.0' num2str(i) '.mat'], 'file')~= 0
                 load(['man_frz_dur_172002.1.0' num2str(i) '.mat']);
@@ -196,18 +198,18 @@ switch exp
                 elseif exist (['pos_theta_172002.1.' num2str(i) '.mat'], 'file')~= 0
                     load(['pos_theta_172002.1.' num2str(i) '.mat']);
                 else
-                    errormsg('Angle file does not exist. Get angle data from manualfrzdata.m');
+                    warning('Angle file does not exist. Get angle data from manualfrzdata.m');
                 end
                 if exist (['head_theta_172002.1.0' num2str(i) '.mat'], 'file')~= 0
                     load(['head_theta_172002.1.0' num2str(i) '.mat'])
                 elseif exist (['head_theta_172002.1.' num2str(i) '.mat'], 'file')~= 0
                     load(['head_theta_172002.1.' num2str(i) '.mat'])
                 else
-                    errormsg('Head angle file does not exist. Get angle data from manualfrzdata.m');
+                    warning('Head angle file does not exist. Get angle data from manualfrzdata.m');
                 end
                 
             else
-                errormsg('Freeze duration file does not exist. Get data from manualfrzdata.m');
+                warning('Freeze duration file does not exist. Get data from manualfrzdata.m');
                 continue
             end
             
@@ -223,45 +225,56 @@ switch exp
             perf = nanmean(in_trials);
             perf_col = reshape(perf,[30,2]);
             ses_num = find(~isnan(perf_col(:,1)), 1, 'last' );
-%             ses_num = sum(~isnan(perf_col));
-            save (['performance_172002.1.' num2str(i) '.mat'], 'perf_col')
-            
+            ses_num = sum(~isnan(perf_col));
+            save (['performance_172002.1.' num2str(i) '.mat'], 'perf_col');
+            %             load(['performance_172002.1.', num2str(i),'.mat']);
+            perf_col = perf_col*100;
             my_colours;
             
             figure(i);
             
             if any(~isnan(perf_col(:,2)))
                 bhand_perf = bar(perf_col);
-                set(bhand_perf(1),'FaceColor',my_burlywood, 'edgecolor', grey_30);
-                set(bhand_perf(2),'FaceColor',my_turquoiseblue, 'edgecolor', grey_30);
+                set(bhand_perf(1),'FaceColor',my_burlywood, 'edgecolor', grey_30,'LineWidth',2);
+                set(bhand_perf(2),'FaceColor',my_turquoiseblue, 'edgecolor', grey_30,'LineWidth',2);
             else
                 bhand_perf = bar(perf_col(:,1));
-                set(bhand_perf,'FaceColor',my_burlywood, 'edgecolor', grey_30);
+                set(bhand_perf,'FaceColor',my_burlywood, 'edgecolor', grey_30,'LineWidth',2);
             end
             
-            ylim([0, 1.1])
+            ylim([0, 100])
             %     ax1 = gca;
             %     ax1.YTick = 0:0.05:1;
             %     ax1.YGrid = 'on';
             %     ax1.GridLineStyle = ':';
-            xlim([0 max(ses_num)+1]);
+            %             xlim([0 max(ses_num)+1]);
+            xlim([0 7])
             box off
-            title(['Ellipse vs Disc, mouse 172002.1.0' num2str(i)], 'FontSize', 18);
-            ylabel('Propotion freezing', 'FontSize', 18);
-            xlabel('Time(sessions)', 'FontSize', 18);
+            %             title(['Surface area test, mouse 172002.1.' num2str(i)], 'FontSize', 18);
+            title('two dimensions', 'FontSize', 20);
+            ylabel('freezing (%)', 'FontWeight','bold');
+            xlabel('Time(sessions)', 'FontWeight','bold');
+            ax = gca;
+            ax.XAxis.FontSize = 20;
+            ax.XAxis.FontWeight = 'bold';
+            ax.YAxis.FontSize = 20;
+            ax.YAxis.FontWeight = 'bold';
+            set(gca,'Xcolor', grey_30,'Ycolor', grey_30,'LineWidth',3, 'FontWeight','bold');
             hold on
             yyaxis 'right';
-            phand_dur = plot(mean_dur(:,:,1,i), '-.h', 'color',my_peru, 'linewidth', 1.2);
+            phand_dur = plot(mean_dur(:,:,1,i), '-.h', 'color',my_peru, 'linewidth', 1.2,'markerSize',9);
             ax2 = gca;
-            ax2.YColor = 'k';
+            ax2.YColor = grey_30;
             ylim(ax2,[0 2.1]);
-            ylabel('freezing duration(s)');
-            legend([bhand_perf(1),phand_dur],'hab', '\mu dur hab', 'FontSize', 18);
+            ylabel('freezing duration(s)', 'FontWeight', 'bold');
+            set(gca,'Ycolor', grey_30,'LineWidth',3, 'FontSize', 20,'FontWeight','bold');
+            legend([bhand_perf(1),phand_dur],'habituating', '\mu duration hab', 'FontSize', 18);
+            legend({'habituating','novel'},'FontSize',15,'FontWeight','bold', 'Textcolor', grey_30);
             legend('boxoff');
             
             if any(~isnan(mean_dur(:,:,2,i)))
                 plot(mean_dur(:,:,2,i), '-.*', 'color',my_darkturquoise, 'linewidth', 1.2);
-                legend('hab','novel', '\mu dur hab', '\mu dur nov');
+                legend({'habituating','novel', '\mu duration hab', '\mu duration nov'}, 'FontSize', 18);
                 legend('boxoff');
             end
         end
@@ -331,8 +344,8 @@ switch exp
         %             val_head_theta(m,i) = NaN;
         %         end
         %     end
-
-        case 172005
+        
+    case 172005
         mice_172005;
         n_mice = length(mice);
         
