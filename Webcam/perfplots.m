@@ -179,7 +179,7 @@ switch exp
         % val_pos_theta = NaN(200,n_mice);
         % val_head_theta = NaN(200,n_mice);
         
-        for i = 37:46 %2d: [37:46], aspect ratio: [1:2,5:12], surface area: [13,15,17:24,35,36], acicularity: [25:34]
+        for i = [1:2,5:12] %2d: [37:46], aspect ratio: [1:2,5:12], surface area: [13,15,17:24,35,36], acicularity: [25:34]
             %             1:n_mice
             i
             %     1:n_mice
@@ -273,10 +273,10 @@ switch exp
                 plot(mean_dur(:,:,2,i), '-.*', 'color',my_darkturquoise, 'linewidth', 1.2);
                 legend({'habituating','novel', '\mu duration hab', '\mu duration nov'}, 'FontSize', 18);
                 legend('boxoff');
-            else
-                
-                 legend([bhand_perf(1),phand_dur],'habituating', '\mu duration hab', 'FontSize', 18);
+            else 
+%                  legend([bhand_perf(1),phand_dur],{'habituating', '\mu duration hab', 'FontSize'}, 18);
 %             legend({'habituating','novel'},'FontSize',15,'FontWeight','bold', 'Textcolor', grey_30);
+legend
                  legend('boxoff');
             end
         end
