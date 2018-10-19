@@ -179,7 +179,7 @@ switch exp
         % val_pos_theta = NaN(200,n_mice);
         % val_head_theta = NaN(200,n_mice);
         
-        for i = 46
+        for i = 37:46
             %             1:n_mice
             i
             %     1:n_mice
