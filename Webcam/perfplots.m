@@ -179,7 +179,7 @@ switch exp
         % val_pos_theta = NaN(200,n_mice);
         % val_head_theta = NaN(200,n_mice);
         
-        for i = [1:2,5:12] %2d: [37:46], aspect ratio: [1:2,5:12], surface area: [13,15,17:24,35,36], acicularity: [25:34]
+        for i = [13,15,17:24,35,36] %2d: [37:46], aspect ratio: [1:2,5:12], surface area: [13,15,17:24,35,36], acicularity: [25:34]
             %             1:n_mice
             i
             %     1:n_mice
