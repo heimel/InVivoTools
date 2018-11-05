@@ -21,7 +21,11 @@ if isoctave
     warning('off','Octave:shadowed-function');
     warning('off', 'Octave:language-extension');
     warning('off', 'Octave:mixed-string-concat');
-    pkg load control
+    try
+        pkg load control
+    catch me
+       disp(me.message);
+    end
 end
 
 disp([ upper(mfilename) ': Manual available at https://github.com/heimel/InVivoTools/wiki']);
