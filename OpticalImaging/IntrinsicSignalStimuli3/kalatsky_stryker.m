@@ -32,9 +32,10 @@ pspar.distance = NewStimViewingDistance;
 pspar.rect = windowrect;
 pspar.imageType = 6; % edge
 pspar.animType = 4; % drifting grating
-pspar.tFrequency = 0.09987; % Hz, to be used with acqtime:580747ms, 12camframperdataframe
+%pspar.tFrequency = 0.09987; % Hz, to be used with acqtime:580747ms, 12camframperdataframe
+pspar.tFrequency = 0.10; % Hz, to be used with acqtime:580747ms, 12camframperdataframe
 pspar.sFrequency = 0.0048; % cpd
-pspar.barWidth = 0.05; % fraction of screen width?
+pspar.barWidth = 0.02; % fraction of screen width?
 pspar.barColor = 0;
 pspar.nCycles = 30; % about 5 min
 pspar.background = 0.5;
@@ -42,8 +43,11 @@ pspar.backdrop = 0.5;
 pspar.windowShape = 0;
 pspar.dispprefs = {'BGpretime',0,'BGposttime',0};
 pspar.angle = 45;
-pspar.prestim_time = 3
+pspar.prestim_time = 3;
 directions = [90 270 0 180]; % right, left, up, down
+
+% 300000 ms imaging, 626 data frames per stimulus, 12 camera frames per dat
+% frame
 
 for i = 1:length(directions)
     iss_script(i) = stimscript(0);
@@ -52,14 +56,14 @@ for i = 1:length(directions)
     iss_script(i) = loadStimScript(iss_script(i));
 end
 
-teststim = 1;
-% show script as test
-MTI = DisplayTiming(iss_script(teststim));
-tic
-DisplayStimScript(iss_script(teststim),MTI,0,0);
-toc
+% teststim = 3;
+% % show script as test
+% MTI = DisplayTiming(iss_script(teststim));
+% tic
+% DisplayStimScript(iss_script(teststim),MTI,0,0);
+% toc
 
-return
+%return
 
 try
     % waiting for stimulus signal on parallelport
@@ -93,4 +97,3 @@ catch me
     rethrow(me);
     close_parallelport(lpt);
 end
-
