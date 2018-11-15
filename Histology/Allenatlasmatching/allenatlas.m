@@ -31,6 +31,7 @@ set(fig,'Position',[20 screensize(4)/2-40 screensize(3)-2*20 screensize(4)/2-2*4
 if ~isfield(ud,'slice_name') || (~isempty(slice_name) && ~strcmp(ud.slice_name,slice_name))
     filename = fullfile('Slices',[slice_name '.jpg']);
     if ~exist(filename,'file')
+        disp('Choose a slice image');
         [filename,pathname] = uigetfile({'*.*','All Files (*.*)'},'Choose a slice image');
         if filename==0
             return
@@ -56,6 +57,11 @@ if ~isfield(ud,'VOL') || ~isfield(ud,'ANO') || isempty(ud.VOL) || isempty(ud.ANO
     ud.size_lr = blocksize(3);
     % VOL = 3-D matrix of atlas Nissl volume
     atlasfilename = fullfile(atlasfolder,'atlasVolume.raw');
+    if ~exist(atlasfilename,'dir')
+        disp('Select atlasVolume.raw');
+        [atlasfilename,atlasfolder] = uigetfile({'*.raw','Raw Files (*.raw)'},'Locate atlasVolume.raw');
+        atlasfilename = fullfile(atlasfolder,atlasfilename);
+    end
     fid = fopen(atlasfilename, 'r', 'l' );
     if fid==-1
         disp(['Error opening ' atlasfilename ]);
@@ -363,7 +369,7 @@ xlim([min(x_mm) max(x_mm)]);
 function plot_borders(b)
 clr = 'gbry';
 hold on
-for i=[1 2 3 ] %[1 3]
+for i=[1 2 3 4] %[1 2 3]
     for k = 1:length(b{i})
         boundary = b{i}{k} ;
         plot(boundary(:,1),boundary(:,2) ,  [':' clr(i)], 'LineWidth', 2)
@@ -454,7 +460,6 @@ end
 aplims = [round(ud.axis_ap + r_lims(1)*cos(ud.phi) + 1) round(ud.axis_ap + (r_lims(2)-1)*cos(ud.phi) + 1)];
 lrlims = [round(ud.axis_lr + r_lims(1)*sin(ud.phi) + 1) round(ud.axis_lr + (r_lims(2)-1)*sin(ud.phi) + 1)];
 
-
 imagesc(ud.topim);
 colormap gray;
 axis image off
@@ -467,7 +472,7 @@ else
 end
 set(gca,'ydir','normal');
 
-s =0.59;
+s = 0.59;
 for i=1:length(Model.Boundaries)
     for j=1:length(Model.Boundaries{i})
         plot(s*Model.Boundaries{i}{j}(:,2),s*Model.Boundaries{i}{j}(:,1)-10,'k');
