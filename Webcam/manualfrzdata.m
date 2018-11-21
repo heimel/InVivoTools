@@ -1,4 +1,4 @@
-function manualfrzdata(subj, exp)
+function manualfrzdata(subj, exp, expname)
 
 % function takes the mouse number and saves a .mat file with the raw
 %duration and angel data
