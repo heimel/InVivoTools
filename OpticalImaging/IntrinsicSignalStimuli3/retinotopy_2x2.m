@@ -50,7 +50,7 @@ pspar.prestim_time = 3
 angles = [0:pspar.angle:360-pspar.angle];
 
 for i = 1:n_x*n_y
-    iss_script(i) = StimScript(0);
+    iss_script(i) = stimscript(0);
    
     % location
     row=floor( (i-1)/n_x);
