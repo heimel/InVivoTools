@@ -14,7 +14,7 @@ elseif isunix
         load handel
         sound(y(1:20000),Fs)
     catch
-        disp('STIMENDSOUND: Could not play sound');
+        logmsg('Could not play sound');
     end
 end
 

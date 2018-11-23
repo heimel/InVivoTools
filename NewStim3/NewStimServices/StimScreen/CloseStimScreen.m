@@ -1,20 +1,26 @@
 function CloseStimScreen
 StimWindowGlobals
 
-if ~isempty(StimWindow),
-	temp = StimWindow;
-	StimWindow = [];
-	try
-		Screen(temp,'close');
-	end;
+if ~isempty(StimWindow) %#ok<*NODEF>
+    temp = StimWindow;
+    StimWindow = []; %#ok<*NASGU>
+    try
+        Screen(temp,'close');
+    catch me
+        logmsg(me.message);
+    end
 else
-	StimWindow = [];
+    StimWindow = [];
 end
 
-if ~isempty(StimWindowPreviousCLUT),
-	Screen('LoadNormalizedGammaTable',StimWindowMonitor,StimWindowPreviousCLUT);
-	StimWindowPreviousCLUT = [];
-end;
+if ~isempty(StimWindowPreviousCLUT)
+    try
+        Screen('LoadNormalizedGammaTable',StimWindowMonitor,StimWindowPreviousCLUT);
+    catch me
+        logmsg(me.message);
+    end
+    StimWindowPreviousCLUT = [];
+end
 CloseStimScreenBlender
 
 ShowCursor;

@@ -137,6 +137,8 @@ NSUseInitialSerialTrigger = 1;
 NSUseStimSerialTrigger = 0;
 
 StimDisplayOrderRemote = 0;
+StimNoBreak = true;
+
 StimTriggerClear
 
 %fitzTrigParams.triggerStimOnset = 1; % 0 means trigger BGpre instead of stim onset

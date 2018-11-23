@@ -63,7 +63,7 @@ switch Remote_Comm_method
 
             while 1  % needs control-C to exit
                 pause(0.05);
-                if KbCheck && ~StimDisplayOrderRemote && ~gNewStim.StimWindow.debug
+                if KbCheck && ~StimDisplayOrderRemote && ~gNewStim.StimWindow.debug && ~StimNoBreak
                     CloseStimScreen
                     return
                 end

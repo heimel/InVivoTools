@@ -97,12 +97,6 @@ if capture_movie
     end
 end
 Screen('screens'); 
-try % warm up these functions, try to get them in memory
-    Snd('open'); 
-    Snd('close'); 
-catch me
-    logmsg(me.message);
-end
 
 Screen(StimWindow,'WaitBlanking');
 startTrig = StimTriggerAct('Script_Start_trigger');
