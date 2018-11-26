@@ -180,7 +180,7 @@ function [starttime,filename] = start_recording(datapath)
 mkdir(datapath);
 filename = fullfile(datapath,['webcam_' host '_' subst_filechars(datestr(now,31)) '.h264'] );
 %cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480 -p 100,100,300,300 '];
-cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480 -p 100,100,300,300 '];
+cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480 -p 100,100,740,580 '];
 logmsg(['Started recording ' filename ' at ' datestr(now)]);
 logmsg('Use Ctrl-C to stop recording');
 system(cmd,false,'async' );
