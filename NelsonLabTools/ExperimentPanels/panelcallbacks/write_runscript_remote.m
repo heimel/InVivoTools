@@ -37,7 +37,7 @@ end
 
  % if we're running the ReceptiveFieldMapper or if the stimscript isn't
  % actually there or not loaded, then don't show and beep an error message below
-fprintf(fid,'ReceptiveFieldGlobals; if (isempty(RFparams)|RFparams.state==0)&(exist(''%s'')==1&isloaded(%s)),',scriptName,scriptName);
+fprintf(fid,'ReceptiveFieldGlobals; if (isempty(RFparams)||RFparams.state==0)&&(exist(''%s'')==1&&isloaded(%s)),',scriptName,scriptName);
 
 % make sure screen is up, compute stimulus timings
 fprintf(fid,'ShowStimScreen\n');
