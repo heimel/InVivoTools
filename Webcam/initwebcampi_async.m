@@ -83,6 +83,7 @@ if ~isempty(datapath) && any(datapath==filesep)
 end
 
 logmsg('Finding serial port')
+s1 = [];
 for i = 1:10
     devfolder = strcat('/dev/ttyUSB',num2str(i-1));
     if ~isempty(dir(devfolder))
@@ -92,8 +93,21 @@ for i = 1:10
 end
 
 [recstart,filename] = start_recording(recdatapath);
-acqparams_in = fullfile(datapath,'acqParams_in');
 
+
+if isempty(s1)
+    logmsg('Could not find serial port of form /dev/ttyUSB*');
+    try 
+        while 1
+            pause(0.01);
+        end
+    catch me
+        logmsg(me.message);
+        stop_recording(filename);
+    end
+else
+   
+acqparams_in = fullfile(datapath,'acqParams_in');
 try
     fopen(s1);
     
@@ -139,11 +153,12 @@ try
         prev_cts = cts;
         pause(0.01);
     end
-catch
+catch me
+    logmsg(me.message);
     stop_recording(filename);
     fclose(s1);
 end
-
+end
 
 
 
