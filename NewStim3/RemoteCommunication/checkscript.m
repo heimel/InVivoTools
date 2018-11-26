@@ -1,19 +1,19 @@
-function txt=checkscript(fname)
+function txt = checkscript(fname)
+txt = '';
 refreshnetwork;
-fid = fopen(fname,'rt');
-if fid>0
-    disp(['CHECKSCRIPT: Opening file ' fname]);
-    txt = [];
-    while 1
-        line = fgetl(fid);
-        if ~ischar(line)
-            break
-        end
-        txt = [txt sprintf('\n') line]; %#ok<AGROW>
-    end
-    fclose(fid);
-else
-    txt = [];
-    fclose('all');
+if exist(fname,'file')
+    fid = fopen(fname,'rt');
+    if fid>0
+        logmsg(['Opening file ' fname]);
+        while 1
+           line = fgetl(fid);
+           if ~ischar(line)
+               break
+           end
+           txt = [txt sprintf('\n') line]; %#ok<AGROW>
+         end
+         fclose(fid);
+     else
+         fclose('all'); % seems unnecessary?
+     end
 end
-
