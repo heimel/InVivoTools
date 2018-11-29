@@ -102,15 +102,16 @@ Screen(StimWindow,'WaitBlanking');
 startTrig = StimTriggerAct('Script_Start_trigger');
 
 if NSUseInitialSerialTrigger
-    disp('DISPLAYSTIMSCRIPT: Temporarily hard coded StimSerial trigger for LeveltLab');
     OpenStimSerial
     StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
 
     if exist('NSUseInitialSerialContinuous','var') && ~isempty(NSUseInitialSerialContinuous) && NSUseInitialSerialContinuous
         StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+        disp(['DISPLAYSTIMSCRIPT: ' StimSerialScriptOutPin ' pin flipped down for whole script']);
     else
         WaitSecs(0.001);
         StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+        disp(['DISPLAYSTIMSCRIPT: ' StimSerialScriptOutPin ' pin flipped down for 1 ms']);
     end
 end
 

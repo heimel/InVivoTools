@@ -52,7 +52,7 @@ end
 if trigger
     % Levelt lab trigger hard coded. Should use StimTriggerAct structure
     StimSerialGlobals
-    disp('trigger');
+    disp(['DISPLAYSTIMULUS: trigger down on pin ' StimSerialScriptOutPin ' for 1 ms']);
     StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
 
     WaitSecs(0.001);
@@ -61,6 +61,7 @@ if trigger
     % turn on separate trigger channel
     %logmsg('Turning on RTS'); 
     StimSerial('rts',StimSerialStim,1);
+    disp(['DISPLAYSTIMULUS: trigger up on pin ReadyToSend for whole stimulus']);
 else
     StimSerialGlobals
     % turn off separate trigger channel
