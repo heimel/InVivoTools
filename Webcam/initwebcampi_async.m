@@ -148,6 +148,7 @@ try
         end
         if cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)  % i.e. changed and not same as original
             stimstart =  time - recstart;
+
             logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
             
             fid = fopen(acqready,'r');

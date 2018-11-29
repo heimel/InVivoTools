@@ -1,7 +1,7 @@
 /*
  * optopulse.c:
  *      blinks the first LED on raspberry pi
- * usage: optopulse DURATION=3 FREQUENCY=20
+ * usage: optopulse DURATION=60 FREQUENCY=20
  *   where DURATION is the total blink time in seconds
  *     and FREQUENCY is blinking frequency in Hz
  *
@@ -22,7 +22,7 @@ int main (int argc, char *argv[])
   int i;
   float frequency = 20; // Hz
   int writetime = 111; // us, time to write pin
-  float duration = 3; // s
+  float duration = 60; // s
 
 
   if (argc>2)
@@ -34,7 +34,7 @@ int main (int argc, char *argv[])
   if (argc>1)
     duration = atof( argv[1]);
 
-  printf ("OPTOSPULSE.C: Start blink for %.2f s at %.1f Hz.\n",duration,frequency) ;
+  printf ("OPTOPULSE.C: Start blinking for %.2f s at %.1f Hz.\n",duration,frequency) ;
 
   if (wiringPiSetup () == -1)
     return 1 ;
@@ -49,7 +49,9 @@ int main (int argc, char *argv[])
     usleep (halfpulse-writetime) ;         // us
   }
 
-  printf ("OPTOSPULSE.C: Stopped blink\n") ;
+  digitalWrite (0, 0) ;       // Off (added for duration = 0)
+  printf ("OPTOSPULSE.C: Stopped blinking.\n") ;
 
   return 0 ;
+}
 
