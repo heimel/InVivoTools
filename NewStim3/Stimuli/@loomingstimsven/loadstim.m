@@ -4,7 +4,13 @@ NewStimGlobals
 
 params = getparameters(stim);
 
-[my_image, ~, alpha] = imread(params.filename);  
+if isempty(fileparts(params.filename)) % i.e. no path included
+    filepath = fileparts(mfilename('fullpath'));
+    filename = fullfile(filepath,params.filename);
+else
+    filename = params.filename;
+end
+[my_image, ~, alpha] = imread(filename);  
 my_image(:,:,4) = alpha(:,:);
 tex = Screen('MakeTexture', StimWindow, my_image, [], [], [], [], []);
 
