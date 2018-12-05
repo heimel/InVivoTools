@@ -348,7 +348,27 @@ switch exp
         %     end
         
     case 172005
-        mice_172005;
+        group = 1;
+            switch group
+                case 1
+                    mice_172005_1 %SC
+                    filestr1 = 'man_frz_dur_172005.1.0' ;
+                    filestr2 = 'man_frz_dur_172005.1.' ;
+                    perfstr = 'performance_172005.1.';
+                    titlestr = 'Hawk vs Disc, SC inhibition, 172005.1.';
+                case 2
+                    mice_172005_2 %V1
+                    filestr1 = 'man_frz_dur_172005.2.0' ;
+                    filestr2 = 'man_frz_dur_172005.2.' ;
+                    perfstr = 'performance_172005.2.';
+                    titlestr = 'Hawk vs Disc, V1 inhibition, 172005.2.';
+                case 3
+                    mice_172005_3 %LP
+                    filestr1 = 'man_frz_dur_172005.3.0' ;
+                    filestr2 = 'man_frz_dur_172005.3.' ;
+                    perfstr = 'performance_172005.3.';
+                    titlestr = 'Hawk vs Disc, LP inhibition, 172005.3.';
+            end
         n_mice = length(mice);
         
         mean_dur = NaN(1, 30, 2, n_mice);
