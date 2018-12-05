@@ -223,7 +223,7 @@ switch exp
         % val_pos_theta = NaN(200,n_mice);
         % val_head_theta = NaN(200,n_mice);
         
-        for i = 1:11-13
+        for i = 11:13
             i
             %     1:n_mice
             subj = mice(i);
@@ -262,30 +262,33 @@ switch exp
                 bhand_perf = bar(perf_col(:,1));
                 set(bhand_perf,'FaceColor',my_burlywood, 'edgecolor', grey_30,'LineWidth',2);
             end
-            title(['Hawk vs Disc, sSC inhibition, 172005.1.0' num2str(i)]);
+            title(['Hawk vs Disc, SC inhibition, 172005.1.' num2str(i)]);
+            
             ax = gca;
             ax.XAxis.FontSize = 20;
             ax.XAxis.FontWeight = 'bold';
             ax.YAxis.FontSize = 20;
             ax.YAxis.FontWeight = 'bold';
-            set(gca,'Xcolor', grey_30,'Ycolor', grey_30,'LineWidth',3, 'FontWeight','bold');
+            set(gca,'Xcolor', grey_30,'LineWidth',3, 'FontWeight','bold');
+            ylim([0, 1]);
+            xlim([0 8]);
+            %             xlim([0 max(ses_num)+1]);
+            box off
+            yyaxis 'right'
+            ylim([0 2.1]);
+            ax.YTick = 0.5:0.5:2;
+            yax1 = ax.YAxis(1);
+            yax1.Color = grey_30;
+            set(gca,'Ycolor', grey_30,'LineWidth',3, 'FontWeight','bold');
+            %     ax1 = gca;
+%                 ax1.YTick = 0:0.05:1;
+            %     ax1.YGrid = 'on';
+            %     ax1.GridLineStyle = ':';    
             xlabel('Time(sessions)');
             ylabel('Propotion freezing');
+ 
             hold on
-            yyaxis 'right';
             phand_dur = plot(mean_dur(:,:,1,i), '-.h', 'color',my_peru, 'linewidth', 1.2,'markerSize',9);
-            ax2 = gca;
-            ax2.YColor = grey_30;
-            xlim([0 max(ses_num)+1]);
-            ylim([0, 1.1])
-            %     ax1 = gca;
-            %     ax1.YTick = 0:0.05:1;
-            %     ax1.YGrid = 'on';
-            %     ax1.GridLineStyle = ':';            
-            box off
-            ax2 = gca;
-            ax2.YColor = grey_30;
-            ylim(ax2,[0 2.1]);
             ylabel('freezing duration(s)', 'FontWeight', 'bold');
             set(gca,'Ycolor', grey_30,'LineWidth',3, 'FontSize', 20,'FontWeight','bold');
 %             legend([bhand_perf(1),phand_dur],'habituating', '\mu duration hab', 'FontSize', 18);
@@ -297,8 +300,6 @@ switch exp
                 legend('hab','novel', '\mu dur hab', '\mu dur nov');
                 legend('boxoff');
             end
-            
-            
-        end
+            end
 end
 
