@@ -37,7 +37,7 @@ end
 
  % if we're running the ReceptiveFieldMapper or if the stimscript isn't
  % actually there or not loaded, then don't show and beep an error message below
-fprintf(fid,'ReceptiveFieldGlobals; if (isempty(RFparams)|RFparams.state==0)&(exist(''%s'')==1&isloaded(%s)),',scriptName,scriptName);
+fprintf(fid,'ReceptiveFieldGlobals; if (isempty(RFparams)||RFparams.state==0)&&(exist(''%s'')==1&&isloaded(%s)),',scriptName,scriptName);
 
 % make sure screen is up, compute stimulus timings
 fprintf(fid,'ShowStimScreen\n');
@@ -80,8 +80,6 @@ if saveWaves, % save the stimulus timings;
   
   fprintf(fid,'save(''stims.mat'',''-v7'',''MTI2'',''start'',''saveScript'',''StimWindowRefresh'',''NewStimViewingDistance'',''NewStimPixelsPerCm'');\n');
   fprintf(fid,'disp(''saved stimulus'');cd(gggg);\n');
-%  fprintf(fid,'pause(max([0 10-etime(clock,zzz)]));StimEndSound;\n');
-%  fprintf(fid,'StimEndSound;\n');
   % generally acqusition continues a few seconds longer than the stimulus presentation
   % to make sure all is acquired, so we pause here so the user cannot
   % start another stimulus before acquisition is done.

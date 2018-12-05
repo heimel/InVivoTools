@@ -85,6 +85,7 @@ for i = 1:10
     devfolder = strcat('/dev/ttyUSB',num2str(i-1));
     if ~isempty(dir(devfolder))
         s1 = serial(devfolder);
+        logmsg(['Found one at '  devfolder]);
         break
     end
 end
@@ -94,7 +95,7 @@ end
 
 if ~isa(s1,'octave_serial') && ~isa(s1,'serial')
     logmsg('Could not find serial port of form /dev/ttyUSB*');
-    try 
+    try
         while 1
             pause(0.01);
         end
@@ -103,75 +104,96 @@ if ~isa(s1,'octave_serial') && ~isa(s1,'serial')
         stop_recording(filename);
     end
 else
-   
-acqparams_in = fullfile(datapath,'acqParams_in');
-try
-  if strcmp(devfolder,StimSerialScriptIn)
-      switch StimSerialScriptInPin
-          case 'dsr'
-              pin = 'DataSetReady';
-          case 'cts'
-              pin = 'ClearToSend';
-      end
-  else
-      pin = 'DataSetReady';
-  end
-
-    fopen(s1);
     
-    %edit Sven april 2015: Made compatible with two versions of instrument-control
-    if isfield(get(s1),'pinstatus')
-        new_instr_contr = 1;
-    else
-        new_instr_contr = 0;
-        pin = lower(pin);
-    end
-    
-    if new_instr_contr
-        s2 = get(s1,'pinstatus');
-        prev_cts = s2.(pin);
-    else
-        prev_cts = get(s1,pin);
-    end
-    
-    org_cts = 'on'; %prev_cts;
-    
-    while 1 % loop to find trigger
-    
-     % get(s1,'pinstatus')
-    
+    acqparams_in = fullfile(datapath,'acqParams_in');
+    try
+        if strcmp(devfolder,StimSerialScriptIn)
+            switch StimSerialScriptInPin
+                case 'dsr'
+                    pin = 'DataSetReady';
+                case 'cts'
+                    pin = 'ClearToSend';
+            end
+        else
+            pin = 'DataSetReady';
+        end
+        
+        logmsg(['Serial pin for script start: ' pin]);
+        
+        optopin = 'ClearToSend';
+        logmsg(['Serial pin for optogenetics: ' optopin]);
+        
+        
+        
+        fopen(s1);
+        
+        %edit Sven april 2015: Made compatible with two versions of instrument-control
+        if isfield(get(s1),'pinstatus')
+            new_instr_contr = 1;
+        else
+            new_instr_contr = 0;
+            pin = lower(pin);
+        end
+        
         if new_instr_contr
             s2 = get(s1,'pinstatus');
-            cts = s2.(pin);
+            prev_cts = s2.(pin);
         else
-            cts = get(s1,pin);
+            prev_cts = get(s1,pin);
         end
-        if cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)  % i.e. changed and not same as original
-            stimstart =  time - recstart;
-
-            logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
+        
+        org_cts = 'on'; %prev_cts;
+        optogenetic_stimulation = false;
+        
+        while 1 % loop to find trigger
             
-            fid = fopen(acqready,'r');
-            fgetl(fid); % pathSpec line
-            datapath = fgetl(fid);
-            fclose(fid);
+            if new_instr_contr
+                s2 = get(s1,'pinstatus');
+                cts = s2.(pin);
+                opto = s2.(optopin);
+            else
+                cts = get(s1,pin);
+                opto = get(s1,optopin);
+            end
             
-            recording_name = fullfile(datapath,['webcam_' host '_info.mat']);
-            mkdir(datapath);
-            save('-v7',recording_name,'filename','stimstart');
-            logmsg(['Saved timing info in ' recording_name]);
+            if ~optogenetic_stimulation
+                if strcmp(opto,'on')
+                    logmsg('Starting optogenetic stimulation');
+                    optopulse; 
+                    optogenetic_stimulation = true;
+                end
+            else 
+                if strcmp(opto,'off')
+                    logmsg('Stopping optogenetic stimulation');
+                    system('pkill optopulse');
+                    optopulse(0);
+                    optogenetic_stimulation = false;
+                end
+            end
+            
+            if cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)  % i.e. changed and not same as original
+                stimstart =  time - recstart;
+                logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
+                
+                fid = fopen(acqready,'r');
+                fgetl(fid); % pathSpec line
+                datapath = fgetl(fid);
+                fclose(fid);
+                
+                recording_name = fullfile(datapath,['webcam_' host '_info.mat']);
+                mkdir(datapath);
+                save('-v7',recording_name,'filename','stimstart');
+                logmsg(['Saved timing info in ' recording_name]);
+            end
+            prev_cts = cts;
+            pause(0.005);
         end
-        prev_cts = cts;
-        pause(0.01);
+    catch me
+        logmsg(me.message);
+        stop_recording(filename);
+        fclose(s1);
     end
-catch me
-    logmsg(me.message);
-    stop_recording(filename);
-    fclose(s1);
 end
-end
-
-
 
 
 
@@ -185,8 +207,8 @@ cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480 -p 100,100,740,58
 logmsg(['Started recording ' filename ' at ' datestr(now)]);
 logmsg('Use Ctrl-C to stop recording');
 system(cmd,false,'async' );
-starttime = time; 
-  
+starttime = time;
+
 function stop_recording(filename)
 logmsg('Stopping raspivid');
 system('pkill raspivid',false,'async');

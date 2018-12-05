@@ -22,7 +22,7 @@ if isoctave
     warning('off', 'Octave:language-extension');
     warning('off', 'Octave:mixed-string-concat');
     try
-        pkg load control
+        pkg load instrument-control
     catch me
        disp(me.message);
     end

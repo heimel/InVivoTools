@@ -15,7 +15,7 @@ NewStimGlobals;
 
 remotecommglobals;
 %  Is this a remote (slave, or, in other words, a stimulus) machine?
-Remote_Comm_isremote = 0; %#ok<*NASGU>
+Remote_Comm_isremote = 1; %#ok<*NASGU>
 
 Remote_Comm_enable = 1;  % enable remote communication?
 
@@ -24,7 +24,7 @@ Remote_Comm_method = 'filesystem';  % 'sockets' or 'filesystem'
 
 % settings for Remote_Comm_method = 'filesystem'
 % Remote_Comm_dir = '\\vs01.herseninstituut.knaw.nl\MVP\Shared\InVivo\'; % the local name of folder in which to write
-Remote_Comm_dir = 'C:\Windows\Temp'; % the local name of folder in which to write
+Remote_Comm_dir = '/mnt/MVP/Shared/InVivo/Communication/Nin192'; % the local name of folder in which to write
 %   files for communication
 
 % settings for Remote_Comm_method = 'sockets'
@@ -66,8 +66,8 @@ Remote_Comm_remoteprefix = '/mnt/THISHOSTNAME/data';
 
 StimWindowGlobals;
 StimWindowMonitor = 0;  % use the given monitor, 0 is first
-StimComputer = 0;       % is this a stimulus computer?
-StimDebug = false;      % do you want to show stimuli in 640x480 window
+StimComputer = 1;       % is this a stimulus computer?
+StimDebug = true;      % do you want to show stimuli in 640x480 window
 
 StimWindowUseCLUTMapping = 0; % most users will say 0
 
@@ -103,6 +103,7 @@ GammaCorrectionEnable = 0;
 LoadGammaCorrectionTable('gct_linear.txt');
 %LoadGammaCorrectionTable('gct_HOSTNAME.txt');
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Triggering/stimulus reporting settings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -123,24 +124,23 @@ LoadGammaCorrectionTable('gct_linear.txt');
 
 StimSerialGlobals; % see help file for description
 StimSerialSerialPort = 1;          % do you want to enable this feature?
-StimSerialScriptIn = '/dev/ttyS0';       % NewStim flips ScriptOutPin on this port when trial starts
-StimSerialScriptInPin = 'dtr';       % flips this pin when trial starts
-StimSerialScriptOut = '/dev/ttyS0';     % same
-StimSerialScriptOutPin = 'dtr';       %
-StimSerialStimIn = '/dev/ttyS0';  % NewStim flips DTR on this this port when individual stimuli start
-StimSerialStimInPin = 'dtr';  % NewStim flips this pin when individual stimuli start
-StimSerialStimOut = '/dev/ttyS0';% same
-StimSerialStimOutPin = 'dtr';% same
+StimSerialScriptIn = '/dev/ttyUSB0';       % NewStim flips ScriptOutPin on this port when trial starts
+StimSerialScriptInPin = 'dsr';       % flips this pin when trial starts
+StimSerialScriptOut = '/dev/ttyUSB0';     % same
+StimSerialScriptOutPin = 'not used';       %
+StimSerialStimIn = '/dev/ttyUSB0';  % NewStim flips DTR on this this port when individual stimuli start
+StimSerialStimInPin = 'dsr';  % NewStim flips this pin when individual stimuli start
+StimSerialStimOut = '/dev/ttyUSB0';% same
+StimSerialStimOutPin = 'not used';% same
 
 % Display preferences
 NSUseInitialSerialTrigger = 1;
 NSUseStimSerialTrigger = 0;
 
 StimDisplayOrderRemote = 0;
-StimNoBreak = true;
-
 StimTriggerClear
 
 %fitzTrigParams.triggerStimOnset = 1; % 0 means trigger BGpre instead of stim onset
 %StimTriggerAdd('FitzTrig',fitzTrigParams);
 %StimTriggerAdd('VHTrig',[]); % add Van Hooser lab triggering
+

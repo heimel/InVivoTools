@@ -42,8 +42,8 @@ for i=1:length(d)
             errormsg('Missing semicolon in start=XX:XX;');
             return
         end
-        minutes = str2num(comment(ind+6:ind+ind2-2));
-        seconds = str2num(comment(ind+ind2:ind+ind3-2));
+        minutes = str2double(comment(ind+6:ind+ind2-2));
+        seconds = str2double(comment(ind+ind2:ind+ind3-2));
         wcinfo(i).real_stimstart = minutes*60+seconds;
         wcinfo(i).stimstart = (wcinfo(i).real_stimstart-par.wc_timeshift)/par.wc_timemultiplier ;
         
