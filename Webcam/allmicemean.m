@@ -768,14 +768,17 @@ switch exp %can be 14.13, 172002, 172005
                     mice_172005_1 %SC
                     perfstr = 'performance_172005.1.';
                     titlestr = 'Hawk vs Disc, SC inhibition';
+                    allmice_num = 11:16;
                 case 2
                     mice_172005_2 %V1
                     perfstr = 'performance_172005.2.';
                     titlestr = 'Hawk vs Disc, V1 inhibition';
+                    allmice_num = 11:16;
                 case 3
                     mice_172005_3 %LP
                     perfstr = 'performance_172005.3.';
                     titlestr = 'Hawk vs Disc, LP inhibition';
+                    allmice_num = 11:16;
             end
             
             for i = allmice_num
