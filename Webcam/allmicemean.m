@@ -760,6 +760,110 @@ switch exp %can be 14.13, 172002, 172005
         ax_comp.XTick = 1:length(comp_data);
         set(gca,'XTickLabel', {'1' ,'5', '6', '6'}, 'Xcolor', grey_30,'Ycolor', grey_30,'LineWidth',3, 'FontWeight','bold');
         
+        %% 172005
+        Case 172005
+            group = 1;
+            switch group
+                case 1
+                    mice_172005_1 %SC
+                    perfstr = 'performance_172005.1.';
+                    titlestr = 'Hawk vs Disc, SC inhibition';
+                case 2
+                    mice_172005_2 %V1
+                    perfstr = 'performance_172005.2.';
+                    titlestr = 'Hawk vs Disc, V1 inhibition';
+                case 3
+                    mice_172005_3 %LP
+                    perfstr = 'performance_172005.3.';
+                    titlestr = 'Hawk vs Disc, LP inhibition';
+            end
+            
+            for i = allmice_num
+            if exist (['performance_172002.1.' num2str(i) '.mat'], 'file')~= 0
+                load(['performance_172002.1.' num2str(i) '.mat']);
+            elseif exist (['performance_172002.1.0' num2str(i) '.mat'], 'file')~= 0
+                load(['performance_172002.1.0' num2str(i) '.mat']);
+            else
+                errormsg('Freeze duration file does not exist. Get data from manualfrzdata.m');
+            end
+            hab_first(i) = perf_col(1,1);  %#ok<*AGROW>
+            
+            for j = 1:30
+                if ~isnan(perf_col(j,2)) == 1
+                    nov_first(i) = perf_col(j,2);
+                    hab_2stim(i) = perf_col(j,1);
+                    hab_last(i) = perf_col(j-1,1);
+                    break
+                else
+                    hab_only_trials(j,i) = perf_col(j,1);
+                end
+            end
+        end
+        
+        hab_first = hab_first*100;
+        hab_last = hab_last*100; 
+        hab_2stim = hab_2stim*100; 
+        nov_first = nov_first*100;
+        all_perfs = [hab_first; hab_last; hab_2stim; nov_first];
+        
+        [h,p_hab_first2last,ci,stats]=ttest(hab_first(allmice_num),hab_last(allmice_num));
+        [h,p_hab_first2stim,ci,stats]=ttest(hab_first(allmice_num),hab_2stim(allmice_num));
+        [h,p_hablast_nov,ci,stats]=ttest(hab_last(allmice_num),nov_first(allmice_num));
+        [h,p_hab2stim_nov,ci,stats]=ttest(hab_2stim(allmice_num),nov_first(allmice_num));
+        [h,p_hab_last2stim,ci,stats]=ttest(hab_last(allmice_num),hab_2stim(allmice_num));
+        [h,p_hab_first_nov_first,ci,stats]=ttest(hab_first(allmice_num),nov_first(allmice_num));
+        %
+        p_all = [p_hab_first2last,p_hab_first2stim,p_hablast_nov,p_hab2stim_nov,...
+            p_hab_last2stim,p_hab_first_nov_first];
+        
+        mean_all_days = nanmean(all_perfs(:,allmice_num),2);
+        sem_all_days = sem(all_perfs(:,allmice_num),2);
+        
+        figure;
+        hold on
+        for i = 1:2
+            if i == 1
+                han(i) = bar(bar_dist, mean_all_days);
+                set(han(i),'FaceColor', my_burlywood, 'edgecolor', grey_30, 'LineWidth',2, 'barwidth', 0.4);
+            else
+                han(i) = bar(bar_dist(4), mean_all_days(4));
+                set(han(i),'FaceColor', my_turquoiseblue, 'edgecolor', grey_30, 'LineWidth',2,  'barwidth', 0.2);
+            end
+        end
+        er = errorbar(bar_dist,mean_all_days,sem_all_days,'.');
+        er.Color = grey_30;
+        er.LineWidth = 2;
+        
+        plot_points(1,all_perfs(1,allmice_num),3);
+        plot_points(1.5,all_perfs(2,allmice_num),3);
+        plot_points(2,all_perfs(3,allmice_num),3);
+        plot_points(2.5,all_perfs(4,allmice_num),3);
+        
+        groups = {[1,1.5],[1,2],[1.5,2.5],[2,2.5]};
+        star_hand = sigstar(groups,[p_hab_first2last,p_hab_first2stim,p_hablast_nov,p_hab2stim_nov]);
+        
+        %         groups = {[1,2],[1,3],[2,4],[3,4],[2,3],[1,4]};
+        %         star_hand = sigstar(groups,[p_hab_first2last,p_hab_first2stim,p_hablast_nov,p_hab2stim_nov,p_hab_last2stim,p_hab_first_nov_first]);
+        %         star_hand(2,1) = star_hand(1,1)
+        
+        box off
+
+        ylim([0 100])
+        xlim([0.75 2.75])
+        ylabel('mean freezing(%)','FontWeight','bold')
+        xlabel('Time(sessions)','FontWeight','bold')
+        legend({'habituating','novel'},'FontSize',15,'FontWeight','bold', 'Textcolor', grey_30);
+        legend('boxoff')
+        ax = gca;
+        ax.XAxis.FontSize = 18;
+        ax.XAxis.FontWeight= 'bold';
+        ax.YAxis.FontSize = 18;
+        ax.YAxis.FontWeight= 'bold';
+        ax.XTick = bar_dist;
+        set(gca,'XTickLabel', {'1' ,'5', '6', '6'},'Xcolor', grey_30,'Ycolor', grey_30,'LineWidth',3, 'FontWeight','bold');
+        title(titlestr)
+        hold off
+        
 end
 
 
