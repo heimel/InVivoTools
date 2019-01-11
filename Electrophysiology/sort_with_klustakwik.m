@@ -3,7 +3,7 @@ function cells = sort_with_klustakwik(orgcells,record)
 %
 %   CELLS = SORT_WITH_KLUSTAKWIK( ORGCELLS, RECORD )
 %
-% 2013-2015, Alexander Heimel
+% 2013-2019, Alexander Heimel
 %
 
 params = ecprocessparams(record);
@@ -18,19 +18,19 @@ else
     [r,kkexecutable]=system('where klustakwik.exe');
     kkexecutable = ['"' strtrim(kkexecutable) '"'];
     if r~=0
-        kkexecutable = which('KlustaKwik.exe');
+        kkexecutable = ['"' which('KlustaKwik.exe') '"'];
     end
 end
 
-[status,result] = system(kkexecutable);
+status = system(kkexecutable);
 
 if status~=1
     if isunix
         kkexecutable = 'MaskedKlustaKwik';
     else
-        kkexecutable = which('MaskedKlustaKwik.exe');
+        kkexecutable = ['"' which('MaskedKlustaKwik.exe') '"'];
     end
-    [status,result] = system(kkexecutable);
+    status = system(kkexecutable);
 end
 
 if status~=1
@@ -61,7 +61,6 @@ if isempty(cells) %|| 1
     arguments = params.sort_klustakwik_arguments;
     
     for ch=channels
-    %    cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments ' -StartCluFile klustakwik.clu.7'];
        cmd = [kkexecutable ' klustakwik ' num2str(ch) ' ' arguments];
         logmsg(cmd);
         [status,result] = system(cmd);

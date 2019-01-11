@@ -11,6 +11,8 @@ function par = dog_fit(x,y,options)
 %    SE is standard deviation of positive gaussian
 %    RI is maximum response of negative gaussian
 %    SI is standard deviation of negative gaussian
+%
+% 200X-2019, Alexander Heimel
 
 if nargin<3 || isempty(options)
     options = '';
@@ -23,7 +25,7 @@ search_options=optimset('fminsearch');
 	search_options.Display='off';
 
 % starting values
-[m,ind] = max(x);
+[~,ind] = max(x);
 r0 = y(ind); %min(y);
 re = max(y)-r0;
 se = max(x)/2;
@@ -35,6 +37,7 @@ switch lower(options)
     case 'zerobaseline'
         xo(1)= 0;
         par = fminsearch(@(par) dog_error([0 par(2:5)],x,y),xo,search_options);
+        par(1) = 0;
     otherwise
         par = fminsearch(@(par) dog_error(par,x,y),xo,search_options);
 end

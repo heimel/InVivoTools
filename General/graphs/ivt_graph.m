@@ -729,7 +729,7 @@ switch style
                         rc=nanmean(ry{i})/nanmean(rx{i});
                         fity{i}=rc*fitx;
                         logmsg([' Proportionality: rc = ' num2str(rc)  ]);
-                        [rcoef,n,p,t,df]=nancorrcoef(rx{i},ry{i});
+                        [rcoef,~,p,t,df] = nancorrcoef(rx{i},ry{i});
                         logmsg(['   correlation coeff = ' num2str(rcoef) ...
                             ' , p = ' num2str(p) ' , df = ' num2str(df) ...
                             ' , t = ' num2str(t) ' (chi-squared test)']);
@@ -746,7 +746,7 @@ switch style
                         offset=nanmean(ry{i})-rc*nanmean(rx{i});
                         fity{i}=rc*fitx+offset;
                         logmsg(['fit: rc = ' num2str(rc) ', offset = ' num2str(offset) ]);
-                        [rcoef,n,p,t,df]=nancorrcoef(rx{i},ry{i});
+                        [rcoef,~,p,t,df] = nancorrcoef(rx{i},ry{i});
                         logmsg(['   correlation coeff = ' num2str(rcoef) ...
                             ' , p = ' num2str(p) ' , df = ' num2str(df) ...
                             ' , t = ' num2str(t) ' (chi-squared test)']);

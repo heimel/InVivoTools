@@ -28,7 +28,7 @@ switch lower(record.setup)
         cells = importspike2(record);
 end
 n_spikes = 0;
-for i=1:length(cells);
+for i=1:length(cells)
     n_spikes = n_spikes + length(cells(i).data);
 end
 
@@ -69,7 +69,7 @@ switch processparams.spike_sorting_routine
         end
     case 'wpca'
         cells = sort_with_wpca(cells,record,verbose);
-    case '';
+    case ''
         % don't sort
     otherwise
         logmsg(['Unknown spike sorting routine ' processparams.spike_sorting_routine]);
