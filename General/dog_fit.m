@@ -42,7 +42,10 @@ switch lower(options)
         par = fminsearch(@(par) dog_error(par,x,y),xo,search_options);
 end
 
-
+if any(par(2:end)<0) || par(3) > 10000 * max(x)
+    logmsg('Failed to fit difference of gaussians.');
+    par = NaN(size(par));
+end
 
 
 

@@ -147,6 +147,10 @@ for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
 end
 
+if exist('fontsize','var') && ischar(fontsize)
+    fontsize = eval(fontsize);
+end
+
 if isempty(linewidth)
     switch style
         case { 'bar','box'}
@@ -228,12 +232,12 @@ end
 
 % make graph
 if isempty(axishandle)
-    h.fig=figure;
+    h.fig = figure;
 else
     axes(axishandle);
-    h.fig=get(gca,'parent');
+    h.fig = get(gca,'parent');
 end
-h.p_sig={};
+h.p_sig = {};
 hold on;
 
 if length(prefax)==4
@@ -299,11 +303,11 @@ if iscell(y{1})
             end
         end
     end
-    orgxticklabels=xticklabels;
+    orgxticklabels = xticklabels;
     if ~isempty(xticklabels)
-        xticklabels={};
+        xticklabels = {};
         for i=1:n_measures
-            xticklabels={xticklabels{:},orgxticklabels{i}{:}};
+            xticklabels = {xticklabels{:},orgxticklabels{i}{:}};
         end
     end
 end
@@ -938,14 +942,14 @@ end
 % set xticklabels
 if ~isempty(xticklabels)
     set(gca,'XTick',[]);
-    rotate_xticklabels=str2double(rotate_xticklabels);
+    rotate_xticklabels = str2double(rotate_xticklabels);
     ax=axis;
     if ~iscell(xticklabels)
-        xtc= cell(size(xticklabels,1),1);
-        for i=1:size(xticklabels,1)
-            xtc{i}=xticklabels(i,:);
+        xtc = cell(size(xticklabels,1),1);
+        for i = 1:size(xticklabels,1)
+            xtc{i} = xticklabels(i,:);
         end
-        xticklabels=xtc;
+        xticklabels = xtc;
         clear('xtc');
     end
     n_xtlabels=length(xticklabels);
