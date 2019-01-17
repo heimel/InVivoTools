@@ -4,7 +4,7 @@ function measures=analyse_ps( inp , record, verbose)
 %
 %  MEASURES = ANALYSE_PS( INP, RECORD, VERBOSE)
 %
-% 2007-2016, Alexander Heimel
+% 2007-2019, Alexander Heimel
 %
 
 if nargin<3
@@ -143,6 +143,25 @@ for i = 1:length(triggers)
     rastcount_max = spatialfilter(rastcount_max,filterwidth);
     [ind_max_label,ind_max] = max(rastcount_max); %#ok<ASGLU>
     measures.time_peak{i} = ind_max*binsize;
+    
+    % peak time all stimuli
+    rastcount_allf = spatialfilter(rastcount_all,filterwidth);
+    [~,ind_max] = max(rastcount_allf);
+    measures.time_peak_all{i} = tbins_all(ind_max);
+    
+    % onset latency
+    filterwidth = 0.02/binsize; % 20 ms width = too broad for onset times!
+    rastcount_allf = spatialfilter(rastcount_all,filterwidth);
+    %     dcount_all = diff(rastcount_allf);
+    %     ddcount_all = diff(dcount_all);
+    %     maxpre = max(ddcount_all(1:find(tbins_all>0,1)));
+    ind0 = find(tbins_all>0,1);
+    meanpre = mean(rastcount_allf(1:ind0));
+    stdpre = std(rastcount_allf(1:ind0));
+    %     ind_max = find(ddcount_all>maxpre,1);
+    ind_latency = ind0-1+find(rastcount_allf(ind0:end)>meanpre+2*stdpre,1);
+    measures.time_onsetlatency_all{i} = tbins_all(ind_latency);
+    
 end % trigger i
 
 if length(inps)==1
@@ -177,7 +196,7 @@ else
 end
 measures.variable = paramname;
 
-switch measures.variable
+switch lower(measures.variable)
     case 'contrast'
         measures = compute_contrast_measures(measures);
     case 'angle'
@@ -188,6 +207,10 @@ switch measures.variable
         measures = compute_size_measures(measures,inp.st,record);
     case 'location'
         measures = compute_position_measures(measures,inp.st);
+    case 'tfrequency'
+        measures = compute_tfrequency_measures(measures);
+    case 'sfrequency'
+        measures = compute_sfrequency_measures(measures);
 end
 
 
