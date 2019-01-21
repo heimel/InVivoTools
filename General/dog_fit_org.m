@@ -13,6 +13,8 @@ function par = dog_fit(x,y,options,xo)
 %    SI is standard deviation of negative gaussian
 %
 % 200X-2019, Alexander Heimel
+%
+% DEPRECATED, COULD BE REMOVED IF DOG_FIT IS PROPERLY TESTED
 
 if nargin<3 || isempty(options)
     options = '';
@@ -36,16 +38,16 @@ search_options=optimset('fminsearch');
 	search_options.Display='off';
 
 switch lower(options)
-    case 'zerobaseline'       
-        xo(1) = 0;
+    case 'zerobaseline'
+        xo(1)= 0;
         par = fminsearch(@(par) dog_error([0 par(2:5)],x,y),xo,search_options);
         par(1) = 0;
     otherwise
         par = fminsearch(@(par) dog_error(par,x,y),xo,search_options);
 end
 
-if par(2)<0 || par(4)<0 || par(3) > 10 * max(x)  
-    logmsg(['Failed to fit difference of gaussians. par = ' mat2str(par)] );
+if par(2)<0 || par(4)<0 || par(3) > 10 * max(x)
+    logmsg('Failed to fit difference of gaussians.');
     par = NaN(size(par));
 end
 
