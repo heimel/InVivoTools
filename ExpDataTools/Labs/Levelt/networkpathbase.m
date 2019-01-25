@@ -28,7 +28,7 @@ end
 if usejava('jvm')
     address = java.net.InetAddress.getLocalHost;
     IPaddress = char(address.getHostAddress);
-    if ~strcmp(IPaddress(1:6),'192.87') && ~strcmp(IPaddress,'169.254.112.74') % at the NIN or G2P
+    if ~strcmp(IPaddress(1:6),'192.87') && ~strcmp(IPaddress,'169.254.112.74') && ~strcmp(IPaddress(1:6),'146.50') % at the NIN or G2P
         logmsg('Not at the NIN, thus no networkpath');
         base = '.';
         base_persistent = base;
