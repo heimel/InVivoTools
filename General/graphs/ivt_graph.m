@@ -786,16 +786,14 @@ switch style
                         rescale_to_1 = false;
                     end
                     for i=1:length(ry)
-                        % first fit proportional to get good seeding values
-                        % rc=nanmean(ry{i})/nanmean(rx{i});
-                        %						[nk_rm,nk_b,nk_n] = naka_rushton(rx{i},ry{i}, [ rc 0.57 1]);
                         
-                        c=rx{i}(~isnan(rx{i}));
-                        r=ry{i}(~isnan(rx{i}));
+                        c = rx{i}(~isnan(rx{i}));
+                        r = ry{i}(~isnan(rx{i}));
                         
-                        [nk_rm,nk_b,nk_n] = naka_rushton(c,r);
-                        fity{i}=nk_rm* (fitx.^nk_n)./ ...
+                        [nk_rm,nk_b,nk_n,~,c50,r_at_c50] = naka_rushton(c,r);
+                        fity{i} = nk_rm* (fitx.^nk_n)./ ...
                             (nk_b^nk_n+fitx.^nk_n) ;
+                        
                     end
                     if rescale_to_1
                         fitx = fitx*100;

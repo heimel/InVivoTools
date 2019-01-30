@@ -313,6 +313,7 @@ for c=1:n_cells
                     y = printfield(measure,'nk_rm',y,0.5);
                     printfield(measure,'nk_b',y);
                     y = printfield(measure,'nk_n',y,0.5);
+                    printfield(measure,'fit_explained_variance',y);
                 case {'position','location'}
                     y = printfield(measure,'rf_center',y);
             end

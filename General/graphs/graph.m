@@ -49,6 +49,8 @@ function h=graph(y,x,varargin)
 %
 % 2006-2015, Alexander Heimel
 %
+% DEPRECATED! USE IVT_GRAPH. THIS FUNCTION GRAPH WILL BE REMOVED, TO AVOID
+%   CONFUSION WITH MATLAB FUNCTION GRAPH
 
 h=[];
 if nargin<2

@@ -129,7 +129,7 @@ if nonparametric || notnormal
     for i=1:length(y)
         ind = ~isnan(y{i});
         n = ceil(100000/length(y{i}(ind)));
-        btsm=std(bootstrp(n,@mean,y{i}(ind)));
+        btsm = std(bootstrp(n,@median,y{i}(ind)));
         logmsg(['Group ' num2str(i) ':  ' num2str(median(y{i}(ind)),3) ...
             ' +/- ' num2str(btsm,2)  ...
             ' (median +/- bootstrap std (sem)), n = ' num2str(length(y{i}(ind))) ' + ' num2str(sum(isnan(y{i}))) ' NaNs']);
