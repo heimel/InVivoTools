@@ -17,8 +17,8 @@ function CSnip = ExsnipTDT(EVENT, Trials, use_matlab_tdt)
 %
 %       Trials : (double)stimulus onset time determined in analyse_veps
 %
-%Chris van der Togt, 11/11/2005
-%updated 01/06/2006
+% 2005-2006, Chris van der Togt, 11/11/2005, updated 01/06/2006
+% 2019, Alexander Heimel
 
 
 if nargin<2 || isempty(use_matlab_tdt)
@@ -38,7 +38,7 @@ if ~isfield(EVENT, 'Start') || ~isfield(EVENT, 'Triallngth')
     return
 end
 
-F = figure('Visible', 'off');
+F = figure('WindowStyle','Normal','Visible', 'off');
 H = actxcontrol('TTANK.X', [20 20 60 60], F);
 H.ConnectServer('local', 'me');
 

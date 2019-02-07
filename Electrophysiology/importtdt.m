@@ -16,7 +16,7 @@ if processparams.always_use_matlab_tdt || isunix
     use_matlab_tdt = true;
 else
     try
-        F = figure('Visible', 'off');
+        F = figure('WindowStyle','normal','Visible', 'off');
         actxcontrol('TTANK.X', [20 20 60 60], F);
         close(F)
         use_matlab_tdt = false;

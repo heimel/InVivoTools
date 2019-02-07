@@ -313,6 +313,7 @@ for c=1:n_cells
                     y = printfield(measure,'nk_rm',y,0.5);
                     printfield(measure,'nk_b',y);
                     y = printfield(measure,'nk_n',y,0.5);
+                    printfield(measure,'fit_explained_variance',y);
                 case {'position','location'}
                     y = printfield(measure,'rf_center',y);
             end
@@ -772,8 +773,8 @@ for i=1:length(curves) % over triggers
             if isfield(measure,'tf_fit_optimal') && ~isnan(measure.tf_fit_optimal{i})
                 plot([measure.tf_fit_optimal{i} measure.tf_fit_optimal{i}],ylim,'g-');
             end
-            if isfield(measure,'tf_fit_dogpar')
-                par = measure.tf_fit_dogpar;
+            if isfield(measure,'tf_fit_dogpar') && iscell(measure.tf_fit_dogpar) && ~isempty(measure.tf_fit_dogpar{i}) && ~any(isnan(measure.tf_fit_dogpar{i}))
+                par = measure.tf_fit_dogpar{i};
             else 
                 if isfield(measure,'rate_spont')
                     par = dog_fit(curve(1,:),curve(2,:)- measure.rate_spont{i},'zerobaseline');

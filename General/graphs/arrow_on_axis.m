@@ -109,7 +109,7 @@ switch which_axis
         start = [ax(axind+axindp)+side*l m];
         stop = [ax(axind+axindp) m];
 end
-h = arrow( start,stop,7);
+h = arrow( start,stop,7,'Length',25);
 set(h,'Edgecolor',clr);
 set(h,'Facecolor',clr);
 axis(ax);
