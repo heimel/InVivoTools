@@ -9,9 +9,6 @@ function [frameRate, arena] = get_arena(filename, stimStart, record)
 v = VideoReader(filename);
 frameRate = get(v, 'FrameRate');
 
-%stimFrame = stimStart*frameRate;
-%firstframe = read(v,stimFrame); % read a frame at the beginning. 
-
 v.CurrentTime = stimStart;
 firstframe = readFrame(v);
 
@@ -25,10 +22,6 @@ filename2 = fullfile(experimentpath(record),'firstframe.mat');
 save(filename2, 'firstframe');
 
 title('Select the chamber arena region');
-
-%h = msgbox('Select the chamber arena region.'); 
-%set(h, 'Position', [390 388 130 53]); 
-%uiwait(h);
 
 % roiR = getrect; % this is a classical method. which is also ok but the one bellow is better
 h = imrect; % select a ROI in the frame

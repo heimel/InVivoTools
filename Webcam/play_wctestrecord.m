@@ -32,7 +32,7 @@ if ~exist(filename,'file')
     return
 end
 
-vid=VideoReader(filename);
+vid = VideoReader(filename);
 
 %Get paramters of video
 frameRate = get(vid, 'FrameRate'); %30 frames/sec
@@ -58,11 +58,11 @@ while 1
         imframe = readFrame(vid);
         
         gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
-        
         image(gimframe);
         axis image
         changed = false;
         title([num2str(vid.CurrentTime,'%.2f') ' s - Frame ' num2str(vid.CurrentTime*frameRate) ]);
+        draw_screen(record);
         drawnow
         pause(1/frameRate);
     else
@@ -95,6 +95,7 @@ while 1
                 image(vidFrame);
                 axis image
                 title([num2str(vid.CurrentTime,'%.2f') ' s - Frame ' num2str(vid.CurrentTime*frameRate) ]);
+                draw_screen(record)
                 drawnow
                 pause(1/frameRate);
                 keyCode = double(get(gcf,'CurrentCharacter'));
@@ -117,4 +118,16 @@ while 1
     end
 end
 delete(fig);
+
+function draw_screen(record)
+% plot screen sides
+if ~isempty(record.measures) && isfield(record.measures,'arena') && length(record.measures.arena)==4
+    hold on
+    a = record.measures.arena;
+    line([a(1) a(1)],[a(2) a(2)+a(4)],'color',[1 1 0]);
+    line([a(1) a(1)+a(3)],[a(2)+a(4) a(2)+a(4)],'color',[1 1 0]);
+    line([a(1)+a(3) a(1)+a(3)],[a(2)+a(4) a(2)],'color',[1 1 0]);
+    line([a(1)+a(3) a(1)],[a(2) a(2)],'color',[1 1 0]);
+    hold off
+end
 
