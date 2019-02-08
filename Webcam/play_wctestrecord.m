@@ -50,60 +50,42 @@ changed = true;
 
 gamma = 1;
 
+play = false;
+
 while 1
     if ~hasFrame(vid)
         logmsg('No more frames available');
-        pause(0.01);
-    elseif changed
+    elseif changed || play
         imframe = readFrame(vid);
-        
         gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
-        image(gimframe);
-        axis image
+        draw_frame(gimframe,gamma,vid,record)
         changed = false;
-        title([num2str(vid.CurrentTime,'%.2f') ' s - Frame ' num2str(vid.CurrentTime*frameRate) ]);
-        draw_screen(record);
-        drawnow
-        pause(1/frameRate);
-    else
-        pause(0.01);
     end
-    keydown = waitforbuttonpress;
-    if keydown
-        keyCode = double(get(gcf,'CurrentCharacter'));
-    else
-        keyCode = 0;
+    pause(1/frameRate);
+    if ~isvalid(fig)
+        break;
+    end
+    figure(fig);
+        
+    keyCode = double(get(fig,'CurrentCharacter'));
+    set(fig,'CurrentCharacter',' ');
+    if isempty(keyCode)
+        continue
     end
     
     switch keyCode
         case '-'
             gamma = gamma + 0.1;
-            gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
-            image(gimframe);
-            axis image
+            draw_frame(imframe,gamma,vid,record);
         case '+'
             if gamma>0.1
                 gamma = gamma - 0.1;
             end
-            gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
-            
-            image(gimframe);
-            axis image
+            draw_frame(imframe,gamma,vid,record);
         case 31 %arrow down
-            while hasFrame(vid)
-                vidFrame = readFrame(vid);
-                image(vidFrame);
-                axis image
-                title([num2str(vid.CurrentTime,'%.2f') ' s - Frame ' num2str(vid.CurrentTime*frameRate) ]);
-                draw_screen(record)
-                drawnow
-                pause(1/frameRate);
-                keyCode = double(get(gcf,'CurrentCharacter'));
-                if keyCode==30 % arrow up
-                    break
-                end
-            end
-            changed = false;
+            play  = true;
+        case 30 % arrow down
+            play = false;
         case 28 % arrow left
             if vid.CurrentTime >= 2/frameRate
                 vid.CurrentTime = vid.CurrentTime - 2/frameRate;
@@ -119,7 +101,25 @@ while 1
 end
 delete(fig);
 
-function draw_screen(record)
+
+function draw_frame(imframe,gamma,vid,record)
+gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
+image(gimframe);
+axis image
+title([num2str(vid.CurrentTime,'%.2f') ' s - Frame ' num2str(vid.CurrentTime*vid.FrameRate) ]);
+
+if ~isempty(record.measures) && isfield(record.measures,'trajectory') && ~isempty(record.measures.trajectory)
+    ind = find(record.measures.trajectory(:,1)>=vid.CurrentTime,1);
+    hold on
+    plot(record.measures.trajectory(ind,2),record.measures.trajectory(ind,3),'xr');
+    hold off
+end
+
+draw_screen_outline(record)
+drawnow
+
+
+function draw_screen_outline(record)
 % plot screen sides
 if ~isempty(record.measures) && isfield(record.measures,'arena') && length(record.measures.arena)==4
     hold on

@@ -27,6 +27,8 @@ function [Yn,Xn,Yerr] = slidingwindowfunc(X, Y, start, stepsize, stop, windowsiz
 %  Xn is the center location of each window and Yn is the result of the
 %  function in each window.
 %
+%  Also see MOVMEAN
+%
 % 200X, Steve Van Hooser (?), 2016 Alexander Heimel
 
 if nargin<8 || isempty(zeropad)
