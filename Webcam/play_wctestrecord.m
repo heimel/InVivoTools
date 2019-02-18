@@ -6,7 +6,7 @@ function play_wctestrecord(record)
 % Updated implementation to use readFrame instead of read
 % and switch to time dominated from frame dominated
 %
-% 2015-2018, Alexander Heimel
+% 2015-2019, Alexander Heimel
 
 par = wcprocessparams( record );
 
@@ -15,7 +15,7 @@ if isempty(par.wc_playercommand)
     return
 end
 
-wcinfo = wc_getmovieinfo( record);
+[wcinfo,filename] = wc_getmovieinfo( record);
 
 if isempty(wcinfo)
     errormsg(['No movie found for ' recordfilter(record)]);
@@ -23,8 +23,6 @@ if isempty(wcinfo)
 end
 
 starttime = (wcinfo(1).stimstart-par.wc_playbackpretime) * par.wc_timemultiplier + par.wc_timeshift;
-
-filename = fullfile(wcinfo.path,wcinfo.mp4name);
 
 logmsg('Running video in matlab');
 if ~exist(filename,'file')
@@ -56,9 +54,7 @@ while 1
     if ~hasFrame(vid)
         logmsg('No more frames available');
     elseif changed || play
-        imframe = readFrame(vid);
-        gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
-        draw_frame(gimframe,gamma,vid,record)
+        wc_show_frame(record,vid,[],fig,gamma);
         changed = false;
     end
     pause(1/frameRate);
@@ -76,12 +72,14 @@ while 1
     switch keyCode
         case '-'
             gamma = gamma + 0.1;
-            draw_frame(imframe,gamma,vid,record);
+            vid.CurrentTime = vid.CurrentTime - frameRate;
+            changed = true;
         case '+'
             if gamma>0.1
                 gamma = gamma - 0.1;
             end
-            draw_frame(imframe,gamma,vid,record);
+            vid.CurrentTime = vid.CurrentTime - frameRate;
+            changed = true;
         case 31 %arrow down
             play  = true;
         case 30 % arrow down
@@ -101,33 +99,4 @@ while 1
 end
 delete(fig);
 
-
-function draw_frame(imframe,gamma,vid,record)
-gimframe = uint8(double(imframe).^gamma / (255^gamma) * 255);
-image(gimframe);
-axis image
-title([num2str(vid.CurrentTime,'%.2f') ' s - Frame ' num2str(vid.CurrentTime*vid.FrameRate) ]);
-
-if ~isempty(record.measures) && isfield(record.measures,'trajectory') && ~isempty(record.measures.trajectory)
-    ind = find(record.measures.trajectory(:,1)>=vid.CurrentTime,1);
-    hold on
-    plot(record.measures.trajectory(ind,2),record.measures.trajectory(ind,3),'xr');
-    hold off
-end
-
-draw_screen_outline(record)
-drawnow
-
-
-function draw_screen_outline(record)
-% plot screen sides
-if ~isempty(record.measures) && isfield(record.measures,'arena') && length(record.measures.arena)==4
-    hold on
-    a = record.measures.arena;
-    line([a(1) a(1)],[a(2) a(2)+a(4)],'color',[1 1 0]);
-    line([a(1) a(1)+a(3)],[a(2)+a(4) a(2)+a(4)],'color',[1 1 0]);
-    line([a(1)+a(3) a(1)+a(3)],[a(2)+a(4) a(2)],'color',[1 1 0]);
-    line([a(1)+a(3) a(1)],[a(2) a(2)],'color',[1 1 0]);
-    hold off
-end
 
