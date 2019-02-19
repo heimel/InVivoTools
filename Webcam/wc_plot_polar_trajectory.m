@@ -38,8 +38,8 @@ ind = find(~isnan(azimuth),1,'first');
 r.azimuth_stimstart = azimuth(ind);
 r.elevation_stimstart = elevation(ind);
 
-%h = polarplot(r.azimuth_stimstart,pi/2-r.elevation_stimstart,'go');
-%set(h,'MarkerFaceColor',get(h,'Color'));
+h = polarplot(r.azimuth_stimstart,pi/2-r.elevation_stimstart,'go');
+set(h,'MarkerFaceColor',get(h,'Color'));
 
 
 % ind = find(~isnan(azimuth),1,'last');
@@ -58,6 +58,10 @@ r.elevation_freezestart = [];
 r.azimuth_freeze = [];
 r.elevation_freeze = [];
 for i = 1:size(freezetimes,1)
+    if ~isfield(record.measures,'pos_theta') || isnan( record.measures.pos_theta(i))
+        % not a proper freeze as determined by manual operator
+        continue
+    end
     ind = find(t>=freezetimes(i,1) & t<=freezetimes(i,2));
     if ~isempty(ind)
         indind = find(~isnan(ind),1,'first');
