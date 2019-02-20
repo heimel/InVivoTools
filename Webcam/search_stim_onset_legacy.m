@@ -30,7 +30,7 @@ for i = start_frame:end_frame
     %        crossL = min(im_roiL);
 end
 
-logmsg(['End time = ' num2str(v.CurrentTime)]);
+% logmsg(['End time = ' num2str(v.CurrentTime)]);
 
 len = length(brightness);
 frames = start_frame:end_frame;

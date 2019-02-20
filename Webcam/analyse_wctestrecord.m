@@ -43,10 +43,16 @@ stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
 
 
 if par.use_legacy_videoreader
-    if isfield(record.measures,'peakPoints')
-        peakPoints = record.measures.peakPoints;
+    
+    if isempty(record.stimstartframe)
+        if isfield(record.measures,'peakPoints')
+            peakPoints = record.measures.peakPoints;
+        else
+            error('Stimulus onset is not determined. use "track" button')
+        end
     else
-        error('Stimulus onset is not determined. use "track" button')
+        stimStart = record.stimstartframe / 30;
+        peakPoints = [];
     end
 
     [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...

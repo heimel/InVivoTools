@@ -24,6 +24,7 @@ end
 starttime = (wcinfo(1).stimstart-par.wc_playbackpretime) * par.wc_timemultiplier + par.wc_timeshift;
 
 filename = fullfile(wcinfo.path,wcinfo.mp4name);
+vid_name = [sprintf('%s', record.mouse,'-', record.date,'-', record.epoch) '.avi'];
 
 logmsg('Running video in matlab');
 vid=VideoReader(filename);
@@ -41,6 +42,7 @@ end
 figure;
 changed = true;
 prevnokey = true;
+makeVideo = 1;
 
 while 1
     if changed
@@ -59,20 +61,37 @@ while 1
     end
     if keyIsDown && prevnokey
         switch find(keyCode,1)
-            case 40 %arrow down
+            case 40 %arrow down 
+                
+                if makeVideo
+                    writerObj = VideoWriter(vid_name); %#ok<UNRCH>
+                    writerObj.FrameRate = frameRate;
+                    open(writerObj);
+                end
+                
                 while 1
                     vidFrame = read(vid, frame);
                     image(vidFrame);
                     drawnow
                     pause(1/frameRate);
                     frame = frame+1;
-                    [keyIsDown, secs, keyCode, deltaSecs] = KbCheck;
-                    if keyIsDown && find(keyCode,1)==38 % arrow up
+                    if makeVideo
+                        frames = getframe; %#ok<UNRCH>
+                        writeVideo(writerObj,frames);
+                        [keyIsDown, secs, keyCode, deltaSecs] = KbCheck;
+                        if keyIsDown && find(keyCode,1)==38 % arrow up
+                            if makeVideo
+                                close(writerObj); %#ok<UNRCH>
+                            end
+                        
                         break
-                    end
+                        
+                        end
+                    end 
                 end
                 changed = false;
                 prevnokey = false;
+                
             case 37 % arrow left
                 if frame>1
                     frame = frame - 1;
@@ -81,6 +100,7 @@ while 1
                 else
                     logmsg('Reached start of movie');
                 end
+                
             case 39 % arrow right
                 if frame<numFrames
                     frame = frame +1;
@@ -89,6 +109,7 @@ while 1
                 else
                     logmsg('Reached end of movie');
                 end
+                
             case 81 % q
                 break
         end

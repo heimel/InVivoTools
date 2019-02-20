@@ -32,6 +32,13 @@ s=size(Frame);
 secBeforeAfter = 10;
 framesBeforeAfter = secBeforeAfter *frameRate;
 
+%%
+    stimFrame = stimStart*frameRate;
+    firstframe = read(vid,stimFrame);
+    filename2 = fullfile(experimentpath(record),'firstframe.mat');
+    save(filename2, 'firstframe');
+    %%
+
 if ~isempty(record.stimstartframe)
     stimFrame = record.stimstartframe;
 else
@@ -75,6 +82,8 @@ freezeTreshold = 0.5; % in seconds, treshold for %was 1
 deriv2Tresh = 0.08; % Treshold for 2nd derivative of vidDif %was 0.05
 noNest = 1;
 discDetection = 0; %Makes script very slow, don't run on average computer
+
+showMovie = 0;
 if showMovie
     figure;
 end
@@ -509,6 +518,7 @@ for i = target_frames
     
     if smoothVidDif(i) < minimalMovement + difTreshold && deriv2(i) < deriv2Tresh...
             && deriv2(i) > -deriv2Tresh && smoothTrajectory(i,1) ~= 0;
+        i
         % && ~inNest(i) && smoothTrajectory(i,1) ~= 0;
         if firstHit
             startTime = i / frameRate;
@@ -547,7 +557,8 @@ for i = target_frames
                         p = 1; framesforward = 0;
                         message1 =sprintf('Click first on nose then on arse');
                         if k==1
-                            uiwait(msgbox(message1));
+                            logmsg(message1);
+%                             uiwait(msgbox(message1));
                         else
                             logmsg(message1);
                         end
@@ -563,7 +574,8 @@ for i = target_frames
                         if startTime<ActStartTime || startTime>ActEndTime+0.2
                             message3 = sprintf('press "space" for manual input, OK to continue');
                             %                            if k==1
-                            uiwait(msgbox(message3));
+%                             uiwait(msgbox(message3));
+                            logmsg(message3);
                             %                         else
                             %                             logmsg(message3);
                             %                         end
@@ -602,7 +614,8 @@ for i = target_frames
                                             if p==2
                                                 %                                                 if ~isempty(stim(k,:));
                                                 message5 = ('Click on stim');
-                                                uiwait(msgbox(message5));
+                                                logmsg(message5)
+%                                                 uiwait(msgbox(message5));
                                                 [xs(p), ys(p)] = ginput(1);
                                                 stim(k,:) = [xs(p) ys(p)]; hold on;
 %                                                 figure;
@@ -623,7 +636,8 @@ for i = target_frames
                             end
                         else
                             message2 = sprintf('Click on stimulus center or press ''n'' for absent stimulus');
-                            uiwait(msgbox(message2));
+                            logmsg(message2);
+%                             uiwait(msgbox(message2));
                             [stim(k,1), stim(k,2), button] = ginput(1);
                             if eq(button,110)
                                 while p<2   % looking at frames and checking
@@ -654,7 +668,8 @@ for i = target_frames
                                             p = p + 1;
                                             if p==2
                                                 message4 = ('Click on stim');
-                                                uiwait(msgbox(message4));
+                                                logmsg(message4);
+%                                                 uiwait(msgbox(message4));
                                                 [xs(p), ys(p)] = ginput(1);
                                                 stim(k,:) = [xs(p) ys(p)]; hold on;
                                                 plot([nose(k,1),stim(k,1)],[nose(k,2),stim(k,2)], 'linewidth', 2);%position line
