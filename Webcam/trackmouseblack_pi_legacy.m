@@ -581,8 +581,8 @@ for i = target_frames
                         if startTime<ActStartTime || startTime>ActEndTime+0.2
                             message3 = sprintf('press "space" for manual input, OK to continue');
                             %                            if k==1
-%                             uiwait(msgbox(message3));
-                            logmsg(message3);
+                            uiwait(msgbox(message3));
+%                             logmsg(message3);
                             %                         else
                             %                             logmsg(message3);
                             %                         end
