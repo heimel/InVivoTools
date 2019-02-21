@@ -20,6 +20,10 @@ function [freezeTimes, nose, arse, stim, mouse_move, move_2der,trajectory_length
 %
 %  Uses old VideoReader implementation
 
+
+            gamma  = 0.3;
+
+
 vid=VideoReader(filename);
 %Get paramters of video
 numFrames = get(vid, 'NumberOfFrames');
@@ -527,6 +531,9 @@ for i = target_frames
             
             snapframe = read(vid, i);%+vidlag
             
+            snapframe = uint8(double(snapframe).^gamma / (255^gamma) * 255);
+
+            
             sfr = size(snapframe);
             
         else
@@ -654,8 +661,8 @@ for i = target_frames
                                             framesforward = framesforward - 1;
                                             framenr = round(startTime*frameRate)...
                                                 +framesforward;
-                                            snapframe = read(vid,framenr);image...
-                                                (snapframe, 'Parent', snapaxes);
+                                            snapframe = read(vid,framenr);
+                                            image(snapframe, 'Parent', snapaxes);
                                             
                                         case 29 % right arrow
                                             framesforward = framesforward + 1;

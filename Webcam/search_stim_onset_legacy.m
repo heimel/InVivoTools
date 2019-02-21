@@ -21,7 +21,7 @@ roiL = [Xmin, Ymin, W, H];
 brightness = zeros(2,num_frames); j = 0; % vector of all averaged brightness (left and right) values for the ROI
 for i = start_frame:end_frame
     j = j+1;
-    frame = read(v,i);
+    frame = read(v,floor(i));
     im_roiR = imcrop(frame,roiR);
     im_roiL = imcrop(frame,roiL);
     brightness(1,j)  = mean(im_roiR(:));

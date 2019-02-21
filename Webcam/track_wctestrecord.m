@@ -29,8 +29,9 @@ if isfield(stimparams,'start_position')
 else
     startside = NaN;
 end
+
 rec = 1;
-if isempty(record.stimstartframe)
+if isempty(record.stimstartframe) || ~isfield(record.measures, 'arena')
     stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
     record.measures = [];
     record.measures.stimstart = stimStart;
@@ -53,9 +54,13 @@ if isempty(record.stimstartframe)
     record.measures.peakPoints = peakPoints;
 else
     stimStart = (record.stimstartframe)/30;
+    record.measures.stimstart = stimStart;
+    
     disp(['stimulus started at ', num2str(stimStart), ' s'])
     v = VideoReader(filename);
     frameRate = get(v, 'FrameRate');
+    record.measures.frameRate = frameRate;
+    
     stimFrame = stimStart*frameRate;
     firstframe = read(v,stimFrame);
     filename2 = fullfile(experimentpath(record),'firstframe.mat');
