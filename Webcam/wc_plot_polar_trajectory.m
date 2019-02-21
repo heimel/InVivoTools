@@ -31,6 +31,7 @@ indnnan = ~isnan(azimuth);
 
 
 polarplot(azimuth,pi/2-elevation,'.','color',0.8*[1 1 1])
+set(gca,'ThetaDir','clockwise') % to fit with movie
 hold on
 %polarplot(azimuth(indnnan),pi/2-elevation(indnnan),'-','color',0.8*[1 1 1])
 ind = find(~isnan(azimuth),1,'first');
