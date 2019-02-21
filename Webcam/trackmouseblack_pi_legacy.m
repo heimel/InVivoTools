@@ -277,7 +277,7 @@ for currentframenr = frameRange %1:5:numFrames
     % frame is calculated
     if ~isempty(oldframe) && ~isempty(finalpos) && finalpos(1) ~= 0
         if isempty(pos)
-            vidDif(currentframenr - 1) = 0;
+            vidDif(floor(currentframenr) - 1) = 0;
         else
             frameDif = abs(Frame - oldframe);
             if round(finalpos(1) - difScope) < 1
