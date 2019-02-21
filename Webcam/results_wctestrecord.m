@@ -33,94 +33,95 @@ end
 
 stimstart = measures.stimstart;
 frameRate = measures.frameRate;
-arena = measures.arena;
-brightness = measures.brightness;
 frame1 = firstframe;
 
-
-if showstimpeaks
-    figure;
-    image(frame1);
-    axis image
-    %imshow(frame1, []); % just show it
+if isfield(record.measures,'arena')
+    arena = measures.arena;
+    brightness = measures.brightness;
     
-    W = 15;
-    H = 30;
-    Xmin = arena(1)+arena(3)-W;
-    Ymin = arena(2)+arena(4)/2-H/2;
-    roiR = [Xmin, Ymin, W, H];
-    Xmin = arena(1);
-    roiL = [Xmin, Ymin, W, H];
-    
-    h2 = imrect(gca, roiR);
-    h3 = imrect(gca, roiL);
-    h_arena = imrect(gca, arena);
-    binaryImage = h_arena.createMask();
-    binaryImage2 = h2.createMask();
-    binaryImage3 = h3.createMask();
-    
-    m = 2; n = 3;
-    subplot(m,n,1);
-    image(frame1);
-    axis image
-    %imshow(frame1,[]);
-    axis on;
-    title('Sample Frame');
-    subplot(m,n,2);
-    burned_frame = frame1;
-    burned_frame(binaryImage) = 0;
-    image(burned_frame);
-    %imshow(burned_frame,[]);
-    axis image on;
-    title('Selection of arena');
-    
-    subplot(m,n,3);
-    burned_frame = frame1;
-    burned_frame(binaryImage2 | binaryImage3) = 255;
-    %imshow(burned_frame,[]);
-    image(burned_frame);
-    axis image
-    axis on;
-    title('ROI');
-    
-    % plots stimulus onset brightness
-    
-    if isfield(measures,'thresholdsStimOnset') && ~isempty(measures.thresholdsStimOnset)
-        thresholdsStimOnset = measures.thresholdsStimOnset;
-    else
-        errormsg('thresholdsStimOnset is not determined. use "track" button')
-    end
-    if isfield(measures,'peakPoints')
-        peakPoints = measures.peakPoints;
-    else
-        errormsg('Peaks are not determined. use "track" button')
-    end
-    
-    if ~isempty(measures.peakPoints)
-        peakPointR = peakPoints(1,:);
-        peakPointL = peakPoints(2,:);
-    end
-    
-    stimFrame = stimstart*frameRate;
-    start_frame = stimFrame-30-10; %30:length of the stim, 10:for interval
-    end_frame = stimFrame+90+30;
-    frames = start_frame:end_frame;
-    % figure;
-    subplot(m,n,4:6);
-    plot(frames,brightness(1,:),'color',[0 2/3 1], 'LineWidth',2); hold on;
-    plot(frames,brightness(2,:),'color',[1 2/3 0], 'LineWidth',2); hold on;
-    plot(frames,thresholdsStimOnset(1,:),'--','color',[0 1/3 1]);
-    plot(frames,thresholdsStimOnset(2,:),'--','color',[0 1/3 1]);
-    plot(frames,thresholdsStimOnset(3,:),'--','color',[1 1/3 0]);
-    plot(frames,thresholdsStimOnset(4,:),'--','color',[1 1/3 0]);
-    legend('Right ROI','Left ROI','Location',[.705,.46,.2,.1]);
-    
-    if ~isempty(measures.peakPoints)
-        plot(peakPointR(1,2),peakPointR(1,3),'k^','markerfacecolor','k'); axis tight;
-        plot(peakPointL(1,2),peakPointL(1,3),'k^','markerfacecolor','m'); axis tight;
+    if showstimpeaks
+        figure;
+        image(frame1);
+        axis image
+        %imshow(frame1, []); % just show it
+        
+        W = 15;
+        H = 30;
+        Xmin = arena(1)+arena(3)-W;
+        Ymin = arena(2)+arena(4)/2-H/2;
+        roiR = [Xmin, Ymin, W, H];
+        Xmin = arena(1);
+        roiL = [Xmin, Ymin, W, H];
+        
+        h2 = imrect(gca, roiR);
+        h3 = imrect(gca, roiL);
+        h_arena = imrect(gca, arena);
+        binaryImage = h_arena.createMask();
+        binaryImage2 = h2.createMask();
+        binaryImage3 = h3.createMask();
+        
+        m = 2; n = 3;
+        subplot(m,n,1);
+        image(frame1);
+        axis image
+        %imshow(frame1,[]);
+        axis on;
+        title('Sample Frame');
+        subplot(m,n,2);
+        burned_frame = frame1;
+        burned_frame(binaryImage) = 0;
+        image(burned_frame);
+        %imshow(burned_frame,[]);
+        axis image on;
+        title('Selection of arena');
+        
+        subplot(m,n,3);
+        burned_frame = frame1;
+        burned_frame(binaryImage2 | binaryImage3) = 255;
+        %imshow(burned_frame,[]);
+        image(burned_frame);
+        axis image
+        axis on;
+        title('ROI');
+        
+        % plots stimulus onset brightness
+        
+        if isfield(measures,'thresholdsStimOnset') && ~isempty(measures.thresholdsStimOnset)
+            thresholdsStimOnset = measures.thresholdsStimOnset;
+        else
+            errormsg('thresholdsStimOnset is not determined. use "track" button')
+        end
+        if isfield(measures,'peakPoints')
+            peakPoints = measures.peakPoints;
+        else
+            errormsg('Peaks are not determined. use "track" button')
+        end
+        
+        if ~isempty(measures.peakPoints)
+            peakPointR = peakPoints(1,:);
+            peakPointL = peakPoints(2,:);
+        end
+        
+        stimFrame = stimstart*frameRate;
+        start_frame = stimFrame-30-10; %30:length of the stim, 10:for interval
+        end_frame = stimFrame+90+30;
+        frames = start_frame:end_frame;
+        % figure;
+        subplot(m,n,4:6);
+        plot(frames,brightness(1,:),'color',[0 2/3 1], 'LineWidth',2); hold on;
+        plot(frames,brightness(2,:),'color',[1 2/3 0], 'LineWidth',2); hold on;
+        plot(frames,thresholdsStimOnset(1,:),'--','color',[0 1/3 1]);
+        plot(frames,thresholdsStimOnset(2,:),'--','color',[0 1/3 1]);
+        plot(frames,thresholdsStimOnset(3,:),'--','color',[1 1/3 0]);
+        plot(frames,thresholdsStimOnset(4,:),'--','color',[1 1/3 0]);
+        legend('Right ROI','Left ROI','Location',[.705,.46,.2,.1]);
+        
+        if ~isempty(measures.peakPoints)
+            plot(peakPointR(1,2),peakPointR(1,3),'k^','markerfacecolor','k'); axis tight;
+            plot(peakPointL(1,2),peakPointL(1,3),'k^','markerfacecolor','m'); axis tight;
+        end
     end
 end
-
 
 % plots movement trajectory
 if isfield(measures,'mousemove') && ~isempty(measures.mousemove)
