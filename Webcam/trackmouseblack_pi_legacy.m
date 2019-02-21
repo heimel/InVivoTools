@@ -38,7 +38,7 @@ framesBeforeAfter = secBeforeAfter *frameRate;
 
 %%
     stimFrame = stimStart*frameRate;
-    firstframe = read(vid,stimFrame);
+    firstframe = read(vid,floor(stimFrame));
     filename2 = fullfile(experimentpath(record),'firstframe.mat');
     save(filename2, 'firstframe');
     %%
@@ -106,7 +106,7 @@ end
 bgframes = frameRange(1:90:600);
 firstdone = 0;
 for i = bgframes
-    vidFrames = read(vid, i);
+    vidFrames = read(vid, floor(i));
     Frame=vidFrames(:,:,:,1);
     if ~firstdone
         bgsum = double(Frame);
@@ -174,7 +174,7 @@ testFrames = frameRange(10:90:600);
 maxRGBs = zeros(1,length(testFrames));
 j = 1;
 for i = testFrames
-    vidFrames = read(vid, i);
+    vidFrames = read(vid, floor(i)); %floor for 2018a
     Frame = vidFrames(:,:,:,1);
     B=imcomplement(Frame);
     B = double(B) - double_bg;
@@ -201,7 +201,7 @@ nearNest = zeros(numFrames,1); %Stores when mouse is near nest
 nearNest(round(frameRange(1))) = 1;
 
 for currentframenr = frameRange %1:5:numFrames
-    vidFrames = read(vid, currentframenr);
+    vidFrames = read(vid, floor(currentframenr));
     Frame=vidFrames(:,:,:,1);
     % Find out were the disc is
     if discDetection
@@ -522,7 +522,7 @@ for i = target_frames
     
     if smoothVidDif(i) < minimalMovement + difTreshold && deriv2(i) < deriv2Tresh...
             && deriv2(i) > -deriv2Tresh && smoothTrajectory(i,1) ~= 0;
-        i
+        i;
         % && ~inNest(i) && smoothTrajectory(i,1) ~= 0;
         if firstHit
             startTime = i / frameRate;
