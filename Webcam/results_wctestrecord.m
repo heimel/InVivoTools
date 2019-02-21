@@ -11,7 +11,7 @@ global_record = record;
 
 experimentpath(record)
 
-measures = record.measures;
+measures = record.measures
 
 filename = fullfile(experimentpath(record),'firstframe.mat');
 load(filename);
@@ -21,8 +21,6 @@ evalin('base','global global_record');
 logmsg('Measures available in workspace as ''measures'',, record as ''global_record''.');
 
 % plots the arena
-% figHandles = findall(0,'Type','figure');
-% fig_n = max(figHandles)+1;
 
 showstimpeaks = true;
 

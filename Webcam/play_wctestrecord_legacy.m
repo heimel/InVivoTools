@@ -43,6 +43,8 @@ figure;
 changed = true;
 prevnokey = true;
 makeVideo = 1;
+work_path = cd; 
+vid_sav_path = fullfile(wcinfo.path, record.epoch);
 
 while 1
     if changed
@@ -64,9 +66,11 @@ while 1
             case 40 %arrow down 
                 
                 if makeVideo
+                    cd(vid_sav_path)
                     writerObj = VideoWriter(vid_name); %#ok<UNRCH>
                     writerObj.FrameRate = frameRate;
                     open(writerObj);
+                    cd(work_path);
                 end
                 
                 while 1
@@ -77,11 +81,15 @@ while 1
                     frame = frame+1;
                     if makeVideo
                         frames = getframe; %#ok<UNRCH>
+                        cd(vid_sav_path)
                         writeVideo(writerObj,frames);
+                        cd(work_path);
                         [keyIsDown, secs, keyCode, deltaSecs] = KbCheck;
                         if keyIsDown && find(keyCode,1)==38 % arrow up
                             if makeVideo
+                                cd(vid_sav_path)
                                 close(writerObj); %#ok<UNRCH>
+                                cd(work_path);
                             end
                         
                         break
