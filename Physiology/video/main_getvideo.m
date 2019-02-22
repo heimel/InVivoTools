@@ -136,32 +136,46 @@ trigger_vid = create_trigger(recording_time);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % executes start command for Analog Input Object, and waits for a trigger
-start(trigger_vid);
-
+try
+    start(trigger_vid);
+catch me
+    switch me.identifier
+        case 'daq:daqmex:unexpected'
+            logmsg(me.message);
+            stop(trigger_vid);
+    end
+end
+    
 logmsg(' *** Waiting for trigger ***');disp(' ');
 
 % main while loop -> optimized for video acquisition via open_grab()
 counter = 1;
-while true
-    
-    % *** when acquisition is triggered ***
-    if (trigger_vid.TriggersExecuted == 1 && counter == 1);
+try
+    while true
         
-        logmsg('Received trigger. Acquisition Started')
-        counter = counter + 1;
+        % *** when acquisition is triggered ***
+        if (trigger_vid.TriggersExecuted == 1 && counter == 1);
+            
+            logmsg('Received trigger. Acquisition Started')
+            counter = counter + 1;
+            
+            % Start Video executable run script.
+            open_grab(recording_time,output);
+            
+        end
         
-        % Start Video executable run script.
-        open_grab(recording_time,output);
+        % *** when acquisition time ends ***
+        % breaks from loop if daq is inactive (i.e. waiting for start command)
+        if strcmp(trigger_vid.Running,'Off')
+            logmsg('Acquisition ended, returning to init_getvideo()');
+            break
+        end
         
     end
-    
-    % *** when acquisition time ends ***
-    % breaks from loop if daq is inactive (i.e. waiting for start command)
-    if strcmp(trigger_vid.Running,'Off')
-        logmsg('Acquisition ended, returning to init_getvideo()');
-        break
-    end
-    
+catch
+    stop(trigger_vid);       % Stops (all active processes on) analog input object
+    delete(trigger_vid);     % Deletes analog input object
+    clear trigger            % Removes analog input object from workspace
 end
 
 % Destroy trigger (Analog Input object) to prevent faulty results when
