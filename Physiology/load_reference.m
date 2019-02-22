@@ -58,7 +58,7 @@ data_dir = fullfile(temp);
 % retrieve total amount of blocks to time each acquisition session. the
 % loop is needed because there is a short delay between the systems
 while exist(data_dir_file,'file') == 0
-logmsg('wait for acqParams_in to be ready')
+    logmsg(['wait for ' data_dir_file ' to be ready'])
 end
 
 % import block and stimulus duration information.
