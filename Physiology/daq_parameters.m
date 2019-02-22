@@ -58,13 +58,13 @@ settings.trigger_repeat = 0;              % the amount of triggered samples to b
 
 %%% Retrieve trigger information and save directory reference from Stimulus-PC %%%
 if input_arg.simulate == true
-settings.duration = 10;                  % Duration of sample (seconds)
-settings.data_dir = input_arg.save_dir_temp;
+    settings.duration = 10;                  % Duration of sample (seconds)
+    settings.data_dir = input_arg.save_dir_temp;
 else
-[settings.block_number, settings.data_dir] = load_reference;
-% Duration is number of blocks times 10 sec + an additional extra second. 
-% FIXED TIMING PARAMETER! -> DO NOT CHANGE
-settings.duration = (settings.block_number * 10) + 1;                 
+    [settings.block_number, settings.data_dir] = load_reference;
+    % Duration is number of blocks times 10 sec + an additional extra second.
+    % FIXED TIMING PARAMETER! -> DO NOT CHANGE
+    settings.duration = (settings.block_number * 10) + 1;
 end
 
 
