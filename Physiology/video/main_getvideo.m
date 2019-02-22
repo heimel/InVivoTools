@@ -60,9 +60,11 @@ remotecommglobals;
 %%%         Set Time         %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% recording time is number of blocks (10 sec each) + an additional second
-recording_time = (block_number * 10) + 1; % recording time in seconds
+% recording time is number of blocks (10 sec each) + an additional 10 second
+recording_time = (block_number * 10) + 10; % recording time in seconds
 
+% logmsg('Temporarily setting 200 s recording time');
+% recording_time = 200;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%  Set Save Path and Name  %%%
