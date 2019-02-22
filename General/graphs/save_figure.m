@@ -30,7 +30,7 @@ if ~exist(path,'dir')
 end
 cd(path);
 if  isunix && ~ismac
-    savefig([filename '.png'],h,'png'); % to avoid missing fonts
+    savefig_gs([filename '.png'],h,'png'); % to avoid missing fonts
     % alternative
     % frame = getframe(h);
     % imwrite(frame.cdata,[filename '.png']);

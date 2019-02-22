@@ -1,12 +1,14 @@
-function wcinfo = wc_getmovieinfo( record)
+function [wcinfo,filename] = wc_getmovieinfo( record)
 %WC_GETMOVIEINFO gets info about recorded webcam movies
 %
-% WCINFO = WC_GETMOVIEINFO( RECORD )
+% [WCINFO,FILENAME] = WC_GETMOVIEINFO( RECORD )
+%    FILENAME is full mp4 filename including path and extension
 %
-% 2015, Alexander Heimel
+% 2015-2019, Alexander Heimel
 
 par = wcprocessparams(record);
 
+filename = [];
 d = dir(fullfile(experimentpath(record),'webcam*info.mat'));
 logmsg(['Found ' num2str(length(d)) ' webcam records in ' experimentpath(record)]);
 if isempty(d)
@@ -16,20 +18,49 @@ end
 
 for i = 1:length(d)
     wcinfo(i) = load(fullfile(experimentpath(record),d(i).name));
-    
     [pth,wcinfo(i).filename] = fileparts(wcinfo(i).filename);
     wcinfo(i).filename = [wcinfo(i).filename '.h264'];
 end
 
-% create mp4 wrappers   
+for i=1:length(d)
+    if isempty(wcinfo(i).stimstart)
+        logmsg(['Empty stimstart in ' recordfilter(record)]);
+        comment = record.comment;
+        comment(comment==' ')=[];
+        
+        ind = strfind(comment,'start=');
+        if isempty(ind)
+            errormsg('No stimstart in wcinfo. Add starttime to comment field, as ''start=XX:XX;''. note semicolon at end');
+            return
+        end
+        ind2 = find(comment(ind:end)==':');
+        if isempty(ind2)
+            errormsg('Missing colon in start=XX:XX;');
+            return
+        end
+        ind3 = find(comment(ind:end)==';');
+        if isempty(ind3)
+            errormsg('Missing semicolon in start=XX:XX;');
+            return
+        end
+        minutes = str2double(comment(ind+6:ind+ind2-2));
+        seconds = str2double(comment(ind+ind2:ind+ind3-2));
+        wcinfo(i).real_stimstart = minutes*60+seconds;
+        wcinfo(i).stimstart = (wcinfo(i).real_stimstart-par.wc_timeshift)/par.wc_timemultiplier ;
+        
+    end
+end
+
+
+% create mp4 wrappers
 parpath = fullfile(experimentpath(record),'..');
 
-if ~isempty(par.wc_mp4wrappercommand) 
+if ~isempty(par.wc_mp4wrappercommand)
     for i=1:length(d)
         wcinfo(i).path = parpath;
         wcinfo(i).mp4name = [ wcinfo(i).filename '.mp4'];
         if  ~exist(fullfile(parpath,wcinfo(i).mp4name),'file') || ...
-                getfield(dir(fullfile(parpath,wcinfo(i).mp4name)),'datenum')<getfield(dir(fullfile(parpath,wcinfo(i).filename)),'datenum') 
+                getfield(dir(fullfile(parpath,wcinfo(i).mp4name)),'datenum')<getfield(dir(fullfile(parpath,wcinfo(i).filename)),'datenum')
             if exist(fullfile(parpath,wcinfo(i).mp4name),'file')
                 logmsg(['Backing up ' fullfile(wcinfo(i).path,wcinfo(i).mp4name)]);
                 movefile(fullfile(wcinfo(i).path,wcinfo(i).mp4name),fullfile(wcinfo(i).path ,[wcinfo(i).mp4name '.bak']));
@@ -59,3 +90,5 @@ for i=1:length(wcinfo)
     logmsg(['Stimulus started corrected: ' num2str(real_stimstart) ' s = '...
         num2str(floor(real_stimstart/60)) ':' num2str(real_stimstart-60*floor(real_stimstart/60),'%02.2f')   ]);
 end
+
+filename = fullfile(wcinfo.path,wcinfo.mp4name);

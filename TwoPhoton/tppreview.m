@@ -7,7 +7,8 @@ function im = tppreview(record, selFrames, firstFrames, channel,opt, mode, verbo
 %  directory name to be opened, and NUMFRAMES is the number of
 %  frames to read.  If FIRSTFRAMES is 1, then the first SELFRAMES
 %  frames will be read; If FIRSTFRAMES is 0, the frames will be taken
-%  randomly from those available.
+%  randomly from those available. If FIRSTFRAMES > 1 then start at
+%  FIRSTFRAMES (i.e. skip FIRSTFRAMES-1 frames at start)
 %
 %  CHANNEL is the channel to be read.  If it is empty, then
 %  all channels will be read and third dimension of im will
@@ -18,34 +19,37 @@ function im = tppreview(record, selFrames, firstFrames, channel,opt, mode, verbo
 %  maximum projection is used. For MODE is 3 an maximum projection across
 %  the X-axis is taken, for MODE 4 the same through the Y-axis
 %
-%  2008, Steve Van Hooser, 2010-2015 adapted by Alexander Heimel
+%  2008, Steve Van Hooser
+%  2010-2017, Alexander Heimel
 %
 
-if nargin<7; verbose = []; end
-if nargin<6; mode = []; end
-if nargin<5; opt = []; end
-if nargin<4; channel = []; end
-if nargin<3; firstFrames = []; end
-if nargin<2; selFrames = [];end
-
-if isempty(verbose)
+if nargin<7 || isempty(verbose) 
     verbose = true;
 end
-if isempty(firstFrames)
+if nargin<6
+    mode = []; 
+end
+if nargin<5 
+    opt = []; 
+end
+if nargin<4 
+    channel = [];
+end
+if nargin<3 || isempty(firstFrames)
     firstFrames = 1;
 end
-if isempty(selFrames)
+if nargin<2 || isempty(selFrames)
     selFrames = 100;
 end
 
-fname=tpfilename(record);
+fname = tpfilename(record);
 if ~exist(fname,'file')
     errormsg(['File ' fname ' does not exist.']);
     im = [];
     return
 end
 
-inf=tpreadconfig(record);
+inf = tpreadconfig(record);
 
 if isfield(inf,'third_axis_name') && ~isempty(inf.third_axis_name) && lower(inf.third_axis_name(1))=='z'
     zstack = true;
@@ -54,15 +58,10 @@ else
 end
 
 if isempty(mode)
-    switch record.experiment
-        case '12.98'  % Rogier
-            mode = 2; % maximum projection
-        otherwise
-            if zstack
-                mode = 2; % maximum projection
-            else
-                mode = 1; % average
-            end
+    if zstack
+        mode = 2; % maximum projection
+    else
+        mode = 1; % average
     end
 end
 
@@ -78,61 +77,23 @@ else
     first = 1;
 end
 
-switch firstFrames,
-    case 0
-        N = randperm(total_nFrames);
+if firstFrames == 0
+    N = randperm(total_nFrames);
         frame_selection = sort(N(1:numFrames));
-    case 1
+elseif firstFrames == 1
         frame_selection = first:numFrames;
-end;
+else % skip some
+    frame_selection = firstFrames:(firstFrames+numFrames);
+end
+
 
 warning('ON','TPREADFRAME:MEM');
 
 switch mode
-    case 1 % average through Z/T axis
+    case {1,2} % average or max through Z/T axis
         im = zeros( inf.Height,inf.Width,inf.NumberOfChannels);
-        if verbose
-            hwait = waitbar(0,'Loading preview');
-        end
         for c=channel
-           try
-                im(:,:,c) = tpreadframe(record,c,frame_selection,opt,verbose,[],1);
-            catch me
-                logmsg(['PLEASE TELL ALEXANDER: ' me.message]);
-                im(:,:,c) = double( tpreadframe(record,c,frame_selection(1),opt,verbose) );
-                for f=frame_selection(2:end)
-                    im(:,:,c) = im(:,:,c) + double(tpreadframe(record,c,f,opt,verbose));
-%                     if verbose
-%                         waitbar(((c-1)*length(frame_selection)+f)/length(channel)/length(frame_selection));
-%                     end
-                end
-            end
-        end
-        if verbose
-            close(hwait);
-        end
-        im=im/length(frame_selection);
-    case 2 % maximum projection through Z/T axis
-        im = zeros( inf.Height,inf.Width,inf.NumberOfChannels);
-        if verbose
-            hwait = waitbar(0,'Loading preview');
-        end
-        for c=channel
-            try
-                im(:,:,c) = tpreadframe(record,c,frame_selection,opt,verbose,[],2);
-            catch me
-                logmsg(['PLEASE TELL ALEXANDER: ' me.message]);
-                im(:,:,c) = double( tpreadframe(record,c,frame_selection(1),opt,verbose) );
-                for f=frame_selection(2:end)
-                    im(:,:,c) = max(im(:,:,c), double(tpreadframe(record,c,f,opt,verbose)));
-                    %                 if verbose
-                    %                     waitbar(((c-1)*length(frame_selection)+f)/length(channel)/length(frame_selection));
-                    %                 end
-                end
-            end
-        end
-        if verbose
-            close(hwait);
+            im(:,:,c) = tpreadframe(record,c,frame_selection,opt,verbose,[],mode);
         end
     case {3,4} % maximum projection through X or Y axis, respectively
         % takes memory

@@ -1,10 +1,14 @@
-function cells = importtdt(record, channels2analyze)
+function cells = importtdt(record, channels2analyze, allowchanges)
 %IMPORTTDT
 %
-% CELLS = IMPORTTDT( RECORD, CHANNELS2ANALYZE )
+% CELLS = IMPORTTDT( RECORD, CHANNELS2ANALYZE, ALLOWCHANGES=true )
 %
-% 2015, Alexander Heimel
+% 2015-2017, Alexander Heimel
 %
+
+if nargin<3 || isempty(allowchanges)
+    allowchanges = true;
+end
 
 processparams = ecprocessparams(record);
 
@@ -12,14 +16,15 @@ if processparams.always_use_matlab_tdt || isunix
     use_matlab_tdt = true;
 else
     try
-        F = figure('Visible', 'off');
+        F = figure('WindowStyle','normal','Visible', 'off');
         actxcontrol('TTANK.X', [20 20 60 60], F);
         close(F)
         use_matlab_tdt = false;
     catch me
-        if strcmp(me.identifier,'MATLAB:COM:InvalidProgid')
-            use_matlab_tdt = true;
+        if ~strcmp(me.identifier,'MATLAB:COM:InvalidProgid')
+            logmsg(me.identifier);
         end
+        use_matlab_tdt = true;
     end
 end
 
@@ -27,7 +32,7 @@ datapath=experimentpath(record,false);
 
 EVENT.Mytank = datapath;
 EVENT.Myblock = record.test;
-EVENT = load_tdt(EVENT, use_matlab_tdt);
+EVENT = load_tdt(EVENT, use_matlab_tdt,allowchanges);
 if ~isfield(EVENT,'strons')
     errormsg(['No triggers present in ' recordfilter(record)]);
     cells = [];
@@ -101,7 +106,6 @@ n_cells = length(WaveTime_Spikes);
 % load stimulus starttime
 stimsfile = getstimsfile( record );
 
-
 if isempty(stimsfile) 
     errormsg(['No stimsfile for record ' recordfilter(record) '. Use ''stiminterview(global_record)'' to generate stimsfile. Now no analysis']);
     intervals = [EVENT.timerange(1) EVENT.timerange(2)]; % arbitrary, no link to real stimulus
@@ -111,14 +115,14 @@ else
     intervals = [stimsfile.start stimsfile.MTI2{end}.frameTimes(end)+10];
 end
 
-
 EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
 
 if 0 % to check alignment of triggers with stimulus times
-    stims= getstimsfile(record);
-    ss=[cellfun(@(x) getfield(x(1),'startStopTimes'),stims.MTI2,'UniformOutput',false)]
-    ss= cellfun(@(x) x(1),ss);
-    figure;plot(EVENT.strons.tril(2:end)-ss(1:2:end)+stims.start,'.');
+    stims = getstimsfile(record); %#ok<UNRCH>
+    ss = cellfun(@(x) getfield(x(1),'startStopTimes'),stims.MTI2,'UniformOutput',false);
+    ss = cellfun(@(x) x(1),ss);
+    figure;
+    plot(EVENT.strons.tril(2:end)-ss(1:2:end)+stims.start,'.');
 end
 
 % shift time to fit with TTL and stimulustimes

@@ -5,14 +5,14 @@ function refreshnetwork
 
 
 if isunix
-	fid=fopen('refreshnetworkfile.dummy','w');
+	fid = fopen('refreshnetworkfile.dummy','w');
 	if fid>0
         fclose(fid); 
     end
 else
-	switch upper(computer),
-		case 'MAC2'
-			thedir = pwd; 
+    switch upper(computer),
+		    case 'MAC2'
+		      	thedir = pwd; 
             cd(pwd);
     end
 end

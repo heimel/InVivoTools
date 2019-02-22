@@ -26,7 +26,7 @@ function open_grab(recording_time,output)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % open_grab() needs to be in the video acquisition directory 
-cd c:\software\invivotools\physiology\video;
+cd('c:\software\invivotools\physiology\video');
 
 % set executable name
 run_exe = 'grabpupilsize ';

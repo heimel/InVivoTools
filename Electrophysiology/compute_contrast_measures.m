@@ -4,7 +4,7 @@ function measures = compute_contrast_measures( measures )
 %  MEASURES = COMPUTE_CONTRAST_MEASURES( MEASURES )
 %
 %
-% 2013-2016 Alexander Heimel
+% 2013-2019 Alexander Heimel
 %
 
 measures.usable=1;
@@ -32,36 +32,29 @@ for t = 1:n_triggers
     else
         response = measures.curve{t}(2,:)-mean(measures.curve{t}(2,ind_blank));
     end
-    [measures.nk_rm{t},measures.nk_b{t},measures.nk_n{t}] = naka_rushton(measures.range{t},response);
+    [measures.nk_rm{t},measures.nk_b{t},measures.nk_n{t},measures.fit_explained_variance{t}] = ...
+        naka_rushton(measures.range{t},response);
     
-    % get c50 from fit
-    cn=(0:0.01:1);
-    r=measures.nk_rm{t}* (cn.^measures.nk_n{t})./ ...
-        (measures.nk_b{t}^measures.nk_n{t}+cn.^measures.nk_n{t}) ; % without spont
-    ind=findclosest(r,0.5*max(r));
-    measures.c50{t}=cn(ind);
+    % compute C50 and dynamic range
+    measures.c50{t} = NaN;
+    measures.dynamic_range{t} = NaN;
+    cXX = @(f,b,n) ((f * b^n)/(b^n+1-f))^(1/n); 
+    measures.c50{t} = cXX(0.5,measures.nk_b{t},measures.nk_n{t});
+    c25 = cXX(0.25,measures.nk_b{t},measures.nk_n{t});
+    c75 = cXX(0.75,measures.nk_b{t},measures.nk_n{t});
+    measures.dynamic_range{t} = c75-c25;
+    
 end
 
 if any([measures.c50{:}]<0.1)
-    measures.usable=0;
+    measures.usable = 0;
     logmsg('C50 below 10%');
 end
 
 if any([measures.nk_n{:}]<0.9)
-    measures.usable=0;
+    measures.usable = 0;
     logmsg('nk_n below 0.9');
 end
 
 
-% % calculate adaptation
-% n_spikes_per_stim=zeros(1,length(inp.st.mti));
-% for i=1:length(inp.st.mti)
-%   n_spikes_per_stim(i)= ...
-%     length(get_data(inp.spikes,[inp.st.mti{i}.startStopTimes(2),inp.st.mti{i}.startStopTimes(3)]));
-% end
-% norm_n_spikes_per_stim=n_spikes_per_stim/mean(n_spikes_per_stim);
-%
-% pfit=polyfit((1:length(n_spikes_per_stim)),norm_n_spikes_per_stim,1);
-% % p(1) is fractional change in rate per presented stimulus;
-% measures.rate_change=pfit(1);
 

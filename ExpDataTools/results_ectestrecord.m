@@ -3,7 +3,7 @@ function results_ectestrecord( record )
 %
 %  RESULTS_ECTESTRECORD( record )
 %
-%  2007-2014, Alexander Heimel
+%  2007-2019, Alexander Heimel
 %
 
 global measures analysed_script global_record
@@ -20,9 +20,6 @@ else
     logmsg('No savedscript');
 end
 
-
-
-
 if isfield(record,'electrode') % i.e. ecdata
     data_type = 'ec';
 elseif isfield(record,'laser') % i.e. tpdata
@@ -34,7 +31,7 @@ end
 
 switch data_type
     case 'ec'
-        params = ecprocessparams;
+        params = ecprocessparams(record);
         if params.plot_spike_features || params.plot_spike_shapes
             spikesfile = fullfile(experimentpath(record),'_spikes.mat');
             if exist(spikesfile,'file')
@@ -120,7 +117,7 @@ for c=1:n_cells
         
         figpos = [ fix( [figleft  (screensize(4)-height-titleheight)/2]) ...
             width height+titleheight];
-        figure('Name',tit,'NumberTitle','off','units','pixels',...
+        figure('WindowStyle','normal','Name',tit,'NumberTitle','off','units','pixels',...
             'Position',figpos,'MenuBar','none');
         
         reltitlepos = (max_rows*subheight)/(max_rows*subheight+titleheight);
@@ -316,6 +313,7 @@ for c=1:n_cells
                     y = printfield(measure,'nk_rm',y,0.5);
                     printfield(measure,'nk_b',y);
                     y = printfield(measure,'nk_n',y,0.5);
+                    printfield(measure,'fit_explained_variance',y);
                 case {'position','location'}
                     y = printfield(measure,'rf_center',y);
             end
@@ -762,6 +760,10 @@ for i=1:length(curves) % over triggers
             plot(fitx,fity,'k');
             set(gca,'xscale','log')
         case 'tFrequency'
+            yl = ylim;
+            if yl(1)>0
+                ylim([0 yl(2)]);
+            end
             if isfield(measure,'tf_fit_halfheight_low') && ~isnan(measure.tf_fit_halfheight_low{i})
                 plot([measure.tf_fit_halfheight_low{i} measure.tf_fit_halfheight_low{i}],ylim,'y-');
             end
@@ -771,11 +773,26 @@ for i=1:length(curves) % over triggers
             if isfield(measure,'tf_fit_optimal') && ~isnan(measure.tf_fit_optimal{i})
                 plot([measure.tf_fit_optimal{i} measure.tf_fit_optimal{i}],ylim,'g-');
             end
+            if isfield(measure,'tf_fit_dogpar') && iscell(measure.tf_fit_dogpar) && ~isempty(measure.tf_fit_dogpar{i}) && ~any(isnan(measure.tf_fit_dogpar{i}))
+                par = measure.tf_fit_dogpar{i};
+            else 
+                if isfield(measure,'rate_spont')
+                    par = dog_fit(curve(1,:),curve(2,:)- measure.rate_spont{i},'zerobaseline');
+                    par(1) = par(1) +  measure.rate_spont{i};
+                else
+                    % not subtracting spontaneous here!
+                    par = dog_fit(curve(1,:),curve(2,:));
+                end
+            end
             fitx = 0:0.1:40;
-            par = dog_fit(curve(1,:),curve(2,:));
             fity = dog(par,fitx);
             hold on
             plot(fitx,fity,'k');
+            xlim([0.3 32]);
+            set(gca,'xscale','log')
+            set(gca,'xtick',[0.5 1 2 4 8 16]);
+            box off
+
         case 'size'
             if isfield(measure,'size_fit_optimal') && ~isnan(measure.size_fit_optimal{i})
                 plot([measure.size_fit_optimal{i} measure.size_fit_optimal{i}],ylim,'g-');

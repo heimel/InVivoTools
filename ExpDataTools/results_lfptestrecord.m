@@ -140,7 +140,7 @@ for lfpch=1:length(measures)
         [ 2/3+0.01 reltitlepos-(1-0.2)*relsubheight 1/3*0.96 relsubheight*0.8]);
     hold on;box off
     
-    band_names = fields(oscillation_bands);
+    band_names = fieldnames(oscillation_bands);
     n_bands = length(band_names);
     
     switch record.stim_type
@@ -270,7 +270,7 @@ logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_
 function plottuning(name,measures,triggers,lfpch)
 %bandcolors = 'rgcby';
 bands = oscillation_bands;
-band_names = fields(bands);
+band_names = fieldnames(bands);
 n_bands = length(band_names);
 triggercolors = 'kbry';
 triggernames = {'Off','On'};
@@ -370,7 +370,7 @@ figure('Name',name,'NumberTitle','off');
 
 bandcolors = 'rgcby';
 bands = oscillation_bands;
-band_names = fields(bands);
+band_names = fieldnames(bands);
 
 n_conditions = size(powerm.power,3);
 

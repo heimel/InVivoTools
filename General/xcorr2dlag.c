@@ -1,16 +1,16 @@
-/*=================================================================
- *
- * XCORR2DLAG.C	Cross-correlation at given lags
- *  2006-02-28, Steve Van Hooser, vanhooser@neuro.duke.edu
- * The calling syntax is:
- *
- *		[XC] = XCORR2DLAG(W1,W2,XLAGS,YLAGS)
- *
- *  Computes 2D cross-correlation of W1 and W2 at the lags
- *  specified in vectors XLAGS and YLAGS.
- *  Look at the corresponding M-code, xcorr2dlag.m, for help.
- *
- *=================================================================*/
+//=================================================================
+//
+// XCORR2DLAG.C	Cross-correlation at given lags
+//  2006-02-28, Steve Van Hooser, vanhooser@neuro.duke.edu
+// The calling syntax is:
+//
+//		[XC] = XCORR2DLAG(W1,W2,XLAGS,YLAGS)
+//
+//  Computes 2D cross-correlation of W1 and W2 at the lags
+//  specified in vectors XLAGS and YLAGS.
+//  Look at the corresponding M-code, xcorr2dlag.m, for help.
+//
+//=================================================================*/
 
 #include <math.h>
 #include "mex.h"

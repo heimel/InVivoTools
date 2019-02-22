@@ -14,7 +14,7 @@ theDir = Remote_Comm_dir;
 if ~exist(theDir,'dir')
     CloseStimScreen
     msg={['Remote communication folder ' theDir ' does not exist. ']};
-    try
+    try 
         if ~check_network
             msg{end+1} = '';
             msg{end+1} = 'Network connection is unavailable. Check UTP cables, make sure firewall is turned off, or consult with ICT department.';
@@ -22,6 +22,8 @@ if ~exist(theDir,'dir')
             msg{end+1} = '';
             msg{end+1} = 'Ethernet connection is working properly. Check NewStimConfiguration or availability of host computer.';
         end
+    catch me
+        logmsg(me.message);
     end
     msg{end+1} = '';
     msg{end+1} = 'Consult NewStim manual troubleshooting section.';
@@ -63,7 +65,7 @@ switch Remote_Comm_method
 
             while 1  % needs control-C to exit
                 pause(0.05);
-                if KbCheck && ~StimDisplayOrderRemote && ~gNewStim.StimWindow.debug
+                if KbCheck && ~StimDisplayOrderRemote && ~gNewStim.StimWindow.debug && ~StimNoBreak
                     CloseStimScreen
                     return
                 end
@@ -71,16 +73,22 @@ switch Remote_Comm_method
                 
                 errorflag = 0;
                 txt = checkscript('runit.m');
-                if ~isempty(txt),
-                    pause(0.05); % to make sure runit is fully written
-                    txt = checkscript('runit.m');
+                if ~isempty(txt)
+                    prevtxt =  '';
+                    while length(prevtxt)<length(txt)
+                        pause(0.2); % to make sure runit is fully written
+                        prevtxt = txt;
+                        txt = checkscript('runit.m');
+                    end
+                        
                     try
                         eval(txt)
                         disp(txt);
                     catch me
                         errorflag = 1;
                         errorstr = me.message;
-                        inds = find(errorstr==sprintf(Remote_Comm_eol)); errorstr(inds) = ':';
+                        inds = find(errorstr==sprintf(Remote_Comm_eol));
+                        errorstr(inds) = ':';
                         save scripterror errorstr -mat
                         CloseStimScreen;
                         logmsg(['Error in script: ' errorstr '.']);

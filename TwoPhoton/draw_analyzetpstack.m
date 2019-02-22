@@ -3,7 +3,7 @@ function [fig,ud] = draw_analyzetpstack( record, analysis_parameters, process_pa
 %
 %  only to be used by ANALYZETPSTACK
 %
-% 2011, Alexander Heimel
+% 2011-2017, Alexander Heimel
 %
 
 ud.record = record;
@@ -26,7 +26,6 @@ if ~isfield(analysis_parameters,'blind') || ~analysis_parameters.blind
 else
     name = ['Analyze: record index ' num2str(analysis_parameters.record_index)];
 end
-
 
 figheight = 650;
 figwidth = 630;
@@ -58,7 +57,6 @@ button.Style='pushbutton';
 % define text style
 txt.Units = 'pixels';
 txt.BackgroundColor = [0.8 0.8 0.8];
-%txt.fontsize = 12;
 txt.fontname = 'arial';
 txt.fontweight = 'normal';
 txt.HorizontalAlignment = 'center';
@@ -69,7 +67,6 @@ edit = txt;
 edit.BackgroundColor = [ 1 1 1];
 edit.Style = 'Edit';
 edit.Enable = 'inactive'; % for enable_editclick_notification
-%edit.Enable = 'on'; % for normal behavior
 
 %define popup style
 popup = txt;
@@ -83,7 +80,6 @@ listbox.Style = 'list';
 cb = txt;
 cb.Style = 'Checkbox';
 cb.Callback = 'genercallback';
-%cb.fontsize = 12;
 
 %define togglebutton style
 tb = button;
@@ -113,7 +109,7 @@ guicreate(tb,'String','','Tag','zoomBt','CData',iconread('zoom-in.png',bgcolor),
     'Enable','on','left',0,'top','top_nomargin','width',24,'height',24,'parent',hi,'move','right');
 guicreate(button,'String','','Tag','zoomOutBt','CData',iconread('zoom-original.png',bgcolor),'Enable','on','width',24,'height',24,'parent',hi,'move','right');
 
-h=guicreate( txt,'Tag','zoomTxt','String','000x','visible','on','width','auto','move','right','parent',hi,'fontsize',8);
+guicreate( txt,'Tag','zoomTxt','String','000x','visible','on','width','auto','move','right','parent',hi,'fontsize',8);
 
 % Pan
 guicreate(tb,'String','(P)an','Tag','panBt','Enable','on','width','auto','parent',hi,'move','right');
@@ -126,12 +122,12 @@ left = g.guicreate.left; % to put frameslider at same location
 
 guicreate(txt,'String','','width',1,'fontsize',8,'move','right','horizontalalignment','center','Tag','FirstFrameTxt','parent',hi);
 guicreate(edit,'String','1',...
-    'horizontalalignment','center','width',20,'Tag',['FirstFrameEdit'],...
+    'horizontalalignment','center','width',20,'Tag','FirstFrameEdit',...
     'parent',hi,'callback','genercallback','move','right','fontsize',8,...
     'tooltipstring','First frame in projection');
 guicreate(txt,'String',':','width',15,'fontsize',8,'move','right','horizontalalignment','center','Tag','LastFrameTxt','parent',hi);
 guicreate(edit,'String','inf',...
-    'horizontalalignment','center','width',20,'Tag',['LastFrameEdit'],...
+    'horizontalalignment','center','width',20,'Tag','LastFrameEdit',...
     'parent',hi,'callback','genercallback','move','right','fontsize',8,...
     'tooltipstring','Last frame in projection');
 
@@ -145,7 +141,7 @@ h = guicreate(slider,'Tag','FrameSlid','value',0.5,'visible','off','parent',hi,'
 set(h,'Min',1)
 set(h,'Max',ti.NumberOfFrames)
 set(h,'Value',ceil(ti.NumberOfFrames/2));
-set(h,'SliderStep',[1/ti.NumberOfFrames 0.1]);
+set(h,'SliderStep',[1/ti.NumberOfFrames max(0.1,1/ti.NumberOfFrames)]);
 
 
 axes('parent',hi,'position',[0 0.15 1 0.78],'Tag','tpaxes');
@@ -158,7 +154,6 @@ c2r = tp_channel2rgb(ud.record);
 
 for ch = ti.NumberOfChannels:-1:1
     % Channel
-    %    guicreate( txt,'String','Ch','left','left','width','auto','fontsize',8,'move','right','parent',hi);
     h=guicreate(tb,'String',num2str(ch),'value',1,'left','left',...
         'horizontalalignment','center','callback','genercallback',...
         'Tag',['channel' num2str(ch) 'Tg'],'fontsize',8,'parent',hi,...
@@ -171,34 +166,21 @@ for ch = ti.NumberOfChannels:-1:1
     end
     
     % Min value:
-    %    guicreate( txt,'String','Min','width','auto','move','right','fontsize',8,'parent',hi);
     guicreate(edit,'String',num2str(process_parameters.viewing_default_min(ch)),...
         'horizontalalignment','center','width',30,'Tag',['ColorMin' num2str(ch) 'Edit'],...
         'parent',hi,'callback','genercallback','move','right','fontsize',8,...
         'tooltipstring','Minimum value, set to -1 to set mode');
     % Max value:
-    %    guicreate( txt,'String','Max','width','auto','move','right','fontsize',8,'parent',hi);
     guicreate(edit,'String',num2str(process_parameters.viewing_default_max(ch)),...
         'horizontalalignment','center','width',30,'Tag',['ColorMax' num2str(ch) 'Edit'],...
         'parent',hi,'callback','genercallback','move','right','fontsize',8,...
         'tooltipstring','Maximum value, set to negative number to specify percentage to be saturated');
     % Gamma:
-    %    h=guicreate( txt,'String','g','width','auto','move','right','fontsize',8,'parent',hi);
-    %    set(h,'FontName','symbol');
     guicreate(edit,'String',num2str(process_parameters.viewing_default_gamma(ch)),...
         'horizontalalignment','center','width',30,...
         'parent',hi,'Tag',['ColorGamma' num2str(ch) 'Edit'],...
         'callback','genercallback','move','up','fontsize',8,'tooltipstring','Gamma value, set to -1 to bring mode to monitor threshold level');
-    
-    
-    
 end
-%guicreate(txt,'String','Ch','left','left','width',15,'fontsize',8,'move','right','horizontalalignment','center','parent',hi);
-%guicreate(txt,'String','Min','width',30,'fontsize',8,'move','right','horizontalalignment','center','parent',hi);
-%guicreate(txt,'String','Max','width',30,'fontsize',8,'move','right','horizontalalignment','center','parent',hi);
-%h = guicreate( txt,'String','g','width',25,'move','right','fontsize',8,'horizontalalignment','center','parent',hi);
-%set(h,'FontName','symbol');
-
 
 % ROI labels panel
 panel_height = 0.37;
@@ -210,9 +192,7 @@ hroilabelspanel = uipanel('Title','ROIs','Position',[panel_left panel_top-panel_
 guicreate(tb,'String','(S)how','Tag','DrawROIsCB','left','left','top','top','move','right','width','auto','parent',hroilabelspanel);
 guicreate(tb,'String','Nos','Tag','DrawROINosCB','move','right','width','auto','parent',hroilabelspanel);
 
-
-
-fr=fields(tp_emptyroirec);
+fr = fieldnames(tp_emptyroirec);
 guicreate(txt,'String','Sort','Enable','on','width','auto','parent',hroilabelspanel,'move','right','fontsize',9);
 guicreate(popup,'String',{fr{[1:5 7]}},'Tag','sortROIsBt','Enable','on','width',80,'parent',hroilabelspanel,'move','down','fontsize',9,'callback','genercallback');
 
@@ -225,11 +205,13 @@ set(h,'Max',2); % multiple ROIs can be selected
 guicreate(button,'String','Draw','Tag','drawnewBt','Enable','on','left','left','width','auto','parent',hroilabelspanel,'move','right');
 guicreate(button,'String','Auto','Tag','autoDrawCellsBt','Enable','on','width','auto','parent',hroilabelspanel,'move','right');
 guicreate(button,'String','(C)ircles','Tag','drawnewballBt','Enable','on','width','auto','parent',hroilabelspanel,'move','right','fontsize',8);
-if ud.zstack
-    def_radius = 6;
-else
-    def_radius = 12;
-end
+
+def_radius = process_parameters.default_roi_disk_radius_pxl;
+% if ud.zstack
+%     def_radius = 6;
+% else
+%     def_radius = 12;
+% end
 guicreate(edit,'String',num2str(def_radius,'%02d'),'Tag','newballdiameterEdit','Enable','on','width','auto','parent',hroilabelspanel,'move','right');
 guicreate(txt,'String','px','Enable','on','width','auto','parent',hroilabelspanel,'move','down','fontsize',8);
 % draw neurite
@@ -244,8 +226,11 @@ end
 guicreate(popup,'String',snaptolist,...
     'Tag','snaptoPopup','Enable','on','width',35,'parent',hroilabelspanel,'move','right','callback','genercallback');
 
-% Export
-guicreate(button,'String','Export','Tag','exportROIsBt','Enable','on','tooltipstring','Export ROIs','width','auto','parent',hroilabelspanel,'move','down');
+% Export ROIs
+guicreate(button,'String','Export','Tag','exportROIsBt','Enable','on','tooltipstring','Export ROIs','width','auto','parent',hroilabelspanel,'move','right');
+
+% Import ROIs
+guicreate(button,'String','Import','Tag','importROIsBt','Enable','on','tooltipstring','Import ROIs','width','auto','parent',hroilabelspanel,'move','down');
 
 % link ROIs
 guicreate(button,'String','Link all','Tag','linkROIsBt','Enable','on','left','left','tooltipstring','Link all ROIs based on distance','width','auto','parent',hroilabelspanel,'move','right');
@@ -351,8 +336,6 @@ if ud.zstack
     guicreate(button,'String','Measures','move','right',...
         'width','auto','Tag','measuresBt','callback','genercallback',...
         'tooltipstring','Show ROI measures','parent',himpro);
-    
-    % guicreate(button,'String','Puncta','Tag','punctaBt','Value',0,'left','left','width','auto','move','right','parent',himpro);
 end
 
 % analysis
@@ -364,43 +347,21 @@ if ~ud.zstack
     guicreate(edit,'string',num2str(ud.channel),'width',40,'Tag','stimChannelEdit','callback','genercallback','move','down','parent',ha);
     guicreate(txt,'string','Trials:','width','auto','left','left','move','right','parent',ha);
     guicreate(edit,'string','','Tag','trialsEdit','width',40,'tooltipstring','blank for default','parent',ha,'move','right');
-%     guicreate(txt,'string','Epochs:','width','auto','move','right','parent',ha);
-%     guicreate(edit,'string','','Tag','epochsEdit','width',45,'tooltipstring','blank for default','parent',ha,'move','down');
-    
     guicreate(txt,'string','Intervals:','width','auto','move','right','parent',ha);
     guicreate(edit,'string','     ','Tag','timeintEdit','tooltipstring','[time int]','width','auto','move','right','parent',ha);
     guicreate(edit,'string','     ','Tag','sptimeintEdit','tooltipstring','[spont int]','width','auto','move','down','parent',ha);
-%     guicreate(txt,'string','Blank:','width','auto','move','right','parent',ha);
-%     guicreate(edit,'string','   ','Tag','BlankIDEdit','tooltipstring','empty for default','width','auto','parent',ha);
-    %    guicreate(txt,'string','Process:','width','auto','move','right','parent',ha);
-    %    guicreate(popup, 'String',tpsignalprocess('?'),'Tag','signalprocessPopup','width',100,'callback','genercallback','parent',ha);
-    %    guicreate(txt,'string','Filter:','left','left','width','auto','move','right','parent',ha);
-    %    guicreate(edit,'string',' 0 ','Tag','filterEdit','tooltipstring','number of frames to average, 0 for no filtering','width','auto','move','right','parent',ha);
-    %    guicreate(txt,'string','f ','width','auto','move','right','parent',ha);
-%     guicreate(cb,'string','Recompute','Tag','recomputeCB','left','left','width','auto','value',0,'parent',ha);
-%    guicreate(button,'string','Raw','Tag','AnalyzeRawBt','move','right','width','auto','parent',ha);
     guicreate(button,'string','Analyse','Tag','AnalyzeParamBt','left','left','width','auto','move','right','parent',ha);
     guicreate(button,'string','Results','Tag','ResultsBt','width','auto','move','right','parent',ha);
     guicreate(button,'string','Export','Tag','ExportRawBt','move','down','width','auto','parent',ha);
-%     guicreate(txt,'string','Variable','Tag','variableTxt','width','auto','left','left','move','right','parent',ha);
-%     guicreate(edit,'string','     ','Tag','stimparamnameEdit','tooltipstring','Variable to analyse, e.g. angle. Empty for default','width','auto','parent',ha,'move','down');
-    %    guicreate(txt,'string','PSTH','Tag','QuickPSTHBt','width','auto','move','right','parent',ha);
-    %    guicreate(button,'string','PSTH','Tag','QuickPSTHBt','width','auto','left','left','move','right','parent',ha);
-    %    guicreate(edit,'string','  1','Tag','QuickPSTHEdit','tooltipstring','Bin width (s)','width','auto','move','right','parent',ha);
-    %    guicreate(txt,'string','s ','width','auto','move','down','parent',ha);
-    %    guicreate(cb,'string','Traces   ','Tag','QuickPSTHCB','width','auto','value',0,'parent',ha);
     guicreate(button,'string','ImageMath','Tag','ImageMathBt','left','left','width','auto','move','right','parent',ha);
     guicreate(edit,'string','1 - 5','Tag','ImageMathEdit','width','auto','parent',ha);
     guicreate(button,'string','Single conditions','Tag','singleCondBt','width','auto','left','left','move','right','parent',ha);
     guicreate(button,'string','Map','Tag','QuickMapBt','width','auto','move','down','tooltipstring','Color map based on tuning curve output','parent',ha);
-    %    guicreate(edit,'string','0.05','Tag','mapthreshEdit','width','auto','tooltipstring','Map threshold','parent',ha);
     guicreate(button,'string','Movie','Tag','movieBt','width','auto','left','left','move','right','parent',ha);
     guicreate(edit,'string','     ','Tag','movieStimsEdit','width','auto','tooltipstring','Stims','move','right','parent',ha);
     guicreate(edit,'string','movie.avi','Tag','movieFileEdit','width','auto','tooltipstring','Movie filename','move','right','parent',ha);
     guicreate(cb,'string','dF','Tag','moviedFCB','tooltipstring','Show delta F','width','auto','value',0,'move','right','parent',ha);
     guicreate(cb,'string','Sort','Tag','movieSortCB','tooltipstring','Sorted','width','auto','value',0,'parent',ha);
-%     guicreate(button,'string','Analysis','Tag','AnalyzePatternsBt','width','auto','left','left','move','right','parent',ha);
-%     guicreate(popup, 'String',analyze_tppatterns('?'),'Tag','patternanalysisPopup','width',100,'callback','genercallback','parent',ha,'move','down');
     guicreate(button,'string','Stimulus','Tag','StimulusBt','width','auto','left','left','move','right','parent',ha);
 end
 
@@ -416,7 +377,6 @@ guicreate(cb,'String','Verbose','value',0,...
 
 ud.persistent=1;
 set_normalized_units( hi );
-%set_normalized_units( fig );
 
 
 function icon = iconread(fname,bgcolor)

@@ -16,8 +16,8 @@ if isempty(parameters)||(ischar(parameters)&&strcmp(parameters,'default'))
         parameters = default_p; 
 end
 
-[good,er]=verifyparameters(parameters,getinputs(ra));
-if ~good,error(['PARAMETERS: ' er]);end;
+%[good,er]=verifyparameters(parameters,getinputs(ra));
+%if ~good,error(['PARAMETERS: ' er]);end;
 
 ra.RAparams = parameters;
 configuremenu(ra); ra = compute(ra); draw(ra);

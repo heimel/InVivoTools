@@ -30,10 +30,13 @@ global NewStimViewingDistance;  % distance of subject to screen in cm
 global NewStimTilt % in degrees
 
 global NewStimStimDelay % time to allow acquisition and webcams to start
-
-% some defaults
 if isempty(NewStimStimDelay)
     NewStimStimDelay = 6; %
+end
+
+global StimNoBreak
+if isempty(StimNoBreak)
+    StimNoBreak = false;
 end
 
 global gNewStim % to replace other globals in the future

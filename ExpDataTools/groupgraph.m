@@ -49,7 +49,8 @@ pos_args={...  %  'reliable',1,...  % 1 to only use reliable records, 0 to use a
     'depth',[],...
     'add2graph_handle','',...
     'limit','',...
-    };
+    'empty_group_spacing',1,...
+};
 
 if nargin<3
     logmsg('Using default arguments:');
@@ -116,6 +117,11 @@ for i=1:2:length(extra_options)
     end
 end
 
+
+if ischar(empty_group_spacing)
+  empty_group_spacing = str2double(empty_group_spacing);
+end
+
 logmsg(['Collecting data for figure ' name ]);
 
 if isempty(mousedb)
@@ -127,8 +133,14 @@ if isempty(groups)
     return
 end
 
+if exist('collect_records','var')
+    collect_records = eval(collect_records); 
+else
+    collect_records = false;
+end
+
 % LEVELT LAB SPECIFIC SHOULD GO SOMEWHERE ELSE
-if ~iscell(groups);
+if ~iscell(groups)
     bxdshift=0;
     if strcmp(strtrim(groups),'BXD* shift')==1
         bxdshift=1;
@@ -156,14 +168,14 @@ if ~iscell(groups);
             if exist('exclude','var') && ~isempty(strfind(groupdb(ind_md(i)).name,'02'))
                 continue
             end
-            groups=[groups ',' groupdb(ind_md(i)).name op groupdb(ind_ctl(i)).name postop]; %#ok<AGROW>
-            grouplabels=[grouplabels ',' groupdb(ind_md(i)).name(4:5)]; %#ok<AGROW>
+            groups=[groups ',' groupdb(ind_md(i)).name op groupdb(ind_ctl(i)).name postop];
+            grouplabels=[grouplabels ',' groupdb(ind_md(i)).name(4:5)];
         end
     end
 end
 
 % parse groups
-if ~iscell(groups);
+if ~iscell(groups)
     groups=split(groups,',');
 end
 % check for group operators
@@ -224,6 +236,10 @@ for g=1:n_groups
 end
 n_groups=length(groups); % it can be that multiple groups match group criteria
 
+if collect_records
+    collect_record(groups,'group');
+end
+
 % parse criteria
 criteria = split(criteria,',',true);
 n_criteria = length(criteria);
@@ -257,27 +273,27 @@ if n_criteria>0
 end
 
 % parse filters
-groupfilters={};
+groupfilters = {};
 for g=1:n_groups
-    groupfilters{g}=group2filter(groups(g),groupdb);
+    groupfilters{g} = group2filter(groups(g),groupdb,collect_records);
     if isempty(groupfilters{g})
-        groupfilters{g}=['strain=' groups(g).name];
+        groupfilters{g} = ['strain=' groups(g).name];
     end
 end
 
 % parse grouplabels
 if isempty(grouplabels)
-    grouplabels={};
+    grouplabels = {};
     for g=1:n_groups
-        grouplabels{g}=groups(g).label;
+        grouplabels{g} = groups(g).label;
     end
 elseif ~iscell(grouplabels)
-    grouplabels=split(grouplabels,',');
+    grouplabels = split(grouplabels,',');
 end
-grouplabels=shorten_bxdnames(grouplabels);
+grouplabels = shorten_bxdnames(grouplabels);
 
 % collect results from databases
-[r,dr,def_measurelabels]=get_compound_measurements(groups,measures,...
+[r,dr,def_measurelabels] = get_compound_measurements(groups,measures,...
     'testdb',testdb,...
     'mousedb',mousedb,...
     'groupdb',groupdb,...  %    'reliable',reliable,...
@@ -353,7 +369,6 @@ elseif ~iscell(measurelabels)
 end
 
 % center measurelabels for use in captions
-%measurelabels=strjust(char(measurelabels),'center');
 wrong_number_labels = false;
 switch style
     case 'surf'
@@ -371,7 +386,6 @@ if wrong_number_labels
         ' or zero measure labels.'])
     return
 end
-
 
 % make difference of groups if necessary
 if ~isempty(operator_groups)
@@ -457,22 +471,6 @@ if ~isempty(operator_groups)
     
     n_groups=length(r{1});
 end
-
-% for m=1:n_measures
-%     for g=1:n_groups
-%         if length(grouplabels)==n_groups
-%             grouplabel=grouplabels{g};
-%         else
-%             grouplabel='';
-%         end
-%         if isempty(grouplabel)
-%             grouplabel=['group ' num2str(g)];
-%         end
-%         %         disp([measurelabels{m} ' ' grouplabel ...
-%         %             ' mean = ' num2str(nanmean(r{m}{g}(:)),3) ...
-%         %             ', sem = ' num2str(r_std{m}{g}/sqrt(r_n{m}{g}-1),3) ]);
-%     end
-% end
 
 % center grouplabels for use in captions
 grouplabels=strjust(char(grouplabels),'center');
@@ -605,7 +603,7 @@ switch style
                 inc_xt_measure=n_groups+1;
         end
         n_measures=length(r);
-        for m=1:n_measures;
+        for m=1:n_measures
             xt=1+(m-1)*inc_xt_measure;
             barcount=1;
             for g=1:n_groups
@@ -634,7 +632,7 @@ switch style
                     barcount=barcount+1;
                     xt=xt+inc_xt_group;
                 elseif isempty(strtrim(grouplabels(g,:))) || n_measures>1
-                    xt=xt+inc_xt_group;
+                    xt=xt+inc_xt_group*empty_group_spacing;
                 else
                     logmsg(['Less than ' num2str(min_n) ...
                         ' points in group [' grouplabels(g,:) ']']);
@@ -698,7 +696,7 @@ else
     return
 end
 
-h = graph(gy,gx,...
+h = ivt_graph(gy,gx,...
     'ylab',ylab,...
     'xlab',xlab,...
     'axishandle',gca,... % seems it should be axishandle
@@ -721,7 +719,7 @@ if exist('name','var') && ~isempty(name)  && ishandle(h.fig)
 end
 
 if save_option
-    filename=save_figure(filename,path);
+    filename = save_figure(filename,path);
 end
 
 values_x = gx;

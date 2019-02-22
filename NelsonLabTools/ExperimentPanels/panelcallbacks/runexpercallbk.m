@@ -141,8 +141,45 @@ switch action
             add_record( 'TP', get(h.savedir,'string'), scriptName );
             add_record( 'Wc', get(h.savedir,'string'), scriptName );
             add_record( 'oi', get(h.savedir,'string'), scriptName );
+
+            switch lower(host)
+                case {'helero2p','g2p'} % scanbox 2photon computer
+                    f = findall(0,'Name','scanbox');
+                    if isempty(f)
+                        logmsg('Cannot find Scanbox window. Not setting Scanbox folder');
+                    else
+                        % make scanbox window persistent
+                        % should be elsewhere
+                        ud = get(f,'UserData');
+                        if isempty(ud)
+                            ud = [];
+                            ud.persistent = 1;
+                            set(f,'UserData',ud);
+                        end
+                        
+                        f = findall(0,'Tag','dirname');
+                        global datadir
+                        datadir = datapath;
+                        f.String = datadir;
+                        mkdir(fullfile(datadir,h.savedir.String)); % make nested folder for scanbox
+                    end
+                    
+                    udport = udp('localhost','RemotePort',7000);
+                    fopen(udport);
+                    fprintf(udport,['A' get(h.savedir,'string')]);
+                    fprintf(udport,'U0'); % 
+                    fprintf(udport,'E0'); % set experiment nr
+                    pause(0.1);
+                    fprintf(udport,['MStarting ' scriptName]);
+                    fprintf(udport,'G'); % start grabbing
+                    % Now scanbox takes over if in same matlab instance
+                    logmsg('Back in runexpercallbk');
+                    %pause(0.1);
+                    %fclose(udport);
+                       %fprintf(udport,'G'); % stop grabbing
+            end
         end
-    case 'add_aq',
+    case 'add_aq'
         aqdata = get(h.list_aq,'UserData');
         strDat = get(h.list_aq,'String');
         iscell(strDat),
@@ -151,7 +188,7 @@ switch action
             clear('aqdata');%otherwise error in aqdata(l+1)=struct
         end
         [strDat{l+1},aqdata(l+1)]=input_aq([],[]);
-        if ~isempty(strDat{l+1}),
+        if ~isempty(strDat{l+1})
             set(h.list_aq,'UserData',aqdata, ...
                 'String',strDat,'value',l+1);
         end;
@@ -159,7 +196,7 @@ switch action
         aqdata = get(h.list_aq,'UserData');
         strDat = get(h.list_aq,'String');
         val = get(h.list_aq,'value');
-        if val>0,
+        if val>0
             [strDat{val},aqdata(val)]=input_aq(strDat{val},aqdata(val));
         end;
         set(h.list_aq,'UserData',aqdata,'String',strDat);
@@ -168,9 +205,9 @@ switch action
         strDat = get(h.list_aq,'String');
         l = length(strDat);
         val = get(h.list_aq,'value');
-        if val>0,
+        if val>0
             newStrDat={};
-            if l~=1,
+            if l~=1
                 [newStrDat{1:length(strDat)-1}]= ...
                     deal(strDat{[1:val-1 val+1:l]});
                 newAqDat=aqdata([1:val-1 val+1:l]);
@@ -185,9 +222,9 @@ switch action
             set(h.list_aq,'UserData',newAqDat, ...
                 'String',newStrDat,'value',val);
         end;
-    case 'open_aq',
+    case 'open_aq'
         [fname, pname] = uigetfile('*','Open file ...');
-        if fname(1)~=0,  % if user doesn't cancel
+        if fname(1)~=0  % if user doesn't cancel
             newAqDat = loadStructArray([pname fname]);
             StrDat = cell(length(newAqDat),1);
             for i=1:length(newAqDat)
@@ -196,18 +233,18 @@ switch action
             set(h.list_aq,'UserData',newAqDat,'String',StrDat, ...
                 'value',1);
         end;
-    case 'save_aq',
+    case 'save_aq'
         [fname, pname] = uiputfile('*', 'Save As ...');
-        if fname(1)~=0,
+        if fname(1)~=0
             aqDat=get(h.list_aq,'UserData');
             writeAcqStruct([pname fname],aqDat);
         end;
-    case 'extdevaddbt', % add a command
+    case 'extdevaddbt' % add a command
         str = get(findobj(fig,'Tag','extdevlist'),'string');
         prompt={'Enter the new command'};
         def = {''};
         answer = inputdlg(prompt,'Extra stimulus command',1,def);
-        if ~isempty(answer),
+        if ~isempty(answer)
             str(end+1) = answer;
             set(findobj(fig,'Tag','extdevlist'),'string',str);
             set(findobj(fig,'Tag','extdevlist'),'max',2);

@@ -94,4 +94,4 @@ end
 thedir = fileparts(filename);
 MTI2 = mti2;  %#ok<NASGU>
 start = 0; %#ok<NASGU>
-save(fullfile(thedir, 'stims.mat'),'saveScript','MTI2','start','-mat');
+save(fullfile(thedir, 'stims.mat'),'saveScript','MTI2','start','-v7');

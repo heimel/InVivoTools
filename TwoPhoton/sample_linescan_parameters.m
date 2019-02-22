@@ -29,7 +29,7 @@ for r=1:length(org_db)
     record.process_params.filter.parameters = 0;
     record.process_params.filter.unit = '#'; % {'#','s'}
     record.process_params.detect_events = 'onset';
-    for filter_param = [0 4 8];% [0 5 10 ]
+    for filter_param = [0 4 8]
         record.process_params.filter.parameters = filter_param;
         for detect_events_threshold = 1.5:0.5:2 % 1.5:0.5:3.5
             record.process_params.detect_events_threshold  = detect_events_threshold;
@@ -43,7 +43,7 @@ for r=1:length(org_db)
                 %results_tppatternanalysis(record.result, record.process_params);
                 close all
                 disp('*****************');
-                save(samplefilename,'db','-mat');
+                save(samplefilename,'db','-v7');
             end
         end
     end

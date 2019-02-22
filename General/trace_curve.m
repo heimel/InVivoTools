@@ -5,26 +5,28 @@ function [x,y]=trace_curve(fig,n)
 %   FIG can be figure handle or image filename, defaults to GCF
 %   N is number of datasets/lines to gather, defaults to 1.
 %
-% 2008-2013, Alexander Heimel
+% 2008-2018, Alexander Heimel
 %
 
-if nargin<2
-    n=[];
-end
-if isempty(n)
+if nargin<2 || isempty(n)
     n = 1;
 end
 if nargin<1
-    fig = gcf;
+    if ~isempty(get(0,'children'))
+        fig = gcf;
+    else
+        [filename, pathname, filterindex] = uigetfile('*.*', 'Select an image file');
+        fig = fullfile(pathname,filename);
+    end
 end
 
-if isnumeric(fig) % then figurehandle
-    figure(fig);
-elseif ischar(fig) % filename
+if ischar(fig) % filename
     img=imread(fig);
     fig = figure;
     image(img);
     axis image off;
+elseif isnumeric(fig) || ishandle(fig) % then figure handle
+    figure(fig);
 end
 
 ax = axis;
@@ -133,12 +135,12 @@ set(fig,'name',figname);
 removetrace(h);
 
 function removetrace( h )
-    if ~isempty(h)
-        % delete points and lines
-        f = fields(h);
-        for i=1:length(f)
-            if all(ishandle(h.(f{i})))
-                delete(h.(f{i}));
-            end
+if ~isempty(h)
+    % delete points and lines
+    f = fieldnames(h);
+    for i=1:length(f)
+        if all(ishandle(h.(f{i})))
+            delete(h.(f{i}));
         end
     end
+end

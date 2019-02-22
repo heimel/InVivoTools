@@ -1,10 +1,10 @@
 function par = wcprocessparams( record )
 %WCPROCESSPARAMS sets parameters for webcam recording
 %
-% 2015, Alexander Heimel
+% 2015-2018, Alexander Heimel
 
 % set player
-if isunix
+if isunix && ~ismac
     par.wc_player = 'vlc' ;
     [status,out] = system(['which ' par.wc_player]);
     if status==0
@@ -18,6 +18,9 @@ if isunix
             par.wc_playercommand = '';
         end
     end
+elseif ismac
+    par.wc_player = 'VLC'; 
+    par.wc_playercommand = 'open -a VLC' ;
 else
     par.wc_player = 'vlc'; 
     par.wc_playercommand = 'C:\Program Files (x86)\VideoLAN\VLC\vlc.exe' ;
@@ -27,8 +30,7 @@ else
     if ~exist(par.wc_playercommand,'file')
         par.wc_playercommand = '';
     end
-    
-    if exist(par.wc_playercommand,'file');
+    if exist(par.wc_playercommand,'file')
         par.wc_playercommand=['"' par.wc_playercommand '"'];
     end
 end
@@ -49,8 +51,26 @@ else
 end
 
 par.wc_playbackpretime = 0; % s to show before stim onset
-par.wc_timemultiplier = 1.01445;
-par.wc_timemultiplier = 1.015355;
-%par.wc_timemultiplier = 1.015;
-par.wc_timeshift = -0.5;
+
+
+% par.wc_timemultiplier = 1.01445;
+
+if datenum(record.date)<=datenum('2018-04-28')
+    par.wc_timemultiplier = 1.015355;
+    par.wc_timeshift = -0.5;
+else % something was changed in the timing of the movies between 2018-04-28 and 2018-04-30
+    par.wc_timemultiplier = 1.00058;
+    par.wc_timeshift = -0.5;
+end
+
+
+if ismac
+    par.use_legacy_videoreader = false;
+else
+    par.use_legacy_videoreader = true;
+end
+
+if exist('processparams_local.m','file')
+    par = processparams_local( par );
+end
 

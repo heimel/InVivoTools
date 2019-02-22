@@ -76,7 +76,8 @@ else                                                        % Frame based data -
             start=1; 
             h.stop(Frame(i))=header(3,i);                   % End time for this frame, clock ticks
             if(i<Info.blocks)                               %***************15/12/03
-            h.start(Frame(i+1))=header(2,i+1);              % Time of first data point in next frame (clock ticks)*************15/12/03
+                h.start(Frame(i+1))=header(2,i+1);              % Time of first data point in next frame (clock ticks)*************15/12/03
+            end % inserted if to fix error? 2017-06-02
         end;
     end;
 end;

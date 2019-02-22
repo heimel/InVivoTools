@@ -5,12 +5,9 @@ function [record,measures]=analyse_tptestrecord( record, verbose)
 %
 %      MEASURES contains full measures (including PSTHs)
 %
-% 2013-2014, Alexander Heimel
+% 2013-2018, Alexander Heimel
 
-if nargin<2
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<2 || isempty(verbose)
     verbose = true;
 end
 
@@ -45,7 +42,11 @@ end
 record.ROIs.celllist = structconvert(record.ROIs.celllist,tp_emptyroirec);
 
 % clean all measures, but save some in case we don't have the tiffs locally
-storedmeasures = record.measures;
+if isfield(record,'measures')
+    storedmeasures = record.measures;
+else
+    storedmeasures = [];
+end
 record.measures = [];
 
 if isfield(record,'ROIs') && isfield(record.ROIs,'celllist')
@@ -86,7 +87,7 @@ end
 
 % create measure fields for labels and types
 labels = {};
-for i=1:length(record.ROIs.celllist);
+for i=1:length(record.ROIs.celllist)
     labels = [labels{:},record.ROIs.celllist(i).labels'];
 end
 labels = uniq(sort(labels));
@@ -148,7 +149,7 @@ if isfield(record,'measures') && isfield(record.measures,'mito') && any([record.
     record = tp_mito_close( record );
 end
 
-if isfield(record,'measures') && isfield(record.measures,'bouton') && any([record.measures(:).bouton])
+if isfield(record,'measures') && isfield(record.measures,'bouton') && any([record.measures(:).bouton]) && isfield(record.measures,'t_bouton')
     record = tp_automated_bouton_analysis( record );
     record = tp_bouton_close( record );
 end
@@ -311,7 +312,7 @@ else
 end
 
 if is_movie
-    record = tp_analyse_movie( record );
+    record = tp_analyse_movie( record, verbose);
     record = add_distance2preferred_stimulus( record );
 end
 
@@ -320,7 +321,7 @@ if exist(experimentpath(record),'dir')
     measuresfile = fullfile(experimentpath(record),'tp_measures.mat');
     measures = record.measures;
     try
-        save(measuresfile,'measures');
+        save(measuresfile,'measures','-v7');
     catch
         errormsg(['Could not write measures file ' measuresfile ]);
     end

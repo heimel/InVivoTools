@@ -1,14 +1,26 @@
 function [brightness, thresholdsStimOnset, peakPoints] = ...
     search_stim_onset(filename, stimStart, arena, frameRate)
-%search the roi for the _actual_ stimulus onset
-% Azadeh Tafreshiha, feb 2016
+%SEARCH_STIM_ONSET searches the roi for the _actual_ stimulus onset
+%
+%  [brightness, thresholdsStimOnset, peakPoints] = ...
+%    search_stim_onset(filename, stimStart, arena, frameRate)
+%
+% 2016, Azadeh Tafreshiha
+% 2018, Edit by Alexander Heimel
 
-%% get the frame and roi
+% get the frame and roi
 v = VideoReader(filename);
 stimFrame = stimStart*frameRate;
 start_frame = stimFrame-30-10; %30:length of the stim, 10:for interval
 end_frame = stimFrame+90+30;
-num_frames  = numel(start_frame:end_frame);%;v.NumberofFrames;
+
+start_time = stimStart - 30/frameRate - 10/frameRate; % 30:length of the stim, 10:for interval
+end_time = stimStart + 90/frameRate + 30/frameRate;
+
+frames = start_frame:end_frame;
+num_frames  = numel(frames);%;v.NumberofFrames;
+
+%num_frames = ceil((end_time - start_time) * frameRate); 
 
 W = 15; H = 30;
 Xmin = arena(1)+arena(3)-W;
@@ -17,11 +29,16 @@ roiR = [Xmin, Ymin, W, H];
 Xmin = arena(1);
 roiL = [Xmin, Ymin, W, H];
 
-%% calculate the brightness changes in rois
-brightness = zeros(2,num_frames); j = 0; % vector of all averaged brightness (left and right) values for the ROI
-for i = start_frame:end_frame
+% calculate the brightness changes in rois
+brightness = zeros(2,num_frames); 
+% vector of all averaged brightness (left and right) values for the ROI
+j = 0; 
+
+v.CurrentTime = start_time;
+while v.CurrentTime <= end_time
+%for i = start_frame:end_frame
     j = j+1;
-    frame = read(v,i);
+    frame = readFrame(v);
     im_roiR = imcrop(frame,roiR);
     im_roiL = imcrop(frame,roiL);
     brightness(1,j)  = mean(im_roiR(:));
@@ -29,8 +46,10 @@ for i = start_frame:end_frame
     %        crossR = min(im_roiR);
     %        crossL = min(im_roiL);
 end
-len = length(brightness);
-frames = start_frame:end_frame;
+
+logmsg(['End time = ' num2str(v.CurrentTime)]);
+
+%len = length(brightness);
 % threshMinR = mean(brightness(1,:)) - 5 * sigmaR; % define a threshold value for brightness crossing
 % threshMaxR = mean(brightness(1,:)) - 2 * sigmaR; % To avoid getting a mouse.
 % threshMinL = mean(brightness(2,:)) - 5 * sigmaL; % define a threshold value for brightness crossing
@@ -47,8 +66,8 @@ low_passR = filter(b,a,brightness(1,:))./edgeCorrFactor; % low pass filter
 low_passL = filter(b,a,brightness(2,:))./edgeCorrFactor; % low pass filter
 sigmaR = std(brightness(1,:));
 sigmaL = std(brightness(2,:));
-stdmin = 3;
-stdmax = 20;
+%stdmin = 3;
+%stdmax = 20;
 
 threshMinR = low_passR - 6 * sigmaR; % define a threshold value for brightness crossing
 threshMaxR = low_passR - 2 * sigmaR; % To avoid getting a mouse.
@@ -56,11 +75,11 @@ threshMinL = low_passL - 6 * sigmaL; % define a threshold value for brightness c
 threshMaxL = low_passL - 2 * sigmaL; % To avoid getting a mouse.
 thresholdsStimOnset = [threshMinR; threshMaxR; threshMinL; threshMaxL];
 
-noise_std_detect_ref_r = median(abs(brightness(1,:)))/0.6745;
-noise_std_detect_ref_l = median(abs(brightness(2,:)))/0.6745;
+%noise_std_detect_ref_r = median(abs(brightness(1,:)))/0.6745;
+%noise_std_detect_ref_l = median(abs(brightness(2,:)))/0.6745;
 
-thr_ref = stdmin * noise_std_detect_ref_r;        %threshold for detection
-thrmax_ref = stdmax * noise_std_detect_ref_l;     %thrmax for artifact removal
+%thr_ref = stdmin * noise_std_detect_ref_r;        %threshold for detection
+%thrmax_ref = stdmax * noise_std_detect_ref_l;     %thrmax for artifact removal
 
 % search the frames
 crossingsR = (brightness(1,:) > threshMinR & brightness(1,:) < threshMaxR);
@@ -86,7 +105,7 @@ end
 for i = 1:length(cross_indL)
     if cross_indL(i) >= cross_indL0 + ref
         pkdl = pkdl + 1; % number of peaks detected + 1
-        [peaksL(pkdl), peaksLI(pkdl)] = min(brightness(2,cross_indL(i):cross_indL(i)+ref));
+        [peaksL(pkdl), peaksLI(pkdl)] = min(brightness(2,cross_indL(i):cross_indL(i)+(length(cross_indL)-i)));
         indexL(pkdl) = cross_indL(i) + peaksLI(pkdl)-2; %index of the peak
         cross_indL0 = indexL(pkdl);
     end
@@ -127,7 +146,7 @@ if ~isempty(peakPoints)
 end
 logmsg('done!')
 
-%%
+%
 % L/R validation of crossings
 % min_iti = 1000; % min number of frames between trials
 % plot(pk_frRall,peaksRAll,'o'); hold on; plot(pk_frLall,peaksLAll,'o');

@@ -1,9 +1,15 @@
-function record=analyse_ectestrecord(record,verbose)
-%ANALYSE_ECTESTRECORD
+function record = analyse_ectestrecord(record,verbose,allowchanges)
+%ANALYSE_ECTESTRECORD runs all analysis on electrophysiology testrecord
 %
-%   RECORD=ANALYSE_ECTESTRECORD( RECORD, VERBOSE )
+%   RECORD = ANALYSE_ECTESTRECORD( RECORD, VERBOSE=true, ALLOWCHANGES=true )
 %
-% 2007-2015, Alexander Heimel, Mehran Ahmadlou
+%       if ALLOWCHANGES is false, then no changes to any stored files are made
+%
+% 2007-2017, Alexander Heimel, Mehran Ahmadlou
+
+if nargin<3 || isempty(allowchanges)
+    allowchanges = true; 
+end
 
 if nargin<2 || isempty(verbose)
     verbose = true;
@@ -35,7 +41,7 @@ if isempty(channels2analyze)
     channels2analyze = recorded_channels;
 end
 
-cells = import_spikes( record, channels2analyze, verbose ); %
+cells = import_spikes( record, channels2analyze, verbose, allowchanges ); 
 
 if isempty(cells)
     return
@@ -196,7 +202,7 @@ for i=1:length(g) % for all cells
         cellmeasures.p_subunit = cells(i).p_subunit;
     end
     
-    flds = fields(cells);
+    flds = fieldnames(cells);
     spike_flds = flds(strncmp('spike_',flds,6));
     for field = spike_flds
         if ~isempty(field) && isfield(cells(i),field{1})
@@ -316,10 +322,12 @@ else
     measuresfile = fullfile(experimentpath(record),[record.datatype '_measures.mat']);
 end
 
-try
-    save(measuresfile,'measures');
-catch me
-    errormsg(['Could not write measures file ' measuresfile '. ' me.message]);
+if allowchanges
+    try
+        save(measuresfile,'measures','-v7');
+    catch me
+        errormsg(['Could not write measures file ' measuresfile '. ' me.message]);
+    end
 end
 
 % remove fields that take too much memory

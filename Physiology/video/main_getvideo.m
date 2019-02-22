@@ -9,16 +9,16 @@ function main_getvideo()
 %   The script retrieves the acquisition session time and save directory by
 %   running load_reference(). The save directory is stripped from the
 %   acqReady file and reformed to the propper input syntax for the video
-%   acquisition executable. 
+%   acquisition executable.
 %
 %   Each trial the acquisition is saved in the retrieved directory and
 %   named pupil_mouse.avi.
 %
-%   A trigger is created with create_trigger() and executed, while the 
-%   trigger is executed the the script is waiting for a TTL trigger on the 
-%   NI DAQ to start acquisition. During acquistion the DAQ cannot handle 
+%   A trigger is created with create_trigger() and executed, while the
+%   trigger is executed the the script is waiting for a TTL trigger on the
+%   NI DAQ to start acquisition. During acquistion the DAQ cannot handle
 %   follow-up TTL pulses.
-%   
+%
 %   Used scripts:
 %       load_reference()
 %       remotecommglobals()
@@ -37,15 +37,13 @@ function main_getvideo()
 %-------------------------------------------------------------------------%
 
 % initialize main_getvideo script
-clc
-disp(' ');
+
 logmsg('Initialize main_getvideo.m script :');
-logmsg(' - Video acquisition loop');
-logmsg(' - Used in InVivoTool toolbox');
-logmsg(' - Using grabpupilsize.exe for video acquisition and analysis');
-disp(' ');disp(' ');
-logmsg(' *** Wait for trigger to be ready ... ***');
-disp(' ');
+% logmsg(' - Video acquisition loop');
+% logmsg(' - Used in InVivoTool toolbox');
+% logmsg(' - Using grabpupilsize.exe for video acquisition and analysis');
+% disp(' ');disp(' ');
+logmsg('Wait for trigger to be ready ... ');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%   Load Stim. References  %%%
@@ -71,7 +69,7 @@ recording_time = (block_number * 10) + 1; % recording time in seconds
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % set acqReady path
-read_data = fullfile(Remote_Comm_dir,'acqReady'); 
+read_data = fullfile(Remote_Comm_dir,'acqReady');
 % read_data = fullfile(data_dir,'acqReady');      % <- REMOVE when done
 
 % set file output name for video output
@@ -86,6 +84,10 @@ tmp = importdata(read_data);
 % retrieve data save directory
 str  = char(tmp(2));
 
+if strcmpi(host,'lansbergen')
+    str = strrep(str,'mnt','');
+end
+
 % strip  data save directory with \ as delimiter
 save_path_cell = textscan(str,'%q','Delimiter','\');
 save_path_cell = save_path_cell{1};
@@ -97,18 +99,18 @@ save_path_cell = save_path_cell{1};
 % by changing the sep variable (could be necessary when
 % executable is updated).
 for i = 1:ind
-
+    
     % sep = '\\';
     sep = '/';
     % sep = '\';
     
     save_path = char(save_path_cell(i));
     if i == 1 && i <= ind
-    save_to = strcat(save_path,sep);
+        save_to = strcat(save_path,sep);
     elseif i >= 1 &&  i <= ind
-    save_to = strcat(save_to,save_path,sep);
+        save_to = strcat(save_to,save_path,sep);
     elseif i == ind
-    save_to = strcat(save_to,save_path);
+        save_to = strcat(save_to,save_path);
     end
     
 end
@@ -138,34 +140,32 @@ logmsg(' *** Waiting for trigger ***');disp(' ');
 
 % main while loop -> optimized for video acquisition via open_grab()
 counter = 1;
-while true  
- 
+while true
+    
     % *** when acquisition is triggered ***
     if (trigger_vid.TriggersExecuted == 1 && counter == 1);
         
-        logmsg(' *** Acquisition Started ***')
+        logmsg('Received trigger. Acquisition Started')
         counter = counter + 1;
         
         % Start Video executable run script.
         open_grab(recording_time,output);
-                               
+        
     end
     
     % *** when acquisition time ends ***
     % breaks from loop if daq is inactive (i.e. waiting for start command)
     if strcmp(trigger_vid.Running,'Off')
-        logmsg(' *** Acquisition ended, returning to init_getvideo() ***');
+        logmsg('Acquisition ended, returning to init_getvideo()');
         break
     end
     
 end
-
 
 % Destroy trigger (Analog Input object) to prevent faulty results when
 % runned in a script
 stop(trigger_vid);       % Stops (all active processes on) analog input object
 delete(trigger_vid);     % Deletes analog input object
 clear trigger            % Removes analog input object from workspace
-
 
 end

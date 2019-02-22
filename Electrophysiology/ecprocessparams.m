@@ -52,10 +52,13 @@ params.rc_interval = [0.0205 0.4205];
 params.rc_timeres = 0.2; % time resolution
 params.rc_gain = 1; % image gain
 % params.rc_peak_interval_number = 1; % which interval to use for peak computation
-switch protocol
-    case '13.20'
-        params.rc_interval=[0.0205 0.2205];
-end
+
+%switch protocol
+%    case '13.20'
+%        params.rc_interval=[0.0205 0.2205];
+%    case '13.03'
+%        params.rc_interval=[0.0205 0.6205];
+%end
 
 params.vep_poweranalysis_type = 'wavelet'; % or 'spectrogram' or 'wavelet'
 params.vep_remove_line_noise = 'temporal_domain'; % 'frequency_domain' or 'none' or 'temporal_domain'
@@ -144,10 +147,21 @@ params.sort_klustakwik_arguments = [ ...
 % time calibration
 switch lower(record.setup)
     case 'antigua' % tdt data on nin380
-        params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
-        params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time 
+        newsetupdate = '2018-01-01';
+        if datenum(record.date)>=datenum(newsetupdate)
+          params.trial_ttl_delay = -0.009; % s delay of visual stimulus after trial start TTL
+          params.secondsmultiplier = 0.9999986; % multiplification factor of electrophysical signal time 
+        else    
+          params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
+          params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time 
         % calibrated on 4-2-2016 (experiment 14.14), should be 1.0000190, but kept at 1.000017
         % to not change previous analysis
+        end
+    case 'intan' % 
+        params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
+        params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time 
+        warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
+        warning('off', 'ECPROCESSPARAMS:TIMING');
     case 'wall-e'
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
         params.secondsmultiplier = 1; % multiplification factor of electrophysical signal time
@@ -167,10 +181,10 @@ switch lower(record.setup)
 end
 
 params.compute_fraction_overlapping_spikes = false;
-switch experiment
-    case '13.20'
-        params.compute_fraction_overlapping_spikes = true;
-end
+%switch experiment
+%    case '13.20'
+%        params.compute_fraction_overlapping_spikes = true;
+%end
 
 if exist('processparams_local.m','file')
     oldparams = params;

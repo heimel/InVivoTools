@@ -86,18 +86,7 @@ end
 if (isempty(paramname) || strcmp(paramname,'location')) && ...
         (~isempty(strfind(lower(record.stim_type),'til')) ||...
         ~isempty(strfind(lower(record.stim_type),'position')))
-    variable = 'position';
-%     stimparams = cellfun(@getparameters,get(s.saveScript));
-%     rects = cat(1,stimparams(:).rect);
-%     left = uniq(sort(rects(:,1)));
-%     right = uniq(sort(rects(:,3)));
-%     top = uniq(sort(rects(:,2)));
-%     bottom = uniq(sort(rects(:,4)));
-%     center_x = (left+right)/2;
-%     center_y = (top+bottom)/2;
-%     n_x = length(center_x);
-%     n_y = length(center_y);
-%     stimrect = [min(left) min(top) max(right) max(bottom)];
+    variable = 'location';
 else
     variable = paramname;
 end
@@ -111,7 +100,7 @@ if isempty(thetrials)
     do_analyze_i = 1:length(do);
 else
     do_analyze_i = [];
-    for i=1:length(thetrials),
+    for i=1:length(thetrials)
         do_analyze_i = cat(2,do_analyze_i,...
             fix(1+(thetrials(i)-1)*length(do)/tottrials):fix(thetrials(i)*length(do)/tottrials));
     end;
@@ -119,9 +108,9 @@ end;
 
 interval = zeros(length(do_analyze_i),2);
 spinterval = zeros(length(do_analyze_i),2);
-for i=1:length(do_analyze_i),
+for i=1:length(do_analyze_i)
     stimind = do_analyze_i(i);
-    if ~isempty(timeint),
+    if ~isempty(timeint)
         interval(i,:) = s.MTI2{stimind}.frameTimes(1) + timeint;
     else
         stimtime = s.MTI2{stimind}.startStopTimes(3)-s.MTI2{stimind}.startStopTimes(2);
@@ -130,7 +119,7 @@ for i=1:length(do_analyze_i),
     end;
     
     dp = struct(getdisplayprefs(get(s.saveScript,do(i))));
-    if ~isempty(sponttimeint),
+    if ~isempty(sponttimeint)
         spinterval(i,:) = s.MTI2{stimind}.frameTimes(1) + sponttimeint;
     else
         BGpretime = dp.BGpretime;
@@ -142,10 +131,10 @@ for i=1:length(do_analyze_i),
             BGposttime = 0;
         end
         
-        if BGposttime > 0,  % always analyze before time
+        if BGposttime > 0  % always analyze before time
             spinterval(i,:)=[s.MTI2{stimind}.startStopTimes(1)-BGposttime+1 s.MTI2{stimind}.startStopTimes(1)];
             spinterval(i,:)=[s.MTI2{stimind}.startStopTimes(1)-BGposttime+1 s.MTI2{stimind}.startStopTimes(1)];
-        elseif BGpretime > 0,
+        elseif BGpretime > 0
             if BGpretime > params.separation_from_prev_stim_off
                 separation_from_prev_stim_off =  params.separation_from_prev_stim_off; %s
             else
@@ -158,10 +147,10 @@ end
 
 meanforbaselines = [];
 
-if iscell(pixels),
+if iscell(pixels)
     [data,t] = tpreaddata(record, [interval; spinterval]-starttime, pixels,0, channel);
 else
-    if params.response_baselinemethod==3,
+    if params.response_baselinemethod==3
         meanforbaselines = zeros(1,size(pixels.data,2));
         for p=1:size(pixels.data,2)
             [pixels.data{p},meanforbaselines(p)] = tpfilter(pixels.data{p},pixels.t{p});
@@ -175,25 +164,25 @@ for p=1:size(data,2) % roi p
     indspontt = []; indspontm = []; indsponttm = [];
     blankd = []; blankt = []; blankdm = []; blanktm = [];
     
-    for i=(size(interval,1)+1):(size(interval,1)+size(spinterval,1)),
-        indspont = cat(1,indspont,data{i,p});
+    for i=(size(interval,1)+1):(size(interval,1)+size(spinterval,1))
+        indspont = cat(1,indspont,data{i,p} );
         indspontt = cat(1,indspontt,t{i,p});
         indspontm = cat(1,indspontm,nanmean(data{i,p}));
         indsponttm = cat(1,indsponttm,nanmean(t{i,p}));
     end;
     spont = [ nanmean(indspont) nanstd(indspont) nanstderr(indspont) ];
     
-    if theblankid==-1,
-        for i=1:numStims(s.saveScript),
+    if theblankid==-1
+        for i=1:numStims(s.saveScript)
             if isfield(getparameters(get(s.saveScript,i)),'isblank')
                 theblankid = i;
                 break
             end
         end
     end
-    if theblankid>0,
+    if theblankid>0
         li = find(do(do_analyze_i)==theblankid);
-        for j=1:length(li),
+        for j=1:length(li)
             mn = data{li(j),p};
             blankd = cat(1,blankd,mn);
             blankt = cat(1,blankt,t{li(j),p});
@@ -202,8 +191,8 @@ for p=1:size(data,2) % roi p
         end
     end
     
-    if params.response_baselinemethod==3,
-        if theblankid>0,
+    if params.response_baselinemethod==3
+        if theblankid>0
             baseline = repmat(nanmean(blankdm),1,(size(interval,1)+size(spinterval,1)));
         else
             baseline = repmat(meanforbaselines(p),1,(size(interval,1)+size(spinterval,1)));
@@ -221,13 +210,13 @@ for p=1:size(data,2) % roi p
                 indf{myind} = []; %#ok<AGROW>
                 for j=1:length(li)
                     mn = nanmean(data{li(j),p}');
-                    ind{myind} = cat(1,ind{myind},(mn-baseline(li(j)))/baseline(li(j))); %#ok<AGROW>
+                    ind{myind} = cat(1,ind{myind},(mn-baseline(li(j)))/baseline(li(j))); 
                     indf{myind} = cat(1,indf{myind},mn);
                 end
                 if isempty(paramname)
                     curve(1,myind) = myind; %#ok<AGROW>
                 else
-                    curve(1,myind) = getfield( getparameters(get(s.saveScript,i)),paramname); %#ok<GFLD>
+                    curve(1,myind) = getfield( getparameters(get(s.saveScript,i)),paramname); 
                 end
                 curve(2,myind) = nanmean(ind{myind}); %#ok<AGROW>
                 curve(3,myind) = nanstd(ind{myind}); %#ok<AGROW>
@@ -237,7 +226,7 @@ for p=1:size(data,2) % roi p
         else
             li = find(do(do_analyze_i)==i);
             blankind = [];
-            for j=1:length(li),
+            for j=1:length(li)
                 mn = nanmean(data{li(j),p}');
                 blankind = cat(1,blankind,(mn-baseline(li(j)))/baseline(li(j)));
             end
@@ -314,13 +303,13 @@ for p=1:size(data,2) % roi p
             newmeasures = compute_tfrequency_measures(record.measures(p));
         case 'size'
             newmeasures = compute_size_measures(record.measures(p),s,record);
-        case 'position'
+        case 'location'
             newmeasures = compute_position_measures(record.measures(p),s);
     end
     if ~isempty(newmeasures)
         record.measures = structconvert(record.measures,newmeasures);
+        record.measures(p) = newmeasures;
     end
-    record.measures(p) = newmeasures;
 
     record.measures(p).responsive = any(curve(2,:)-2*curve(4,:)>0);
 end % roi p

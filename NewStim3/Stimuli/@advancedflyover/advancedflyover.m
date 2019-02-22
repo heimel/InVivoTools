@@ -7,7 +7,7 @@ if nargin<2
     oldstim = [];
 end
 
-default.filename = 'square_red100.png';
+default.filename = 'large_circle.png';
 default.appear = 1;
 default.stay = 0;
 default.stoppoint = 15;

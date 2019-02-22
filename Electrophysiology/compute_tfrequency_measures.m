@@ -11,9 +11,11 @@ function measures = compute_tfrequency_measures( measures )
 %   bandwidth and tf_fit_halfheight_low are NaN if the response does not
 %   drop below half max
 %
-% 2016, Alexander Heimel
+% 2016-2019, Alexander Heimel
 %
+
 measures.usable=1;
+fittozerobaseline = true;
 
 if ~iscell(measures.curve)
     measures.curve = {measures.curve};
@@ -45,27 +47,62 @@ for t = 1:n_triggers
     measures.tf_fit_halfheight_low{t} = NaN;
     measures.tf_fit_bandwidth{t} = NaN;
     measures.tf_fit_lowpass{t} = NaN;
+    measures.tf_fit_dogpar{t} = NaN;
 
     response = response - baseline;
 
-    par = dog_fit(measures.range{t} ,response );
+    if all(measures.response{t}==0)
+        logmsg('Completely no response. Not fitting');
+        return
+    end
+    
+    if fittozerobaseline
+        par = dog_fit(measures.range{t} ,response,'zerobaseline' );
+    else
+        par = dog_fit(measures.range{t} ,response ); %#ok<UNRCH>
+    end
     par(1) = par(1) + baseline;
+    measures.tf_fit_dogpar{t} = par;
+
     if any(isnan(par))
         logmsg('Could not fit DOG to tf curve');
-        return;
+        measures.tf_fit_dogpar{t} = NaN;
+        return
+    end
+    
+    if par(2)<1E-4 && par(4)<1E-4
+        logmsg('DOG fit gives flat line');
+        measures.tf_fit_dogpar{t} = NaN;
+        return
+    end
+    
+
+    if par(2)<1E-4 
+        logmsg('DOG does not fit well');
+        measures.tf_fit_dogpar{t} = NaN;
+        return
     end
 
     
-    
-    fitx = min(measures.range{t}):0.001:max(measures.range{t}); % only get optimum in tested range
+    par(1) = 0; % set baseline to zero
+    fitx = logspace(log10(min(measures.range{t})),log10(max(measures.range{t})),1000);
     fity = dog(par,fitx);
     [m,indm] = max(fity);
     fit_optimal = fitx(indm);
-    fitx = 1:0.1:40;
+    
+    if fit_optimal == max(measures.range{t})
+        logmsg('DOG does not fit well. Measured on too small a range');
+        measures.tf_fit_dogpar{t} = NaN;
+        return
+    end
+        
+    
+    %fitx = 0.5:0.1:40;
+    fitx = logspace(log10(0.1),log10(40),1000);
     fity = dog(par,fitx);
     indm = find(fitx>fit_optimal,1);
     indh = find(fity>m/2,1,'last');
-    if ~isempty(indh) && indh>indm && fitx(indh)<max(measures.range{t})
+    if ~isempty(indh) && indh>indm %&& fitx(indh)<max(measures.range{t})
         fit_halfheight_high = fitx(indh);
     else 
         fit_halfheight_high = NaN;

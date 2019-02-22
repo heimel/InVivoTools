@@ -55,7 +55,7 @@ angles = [0:pspar.angle:360-pspar.angle];
 
 for i = 1:n_x*n_y
     if i==1
-        iss_script(i) = StimScript(0);
+        iss_script(i) = stimscript(0);
         
         % location
         row=floor( (i-1)/n_x);
@@ -75,7 +75,7 @@ for i = 1:n_x*n_y
         iss_script(i) = loadStimScript(iss_script(i));
     end
     if i==2
-        iss_script(i) = StimScript(0);
+        iss_script(i) = stimscript(0);
         
         % location
         row=floor( (i-1)/n_x);
@@ -95,7 +95,7 @@ for i = 1:n_x*n_y
         iss_script(i) = loadStimScript(iss_script(i));
     end
     if i==3
-        iss_script(i) = StimScript(0);
+        iss_script(i) = stimscript(0);
         
         % location
         row=floor( (i-1)/n_x);
@@ -111,11 +111,11 @@ for i = 1:n_x*n_y
             pspar.angle = angle;
             retinotopy_stim = periodicstim(pspar);
             iss_script(i) = append(iss_script(i),retinotopy_stim);
-        end
+        end 
         iss_script(i) = loadStimScript(iss_script(i));
     end
     if i==4
-        iss_script(i) = StimScript(0);
+        iss_script(i) = stimscript(0);
         
         % location
         row=floor( (i-1)/n_x);
@@ -163,7 +163,7 @@ try
             ready=0;
         end
         pause(0.01);
-        if kbcheck
+        if KbCheck
             CloseStimScreen;
             return
         end

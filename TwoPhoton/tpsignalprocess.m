@@ -1,7 +1,7 @@
-function [processed_data, processed_t] = tpsignalprocess(params, data, t)
+function [processed_data, processed_t] = tpsignalprocess(record, data, t)
 %  TPSIGNALPROCESS - processes two-photon data
 %
-%     [PROCESSED_DATA, PROCESSED_T] = TPSIGNALPROCESS(METHOD, DATA, T,
+%     [PROCESSED_DATA, PROCESSED_T] = TPSIGNALPROCESS(RECORD, DATA, T,
 %     PARAMS)
 %
 %    PARAMS.filter.type = {'none','smooth'}
@@ -17,29 +17,38 @@ function [processed_data, processed_t] = tpsignalprocess(params, data, t)
 % 2010, Alexander Heimel
 %
 
-if ischar(params)
-    switch params
-        case '?'
-            % return possible methods
-            processed_data = {'none','normalize','event_detection'};
-            return
-        otherwise
-            error('TPSIGNALPROCESS:unknown_option','TPSIGNALPROCESS: Unknown option');
-    end
+
+% 
+% if ischar(params)
+%     switch params
+%         case '?'
+%             % return possible methods
+%             processed_data = {'none','normalize','event_detection'};
+%             return
+%         otherwise
+%             error('TPSIGNALPROCESS:unknown_option','TPSIGNALPROCESS: Unknown option');
+%     end
+% end
+% 
+% 
+% if ~isfield(params,'method')
+%     params.method = 'none';
+% end
+
+
+if ~isfield(record,'artefact_removal')
+    params = tpprocessparams(record);
+    default = tpprocessparams(record);
+else
+    params = record;
+    default = tpprocessparams;
 end
-
-if ~isfield(params,'method')
-    params.method = 'none';
-end
-
-
-default = tpprocessparams;
 
 sampletime = (t{1,1}(end) - t{1,1}(1)) / (length(t{1,1})-1);
 
 
 % fill in params struct by default
-for f = fields(default)'
+for f = fieldnames(default)'
     if ~isfield(params,f{1})
         params.(f{1}) = default.(f{1});
     end

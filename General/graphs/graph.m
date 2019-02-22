@@ -49,6 +49,8 @@ function h=graph(y,x,varargin)
 %
 % 2006-2015, Alexander Heimel
 %
+% DEPRECATED! USE IVT_GRAPH. THIS FUNCTION GRAPH WILL BE REMOVED, TO AVOID
+%   CONFUSION WITH MATLAB FUNCTION GRAPH
 
 h=[];
 if nargin<2
@@ -95,7 +97,7 @@ pos_args={...
     'fontsize',20,...
     'fontname','arial',...
     'linestyles','',...
-    'linewidth',2,...
+    'linewidth',[],...
     'ystd',[],...
     'ny',[],...
     'bins',[],... % for (cumulative) histogram and rose
@@ -107,6 +109,10 @@ pos_args={...
     'merge_x',[],...
     'transform','',... % for statistics, not implemented yet
     'showpairing',false,...
+    'barwidth',[],...
+    'correction',[],...
+    'outlierremoval',false,...
+    'normalitytest',''...
     };
 
 assign(pos_args{:});
@@ -135,13 +141,21 @@ if nvarargin>0
     end
 end
 
-
 % parse extra options
 if ischar(extra_options)
     extra_options=split(extra_options,',');
 end
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
+end
+
+if isempty(linewidth)
+    switch style
+        case { 'bar','box'}
+            linewidth = 1;
+        otherwise
+            linewidth =2;
+    end
 end
 
 if exist('errorbars_sides','var')
@@ -165,6 +179,25 @@ if exist('smoothing','var')
     smoothing = str2double(smoothing);
 else
     smoothing = 0;
+end
+
+if exist('outlierremoval','var') && ischar(outlierremoval)
+    outlierremoval = str2double(outlierremoval);
+else
+    outlierremoval = 0;
+end
+
+
+if exist('linewidth','var')
+    if ischar(linewidth) && ~isempty(linewidth)
+        linewidth = str2double(linewidth);
+    end
+end
+
+if exist('barwidth','var')
+    if ischar(barwidth) && ~isempty(barwidth)
+        barwidth = str2double(barwidth);
+    end
 end
 
 if exist('markersize','var')
@@ -277,6 +310,13 @@ if iscell(y{1})
     end
 end
 
+
+if outlierremoval
+    logmsg('Removing outliers');
+    for i=1:length(y)
+        y{i} = remove_outliers(y{i});
+    end
+end
 
 
 switch style
@@ -400,14 +440,16 @@ switch style
         
         % figure positioning and size
         set(gcf,'PaperPositionMode','auto');
-        if length(x)>5
-            p=get(gcf,'position');
-            p(3)=p(3)*(length(x)/6)^0.5;
-            set(gcf,'position',p);
+        if isempty(axishandle)
+            if length(x)>5
+                p=get(gcf,'position');
+                p(3)=p(3)*(length(x)/6)^0.5;
+                set(gcf,'position',p);
+            end
+            width=min(0.6,0.2*length(x));
+            left=0.5-width/2;
+            subplot('position',[left 0.20 width 0.7]);
         end
-        width=min(0.6,0.2*length(x));
-        left=0.5-width/2;
-        subplot('position',[left 0.20 width 0.7]);
         hold on;
         if length(x)>5 % broad graph, show horizontal lines
             set(gca,'YGrid','on')
@@ -451,7 +493,10 @@ switch style
         if ~exist('errorbars_sides','var')
             errorbars_sides='away';
         end
-        h.errorbar=plot_errorbars(y,x,ystd,ny,means,errorbars,errorbars_sides,errorbars_tick); %#ok<*NODEF>
+        h.errorbar=plot_errorbars(y,x,ystd,ny,means,...
+            errorbars,errorbars_sides,errorbars_tick,color); %#ok<*NODEF>
+
+
         
         % plot bars
         if ~exist('nobars','var')
@@ -461,6 +506,16 @@ switch style
                     set(h.bar{i},'facecolor',color{i});
                 else
                     set(h.bar{i},'facecolor',color);
+                end
+                if ~isempty(linewidth)
+                    if linewidth>0
+                        set(h.bar{i},'linewidth',linewidth);
+                    else
+                        set(h.bar{i},'linestyle','none');
+                    end
+                end
+                if ~isempty(barwidth)
+                    set(h.bar{i},'barwidth',barwidth)
                 end
             end
         end
@@ -474,8 +529,7 @@ switch style
                         set(hp,'marker','none');
                     case 'closed_circle'
                         set(hp,'marker','o');
-                        set(hp,'markerfacecolor',color{i});                        set(hp,'markerfacecolor',color{i});
-%                        set(hp,'markeredgecolor',color{i});
+                        set(hp,'markerfacecolor',color{i});   
                     case 'open_circle'
                         set(hp,'marker','o');
                 end
@@ -487,7 +541,7 @@ switch style
         end
         
         % compute and plot significances
-        h = compute_significances( y,x, test, signif_y, ystd, ny, tail,transform, h );
+        h = compute_significances( y,x, test, signif_y, ystd, ny, tail,transform, h,correction,normalitytest );
         
         % tighten x-axis
         ax = axis;
@@ -602,7 +656,7 @@ switch style
                     ebsides=errorbars_sides;
                 end
                 h.errorbar(i)=plot_errorbars({y{i}},x{i},{ystd{i}},[],y{i},...
-                    errorbars,ebsides,errorbars_tick);
+                    errorbars,ebsides,errorbars_tick,color);
                 if ishandle(h.errorbar(i)) || ~isnan(h.errorbar(i))
                     set(h.errorbar(i),'color',color{i},'clipping','off');
                 end
@@ -618,7 +672,7 @@ switch style
                         try
                             [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,test]=...
                                 compute_significance(pointsy{i}{k},...
-                                pointsy{j}{k},test,[],[],[],[],tail,transform);
+                                pointsy{j}{k},test,[],[],[],[],tail,transform,[],correction,normalitytest);
                             
                             
                             plot_significance(  x{i}(k),...
@@ -749,6 +803,12 @@ switch style
                         fity{i} = dog(par,fitx);
                         logmsg([' fit: dog par = ' num2str(par)  ]);
                     end
+                case 'dog_zerobaseline'
+                    for i=1:length(ry)
+                        par = dog_fit(rx{i},ry{i},'zerobaseline');
+                        fity{i} = dog(par,fitx);
+                        logmsg([' fit: dog par = ' num2str(par)  ]);
+                    end
                 otherwise
                     logmsg([' Fit type ' fit ' is not implemented.']);
                     fit='';
@@ -823,11 +883,10 @@ switch style
                         set(h.points(i),'markerfacecolor',color{i});
                     case 'open_circle'
                         set(h.points(i),'marker','o');
-
                        % set(h.points(i),'markerfacecolor',[1 1 1]);
                         hm = h.points(i).MarkerHandle;
                         if ~isempty(hm)
-                        hm.FaceColorData=uint8([255; 255; 255; 255])
+                        hm.FaceColorData=uint8([255; 255; 255; 255]);
                         end
                     case 'closed_circle'
                         set(h.points(i),'marker','o');
@@ -949,17 +1008,17 @@ return
 
 
 
-function h=plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick)
-if nargin<8
+function h=plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick,colors)
+if nargin<9 || isempty(colors)
+    colors = [];
+end
+if nargin<8 || isempty(tick)
     tick = [];
 end
-if nargin<7
+if nargin<7 || isempty(sides)
     sides='away';
 end
-if nargin<6
-    errorbars = '';
-end
-if isempty(errorbars)
+if nargin<6 || isempty(errorbars)
     errorbars = 'std';
 end
 
@@ -1035,6 +1094,14 @@ switch errorbars
                 h=errorbar(x,means,0*dyeb,dyeb,'k.');
             case 'none'
                 h=errorbar(x,means,0*dyeb,0*dyeb,'k.');
+                
+            case  'topline'   
+                for i=1:length(x)
+                    if means(i)<0
+                        dyeb(i) = -dyeb(i);
+                    end
+                    plot([x(i) x(i)],[means(i) means(i)+dyeb(i)],'-','linewidth',2,'color',colors{i});
+                end
         end
 end
 

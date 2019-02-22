@@ -148,7 +148,7 @@ if isempty(meanmeasures)
 end
 
 
-flds = fields(meanmeasures);
+flds = fieldnames(meanmeasures);
 for c=1:length(meanmeasures) % cell
     for f=1:length(flds) % field
         field = flds{f};

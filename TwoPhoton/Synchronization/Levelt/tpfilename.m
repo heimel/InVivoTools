@@ -48,12 +48,12 @@ else
     record.stack = 'Live_0000'; % default Fluoview name
     fname = getfname( record,processed,fmiddle,optcode,ext);
     if exist(fname,'file')
-        disp('TPFILENAME: Using default fluoview name Live_0000.tif');
+        logmsg('Using default fluoview name Live_0000.tif');
     else
         record.stack = 'Live_0001'; % default Fluoview name
         fname = getfname( record,processed,fmiddle,optcode,ext);
         if exist(fname,'file')
-            disp('TPFILENAME: Using default fluoview name Live_0001.tif');
+            logmsg('Using default fluoview name Live_0001.tif');
         else 
             record.stack = '';
             fname = getfname( record,processed,fmiddle,optcode,ext);
@@ -69,7 +69,13 @@ if strcmpi(stack(end-length(ext)+1:end),ext)
     stack = stack(1:end-length(ext));
 end
 
-fname = fullfile(experimentpath( record ),processed,...
-    [stack fmiddle optcode ext]);
+f = filesep; % faster than fullfile
+if ~isempty(processed)
+    fname = [ experimentpath( record ) f processed f stack fmiddle optcode ext];
+else
+    fname = [ experimentpath( record ) f stack fmiddle optcode ext];
+end
+% fname = fullfile(experimentpath( record ),processed,...
+%     [stack fmiddle optcode ext]);
 
 

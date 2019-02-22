@@ -11,14 +11,18 @@ function b = transferscripts(scriptnames,scriptlist) %#ok<INUSD>
 NewStimGlobals;
 
 b = checkremotedir(NewStimRemoteCommDir);
-if ~b, return; end;
+if ~b
+    return;
+end
 
 biglist = [];
-for i=1:length(scriptnames),
+for i=1:length(scriptnames)
   eval([scriptnames{i} '=scriptlist{i};']);
   biglist = [biglist ' ''' scriptnames{i} ''','];
-end;
-if ~isempty(biglist), biglist = biglist(1:end-1); end;
+end
+if ~isempty(biglist)
+    biglist = biglist(1:end-1); 
+end
 pathn = fixpath(NewStimRemoteCommDir);
 fname = [pathn 'toremote.mat'];  %#ok<NASGU>
 eval(['save (fname,' biglist ',''-v6'');']);
@@ -54,12 +58,16 @@ strs = {      'names=load(''toremote.mat'',''-mat'');fnames=fieldnames(names);'.
                  'finished(i)=1;'...
                'end;'...
              'end;'...
-             'save(''gotit.mat'',''fnames'',''-mat'');',...   
-             'save(''fromremote.mat'',''fnames'',''-mat'');'};    
+             'save(''gotit.mat'',''fnames'',''-v7'');',...   
+             'save(''fromremote.mat'',''fnames'',''-v7'');'};    
                    
 b = sendremotecommand(pathn,strs);
-if b,
+if b
   dowait(1);
   thefig = geteditor('RemoteScriptEditor');
-  if isempty(thefig), RemoteScriptEditor; else, RemoteScriptEditor('Update',thefig); end;
-end;
+  if isempty(thefig)
+      RemoteScriptEditor; 
+  else
+      RemoteScriptEditor('Update',thefig);
+  end
+end

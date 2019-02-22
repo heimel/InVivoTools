@@ -9,9 +9,8 @@ function [results,dresults,measurelabel, rawdata] = get_measurements( groups, me
 %       SEM in the individual measurements
 %    MEASURELABEL is cell list of string
 %
-% 2007-2014, Alexander Heimel
+% 2007-2019, Alexander Heimel
 %
-
 
 persistent expdb_cache
 
@@ -71,6 +70,11 @@ end
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
 end
+if exist('collect_records','var')
+    collect_records = eval(collect_records); %#ok<NODEF>
+else
+    collect_records = false;
+end
 
 if ischar(measure)
     measuress=get_measures(measure,measuredb);
@@ -82,6 +86,10 @@ if isempty(measuress)
     return
 end
 measurelabel=measuress.label;
+
+if collect_records
+    collect_record(measuress,'measure');
+end
 
 if ischar(groups)
     groupss=get_groups(groups,groupdb);
@@ -97,7 +105,7 @@ end % g
 
 linehead = '';
 switch measuress.datatype
-    case {'oi','ec','lfp','tp','ls','fret','fp'}
+    case {'oi','ec','lfp','tp','ls','fret','fp','pupil'}
         reload = false;
         if isempty(expdb_cache) || ...
                 ~isfield(expdb_cache,measuress.datatype) || ...
@@ -247,12 +255,10 @@ for i_mouse=indmice
             logmsg('Changed behavior from group on 2013-04-27');
     end
     
-    
     if ~isempty(res) && numel(res)==length(res)
         results=[results(:)' res(:)'];
         dresults=[dresults(:)' dres(:)'];
-        rawdata = [rawdata raw];
-        
+        rawdata = [rawdata raw]; %#ok<AGROW>
     elseif isempty(res)
         % do nothing
     elseif isempty(results)
@@ -284,6 +290,12 @@ end
 isolation='';
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
+end
+
+if exist('collect_records','var')
+    collect_records = eval(collect_records); %#ok<NODEF>
+else
+    collect_records = false;
 end
 
 if strcmpi(measure.datatype,'genenetwork')
@@ -325,13 +337,13 @@ if isfield(testdb,'stim_type') && exist('stim_type','var')
     cond=[cond ', (stim_type=' stim_type ')' ];
 end
 
-
 if isfield(testdb,'experimenter') && exist('experimenter','var')
     cond=[cond ', (experimenter=' experimenter ')' ];
 end
 if isfield(testdb,'stim_onset') && exist('stim_onset','var')
     cond=[cond ', (stim_onset=' stim_onset ')' ];
 end
+
 if isfield(testdb,'comment') &&  exist('comment','var')
     comment = strtrim(comment); %#ok<NODEF>
     if comment(1)=='{'
@@ -354,6 +366,19 @@ if isfield(testdb,'comment') &&  exist('nocomment','var')
         cond=[cond ', comment!*' nocomment{i} '*']; %#ok<AGROW>
     end
 end
+
+if isfield(testdb,'stim_parameters') &&  exist('stim_parameters','var')
+    stim_parameters = strtrim(stim_parameters);  %#ok<NODEF>
+    if stim_parameters(1)=='{'
+        stim_parameters = strtrim(split( stim_parameters(2:end-1)));
+    else
+        stim_parameters = {stim_parameters};
+    end
+    for i=1:length(stim_parameters)
+        cond=[cond ', stim_parameters=*' stim_parameters{i} '*']; %#ok<AGROW>
+    end
+end
+
 if exist('test','var')
     cond=[cond ', test=*' test '*'];
 end
@@ -428,7 +453,7 @@ for i_test=indtests
     if ~isempty(res) && numel(res)==length(res) % i.e. 1D results
         results=[results(:)' res(:)'];
         dresults=[dresults(:)' dres(:)'];
-        rawdata = [rawdata raw];
+        rawdata = [rawdata raw]; %#ok<AGROW>
     elseif isempty(res)
         % do nothing
     elseif isempty(results)
@@ -456,6 +481,11 @@ for i_test=indtests
     end
 end % test records
 
+if ~isempty(results) && collect_records
+    collect_record( mouse ,'mouse');
+end
+
+
 
 function [results, dresults, rawdata]=get_measurements_for_test(testrecord, mouse, measure, criteria,value_per,extra_options,linehead)
 results = [];
@@ -477,7 +507,7 @@ if exist('reliable','var') && eval(reliable)==1 && length(testrecord.reliable)==
     end
 end
 
-if ~exist('reliable','var') && length(testrecord.reliable)==1 
+if ~exist('reliable','var') && length(testrecord.reliable)==1
     if isnumeric(testrecord.reliable)
         if testrecord.reliable==0
             return % no need to check individual cells
@@ -520,6 +550,9 @@ switch measure.measure
         results = get_mouse_weight( mouse);
         return
     case 'age'
+        if isempty(mouse.birthdate) || strcmpi(mouse.birthdate,'unknown')
+            logmsg(['Birthdate unknown for ' recordfilter(mouse)]);
+        end
         results = age(mouse.birthdate,testrecord.date);
         dresults = NaN;
         return
@@ -613,7 +646,7 @@ else
                     result_for_neuritepool{i} = [result_for_neuritepool{i} result_for_neurite];
                 end
             end
-
+            
             res = [];
             dres = [];
             
@@ -665,7 +698,6 @@ if ~isempty(results)
     end
 end
 return
-
 
 
 

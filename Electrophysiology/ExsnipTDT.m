@@ -17,8 +17,8 @@ function CSnip = ExsnipTDT(EVENT, Trials, use_matlab_tdt)
 %
 %       Trials : (double)stimulus onset time determined in analyse_veps
 %
-%Chris van der Togt, 11/11/2005
-%updated 01/06/2006
+% 2005-2006, Chris van der Togt, 11/11/2005, updated 01/06/2006
+% 2019, Alexander Heimel
 
 
 if nargin<2 || isempty(use_matlab_tdt)
@@ -31,18 +31,6 @@ if use_matlab_tdt
 end
 
 CSnip = [];
-% Rt = strmatch(EVENT.Myevent, {EVENT.snips.Snip.name} );
-% if isempty(Rt)
-%     errordlg([EVENT.Myevent ' is not a snip type event'])
-%     return
-% end
-
-% matfile = fullfile(EVENT.Mytank,EVENT.Myblock); %name of file used to save lfp structure
-% MatFile=fullfile(matfile,SpikesFile);
-% if exist([MatFile '.mat'], 'file')
-%     load(MatFile);
-%     return
-% end
 
 %check if start and triallength exist
 if ~isfield(EVENT, 'Start') || ~isfield(EVENT, 'Triallngth')
@@ -50,7 +38,7 @@ if ~isfield(EVENT, 'Start') || ~isfield(EVENT, 'Triallngth')
     return
 end
 
-F = figure('Visible', 'off');
+F = figure('WindowStyle','Normal','Visible', 'off');
 H = actxcontrol('TTANK.X', [20 20 60 60], F);
 H.ConnectServer('local', 'me');
 

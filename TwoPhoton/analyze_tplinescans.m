@@ -19,7 +19,7 @@ load_testdb('ls')
 if  reanalyze
     db = analyze_all(db);
     clear('datapath','reanalyze');
-    save(fullfile(expdatabasepath,expdatabases('ls')),'-mat');
+    save(fullfile(expdatabasepath,expdatabases('ls')),'-v7');
 end
 
 db=db(29:end);
@@ -51,7 +51,7 @@ return
 function results = combine_results( db )
 results = db(1).result;
 
-flds = fields(results);
+flds = fieldnames(results);
 
 for i = 2:length(db)
     for j = 1:length(flds)
@@ -64,7 +64,7 @@ for i = 2:length(db)
                     results.(field) = [results.(field) ; db(i).result.(field) ];
                 end  
                 elseif isstruct(results.(field))
-                sflds = fields(results.(field));
+                sflds = fieldnames(results.(field));
                 for k = 1:length(sflds)
                     subfield = sflds{k};
                     results.(field).(subfield) = [results.(field).(subfield) ; db(i).result.(field).(subfield) ];

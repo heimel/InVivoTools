@@ -133,9 +133,3 @@ end
 H.CloseTank;
 H.ReleaseServer;
 close(F)
-
-% save(MatFile, 'SIG')
-
-% EVENT.strons.stim
-% G=EVENT.strons.stim;f = find(~isnan(G));
-% Trials = G(f);

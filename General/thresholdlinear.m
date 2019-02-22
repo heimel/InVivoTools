@@ -1,4 +1,4 @@
-function y=thresholdlinear( x )
+function y = thresholdlinear(x)
 %THRESHOLDLINEAR returns x if x>0, otherwise 0
 %
 %  Y=THRESHOLDLINEAR( X )
@@ -6,5 +6,5 @@ function y=thresholdlinear( x )
 %   2003-2013, Alexander Heimel
 %
 
-y=x;
-y(x<0)=0;
+y = x;
+y(x<0) = 0;

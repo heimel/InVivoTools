@@ -49,7 +49,8 @@ ax([1 2])=[time(1) time(end)];
 axis(ax);
 
 if leg~=0
-	h_leg=legend(leg,0);
+	%h_leg=legend(leg,0);
+	h_leg=legend(leg,'location','northwest');
 else 
 	h_leg=[];
 end

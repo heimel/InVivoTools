@@ -20,7 +20,7 @@ lineend = '\r\n';
 
 params = ecprocessparams(record);
 
-flds = fields(allcells);
+flds = fieldnames(allcells);
 ind = strmatch('spike_',flds);
 features = flds(ind);
 

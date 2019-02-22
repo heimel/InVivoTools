@@ -23,7 +23,8 @@ Remote_Comm_eol = '\r';  % End of line, '\r' for MacOS9, '\n' for unix
 Remote_Comm_method = 'filesystem';  % 'sockets' or 'filesystem'
 
 % settings for Remote_Comm_method = 'filesystem'
-Remote_Comm_dir = '/home/data/stims'; % the local name of folder in which to write
+% Remote_Comm_dir = '\\vs01.herseninstituut.knaw.nl\MVP\Shared\InVivo\'; % the local name of folder in which to write
+Remote_Comm_dir = 'C:\Windows\Temp'; % the local name of folder in which to write
 %   files for communication
 
 % settings for Remote_Comm_method = 'sockets'
@@ -41,7 +42,7 @@ Remote_Comm_port = 1205;
 Remote_Comm_remotearchitecture = 'unix'; % options are 'PC', 'Mac' (MacOS9), or 'unix' (Linux, MacOSX)
 % the computer type of the remote machine you are talking to (not of THIS computer, necessarily)
 
-Remote_Comm_localprefix = '/home/data/'; % for example, 'Z:', 'z:', '/Users/Shared/myexperimentdir'
+Remote_Comm_localprefix = 'C:\Data'; % for example, 'Z:', 'z:', '/Users/Shared/myexperimentdir'
 % the prefix to the shared directory on THIS computer
 
 Remote_Comm_remoteprefix = '/mnt/THISHOSTNAME/data';
@@ -75,7 +76,7 @@ MonitorWindowMonitor = 0;  % use the given monitor, 0 is first
 MonitorComputer = 0;       % does this computer have a monitor window?
 
 
-if StimComputer&&haspsychtbox==2,  % set up timing and monitor settings
+if StimComputer&&haspsychtbox==2  % set up timing and monitor settings
     Screen('Preference','SecondsMultiplier',1.0);
     Screen('Preference','Backgrounding',1); 
 else
@@ -83,7 +84,7 @@ else
     StimWindowRefresh = 60;
     StimWindowDepth = 8;
     StimWindowRect = [ 0 0 800 600 ];
-end;
+end
 
 % pixels_per_cm of the monitor in use
 pixels_per_cm = 200/9.5;
@@ -101,7 +102,6 @@ GammaCorrectionTableGlobals;
 GammaCorrectionEnable = 0;
 LoadGammaCorrectionTable('gct_linear.txt');
 %LoadGammaCorrectionTable('gct_HOSTNAME.txt');
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Triggering/stimulus reporting settings
@@ -137,6 +137,8 @@ NSUseInitialSerialTrigger = 1;
 NSUseStimSerialTrigger = 0;
 
 StimDisplayOrderRemote = 0;
+StimNoBreak = true;
+
 StimTriggerClear
 
 %fitzTrigParams.triggerStimOnset = 1; % 0 means trigger BGpre instead of stim onset

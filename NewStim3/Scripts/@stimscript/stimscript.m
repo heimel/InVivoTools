@@ -4,13 +4,13 @@ NewStimScriptListAdd('stimscript');
 
 if nargin==0,
 	A = stimscript('default');
-	return;
-end;
+	return
+end
 
 A = [];
 if nargin==2,
 	A = oldscript;
-else, 
+else
 
 	%displayMethod should be removed, but don't want to mess stuff up
 	data = struct('displayMethod', [], 'displayOrder', [], ...
@@ -19,4 +19,4 @@ else,
 
 	A = class(data,'stimscript');
 
-end;
+end

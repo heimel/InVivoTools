@@ -32,7 +32,7 @@ switch process_params.method
         n_panelrows = 1;
     case 'none'
         stack_lines = 0;
-        marker='none';
+        marker='.' ;%'none';
         linestyle = '-';
         ylab = 'F (a.u.)';
         n_panelrows = 1;
@@ -47,12 +47,10 @@ h_traces  = subplot(n_panelrows,1,1);
 hold on;
 for i=1:length(record.measures)
     ind=mod(i-1,length(colors))+1;
-    
-
-    
-    
+      
     t = record.measures(i).raw_t;
-    y = smoothen(record.measures(i).raw_data,0.8);
+%    y = smoothen(record.measures(i).raw_data,0.8);
+    y = record.measures(i).raw_data;
 
     if process_params.tp_raw_dynamic_zero
         [ymin,tmin]  = slidingwindowfunc(t,y,[],[],[],8,'min');
@@ -67,25 +65,6 @@ end
 ylabel(ylab);
 xlabel('Time (s)');
 xlims = xlim;
-
-% show data as color image
-% subplot(n_panelrows,2,2);
-%
-% imgdata = [];
-% markers = [];
-% marker_labels = {};
-% marker_index = 1;
-%
-% for i = 1:length(record.measures)
-%     imgdata = [imgdata; record.measures(i).data];
-% end
-% imagesc(imgdata);
-% set(gca,'YDir','normal')
-% set(gca,'Xtick',markers);
-% set(gca,'Xticklabel',marker_labels);
-% ylabel('Cell');
-% xlabel('Time (ks)');
-% colormap jet
 
 % global events
 switch process_params.method

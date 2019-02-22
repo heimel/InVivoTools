@@ -9,7 +9,7 @@ function db = xls2db( fname, sheet, label_row)
 
 var = xls2var( fname, sheet, label_row );
 
-flds = fields( var );
+flds = fieldnames( var );
 n_rows = length(var.(flds{1}));
 
 for i = 1:n_rows

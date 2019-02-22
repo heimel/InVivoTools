@@ -6,7 +6,7 @@ function params = tpprocessparams(  record )
 %  Local changes to settings should be made in processparams_local.m
 %  This should be an edited copy of processparams_local_org.m
 %
-% 2009-2015, Alexander Heimel
+% 2009-2017, Alexander Heimel
 %
 
 if nargin<1
@@ -105,20 +105,27 @@ params.output_show_figures = true;
 params.output_show_waves = true;
 
 % image processing (for z-stack)
+params.spatial_filteroptions = '';
 switch lower(record.experiment)
     case 'holtmaat'
         params.unmixing = false; % channel unmixing
         params.spatial_filter = false;
+        params.spatial_filterhandle = @medfilt2;
     case {'10.24','11.12'}
         params.unmixing = true; % channel unmixing
         params.spatial_filter = true;
+        params.spatial_filterhandle = @medfilt2;
     case {'11.74'}
         params.unmixing = true; % channel unmixing
         params.spatial_filter = true;
+        params.spatial_filterhandle = @medfilt2;
     otherwise
         params.unmixing = false; % channel unmixing
         params.spatial_filter = false;
+        params.spatial_filterhandle = @medfilt3;
 end
+
+params.apply_postfunction = []; % function to apply after imageprocessing, e.g imregisterstack
 
 % unmixing parameters
 
@@ -134,9 +141,21 @@ params.which_frac_ch2_in_ch1 = 'firstmax'; % used since 2012-01-27
 
 % image viewing parameters 
 n_channels = 10;
-params.viewing_default_min = -1*ones(1,n_channels); % for n_channels channels, i.e. set to minimum intensity
-params.viewing_default_max = -0.1*ones(1,n_channels);% for n_channels channels, i.e. saturate 0.1%
-params.viewing_default_gamma = 1*ones(1,n_channels);% for n_channels channels
+
+% viewing_default_min used for thresholding minimum intensity, 
+% positive numbers set the absolute threshold to that intensity
+% -1 will use the mode of the image, 
+% other negative numbers set the threshold to that percentile level
+params.viewing_default_min = -1*ones(1,n_channels); 
+
+% viewing_default_max used for thresholding maximum intensity, 
+% positive numbers set the absolute threshold to that intensity
+% negative numbers set the threshold to that percentile level, 
+% i.e. -0.1 means saturate 0.1% of channels
+params.viewing_default_max = -0.1*ones(1,n_channels);
+
+params.viewing_default_gamma = 1*ones(1,n_channels);
+
 switch lower(record.experiment)
     case '10.24'
         params.viewing_default_min = -1*ones(1,n_channels); % for ten channels, i.e. set to minimum intensity
@@ -159,9 +178,7 @@ switch lower(record.experiment)
         params.viewing_default_max = -0.1*ones(1,n_channels);% for n_channels channels, i.e. saturate 0.1%
 end
 
-
 params.tp_monitor_threshold_level = 0.01;
-
 
 % alignment parameters
 switch lower(record.experiment)
@@ -169,10 +186,16 @@ switch lower(record.experiment)
         params.align_channel = 2; % for Daan's original stacks
 end
 
+% maximum number of frames to jump when snapping neurite
+params.max_snap_range = 2; % frames
+
+% default roi circle size
+params.default_roi_disk_radius_pxl = 12; 
+
 % maximum distance for linking ROI to neurite
 switch record.experiment
     case '11.21'
-        if isempty(findstr(record.stack,'overview'))
+        if isempty(strfind(record.stack,'overview'))
             params.max_roi_linking_distance_um = 4;
         else
             params.max_roi_linking_distance_um = 500; 
@@ -184,7 +207,6 @@ switch record.experiment
 end
 
 params.cell_colors = repmat('kbgrcmy',1,50);
-
 
 % measures to compute time xz for
 params.series_measures = ['present','lost','gained','timepoint',tpstacktypes(record),tpstacklabels(record)];
@@ -205,7 +227,7 @@ params.bouton_close_minimum_intensity_rel2dendrite = zeros(1,100); %max 100 chan
 % get intensities
 params.get_intensities = false;
 switch record.experiment
-    case {'12.81','Examples','14.26'}
+    case {'12.81','Examples','14.26','17.20.16'}
         params.get_intensities = true;
     case '13.29' % dani cr
         switch lower(record.setup)
@@ -239,15 +261,21 @@ params.psth_baselinemethod = 0; % the baseline used to identify F in dF/F.
 %    for baseline.
 
 params.psth_align_stim_onset = false; % to align df/f at t = 0
-params.mti_timeshift = 0.058; % ms for Fluoview scope
+
+switch lower(record.setup)
+    case {'helero2p','g2p'} % Gaia
+        params.mti_timeshift = 0.00; % s
+    case {'olympus','wall-e'} % Fluoview scope
+        params.mti_timeshift = 0.058; % s 
+    otherwise
+        params.mti_timeshift = 0.058; % s
+end
 
 switch record.datatype
-    case 'tp'
-        params.response_channel = 1; % assuming OGB, GCaMP on first channel
     case 'fret'
         params.response_channel = [1 2];
     otherwise
-        params.response_channel = 1;
+        params.response_channel = 1; % assuming OGB, GCaMP on first channel
 end
 
 params.response_projection_method = 'max';  
@@ -264,9 +292,6 @@ params.response_baselinemethod = 0;
 %     1  - Use the closest blank stimulus
 %     2  - Use a 20s window of ISI and blank values.
 %     3  - Filter data with 240s highpass and use mean
-
-
-
 
 % if datenumber(record.date)<datenumber('2014-07-01') % time when introduced new pixelshift
 %     params.pixelshift_pixel = 14;
@@ -313,14 +338,28 @@ switch lower(record.experiment)
 end
 params.blind_stacks_with_specific_shuffle = {};
 
+% drift correction
+
+% SEARCHX and SEARCHY are vectors containing offsets from 0 (no drift).  REFSEARCHX and
+%  REFSEARCHY are the offsets to check during the initial
+%  effort to find a match between frames acquired for a different
+%  record.
+params.drift_correction_searchx = -6:2:6; % search x range in pixels
+params.drift_correction_searchy = -6:2:6; % search y range in pixels
+params.drift_correction_refsearchx = -100:10:100; % search x range in pixels wrt reference
+params.drift_correction_refsearchy = -100:10:100; % search y range in pixels wrt reference
+params.drift_correction_howoften = 10; % skip N-1 frames for each corrected frame
+params.drift_correction_avgframes = 5; % average frames before drift correcting
+params.drift_field_of_view_margins = [10 10 10 10]; % margins in pixels, left, right, top, bottom
+params.drift_correction_skip_firstframes = 5; % skip frames at start
+% use 0 for no margins
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % keep at bottom
 
 if exist('processparams_local.m','file')
-    oldparams = params;
     params = processparams_local( params );
-    %     changed_process_parameters(params,oldparams);
 end
 
 

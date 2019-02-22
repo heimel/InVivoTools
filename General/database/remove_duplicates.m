@@ -9,22 +9,15 @@ function db = remove_duplicates(db,flds,keep,keep_criterium)
 %     'keep_criterium'. If none fits the keep criterium, it will keep the
 %     last
 %
-% 2013, Alexander Heimel, Daan van Versendaal
+% 2013-2017, Alexander Heimel, Daan van Versendaal
 %
 
-if nargin<2
-    flds = {};
+if nargin<2 || isempty(flds)
+    flds = fieldnames(db);
 end
-if isempty(flds)
-    flds = fields(db);
-end
-if nargin<3
-    keep = '';
-end
-if isempty(keep)
+if nargin<3 || isempty(keep)
     keep = 'all';
 end
-
 
 remove = false(length(db),1);
 for i=1:length(db)

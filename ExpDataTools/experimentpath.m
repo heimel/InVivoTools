@@ -17,13 +17,17 @@ end
 if nargin<4 || isempty(vers) 
     vers = '2004';
     if isfield(record,'setup')
-        switch record.setup
+        switch lower(record.setup)
             case 'jander'
                 vers = '2015';
             case 'daneel'
                 if isfield(record,'experiment') && strcmpi(record.experiment,'examples')
                     vers = '2015';
                 end
+            case {'gaia','helero2p','g2p','intan'}
+                vers = '2015';
+            case 'lif'
+                vers = '2015';
         end
     end
 end
@@ -48,7 +52,7 @@ switch vers
             switch record.datatype
                 case {'tp','fret','ls'}
                     datapath = tpdatapath(record,include_test);
-                case {'ec','lfp'}
+                case {'ec','lfp','pupil'}
                     datapath = ecdatapath(record);
                     if include_test
                         if isfield(record,'test')
@@ -121,6 +125,8 @@ switch vers
                 end
             case {'wc'}
                 datatype = 'Webcam';
+            case {'pupil'}
+                datatype = 'Electrophys';
             otherwise
                 errormsg(['Unknown datatype ' record.datatype],true);
         end
@@ -138,14 +144,15 @@ switch vers
                     setup,...
                     test);
             otherwise
-                datapath = fullfile(localpathbase(vers),...
-                    'InVivo',...
-                    datatype,...
-                    setup,...
-                    experiment,...
-                    record.mouse,...
-                    record.date,...
-                    test);
+                f = filesep; % faster than fullfile
+                datapath = [localpathbase(vers) f...
+                    'InVivo' f ...
+                    datatype f ...
+                    setup f ...
+                    experiment f ...
+                    record.mouse f ...
+                    record.date f ...
+                    test];
         end
         if ~exist(datapath,'dir')
             if create

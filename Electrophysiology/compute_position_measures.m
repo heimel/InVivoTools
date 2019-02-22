@@ -6,7 +6,7 @@ function measures = compute_position_measures( measures, st )
 % 2016 Alexander Heimel
 %
 
-if ~strcmp(measures.variable,'position') 
+if ~strcmp(measures.variable,'location') 
     return
 end
 

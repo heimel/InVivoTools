@@ -12,14 +12,15 @@ function g = listofvars(classname)
 %
 %                                     Questions to vanhoosr@brandeis.edu
 
-g = {}; g_ = 0;
+g = {}; 
+g_ = 0;
 w = evalin('base','whos');
 
 for i=1:length(w),
-        if (strcmp(w(i).name,'ans')==0)&...
-             evalin('base',['isa(' w(i).name ',''' classname ''')']),
+        if (strcmp(w(i).name,'ans')==0) && ...
+             evalin('base',['isa(' w(i).name ',''' classname ''')'])
                 g_ = g_ + 1;
                 g{g_} = w(i).name;
-        end;
-end;
+        end
+end
 

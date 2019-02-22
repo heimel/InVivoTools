@@ -11,7 +11,7 @@ if exist(fn, 'file')
   g = load(fn,'-mat');
   n = fieldnames(g);
   delete(fn);
-  for i=1:length(n),
+  for i=1:length(n)
      if ~streq(n{i},pattern)% && ~strcmp(n{i},'name')
        eval([n{i} '=g.' n{i} ';']);
 %               save(fn,n{i},'-mat'); % Mehran

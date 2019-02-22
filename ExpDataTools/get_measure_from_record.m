@@ -3,8 +3,11 @@ function [val,val_sem]=get_measure_from_record(record,measure,criteria,extra_opt
 %
 %  [val,val_sem] = get_measure_from_record(record,measure,criteria,extra_options)
 %
-% 2007-2014, Alexander Heimel
+% 2007-2018, Alexander Heimel
 
+if nargin<3
+    criteria = [];
+end
 if nargin<4
     extra_options = {};
 end
@@ -96,7 +99,8 @@ end
 
 get = 1;
 if exist('anesthetic','var')
-    if isempty(strfind(lower(record.anesthetic),lower(anesthetic)))
+%    if isempty(strfind(lower(record.anesthetic),lower(anesthetic)))
+    if ~contains(lower(record.anesthetic),lower(anesthetic),'IgnoreCase',true)
         get = 0;
     end
 end
@@ -105,6 +109,12 @@ if exist('depth','var') && ~isempty(depth) && depth~=0 %#ok<NODEF>
         get = 0;
     end
 end
+if exist('collect_records','var')
+    collect_records = eval(collect_records); %#ok<NODEF>
+else
+    collect_records = false;
+end
+
 if ~isempty(layer)
     if isfield(record,'depth')
         depth=record.depth-record.surface;
@@ -139,6 +149,11 @@ if isfield(record,measure)
         val = double(val);
     end
     val_sem = NaN(size(val));
+    
+    if collect_records
+        collect_record(record,'test');
+    end
+    
     return
 end
 
@@ -337,8 +352,22 @@ for c=1:length(record.measures) % over all cells or ROIs
                 if isfield(measures,'psth') && isfield(measures.psth,'data')
                     tempval = measures.psth.data;
                 end
-            case 'depth'
-                tempval = record.depth-record.surface;
+            case {'depth','depthfromsurface'}
+                if isfield(record,'depth')
+                    tempval = record.depth-record.surface;
+                elseif isfield(record,'location') % twophoton
+                    loc = record.location;
+                    p = find(loc==':'); % of type area1:-X.X,Y.Y,Z.Z
+                    if ~isempty(p)
+                        loc = loc(p+1:end);
+                    end
+                    loc = str2num(loc); %#ok<ST2NM>
+                    if numel(loc)==3
+                        tempval = loc(3); 
+                    else
+                        logmsg(['Location does not have 3 coordinates for ' recordfilter(record)]);
+                    end
+                end
             case {'range','parameter'} % parameter is deprecated
                 if isfield(measures,'curve')
                     logmsg('Range should be measure already. Reanalyze test records.');
@@ -388,7 +417,7 @@ for c=1:length(record.measures) % over all cells or ROIs
             case 'time_peak_highcontrast'
                 logmsg('TIME_PEAK_HIGHCONTRAST IS DEPRECATED AND RETURNS PREFERRED STIMULUS');
                 time_peak = measures.time_peak;
-                if iscell(time_peak);
+                if iscell(time_peak)
                     time_peak = time_peak{1};
                 end
                 tempval = time_peak;
@@ -450,6 +479,12 @@ end % next cell c
 
 if any(size(val)~=size(val_sem))
     logmsg('Sizes of VAL and VAL_SEM are not equal');
+end
+
+if collect_records
+    if collect_records
+        collect_record(record,'test');
+    end
 end
 
 

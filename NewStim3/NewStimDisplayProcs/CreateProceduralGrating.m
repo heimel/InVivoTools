@@ -96,12 +96,13 @@ if nargin < 8 || isempty(phaseOffset)
     phaseOffset = 0; 
 end
 
+debug = 0;
 if isinf(radius)
     % Load standard grating shader:
-    gratingShader = LoadGLSLProgramFromFiles('BasicSineGratingShader', 1);
+    gratingShader = LoadGLSLProgramFromFiles('BasicSineGratingShader', debug);
 else
     % Load grating shader with circular aperture support:
-    gratingShader = LoadGLSLProgramFromFiles({'BasicSineGratingShader.vert.txt', which('ApertureGratingShader.frag.txt')}, 1);
+    gratingShader = LoadGLSLProgramFromFiles({'BasicSineGratingShader.vert.txt', which('ApertureGratingShader.frag.txt')}, debug);
 end
 
 % Setup shader:

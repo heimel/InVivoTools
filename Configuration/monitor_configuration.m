@@ -30,10 +30,10 @@ switch lower(record.setup)
         monitor.center_rel2nose_cm = [10 0 7];
         monitor.tilt_deg = 20;
     case 'antigua'
-        monitor.size_cm = [70.5 70.5/800*600];
-        monitor.size_pxl = [800 600];
+        monitor.size_cm = [60 42];
+        monitor.size_pxl = [1152 864];
         monitor.slant_deg = 0;
-        logmsg('Monitor settings are not checked yet!');
+        monitor.center_rel2nose_cm = [0 0.1*monitor.size_cm(2) 17.5];
     otherwise
         logmsg('Cannot recognize monitor settings. Defaulting');
 end

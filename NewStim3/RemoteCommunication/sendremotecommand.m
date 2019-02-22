@@ -41,7 +41,7 @@ if checkremotedir(Remote_Comm_dir), % directory exists
 		pathn=fixpath(Remote_Comm_dir);
 		fname = [pathn 'gotit'];
 		fnameerror = [pathn 'scripterror'];
-		g = msgbox('Please wait', 'Please wait');
+		g = msgbox(['Waiting for writing of ' fname ' by remote computer.'] , 'Please wait');
 		x = findobj(g,'Style','PushButton');
 		set(x,'String','Cancel');
 		drawnow;
@@ -54,7 +54,7 @@ if checkremotedir(Remote_Comm_dir), % directory exists
 			if strcmp(Remote_Comm_method,'filesystem'),
 				cd(pwd); % flush file info
 				errorflag = exist(fnameerror);
-				scriptdone = exist(fname)|errorflag;
+				scriptdone = exist(fname,'file') || exist([fname '.mat'],'file') || errorflag;
 				if errorflag,
 					load(fnameerror,'-mat');
 					errordlg(['Error: remote script failed with error ' errorstr '.']);

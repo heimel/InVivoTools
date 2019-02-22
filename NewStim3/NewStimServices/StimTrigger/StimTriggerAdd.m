@@ -22,14 +22,10 @@ myDevStruct = struct('TriggerType',TriggerType,'parameters',parameters);
 
 b = 1;
 
-%try,
-	eval([TriggerType '_StimTriggerAdd(TriggerType,parameters);']);
-	if isempty(StimTriggerList),
-		StimTriggerList = myDevStruct;
-	else,
-		StimTriggerList(end+1) = myDevStruct;
-	end;
-%catch,
-%	b = 0;
-%end;
+eval([TriggerType '_StimTriggerAdd(TriggerType,parameters);']);
+if isempty(StimTriggerList),
+    StimTriggerList = myDevStruct;
+else
+    StimTriggerList(end+1) = myDevStruct;
+end
 

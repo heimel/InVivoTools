@@ -7,15 +7,31 @@ function load_invivotools
 %    check https://github.com/heimel/InVivoTools for most recent version
 %    and documentation. In Manual folder
 %
-% 2014, Alexander Heimel
+% 2014-2017, Alexander Heimel
 %
 
-more off
+if exist ('OCTAVE_VERSION', 'builtin') 
+    isoctave = true;
+else
+    isoctave = false;
+end
+
+if isoctave
+    more off
+    warning('off','Octave:shadowed-function');
+    warning('off', 'Octave:language-extension');
+    warning('off', 'Octave:mixed-string-concat');
+    try
+        pkg load instrument-control
+    catch me
+       disp(me.message);
+    end
+end
 
 disp([ upper(mfilename) ': Manual available at https://github.com/heimel/InVivoTools/wiki']);
 
 if isunix
-    updatestr = ['To update InVivoTools: update_invivotools'];
+    updatestr = 'To update InVivoTools: update_invivotools';
 else
     updatestr = 'To update InVivoTools: open github and click on Sync.';
 end
@@ -35,7 +51,6 @@ elseif ~isempty(processparams_local([]))
 end
 disp([ upper(mfilename) ': To override InVivoTools settings: edit processparams_local']);
 
-
 % defaults, put overrides in processparams_local.m file
 params.load_general = 1; % necessary for host function
 params.load_nelsonlabtools = 1; % needed for analysis, should be phased out
@@ -49,6 +64,7 @@ params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_webcam = 1; % needed for InVivoTools analysis
 params.load_studies = {}; % folders of Studies to load
 params.load_physiology = 1; % needed for EXG recordings
+params.load_histology = 1; % needed for matching histology to Allen Mouse Brain Atlas
 
 % set default lab, can be overruled depending on host:
 % alternatives 'Fitzpatrick','Levelt','Lohmann'
@@ -57,8 +73,7 @@ params.lab='Levelt';
 
 params = processparams_local(params); % load local overrides
 
-
-if params.load_general, % general
+if params.load_general % general
     % some generally useful tools not associated with any particular package
     path2general=fullfile(majorprefix,'General');
     addpath(path2general, ...
@@ -78,7 +93,6 @@ if params.load_general, % general
         fullfile(path2general,'CircStat'), ... % circular statistics toolbox
         fullfile(path2general,'database','matlab_7'));
 end
-
 
 path2invivotools = majorprefix;
 
@@ -105,7 +119,6 @@ if params.load_twophoton
         case 'Fitzpatrick'
             twophoton_microscope_type='PrairieView';
     end
-
     
     addpath(twophoton_path, ...
         fullfile(twophoton_path, 'Reid_cell_finder' ),...
@@ -135,7 +148,6 @@ if params.load_electrophys
         fullfile(path2invivotools,'Electrophysiology','Axon'),... % for importing Axon abf files
         genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5')));    % for MClust spike sorter
 end
-
 
 % Physiology analyses
 if params.load_physiology
@@ -189,6 +201,11 @@ if params.load_erg
     addpath(ergpath,fullfile(ergpath,'usbActiveWire'));
 end
 
+% Histology and Allen Atlas matching
+if params.load_histology
+    addpath(fullfile(path2invivotools,'Histology','Allenatlasmatching'));
+end
+    
 % Temp folder for work in progress
 addpath(fullfile(path2invivotools,'Working'));
 
@@ -210,4 +227,8 @@ if isunix % bug workaround for Matlab R2012b and more recent
     end
 end
 
-clear
+if isoctave
+    warning('on','Octave:shadowed-function');
+end
+
+%clear 

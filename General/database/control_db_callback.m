@@ -150,7 +150,7 @@ switch windowname
                 init = get(ud.h.crit,'String');
                 if ~isempty(init)
                     if ~any(init=='=')
-                        f = fields(ud.db);
+                        f = fieldnames(ud.db);
                         init = [f{1} '=' init];
                     end
                 end
@@ -287,7 +287,7 @@ switch windowname
                 set(h_fig,'Userdata',ud);
                 control_db_callback(ud.h.filter);
                 control_db_callback(ud.h.current_record);
-            case 'save',
+            case 'save'
                 if isempty(ud.filename)
                     control_db_callback(ud.h.save_as);
                     return
@@ -335,11 +335,11 @@ switch windowname
                     answer=questdlg('Do you want to save changes?',...
                         'Close Database control','Yes');
                     switch answer
-                        case 'Yes',
+                        case 'Yes'
                             control_db_callback(ud.h.save);
-                        case 'No',
+                        case 'No'
                             % do nothing
-                        case 'Cancel',
+                        case 'Cancel'
                             return
                     end
                 end
@@ -357,13 +357,13 @@ switch windowname
                     set(h_fig,'CloseRequestFcn','closereq');
                     close(h_fig);
                 end
-            case 'close figs',
+            case 'close figs'
                 close_figs;
             case 'table'
                 show_table(ud.db(ud.ind));
             otherwise
                 if ~isempty(action)
-                    ud=feval(action,ud );
+                    ud = feval(action,ud );
                     set(h_fig,'Userdata',ud);
                     control_db_callback(ud.h.current_record);
                 end

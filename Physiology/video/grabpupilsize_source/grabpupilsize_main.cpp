@@ -1,16 +1,8 @@
 //grabpupilsize.cpp (compile x64)
-//-----------------------------------------------------------------------//
 //																		 
 // * updated 12-7-2016 * FULLY FUNCTIONING END VERSION!
 //
-// Software written by Simon Lansbergen, 
-// 
-//	(c) July 2016. SL
-//
-//
-//
-//------------------------------------------------------------------------//
-
+// 2016, Simon Lansbergen
 
 // Include files to use the PYLON API.
 #include <pylon/PylonIncludes.h>
@@ -30,16 +22,13 @@
 #include <fstream>
 #include <iostream>
 
-
-
-
 using namespace Pylon; // Namespace for using pylon objects.
 using namespace cv;    // Namespace for using openCV objects.
 using namespace std;   // Namespace for using cout.
 
-
 					   // Global variables - used outside Main{}
 int drag = 0;
+
 Mat set_ROI;			// Images
 Mat end_result;
 Mat frame;
@@ -79,7 +68,6 @@ static void onMouse(int event, int x, int y, int, void*) {
 	}
 	if (drag == 1) {}
 
-
 	// user release left button
 	if (event == CV_EVENT_LBUTTONUP && drag)
 	{
@@ -118,11 +106,8 @@ int main(int argc, char* argv[])
 
 	// The exit code of the sample application.
 	int exitCode = 0;
-	system("CLS");
-
-	cout << "*------------------------------------------------------*" << endl;
-	cout << "*******   Program by S.E Lansbergen, June 2016  ********" << endl;
-	cout << "*------------------------------------------------------*" << endl;
+	
+	cout << "grabpupilsize by S.E Lansbergen, June 2016" << endl;
 
 	//------------------------//
 	// Configuration variable //
@@ -182,7 +167,7 @@ int main(int argc, char* argv[])
 	}
 
 	//-------------------//
-	// Defualt variables //
+	// Default variables //
 	//-------------------//
 
 	// default hard coded settings if Config.cfg file is not present or in-complete/commented
@@ -235,6 +220,7 @@ int main(int argc, char* argv[])
 	double pi = 3.14159;
 	uint32_t time, frames;
 	Point pupil_position;
+	uint64_t camera_timestamp;
 
 	//---------------------//
 	// Remaining variables //
@@ -411,17 +397,13 @@ int main(int argc, char* argv[])
 			cali_y_b = cfg.getValueOfKey<int>("cali_y_b");
 		}
 
-
-
 		// BETA 14-6-2016
 		if (cfg.keyExists("save_path_xy") == true) { // get numerical output file name & path
 			save_path_xy = cfg.getValueOfKey<string>("save_path_xy");
 			//save_path_num = sav_pat_num.c_str();
 		}
 
-
 		cout << endl << endl << " *** Configuration file loaded ***" << endl;
-
 	}
 	else {
 		cout << endl << endl << " *** No configuration file found ***" << endl;
@@ -612,10 +594,7 @@ int main(int argc, char* argv[])
 		cout << endl;
 		cout << "* Show text on end result stream      : " << show_ost << endl;
 		cout << "* Size text on screen                 : " << size_text << endl;
-		cout << "*" << endl;
-		cout << "*------------------------------------------------------*" << endl;
 		cout << "*******   Program by S.E Lansbergen, July 2016  ******** " << endl;
-		cout << "*------------------------------------------------------*" << endl;
 
 	}
 
@@ -764,6 +743,11 @@ int main(int argc, char* argv[])
 			// Image grabbed successfully?
 			if (ptrGrabResult->GrabSucceeded())
 			{
+				camera_timestamp = ptrGrabResult->GetTimeStamp();
+				// printf("Frame number %lld\n", ptrGrabResult->GetImageNumber());
+
+				if (ptrGrabResult->GetNumberOfSkippedImages() > 0)
+					printf("Skipped %lld frames\n", ptrGrabResult->GetNumberOfSkippedImages());
 
 				// Pre-Step: set (click on-)mouse call back function
 				setMouseCallback("End Result", onMouse, 0);
@@ -949,10 +933,10 @@ int main(int argc, char* argv[])
 				// Store radius & video streams //
 				//------------------------------//
 
-				// store radius in output file
+				// store radius and xy in output file
 				if (save_radius == true) {
-					output_end_result << area_output << endl;
-					output_xy << x_out << char(44) << char(32) << y_out << endl;
+					output_end_result << camera_timestamp << ", " << area_output << endl;
+					output_xy << camera_timestamp << ", " << x_out << char(44) << char(32) << y_out << endl;
 				}
 
 				// write the end result into file
@@ -1033,6 +1017,7 @@ int main(int argc, char* argv[])
 	else {
 		cout << endl << endl << " *** Done ***" << endl << endl;
 	}
+	
 
 	return exitCode;
 }

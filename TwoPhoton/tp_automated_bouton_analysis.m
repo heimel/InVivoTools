@@ -1,4 +1,5 @@
 function record = tp_automated_bouton_analysis( record)
+% Chris vd Togt
 
 % see tp_analyse_neurites
 measures = record.measures;

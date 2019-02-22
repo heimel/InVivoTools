@@ -38,7 +38,7 @@ if ~exist(id,'file')
 end
 
 fid = fopen(id);
-buf = fread(fid,1000000);
+buf = fread(fid,5000000);
 fclose(fid);
 txt = char(buf(14:2:end))';
 
@@ -94,7 +94,7 @@ r.setMetadataStore(loci.formats.MetadataTools.createOMEXMLMetadata());
 r.setId(id);
 numSeries = r.getSeriesCount();
 if numSeries>size(dd,1)
-   logmsg(['Reported numSeries = ' num2str(numSeries) ', but only read header info for ' num2str(size(dd,1)) ' series']);
+   errormsg(['Reported numSeries = ' num2str(numSeries) ', but only read header info for ' num2str(size(dd,1)) ' series. Need to increase read buffer']);
    numSeries = size(dd,1);
 end
 
@@ -205,7 +205,7 @@ else
     end
 end
 if stored
-    save(infname,'inf','imagenames','-mat');
+    save(infname,'inf','imagenames','-v7');
 end
 
 return

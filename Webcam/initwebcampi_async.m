@@ -2,21 +2,18 @@ function initwebcampi_async(ready)
 %INITWEBCAMPI
 % starts recording one long file while checking change in acqReady
 %
-% 2015, Alexander Heimel
+% 2015-2018, Alexander Heimel
 %
 more off
 pkg load instrument-control
 NewStimConfiguration
+StimSerialGlobals
 
-if nargin<1
-    ready=[];
-end
-if isempty(ready)
-    ready=0;
+if nargin<1 || isempty(ready)
+    ready = 0;
 end
 
 
-%wc_videorecording(recording_name, [], 0, 1, 1, recording_period)
 global gNewStim
 
 gNewStim.Webcam.Window = [];
@@ -83,6 +80,7 @@ if ~isempty(datapath) && any(datapath==filesep)
 end
 
 logmsg('Finding serial port')
+s1 = [];
 for i = 1:10
     devfolder = strcat('/dev/ttyUSB',num2str(i-1));
     if ~isempty(dir(devfolder))
@@ -92,18 +90,41 @@ for i = 1:10
 end
 
 [recstart,filename] = start_recording(recdatapath);
-acqparams_in = fullfile(datapath,'acqParams_in');
 
+
+if ~isa(s1,'octave_serial') && ~isa(s1,'serial')
+    logmsg('Could not find serial port of form /dev/ttyUSB*');
+    try 
+        while 1
+            pause(0.01);
+        end
+    catch me
+        logmsg(me.message);
+        stop_recording(filename);
+    end
+else
+   
+acqparams_in = fullfile(datapath,'acqParams_in');
 try
+  if strcmp(devfolder,StimSerialScriptIn)
+      switch StimSerialScriptInPin
+          case 'dsr'
+              pin = 'DataSetReady';
+          case 'cts'
+              pin = 'ClearToSend';
+      end
+  else
+      pin = 'DataSetReady';
+  end
+
     fopen(s1);
     
     %edit Sven april 2015: Made compatible with two versions of instrument-control
     if isfield(get(s1),'pinstatus')
         new_instr_contr = 1;
-        pin = 'DataSetReady';
     else
         new_instr_contr = 0;
-        pin = 'datasetready';
+        pin = lower(pin);
     end
     
     if new_instr_contr
@@ -116,6 +137,9 @@ try
     org_cts = 'on'; %prev_cts;
     
     while 1 % loop to find trigger
+    
+     % get(s1,'pinstatus')
+    
         if new_instr_contr
             s2 = get(s1,'pinstatus');
             cts = s2.(pin);
@@ -124,6 +148,7 @@ try
         end
         if cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)  % i.e. changed and not same as original
             stimstart =  time - recstart;
+
             logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
             
             fid = fopen(acqready,'r');
@@ -139,11 +164,12 @@ try
         prev_cts = cts;
         pause(0.01);
     end
-catch
+catch me
+    logmsg(me.message);
     stop_recording(filename);
     fclose(s1);
 end
-
+end
 
 
 
@@ -155,12 +181,12 @@ function [starttime,filename] = start_recording(datapath)
 mkdir(datapath);
 filename = fullfile(datapath,['webcam_' host '_' subst_filechars(datestr(now,31)) '.h264'] );
 %cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480 -p 100,100,300,300 '];
-cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480  '];
+cmd = ['raspivid -t 0 --keypress -o ' filename ' -w 640 -h 480 -p 100,100,740,580 '];
 logmsg(['Started recording ' filename ' at ' datestr(now)]);
 logmsg('Use Ctrl-C to stop recording');
 system(cmd,false,'async' );
-starttime = time;
-
+starttime = time; 
+  
 function stop_recording(filename)
 logmsg('Stopping raspivid');
 system('pkill raspivid',false,'async');

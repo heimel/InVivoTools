@@ -19,6 +19,8 @@ switch record.datatype
         %results_lstestrecord( record );
     case 'wc'
         results_wctestrecord( record );
+    case 'pupil'
+        results_pupiltestrecord( record );
     otherwise
         errormsg(['Unknown datatype ' record.datatype ]);
         return

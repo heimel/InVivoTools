@@ -27,7 +27,7 @@ else, f = find(cksds.pathname==filesep);
 				mkdir(cksds.pathname,'analysis');
 			end;
 			name = expf;
-			save(p,'name','-mat');
+			save(p,'name','-v7');
 		end;
 	end;
 end;

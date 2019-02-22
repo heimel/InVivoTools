@@ -1,21 +1,37 @@
-function h = plot_stimulus_timeline(record,xlims)
+function h = plot_stimulus_timeline(record,xlims,variable,show_icons,stepped)
 %PLOT_STIMULUS_TIMELINE plots onsets and offset of the stimuli from stimsfile
 %
-% 2014, Alexander Heimel
+%  H = PLOT_STIMULUS_TIMELINE(RECORD,XLIMS,VARIABLE,SHOW_ICONS,STEPPED)
+%
+% 2014-2017, Alexander Heimel
 %
 
+if nargin<5 || stepped
+    stepped = true;
+end
+if nargin<4 || isempty(show_icons)
+    show_icons = false;
+end
+if nargin<3
+    variable = [];
+end
 if nargin<2
     xlims = [];
 end
 
-stimsfile = getstimsfile(record);
-if isempty(stimsfile)
-    return
+if isfield(record,'MTI2') % record is stimsfile struct
+	stimsfile = record;
+else
+	stimsfile = getstimsfile(record);
 end
+if isempty(stimsfile)
+	return
+end
+stims = get(stimsfile.saveScript);
 
-stims=get(stimsfile.saveScript);
-
-variable = record.measures(1).variable;
+if isempty(variable) && isfield(record,'measures') && isfield(record.measures(1),'variable')
+    variable = record.measures(1).variable;
+end
 if isempty(variable)
     variable = varied_parameters(stimsfile.saveScript);
     if length(variable)>1
@@ -25,8 +41,7 @@ if isempty(variable)
         variable = variable{1};
     end
 end
-
-
+show_labels = true;
 starttime = 0;
 stoptime = stimsfile.MTI2{end}.startStopTimes(end)-stimsfile.start;
 do  = getDisplayOrder(stimsfile.saveScript);
@@ -35,15 +50,22 @@ tstep = (stoptime-starttime)/n_bins;
 imbar = zeros(1,n_bins);
 tx= [];
 ty = [];
-stimlabel = {};
+label = {};
 
 ax = axis;
 low = ax(3);
 high = ax(4);
+if stepped 
+    steps = 3;
+else
+    steps = 1;
+end
 
-vx = [0];
+vx = 0;
 vy = low;
 
+ax = gca;
+pa = get(ax,'position');
 for i=1:length(stimsfile.MTI2)
     % on
     vx(end+1) = stimsfile.MTI2{i}.startStopTimes(2)-stimsfile.start;
@@ -57,13 +79,26 @@ for i=1:length(stimsfile.MTI2)
     vy(end+1) = low;
     
     tx(end+1) = mean([stimsfile.MTI2{i}.startStopTimes(2) stimsfile.MTI2{i}.startStopTimes(3)])-stimsfile.start;
-    ty(end+1) = low+ 0.25*(high-low)*(mod(i,3)/4+0.25);
+    ty(end+1) = low+ 0.25*(high-low)*(mod(i,steps)/steps + 0.25);
     
     if ~isempty(variable) && ~strcmp(variable,'position')
         par = getparameters(stims{do(i)});
-        stimlabel{end+1} = num2str(par.(variable));
+        label{end+1} = num2str(par.(variable));
+        
+        if show_icons && tx(end)>xlims(1) && tx(end)<xlims(2)
+            if ismethod(stims{do(i)},'stimicon')
+                w = 0.05;
+                subplot('position',[pa(1)+ pa(3)*(tx(end)-xlims(1))/(xlims(2)-xlims(1))-w/2 pa(2)-w w w])
+                stimicon(stims{do(i)});
+                show_labels = false;
+            elseif ismethod(stims{do(i)},'stimlabel')
+                label{end} = stimlabel(stims{do(i)});
+            else
+                logmsg('No stimicon or stimlabel methods available');
+            end
+        end
     else
-         stimlabel{end+1} = num2str(do(i));
+         label{end+1} = num2str(do(i));
     end
     
     imbar( max(1,round((stimsfile.MTI2{i}.startStopTimes(2)-stimsfile.start)/tstep)):min(end,round((stimsfile.MTI2{i}.startStopTimes(3)-stimsfile.start)/tstep))) = ...
@@ -75,13 +110,10 @@ vy(end+1) = low;
 
 vbasey = min(0,min(vy));
 ShadingColor = 0.9*[1 1 1];
-%h = plot(vx,vy,'k-');  % will be reversed with the next at the end
-% set(h,'color',ShadingColor);
+
+axes(ax);
 h = fill([vx vx(end) vx(1)], [vy vbasey vbasey], ShadingColor); 
 set(h,'edgecolor',ShadingColor);
-%ylim([0 1.3]);
-%set(gca,'ytick',[])
-%box off
 if ~isempty(xlims)
     xlim(xlims);
 end
@@ -90,26 +122,11 @@ ylim([low high]);
 children = get(gca,'children');
 set(gca,'children',children(end:-1:1));
 
-
-for i = 1:length(stimlabel)
-    if isempty(xlims) || (tx(i)>xlims(1) && tx(i)<xlims(2))
-        ht = text(tx(i),ty(i),stimlabel{i},'HorizontalAlignment','center');
+if show_labels
+    for i = 1:length(label)
+        if isempty(xlims) || (tx(i)>xlims(1) && tx(i)<xlims(2))
+            ht = text(tx(i),ty(i),label{i},'HorizontalAlignment','center');
+        end
     end
 end
 
-
-%     imbarcol = zeros(1,size(imbar,2),3);
-%     colmap = [0 0 1;0 1 0;1 0 0; 0 1 1;1 0 1;1 1 0];
-%     for i=1:size(imbar,2);
-%         if imbar(i)==0
-%             imbarcol(1,i,:) = [ 1 1 1];
-%         else
-%        imbarcol(1,i,:) = colmap(mod(imbar(i)-1,size(colmap,1))+1,:); 
-%         end
-%     end
-%     
-%     figure;
-%     image(imbarcol);
-%     
-    
-    

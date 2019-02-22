@@ -57,10 +57,13 @@ if clip == 0
     rang = max(abs(min(avg(:))-gemiddelde),abs(max(avg(:))-gemiddelde));
     low = gemiddelde - rang;
     high = gemiddelde + rang;
-else
+elseif clip > 0 
     logmsg(['Clipping at median plus and minus ' num2str(clip) 'x the standard deviation']);
     low = gemiddelde-clip*deviatie;
     high = gemiddelde+clip*deviatie;
+else % clip < 0 
+    low = gemiddelde + clip; %-0.002
+    high = gemiddelde - clip; % 0.001
 end
 switch params.average_image_normmethod
     case 'subtractframe_ror'

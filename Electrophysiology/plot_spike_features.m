@@ -15,7 +15,7 @@ end
 
 params = ecprocessparams(record);
 
-flds = fields(cells);
+flds = fieldnames(cells);
 ind = strmatch('spike_',flds);
 if isempty(ind)
     logmsg('No features available');

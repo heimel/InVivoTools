@@ -23,8 +23,8 @@ elseif isfield(record,'protocol') % i.e. called from dec_db
     protocol_number = record.protocol;
     
     load(fullfile(expdatabasepath,'mousedb.mat'),'db');
-    mousedb = db
-    flds = fields(mousedb);
+    mousedb = db;
+    flds = fieldnames(mousedb);
     record = [];
     for i=1:length(flds)
         record.(flds{i}) = [];
@@ -63,8 +63,10 @@ end
 hfig    = figure('PaperType','A4','PaperUnits','centimeters','Toolbar','None','visible','on');
 
 X=0;Y=0;
-xSize = 14; ySize = 17;
-xLeft = (21-xSize)/2; yTop = (30-ySize)/2;
+xSize = 14; 
+ySize = 17;
+%xLeft = (21-xSize)/2; 
+%yTop = (30-ySize)/2;
 %set(gcf,'PaperPosition',[xLeft yTop xSize ySize])
 set(gcf,'PaperPosition',[1 1.5 19 25])
 

@@ -6,7 +6,21 @@ int DC = 1;       // 1:Anodal DC             2:Cathodal DC
 
 //Sine wave:
 const double elec_diameter = 3; //in mm  ~Set diameter~
-const double current_density = 0.0105;    //in mA/mm^2  ~Set density~
+// before 2017-12-18
+//const double current_density = 0.0105;    //in mA/mm^2  ~Set density~
+
+// changed 2017-12-18, to 3 times less, (we will also use 10x stimulation now), so in total 3x times less
+//const double current_density = 0.0035;    //in mA/mm^2  ~Set density~
+
+// changed 2017-12-18, to 6 times less of orginal, (we will also use 10x stimulation now), so in total 3x times less
+//const double current_density = 0.00175;    //in mA/mm^2  ~Set density~
+
+// changed 2017-12-18, to 3 times less, (we will also use 10x stimulation now), so in total 3x times less
+//const double current_density = 0.0035;    //in mA/mm^2  ~Set density~
+
+// changed 2017-12-27, to 6 times less of orginal, (we will also use 10x stimulation now), so in total 3x times less
+const double current_density = 0.00175;    //in mA/mm^2  ~Set density~
+
 
 const double pi = 3.14159;
 double elec_surface = pi * sq(elec_diameter / 2);

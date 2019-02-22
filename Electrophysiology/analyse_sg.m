@@ -22,7 +22,7 @@ para_stim = getparameters(inp.stimtime(1).stim);
 
 measures.usable=1;
 
-if 0 && verbose
+if 0 && verbose % 1 for the RF ON/OFF
     where.figure=figure;
     where.rect=[0 0 1 1];
     where.units='normalized';
@@ -33,7 +33,6 @@ end
 para_rc.interval = processparams.rc_interval;
 para_rc.timeres = processparams.rc_timeres;
 para_rc.gain = processparams.rc_gain;
-%para_rc.bgcolor=2;
 
 rc = reverse_corr(inp,para_rc,where);
 if isempty(rc)
@@ -53,13 +52,18 @@ measures.rc_lags = rcs.crc.lags; % stimulus time - spike time
 measures.rc_feamean = para_rc.feamean;
 
 % store normalized receptive field plots
-measures.rf(:,:,:) = max(rcs.reverse_corr.rc_avg(1,:,:,:,end),[],5);  
-
+%measures.rf(:,:,:) = max(rcs.reverse_corr.rc_avg(1,:,:,:,end),[],5);  
+measures.rf = squeeze(max(rcs.reverse_corr.rc_avg(1,:,:,:,end),[],5));
 
 % find rf center
-rff = squeeze(max(abs(measures.rf - para_rc.feamean),[],1));
+if ndims(measures.rf)>2
+    rff = squeeze(max(abs(measures.rf - para_rc.feamean),[],1));
+    maxtimeint_ind = find(abs(measures.rf(:,xy)-para_rc.feamean)==m,1);
+else
+    maxtimeint_ind = 1;
+    rff = abs(measures.rf - para_rc.feamean);
+end
 [m,xy] = max(rff(:));
-maxtimeint_ind = find(abs(measures.rf(:,xy)-para_rc.feamean)==m,1); 
 [x,y,rect]=getgrid(inp.stimtime.stim);
 rfx = ceil(xy/y);
 rfy = rem(xy-1,y)+1;
@@ -232,7 +236,7 @@ if 0 % show histograms & roc
     hold on
     h=bar(x+0.15,dist2,0.3);
     set(h,'FaceColor',[1 0 0]);
-    legend('no onframe','onframe')
+    legend('no onframe','onframe');
     ylabel('Number of responses per occurence');
     xlabel(['# spikes ' num2str(hist_start) '-' num2str(hist_end) 's after frame' ]);
     set(gca,'YScale','log');
@@ -315,7 +319,7 @@ measures.time_peak=median(spiketimes_around_peak);
 
 rate=zeros(1,length(arfy));% pre-allocation
 dist=zeros(1,length(arfy));% pre-allocation
-for i=1:length(arfy);
+for i=1:length(arfy)
     onframes=find(f(arfy(i),arfx(i),:,1)>0);
     rate(i)=sum(bins(1,onframes))/length(onframes)/para_rc.timeres;
     dist(i)=sqrt( (arfy(i)-rfy)^2 + (arfx(i)-rfx)^2);

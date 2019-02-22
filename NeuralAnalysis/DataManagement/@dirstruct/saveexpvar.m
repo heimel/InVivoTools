@@ -56,8 +56,9 @@ if exist(fn_sev)==2,
 	end;
    	fid0_sev=fopen(fnlock_sev,'w'); if fid0_sev>0, openedlock_sev = 1; end;
 	try,
-        if doappend_sev, save(fn_sev,name_sev{:},'-append','-mat');
-        else, save(fn_sev,name_sev{:},'-mat');
+        if doappend_sev, save(fn_sev,name_sev{:},'-append','-v7');
+        else,
+            save(fn_sev,name_sev{:},'-v7');
         end;
 	catch,
 		if openedlock_sev, delete(fnlock_sev); end;

@@ -1,7 +1,7 @@
-function EVENT = load_tdt(EVENT, use_matlab_tdt)
+function EVENT = load_tdt(EVENT, use_matlab_tdt, allowchanges)
 %LOAD_TDT
 %
-%   EVENT = LOAD_TDT( EVENT, [USE_MATLAB_TDT] ) 
+%   EVENT = LOAD_TDT( EVENT, USE_MATLAB_TDT=isunix, ALLOWCHANGES=true ) 
 %
 %called by Tdt2ml to retrieve info about events and
 %the timing data of strobe events from a TDT Tank
@@ -15,21 +15,26 @@ function EVENT = load_tdt(EVENT, use_matlab_tdt)
 %             1st column contains stimulus onset times
 %             4th target onset times
 %             7th micro stim times
-% Chris van der Togt, 29/05/2006
 %
 %uses GetEpocsV to retrieve stobe-on epocs; Updated 17/04/2007
+%
+% 2006, Chris van der Togt, 29/05/2006
+% 2019, Alexander Heimel
 
 if nargin<2 || isempty(use_matlab_tdt)
     use_matlab_tdt = isunix;
 end
-
 if use_matlab_tdt
     logmsg('Using TDTREAD matlab routines.');
     EVENT = load_tdt_linux(EVENT);
     return
 end
+if nargin<3 || isempty(allowchanges)
+    allowchanges = true;
+end
 
-F = figure('Visible', 'off');
+
+F = figure('WindowStyle','normal','Visible', 'off');
 try
     H = actxcontrol('TTANK.X', [20 20 60 60], F);
 catch me
@@ -76,7 +81,7 @@ EVS = H.GetEventCodes(E.STREAM); %gets the long codes of event types
 STRMS = size(EVS,2);
 strms = cell(STRMS,1);
 if ~isnan(EVS)
-    for i = 1:STRMS;
+    for i = 1:STRMS
         strms{i} = H.CodeToString(EVS(i));
         %        IxC = find(strcmp(AllCodes, strms(i)));
         %        AllCodes(IxC) = [];
@@ -104,7 +109,7 @@ EVS = H.GetEventCodes(E.SNIP);
 SNIPS = size(EVS,2);
 snips = cell(SNIPS,1);
 if ~isnan(EVS)
-    for i = 1:SNIPS;
+    for i = 1:SNIPS
         snips{i} = H.CodeToString(EVS(i));
         %remove this item from allcodes
         %            IxC = find(strcmp(AllCodes, snips(i)));
@@ -167,7 +172,7 @@ for j = 1:length(strons)
     Epoch = char(strons{j});
     Temp = H.GetEpocsV( Epoch, 0, 0, 100000);
     if isnan(Temp)
-        disp([ Epoch ' Event has been recorded, but cannot be retrieved']);
+        logmsg([ Epoch ' Event has been recorded, but cannot be retrieved']);
     else
         TINFO = Temp(2,:);
         
@@ -182,8 +187,10 @@ H.CloseTank;
 H.ReleaseServer;
 close(F)
 
-MatFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
-save(MatFile, 'EVENT')
+if allowchanges
+    MatFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
+    save(MatFile, 'EVENT','-v7')
+end
 
 % % % keyboard
 % EVENT.Myevent = 'Snip';
