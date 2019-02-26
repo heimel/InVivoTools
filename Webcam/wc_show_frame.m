@@ -38,8 +38,11 @@ if ~isempty(record.measures) && isfield(record.measures,'body_trajectory') && ~i
     plot(record.measures.nose_trajectory(ind,1),record.measures.nose_trajectory(ind,2),'*w');
     plot(record.measures.arse_trajectory(ind,1),record.measures.arse_trajectory(ind,2),'*r');
     
-    text(10,10,['Azimuth = ' num2str(record.measures.azimuth_trajectory(ind,1))],...
-        'color',[1 1 1])
+    
+    if isfield(record.measures,'azimuth_trajectory')
+        text(10,10,['Azimuth = ' num2str(record.measures.azimuth_trajectory(ind,1))],...
+            'color',[1 1 1])
+    end
     
     d=(record.measures.freezetimes_aut - vid.CurrentTime)>0;
     if ~isempty(d) && any(d(:,2)-d(:,1))
