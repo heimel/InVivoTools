@@ -1,4 +1,4 @@
-function optoheartecgpupil( record)
+function record = optoheartecgpupil( record)
 %OPTOHEARTECGPUPIL starts ECG and sends trigger and turns on channel
 %
 % 2019, Alexander Heimel
@@ -23,6 +23,11 @@ par.outputsamplerate = 1000; % Hz
 %par.recording_duration = 5;% s, duration of recording
 par.optopulse_duration = 2;% s, optopulse duration in seconds
 par.optopulse_frequency = 20; % Hz
+par.stimduration = 0.5; % s
+par.prestim = 5; % s
+par.repeats = 5;
+par.delay = 5; % s
+
 
 
 datapath = experimentpath(record,true,true,'2015t');
@@ -45,12 +50,14 @@ if isempty(boardid)
     return
 end
 
+duration = (par.delay + par.repeats*(par.prestim+par.stimduration));
+
 % Write acqParams_in
 aqDat.name = 'eye';
 aqDat.type = 'eyetrack';
 aqDat.fname = 'eye';
 aqDat.samp_dt = NaN;
-aqDat.reps = 1; % 10s per rep
+aqDat.reps = ceil( duration/10); % 10s per rep
 aqDat.ref = 1;
 aqDat.ECGain = NaN;
 writeAcqStruct(fullfile(datapath,'acqParams_in'),aqDat);
@@ -61,6 +68,9 @@ pause(0.3);
 input_arg.simulate = false;
 ai = daq_parameters_mcc(input_arg); % get datapath from acqReady
 ai.triggertype = 'manual';
+ai.SamplesPerTrigger = ai.SampleRate * duration;
+
+
 
 ao = analogoutput('mcc',boardid);
 set(ao,'SampleRate',par.outputsamplerate); % Hz
@@ -68,7 +78,7 @@ addchannel(ao,[0 1]); % opto, trigger
 
 ao.Channel(1).ChannelName = 'Opto';
 
-
+% 1 Frequency pulse for duration
 npulses = par.optopulse_duration * par.optopulse_frequency;
 onepulse = zeros(round(par.outputsamplerate / par.optopulse_frequency),1);
 onepulse(1:round(par.outputsamplerate / par.optopulse_frequency / 2)) = par.upvoltage;
@@ -77,6 +87,15 @@ if length(optopulse)<1024 % minimally 1024 samples required
     optopulse(end+1:end) = 0;
 end
 
+% delay [prestim stimduration] x repeats 0 
+delaypulse = zeros(par.outputsamplerate*par.delay,1);
+prestimpulse = zeros(par.outputsamplerate*par.prestim,1);
+stimpulse = par.upvoltage*ones(par.outputsamplerate*par.stimduration,1);
+optopulse = [delaypulse; repmat( [prestimpulse;stimpulse],par.repeats,1); 0];
+
+
+
+
 ao.Channel(1).OutputRange = [-10 10];
 
 ao.Channel(2).ChannelName = 'Trigger';
@@ -84,7 +103,7 @@ ao.Channel(2).OutputRange = [-10 10];
 
 triggerpulse = zeros(size(optopulse));
 triggerpulse(2:5,1) = par.upvoltage; % trigger up samples
-putdata(ao,[optopulse triggerpulse]); % put on both channels
+putdata(ao,[  optopulse triggerpulse]); % put on both channels
 
 
 
@@ -102,3 +121,8 @@ stop(ai);
 stop(ao);
 
 logmsg(['Stopped optopulse and triggerpulse ' datestr(now,'hh:mm:ss')]);
+
+
+record.measures.parameters = par;
+
+save(fullfile(datapath,'record.mat'),'record','-mat');
