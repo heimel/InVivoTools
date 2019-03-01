@@ -12,7 +12,7 @@ function open_grab(recording_time,output)
 %   
 %
 %   ADD INFO
-%
+%`
 %   Last edited 14-6-2016. SL
 %
 %   Tested up to acquisistion trigger - no simulation except triggering
@@ -21,9 +21,17 @@ function open_grab(recording_time,output)
 %
 %-------------------------------------------------------------------------%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%        Set Paths etc.        %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if nargin<1 || isempty(recording_time)
+    recording_time = 60; % s
+    logmsg(['Defaulting recording time to ' num2str(recording_time)]);
+end
+
+if nargin<2 || isempty(output)
+    outputpath = getdesktopfolder();
+    output.reference = fullfile(outputpath,'pupil_mouse.avi');
+    output.reference_num = fullfile(outputpath,'pupil_area.txt');
+    output.reference_num_xy = fullfile(outputpath,'pupil_xy.txt');
+end
 
 % open_grab() needs to be in the video acquisition directory 
 cd('c:\software\invivotools\physiology\video');
@@ -36,16 +44,11 @@ rec_time = num2str(recording_time);
 
 % set final command to run
 run_this = [run_exe rec_time ' ' output.reference_num ' ' output.reference_num_xy ' ' output.reference];
-%run_this = run_exe;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%        Video Recording       %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % run video executable -> fails when grabavi.exe is not present in root dir
 [~,cmdout] = system(run_this);
 
 % output command-line info from executable
-disp(cmdout);
-
+logmsg(cmdout);
 
 end
