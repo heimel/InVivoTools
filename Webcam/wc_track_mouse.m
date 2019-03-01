@@ -233,8 +233,11 @@ while vid.CurrentTime < timeRange(2) && hasFrame(vid)
             gamma = gamma + 0.1;
             logmsg(['Gamma = ' num2str(gamma)]);
         end
-        if keyCode(32)
+        if keyCode(32) % space
             step = not(step);
+        end
+        if keyCode(68) % d
+            keyboard
         end
     end
     
