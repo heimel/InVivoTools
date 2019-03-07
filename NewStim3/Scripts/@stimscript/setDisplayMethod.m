@@ -35,13 +35,13 @@ methodarg = fix(methodarg);
 
 switch(newmethod)
     case 0
-        if methodarg>0,
+        if methodarg>0
             S.displayOrder = repmat(1:numStims(S),1,methodarg);
         else
             error('METHODARG must be greater than 0.');
         end
     case 1
-        if methodarg>0,
+        if methodarg>0
             N = numStims(S);
             if N>1
                 p = 0:1/(N-1):1;
@@ -65,9 +65,9 @@ switch(newmethod)
         else
             error('METHODARG must be greater than 0.');
         end
-    case 2,
+    case 2
         methodarg= fix(methodarg);  % make sure integer
-        if (min(methodarg)>=1)&&(max(methodarg)<=numStims(S)),
+        if (min(methodarg)>=1)&&(max(methodarg)<=numStims(S))
             S.displayOrder = methodarg;
         else
             error(['Error in setDisplayMethod: elements of ' ...
