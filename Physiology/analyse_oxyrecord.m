@@ -47,33 +47,9 @@ end
 load(filename,'time','data','settings' )
 params = settings;
 
+params = oxyprocessparams(record,params);
 
-
-params.heartrate_binwidth = 0.1; %s
-params.heartrate_pre_window = [-2 0]; % time window (s) for analysis before stim
-params.heartrate_post_window = [0 3]; % time window (s) for analysis after stim
-params.heartrate_separation_from_prev_stim_off = 0.5;  % time (s) to stay clear of prev_stim_off
-
-
-params.max_heart_rate = 30; %Hz, really upper limit
-params.sample_rate = 1/median(diff(time)); % Hz ?
-% for Savitzky-Golayfilter
-params.poly_order = 0; %
-params.window_size = 71; % samples
-% for detrending
-params.sigma = ceil(0.14 * params.sample_rate); % samples
-params.factor = 1; %
-% % for peak detection
-% params.minimal_distance_peaks = ceil(params.sample_rate / params.max_heart_rate); % samples
-% params.minimal_height_peaks = 0.5 * pi; %
-
-
-params.beats = 5; % number of beats to use for moving median
-
-params.post_time = 1; % ? random
-
-
-
+params.sample_rate = 1/median(diff(time)); % Hz 
 
 if verbose
     figure('Name','Raw');
