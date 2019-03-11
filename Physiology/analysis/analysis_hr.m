@@ -1,4 +1,5 @@
 function analysed = analysis_hr(data,settings,stim_par,verbose)
+logmsg('DEPRECATED 2019-03-11');
 
 if nargin<4 || isempty(verbose)
     verbose = true;
