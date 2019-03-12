@@ -86,6 +86,7 @@ if isfield(record.measures,'pos_theta') % analysed by manual operator
             azimuth(ind) = NaN;
             elevation(ind) = NaN;
         end
+        
     end
 end
 
