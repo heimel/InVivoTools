@@ -38,7 +38,8 @@ echo off        % No echoing of commands lines in script/function files
 % current setup -> daq_parameters_mcc_USBmic. Default configuration can be found
 % in daq_parameters.
 if nargin<1
-    parameter_file_name = 'daq_parameters_mcc_USBmic';
+%    parameter_file_name = 'daq_parameters_mcc_USBmic';
+    parameter_file_name = 'daq_parameters_mcc';
 end
 
 %

@@ -1,5 +1,8 @@
 function perfplots(exp)
 
+logmsg('THERE IS ALSO ANOTHER VERSION PERFPLOTS2 OF THIS. CHECK OUT THE DIFFERENCES (2019-02-20)' );
+
+
 % Makes performance figures for mice 14.13 group 2 and 172002
 % works in 2016a
 % Azadeh October 2017

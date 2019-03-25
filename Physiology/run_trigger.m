@@ -11,39 +11,32 @@ function run_trigger(ai,event,settings)
 %   saved varaibles names after the channel names given in the 
 %   parameter file.
 %   
-%
-%
-%   (c) 15-2-2016, Simon Lansbergen.
-% 
+%   2016, Simon Lansbergen.
+%   2019, Alexander Heimel
 
 
 % wait to block Matlab during acquisition time, with an additional 0.5
 % seconds for safety.
 wait(ai,(settings.duration + 0.5));
-
-% get actual data
 [data_temp, time] = getdata(ai);
-
 
 % save file according to channel name
 [~,x]=size(settings.hwchannels);
 if x == 1
     file_str = cell2mat(settings.hwnames(1));
     save_to = fullfile(settings.data_dir,file_str);
-    data = data_temp(:,1);      
+    data = data_temp(:,1);       %#ok<NASGU>
     save(save_to,'data','time','settings','-v7');
 else 
     for i=1:x
         file_str = cell2mat(settings.hwnames(i));
         save_to = fullfile(settings.data_dir,file_str);
-        data = data_temp(:,i);      
+        data = data_temp(:,i);       %#ok<NASGU>
         save(save_to,'data','time','settings','-v7');
     end  
     
 end
 
-% Done acquiring and saving session data
-done_msg = sprintf('\n \n Done acquiring and saving session \n \n');
-logmsg(done_msg);
+logmsg('Done acquiring and saving session');
 
 end

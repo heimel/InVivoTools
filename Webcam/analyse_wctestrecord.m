@@ -43,10 +43,16 @@ stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
 
 
 if par.use_legacy_videoreader
-    if isfield(record.measures,'peakPoints')
-        peakPoints = record.measures.peakPoints;
+    
+    if isempty(record.stimstartframe)
+        if isfield(record.measures,'peakPoints')
+            peakPoints = record.measures.peakPoints;
+        else
+            error('Stimulus onset is not determined. use "track" button')
+        end
     else
-        error('Stimulus onset is not determined. use "track" button')
+        stimStart = record.stimstartframe / 30;
+        peakPoints = [];
     end
 
     [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
@@ -89,12 +95,15 @@ if par.use_legacy_videoreader
         record.measures.pos_theta = NaN;
     end
     
-else
     %     [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
     %         averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] = ...
     %         trackmouseblack_pi(filename,false,stimStart,startside,peakPoints, record);
-    record = wc_track_mouse(record, [], verbose);
-    record = wc_interpret_tracking(record,verbose);
 end
 
+try
+    record = wc_track_mouse(record, [], verbose);
+    record = wc_interpret_tracking(record,verbose);
+catch me
+    errormsg(me.message);
+end
 

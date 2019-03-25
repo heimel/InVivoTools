@@ -49,18 +49,14 @@ else
     logmsg(['Manual detection not done yet for ' recordfilter(record)]);
 end
 
-nose_pxl = movmedian(nose_pxl,7);
-arse_pxl = movmedian(arse_pxl,7);
-stim_pxl = movmedian(stim_pxl,7);
+nose_pxl = movmedian(nose_pxl,5,'omitnan');
+arse_pxl = movmedian(arse_pxl,5,'omitnan');
+%stim_pxl = movmedian(stim_pxl,3);
 
 [azimuth,elevation,~] = wc_compute_overheadstim_angles( nose_pxl,arse_pxl,stim_pxl);
 
-%record.measures.azimuth_trajectory = movmedian(azimuth,7);
-%record.measures.elevation_trajectory = movmedian(elevation,7);
-
 record.measures.azimuth_trajectory = azimuth;
 record.measures.elevation_trajectory = elevation;
-
 
 if verbose
     wc_plot_polar_trajectory(record);

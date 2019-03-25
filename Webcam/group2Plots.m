@@ -21,7 +21,7 @@ val_head_theta = NaN(200,n_mice);
 for i = 1:14
 %     1:n_mice
     subj = mice(i);
-    manualfrzdata(subj)
+%     manualfrzdata(subj)
     
     if exist (['man_frz_dur_14.13.2.0' num2str(i) '.mat'], 'file')~= 0
         load(['man_frz_dur_14.13.2.0' num2str(i) '.mat']);

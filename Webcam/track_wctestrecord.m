@@ -25,38 +25,76 @@ end
 stimparams = getparameters(stims{1});
 if isfield(stimparams,'start_position')
     startside = stimparams.start_position;
+    
 else
     startside = NaN;
 end
+
 rec = 1;
-
-stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
-
-record.measures = [];
-record.measures.stimstart = stimStart;
-
-[frameRate, arena] = get_arena(filename, stimStart, record);
-
-record.measures.frameRate = frameRate;
-record.measures.arena = arena;
-
-if par.use_legacy_videoreader
-    [brightness, thresholdsStimOnset, peakPoints] = ...
-        search_stim_onset_legacy(filename, stimStart, arena, frameRate);
+if isempty(record.stimstartframe) || ~isfield(record.measures, 'arena')
+    stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
+    record.measures = [];
+    record.measures.stimstart = stimStart;
+    
+    [frameRate, arena] = get_arena(filename, stimStart, record);
+    
+    record.measures.frameRate = frameRate;
+    record.measures.arena = arena;
+    
+    if par.use_legacy_videoreader
+        [brightness, thresholdsStimOnset, peakPoints] = ...
+            search_stim_onset_legacy(filename, stimStart, arena, frameRate);
+    else
+        [brightness, thresholdsStimOnset, peakPoints] = ...
+            search_stim_onset(filename, stimStart, arena, frameRate);
+    end
+    
+    record.measures.brightness = brightness;
+    record.measures.thresholdsStimOnset = thresholdsStimOnset;
+    record.measures.peakPoints = peakPoints;
 else
-    [brightness, thresholdsStimOnset, peakPoints] = ...
-        search_stim_onset(filename, stimStart, arena, frameRate);
+    stimStart = (record.stimstartframe)/30;
+    record.measures.stimstart = stimStart;
+    
+    disp(['stimulus started at ', num2str(stimStart), ' s'])
+    v = VideoReader(filename);
+    frameRate = get(v, 'FrameRate');
+    record.measures.frameRate = frameRate;
+    
+    stimFrame = stimStart*frameRate;
+    firstframe = read(v,stimFrame);
+    filename2 = fullfile(experimentpath(record),'firstframe.mat');
+    save(filename2, 'firstframe');
+    disp('done!');
+    
 end
+% stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
 
-record.measures.brightness = brightness;
-record.measures.thresholdsStimOnset = thresholdsStimOnset;
-record.measures.peakPoints = peakPoints;
+% record.measures = [];
+% record.measures.stimstart = stimStart;
+%
+% [frameRate, arena] = get_arena(filename, stimStart, record);
+%
+% record.measures.frameRate = frameRate;
+% record.measures.arena = arena;
+%
+% if par.use_legacy_videoreader
+%     [brightness, thresholdsStimOnset, peakPoints] = ...
+%         search_stim_onset_legacy(filename, stimStart, arena, frameRate);
+% else
+%     [brightness, thresholdsStimOnset, peakPoints] = ...
+%         search_stim_onset(filename, stimStart, arena, frameRate);
+% end
+%
+% record.measures.brightness = brightness;
+% record.measures.thresholdsStimOnset = thresholdsStimOnset;
+% record.measures.peakPoints = peakPoints;
 
 
 
 
 % % record.measures.freezing_computed = ~isempty(freezeTimes);
-% 
+%
 % manualoverride=regexp(record.comment,'freezing=(\s*\d+)','tokens');
 % if ~isempty(manualoverride)
 %     record.measures.freezing = manualoverride{1};

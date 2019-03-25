@@ -10,10 +10,7 @@ function [ ai, ai_channel_setting ] = create_analog_input( settings )
 %   Includes addition of runtrigger callback function, executed/called back
 %   when triggered by TTL.
 %
-%   Last edited: 10-3-2016. SL
-%
-%   (c) 2016, Simon Lansbergen.
-%
+% 2016, Simon Lansbergen.
 
 % Create Analog Input Object
 ai = analoginput(settings.daq_type,settings.daq_hw_id);
@@ -44,18 +41,18 @@ ai_channel_setting = addchannel(ai,settings.hwchannels,settings.hwnames);
 % correctly configured (i.e. missing configuration values) the vendor
 % default configuration is set.
 
-[~,size_hwchannels]=size(settings.hwchannels);
-[~,size_inputrange]=size(settings.input_range_channel);
-[~,size_inputsensor]=size(settings.sensor_range_channel);
-[~,size_unitsrange]=size(settings.units_range_channel);
+[~,size_hwchannels] = size(settings.hwchannels);
+[~,size_inputrange] = size(settings.input_range_channel);
+[~,size_inputsensor] = size(settings.sensor_range_channel);
+[~,size_unitsrange] = size(settings.units_range_channel);
 
 % Loop that adds proper channel configuration to channels.
-if size_hwchannels == size_inputrange && size_inputsensor && size_unitsrange    
+if size_hwchannels == size_inputrange && size_inputsensor && size_unitsrange
     for i = 1: size_hwchannels
         ai.Channel(i).InputRange = [-settings.input_range_channel(i), settings.input_range_channel(i)];
         ai.Channel(i).SensorRange = [-settings.sensor_range_channel(i), settings.sensor_range_channel(i)];
         ai.Channel(i).UnitsRange = [-settings.units_range_channel(i), settings.units_range_channel(i)];
-    end 
+    end
 else
     logmsg('Channels not properly configured, see daq_parameters config-file');
     logmsg(' -> default vendor settings are applied');

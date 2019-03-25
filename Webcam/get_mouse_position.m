@@ -21,12 +21,11 @@ if nargin<2 || isempty(par)
     par.minStimSize = 10; % pxl, Minimal area for region that might be stimulus
     par.tailWidth = 12; % pxl
     par.tailToMiddle = 70; % pxl
-    par.blackThreshold = 13; % Treshold for detecting difference from background
     par.minComponentSize = 10; % pxl, Consider smaller components as noise
     par.dilation = ones(5); % for image dilation
 end
 
-par.blackThreshold = 0.4;
+par.blackThreshold = 0.3;
 
 blackThreshold = par.blackThreshold;
 
