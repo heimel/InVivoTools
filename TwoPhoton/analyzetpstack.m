@@ -280,7 +280,9 @@ switch command
         
         switch ud.ztproject
             case true % z-projection
-                if ~ud.recompute_preview && isempty(ud.previewimage)
+                if (~ud.recompute_preview && isempty(ud.previewimage))...
+                        || (isfield(ud, 'driftcorrectionmethod')...
+                        && strcmp(ud.driftcorrectionmethod, 'lucaskanade')) % Laila
                     pvfilename = tpscratchfilename( ud.record, 1, 'preview');
                     if exist(pvfilename,'file')
                         pvimg = load(pvfilename);
@@ -294,12 +296,18 @@ switch command
                     % compute preview image
                     first = str2double(get(ft(fig,'FirstFrameEdit'),'String'));
                     last = str2double(get(ft(fig,'LastFrameEdit'),'String'));
-                    pvimg = tppreview(ud.record,[first last],1,channels,ud.image_processing);
+                    if isfield(ud, 'driftcorrectionmethod') && strcmp(ud.driftcorrectionmethod, 'lucaskanade') % Laila
+                        pvimg = tppreview(ud.record,[first last],1,channels,'tryagain'); % with options 'tryagain' so fname is overwriten
+                    else
+                        pvimg = tppreview(ud.record,[first last],1,channels,ud.image_processing);
+                    end
                     pvfilename = tpscratchfilename( ud.record, 1, 'preview');
                     save(pvfilename,'pvimg');
                     im = pvimg;
                     ud.previewimage{1} = im;
                     ud.recompute_preview = false;
+                    ud.driftcorrectionmethod = [];
+                
                 else
                     im = ud.previewimage{1};
                     compute_pixelshift = false;
@@ -1152,6 +1160,16 @@ switch command
     case 'correctDriftBt'
         tpdriftcheck(ud.record,ud.channel,ud.ref_record,ud.driftcorrectionmethod,true,true);
         tpdriftplot(ud.record,ud.channel);
+        
+        if strcmp(ud.driftcorrectionmethod, 'lucaskanade')      % Laila     
+            ud.recompute_preview = true;
+            pvfilename = tpscratchfilename( ud.record, 1, 'preview');
+            if exist(pvfilename,'file')
+               delete(pvfilename);
+               ud.previewimage = {};
+            end        
+            analyzetpstack('UpdatePreviewImage',ud.record,fig); % Laila
+        end
     case 'checkDriftBt'
         dirname = experimentpath(ud.record);
         val = get(ft(fig,'celllist'),'value');
@@ -1919,7 +1937,8 @@ set(fig,'userdata',ud);
 
 function dr = getcurrentdirdrift(ud, numpreviewframes)
 df = tpscratchfilename(ud.record,[],'drift');
-if ~exist(df, 'file')
+lkf = tpscratchfilename(ud.record,[],'lucaskanade', 'tif');
+if ~exist(df, 'file') || exist(lkf, 'file')
     dr = [0 0];
 else
     drift=[];
