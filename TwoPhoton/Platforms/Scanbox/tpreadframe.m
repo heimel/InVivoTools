@@ -24,6 +24,14 @@ end
 if nargin<4
     opt = [];
 end
+
+if strcmp(opt, 'lucas')
+    check = false;
+    opt = [];
+else
+    check = true;
+end
+
 if nargin<6 || isempty(fname)
     fname = tpfilename( record, frame, channel, opt);
 end
@@ -37,126 +45,172 @@ if strcmp(readfname,fname)==0 % not read in yet
     org_fname = tpfilename( record, frame, channel); % no options
     iminf = tpreadconfig(record);
     
-    if iminf.BitsPerSample~=16
-        warning('TPREADFRAME:not_16bits','TPREADFRAME: Bits per samples is unequal to 16');
-    end
-    try
-        images = zeros(iminf.Height,iminf.Width,iminf.NumberOfFrames,iminf.NumberOfChannels,'uint16');
-    catch me
-        if strcmp(me.identifier,'MATLAB:nomem')
-            required = iminf.Height*iminf.Width*iminf.NumberOfFrames*iminf.NumberOfChannels*2/1024/1024; % in Mb
-            m = memory;
-            available = m.MaxPossibleArrayBytes/1024/1024; % in Mb
-            warning('TPREADFRAME:MEM',['TPREADFRAME: Array size to large. ' ...
-                num2str(fix(required)) ' Mb required, ' num2str(fix(available)) ' Mb available.']);
-            warning('OFF','TPREADFRAME:MEM');
-            if ~isfield(iminf,'slice') || isempty(iminf.slice)
-                im = sbxread(fname,frame-1,1);
-            else
-                im = sbxread(fname,(frame-1)*iminf.slices + iminf.slice,1);
-            end
-            return
-        else
-            rethrow me
+    if strcmp(org_fname(end-3:end),'.tif') && check % If Lucas-Kanade corrected exists, read in tif stack
+        logmsg(['Loading TIFF: ' org_fname]);
+        logmsg('This might take a while..');
+        
+        FileTif=org_fname;
+        InfoImage=imfinfo(FileTif);
+        mImage=InfoImage(1).Width;
+        nImage=InfoImage(1).Height;
+        images=zeros(nImage,mImage,iminf.NumberOfFrames,iminf.NumberOfChannels, 'double');
+        
+        h = waitbar(0,'Loading TIFF: ETA unknown'); 
+        waitbarstep = max(1,round(iminf.NumberOfFrames/100)); % only maximum 100 updates
+        time = zeros(iminf.NumberOfFrames,1);
+        
+        TifLink = Tiff(FileTif, 'r');
+        for i=1:iminf.NumberOfFrames
+           tic;
+           TifLink.setDirectory(i);
+           
+           images(:,:,i,channel)=TifLink.read();
+           time(i) = toc;
+           
+           if mod(i,waitbarstep)==0
+               eta = round((mean(time) * (iminf.NumberOfFrames - i + 1))/60);
+               waitbar(i/iminf.NumberOfFrames, h, sprintf('Loading TIFF: ETA ~%dm', eta));
+           end
         end
-    end
-    logmsg(['Loading ' fname]);
-    if exist(fname,'file') && ~strcmp(org_fname,fname)
-        % i.e. (processed) image file already exists
-        already_processed = true;
-    else
-        already_processed = false;
-    end
-    
-    if verbose
-        hwaitbar = waitbar(0,'Loading frames...');
-    end
-    waitbarstep = max(1,round(iminf.NumberOfFrames/100)); % only maximum 100 updates
+        TifLink.close();
 
-    
-    if ~isfield(iminf,'slice') || isempty(iminf.slice)
-        if iminf.NumberOfChannels>1
-            for fr = 1:iminf.NumberOfFrames
-                images(:,:,fr,:) = permute(sbxread(fname,fr-1,1),[2 3 4 1]);
-                if verbose && mod(fr,waitbarstep)==0
-                    hwaitbar = waitbar(fr/iminf.NumberOfFrames);
-                end
-            end
-        else
-            for fr = 1:iminf.NumberOfFrames
-                images(:,:,fr,1) = sbxread(fname,fr-1,1);
-                if verbose && mod(fr,waitbarstep)==0
-                    hwaitbar = waitbar(fr/iminf.NumberOfFrames);
-                end
-            end
-        end
-    else
-        if iminf.NumberOfChannels>1
-            for fr = 1:iminf.NumberOfFrames
-                images(:,:,fr,:) =permute( sbxread(fname,(fr-1)*iminf.slices + iminf.slice-1,1),[2 3 4 1]);
-                if verbose && mod(fr,waitbarstep)==0
-                    hwaitbar = waitbar(fr/iminf.NumberOfFrames);
-                end
-            end
-        else
-            for fr = 1:iminf.NumberOfFrames
-                images(:,:,fr,1) = sbxread(fname,(fr-1)*iminf.slices + iminf.slice-1,1);
-                if verbose && mod(fr,waitbarstep)==0
-                    hwaitbar = waitbar(fr/iminf.NumberOfFrames);
-                end
-            end
-        end
-    end
-    if verbose
-        close(hwaitbar);
-    end
-    if ~already_processed
-        % shift bidirectional scanned image
-        if isfield(iminf,'bidirectional') && iminf.bidirectional
-            % determine optimal shift
-            
-            mean_image = mean(mean(images,3),4);
-            shift_range = [ 2 3 4 5 6 7 8 9 10 11 ];
-            max_correl = -inf;
-            shift = 0;
-            im = zeros(size(mean_image));
-            for i =1:length(shift_range)
-                % shift odd and even lines
-                oddshift = floor( shift_range(i)/2);
-                evenshift = ceil(shift_range(i)/2);
-                
-                im(1:2:end,1+oddshift:end) = mean_image(1:2:end, 1:end-oddshift);
-                im(2:2:end,1:end-evenshift) = mean_image(2:2:end, 1+evenshift:end);
-                correl = corrcoef( flatten(im(1:2:end,:)), flatten(im(2:2:end,:)));
-                if correl(1,2)>max_correl
-                    shift = shift_range(i);
-                    max_correl = correl(1,2);
-                end
-            end % i shiftrange
-            
-            % shift odd and even lines
-            oddshift = floor( shift/2);
-            evenshift = ceil(shift/2);
-            for ch = 1:iminf.NumberOfChannels
-                for fr = 1:iminf.NumberOfFrames
-                    images(1:2:end,1+oddshift:end,fr,ch) = images(1:2:end, 1:end-oddshift,fr,ch);
-                    images(2:2:end,1:end-evenshift,fr,ch) = images(2:2:end, 1+evenshift:end,fr,ch);
-                end
-            end
-            logmsg(['Optimal line shift for bidirectional ' num2str(shift)]);
+        delete(h);
+        
+        images = tp_image_processing( images, opt,verbose );
+        
+        fname = tpfilename(record, frame, channel);
+        if length(fname)>4 && strcmp(fname(end-3:end),'.sbx')
+            fname = fname(1:end-4);
         end
         
-        % now do image processing
-        images = tp_image_processing( images, opt,verbose );
-        if ~strcmp(fname,org_fname)
-            % save processed file for later use
-            %             logmsg(['Writing processed image stack as ' fname]);
-            %             writepath = fileparts(fname);
-            %             if ~exist(writepath,'dir')
-            %                 mkdir(writepath);
-            %             end
-            logmsg('Not implemented writing processed image');
-            %            fluoviewtiffwrite(images,fname,iminf)
+    else        
+%         org_fname = tpfilename(record, frame, channel); % no options
+        if strcmp(fname, 'tryagain')
+            fname = tpfilename( record, frame, channel, opt);
+            fname = fname(1:end-4);
+        end
+        
+        if iminf.BitsPerSample~=16
+            warning('TPREADFRAME:not_16bits','TPREADFRAME: Bits per samples is unequal to 16');
+        end
+        try
+            images = zeros(iminf.Height,iminf.Width,iminf.NumberOfFrames,iminf.NumberOfChannels,'uint16');
+        catch me
+            if strcmp(me.identifier,'MATLAB:nomem')
+                required = iminf.Height*iminf.Width*iminf.NumberOfFrames*iminf.NumberOfChannels*2/1024/1024; % in Mb
+                m = memory;
+                available = m.MaxPossibleArrayBytes/1024/1024; % in Mb
+                warning('TPREADFRAME:MEM',['TPREADFRAME: Array size to large. ' ...
+                    num2str(fix(required)) ' Mb required, ' num2str(fix(available)) ' Mb available.']);
+                warning('OFF','TPREADFRAME:MEM');
+                if ~isfield(iminf,'slice') || isempty(iminf.slice)
+                    im = sbxread(fname,frame-1,1);
+                else
+                    im = sbxread(fname,(frame-1)*iminf.slices + iminf.slice,1);
+                end
+                return
+            else
+                rethrow me
+            end
+        end
+        logmsg(['Loading ' fname]);
+        if exist(fname,'file') && ~strcmp(org_fname,fname)
+            % i.e. (processed) image file already exists
+            already_processed = true;
+        else
+            already_processed = false;
+        end
+
+        if verbose
+            h2 = waitbar(0,'Loading frames...');
+        end
+        waitbarstep = max(1,round(iminf.NumberOfFrames/100)); % only maximum 100 updates
+
+        if ~isfield(iminf,'slice') || isempty(iminf.slice)
+            if iminf.NumberOfChannels>1
+                for fr = 1:iminf.NumberOfFrames
+                    images(:,:,fr,:) = permute(sbxread(fname,fr-1,1),[2 3 4 1]);
+                    if verbose && mod(fr,waitbarstep)==0
+                        waitbar(fr/iminf.NumberOfFrames, h2);
+                    end
+                end
+            else
+                for fr = 1:iminf.NumberOfFrames
+%                     images(:,:,fr,1) = permute(sbxread(fname,fr-1,1),[2 3 4 1]);
+                    images(:,:,fr,1) = sbxread(fname,fr-1,1);
+                    if verbose && mod(fr,waitbarstep)==0
+                        waitbar(fr/iminf.NumberOfFrames, h2);
+                    end
+                end
+            end
+        else
+            if iminf.NumberOfChannels>1
+                for fr = 1:iminf.NumberOfFrames
+                    images(:,:,fr,:) =permute( sbxread(fname,(fr-1)*iminf.slices + iminf.slice-1,1),[2 3 4 1]);
+                    if verbose && mod(fr,waitbarstep)==0
+                        waitbar(fr/iminf.NumberOfFrames, h2);
+                    end
+                end
+            else
+                for fr = 1:iminf.NumberOfFrames
+                    images(:,:,fr,1) = sbxread(fname,(fr-1)*iminf.slices + iminf.slice-1,1);
+                    if verbose && mod(fr,waitbarstep)==0
+                        waitbar(fr/iminf.NumberOfFrames, h2);
+                    end
+                end
+            end
+        end
+        if verbose
+            close(h2);
+        end
+        if ~already_processed
+            % shift bidirectional scanned image
+            if isfield(iminf,'bidirectional') && iminf.bidirectional
+                % determine optimal shift
+
+                mean_image = mean(mean(images,3),4);
+                shift_range = [ 2 3 4 5 6 7 8 9 10 11 ];
+                max_correl = -inf;
+                shift = 0;
+                im = zeros(size(mean_image));
+                for i =1:length(shift_range)
+                    % shift odd and even lines
+                    oddshift = floor( shift_range(i)/2);
+                    evenshift = ceil(shift_range(i)/2);
+
+                    im(1:2:end,1+oddshift:end) = mean_image(1:2:end, 1:end-oddshift);
+                    im(2:2:end,1:end-evenshift) = mean_image(2:2:end, 1+evenshift:end);
+                    correl = corrcoef( flatten(im(1:2:end,:)), flatten(im(2:2:end,:)));
+                    if correl(1,2)>max_correl
+                        shift = shift_range(i);
+                        max_correl = correl(1,2);
+                    end
+                end % i shiftrange
+
+                % shift odd and even lines
+                oddshift = floor( shift/2);
+                evenshift = ceil(shift/2);
+                for ch = 1:iminf.NumberOfChannels
+                    for fr = 1:iminf.NumberOfFrames
+                        images(1:2:end,1+oddshift:end,fr,ch) = images(1:2:end, 1:end-oddshift,fr,ch);
+                        images(2:2:end,1:end-evenshift,fr,ch) = images(2:2:end, 1+evenshift:end,fr,ch);
+                    end
+                end
+                logmsg(['Optimal line shift for bidirectional ' num2str(shift)]);
+            end
+
+            % now do image processing
+            images = tp_image_processing( images, opt,verbose );
+            if ~strcmp(fname,org_fname)
+                % save processed file for later use
+                %             logmsg(['Writing processed image stack as ' fname]);
+                %             writepath = fileparts(fname);
+                %             if ~exist(writepath,'dir')
+                %                 mkdir(writepath);
+                %             end
+                logmsg('Not implemented writing processed image');
+                %            fluoviewtiffwrite(images,fname,iminf)
+            end
         end
     end
     logmsg('Finished reading')

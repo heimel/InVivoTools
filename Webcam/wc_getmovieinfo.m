@@ -78,6 +78,10 @@ if ~isempty(par.wc_mp4wrappercommand)
         end
     end
 else
+    for i=1:length(d)
+        wcinfo(i).path = parpath;
+        wcinfo(i).mp4name = [ wcinfo(i).filename '.mp4'];
+    end
     logmsg(['Cannot create mp4 wrapper for ' fullfile(parpath,wcinfo(i).filename) '. Try on linux computer, or run sudo apt-get -y install gpac']);
 end
 
@@ -90,5 +94,6 @@ for i=1:length(wcinfo)
     logmsg(['Stimulus started corrected: ' num2str(real_stimstart) ' s = '...
         num2str(floor(real_stimstart/60)) ':' num2str(real_stimstart-60*floor(real_stimstart/60),'%02.2f')   ]);
 end
+
 
 filename = fullfile(wcinfo.path,wcinfo.mp4name);

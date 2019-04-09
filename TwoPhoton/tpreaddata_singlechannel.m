@@ -61,7 +61,6 @@ if nargin<6
     options = [];
 end
 
-
 % tpcorrecttptimes should still be change for levelt and fitzpatrick labs
 frametimes = tpcorrecttptimes(records);
 
@@ -107,6 +106,7 @@ for i=1:1 % used to loop over cycles
     initind = initind + numFrames;
 end;
 driftfilename = tpscratchfilename(record,[],'drift');
+
 if exist(driftfilename,'file')
     drfile = load(driftfilename,'-mat');
     dr=struct('x',[],'y',[]);
@@ -150,6 +150,18 @@ if mode==21
     data = cell(1,length(pixelinds));
     t = cell(1,length(pixelinds));
 end
+
+% initiate video for sizetuning
+
+% videofilename = tpscratchfilename(record,[],'sizetuning_video.avi');
+% if ~exist(videofilename, 'file')
+%     logmsg(['Writing video from frames in ' videofilename]);
+%     writesizetuningvideo = 1;
+%     sizetuningvideo = VideoWriter(videofilename);
+%     open(sizetuningvideo);
+% else
+%     writesizetuningvideo = 0;
+% end
 
 n_rois = length(pixelinds);
 
@@ -202,7 +214,7 @@ for j=1:size(intervals,1) % loop over requested intervals
                 thepixelinds = pixelinds{i};
                 ind_outofbounds = [];
             else % driftcorrection
-                [ii,jj]=ind2sub(size(ims),pixelinds{i});
+                [ii,jj]=ind2sub(size(ims),pixelinds{i}); % ROI 
                 switch drfile.method
                     case 'fullframeshift'
                         [thepixelinds, ind_outofbounds] = ...
@@ -308,11 +320,23 @@ for j=1:size(intervals,1) % loop over requested intervals
                 %     keyboard
                 % end
                 
-                logmsg('THIS SHOULD BE PREALLOCATED!');
+%                 logmsg('THIS SHOULD BE PREALLOCATED!'); annoying
                 data{intervalorder(j),i} = cat(1,data{intervalorder(j),i},thisdata(:));
                 t{intervalorder(j),i} = cat(1,t{intervalorder(j),i},thistime(:));
             end
         end % ROI i
+        
+        
+%         % write videofile
+%         if writesizetuningvideo && f > params.drift_correction_skip_firstframes
+%             if length(size(ims))==3 % i.e. rgb
+%                 imsvideo = nanmean(ims,3);
+%             else
+%                 imsvideo = im2uint8(ims);
+%             end
+%             writeVideo(sizetuningvideo, imsvideo);
+%         end
+        
     end % frame f
     
     warning('on','MATLAB:intMathOverflow')
@@ -339,6 +363,12 @@ for j=1:size(intervals,1) % loop over requested intervals
     end
     
 end %interval j
+
+% % close videos
+% if writesizetuningvideo
+%     close(sizetuningvideo);
+% end
+% logmsg(['Datavideo saved as ' videofilename]);
 
 if mode==21
     for i=1:length(pixelinds)

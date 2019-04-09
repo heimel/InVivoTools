@@ -1,7 +1,7 @@
 function [params,values] = varied_parameters( script )
 %VARIED_PARAMETERS returns which parameters have been varied in a script
 %
-% 2012, Alexander Heimel
+% 2012-2019, Alexander Heimel
 %
 
 params = {};
@@ -10,8 +10,13 @@ values = {};
 possible_params = {'contrast','angle','sFrequency','tFrequency','sPhaseShift','size','typenumber','figdirection','gnddirection','background','location','duration','filename'};
 
 ss = get(script);
+if isempty(ss)
+    return
+end
+
+sss = [];
 for i = 1:length(ss)
-    sss(i) = getparameters(ss{i});
+    sss = [sss getparameters(ss{i})];
 end
 
 for i = 1:length(possible_params)

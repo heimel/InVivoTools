@@ -91,6 +91,7 @@ text = uicontrol(button_window,'Style', 'text',...
 
 % while loop which check for a change in acqReady
 logmsg('Checking for acqReady change');
+showedmessage = false;
 while (ishandle(push_button))     % needs control-C or push button to exit
     acqready_props = dir(acqready);
     if ~isempty(acqready_props) && acqready_props.datenum > acqready_props_prev.datenum
@@ -102,7 +103,10 @@ while (ishandle(push_button))     % needs control-C or push button to exit
         
     else
         pause(0.3);
-        logmsg('Checking for acqReady change...hit button or press Ctrl-C to interrupt.');
+        if ~showedmessage
+            logmsg('Checking for acqReady change...hit button or press Ctrl-C to interrupt.');
+            showedmessage = true;
+        end
     end
 end
 

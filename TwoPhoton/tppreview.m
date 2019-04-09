@@ -93,7 +93,12 @@ switch mode
     case {1,2} % average or max through Z/T axis
         im = zeros( inf.Height,inf.Width,inf.NumberOfChannels);
         for c=channel
-            im(:,:,c) = tpreadframe(record,c,frame_selection,opt,verbose,[],mode);
+            if ~isempty(opt) && strcmp(opt, 'tryagain')
+                im(:,:,c) = tpreadframe(record,c,frame_selection,opt,verbose,'tryagain',mode);
+                opt = [];
+            else
+                im(:,:,c) = tpreadframe(record,c,frame_selection,opt,verbose,[],mode);
+            end
         end
     case {3,4} % maximum projection through X or Y axis, respectively
         % takes memory

@@ -30,7 +30,12 @@ if ~isempty(record.ref_epoch)
     if ~isempty(find(record.ref_epoch=='=',1))
         crit = record.ref_epoch;
     else
-        crit = ['mouse=' record.mouse ',stack=' record.stack ',epoch=' record.ref_epoch];
+        % get mouse name under 'record.experiment' to find the right file 
+        if ~isempty(strfind(record.experimenter, 'LB')) % add experiment if experimenter was Laila
+            crit = ['mouse=' record.mouse ',stack=' record.stack ',epoch=' record.ref_epoch ',experiment=' record.experiment, ',date=' record.date];
+        else
+            crit = ['mouse=' record.mouse ',stack=' record.stack ',epoch=' record.ref_epoch];
+        end
     end
     ind_ref = find_record(db,crit);
 else
