@@ -8,7 +8,7 @@ remotecommglobals
 
 if nargin<1 || isempty(record)
     
-    record.mouse = 'testmouse';
+    record.mouse = '182003.02.04';
     record.experiment = '1820.test';
     record.epoch = 't00001';
     record.datatype = 'wc';
@@ -23,9 +23,9 @@ par.outputsamplerate = 1000; % Hz
 %par.recording_duration = 5;% s, duration of recording
 par.optopulse_duration = 2;% s, optopulse duration in seconds
 par.optopulse_frequency = 20; % Hz
-par.stimduration = 0.5; % s
-par.prestim = 5; % s
-par.repeats = 5;
+par.stimduration = 5; % s
+par.prestim = 20; % s
+par.repeats = 20;
 par.delay = 5; % s
 
 
@@ -93,7 +93,7 @@ end
 delaypulse = zeros(par.outputsamplerate*par.delay,1);
 prestimpulse = zeros(par.outputsamplerate*par.prestim,1);
 stimpulse = par.upvoltage*ones(par.outputsamplerate*par.stimduration,1);
-optopulse = [delaypulse; repmat( [prestimpulse;stimpulse],par.repeats,1); 0];
+optopulse = [delaypulse; repmat( [prestimpulse;stimpulse],par.repeats,1); delaypulse];
 
 
 
