@@ -20,14 +20,15 @@ if nargin<1 || isempty(record)
 end
 
 % par = foprocessparams( record ); % to implement in the future
+par.timeshift = 0.036; % calibrated on 2019-11-04 for NI USB-6001
 par.upvoltage = 3.3;
-par.samplerate = 100; % Hz
+par.samplerate = 1000; % Hz
 par.optopulse_duration = 2;% s, optopulse duration in seconds
 par.optopulse_frequency = 20; % Hz
 par.stimduration = 0.5; % s
-par.prestim = 5; % s
-par.repeats = 5;
-par.delay = 5; % s
+par.prestim = 1; % s
+par.repeats = 2;
+par.delay = 2; % s
 
 
 
@@ -59,6 +60,7 @@ end
 
 duration = (par.delay + par.repeats*(par.prestim+par.stimduration));
 
+
 % Write acqParams_in
 aqDat.name = 'eye';
 aqDat.type = 'eyetrack';
@@ -68,33 +70,17 @@ aqDat.reps = ceil( duration/10); % 10s per rep
 aqDat.ref = 1;
 aqDat.ECGain = NaN;
 writeAcqStruct(fullfile(datapath,'acqParams_in'),aqDat);
-
 % wait to finish writing and write acqReady
 pause(0.3);
 write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
 pause(0.3);
 
-
-addAnalogInputChannel(session,'Photometry', [0 4], 'Voltage'); % photometry
-
 session.Rate = par.samplerate;
 session.NumberOfScans = duration * session.Rate; 
-
-%input_arg.simulate = false;
-%ai = daq_parameters_mcc(input_arg); % get datapath from acqReady
-%ai.triggertype = 'manual';
-%ai.SamplesPerTrigger = ai.SampleRate * duration;
-
-
 addAnalogOutputChannel(session,'Photometry', 'ao0', 'Voltage'); % optopulse
-addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
-
-
-%ao = analogoutput('mcc',boardid);
-%set(ao,'SampleRate',par.outputsamplerate); % Hz
-%addchannel(ao,[0 1]); % opto, trigger
-
-%ao.Channel(1).ChannelName = 'Opto';
+chao1 = addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
+chao1.Range = [-10 10];
+addAnalogInputChannel(session,'Photometry', 0 , 'Voltage'); % photometry
 
 % 1 Frequency pulse for duration
 npulses = par.optopulse_duration * par.optopulse_frequency;
@@ -111,16 +97,9 @@ prestimpulse = zeros(par.samplerate*par.prestim,1);
 stimpulse = par.upvoltage*ones(par.samplerate*par.stimduration,1);
 optopulse = [delaypulse; repmat( [prestimpulse;stimpulse],par.repeats,1); 0];
 
-
-%ao.Channel(1).OutputRange = [-10 10];
-
-%ao.Channel(2).ChannelName = 'Trigger';
-%ao.Channel(2).OutputRange = [-10 10];
-
 triggerpulse = zeros(size(optopulse));
 triggerpulse(2:5,1) = par.upvoltage; % trigger up samples
 
-%putdata(ao,[  optopulse triggerpulse]); % put on both channels
 queueOutputData(session,[optopulse triggerpulse]);
 
 plotData('reset',[]);
@@ -129,31 +108,34 @@ plotData('reset',[]);
 lh = addlistener(session,'DataAvailable', @plotData);
 
 % add sometime for eyetracking computer to prepare
-pause(10);
+pause(5);
 
+session
+prepare(session);
 logmsg('Starting acquisition');
-%start(ai);
 startBackground(session);
 logmsg(['Started optopulse and triggerpulse at ' datestr(now,'hh:mm:ss')]);
+logmsg(['Session duration = ' num2str(duration) ]);
 
 pause(duration);
-%stop(ai);
-%stop(ao);
 
 logmsg(['Stopped optopulse and triggerpulse ' datestr(now,'hh:mm:ss')]);
-
 
 record.measures.parameters = par;
 
 wait(session);
 
-
 [data,time] = plotData('retrieve',[]);
+
+time = time + par.timeshift; % to match calibration
+
 figure
 plot(time,data);
 
-delete(lh);
 
+delete(lh); % delete datahandler
+
+save(fullfile(datapath,'fiberphotometry.mat'),'time','data','par');
 save(fullfile(datapath,'record.mat'),'record','-mat');
 
 
@@ -186,7 +168,7 @@ if ischar(src)
 end
 
 if isempty(data)
-    data = NaN(nbuffer,2);
+    data = NaN(nbuffer,1);
     time = NaN(nbuffer,1);
     counter = 1;
 end
