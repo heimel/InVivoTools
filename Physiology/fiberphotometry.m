@@ -6,9 +6,12 @@ function record = fiberphotometry( record)
 
 logmsg('Set params.experimentpath_localroot in processparam_local.m for place to store data');
 
+
 % National Instruments USB-6001 
 
 remotecommglobals
+
+logmsg(['Communicating via ' Remote_Comm_dir]);
 
 if nargin<1 || isempty(record)
     record.mouse = 'testmouse';
@@ -30,22 +33,18 @@ par.prestim = 1; % s
 par.repeats = 2;
 par.delay = 2; % s
 
-
-
 datapath = experimentpath(record,true,true,'2015t');
 d = dir(datapath);
+if length(d)>2
+        logmsg('Epoch exists. Increasing epoch number.');
+end
 while length(d)>2 % not empty
-    logmsg('Datapath exists. Increasing epoch number.');
     record.epoch = ['t' num2str(str2double(record.epoch(2:end))+1,'%05d')];
     datapath = experimentpath(record,true,true,'2015t');
     d = dir(datapath);
 end
-
-
-
 logmsg(['Writing data to ' datapath]);
 
-%out = daq.getDevices;
 
 try
     session = daq.createSession('ni');
@@ -80,6 +79,7 @@ session.NumberOfScans = duration * session.Rate;
 addAnalogOutputChannel(session,'Photometry', 'ao0', 'Voltage'); % optopulse
 chao1 = addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
 chao1.Range = [-10 10];
+
 addAnalogInputChannel(session,'Photometry', 0 , 'Voltage'); % photometry
 
 % 1 Frequency pulse for duration
@@ -98,7 +98,7 @@ stimpulse = par.upvoltage*ones(par.samplerate*par.stimduration,1);
 optopulse = [delaypulse; repmat( [prestimpulse;stimpulse],par.repeats,1); 0];
 
 triggerpulse = zeros(size(optopulse));
-triggerpulse(2:5,1) = par.upvoltage; % trigger up samples
+triggerpulse(1:100,1) = par.upvoltage; % trigger up samples
 
 queueOutputData(session,[optopulse triggerpulse]);
 
@@ -110,7 +110,6 @@ lh = addlistener(session,'DataAvailable', @plotData);
 % add sometime for eyetracking computer to prepare
 pause(5);
 
-session
 prepare(session);
 logmsg('Starting acquisition');
 startBackground(session);
@@ -129,14 +128,16 @@ wait(session);
 
 time = time + par.timeshift; % to match calibration
 
-figure
-plot(time,data);
-
 
 delete(lh); % delete datahandler
 
 save(fullfile(datapath,'fiberphotometry.mat'),'time','data','par');
 save(fullfile(datapath,'record.mat'),'record','-mat');
+
+figure('Name',recordfilter(record));
+plot(time,data);
+xlabel('Time (s)');
+ylabel('Voltage')
 
 
 
