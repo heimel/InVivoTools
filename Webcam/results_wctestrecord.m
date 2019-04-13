@@ -13,12 +13,16 @@ experimentpath(record)
 
 measures = record.measures
 
-filename = fullfile(experimentpath(record),'firstframe.mat');
-load(filename);
 
 evalin('base','global measures');
 evalin('base','global global_record');
 logmsg('Measures available in workspace as ''measures'',, record as ''global_record''.');
+
+
+filename = fullfile(experimentpath(record),'firstframe.mat');
+if exist(filename,'file')
+    load(filename);
+end
 
 % plots the arena
 
