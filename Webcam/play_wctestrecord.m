@@ -35,7 +35,7 @@ vid = VideoReader(filename);
 %Get paramters of video
 frameRate = get(vid, 'FrameRate'); %30 frames/sec
 
-if ~isempty(record.stimstartframe)
+if isfield(record,'stimstartframe') && ~isempty(record.stimstartframe)
     vid.CurrentTime = record.stimstartframe / frameRate;
 else
     vid.CurrentTime = starttime;

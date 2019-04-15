@@ -2,7 +2,7 @@ function h = plot_stimulus_timeline(record,xlims,variable,show_icons,stepped)
 %PLOT_STIMULUS_TIMELINE plots onsets and offset of the stimuli from stimsfile
 %
 %  H = PLOT_STIMULUS_TIMELINE(RECORD,XLIMS,VARIABLE,SHOW_ICONS,STEPPED)
-%
+%\
 % 2014-2017, Alexander Heimel
 %
 

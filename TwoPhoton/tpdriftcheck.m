@@ -36,8 +36,7 @@ end
 
 switch method
     case '?'
-        % return possible methods
-        method = {'fullframeshift','greenberg'};
+        method = {'fullframeshift','greenberg','lucaskanade'};
         return
 end
 
@@ -68,6 +67,8 @@ switch method
         
         [~,~, ~,~,~,xpixelposition,ypixelposition] ...
             = tpdriftcheck_greenberg(data,base_image);
+    case 'lucaskanade'
+        [dr,howoften,avgframes] = tpdriftcheck_lucaskanade(record, channel);
 end
 logmsg(['Computed drift correction for ' recordfilter(record)]);
 
@@ -78,13 +79,16 @@ switch method
     case 'fullframeshift'
         drift.x = round(interp1(frameind,dr(:,1),newframeind,'linear','extrap')');
         drift.y = round(interp1(frameind,dr(:,2),newframeind,'linear','extrap')'); %#ok<STRNU>
+        save(driftfilename,'method','drift','-v7');
     case 'greenberg'
         drift.xpixelpos = interp1(frameind,shiftdim(xpixelposition(:,:,:),2),newframeind,'linear','extrap');
         drift.ypixelpos = interp1(frameind,shiftdim(ypixelposition(:,:,:),2),newframeind,'linear','extrap');
-        % image mean drifts:
         drift.x = round(mean(mean(drift.xpixelpos,3),2)-(params.pixels_per_line+1)/2);
         drift.y = round(mean(mean(drift.ypixelpos,3),2)-(params.lines_per_frame+1)/2);
+        save(driftfilename,'method','drift','-v7');
+    case 'lucaskanade'
+        if exist(driftfilename,'file')
+            delete(driftfilename);
+        end
 end
-save(driftfilename,'method','drift','-v7');
-
 

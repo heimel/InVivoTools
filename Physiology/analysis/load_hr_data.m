@@ -1,8 +1,5 @@
 function [data,stim_par]=load_hr_data(date,variable_name)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%                Load DATA                 %%%%%%            
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+logmsg('DEPRECATED 2019-03-11');
 
 
 location        = ['session' ' ' date];

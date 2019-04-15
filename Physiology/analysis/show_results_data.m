@@ -1,4 +1,5 @@
 function [avg,avg_br]=show_results_data(analysed,analysed_br,time,settings,baseline,stim_time,data_name,show_all)
+logmsg('DEPRECATED 2019-03-11');
 
 settings.pre_time  = baseline;
 settings.stim_time = stim_time;

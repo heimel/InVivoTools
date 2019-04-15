@@ -40,14 +40,6 @@ if isempty(record)
     
 end
 
-%
-% if ~exist('db','var') || isempty(db)
-%     experiment('17.20.02')
-%     host('tinyhat')
-%     db = load_testdb('wc');
-%     record = db(15535);
-% end
-
 if ~exist('record','var') || isempty(record)
     p = pwd;
     cd('\\vs01\MVP\Shared\InVivo\Experiments');
@@ -103,16 +95,16 @@ timeRange = [max(0,stimStart-secBefore) stimStart+secAfter];
 if verbose
     figRaw = figure('Name','Raw');
     logmsg('Press + or - to change gamma');
+
+    if makeVideo
+        writerObj = VideoWriter('mousetracking1.avi'); %#ok<UNRCH>
+        writerObj.FrameRate = frameRate;
+        open(writerObj);
+    end
 else
     figRaw = [];
 end
 
-% To record video
-if makeVideo
-    writerObj = VideoWriter('mousetracking1.avi'); %#ok<UNRCH>
-    writerObj.FrameRate = frameRate;
-    open(writerObj);
-end
 
 % Make a background by averageing frames in bgframes
 % The background is complemented so black shapes become white and can be
@@ -170,17 +162,9 @@ while vid.CurrentTime < timeRange(2) && hasFrame(vid)
         hold on
     end
     
-    %     bg16(bg16==0) = NaN;
-    %     Frame = double(Frame);
-    %     Frame = imgaussfilt(Frame,3);
-    %     bg16 = double(bg16);
-    %     bg16 = imgaussfilt(bg16,3);
-    %     frame_bg_subtracted = bg16 - Frame;
-    %
     frame_bg_subtracted = bg16 - int16(Frame);
     
     frame_bg_subtracted = abs(frame_bg_subtracted);
-    
     frame_bg_subtracted = double(frame_bg_subtracted);
     frame_bg_subtracted = frame_bg_subtracted ./ (double(bg16) + 40);
     
@@ -206,44 +190,44 @@ while vid.CurrentTime < timeRange(2) && hasFrame(vid)
         frameDifMouse = frameDif(difScopey1:difScopey2,difScopex1:difScopex2,:);
         vidDif(i) = mean(frameDifMouse(:));
     end
+    
     % Show the frame and already set the difscope square and dot for
     % position of mouse
     if verbose
         text(s(2)-70,s(1)-20,[num2str(vid.CurrentTime,'%0.2f') ' s'],'Color','white','horizontalalignment','right');
         drawnow
-    end
-    
-    if makeVideo
-        frame = getframe; %#ok<UNRCH>
-        writeVideo(writerObj,frame);
-    end
-    
-    
-    % detect keys
-    [ keyIsDown, ~, keyCode ] = KbCheck;
-    if keyIsDown
-        disp(['Pressed: ' num2str(find(keyCode))]);
-        if keyCode(160)
-            if gamma>0.1
-                gamma = gamma - 0.1;
+
+        if makeVideo
+            frame = getframe; %#ok<UNRCH>
+            writeVideo(writerObj,frame);
+        end
+        
+        % detect keys
+        [ keyIsDown, ~, keyCode ] = KbCheck;
+        if keyIsDown
+            disp(['Pressed: ' num2str(find(keyCode))]);
+            if keyCode(160)
+                if gamma>0.1
+                    gamma = gamma - 0.1;
+                    logmsg(['Gamma = ' num2str(gamma)]);
+                end
+            end
+            if keyCode(189)
+                gamma = gamma + 0.1;
                 logmsg(['Gamma = ' num2str(gamma)]);
             end
+            if keyCode(32) % space
+                step = not(step);
+            end
+            if keyCode(68) % d
+                keyboard
+            end
         end
-        if keyCode(189)
-            gamma = gamma + 0.1;
-            logmsg(['Gamma = ' num2str(gamma)]);
-        end
-        if keyCode(32) % space
-            step = not(step);
-        end
-        if keyCode(68) % d
-            keyboard
+        if step
+            pause
         end
     end
     
-    if step
-        pause
-    end
     i = i + 1;
 end
 logmsg('Video analysis is done');
