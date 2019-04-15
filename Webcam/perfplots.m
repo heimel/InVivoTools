@@ -226,7 +226,7 @@ switch exp
         % val_pos_theta = NaN(200,n_mice);
         % val_head_theta = NaN(200,n_mice);
         
-        for i = 11:13
+        for i = [15,16,19:22]
             i
             %     1:n_mice
             subj = mice(i);
