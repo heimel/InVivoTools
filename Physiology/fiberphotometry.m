@@ -1,13 +1,16 @@
-function record = fiberphotometry( record)
+function record = fiberphotometry( record,verbose)
 %FIBERPHOTOMETRY starts fiberoptometry and sends trigger at start
+%
+%  RECORD = FIBERPHOTOMETRY( RECORD )
 %
 % 2019, Alexander Heimel
 
+if nargin<2 || isempty(verbose)
+    verbose = true;
+end
 
 logmsg('Set params.experimentpath_localroot in processparam_local.m for place to store data');
 
-
-% National Instruments USB-6001 
 
 remotecommglobals
 
@@ -24,19 +27,38 @@ end
 
 % par = foprocessparams( record ); % to implement in the future
 par.timeshift = 0.036; % calibrated on 2019-11-04 for NI USB-6001
-par.upvoltage = 3.3;
-par.samplerate = 1000; % Hz
+par.voltage_high = 3.3; % V
+par.voltage_low = 0; % V
+par.min_pulsesamples = 1024; % for some NI board
+par.sample_rate = 1000; % Hz
 par.optopulse_duration = 2;% s, optopulse duration in seconds
 par.optopulse_frequency = 20; % Hz
-par.stimduration = 0.5; % s
-par.prestim = 1; % s
-par.repeats = 2;
-par.delay = 2; % s
+par.preoptopulse_duration = 1; % s
+par.postoptopulse_duration = 5; % s
+par.optopulse_repeats = 1;
+par.delay_duration = 0; % s
+
+% create pulses
+[optopulse,time] = optopulsetrain(par.sample_rate,par.delay_duration,par.preoptopulse_duration,...
+    par.optopulse_duration,par.postoptopulse_duration,par.optopulse_frequency,...
+    par.optopulse_repeats,par.voltage_high,par.voltage_low,par.min_pulsesamples );
+triggerpulse = par.voltage_low * ones(size(optopulse));
+triggerpulse(1:round(par.sample_rate *0.1),1) = par.voltage_high; % trigger up samples
+duration = max(time);
+
+if verbose
+    figure
+    plot(time,optopulse);
+    hold on
+    plot(time,triggerpulse);
+    xlabel('Time (s)');
+    ylabel('Pulse (V)');
+end
 
 datapath = experimentpath(record,true,true,'2015t');
 d = dir(datapath);
 if length(d)>2
-        logmsg('Epoch exists. Increasing epoch number.');
+    logmsg('Epoch exists. Increasing epoch number.');
 end
 while length(d)>2 % not empty
     record.epoch = ['t' num2str(str2double(record.epoch(2:end))+1,'%05d')];
@@ -45,25 +67,20 @@ while length(d)>2 % not empty
 end
 logmsg(['Writing data to ' datapath]);
 
-
 try
-    session = daq.createSession('ni');
+    session = daq.createSession('ni'); % National Instruments USB-6001
 catch me
     switch me.identifier
         case 'daq:general:unknownVendor'
-            errormsg('No National Instrument available');
+            errormsg('No National Instrument board available');
             return
     end
 end
 
-
-duration = (par.delay + par.repeats*(par.prestim+par.stimduration));
-
-
 % Write acqParams_in
-aqDat.name = 'eye';
-aqDat.type = 'eyetrack';
-aqDat.fname = 'eye';
+aqDat.name = 'fiber';
+aqDat.type = 'fiber';
+aqDat.fname = 'fiber';
 aqDat.samp_dt = NaN;
 aqDat.reps = ceil( duration/10); % 10s per rep
 aqDat.ref = 1;
@@ -72,46 +89,22 @@ writeAcqStruct(fullfile(datapath,'acqParams_in'),aqDat);
 % wait to finish writing and write acqReady
 pause(0.3);
 write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
-pause(0.3);
 
-session.Rate = par.samplerate;
-session.NumberOfScans = duration * session.Rate; 
+session.Rate = par.sample_rate;
+session.NumberOfScans = duration * session.Rate;
 addAnalogOutputChannel(session,'Photometry', 'ao0', 'Voltage'); % optopulse
 chao1 = addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
 chao1.Range = [-10 10];
-
 addAnalogInputChannel(session,'Photometry', 0 , 'Voltage'); % photometry
-
-% 1 Frequency pulse for duration
-npulses = par.optopulse_duration * par.optopulse_frequency;
-onepulse = zeros(round(par.samplerate / par.optopulse_frequency),1);
-onepulse(1:round(par.samplerate / par.optopulse_frequency / 2)) = par.upvoltage;
-optopulse = repmat(onepulse,npulses,1);
-if length(optopulse)<1024 % minimally 1024 samples required
-    optopulse(end+1:end) = 0;
-end
-
-% delay [prestim stimduration] x repeats 0 
-delaypulse = zeros(par.samplerate*par.delay,1);
-prestimpulse = zeros(par.samplerate*par.prestim,1);
-stimpulse = par.upvoltage*ones(par.samplerate*par.stimduration,1);
-optopulse = [delaypulse; repmat( [prestimpulse;stimpulse],par.repeats,1); 0];
-
-triggerpulse = zeros(size(optopulse));
-triggerpulse(1:100,1) = par.upvoltage; % trigger up samples
-
 queueOutputData(session,[optopulse triggerpulse]);
-
 plotData('reset',[]);
-
-% for data acquisition
 lh = addlistener(session,'DataAvailable', @plotData);
 
-% add sometime for eyetracking computer to prepare
-pause(5);
-
 prepare(session);
+
+pause(2); % add some time for other computers to prepare
 logmsg('Starting acquisition');
+
 startBackground(session);
 logmsg(['Started optopulse and triggerpulse at ' datestr(now,'hh:mm:ss')]);
 logmsg(['Session duration = ' num2str(duration) ]);
@@ -127,8 +120,6 @@ wait(session);
 [data,time] = plotData('retrieve',[]);
 
 time = time + par.timeshift; % to match calibration
-
-
 delete(lh); % delete datahandler
 
 save(fullfile(datapath,'fiberphotometry.mat'),'time','data','par');
@@ -138,15 +129,6 @@ figure('Name',recordfilter(record));
 plot(time,data);
 xlabel('Time (s)');
 ylabel('Voltage')
-
-
-
-
-
-
-
-
-
 
 
 function [outdata,outtime] = plotData(src,event)
@@ -181,11 +163,10 @@ counter = counter + n;
 if counter+n > nbuffer
     counter = 1;
 end
-    
-%plot(event.TimeStamps, event.Data,'.-')
- plot(time,data(:,1));
- xlabel('Time (s)');
- ylabel('Voltage')
- xlim([max([0 time(counter-1)-2]) time(counter-1)]);
+
+plot(time,data(:,1));
+xlabel('Time (s)');
+ylabel('Voltage')
+xlim([max([0 time(counter-1)-2]) time(counter-1)]);
 
 
