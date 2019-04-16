@@ -61,6 +61,8 @@ aqDat.reps = ceil( duration/10); % 10s per rep
 aqDat.ref = 1;
 aqDat.ECGain = NaN;
 writeAcqStruct(fullfile(datapath,'acqParams_in'),aqDat);
+
+% wait to finish writing and write acqReady
 pause(0.3);
 write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
 pause(0.3);
