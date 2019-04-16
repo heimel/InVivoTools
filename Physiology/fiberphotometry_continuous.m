@@ -1,15 +1,12 @@
-function record = fiberphotometry( duration,record,verbose)
+function record = fiberphotometry_continuous( record)
 %FIBERPHOTOMETRY starts fiberoptometry and sends trigger at start
 %
-%  RECORD = FIBERPHOTOMETRY(DURATION, RECORD, VERBOSE )
+%  RECORD = FIBERPHOTOMETRY( RECORD, VERBOSE )
 %
 % 2019, Alexander Heimel
 
-if nargin<1 || isempty(duration)
-    duration = 60; % s
-end
-if nargin<2 || isempty(record)
-    record.mouse = 'testmouse';
+if nargin<1 || isempty(record)
+    record.mouse = '28099';
     record.date = datestr(now,'yyyy-mm-dd');
     record.experiment = '1820.fiberphoto';
     record.setup = 'fiberphoto';
@@ -19,10 +16,6 @@ if nargin<2 || isempty(record)
     record.comment = '';
     record.measures = [];
 end
-if nargin<3 || isempty(verbose)
-    verbose = true;
-end
-
 
 logmsg('Set params.experimentpath_localroot in processparam_local.m for place to store data');
 
@@ -37,9 +30,9 @@ par.timeshift = 0.036; % calibrated on 2019-11-04 for NI USB-6001
 par.voltage_high = 3.3; % V
 par.voltage_low = 0; % V
 par.min_pulsesamples = 1024; % for some NI board
-par.sample_rate = 1000; % Hz
+par.sample_rate = 100; % Hz
 
-triggerpulse = par.voltage_low * ones(ceil(duration*par.sample_rate),1);
+triggerpulse = par.voltage_low * ones(5000,1);
 triggerpulse(1:round(par.sample_rate *0.1),1) = par.voltage_high; % trigger up samples
 
 datapath = experimentpath(record,true,true,'2015t');
@@ -69,7 +62,7 @@ aqDat.name = 'fiber';
 aqDat.type = 'fiber';
 aqDat.fname = 'fiber';
 aqDat.samp_dt = NaN;
-aqDat.reps = ceil( duration/10); % 10s per rep
+aqDat.reps = NaN; %ceil( duration/10); % 10s per rep
 aqDat.ref = 1;
 aqDat.ECGain = NaN;
 writeAcqStruct(fullfile(datapath,'acqParams_in'),aqDat);
@@ -77,33 +70,39 @@ writeAcqStruct(fullfile(datapath,'acqParams_in'),aqDat);
 pause(0.3);
 write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
 
+queuedata('reset');
+plotData('reset',[]);
+
+
 session.Rate = par.sample_rate;
-session.NumberOfScans = duration * session.Rate;
+%session.NumberOfScans = duration * session.Rate;
 addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
 addAnalogInputChannel(session,'Photometry', 0 , 'Voltage'); % photometry
 addAnalogInputChannel(session,'Photometry', 1 , 'Voltage'); % measuring optopulse from raspipi
 queueOutputData(session,triggerpulse);
 
-% data=linspace(-1,1,5000)';
-% lh = addlistener(s,'DataRequired', ...
-%         @(src,event) src.queueOutputData(data));
+lhoutput = addlistener(session,'DataRequired', @queuedata);
     
 figure
-plotData('reset',[]);
 lh = addlistener(session,'DataAvailable', @plotData);
-% session.IsContinuous = true;
+session.IsContinuous = true;
 
 prepare(session);
 
 pause(2); % add some time for other computers to prepare
-logmsg(['Starting acquisition of ' num2str(duration) ' s']);
 startBackground(session);
-logmsg(['Started recording and sent triggerpulse at ' datestr(now,'hh:mm:ss')]);
-
-
-% pause(5);
-% stop(session);
-wait(session);
+logmsg(['Started continuous recording and sent triggerpulse at ' datestr(now,'hh:mm:ss')]);
+logmsg('Press q to quit');
+while 1
+    [keyIsDown,~,keyCode] = KbCheck;
+    if keyIsDown
+        find(keyCode)
+        break
+    end
+    pause(0.05);
+end
+ stop(session);
+%wait(session);
 
 logmsg(['Stopped recording ' datestr(now,'hh:mm:ss')]);
 record.measures.parameters = par;
@@ -119,9 +118,28 @@ save(fullfile(datapath,'record.mat'),'record','-mat');
 
 figure('Name',recordfilter(record));
 plot(time,data);
+hold on
+plot(time,smoothen(data(:,1),5)); % plot fiber data
 xlabel('Time (s)');
 ylabel('Voltage')
 
+function queuedata(src,event)
+persistent data
+
+if ischar(src)
+    switch src
+        case 'reset'
+            data = [];
+            return
+    end
+end
+if isempty(data)
+    data = 0 * ones(5000,1);
+    data(1:100,1) = 3.3;
+else
+    data = 0 * ones(5000,1);
+end
+src.queueOutputData(data);
 
 function [outdata,outtime] = plotData(src,event)
 persistent data time counter
@@ -159,8 +177,11 @@ if counter+n > nbuffer
 end
 
 plot(time,data(:,1)); % plot fiber data
+
 xlabel('Time (s)');
 ylabel('Voltage')
+
+%ylim([0.5 1]);
 xlim([max([0 time(counter-1)-2]) time(counter-1)]);
 
 
