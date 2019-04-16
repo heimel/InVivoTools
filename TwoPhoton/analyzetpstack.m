@@ -1367,7 +1367,7 @@ switch command
             set(h_db,'userdata',db_ud);
             control_db_callback(db_ud.h.filter);
             control_db_callback(db_ud.h.current_record);
-            logmsg('Stored record in database');
+            logmsg(['Stored record nr ' num2str(ind) ' in database']);
         end
         if ud.verbose
             disp(record);

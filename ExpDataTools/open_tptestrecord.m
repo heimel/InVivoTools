@@ -15,7 +15,8 @@ if ~exist(experimentpath(record),'dir')
     errormsg(['There is no directory ' experimentpath(record) ]);
     return
 end
-[filename,record] = tpfilename(record);
+% [filename,record] = tpfilename(record); % Laila
+filename=tpfilename(record); % Laila
 if ~exist(filename,'file')
     errormsg([filename ' does not exist.']);
     return
