@@ -82,6 +82,9 @@ if exist(filename,'file')==0
 		experiment(exp,false);
 	elseif verbose
 		logmsg(['Database ' filename ' does not exist.']);
+        logmsg('Could not find a database. Set params.networkpathbase and/or params.databasepath_localroot in processparams_local.m');
+        logmsg('Type ''clear functions'' at the matlab prompt to reset database search paths.');
+        logmsg('If necessary find empty database (e.g. testdb_empty.mat) and copy to one of the searched folders.');
 	end
 else
 	db = load_single_expdatabase( filename);
