@@ -45,7 +45,7 @@ fname = tpfilename(record);
 mfname = [fname(1:end-4) '.mat'];
 
 if ~exist(mfname,'file')
-    logmsg([fname ' does not exist.']);
+    logmsg([mfname ' does not exist.']);
     params = [];
     per_params = params;
     per_record = rmfields(record,{'ROIs','measures'});

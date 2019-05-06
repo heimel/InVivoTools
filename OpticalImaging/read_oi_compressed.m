@@ -15,36 +15,36 @@ function [frames,fileinfo]=read_oi_compressed(fname,start,...
 %                    if n_part==0, returns only fileinfo
 %          SHOW = {0,1}, plot first and last frame if 1
 %
-% 2003-2014, Alexander Heimel
+% 2003-2019, Alexander Heimel
 %
 
 if nargin<7
-    fileinfo=imagefile_info(fname);
+    fileinfo = imagefile_info(fname);
 end
 if nargin<6
-    show=1;
+    show = 1;
 end
 if nargin<5
-    compression=5;
+    compression = 5;
 end
 if nargin<4
-    n_part=1;
+    n_part = 1;
 end
 if nargin<3
-    max_n_images=10000;
+    max_n_images = 10000;
 end
 if nargin<2
-    start=1;
+    start = 1;
 end
 
 %global frames % for debugging
-frames=ones(0,0,0);
+frames = ones(0,0,0);
 
 if fileinfo.n_images==-1
     return
 end
 
-n_images=min( max_n_images, fileinfo.n_total_images-start+1);
+n_images = min( max_n_images, fileinfo.n_total_images-start+1);
 
 if n_part==0
     disp(['Name:      ' fileinfo.name]);
@@ -59,16 +59,14 @@ if n_part==0
     return; % don't do anything, just report
 end
 
-n_rows=floor(fileinfo.ysize/compression); % lines in file
-n_cols=floor(fileinfo.xsize/compression); % cols in file
-n_remainder_cols=fileinfo.xsize-n_cols*compression;
-n_remainder_rows=fileinfo.ysize-n_rows*compression;
+n_rows = floor(fileinfo.ysize/compression); % lines in file
+n_cols = floor(fileinfo.xsize/compression); % cols in file
+n_remainder_cols = fileinfo.xsize-n_cols*compression;
+n_remainder_rows = fileinfo.ysize-n_rows*compression;
 
-frames=zeros( n_cols,n_rows,n_images);
+frames = zeros( n_cols,n_rows,n_images);
 
-
-%disp('Reading file...');
-[fid,message] = fopen(fname,'r');
+fid = fopen(fname,'r');
 if fid==-1
     error(['Failed to open ' fname]);
 end
@@ -85,7 +83,6 @@ end
 startline = floor( (n_part-1)/compression );
 startcol= mod( n_part-1, compression);
 
-
 % skip to starting frame
 status=fseek(fid,(start-1)*fileinfo.xsize*fileinfo.ysize*fileinfo.n_bytes_per_pixel+1716,'bof');
 
@@ -95,7 +92,6 @@ if status==-1
     fclose(fid);
     return;
 end
-
 
 % separate compresssion=1 from compression>1
 % for increasing speed
@@ -119,23 +115,14 @@ if compression==1
     
     frames=reshape( frames,fileinfo.xsize,fileinfo.ysize,n_images);
 else  % compressed
-    
+    logmsg('DEPRECATED READING USING COMPRESSION');
     % skip other parts
-    status = ...
-        fseek(fid,(startline*fileinfo.xsize+startcol)*...
+    fseek(fid,(startline*fileinfo.xsize+startcol)*...
         fileinfo.n_bytes_per_pixel,'cof');
-    
     
     % read file
     fprintf('Reading image: 0000');
-%     gf=[]; 
-%     GF=frames;
-%     gf=[gf,GF];
-%     save GF
-% FF={};
     for i=1:n_images
-%         ff=frames
-%         FF=[FF,ff]
         for j=1:n_rows
             [frames(:,j,i) , count] = ...
                 fread(fid,floor(fileinfo.xsize/compression),...
@@ -146,32 +133,17 @@ else  % compressed
                 return
             end
             %skip remainder of line
-            status = ...
-                fseek(fid,n_remainder_cols*fileinfo.n_bytes_per_pixel,'cof');
+            fseek(fid,n_remainder_cols*fileinfo.n_bytes_per_pixel,'cof');
             %skip couple of rows
-            status = ...
-                fseek(fid,fileinfo.xsize*(compression-1)*...
+            fseek(fid,fileinfo.xsize*(compression-1)*...
                 fileinfo.n_bytes_per_pixel,'cof');
         end
         % skip remainder rows
-        status = ...
-            fseek(fid,n_remainder_rows*fileinfo.xsize*...
+        fseek(fid,n_remainder_rows*fileinfo.xsize*...
             fileinfo.n_bytes_per_pixel,'cof');
-        %        GG=fid;
-       
-        
-        
-        %  fprintf('\b\b\b\b%04d',i);
     end
 end
-% save FF
-%fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b');
-% fprintf('\r                                                           \r');
-
-
 fclose(fid);
-
-
 
 if show
     plot_oi_frames(frames);
