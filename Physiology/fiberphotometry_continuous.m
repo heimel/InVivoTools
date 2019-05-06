@@ -6,7 +6,7 @@ function record = fiberphotometry_continuous( record)
 % 2019, Alexander Heimel
 
 if nargin<1 || isempty(record)
-    record.mouse = '29710_SC';
+    record.mouse = 'test';
     record.date = datestr(now,'yyyy-mm-dd');
     record.experiment = '1820.fiberphoto';
     record.setup = 'fiberphoto';
@@ -73,7 +73,6 @@ write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
 queuedata('reset');
 plotData('reset',[]);
 
-
 session.Rate = par.sample_rate;
 %session.NumberOfScans = duration * session.Rate;
 addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
@@ -92,26 +91,27 @@ prepare(session);
 pause(2); % add some time for other computers to prepare
 startBackground(session);
 logmsg(['Started continuous recording and sent triggerpulse at ' datestr(now,'hh:mm:ss')]);
-logmsg('Press q to quit');
+logmsg('Hold q to quit');
 while 1
     [keyIsDown,~,keyCode] = KbCheck;
-    if keyIsDown
-        find(keyCode)
+    if keyIsDown && any(find(keyCode)==81) % q
         break
     end
     pause(0.05);
 end
- stop(session);
+
+stop(session);
 %wait(session);
 
 logmsg(['Stopped recording ' datestr(now,'hh:mm:ss')]);
 record.measures.parameters = par;
 
-
 [data,time] = plotData('retrieve',[]);
 
 time = time + par.timeshift; % to match calibration
-delete(lh); % delete datahandler
+
+delete(lh); 
+delete(lhoutput); 
 
 save(fullfile(datapath,'fiberphotometry.mat'),'time','data','par');
 save(fullfile(datapath,'record.mat'),'record','-mat');
@@ -123,7 +123,7 @@ plot(time,smoothen(data(:,1),5)); % plot fiber data
 xlabel('Time (s)');
 ylabel('Voltage')
 
-function queuedata(src,event)
+function queuedata(src,event) %#ok<INUSD>
 persistent data
 
 if ischar(src)
