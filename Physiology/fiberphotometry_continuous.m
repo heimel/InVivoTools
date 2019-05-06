@@ -6,14 +6,14 @@ function record = fiberphotometry_continuous( record)
 % 2019, Alexander Heimel
 
 if nargin<1 || isempty(record)
-    record.mouse = '28099';
+    record.mouse = '29710_SC';
     record.date = datestr(now,'yyyy-mm-dd');
     record.experiment = '1820.fiberphoto';
     record.setup = 'fiberphoto';
     record.datatype = 'wc';
     record.epoch = 't00001';
     record.experimenter = 'ma';
-    record.comment = '';
+    record.comment = 'dlight photometry from SC';
     record.measures = [];
 end
 
