@@ -1,28 +1,13 @@
-function record = fiberphotometry( duration,record,verbose)
+function record = fiberphotometry( record,verbose)
 %FIBERPHOTOMETRY starts fiberoptometry and sends trigger at start
 %
-%  RECORD = FIBERPHOTOMETRY(DURATION, RECORD, VERBOSE )
+%  RECORD = FIBERPHOTOMETRY( RECORD )
 %
 % 2019, Alexander Heimel
 
-if nargin<1 || isempty(duration)
-    duration = 60; % s
-end
-if nargin<2 || isempty(record)
-    record.mouse = 'testmouse';
-    record.date = datestr(now,'yyyy-mm-dd');
-    record.experiment = '1820.fiberphoto';
-    record.setup = 'fiberphoto';
-    record.datatype = 'wc';
-    record.epoch = 't00001';
-    record.experimenter = 'ma';
-    record.comment = '';
-    record.measures = [];
-end
-if nargin<3 || isempty(verbose)
+if nargin<2 || isempty(verbose)
     verbose = true;
 end
-
 
 logmsg('Set params.experimentpath_localroot in processparam_local.m for place to store data');
 
@@ -31,16 +16,46 @@ remotecommglobals
 
 logmsg(['Communicating via ' Remote_Comm_dir]);
 
+if nargin<1 || isempty(record)
+    record.mouse = 'testmouse';
+    record.experiment = '1820.fiberopto';
+    record.epoch = 't00001';
+    record.datatype = 'wc';
+    record.date = datestr(now,'yyyy-mm-dd');
+    record.setup = 'fiberopto';
+end
 
-% par = fpprocessparams( record ); % to implement in the future
+% par = foprocessparams( record ); % to implement in the future
 par.timeshift = 0.036; % calibrated on 2019-11-04 for NI USB-6001
 par.voltage_high = 3.3; % V
 par.voltage_low = 0; % V
 par.min_pulsesamples = 1024; % for some NI board
 par.sample_rate = 1000; % Hz
+par.optopulse_duration = 2;% s, optopulse duration in seconds
+par.optopulse_frequency = 20; % Hz
+par.preoptopulse_duration = 1; % s
+par.postoptopulse_duration = 5; % s
+par.optopulse_repeats = 1;
+par.delay_duration = 2; % s
+% delay [preoptopulse optopulse postoptopulse] x optopulse_repeats
 
-triggerpulse = par.voltage_low * ones(ceil(duration*par.sample_rate),1);
+% create pulses
+[optopulse,time] = optopulsetrain(par.sample_rate,par.delay_duration,par.preoptopulse_duration,...
+    par.optopulse_duration,par.postoptopulse_duration,par.optopulse_frequency,...
+    par.optopulse_repeats,par.voltage_high,par.voltage_low,par.min_pulsesamples );
+triggerpulse = par.voltage_low * ones(size(optopulse));
 triggerpulse(1:round(par.sample_rate *0.1),1) = par.voltage_high; % trigger up samples
+duration = max(time);
+
+verbose = false;
+if verbose
+    figure
+    plot(time,optopulse);
+    hold on
+    plot(time,triggerpulse);
+    xlabel('Time (s)');
+    ylabel('Pulse (V)');
+end
 
 datapath = experimentpath(record,true,true,'2015t');
 d = dir(datapath);
@@ -79,35 +94,32 @@ write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
 
 session.Rate = par.sample_rate;
 session.NumberOfScans = duration * session.Rate;
-addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
+addAnalogOutputChannel(session,'Photometry', 'ao0', 'Voltage'); % optopulse
+chao1 = addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
+chao1.Range = [-10 10];
 addAnalogInputChannel(session,'Photometry', 0 , 'Voltage'); % photometry
 addAnalogInputChannel(session,'Photometry', 1 , 'Voltage'); % measuring optopulse from raspipi
-queueOutputData(session,triggerpulse);
-
-% data=linspace(-1,1,5000)';
-% lh = addlistener(s,'DataRequired', ...
-%         @(src,event) src.queueOutputData(data));
-    
+queueOutputData(session,[optopulse triggerpulse]);
 figure
 plotData('reset',[]);
 lh = addlistener(session,'DataAvailable', @plotData);
-% session.IsContinuous = true;
 
 prepare(session);
 
 pause(2); % add some time for other computers to prepare
-logmsg(['Starting acquisition of ' num2str(duration) ' s']);
+logmsg('Starting acquisition');
+
 startBackground(session);
-logmsg(['Started recording and sent triggerpulse at ' datestr(now,'hh:mm:ss')]);
+logmsg(['Started optopulse and triggerpulse at ' datestr(now,'hh:mm:ss')]);
+logmsg(['Session duration = ' num2str(duration) ]);
 
+pause(duration);
 
-% pause(5);
-% stop(session);
-wait(session);
+logmsg(['Stopped optopulse and triggerpulse ' datestr(now,'hh:mm:ss')]);
 
-logmsg(['Stopped recording ' datestr(now,'hh:mm:ss')]);
 record.measures.parameters = par;
 
+wait(session);
 
 [data,time] = plotData('retrieve',[]);
 
@@ -118,7 +130,9 @@ save(fullfile(datapath,'fiberphotometry.mat'),'time','data','par');
 save(fullfile(datapath,'record.mat'),'record','-mat');
 
 figure('Name',recordfilter(record));
-plot(time,data);
+hold on
+plot(time,data(:,1));
+plot(time,data(:,2));
 xlabel('Time (s)');
 ylabel('Voltage')
 
@@ -158,7 +172,9 @@ if counter+n > nbuffer
     counter = 1;
 end
 
-plot(time,data(:,1)); % plot fiber data
+        plot(time,data(:,1));
+hold on
+        plot(time,data(:,2));
 xlabel('Time (s)');
 ylabel('Voltage')
 xlim([max([0 time(counter-1)-2]) time(counter-1)]);

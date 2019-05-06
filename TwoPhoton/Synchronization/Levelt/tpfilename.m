@@ -21,16 +21,9 @@ if nargin<2
     frame = [];
 end
 
-lucasdrift = tpscratchfilename(record,[],'lucaskanade', 'tif');
-if exist(lucasdrift, 'file')
-    logmsg('Lucas-Kanade corrected tif stack exists');
-    fname = lucasdrift;    
-    return
-end
-
 optcode = '';
 processed = '';
-if ~isempty( image_processing )
+if ~isempty(image_processing )
    if image_processing.unmixing == 1
         optcode = [optcode '_um' ];
         processed = 'processed';

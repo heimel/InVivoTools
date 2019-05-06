@@ -27,22 +27,19 @@ function [info,header,header32]=imagefile_info( fname, verbose)
 %      if file could not be opened, info.n_images=1
 %
 %  2003, Steve Van Hooser, Alexander Heimel
-%  2004-2014, Alexander Heimel
+%  2004-2019, Alexander Heimel
 
-if nargin<2
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<2 || isempty(verbose)
     verbose = false;
 end
 
-info=struct('name','','n_images',-1);
+info = struct('name','','n_images',-1);
 
 fid = fopen(fname,'r');
 if fid==-1
     logmsg(['Could not open ' fname '.']);
     % see if copy exists
-    ind=findstr(fname,'BLK');
+    ind = findstr(fname,'BLK');
     if ~isempty(ind)
         fname(ind:ind+2)='HDR';
         fid = fopen(fname,'r');
@@ -56,14 +53,13 @@ if fid==-1
         logmsg(['Reading header file ' fname ' instead.']);
     end
 else
-    ind=findstr(fname,'BLK');
+    ind = findstr(fname,'BLK');
     if ~isempty(ind)
         info.headeronly=0;
     else
         info.headeronly=[];
     end
 end
-
 
 [header, count] = fread(fid,429,'int32');
 
@@ -87,23 +83,19 @@ if info.filesize==0
     return
 end
 
-
 info.cameraframes_per_frame=header(233);
 info.n_total_images=(info.filesize-info.headersize)/...
     (info.xsize*info.ysize*info.n_bytes_per_pixel);
 
-
-
 if info.n_total_images~=info.n_images*info.n_conditions
-    disp('IMAGEFILE_INFO: Unsure about total number of images');
-    info.n_total_images=0;
-    return
-    % if interpretation of headerfile is wrong
+    logmsg('Unsure about total number of images');
+    info.n_total_images = 0;
+    return  % if interpretation of headerfile is wrong
 end
 
 %header(235); % is also something
 
-header32=header;
+header32 = header;
 
 switch info.n_bytes_per_pixel
     case 2
@@ -116,15 +108,16 @@ end
 
 frewind(fid);
 [header, count] = fread(fid,1716,'uchar');
+fclose(fid);
 
 if count<1716
     errormsg(['Header of ' fname ' is incomplete. File corrupt?']);
     return
 end
 
-info.date=char(header(101:109))'; % date as 03/29/106 for 29-03-06
-info.date(end-2:end+1)=num2str(eval(info.date(end-2:end))+1900)';
-info.n_conditions=header(49); % guess
+info.date = char(header(101:109))'; % date as 03/29/106 for 29-03-06
+info.date(end-2:end+1) = num2str(eval(info.date(end-2:end))+1900)';
+info.n_conditions = header(49); % guess
 
 % specifics for levelt lab:
 ind_imager = [929 954 973 974 975 976 977 978];
@@ -139,21 +132,23 @@ new_imager3 = [15 107   0  0  32 66  0  0]; % andrew 2013?
 if header(973) == 162
     info.imager='daneel';
 elseif header(954)==106 || header(954)==107
-    info.imager='andrew';
-else
-    info.imager='unknown';
+    info.imager = 'andrew';
+elseif header(954)==110 % adhoc, may have to be extended
+    info.imager = 'ninad';
+    info.datatype = 'uint16'; % probably can be found elsewhere in header
+else  
+    info.imager = 'unknown';
+    logmsg(['Unknown imager. Header(954) = ' num2str(header(954))]);
 end
-info.camera_framerate=camera_framerate(info.imager, header);
-info.framerate=info.camera_framerate / info.cameraframes_per_frame;
-info.frameduration= 1/ info.framerate;
-
-fclose(fid);
+info.camera_framerate = camera_framerate(info.imager, header);
+info.framerate = info.camera_framerate / info.cameraframes_per_frame;
+info.frameduration = 1/ info.framerate;
 
 % make copy of the header
-ind=findstr(fname,'BLK');
+ind = findstr(fname,'BLK');
 if ~isempty(ind)
     fname(ind:ind+2)='HDR';
-    fid=fopen(fname,'w');
+    fid = fopen(fname,'w');
     if fid~=-1 % dont bother if I cant open it
         fwrite(fid,header32,'uint32');
         fclose(fid);

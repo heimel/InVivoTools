@@ -1,0 +1,9 @@
+[submodule "matlab-ParforProgress2"]
+	path = matlab-ParforProgress2
+	url = https://github.com/kotowicz/matlab-ParforProgress2
+[submodule "NoRMCorre"]
+	path = NoRMCorre
+	url = https://github.com/flatironinstitute/NoRMCorre
+[submodule "Scanbox_Yeti"]
+	path = Scanbox_Yeti
+	url = https://github.com/Leveltlab/Scanbox_Yeti

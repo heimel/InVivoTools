@@ -42,7 +42,16 @@ end
 
 % check if matlabstored file is present
 if strcmp(readfname,fname)==0 % not read in yet
-    org_fname = tpfilename( record, frame, channel); % no options
+    
+    
+    lucasdrift = tpscratchfilename(record,[],'lucaskanade', 'tif');
+    if exist(lucasdrift, 'file')
+        logmsg('Lucas-Kanade corrected tif stack exists');
+        org_fname = lucasdrift;    
+    else
+        org_fname = tpfilename( record, frame, channel); % no options
+    end
+
     iminf = tpreadconfig(record);
     
     if strcmp(org_fname(end-3:end),'.tif') && check % If Lucas-Kanade corrected exists, read in tif stack
@@ -57,19 +66,24 @@ if strcmp(readfname,fname)==0 % not read in yet
         
         h = waitbar(0,'Loading TIFF: ETA unknown'); 
         waitbarstep = max(1,round(iminf.NumberOfFrames/100)); % only maximum 100 updates
-        time = zeros(iminf.NumberOfFrames,1);
         
         TifLink = Tiff(FileTif, 'r');
+        tic;
         for i=1:iminf.NumberOfFrames
-           tic;
            TifLink.setDirectory(i);
            
            images(:,:,i,channel)=TifLink.read();
-           time(i) = toc;
            
            if mod(i,waitbarstep)==0
-               eta = round((mean(time) * (iminf.NumberOfFrames - i + 1))/60);
-               waitbar(i/iminf.NumberOfFrames, h, sprintf('Loading TIFF: ETA ~%dm', eta));
+               t = toc;
+               t_now = datetime('now');
+               eta = t_now + minutes(((t/i) * (iminf.NumberOfFrames - i + 1))/60);
+               [hour, minute, ~] = hms(eta);
+               if eta < t_now
+                   waitbar(i/iminf.NumberOfFrames, h, sprintf('Loading TIFF: ETA: soon'));
+               else
+                   waitbar(i/iminf.NumberOfFrames, h, sprintf('Loading TIFF: ETA ~%02d:%02d', hour, minute));
+               end
            end
         end
         TifLink.close();
@@ -86,7 +100,7 @@ if strcmp(readfname,fname)==0 % not read in yet
     else        
 %         org_fname = tpfilename(record, frame, channel); % no options
         if strcmp(fname, 'tryagain')
-            fname = tpfilename( record, frame, channel, opt);
+            fname = tpfilename( record, frame, channel, []);
             fname = fname(1:end-4);
         end
         

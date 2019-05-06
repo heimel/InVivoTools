@@ -17,6 +17,7 @@ function [dr,howoften,avgframes] = tpdriftcheck_lucaskanade(record, channel)
 %      dr.y_rigid       linear y shifts (array) computed by NoRMCorre
 %      dr.x_nonrigid    non-rigid x shifts computed by Lucas-Kanade
 %      dr.y_nonrigid    non-rigid y shifts computed by Lucas-Kanade
+%       At this moment, dr information is NOT saved!
 %
 % 2019 Laila Blomer
 
@@ -24,7 +25,8 @@ if nargin<2 || isempty(channel)
     channel = 1;
 end
 
-logmsg('Performing drift correction using Lucas-Kanade method. WARNING: this will double your data size');
+logmsg('Performing drift correction using Lucas-Kanade method');
+warning('This will double your data size');
 
 % dr = [];
 
@@ -74,7 +76,7 @@ options_rigid = NoRMCorreSetParms(...
     'shifts_method', 'FFT',...
     'correct_bidir', 0);
 
-gcp;
+% gcp;
 
 logmsg('Starting rigid NoRMCorre correction');
 [data_rigid,shifts_data,~,~] = normcorre_batch(data,options_rigid,template1);
@@ -87,7 +89,7 @@ template2 = mean(data_rigid(:,:,skipframes:numberofframes),3);
 
 logmsg('Starting non-rigid Lucas-Kanade correction...');
 parfor i = 1:file_size
-    [fr_cor,dpx,dpy] = doLucasKanade(template2,data_rigid(:,:,i));
+    [fr_cor,dpx,dpy] = tp_lucaskanade(template2,data_rigid(:,:,i));
     
     data_nonrigid(:,:,i) = fr_cor;
     
