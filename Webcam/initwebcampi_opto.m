@@ -1,4 +1,4 @@
-function initwebcampi_async(ready)
+function initwebcampi_opto(ready)
 %INITWEBCAMPI
 % starts recording one long file while checking change in acqReady
 %
@@ -127,6 +127,8 @@ else
         
         fopen(s1);
         
+        get(s1)
+        
         %edit Sven april 2015: Made compatible with two versions of instrument-control
         if isfield(get(s1),'pinstatus')
             new_instr_contr = 1;
@@ -142,9 +144,10 @@ else
             prev_cts = get(s1,pin);
         end
         
-        org_cts = 'on'; %prev_cts;
+        org_cts = prev_cts;
         optogenetic_stimulation = false;
         
+        logmsg('Press q to quit');
         while 1 % loop to find trigger
             
             if new_instr_contr
@@ -184,9 +187,16 @@ else
                 mkdir(datapath);
                 save('-v7',recording_name,'filename','stimstart');
                 logmsg(['Saved timing info in ' recording_name]);
+                logmsg('Press q to quit');
             end
             prev_cts = cts;
-            pause(0.005);
+            pause(0.01);
+            [keydown,~,keycode] = KbCheck;
+            if keydown && keycode(25) % 'q
+                logmsg('Pressed q');
+                stop_recording(filename);
+                fclose(s1);
+            end
         end
     catch me
         logmsg(me.message);
