@@ -30,8 +30,8 @@ end
 curve_x = [];
 interval = [];
 cinterval = [];
-pst=0;
-pre=0;
+pst = 0;
+pre = 0;
 for i=1:length(I.st) % implementation of this loop seems defunct, AH
     o = getDisplayOrder(I.st(i).stimscript);
 
@@ -44,7 +44,7 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
         return
     end
         
-    s=1;
+    s = 1;
     interval = zeros(length(ind),2); % assume length(I.st)==1
     cinterval = zeros(length(ind),2);  
     for j=ind(:)' % over stimuli
@@ -57,7 +57,7 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
             condnames{s} = ['stimnumber = ' num2str(j)];
         end
         stimlist = find(o==j);
-        for k=1:length(stimlist),
+        for k=1:length(stimlist)
             if ~isempty(I.st(i).mti{stimlist(k)}.frameTimes)
                 trigs{s}(k)=I.st(i).mti{stimlist(k)}.frameTimes(1);
             else
@@ -80,10 +80,10 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
             Cinterval(s,:) = [0 I.st(1).mti{stimlist(1)}.startStopTimes(3)-I.st(1).mti{stimlist(1)}.startStopTimes(2)]; % for optostim
         end
         
-        if length(I.st(1).mti)>=2,
+        if length(I.st(1).mti)>=2
             if dp.BGpretime - processparams.separation_from_prev_stim_off >= processparams.minimum_spontaneous_time
                 % use BGpretime
-                pre=pre+1;
+                pre = pre+1;
                 interval(s,:) = [ Cinterval(s,1)-dp.BGpretime Cinterval(s,2)];
             elseif dp.BGposttime - processparams.separation_from_prev_stim_off >= processparams.minimum_spontaneous_time 
                 % use BGposttime
@@ -91,25 +91,24 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
                 interval(s,:) = [ Cinterval(s,1) Cinterval(s,2)+dp.BGposttime];
             else
                 interval(s,:) = Cinterval(s,:);
-            end;
+            end
         else % if only one stim, really shouldn't happen
             interval(s,:) = Cinterval(s,:);
-        end;
+        end
         s = s + 1;
     end % j
 end % i
 
-
 sint = [ min(interval(:,1)) max(interval(:,2)) ];
 if pre==0 && pst>0  %BGposttime used
-    spontlabel='stimulus / spontaneous';
+    spontlabel = 'stimulus / spontaneous';
     scint = [ max(Cinterval(:,2))+processparams.separation_from_prev_stim_off max(interval(:,2))];
 elseif pst==0 && pre>0  % BGpretime used
-    spontlabel='spontaneous / stimulus';
+    spontlabel = 'spontaneous / stimulus';
     scint = [ min(interval(:,1))+processparams.separation_from_prev_stim_off min(Cinterval(:,1)) ];
 else
     errormsg('No or too short spontaneous period. Consider changing separation_from_prev_stim_off or minimum_spontaneous_time in processparams_local');
-    spontlabel='trials';
+    spontlabel = 'trials';
     scint = sint;
 end
 
@@ -132,36 +131,36 @@ inp.condnames = condnames(inds);
 inp.spikes = I.spikes; 
 inp.triggers=trigs;
 RAparams.res = p.res; 
-RAparams.interval=interval; 
-RAparams.cinterval=cinterval;
+RAparams.interval = interval; 
+RAparams.cinterval = cinterval;
 RAparams.axessameheight = 1;
-RAparams.showcbars=1; 
-RAparams.fracpsth=0.5; 
-RAparams.normpsth=1; 
-RAparams.showvar=0;
+RAparams.showcbars = 1; 
+RAparams.fracpsth = 0.5; 
+RAparams.normpsth = 1; 
+RAparams.showvar = 0;
 RAparams.psthmode = 0; 
 RAparams.showfrac = 1; 
 tc.internals.rast = raster(inp,RAparams,[]);
 if ~isempty(scint)
-    RAparams.cinterval=scint;
-    RAparams.interval=sint;
-    inp.triggers={[spon{:}]};
+    RAparams.cinterval = scint;
+    RAparams.interval = sint;
+    inp.triggers = {[spon{:}]};
     inp.condnames = {spontlabel};
-    tc.internals.spont=raster(inp,RAparams,[]);
+    tc.internals.spont = raster(inp,RAparams,[]);
     sc = getoutput(tc.internals.spont);
     spontval = [mean(sc.ncounts') mean(sc.ctdev')];
 else
     tc.internals.spont = [];
-end;
+end
 
 c = getoutput(tc.internals.rast);
-curve_y=c.ncounts';
-curve_var=c.ctdev';
+curve_y = c.ncounts';
+curve_var = c.ctdev';
 if isfield(c,'stderr')
-    curve_err=c.stderr';
+    curve_err = c.stderr';
 else
     logmsg('Temporary adding stderr field');
-    curve_err=nan * curve_var;
+    curve_err = nan * curve_var;
 end
 curve = [curve_x; curve_y; curve_var; curve_err];
 
@@ -184,7 +183,6 @@ curve = newcurve;
 maxes = curve(1,maxes);
 [dummy,mins] = min(curve(2,:));  %#ok<ASGLU>
 mins = curve(1,mins);
-
 
 tc.computations=struct('curve',curve,'maxes',maxes,'mins',mins,...
     'spont',spontval,'spontrast',tc.internals.spont,...

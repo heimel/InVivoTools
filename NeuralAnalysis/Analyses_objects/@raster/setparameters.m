@@ -1,5 +1,4 @@
 function newra = setparameters(ra,parameters)
-
 %  NEWRA = SETPARAMETERS(RA,P)
 %
 %  Sets the parameters of the RASTER object RA to P.  P must be a valid set of
@@ -20,6 +19,8 @@ end
 %if ~good,error(['PARAMETERS: ' er]);end;
 
 ra.RAparams = parameters;
-configuremenu(ra); ra = compute(ra); draw(ra);
+configuremenu(ra); 
+ra = compute(ra); 
+draw(ra);
 
 newra = ra;
