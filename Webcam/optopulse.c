@@ -20,12 +20,26 @@
 #include <unistd.h> // for usleep
 #include <stdlib.h> // for atof
 
+void write_usage()
+{
+  printf("optopulse.c: blinks the first LED on raspberry pi\n"
+  "usage: optopulse DURATION=60 FREQUENCY=20 DUTYCYCLE=0.5 RAMPDURATION=0\n"
+  "   where DURATION is the total blink time in seconds\n" 
+  "     and FREQUENCY is blinking frequency in Hz\n" 
+  "     and RAMPDURATION is time (s) to linearly increase dutycycle from 1 ms to DUTYCYCLE\n"
+  "     and back down at the end. This is within the DURATION time, so time blinking\n"
+  "     at DUTYCYCLE is DURATION - 2*RAMPDURATION\n"
+  " 200X, Gordon Henderson, projects@drogon.net\n"
+  " 2018-2019, Alexander Heimel\n");
+}
+
 int main (int argc, char *argv[])
 {
   float frequency = 20; // Hz
   float duration = 60; // s
-  float dutycyle = 0.5; // fraction of cycle light is on
+  float dutycycle = 0.5; // fraction of cycle light is on
   float rampduration = 0; // s
+  float levelduration; // s, duration - 2*rampduration
   int writetime_us = 111; // time to write pin
   int min_onduration_us = 1000; // minimum time pulse on
   int i;
@@ -41,8 +55,13 @@ int main (int argc, char *argv[])
     return 1 ;
   }
 
-  if (argc>1)
-    duration = atof( argv[1]);
+  if (argc>1){
+    if (argv[1][0]=='-'){
+      write_usage();
+      return 1;
+    } else
+      duration = atof( argv[1]);
+  }
 
   if (argc>2)
     frequency = atof( argv[2]);
@@ -53,13 +72,17 @@ int main (int argc, char *argv[])
   if (argc>4)
     rampduration = atof( argv[4]);        
 
+
+  printf ("OPTOPULSE.C: Requested blinking for %.2f s at %.1f Hz with %.1f dutycycle including ramps of %f .\n",
+	duration,frequency,dutycycle,rampduration) ;
+
   // rounding all input parameters to integer number of cycles
-  cycletime_us = round(100000./frequency);
+  cycletime_us = round(1000000./frequency);
   frequency = 1000000./cycletime_us;
-  n_cycles_during_ramp = round(rampduration / frequency);
+  n_cycles_during_ramp = round(rampduration * frequency);
   rampduration = n_cycles_during_ramp / frequency;
   levelduration = duration - 2*rampduration;
-  n_cycles_during_level = round(levelduration / frequency);
+  n_cycles_during_level = round(levelduration * frequency);
   levelduration = n_cycles_during_level / frequency;
   duration = levelduration + 2*rampduration;
 
@@ -109,4 +132,5 @@ int main (int argc, char *argv[])
   printf ("OPTOPULSE.C: Stopped blinking.\n") ;
   return 0 ;
 }
+
 
