@@ -22,12 +22,15 @@ K = length(trigs);
 cstart = cell(K,1); 
 cstop = cell(K,1);
 cind = cell(K,1); 
-dt = [];
+dt = NaN(K,1);
+MI = NaN(K,1);
+MX = NaN(K,1);
 variation = cell(K,1); 
 counts = cell(K,1); 
 ansbins = cell(K,1);
 bins = cell(K,1); 
 edges = cell(K,1);
+
 
 for k=1:K
     % cinterval variables
@@ -51,6 +54,10 @@ for k=1:K
     
     cstart{k} = round((mic-mi)/p.res)+1;
     cstop{k} = floor((mxc-mi)/p.res);
+    
+    if cstop{k}<cstart{k}
+        cstop{k} = cstart{k}; % to at least have 1 bin
+    end
     
     % force all number of bins to be of same size, if they are nearly so
     % to avoid rounding errors creating unequal bin numbers
@@ -90,6 +97,10 @@ fftmean = cell(K,1);
 fftstd = cell(K,1);
 fftstderr = cell(K,1);
 for k=1:K
+    if isempty(cind{k}) % no bins to use for computation
+        continue
+    end
+    
     rast_x = []; rast_y = [];
     vals{k} = zeros(length(bins{k}),length(trigs{k}));
     fftvals{k} = zeros(length(cind{k}),length(trigs{k}));

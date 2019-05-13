@@ -1,12 +1,15 @@
 /*
  * optopulse.c:
  *      blinks the first LED on raspberry pi
- * usage: optopulse DURATION=60 FREQUENCY=20
+ * usage: optopulse DURATION=60 FREQUENCY=20 DUTYCYCLE=0.5 RAMPDURATION=0
  *   where DURATION is the total blink time in seconds
  *     and FREQUENCY is blinking frequency in Hz
+ *     and RAMPDURATION is time (s) to linearly increase dutycycle from 1 ms to DUTYCYCLE
+ *     and back down at the end. This is within the DURATION time, so time blinking
+ *     at DUTYCYCLE is DURATION - 2*RAMPDURATION
  *
- * Adapted from Gordon Henderson, projects@drogon.net
- * by Alexander Heimel, 2018
+ * 200X, Gordon Henderson, projects@drogon.net
+ * 2018-2019, Alexander Heimel
  *
  * to compile: gcc -o optopulse optopulse.c -lwiringPi -lm
  */
@@ -19,39 +22,91 @@
 
 int main (int argc, char *argv[])
 {
-  int i;
   float frequency = 20; // Hz
-  int writetime = 111; // us, time to write pin
   float duration = 60; // s
+  float dutycyle = 0.5; // fraction of cycle light is on
+  float rampduration = 0; // s
+  int writetime_us = 111; // time to write pin
+  int min_onduration_us = 1000; // minimum time pulse on
+  int i;
+  int cycletime_us; // time of one pulse cycle (on+off) 1000000/frequency
+  int onduration_us; // time pulse on
+  int offduration_us; //  time pulse off
+  int n_cycles_during_ramp; 
+  int n_cycles_during_level;
 
-
-  if (argc>2)
-    frequency = atof( argv[2]);
-
-  int halfpulse = round(500000./frequency); //us
-
+  if (wiringPiSetup () == -1)
+  {
+    printf( "OPTOPULSE.C: wiringPiSetup returns -1. No pulse given.");
+    return 1 ;
+  }
 
   if (argc>1)
     duration = atof( argv[1]);
 
-  printf ("OPTOPULSE.C: Start blinking for %.2f s at %.1f Hz.\n",duration,frequency) ;
+  if (argc>2)
+    frequency = atof( argv[2]);
 
-  if (wiringPiSetup () == -1)
-    return 1 ;
+  if (argc>3)
+    dutycycle = atof( argv[3]);
+
+  if (argc>4)
+    rampduration = atof( argv[4]);        
+
+  // rounding all input parameters to integer number of cycles
+  cycletime_us = round(100000./frequency);
+  frequency = 1000000./cycletime_us;
+  n_cycles_during_ramp = round(rampduration / frequency);
+  rampduration = n_cycles_during_ramp / frequency;
+  levelduration = duration - 2*rampduration;
+  n_cycles_during_level = round(levelduration / frequency);
+  levelduration = n_cycles_during_level / frequency;
+  duration = levelduration + 2*rampduration;
+
+  printf ("OPTOPULSE.C: Start blinking for %.2f s at %.1f Hz with %.1f dutycycle including ramps of %f .\n",
+	duration,frequency,dutycycle,rampduration) ;
 
   pinMode (0, OUTPUT) ;         // aka BCM_GPIO pin 17
 
-  for (i=0;i<round(frequency*duration);i++)
+
+  // ramp up
+  for (i=0;i<n_cycles_during_ramp;i++)
   {
-    digitalWrite (0, 1) ;       // On
-    usleep (halfpulse-writetime) ;         // us
-    digitalWrite (0, 0) ;       // Off
-    usleep (halfpulse-writetime) ;         // us
+     onduration_us = min_onduration_us + 
+            round( (dutycycle * cycletime_us - min_onduration_us)/n_cycles_during_ramp) * i;
+     offduration_us = cycletime_us - onduration_us;
+     digitalWrite (0, 1) ; // On
+     usleep (onduration_us - writetime_us) ; 
+     digitalWrite (0, 0) ; // Off
+     usleep (offduration_us - writetime_us) ;  
   }
 
-  digitalWrite (0, 0) ;       // Off (added for duration = 0)
-  printf ("OPTOSPULSE.C: Stopped blinking.\n") ;
+  // level
+  onduration_us = round(dutycycle * cycletime_us); 
+  offduration_us = cycletime_us - onduration_us;
+  for (i=0;i<n_cycles_during_level;i++)
+  {
+    digitalWrite (0, 1) ; // On
+    usleep (onduration_us - writetime_us) ; 
+    digitalWrite (0, 0) ; // Off
+    usleep (offduration_us - writetime_us) ;  
+  }
 
+  // ramp down
+  for (i=n_cycles_during_ramp-1;i>=0;i--)
+  {
+     onduration_us = min_onduration_us + 
+            round( (dutycycle * cycletime_us - min_onduration_us)/n_cycles_during_ramp) * i;
+     offduration_us = cycletime_us - onduration_us;
+     digitalWrite (0, 1) ; // On
+     usleep (onduration_us - writetime_us) ; 
+     digitalWrite (0, 0) ; // Off
+     usleep (offduration_us - writetime_us) ;  
+  }
+
+
+  digitalWrite (0, 0) ;       // Off (added for duration = 0)
+  printf ("OPTOPULSE.C: Stopped blinking.\n") ;
   return 0 ;
 }
 
