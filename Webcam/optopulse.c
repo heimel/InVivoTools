@@ -74,9 +74,9 @@ int main (int argc, char *argv[])
   return 0 ;
 }
 
-int zerofrequency( float duration);
+int zerofrequency( float duration)
 {
-  printf ("OPTOPULSE.C: On for %.2f s. Not pulsing. Not ramping.\n");
+  printf ("OPTOPULSE.C: On for %.2f s. Not pulsing. Not ramping.\n",duration);
   
   digitalWrite (0, 1) ; // On
   usleep ( round(duration*1000000) ) ; 
