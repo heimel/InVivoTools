@@ -96,7 +96,7 @@ int nonzerofrequency( float duration, float frequency, float dutycycle, float ra
   int offduration_us; //  time pulse off
   int n_cycles_during_ramp; 
   int n_cycles_during_level;
-  time_t starttime;
+  struct timespec starttime, curtime;
 
   // rounding all input parameters to integer number of cycles
   cycletime_us = round(1000000./frequency);
@@ -111,8 +111,10 @@ int nonzerofrequency( float duration, float frequency, float dutycycle, float ra
   printf ("OPTOPULSE.C: Start blinking for %.2f s at %.1f Hz with %.1f dutycycle including ramps of %f .\n",
 	duration,frequency,dutycycle,rampduration) ;
 
+  clock_gettime(CLOCK_MONOTONIC,&starttime);
+
   if (VERBOSE){
-    time(&starttime);
+    printf("OPTOPULSE.C: Verbose mode on.\n");
   }
 
   // ramp up
@@ -123,22 +125,43 @@ int nonzerofrequency( float duration, float frequency, float dutycycle, float ra
      offduration_us = cycletime_us - onduration_us;
      digitalWrite (0, 1) ; // On
      if (VERBOSE){
-        printf("%lf,1",time(NULL)-starttime);
+        clock_gettime(CLOCK_MONOTONIC,&curtime);
+        printf("%f,1\n",(curtime.tv_sec-starttime.tv_sec) + 
+                (curtime.tv_nsec - starttime.tv_nsec)*1e-9);
      }
      usleep (onduration_us - writetime_us) ; 
-     digitalWrite (0, 0) ; // Off
-     usleep (offduration_us - writetime_us) ;  
+     if (offduration_us>writetime_us){
+       digitalWrite (0, 0) ; // Off
+       if (VERBOSE){
+          clock_gettime(CLOCK_MONOTONIC,&curtime);
+          printf("%f,0\n",(curtime.tv_sec-starttime.tv_sec) + 
+                (curtime.tv_nsec - starttime.tv_nsec)*1e-9);
+       }
+       usleep (offduration_us - writetime_us) ;
+     }
   }
 
   // level
   onduration_us = round(dutycycle * cycletime_us); 
   offduration_us = cycletime_us - onduration_us;
-  for (i=0;i<n_cycles_during_level;i++)
-  {
+
+  for (i=0;i<n_cycles_during_level;i++) {
     digitalWrite (0, 1) ; // On
-    usleep (onduration_us - writetime_us) ; 
-    digitalWrite (0, 0) ; // Off
-    usleep (offduration_us - writetime_us) ;  
+     if (VERBOSE){
+        clock_gettime(CLOCK_MONOTONIC,&curtime);
+        printf("%f,1\n",(curtime.tv_sec-starttime.tv_sec) + 
+                (curtime.tv_nsec - starttime.tv_nsec)*1e-9);
+     }
+    usleep (onduration_us - writetime_us); 
+    if (offduration_us>writetime_us){
+      digitalWrite (0, 0) ; // Off
+       if (VERBOSE){
+          clock_gettime(CLOCK_MONOTONIC,&curtime);
+          printf("%f,0\n",(curtime.tv_sec-starttime.tv_sec) + 
+                (curtime.tv_nsec - starttime.tv_nsec)*1e-9);
+       }
+      usleep (offduration_us - writetime_us);
+    }
   }
 
   // ramp down
@@ -148,10 +171,27 @@ int nonzerofrequency( float duration, float frequency, float dutycycle, float ra
             round( (dutycycle * cycletime_us - min_onduration_us)/n_cycles_during_ramp) * i;
      offduration_us = cycletime_us - onduration_us;
      digitalWrite (0, 1) ; // On
+     if (VERBOSE){
+        clock_gettime(CLOCK_MONOTONIC,&curtime);
+        printf("%f,1\n",(curtime.tv_sec-starttime.tv_sec) + 
+                (curtime.tv_nsec - starttime.tv_nsec)*1e-9);
+     }
      usleep (onduration_us - writetime_us) ; 
-     digitalWrite (0, 0) ; // Off
-     usleep (offduration_us - writetime_us) ;  
+     if (offduration_us>writetime_us){
+       digitalWrite (0, 0) ; // Off
+       if (VERBOSE){
+          clock_gettime(CLOCK_MONOTONIC,&curtime);
+          printf("%f,0\n",(curtime.tv_sec-starttime.tv_sec) + 
+                (curtime.tv_nsec - starttime.tv_nsec)*1e-9);
+       }
+       usleep (offduration_us - writetime_us) ;
+     }
   }
+
+  clock_gettime(CLOCK_MONOTONIC,&curtime);
+  printf("OPTOPULSE.C: Finished after %.3f s.\n",
+       (curtime.tv_sec-starttime.tv_sec) + 
+       (curtime.tv_nsec - starttime.tv_nsec)*1e-9);
 
 
   return 0;
