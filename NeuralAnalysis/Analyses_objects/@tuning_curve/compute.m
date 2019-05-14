@@ -72,6 +72,8 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
             df = 1/60; % hard coded 60 Hz monitor framerate
         end
         dp = struct(getdisplayprefs(get(I.st(1).stimscript,j)));
+
+        
         if length(I.st(1).mti{stimlist(1)}.frameTimes)>1
             Cinterval(s,:) = ...
                 [0 I.st(1).mti{stimlist(1)}.frameTimes(end)-I.st(1).mti{stimlist(1)}.frameTimes(1)+df];
@@ -95,9 +97,17 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
         else % if only one stim, really shouldn't happen
             interval(s,:) = Cinterval(s,:);
         end
+        
+        if processparams.post_window(2)<Inf
+            logmsg('FOR KOEN: Should not change computation, only showing');
+            interval( interval(:,2)<processparams.post_window(2),2) = processparams.post_window(2);
+        end
+        
         s = s + 1;
     end % j
 end % i
+
+
 
 sint = [ min(interval(:,1)) max(interval(:,2)) ];
 if pre==0 && pst>0  %BGposttime used

@@ -52,6 +52,12 @@ for i = 1:length(triggers)
     par = struct('res',0.01,'showrast',0,'interp',3,'drawspont',1,...
         'int_meth',0,'interval',[0 0]);
     
+    if processparams.post_window(2)<Inf
+        logmsg('For Koen')
+        par.interval = [0 processparams.post_window(2)];
+        par.int_meth = 1;
+    end
+    
     if verbose  % dont show for more than 5 cells
         where.figure=figure;
         where.rect=[0 0 1 1];
