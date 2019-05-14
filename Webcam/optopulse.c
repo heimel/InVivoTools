@@ -13,12 +13,14 @@
  *
  * to compile: gcc -o optopulse optopulse.c -lwiringPi -lm
  */
+#define VERBOSE 1
 
 #include <stdio.h> // for printf
 #include <wiringPi.h>
 #include <math.h> // for round
 #include <unistd.h> // for usleep
 #include <stdlib.h> // for atof
+#include <time.h> // for time
 
 
 int nonzerofrequency( float duration, float frequency, float dutycycle, float rampduration);
@@ -94,6 +96,7 @@ int nonzerofrequency( float duration, float frequency, float dutycycle, float ra
   int offduration_us; //  time pulse off
   int n_cycles_during_ramp; 
   int n_cycles_during_level;
+  time_t starttime;
 
   // rounding all input parameters to integer number of cycles
   cycletime_us = round(1000000./frequency);
@@ -108,6 +111,10 @@ int nonzerofrequency( float duration, float frequency, float dutycycle, float ra
   printf ("OPTOPULSE.C: Start blinking for %.2f s at %.1f Hz with %.1f dutycycle including ramps of %f .\n",
 	duration,frequency,dutycycle,rampduration) ;
 
+  if (VERBOSE){
+    time(&starttime);
+  }
+
   // ramp up
   for (i=0;i<n_cycles_during_ramp;i++)
   {
@@ -115,6 +122,9 @@ int nonzerofrequency( float duration, float frequency, float dutycycle, float ra
             round( (dutycycle * cycletime_us - min_onduration_us)/n_cycles_during_ramp) * i;
      offduration_us = cycletime_us - onduration_us;
      digitalWrite (0, 1) ; // On
+     if (VERBOSE){
+        printf("%lf,1",time(NULL)-starttime);
+     }
      usleep (onduration_us - writetime_us) ; 
      digitalWrite (0, 0) ; // Off
      usleep (offduration_us - writetime_us) ;  
