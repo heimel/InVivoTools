@@ -25,16 +25,26 @@ record.hemisphere = '';
 record.scale = 8;
 record.experimenter = 'ninad';
 
-% record = analyse_oitestrecord(record);
-% results_oitestrecord(record);
+
+analysispath=fullfile(datapath,'analysis');
+rorfile = fullfile(analysispath,record.rorfile);
+if ~exist(rorfile,'file') % draw ROR
+    record = analyse_oitestrecord(record);
+    results_oitestrecord(record);
+end
 
 n_blocks = 2;
 n_rows = 3;
 n_cols = 5;
+rornorm  = true; % normalize by Region of Reference (ROR)
+baseline_frames = 1:9; % frames to use for baseline
+response_frames = 10:80; % frames to use for response
+filterwidth = 4; % pixels
+
 
 if ~exist('orgdata','var') || isempty(orgdata)
     orgdata = zeros(408,300,80,n_blocks,n_rows*7);
-
+    
     b = 1;
     record.blocks = 15;
     orgdata(:,:,:,b,1:7) = oi_read_all_data(record);
@@ -66,15 +76,10 @@ analysispath=fullfile(datapath,'analysis');
 rorfile = fullfile(analysispath,record.rorfile);
 ror = double(imread(rorfile));
 
-
 % load ROI
 roifile = fullfile(analysispath,record.roifile);
 roi = double(imread(roifile));
 
-rornorm  = true; % normalize by Region of Reference (ROR)
-baseline_frames = 1:9;
-response_frames = 10:80; % frames to use for response
-filterwidth = 4; % pixels
 
 data = orgdata;
 if rornorm
