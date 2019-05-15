@@ -1,5 +1,5 @@
 function [h,wtaimg]=plotwta(data,stimlist,blank_stim,colortab_0,maskinds,maskcoltab_0,...
-maskcoltab_1,record,cmap)
+    maskcoltab_1,record,cmap)
 
 % PLOTWTA - Plots winner-take-all plot of intrinsic imaging data
 %
@@ -37,13 +37,10 @@ end
 if nargin<3
     blank_stim = [];
 end
-if nargin<2
-    stimlist = [];
-end
-if isempty(stimlist)
+if nargin<2 || isempty(stimlist)
     stimlist = 1:size(data,3);
 end
-    
+
 if isempty(cmap)
     cmap = retinotopy_colormap(length(stimlist),1);
 end
@@ -56,15 +53,15 @@ if equalize_area
 else
     max_count = 1;
 end
-   
-count = 1; 
+
+count = 1;
 while count<=max_count % equalizing area
     max_img = data(:,:,stimlist(1));
     for i=stimlist
         maxinds = find( max_img>=data(:,:,i) );
         data__ = data(:,:,i);
         max_img(maxinds) = data__(maxinds);
-    end;
+    end
     max_inds = zeros(size(data(:,:,1)));
     
     for i=stimlist
@@ -86,25 +83,23 @@ end
 
 
 if isempty(blank_stim)
-  wtaimg = double(data(:,:,1));
+    wtaimg = double(data(:,:,1));
 else
-  wtaimg = double(data(:,:,blank_stim));
+    wtaimg = double(data(:,:,blank_stim));
 end
-  
-  wtaimg = wtaimg-min(min(wtaimg));
+
+wtaimg = wtaimg-min(min(wtaimg));
 wtaimg = (maskcoltab_1-maskcoltab_0)*wtaimg/max(max(wtaimg))+maskcoltab_0;
 img0 = wtaimg;
 
 for i=stimlist
-  wtaimg(max_inds==i) = colortab_0 + i;
-end;
+    wtaimg(max_inds==i) = colortab_0 + i;
+end
 
 % to make bloodvessel mask gray
 if 0
-  wtaimg(find(maskinds)) = img0(find(maskinds));
+    wtaimg(find(maskinds)) = img0(find(maskinds));
 end
-
-
 
 % show with intensity based on maximum
 maximg=maxintensity(-data(:,:,1:end));
@@ -115,24 +110,22 @@ mask(maskinds)=maximg(maskinds);
 % multiply with light strength for blank stimulus
 %maximg=maximg.*(data(:,:,blank_stim)-min(min(data(:,:,blank_stim))));
 
-maximg=clip(maximg,nanmedian(maximg(:)),3*nanstd(maximg(:)));
+maximg = clip(maximg,nanmedian(maximg(:)),3*nanstd(maximg(:)));
 %maximg(find(maximg==max(maximg(:))))=min(maximg(:));
-h=image_intensity(wtaimg',maximg',cmap);
-
+h = image_intensity(wtaimg',maximg',cmap);
 
 % show with intensity based on difference of maximum and mean
 % this is not very good, because it will create boundaries between good
 % response zones
 if 0   % changed to zero 2006-10-20
-  %figure;
-  maximg=maxintensity(-data(:,:,2:end));
-  meanimg=mean(-data(:,:,2:end),3);
-  intensity=maximg-meanimg;
-  intensity=clip(intensity);
-  image_intensity(wtaimg',intensity',retinotopy_colors);
-  axis equal off;
+    %figure;
+    maximg=maxintensity(-data(:,:,2:end));
+    meanimg=mean(-data(:,:,2:end),3);
+    intensity=maximg-meanimg;
+    intensity=clip(intensity);
+    image_intensity(wtaimg',intensity',retinotopy_colors);
+    axis equal off;
 end
-
 
 % if 1 % no intensity scaling
 %     figure;
