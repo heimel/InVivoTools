@@ -1,5 +1,9 @@
-% add in processparams_local.m
-% params.oidatapath_localroot = 'E:\Dropbox (NIN)\Desktop\Ninad';
+%ANALYSENINAD
+%
+% 2019, Alexander Heimel
+
+logmsg('Add data folder to processparams_local.m');
+logmsg('as e.g. params.oidatapath_localroot = ''E:\Dropbox (NIN)\Desktop\Ninad'';');
 
 record.mouse = '';
 record.test = 'led_E0';
