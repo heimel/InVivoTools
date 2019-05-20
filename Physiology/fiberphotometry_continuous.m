@@ -6,14 +6,17 @@ function record = fiberphotometry_continuous( record)
 % 2019, Alexander Heimel
 
 if nargin<1 || isempty(record)
-    record.mouse = 'test';
+    
+    % h = getwctestdbwindow
+    
+    record.mouse = 'GFP_slide';
     record.date = datestr(now,'yyyy-mm-dd');
     record.experiment = '1820.fiberphoto';
     record.setup = 'fiberphoto';
     record.datatype = 'wc';
     record.epoch = 't00001';
     record.experimenter = 'ma';
-    record.comment = 'dlight photometry from SC';
+    record.comment = 'test';
     record.measures = [];
 end
 
@@ -30,7 +33,7 @@ par.timeshift = 0.036; % calibrated on 2019-11-04 for NI USB-6001
 par.voltage_high = 3.3; % V
 par.voltage_low = 0; % V
 par.min_pulsesamples = 1024; % for some NI board
-par.sample_rate = 100; % Hz
+par.sample_rate = 400; % Hz
 
 triggerpulse = par.voltage_low * ones(5000,1);
 triggerpulse(1:round(par.sample_rate *0.1),1) = par.voltage_high; % trigger up samples
@@ -123,6 +126,12 @@ plot(time,smoothen(data(:,1),5)); % plot fiber data
 xlabel('Time (s)');
 ylabel('Voltage')
 
+ind = find(isnan(data(:,1)),1,'first');
+
+figure;
+pwelch(data(1:min([ind-1 10000 end]),1),[],[],[],par.sample_rate)
+
+
 function queuedata(src,event) %#ok<INUSD>
 persistent data
 
@@ -143,6 +152,7 @@ src.queueOutputData(data);
 
 function [outdata,outtime] = plotData(src,event)
 persistent data time counter
+
 
 n_channels = 2;
 
@@ -181,7 +191,19 @@ plot(time,data(:,1)); % plot fiber data
 xlabel('Time (s)');
 ylabel('Voltage')
 
-%ylim([0.5 1]);
+ylim([ 1 3]);
 xlim([max([0 time(counter-1)-2]) time(counter-1)]);
 
+
+function h = getwctestdbwindow
+% gets open testdbwindow
+children = get(0,'children');
+h = [];
+c = 1
+while isempty(h) && c<=length(children)
+    if ~isempty(strfind(get(children(c),'Name'),'Wc database'))
+        h = children(c);
+    end
+    c = c + 1;
+end
 
