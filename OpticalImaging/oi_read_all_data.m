@@ -1,7 +1,7 @@
-function data = oi_read_all_data( record,conditions,frames) 
+function data = oi_read_all_data( record,conditions,frames, verbose) 
 %OI_READ_ALL_DATA
 %
-%  DATA = OI_READ_ALL_DATA( RECORD, CONDITIONS, FRAMES)
+%  DATA = OI_READ_ALL_DATA( RECORD, CONDITIONS, FRAMES,VERBOSE)
 %     DATA  = [X,Y,FRAMES,BLOCK,CONDITIONS]
 %
 %     RECORD is a struct with at least the following fields
@@ -15,8 +15,11 @@ function data = oi_read_all_data( record,conditions,frames)
 %         numbers
 %     FRAMES is a vector with requested frame numbers
 %
-% 2014-2015, Alexander Heimel
+% 2014-2019, Alexander Heimel
 
+if nargin<4 || isempty(verbose)
+    verbose = false;
+end
 if nargin<2
     conditions = [];
 end
@@ -52,6 +55,12 @@ for i=1:length(filenames)
     end
 end
 
+if isempty(experimentlist)
+    logmsg(['No experiment files found for ' recordfilter(record)]);
+    data = [];
+    return
+end
+
 fileinfo = imagefile_info(experimentlist{1}); % assume all files same structure
 if isempty(conditions)
     conditions = 1:fileinfo.n_conditions; 
@@ -72,12 +81,16 @@ for i=1:length(experimentlist)
    end
 end
 
-if 0
-    figure %#ok<UNRCH>
+if verbose
+    figure 
+    maxdata = max(data(:));
+    mindata = min(data(:));
+    logmsg(['Min = ' num2str(mindata) ', Max = ' num2str(maxdata)]);
     for c=1:size(data,5)
         for t=1:size(data,4)
-            subplot(size(data,5),size(data,4),size(data,4)*(c-1)+t);
-            imagesc(data(:,:,end,t,c));
+            subplot(size(data,4),size(data,5),size(data,4)*(t-1)+c);
+            image( ((data(:,:,end,t,c)- mindata)/(maxdata-mindata) )*64);
+            axis image off
         end
     end
 end

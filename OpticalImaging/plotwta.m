@@ -48,13 +48,15 @@ processparams = oiprocessparams(record);
 
 equalize_area = processparams.wta_equalize_area;
 if equalize_area
-    max_count = 100;
+    max_count = processparams.wta_max_equalizing_steps;
     logmsg('Equalizing area');
 else
     max_count = 1;
 end
 
 count = 1;
+equalizing_factors = ones(length(stimlist),1);
+area_condition = zeros(length(stimlist),1);
 while count<=max_count % equalizing area
     max_img = data(:,:,stimlist(1));
     for i=stimlist
@@ -71,14 +73,28 @@ while count<=max_count % equalizing area
         ind = intersect(ind,maskinds);
         area_condition(i) = length(ind);
     end
-    
-    [~,max_area] = max(area_condition);
     if max_count>1
-        data(:,:,max_area) =  data(:,:,max_area)*.95;
+        switch  processparams.wta_equalizing
+            case 'max'
+                
+                [~,ind_area] = max(area_condition);
+                equalizing_factors(ind_area) = equalizing_factors(ind_area) * processparams.wta_equalizing_factor;
+                data(:,:,ind_area) =  data(:,:,ind_area)*processparams.wta_equalizing_factor;
+            case 'min'
+                [~,ind_area] = min(area_condition);
+                equalizing_factors(ind_area) = equalizing_factors(ind_area) / processparams.wta_equalizing_factor;
+                data(:,:,ind_area) =  data(:,:,ind_area)/processparams.wta_equalizing_factor;
+        end
     end
-    %logmsg(['Adjusting response of condition ' num2str(max_area)]);
+    
+    if any(equalizing_factors<0.1)
+        break
+    end
+    
+    logmsg(['Step' num2str(count) 'Adjusting response of condition ' num2str(ind_area)]);
     count = count+1;
 end
+logmsg(['Equalizing factors: ' mat2str(equalizing_factors',2)]);
 
 
 
@@ -102,16 +118,13 @@ if 0
 end
 
 % show with intensity based on maximum
-maximg=maxintensity(-data(:,:,1:end));
+maximg = maxintensity(-data(:,:,1:end));
 
-mask=zeros(size(maximg));
-mask(maskinds)=maximg(maskinds);
-
-% multiply with light strength for blank stimulus
-%maximg=maximg.*(data(:,:,blank_stim)-min(min(data(:,:,blank_stim))));
+mask = zeros(size(maximg));
+mask(maskinds) = maximg(maskinds);
 
 maximg = clip(maximg,nanmedian(maximg(:)),3*nanstd(maximg(:)));
-%maximg(find(maximg==max(maximg(:))))=min(maximg(:));
+
 h = image_intensity(wtaimg',maximg',cmap);
 
 % show with intensity based on difference of maximum and mean
