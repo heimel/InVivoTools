@@ -13,26 +13,23 @@ function [h,wtaimg]=plotwta(data,stimlist,blank_stim,colortab_0,maskinds,maskcol
 %  XxYxNUMSTIM matrix of imaging data.
 %
 %  Example: h=plotwta(avg_data,2:8,1,256,0,256);
-if nargin<4
-    colortab_0 = 0;
-end
-
-if nargin<6
-    maskcoltab_0 = 0;
-end
-if nargin<7
-    maskcoltab_1 = 0;
-end
-
-if nargin<9
-    cmap = [];
-end
+%
+% 200X-2019 Alexander Heimel
 
 if nargin<8
     record = [];
 end
+if nargin<7 || isempty(maskcoltab_1)
+    maskcoltab_1 = 0;
+end
+if nargin<6 || isempty(maskcoltab_0)
+    maskcoltab_0 = 0;
+end
 if nargin<5
     maskinds = [];
+end
+if nargin<4 || isempty(colortab_0)
+    colortab_0 = 0;
 end
 if nargin<3
     blank_stim = [];
@@ -40,19 +37,19 @@ end
 if nargin<2 || isempty(stimlist)
     stimlist = 1:size(data,3);
 end
-
-if isempty(cmap)
+if nargin<9 || isempty(cmap)
     cmap = retinotopy_colormap(length(stimlist),1);
 end
 processparams = oiprocessparams(record);
 
-equalize_area = processparams.wta_equalize_area;
-if equalize_area
+if processparams.wta_equalize_area
     max_count = processparams.wta_max_equalizing_steps;
     logmsg('Equalizing area');
 else
     max_count = 1;
 end
+
+orgdata = data; % for original intensity scaling
 
 count = 1;
 equalizing_factors = ones(length(stimlist),1);
@@ -65,7 +62,6 @@ while count<=max_count % equalizing area
         max_img(maxinds) = data__(maxinds);
     end
     max_inds = zeros(size(data(:,:,1)));
-    
     for i=stimlist
         ind = find(max_img==data(:,:,i));
         max_inds(ind) = i;
@@ -76,7 +72,6 @@ while count<=max_count % equalizing area
     if max_count>1
         switch  processparams.wta_equalizing
             case 'max'
-                
                 [~,ind_area] = max(area_condition);
                 equalizing_factors(ind_area) = equalizing_factors(ind_area) * processparams.wta_equalizing_factor;
                 data(:,:,ind_area) =  data(:,:,ind_area)*processparams.wta_equalizing_factor;
@@ -91,12 +86,13 @@ while count<=max_count % equalizing area
         break
     end
     
-    logmsg(['Step' num2str(count) 'Adjusting response of condition ' num2str(ind_area)]);
+    % logmsg(['Step' num2str(count) 'Adjusting response of condition ' num2str(ind_area)]);
     count = count+1;
 end
-logmsg(['Equalizing factors: ' mat2str(equalizing_factors',2)]);
-
-
+if processparams.wta_equalize_area
+    logmsg(['Equalizing steps: ' num2str(count)]);
+    logmsg(['Equalizing factors: ' mat2str(equalizing_factors',2)]);
+end
 
 if isempty(blank_stim)
     wtaimg = double(data(:,:,1));
@@ -118,7 +114,8 @@ if 0
 end
 
 % show with intensity based on maximum
-maximg = maxintensity(-data(:,:,1:end));
+%maximg = maxintensity(-data(:,:,1:end));
+maximg = maxintensity(-orgdata(:,:,1:end));
 
 mask = zeros(size(maximg));
 mask(maskinds) = maximg(maskinds);
@@ -140,8 +137,3 @@ if 0   % changed to zero 2006-10-20
     axis equal off;
 end
 
-% if 1 % no intensity scaling
-%     figure;
-%     img=image(wtaimg'); axis equal off;
-%     colormap(cmap);
-% end

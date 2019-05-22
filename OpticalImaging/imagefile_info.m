@@ -39,11 +39,11 @@ fid = fopen(fname,'r');
 if fid==-1
     logmsg(['Could not open ' fname '.']);
     % see if copy exists
-    ind = findstr(fname,'BLK');
+    ind = strfind(fname,'BLK');
     if ~isempty(ind)
         fname(ind:ind+2)='HDR';
         fid = fopen(fname,'r');
-        info.headeronly=1;
+        info.headeronly = 1;
     else
         info.headeronly=0;
     end
@@ -53,15 +53,14 @@ if fid==-1
         logmsg(['Reading header file ' fname ' instead.']);
     end
 else
-    ind = findstr(fname,'BLK');
-    if ~isempty(ind)
-        info.headeronly=0;
+    if contains(fname,'BLK')
+        info.headeronly = 0;
     else
-        info.headeronly=[];
+        info.headeronly = [];
     end
 end
 
-[header, count] = fread(fid,429,'int32');
+header = fread(fid,429,'int32');
 
 info.name=fname;
 info.filesize=header(1);
@@ -120,9 +119,9 @@ info.date(end-2:end+1) = num2str(eval(info.date(end-2:end))+1900)';
 info.n_conditions = header(49); % guess
 
 % specifics for levelt lab:
-ind_imager = [929 954 973 974 975 976 977 978];
+ind_imager = [929 954 973 974 975 976 977 978]; %#ok<NASGU>
 
-old_imager  = [15   0 162 81 33  66 180 6 ];  % telix camera on daneel
+old_imager  = [15   0 162 81 33  66 180 6 ];  %#ok<NASGU> % telix camera on daneel
 
 % .. camera on andrew
 new_imager  = [30 106   0  0 160 65  0  0]; % andrew
@@ -145,9 +144,9 @@ info.framerate = info.camera_framerate / info.cameraframes_per_frame;
 info.frameduration = 1/ info.framerate;
 
 % make copy of the header
-ind = findstr(fname,'BLK');
+ind = strfind(fname,'BLK');
 if ~isempty(ind)
-    fname(ind:ind+2)='HDR';
+    fname(ind:ind+2) = 'HDR';
     fid = fopen(fname,'w');
     if fid~=-1 % dont bother if I cant open it
         fwrite(fid,header32,'uint32');

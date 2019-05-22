@@ -39,7 +39,7 @@ if isempty(fileinfo)
 end
 
 
-h.figure=figure('Name',tit,'NumberTitle','off');
+h.figure=figure('Name',tit,'NumberTitle','off','WindowStyle','normal');
 set(h.figure,'PaperType','a4');
 pos=get(h.figure,'position');
 h_ed=get_fighandle('OI database*');

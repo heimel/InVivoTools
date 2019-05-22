@@ -1,171 +1,110 @@
 %ANALYSENINAD
 %
 % 2019, Alexander Heimel
-
 logmsg('Add data folder to processparams_local.m');
 logmsg('as e.g. params.oidatapath_localroot = ''E:\Dropbox (NIN)\Desktop\Ninad'';');
+
+
+mouse = 'ninad2';
+verbose = false;
+rornorm  = true; % normalize by Region of Reference (ROR)
+filterwidth = 6; % pixels
 
 dbname = fullfile(getdesktopfolder,'testdb_pracownia.mat');
 if ~exist(dbname,'file')
     dbname = 'E:\Dropbox (NIN)\Desktop\Ninad\testdb_pracownia.mat';
 end
-load(dbname);
-if exist('db','var')
-    record = db(1);
+
+if exist(dbname,'file')
+    load(dbname);
 else
-record.mouse = '';
-record.test = 'led_E0';
-record.blocks = 15;
-record.datatype = 'oi';
-record.setup = 'ninad';
-record.date = '2018-09-30';
-record.stim_type = 'retinotopy';
-record.comment = '';
-record.imagefile = '';
-record.roifile = 'led_E0_roi_c1.png';
-record.rorfile = 'led_E0_ror_c1.png';
-record.stim_onset = 10;
-record.stim_offset = 80;
-record.stim_parameters = [1 7];
-record.ref_image = '';
-record.response = [];
-record.hemisphere = '';
-record.scale = 8;
-record.experimenter = 'ninad';
+    db.mouse = '';
+    db.test = 'led_E0';
+    db.blocks = 15;
+    db.datatype = 'oi';
+    db.setup = 'ninad';
+    db.date = '2018-09-30';
+    db.stim_type = 'retinotopy';
+    db.comment = '';
+    db.imagefile = '';
+    db.roifile = 'led_E0_roi_c1.png';
+    db.rorfile = 'led_E0_ror_c1.png';
+    db.stim_onset = 10;
+    db.stim_offset = 80;
+    db.stim_parameters = [1 7];
+    db.ref_image = '';
+    db.response = [];
+    db.hemisphere = '';
+    db.scale = 8;
+    db.experimenter = 'ninad';
 end
 
+ind_db = find_record(db,'mouse=ninad2');
+orgdata = cell(length(ind_db),1);
+roi = cell(length(ind_db),1);
 
-record.test = 'mouse5_r1';
-record.blocks = 13;
-
-
-datapath=experimentpath( record);
-analysispath=fullfile(datapath,'analysis');
-rorfile = fullfile(analysispath,record.rorfile);
-if ~exist(rorfile,'file') % draw ROR
-    logmsg('Analzying for redrawing ROR')
-    record.roifile = '';
-    record.rorfile = '';
-    record = analyse_oitestrecord(record);
-    results_oitestrecord(record);
-end
-
-n_rows = 3;
-n_cols = 5;
-rornorm  = false; % normalize by Region of Reference (ROR)
-baseline_frames = 1:9; % frames to use for baseline
-response_frames = 10:80; % frames to use for response
-filterwidth = 4; % pixels
-
-orgdata = [];
-n_blocks = 2;
-
-verbose = false;
-if ~exist('orgdata','var') || isempty(orgdata)
-    logmsg('Loading data');
-    orgdata = zeros(408,300,80,n_blocks,n_rows*7);
+for i = 1:length(ind_db)
+    record = db(ind_db(i));
     
-    % row 1
-    record.test = 'mouse5_r1';
-    record.blocks = 13;
-    orgdata(:,:,:,1,1:7) = oi_read_all_data(record,[],[],verbose);
-
-    record.test = 'mouse5_r1';
-    record.blocks = 14;
-    orgdata(:,:,:,2,1:7) = oi_read_all_data(record,[],[],verbose);
+    [orgdata{i}, fileinfo, experimentlist] = oi_read_all_data( record,[],[],verbose);
     
-    % row 2
-    record.test = 'mouse5_r2';
-    record.blocks = 17;
-    orgdata(:,:,:,1,8:14) = oi_read_all_data(record,[],[],verbose);
-
-    record.test = 'mouse5_r2';
-    record.blocks = 18;
-    orgdata(:,:,:,2,8:14) = oi_read_all_data(record,[],[],verbose);
-        
-    % row 3
-    record.test = 'mouse5_r3';
-    record.blocks = 15;
-    orgdata(:,:,:,1,15:21) = oi_read_all_data(record,[],[],verbose);
-
-    record.test = 'mouse5_r3';
-    record.blocks = 19;
-    orgdata(:,:,:,2,15:21) = oi_read_all_data(record,[],[],verbose);
-        
+    
+    firststimframe = ceil(record.stim_onset/fileinfo.frameduration);
+    laststimframe = ceil(record.stim_offset/fileinfo.frameduration);
+    
+    baseline_frames = 1:(firststimframe-1); % frames to use for baseline
+    response_frames = firststimframe:laststimframe; % frames to use for response
+    
     
     % select stimulus conditions (exclude blanks)
-    orgdata = orgdata(:,:,:,:,[2:6 9:13 16:20]);
-end
-
-% selecting first block only
-%orgdata = orgdata(:,:,:,2,:);
-
-% load ROR
-datapath=experimentpath( record);
-analysispath=fullfile(datapath,'analysis');
-rorfile = fullfile(analysispath,record.rorfile);
-logmsg(['Loading ROR: ' rorfile]);
-ror = double(imread(rorfile));
-
-% load ROI
-roifile = fullfile(analysispath,record.roifile);
-logmsg(['Loading ROI: ' roifile]);
-roi = double(imread(roifile));
-
-
-data = orgdata;
-if rornorm
-    logmsg('Normalizing by region of reference'); %#ok<*UNRCH>
+    orgdata{i} = orgdata{i}(:,:,:,:,2:6);
+    
+    % load ROR
+    datapath = experimentpath( record);
+    analysispath = fullfile(datapath,'analysis');
+    rorfile = fullfile(analysispath,record.rorfile);
+    if ~exist(rorfile,'file') % draw ROR
+        logmsg('No ROR. Reanalzying for redrawing ROR')
+        record.rorfile = '';
+        record = analyse_oitestrecord(record);
+    end
+    logmsg(['Loading ROR: ' rorfile]);
+    ror = double(imread(rorfile));
     rort = ror'/sum(ror(:));
+    
+    % load ROI
+    roifile = fullfile(analysispath,record.roifile);
+    logmsg(['Loading ROI: ' roifile]);
+    roi{i} = double(imread(roifile));
+    
+    data = orgdata{i};
+    % normalizing
     for b=1:size(data,4)
         for c=1:size(data,5)
-            baseimg = mean(orgdata(:,:,baseline_frames,b,c),3);
-            for f=1:size(data,3)
-                %  data(:,:,f,1,c) = orgdata(:,:,f,1,c) - orgdata(:,:,9,1,c);
-                data(:,:,f,b,c) = orgdata(:,:,f,b,c)./baseimg;
-                data(:,:,f,b,c)=...
-                    data(:,:,f,b,c)/sum(sum(rort .* data(:,:,f,b,c))) -1 ;
+            baseimg = mean(orgdata{i}(:,:,baseline_frames,b,c),3);
+            if rornorm % subtract baseline 
+                for f=1:size(data,3)
+                    data(:,:,f,b,c) = orgdata{i}(:,:,f,b,c)./baseimg;
+                    data(:,:,f,b,c)=...
+                        data(:,:,f,b,c)/sum(sum(rort .* data(:,:,f,b,c))) -1 ;
+                end
+            else % subtracting baseline
+                for f=1:size(data,3)
+                    data(:,:,f,b,c) = orgdata{i}(:,:,f,b,c)- baseimg;
+                end
             end
         end
     end
+    
+    avgresponse{i} = squeeze(mean(mean(data(:,:,response_frames,:,:),3),4));
+    
+end %record i
+
+n_conditions =  size(avgresponse{1},3) * length(avgresponse);
+avg = zeros( size(avgresponse{1},1),  size(avgresponse{1},2), n_conditions);
+for i = 1:length(avgresponse)
+    avg(:,:,(i-1)*size(avgresponse{1},3) + (1:size(avgresponse{1},3)) ) = avgresponse{i};
 end
-
-avgresponse = squeeze(mean(mean(data(:,:,response_frames,:,:),3),4));
-
-if 0 % show raw average data
-    figure;
-    for y=1:n_rows
-        for x=1:n_cols
-            cond = (y-1)*n_cols+x;
-            subplot(n_rows,n_cols,cond);
-            imagesc( avgresponse(:,:,cond) );
-            colorbar
-            axis image off
-        end
-    end
-end
-
-
-% show raw data normalized to same factors
-avgmax = max(avgresponse(:));
-avgmin = min(avgresponse(:));
-figure;
-for y=1:n_rows
-    for x=1:n_cols
-        cond = (y-1)*n_cols+x;
-        subplot(n_rows,n_cols,cond);
-        image( (avgresponse(:,:,cond)-avgmin)/(avgmax - avgmin) *64);
-    end
-end
-
-if ~rornorm
-    baseline_frames = 1:9;
-    avgbaseline = squeeze(mean(mean(data(:,:,baseline_frames,:,:),3),4));
-    avg = avgresponse - avgbaseline ;
-else
-    avg = avgresponse;
-end
-
 
 % show normalized data normalized to same factors
 avgmax = max(avg(:));
@@ -180,33 +119,44 @@ for y=1:n_rows
     end
 end
 
-
-
+% might be better to filter earlier
 avg = spatialfilter(avg,filterwidth,'pixel' );
 
 onlinemaps(avg,[],[],[],record);
 
-figure('Name','Colormap');
+h = figure('Name','Colormap');
 rc = retinotopy_colormap(n_cols,n_rows);
 image( [1:5;6:10;11:15]);
 colormap(rc);axis image off
+saveas(h,fullfile(analysispath,'colormap.png'));
 
-h = plotwta(avg,1:n_rows*n_cols,[],0,find(roi'),5,256,record,rc);
+
+ jointroi = roi{1};
+ for i=2:length(roi)
+     jointroi = jointroi | roi{i};
+ end
+
+ 
+% jointroi = ( spatialfilter( max(-avg,[],3),2,'pixel')  >0.0006)';
+% jointroi = smoothen(jointroi,5)>0.5;
+% figure;imagesc(jointroi);
+
+h = plotwta(avg,1:n_rows*n_cols,[],[],find(jointroi'),5,256,record,rc);
 
 % save WTA
 record.imagefile = [record.test '_wta.png'];
 filename  = fullfile(datapath,'analysis',record.imagefile);
-    children = get(h,'Children');
-                img = get(children(1),'Children');
-                data = get(img,'CData');
-                data = uint8(round(255*data));
-                imwrite(data,filename,'Software', ...
-                    'analyse_record');
+children = get(h,'Children');
+img = get(children(1),'Children');
+data = get(img,'CData');
+data = uint8(round(255*data));
+imwrite(data,filename,'Software', ...
+    'analyse_record');
 logmsg(['Winner-take-all map saved as: ' filename]);
 
-record.test = 'mouse5_r1';
-record.blocks = 13;
+jointroipath = fullfile(analysispath,'jointroi.png'); 
+imwrite(jointroi,jointroipath);
+record.roifile = 'jointroi.png';
 record.stim_parameters = [5 3];
-%record.roifile = '';
 
 results_oitestrecord(record);

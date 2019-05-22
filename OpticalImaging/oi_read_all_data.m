@@ -1,8 +1,10 @@
-function data = oi_read_all_data( record,conditions,frames, verbose) 
+function [data,fileinfo,experimentlist] = oi_read_all_data( record,conditions,frames, verbose) 
 %OI_READ_ALL_DATA
 %
 %  DATA = OI_READ_ALL_DATA( RECORD, CONDITIONS, FRAMES,VERBOSE)
-%     DATA  = [X,Y,FRAMES,BLOCK,CONDITIONS]
+%
+%     DATA(X,Y,FRAMES,BLOCK,CONDITIONS)
+%     FILEINFO contains info from block file
 %
 %     RECORD is a struct with at least the following fields
 %         blocks = a vector of block file numbers to read. If empty, then 
@@ -12,7 +14,8 @@ function data = oi_read_all_data( record,conditions,frames, verbose)
 %         date = imaging data, e.g. '2015-01-22'
 %
 %     CONDITIONS is a vector with the requested condition (stimulus)
-%         numbers
+%         numbers. if CONDITIONS == 0, then only return info, without 
+%         reading the data.
 %     FRAMES is a vector with requested frame numbers
 %
 % 2014-2019, Alexander Heimel
@@ -64,7 +67,13 @@ end
 fileinfo = imagefile_info(experimentlist{1}); % assume all files same structure
 if isempty(conditions)
     conditions = 1:fileinfo.n_conditions; 
+elseif conditions == 0 % only request info
+    data = [];
+    return
 end
+
+
+
 if isempty(frames)
     frames = 1:fileinfo.n_images;
 end

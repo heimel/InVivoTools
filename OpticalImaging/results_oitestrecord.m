@@ -31,9 +31,7 @@ else
     ind_compare_to=[];
 end
 
-% get data and analysispath
 datapath = experimentpath(record);
-analysispath = fullfile(datapath,'analysis');
 
 params = oiprocessparams(record);
 
@@ -42,8 +40,11 @@ params = oiprocessparams(record);
 tests=convert_cst2cell(record.test);
 
 % get image info
-fileinfo=imagefile_info( fullfile(datapath,...
-    [ tests{1} 'B0.BLK']));
+filename = fullfile(datapath,[tests{1} 'B0.BLK']);
+if ~exist(filename,'file') && ~isempty(record.blocks)
+  filename = fullfile(datapath,[tests{1} 'B' num2str(record.blocks(1)) '.BLK']);
+end
+fileinfo=imagefile_info( filename );
 
 switch record.stim_type
     case 'significance'
@@ -174,10 +175,9 @@ switch record.stim_type
         end
         
         % show reference image
-        subplot(3,4,[3 4 7 8 ])
         
-        %try
         if exist(reffname,'file') && ~exist(reffname,'dir')
+            subplot(3,4,[3 4 7 8 ])
             img=imread(reffname,'bmp');
             imgrgb=ind2rgb(img,repmat(linspace(0,1,255)',1,3));
             %img=img+roi_tf_outline;
