@@ -23,8 +23,8 @@ end
 
 optcode = '';
 processed = '';
-if ~isempty( image_processing )
-    if image_processing.unmixing == 1
+if ~isempty(image_processing )
+   if image_processing.unmixing == 1
         optcode = [optcode '_um' ];
         processed = 'processed';
     end
@@ -41,9 +41,9 @@ end
 
 [fmiddle,ext] = tpfilename_setupdependent(record,frame,channel);
 
-
 if ~isempty(record.stack)
     fname = getfname( record,processed,fmiddle,optcode,ext);
+    
 else
     record.stack = 'Live_0000'; % default Fluoview name
     fname = getfname( record,processed,fmiddle,optcode,ext);
@@ -62,6 +62,8 @@ else
 end
 
 
+
+
 function fname = getfname( record,processed,fmiddle,optcode,ext)
 stack = record.stack;
 if strcmpi(stack(end-length(ext)+1:end),ext)
@@ -75,6 +77,9 @@ if ~isempty(processed)
 else
     fname = [ experimentpath( record ) f stack fmiddle optcode ext];
 end
+
+
+
 % fname = fullfile(experimentpath( record ),processed,...
 %     [stack fmiddle optcode ext]);
 

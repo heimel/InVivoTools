@@ -6,6 +6,10 @@ function y=smoothen(x,sigma)
 %
 %  2004, Alexander Heimel
 
+if isnan(sigma)
+    y = x;
+    return
+end
 
 cutoff=ceil(3*sigma);
 

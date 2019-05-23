@@ -46,35 +46,43 @@ if strcmp(normmeth,'subtractframe_ror')
 end
 
 info = imagefile_info(filenames{1}); % assume all files same structure
-if ~isempty(cond),conditions=cond; else conditions=1:info.n_conditions; end;
-if ~isempty(framesuse), frames=framesuse; else frames=1:info.n_images;end;
+if ~isempty(cond)
+    conditions=cond; 
+else
+    conditions=1:info.n_conditions; 
+end
+if ~isempty(framesuse)
+    frames=framesuse; 
+else
+    frames=1:info.n_images;
+end
 
-if strcmp(outmeth,'avgframes'),
+if strcmp(outmeth,'avgframes')
     avg = zeros(floor(info.xsize/compression),...
         floor(info.ysize/compression),...
         length(conditions));
     stddev=avg;
-elseif strcmp(outmeth,'indframes'),
+elseif strcmp(outmeth,'indframes')
     avg = zeros(floor(info.xsize/compression),...
         floor(info.ysize/compression),...
         length(frames),length(conditions));
     stddev=avg;
-end;
+end
 
 for i=1:length(filenames)
     %logmsg(['Working on '  filenames{i} '.']);
-    if strcmp(normmeth,'subtract')||strcmp(normmeth,'divide'),
+    if strcmp(normmeth,'subtract')||strcmp(normmeth,'divide')
         nrm = read_oi_compressed(filenames{i},1+(normflag-1)*info.n_images,...
             info.n_images,1,compression,0);
         nrm = mean(nrm,3);
     end
-    for j=1:length(conditions),
+    for j=1:length(conditions)
         if strcmp(normmeth,'subtractframe')||strcmp(normmeth,'subtractframe_ror')
             block_offset = (conditions(j)-1)*info.n_images+normflag;
             [nrm,fileinfo] = read_oi_compressed(filenames{i},block_offset,1,1,compression,0);
         end
         
-        for k=1:length(frames),
+        for k=1:length(frames)
             block_offset=(conditions(j)-1)*info.n_images+frames(k);
             img=read_oi_compressed(filenames{i},block_offset,1,1,compression,0,fileinfo);
             switch normmeth
@@ -89,24 +97,24 @@ for i=1:length(filenames)
                     img=img/(rort(:)' * img(:)) -1 ;
                 case 'ror'
                     img=img/ (rort(:)' * img(:));
-            end;
-            if strcmp(outmeth,'avgframes'),
+            end
+            if strcmp(outmeth,'avgframes')
                 avg(:,:,j)=avg(:,:,j)+img;
                 stddev(:,:,j)=stddev(:,:,j)+img.*img;
-            elseif strcmp(outmeth,'indframes'),
+            elseif strcmp(outmeth,'indframes')
                 avg(:,:,k,j)=avg(:,:,k,j)+img;
                 stddev(:,:,k,j)=stddev(:,:,k,j)+img.*img;
-            end;
-        end;
-    end;
+            end
+        end
+    end
 end
 logmsg(['Processed until '  filenames{end} '.']);
 
-if strcmp(outmeth,'avgframes'),
+if strcmp(outmeth,'avgframes')
     N = length(frames)*length(filenames);
     avg=avg/N;
     stddev=sqrt((stddev-N*avg.*avg)/(N-1));
-elseif strcmp(outmeth,'indframes'),
+elseif strcmp(outmeth,'indframes')
     N = length(filenames);
     stddev=sqrt((stddev-N*avg.*avg)/(N-1));
     avg=avg/N;

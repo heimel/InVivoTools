@@ -51,6 +51,7 @@ params.compute_f1f0 = false;
 params.rc_interval = [0.0205 0.4205];
 params.rc_timeres = 0.2; % time resolution
 params.rc_gain = 1; % image gain
+params.rc_interactive = false; % interactive reverse correlation figures
 % params.rc_peak_interval_number = 1; % which interval to use for peak computation
 
 %switch protocol

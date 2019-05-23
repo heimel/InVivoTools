@@ -6,7 +6,7 @@ function measures=analyse_sg(inp,n_spikes,record,verbose)
 % n_spikes used for calculating feature mean, should be dropped and spont
 % rate should be used instead for doing RF patch size calculation.
 %
-% 2007-2016 Alexander Heimel
+% 2007-2019 Alexander Heimel
 %
 
 if nargin<4 || isempty(verbose)
@@ -22,7 +22,7 @@ para_stim = getparameters(inp.stimtime(1).stim);
 
 measures.usable=1;
 
-if 0 && verbose % 1 for the RF ON/OFF
+if processparams.rc_interactive && verbose 
     where.figure=figure;
     where.rect=[0 0 1 1];
     where.units='normalized';
@@ -58,12 +58,13 @@ measures.rf = squeeze(max(rcs.reverse_corr.rc_avg(1,:,:,:,end),[],5));
 % find rf center
 if ndims(measures.rf)>2
     rff = squeeze(max(abs(measures.rf - para_rc.feamean),[],1));
+    [m,xy] = max(rff(:));
     maxtimeint_ind = find(abs(measures.rf(:,xy)-para_rc.feamean)==m,1);
 else
     maxtimeint_ind = 1;
     rff = abs(measures.rf - para_rc.feamean);
 end
-[m,xy] = max(rff(:));
+[~,xy] = max(rff(:));
 [x,y,rect]=getgrid(inp.stimtime.stim);
 rfx = ceil(xy/y);
 rfy = rem(xy-1,y)+1;
@@ -137,7 +138,6 @@ if (rf_on+rf_off)==0
     measures.usable = 0;
 end
 
-
 % in the remaining onframes is also used for offframes
 v = getgridvalues(inp.stimtime.stim);
 p.feature = 3;
@@ -166,27 +166,27 @@ switch p.feature
                 onframes = find(f(rfy,rfx,:,1)>0);
         end
 end
-measures.rate_early=sum(bins(1,onframes))/length(onframes)/para_rc.timeres;
-measures.rate_late=sum(bins(end,onframes))/length(onframes)/para_rc.timeres;
+measures.rate_early = sum(bins(1,onframes))/length(onframes)/para_rc.timeres;
+measures.rate_late = sum(bins(end,onframes))/length(onframes)/para_rc.timeres;
 intervals = para_rc.interval(1):para_rc.timeres:para_rc.interval(2);
 measures.rate_intervals = mat2cell( [intervals(1:end-1);intervals(2:end)],2,ones(1,length(intervals)-1));
 
 % compute peristimulus histograms of ON-responses
-onframetimes=inp.stimtime.mti{1}.frameTimes(onframes);
-frameduration=1 / para_stim.fps; % stimulus frameduration in s
-hist_start=-2*frameduration; %used to be 0, 2013-01-20
-hist_end=2*frameduration;
-spiketimes_afterframe=[];
+onframetimes = inp.stimtime.mti{1}.frameTimes(onframes);
+frameduration = 1 / para_stim.fps; % stimulus frameduration in s
+hist_start = -2*frameduration; %used to be 0, 2013-01-20
+hist_end = 2*frameduration;
+spiketimes_afterframe = [];
 % for ROC analysis:
 n_spikes_per_onframe=zeros(1,length(onframetimes));
 for i=1:length(onframetimes)
     try
-        spiketimes_afterthisframe=...
+        spiketimes_afterthisframe = ...
             get_data(inp.spikes,[onframetimes(i)+hist_start onframetimes(i)+hist_end]) - onframetimes(i);
         % for peristimulus histogram:
-        spiketimes_afterframe=[spiketimes_afterframe; spiketimes_afterthisframe]; %#ok<AGROW>
+        spiketimes_afterframe = [spiketimes_afterframe; spiketimes_afterthisframe]; %#ok<AGROW>
         % for ROC analysis and rate change during stimulation
-        n_spikes_per_onframe(i)=length(spiketimes_afterthisframe);
+        n_spikes_per_onframe(i) = length(spiketimes_afterthisframe);
     catch
         % probable only happens for first or last frame
         logmsg(['Data not sampled over entire requested interval around onframe ' num2str(i) ' for ' recordfilter(record)]);
@@ -199,7 +199,7 @@ no_onframetimes=inp.stimtime.mti{1}.frameTimes(...
 n_spikes_per_no_onframe=zeros(length(no_onframetimes),1);
 for i=1:length(onframetimes)
     try
-        spiketimes_afterthisframe=...
+        spiketimes_afterthisframe = ...
             get_data(inp.spikes,[no_onframetimes(i)+hist_start no_onframetimes(i)+hist_end]) - onframetimes(i);
         % for ROC analysis and rate change during stimulation
         n_spikes_per_no_onframe(i)=length(spiketimes_afterthisframe);
@@ -272,35 +272,34 @@ bintimes = (hist_start:binwidth:hist_end);
 psth = smoothen(psth,2);
 psth_before = psth(x<0);
 after_ind = find(x>0);
-spont_mean=mean(psth_before);
+spont_mean = mean(psth_before);
 % is not really spontaneous rate as there were other stimuli on the screen
 % before
-spont_std=std(psth_before);
-onset_threshold=(spont_mean+3*spont_std);
+spont_std = std(psth_before);
+onset_threshold = (spont_mean+3*spont_std);
 
-measures.psth.data=psth;
-measures.psth.tbins=x;
-measures.psth.spont=spont_mean;
-measures.psth.onset_threshold=onset_threshold;
+measures.psth.data = psth;
+measures.psth.tbins = x;
+measures.psth.spont = spont_mean;
+measures.psth.onset_threshold = onset_threshold;
 
 % response onset
-i2=after_ind(find(psth(after_ind) > onset_threshold,1));
+i2 = after_ind(find(psth(after_ind) > onset_threshold,1));
 if isempty(i2)
     logmsg('No response at all.');
     measures.time_onset = NaN;
 else
-    i1=i2-1;
-    rc=(psth(i2)-psth(i1))/(x(i2)-x(i1));
-    measures.time_onset=(onset_threshold - psth(i1) + rc* x(i1))/rc;
+    i1 = i2-1;
+    rc = (psth(i2)-psth(i1))/(x(i2)-x(i1));
+    measures.time_onset = (onset_threshold - psth(i1) + rc* x(i1))/rc;
 end
 
-
 % peaktime
-[m,ind]=max(psth);
+[m,ind] = max(psth);
 
-measures.rate_peak=m;
+measures.rate_peak = m;
 
-spiketimes_around_peak=[];
+spiketimes_around_peak = [];
 for i=1:length(onframetimes)
     try
         spiketimes_around_thispeak=...
@@ -380,7 +379,6 @@ if ~isempty(spikes) && length(spikes)>2 && length(spikes)<100 % added conditions
 else
     measures.rate_change_global=nan;
 end
-
 
 if 0 % OFF-response analysis not finished
     % compute peristimulus histograms of OFF-responses to RF ON center

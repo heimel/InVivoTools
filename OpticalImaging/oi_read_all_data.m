@@ -1,8 +1,10 @@
-function data = oi_read_all_data( record,conditions,frames) 
+function [data,fileinfo,experimentlist] = oi_read_all_data( record,conditions,frames, verbose) 
 %OI_READ_ALL_DATA
 %
-%  DATA = OI_READ_ALL_DATA( RECORD, CONDITIONS, FRAMES)
-%     DATA  = [X,Y,FRAMES,BLOCK,CONDITIONS]
+%  DATA = OI_READ_ALL_DATA( RECORD, CONDITIONS, FRAMES,VERBOSE)
+%
+%     DATA(X,Y,FRAMES,BLOCK,CONDITIONS)
+%     FILEINFO contains info from block file
 %
 %     RECORD is a struct with at least the following fields
 %         blocks = a vector of block file numbers to read. If empty, then 
@@ -12,11 +14,15 @@ function data = oi_read_all_data( record,conditions,frames)
 %         date = imaging data, e.g. '2015-01-22'
 %
 %     CONDITIONS is a vector with the requested condition (stimulus)
-%         numbers
+%         numbers. if CONDITIONS == 0, then only return info, without 
+%         reading the data.
 %     FRAMES is a vector with requested frame numbers
 %
-% 2014-2015, Alexander Heimel
+% 2014-2019, Alexander Heimel
 
+if nargin<4 || isempty(verbose)
+    verbose = false;
+end
 if nargin<2
     conditions = [];
 end
@@ -52,10 +58,22 @@ for i=1:length(filenames)
     end
 end
 
+if isempty(experimentlist)
+    logmsg(['No experiment files found for ' recordfilter(record)]);
+    data = [];
+    return
+end
+
 fileinfo = imagefile_info(experimentlist{1}); % assume all files same structure
 if isempty(conditions)
     conditions = 1:fileinfo.n_conditions; 
+elseif conditions == 0 % only request info
+    data = [];
+    return
 end
+
+
+
 if isempty(frames)
     frames = 1:fileinfo.n_images;
 end
@@ -72,12 +90,16 @@ for i=1:length(experimentlist)
    end
 end
 
-if 0
-    figure %#ok<UNRCH>
+if verbose
+    figure 
+    maxdata = max(data(:));
+    mindata = min(data(:));
+    logmsg(['Min = ' num2str(mindata) ', Max = ' num2str(maxdata)]);
     for c=1:size(data,5)
         for t=1:size(data,4)
-            subplot(size(data,5),size(data,4),size(data,4)*(c-1)+t);
-            imagesc(data(:,:,end,t,c));
+            subplot(size(data,4),size(data,5),size(data,4)*(t-1)+c);
+            image( ((data(:,:,end,t,c)- mindata)/(maxdata-mindata) )*64);
+            axis image off
         end
     end
 end

@@ -1,14 +1,15 @@
 function fig=experiment_db( type, hostname )
 %EXPERIMENT_DB starts physiology database
 %
-%   FIG=EXPERIMENT_DB
-%   FIG=EXPERIMENT_DB( TYPE )
-%   FIG=EXPERIMENT_DB( TYPE, HOSTNAME )
+%   FIG = EXPERIMENT_DB
+%   FIG = EXPERIMENT_DB( TYPE )
+%   FIG = EXPERIMENT_DB( TYPE, HOSTNAME )
+%   FIG = EXPERIMENT_DB( DB );
 %
 %     TYPE can be 'oi','ec','tp','wc'
 %     FIG returns handle to the database control figure
 %
-% 2005-2017, Alexander Heimel
+% 2005-2019, Alexander Heimel
 %
 
 if nargout==1
@@ -39,26 +40,36 @@ export_tests_enabled=0;
 play_data_enable = 0;
 track_data_enable = 0;
 
+if ischar(type)
+    [db,filename]=load_testdb(type, hostname);
+else
+    db = type;
+    if ~isempty(db) && isfield(db(1),'datatype') && ~isempty(db(1).datatype)
+        type = db(1).datatype;
+    else
+        type = 'oi';
+    end
+    filename = {['tempdb_' datestr(now,'yyyymmdd') '.mat']}; % making it a cell to avoid later loading
+end
+
+if isempty(db)
+    return
+end
+
 switch type
     case 'ec'
         channels_enabled = 1;
-    case 'tp' 
+    case 'tp'
         color = [0.4 0.5 1];
         open_data_enable = 1;
         blind_data_enabled = 1;
         reverse_data_enabled = 1; % for reversing database
-    case 'wc' 
+    case 'wc'
         color = [1 0.6 0.4];
         play_data_enable = 1;
         track_data_enable = 1;
 end
 
-% load database
-[db,filename]=load_testdb(type, hostname);
-
-if isempty(db)
-    return
-end
 
 experimental_pc = is_experimental_pc( hostname);
 
@@ -107,7 +118,7 @@ end
 % temporarily adding eye field % 2014?
 switch type
     case {'tp'}
-        if ~isfield(db,'eye') 
+        if ~isfield(db,'eye')
             for i=1:length(db)
                 db(i).eye = '';
             end
@@ -154,15 +165,15 @@ set(h_fig,'Userdata',ud);
 set_control_name(h_fig);
 
 if nargout==1
-    fig=h_fig;
+    fig = h_fig;
 end
 
-maxleft=0;
-left=10;
-buttonwidth=65;
-colsep=3;
-buttonheight=30;
-top=10;
+maxleft = 0;
+left = 10;
+buttonwidth = 65;
+colsep = 3;
+buttonheight = 30;
+top = 10;
 
 ud=get(h_fig,'UserData');
 h=ud.h;
@@ -197,8 +208,8 @@ if strcmp(host,'wall-e')
         'String','Laser', ...
         'Tag','Laser',...
         'Tooltipstring','Close all non-persistent figures');
-    left=left+buttonwidth+colsep;
-    maxleft=max(maxleft,left);
+    left = left+buttonwidth+colsep;
+    maxleft = max(maxleft,left);
 end
 
 if runexperiment_enabled
@@ -211,8 +222,8 @@ if runexperiment_enabled
         'Position',[left top buttonwidth buttonheight], ...
         'Tag','run_callback',...
         'String','Stimulus');
-    left=left+buttonwidth+colsep;
-    maxleft=max(maxleft,left);
+    left = left+buttonwidth+colsep;
+    maxleft = max(maxleft,left);
 end
 
 if open_data_enable
@@ -224,8 +235,8 @@ if open_data_enable
         'ListboxTop',0, ...
         'Position',[left top buttonwidth buttonheight], ...
         'String','Open','Tag','open_tptestrecord_callback');
-    left=left+buttonwidth+colsep;
-    maxleft=max(maxleft,left);
+    left = left+buttonwidth+colsep;
+    maxleft = max(maxleft,left);
 end
 
 if play_data_enable
@@ -262,8 +273,8 @@ h.analyse = ...
     'ListboxTop',0, ...
     'Position',[left top buttonwidth buttonheight], ...
     'String','Analyse' );
-left=left+buttonwidth+colsep;
-maxleft=max(maxleft,left);
+left = left+buttonwidth+colsep;
+maxleft = max(maxleft,left);
 
 h.results = ...
     uicontrol('Parent',h_fig, ...
@@ -273,8 +284,8 @@ h.results = ...
     'ListboxTop',0, ...
     'Position',[left top buttonwidth buttonheight], ...
     'String','Results');
-left=left+buttonwidth+colsep;
-maxleft=max(maxleft,left);
+left = left+buttonwidth+colsep;
+maxleft = max(maxleft,left);
 
 h.which_test = ...
     uicontrol('Parent',h_fig, ...
@@ -286,8 +297,8 @@ h.which_test = ...
     'Position',[left top-0.1*buttonheight buttonwidth buttonheight], ...
     'Value',1,...
     'Tag','');
-left=left+buttonwidth+colsep;
-maxleft=max(maxleft,left);
+left = left+buttonwidth+colsep;
+maxleft = max(maxleft,left);
 
 if average_tests_enabled
     h.average_tests = ...
@@ -345,7 +356,6 @@ h.close_figs = ...
 left=left+buttonwidth+colsep;
 maxleft=max(maxleft,left);
 
-
 if blind_data_enabled
     h.blind = ...
         uicontrol('Style','toggle','Parent',h_fig, ...
@@ -361,9 +371,9 @@ if blind_data_enabled
         left=left+buttonwidth+colsep;
     else
         top = top + buttonheight + colsep;
-
+        
     end
-    maxleft=max(maxleft,left);
+    maxleft = max(maxleft,left);
 end
 
 if reverse_data_enabled
@@ -378,7 +388,7 @@ if reverse_data_enabled
         'Tag','reverse',...
         'String','Reverse');
     left=left+buttonwidth+colsep;
-    maxleft=max(maxleft,left);
+    maxleft = max(maxleft,left);
 end
 
 if channels_enabled
@@ -392,10 +402,10 @@ if channels_enabled
         'TooltipString','Which channels to analyse',...
         'Tag','channels_edit',...
         'String','        ');
-    maxleft=max(maxleft,left);
+    maxleft = max(maxleft,left);
 end
 
-ud.h=h;
+ud.h = h;
 set(h_fig,'UserData',ud);
 
 set(h.analyse,'Tag','analyse_testrecord_callback');
@@ -415,8 +425,8 @@ else
 end
 
 % make figure wide enough
-pos=get(h_fig,'Position');
-pos(3)=max(maxleft,pos(3));
+pos = get(h_fig,'Position');
+pos(3) = max(maxleft,pos(3));
 set(h_fig,'Position',pos);
 
 % set current record

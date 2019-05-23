@@ -10,7 +10,11 @@ if nargin<2 || isempty(channel)
 end
 
 driftfilename = tpscratchfilename( record, [], 'drift');
-if ~exist(driftfilename,'file')
+lucasfilename = tpscratchfilename( record, [], 'lucaskanade', 'tif');
+if exist(lucasfilename, 'file')
+    logmsg(['No driftfile, but Lucas-Kanade correct tif available at ' lucasfilename])
+    return
+elseif ~exist(driftfilename,'file')
     logmsg(['No driftfile ' driftfilename ' exists.']);
     return
 end

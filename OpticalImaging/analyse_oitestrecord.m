@@ -47,8 +47,13 @@ end
 tests=convert_cst2cell(record.test);
 
 % get image info
-fileinfo=imagefile_info( fullfile(datapath,...
-    [ tests{1} 'B0.BLK']));
+filename = fullfile(datapath,[ tests{1} 'B0.BLK']);
+if ~exist(filename,'file') && ~isempty(record.blocks)
+   filename = fullfile(datapath,...
+       [ tests{1} 'B' num2str(record.blocks(1)) '.BLK']);
+end
+
+fileinfo=imagefile_info( filename );
 
 if fileinfo.n_images==-1 || fileinfo.n_images==0
     if isempty(record.imagefile)

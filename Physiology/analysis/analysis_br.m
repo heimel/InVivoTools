@@ -1,4 +1,5 @@
 function [analysed_br] = analysis_br(breath_rate_data,settings,stim_par)
+logmsg('DEPRECATED 2019-03-11');
 
 % perform hilbert transform
 analysed_br.hilbert_trans = angle(hilbert(breath_rate_data));

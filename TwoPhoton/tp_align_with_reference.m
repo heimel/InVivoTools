@@ -28,8 +28,8 @@ logmsg(['Aligning on channel ' num2str(channels)]);
 image_processing.spatial_filterhandle = params.spatial_filterhandle;
 image_processing.spatial_filteroptions = params.spatial_filteroptions;
 
-switch ti.third_axis_name
-    case 'T' % XYT
+switch lower(ti.third_axis_name)
+    case 't' % XYT
         determine_optimal_zshift = false;
         %  determine_optimal_angle = false;
         brightnesscorrect = true;
