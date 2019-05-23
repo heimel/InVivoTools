@@ -4,10 +4,10 @@ function ra = raster(inputs, parameters, where)
 %
 %  RA = RASTER(INPUTS, PARAMETERS, WHERE)
 %
-%  Creates a new raster analysis object.  It allows triggered visualization of 
+%  Creates a new raster analysis object.  It allows triggered visualization of
 %  a spike data object, as well as a means of examining average behavior and
 %  variation.  WHERE should be a set of parameters as described in 'help
-%  ANALYSIS_GENERIC'.  
+%  ANALYSIS_GENERIC'.
 %
 %  INPUTS should contain the following fields:
 %      spikes   [1xN] :     spikedata object
@@ -58,22 +58,15 @@ else
 end
 
 computations = struct('bins',[],'counts',[],'variation',[],'ncounts',[],...
-			'ctdev',[],'rast',[]);
+    'ctdev',[],'rast',[]);
 internals = struct('cstart',[],'cstop',[],'counts',[],'variation',[],'rast',[]);
 
 
 nag =analysis_generic([],[],where); delete(nag);
 ag = analysis_generic([],[],[]);
 ra = class(struct('inputs',inputs,'RAparams',[],'internals',internals,...
-        'computations',computations),'raster',ag);
- %   try
-        ra = setparameters(ra,parameters); % must be immediately after above
-        delete(contextmenu(ra)); ra = newcontextmenu(ra);  % install new contextmenu
-        ra = compute(ra);
-        ra = setlocation(ra,where);
-  %  catch me
- %       if strcmp(me.identifier,'MATLAB:badsubscript')
-  %          rethrow(me);
-  %      end
-  %      disp([upper(mfilename) ': ' me.identifier]);
-  %  end
+    'computations',computations),'raster',ag);
+ra = setparameters(ra,parameters); % must be immediately after above
+delete(contextmenu(ra)); ra = newcontextmenu(ra);  % install new contextmenu
+ra = compute(ra);
+ra = setlocation(ra,where);

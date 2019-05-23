@@ -56,16 +56,16 @@ bc=0.8*[1 1 1];
 ud.db=db;
 ud.current_record=length(ud.db);
 
-screensize=get(0,'ScreenSize');
+screensize = get(0,'ScreenSize');
 
-figwidth=510;
-figheight=140;
+figwidth = 510;
+figheight = 140;
 
 leftp = 0;
 topp = screensize(4)-figheight-60;
 w = get(0,'children');
-for c=w(:)';
-    wud=get(c,'userdata');
+for c = w(:)'
+    wud = get(c,'userdata');
     if isfield(wud,'persistent')&&wud.persistent
         p = get(c,'outerposition');
         leftp = max(leftp,p(1)+p(3));

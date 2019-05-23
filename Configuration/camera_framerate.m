@@ -21,7 +21,7 @@ if ~isempty(header)
         case 30
             rate = 50; % Hz
         case 10 % Ninad
-            rate = 10; % Hz
+            rate = 100; % Hz
         otherwise
             warning('CAMERA_FRAMERATE:UNKNOWN','CAMERA_FRAMERATE: Unknown imaging system. Defaulting to daneel');
             warning('off','CAMERA_FRAMERATE:UNKNOWN');
@@ -34,7 +34,7 @@ else
         case 'daneel'
             rate = 1/0.04032972;  % Hz % old vdaq camera
         case 'ninad'
-            rate = 10; % Hz
+            rate = 100; % Hz
         otherwise
             warning('CAMERA_FRAMERATE:UNKNOWN','CAMERA_FRAMERATE: Unknown imaging system. Defaulting to daneel');
             warning('off','CAMERA_FRAMERATE:UNKNOWN');

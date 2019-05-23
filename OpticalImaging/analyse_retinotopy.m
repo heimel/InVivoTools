@@ -25,7 +25,7 @@ if nargin<5; roi=[]; end
 if nargin<4; late_frames=[]; end
 if nargin<3; early_frames=[]; end
 if nargin<2; blocks=[]; end
-if nargin<1;
+if nargin<1
     logmsg('Experiment name required, e.g. analyse_retinotopy 2004-11-24/mouse_E3');
     return
 end

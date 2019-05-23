@@ -9,11 +9,8 @@ function onlinemaps(avg,framezero_avg,fname,ledtest,record)
 if nargin<5
     record = [];
 end
-if nargin<4
-    ledtest=[];
-end
-if isempty(ledtest)
-    ledtest=0;
+if nargin<4 || isempty(ledtest)
+    ledtest = 0;
 end
 if nargin<3
     fname = '';

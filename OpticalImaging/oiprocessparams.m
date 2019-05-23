@@ -46,6 +46,9 @@ switch experiment
             end
         end
 end
+params.wta_max_equalizing_steps = 100;
+params.wta_equalizing_factor = 0.95;
+params.wta_equalizing = 'max';
 
 
 params.spatial_filter_width = 3; % pixels
