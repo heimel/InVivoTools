@@ -5,7 +5,7 @@ logmsg('Add data folder to processparams_local.m');
 logmsg('as e.g. params.oidatapath_localroot = ''E:\Dropbox (NIN)\Desktop\Ninad'';');
 
 
-mouse = 'ninad2';
+mouse = 'mouse4';
 verbose = false;
 rornorm  = true; % normalize by Region of Reference (ROR)
 filterwidth = 6; % pixels
@@ -41,7 +41,7 @@ else
     db.experimenter = 'ninad';
 end
 
-ind_db = find_record(db,'mouse=ninad2');
+ind_db = find_record(db,['mouse=' mouse ,'stim_type=retinotopy']);
 orgdata = cell(length(ind_db),1);
 roi = cell(length(ind_db),1);
 avgresponse = cell(length(ind_db),1);
