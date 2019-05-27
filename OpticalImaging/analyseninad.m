@@ -9,6 +9,8 @@ mouse = 'ninad2';
 verbose = false;
 rornorm  = true; % normalize by Region of Reference (ROR)
 filterwidth = 6; % pixels
+n_rows = 3;
+n_cols = 5;
 
 dbname = fullfile(getdesktopfolder,'testdb_pracownia.mat');
 if ~exist(dbname,'file')
@@ -42,6 +44,7 @@ end
 ind_db = find_record(db,'mouse=ninad2');
 orgdata = cell(length(ind_db),1);
 roi = cell(length(ind_db),1);
+avgresponse = cell(length(ind_db),1);
 
 for i = 1:length(ind_db)
     record = db(ind_db(i));
@@ -54,8 +57,7 @@ for i = 1:length(ind_db)
     
     baseline_frames = 1:(firststimframe-1); % frames to use for baseline
     response_frames = firststimframe:laststimframe; % frames to use for response
-    
-    
+  
     % select stimulus conditions (exclude blanks)
     orgdata{i} = orgdata{i}(:,:,:,:,2:6);
     
@@ -89,7 +91,7 @@ for i = 1:length(ind_db)
                         data(:,:,f,b,c)/sum(sum(rort .* data(:,:,f,b,c))) -1 ;
                 end
             else % subtracting baseline
-                for f=1:size(data,3)
+                for f=1:size(data,3) %#ok<UNRCH>
                     data(:,:,f,b,c) = orgdata{i}(:,:,f,b,c)- baseimg;
                 end
             end
@@ -136,7 +138,6 @@ saveas(h,fullfile(analysispath,'colormap.png'));
      jointroi = jointroi | roi{i};
  end
 
- 
 % jointroi = ( spatialfilter( max(-avg,[],3),2,'pixel')  >0.0006)';
 % jointroi = smoothen(jointroi,5)>0.5;
 % figure;imagesc(jointroi);
