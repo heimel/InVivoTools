@@ -19,7 +19,7 @@ switch length(p)
   case 2   % p = [ rm b]
     fitr = p(1)*c./(p(2)+c);
     d = (data-repmat(fitr,size(data,1),1));
-    err = err + sum(sum(d.*d)) + thresholdlinear(-p(1)) + thresholdlinear(-p(3)) ;
+    err = err + sum(sum(d.*d)) + thresholdlinear(-p(1))  ;
   case 3   % p = [ rm b n]
     c = c.^p(3);
     fitr = p(1)*c./(p(2)^p(3)+c);

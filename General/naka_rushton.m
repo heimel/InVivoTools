@@ -68,7 +68,11 @@ x = fminsearch(@(x) naka_rushton_err(x,c,data),xo,options);
 
 rm = x(1);
 b = x(2);
-n = x(3);
+if length(x)>2
+    n = x(3);
+else 
+    n = 1;
+end
 
 if rm<0
     rm = max(abs(data(:)))*10^-8;
