@@ -41,7 +41,7 @@ else
     db.experimenter = 'ninad';
 end
 
-ind_db = find_record(db,['mouse=' mouse ,'stim_type=retinotopy']);
+ind_db = find_record(db,['mouse=' mouse ,',stim_type=retinotopy']);
 orgdata = cell(length(ind_db),1);
 roi = cell(length(ind_db),1);
 avgresponse = cell(length(ind_db),1);
@@ -116,7 +116,7 @@ for y=1:n_rows
     for x=1:n_cols
         cond = (y-1)*n_cols+x;
         subplot(n_rows,n_cols,cond);
-        image( (avg(:,:,cond)-avgmin)/(avgmax - avgmin) *64);
+        image( (avg(:,:,cond)-avgmin)'/(avgmax - avgmin) *64);
         axis image off
     end
 end
