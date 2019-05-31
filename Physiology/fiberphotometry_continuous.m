@@ -145,6 +145,7 @@ end
 if isempty(data)
     data = 0 * ones(5000,1);
     data(1:100,1) = 3.3;
+%    data(1:1000,1) = 3.3;
 else
     data = 0 * ones(5000,1);
 end
