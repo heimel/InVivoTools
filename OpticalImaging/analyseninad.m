@@ -42,24 +42,22 @@ else
 end
 
 ind_db = find_record(db,['mouse=' mouse ,',stim_type=retinotopy']);
-orgdata = cell(length(ind_db),1);
 roi = cell(length(ind_db),1);
 avgresponse = cell(length(ind_db),1);
 
 for i = 1:length(ind_db)
     record = db(ind_db(i));
     
-    [orgdata{i}, fileinfo, experimentlist] = oi_read_all_data( record,[],[],verbose);
-    
+    [orgdata, fileinfo, experimentlist] = oi_read_all_data( record,[],[],verbose);
     
     firststimframe = ceil(record.stim_onset/fileinfo.frameduration);
     laststimframe = ceil(record.stim_offset/fileinfo.frameduration);
     
     baseline_frames = 1:(firststimframe-1); % frames to use for baseline
     response_frames = firststimframe:laststimframe; % frames to use for response
-  
+    
     % select stimulus conditions (exclude blanks)
-    orgdata{i} = orgdata{i}(:,:,:,:,2:6);
+    orgdata = orgdata(:,:,:,:,2:6);
     
     % load ROR
     datapath = experimentpath( record);
@@ -79,20 +77,20 @@ for i = 1:length(ind_db)
     logmsg(['Loading ROI: ' roifile]);
     roi{i} = double(imread(roifile));
     
-    data = orgdata{i};
+    data = orgdata;
     % normalizing
     for b=1:size(data,4)
         for c=1:size(data,5)
-            baseimg = mean(orgdata{i}(:,:,baseline_frames,b,c),3);
-            if rornorm % subtract baseline 
+            baseimg = mean(orgdata(:,:,baseline_frames,b,c),3);
+            if rornorm % subtract baseline
                 for f=1:size(data,3)
-                    data(:,:,f,b,c) = orgdata{i}(:,:,f,b,c)./baseimg;
+                    data(:,:,f,b,c) = orgdata(:,:,f,b,c)./baseimg;
                     data(:,:,f,b,c)=...
                         data(:,:,f,b,c)/sum(sum(rort .* data(:,:,f,b,c))) -1 ;
                 end
             else % subtracting baseline
                 for f=1:size(data,3) %#ok<UNRCH>
-                    data(:,:,f,b,c) = orgdata{i}(:,:,f,b,c)- baseimg;
+                    data(:,:,f,b,c) = orgdata(:,:,f,b,c)- baseimg;
                 end
             end
         end
@@ -101,6 +99,8 @@ for i = 1:length(ind_db)
     avgresponse{i} = squeeze(mean(mean(data(:,:,response_frames,:,:),3),4));
     
 end %record i
+clear('orgdata');
+
 
 n_conditions =  size(avgresponse{1},3) * length(avgresponse);
 avg = zeros( size(avgresponse{1},1),  size(avgresponse{1},2), n_conditions);
@@ -132,11 +132,10 @@ image( [1:5;6:10;11:15]);
 colormap(rc);axis image off
 saveas(h,fullfile(analysispath,'colormap.png'));
 
-
- jointroi = roi{1};
- for i=2:length(roi)
-     jointroi = jointroi | roi{i};
- end
+jointroi = roi{1};
+for i=2:length(roi)
+    jointroi = jointroi | roi{i};
+end
 
 % jointroi = ( spatialfilter( max(-avg,[],3),2,'pixel')  >0.0006)';
 % jointroi = smoothen(jointroi,5)>0.5;
@@ -151,13 +150,13 @@ children = get(h,'Children');
 img = get(children(1),'Children');
 data = get(img,'CData');
 data = uint8(round(255*data));
-imwrite(data,filename,'Software', ...
-    'analyse_record');
+imwrite(data,filename,'Software','analyse_record');
 logmsg(['Winner-take-all map saved as: ' filename]);
-
-jointroipath = fullfile(analysispath,'jointroi.png'); 
+% save joint ROI
+jointroipath = fullfile(analysispath,'jointroi.png');
 imwrite(jointroi,jointroipath);
-record.roifile = 'jointroi.png';
-record.stim_parameters = [5 3];
 
+record.test = '*';
+record.roifile = 'jointroi.png';
+record.stim_parameters = [7 3];
 results_oitestrecord(record);

@@ -215,7 +215,7 @@ switch record.stim_type
         
         subplot(3,4,9); % retinotopy colors
         show_retinotopy_colors( record);
-        
+        drawnow
         
         show_single_condition_maps(record,{fullfile(datapath,tests{1})},[],fileinfo,roi,ror,tit);
         

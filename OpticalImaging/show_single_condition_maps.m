@@ -7,7 +7,6 @@ function h=show_single_condition_maps(record,fname,condnames,fileinfo,roi,ror,ti
 if nargin<8
     lims = [];
 end
-
 if nargin<7
     tit = '';
 end
@@ -92,8 +91,7 @@ if isempty(condnames)
     end
 end
 
-pos([2 3 4])=[pos(2)-ny*300+pos(4)  nx*300 ny*300];
-
+pos([2 3 4]) = [pos(2)-ny*300+pos(4)  nx*300 ny*300];
 set(h.figure,'position',pos);
 
 scaling = false;
@@ -102,9 +100,9 @@ if ~scaling
     immin = 0;
 end
 
-for i=1:n_maps
-    h.single_condition(i)=subplot(ny,nx,i);
-    [immap,cmap]=imread(fullfile(filedir,maps(i).name));
+for i = 1:n_maps
+    h.single_condition(i) = subplot(ny,nx,i);
+    immap = imread(fullfile(filedir,maps(i).name));
     
     if params.single_condition_show_roi && ~isempty(roi)
         %draw roi
@@ -116,13 +114,16 @@ for i=1:n_maps
     end
     
     if scaling
-        imagesc(double(immap));
+        imagesc(double(immap)); %#ok<UNRCH>
     else
-        image(immap); colormap gray(255);
+        image(immap); 
+        colormap gray(255);
     end
     
-    if i==n_maps
-        draw_scalebar(record.scale*fileinfo.xbin);
+    if isfield(fileinfo,'xbin') && ~isempty(fileinfo.xbin)
+        if i==n_maps
+            draw_scalebar(record.scale*fileinfo.xbin);
+        end
     end
     
     if showing_online_maps
