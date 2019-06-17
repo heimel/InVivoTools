@@ -48,6 +48,8 @@ avgresponse = cell(length(ind_db),1);
 for i = 1:length(ind_db)
     record = db(ind_db(i));
     
+    %record.blocks = 0;
+    
     [orgdata, fileinfo, experimentlist] = oi_read_all_data( record,[],[],verbose);
     
     firststimframe = ceil(record.stim_onset/fileinfo.frameduration);
@@ -132,14 +134,18 @@ image( [1:5;6:10;11:15]);
 colormap(rc);axis image off
 saveas(h,fullfile(analysispath,'colormap.png'));
 
-jointroi = roi{1};
-for i=2:length(roi)
-    jointroi = jointroi | roi{i};
-end
+join_manual_rois = true;
 
-% jointroi = ( spatialfilter( max(-avg,[],3),2,'pixel')  >0.0006)';
-% jointroi = smoothen(jointroi,5)>0.5;
-% figure;imagesc(jointroi);
+if join_manual_rois
+    jointroi = roi{1};
+    for i=2:length(roi)
+        jointroi = jointroi | roi{i};
+    end
+else
+    jointroi = ( spatialfilter( max(-avg,[],3),2,'pixel')  >0.0006)';
+    jointroi = smoothen(jointroi,5)>0.5;
+    % figure;imagesc(jointroi);
+end
 
 h = plotwta(avg,1:n_rows*n_cols,[],[],find(jointroi'),5,256,record,rc);
 
@@ -158,5 +164,5 @@ imwrite(jointroi,jointroipath);
 
 record.test = '*';
 record.roifile = 'jointroi.png';
-record.stim_parameters = [7 3];
+record.stim_parameters = [5 3];
 results_oitestrecord(record);
