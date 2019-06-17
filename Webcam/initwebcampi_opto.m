@@ -75,6 +75,10 @@ fgetl(fid); % pathSpec line
 datapath = fgetl(fid);
 fclose(fid);
 
+if isunix
+  datapath(datapath=='\') = '/';
+end 
+
 if ~isempty(datapath) && any(datapath==filesep)
     recdatapath = datapath(1:find(datapath==filesep,1,'last'));
 end

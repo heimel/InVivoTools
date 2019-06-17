@@ -8,18 +8,21 @@ function [ theremotefilesep ] = remotefilesep
 %   OS 9 machine, and '\' if it is a PC.
 %
 %   See also: remotecomm, RemoteCommunication, remotecommglobals
+%
+% 200X, Stephen Van Hooser
+% 2019, Alexander Heimel
 
 remotecommglobals
-	switch (lower(Remote_Comm_remotearchitecture)),
-		case 'unix',
-			theremotefilesep = '/';
-		case 'pc',
-			theremotefilesep = '\';
-		case 'mac',
-			theremotefileseps = ':';
-        otherwise, 
-            error(['Cannot determine remote file separator for architecture: Remote_comm_remotearchitecture']);
-	end;
+switch (lower(Remote_Comm_remotearchitecture))
+    case 'unix'
+        theremotefilesep = '/';
+    case 'pc'
+        theremotefilesep = '\';
+    case 'mac'
+        theremotefilesep = ':';
+    otherwise
+        error('Cannot determine remote file separator for architecture: Remote_comm_remotearchitecture');
+end
 
 
 end
