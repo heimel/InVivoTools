@@ -219,6 +219,10 @@ if exist('PsychStartup','file')
     PsychStartup;
 end
 
+% load External repositories
+addpath(fullfile(path2invivotools,'Externals','jsonlab'));
+
+
 % load Study specific folders
 studiespath = cellfun(@(x) fullfile(majorprefix,'Studies',x),params.load_studies,'UniformOutput',false);
 if ~isempty(studiespath)    
