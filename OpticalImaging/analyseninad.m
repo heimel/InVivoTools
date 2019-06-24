@@ -49,6 +49,7 @@ for i = 1:length(ind_db)
     record = db(ind_db(i));
     
     %record.blocks = 0;
+    record.blocks = 20:50;
     
     [orgdata, fileinfo, experimentlist] = oi_read_all_data( record,[],[],verbose);
     
@@ -142,8 +143,10 @@ if join_manual_rois
         jointroi = jointroi | roi{i};
     end
 else
-    jointroi = ( spatialfilter( max(-avg,[],3),2,'pixel')  >0.0006)';
-    jointroi = smoothen(jointroi,5)>0.5;
+    imresp = max(-avg,[],3);
+    imresp = imresp/max(imresp(:));
+    jointroi = ( spatialfilter(imresp,2,'pixel')  >0.3)';
+    %jointroi = smoothen(jointroi,5)>0.5;
     % figure;imagesc(jointroi);
 end
 
@@ -164,5 +167,19 @@ imwrite(jointroi,jointroipath);
 
 record.test = '*';
 record.roifile = 'jointroi.png';
+record.bvimage = 'bvimage.tif';
 record.stim_parameters = [5 3];
 results_oitestrecord(record);
+
+refim=double( imread(fullfile(oidatapath(record),record.bvimage)));
+jointroi = double(jointroi);
+data = double(data);
+ refim(:,:,1)=refim(:,:,1).*(1-0.5*jointroi) ;
+ refim(:,:,2)=refim(:,:,2).*(1-0.5*jointroi) ;
+ refim(:,:,3)=refim(:,:,3).*(1-0.5*jointroi) ;
+
+refim(:,:,1)=refim(:,:,1) + data(:,:,1).*jointroi.*imresp';
+refim(:,:,2)=refim(:,:,2) + data(:,:,2).*jointroi.*imresp';
+refim(:,:,3)=refim(:,:,3) + data(:,:,3).*jointroi.*imresp';
+figure
+image(refim/255);
