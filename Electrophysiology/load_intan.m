@@ -26,6 +26,11 @@ end
 
 path = [fullfile(EVENT.Mytank,EVENT.Myblock),'\'];
 d = dir([path '*.rhd']);
+if isempty(d)
+    errormsg(['No file found in ' path '*.rhd'],true);
+end
+
+
 file = d(end).name;
 
 tic;
