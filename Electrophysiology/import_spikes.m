@@ -100,7 +100,7 @@ if exist(spikesfile,'file')
     if isfield(old,'isi')
         isi = old.isi;
     end
-    if ~isempty(old.cells) && ~isempty(cells) && isfield(old.cells,'channel')
+    if isfield(old,'cells') && ~isempty(old.cells) && ~isempty(cells) && isfield(old.cells,'channel')
         othercells = old.cells(~ismember([old.cells.channel],channels2analyze));
         if ~isempty(othercells)
             try

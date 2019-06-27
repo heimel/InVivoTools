@@ -179,6 +179,9 @@ switch lower(record.setup)
         warning('off', 'ECPROCESSPARAMS:TIMING');
 end
 
+params.ec_intan_spikethreshold = -50; % threshold of spike detection
+
+
 params.compute_fraction_overlapping_spikes = false;
 %switch experiment
 %    case '13.20'

@@ -1,5 +1,4 @@
-function EVENT = load_intan(EVENT)
-
+function EVENT = load_intan(EVENT, matfilename)
 % read_Intan_RHD2000_file
 %
 % Version 1.3, 10 December 2013
@@ -19,6 +18,11 @@ function EVENT = load_intan(EVENT)
 
 % [file, path, filterindex] = ...
 %     uigetfile('*.rhd', 'Select an RHD2000 Data File', 'MultiSelect', 'off');
+
+
+if nargin<2
+    matfilename = '';
+end
 
 path = [fullfile(EVENT.Mytank,EVENT.Myblock),'\'];
 d = dir([path '*.rhd']);
@@ -473,7 +477,12 @@ end
 EVENT.ChanInfo = amplifier_channels;
 EVENT.Freq = frequency_parameters.amplifier_sample_rate;
 MatFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
-save(MatFile, 'EVENT','-v7')
+if isempty(matfilename)
+     matfilename = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
+end
+
+logmsg(['Saving data to matlab file ' matfilename]);
+save(matfilename, 'EVENT','-v7.3')
 
 return
 
