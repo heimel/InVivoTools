@@ -69,7 +69,7 @@ switch vers
                 case 'wc'
                     datapath = wcdatapath(record,create,verbose);
                 otherwise
-                    errormsg(['Unknown datatype ' record.datatype ' in ' recordfilter(record)]);
+                    errormsg(['Unknown datatype ' record.datatype ' for ' recordfilter(record)]);
                     datapath = '';
             end
             
@@ -129,7 +129,7 @@ switch vers
             case {'pupil'}
                 datatype = 'Electrophys';
             otherwise
-                errormsg(['Unknown datatype ' record.datatype],true);
+                errormsg(['Unknown datatype ' record.datatype ' for ' recordfilter(record)],true);
         end
         
         switch vers
