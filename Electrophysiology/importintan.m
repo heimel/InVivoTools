@@ -11,10 +11,14 @@ datapath=experimentpath(record,false);
 EVENT.Mytank = datapath;
 EVENT.Myblock = record.test;
 % IsFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
-matfilename = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
+matfilename = fullfile(EVENT.Mytank,EVENT.Myblock,[EVENT.Myblock '.mat']);
 
-if ~exist(matfilename,'file') && ~exist([matfilename '.mat'],'file')
+if ~exist(matfilename,'file') 
     EVENT = load_intan(EVENT);
+    if isempty(EVENT)
+        cells = [];
+        return
+    end
 else
     logmsg(['Loading precomputed event file ' matfilename]);
     load(matfilename,'EVENT');

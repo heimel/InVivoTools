@@ -24,17 +24,19 @@ if nargin<2
     matfilename = '';
 end
 
-path = [fullfile(EVENT.Mytank,EVENT.Myblock),'\'];
-d = dir([path '*.rhd']);
+path = fullfile(EVENT.Mytank,EVENT.Myblock);
+d = dir(fullfile(path,'*.rhd'));
 if isempty(d)
-    errormsg(['No file found in ' path '*.rhd'],true);
+    errormsg(['No rhd file found in ' path]);
+    EVENT = [];
+    return
 end
 
 
-file = d(end).name;
+filename = d(end).name;
 
 tic;
-filename = [path,file];
+filename = fullfile(path,filename);
 fid = fopen(filename, 'r');
 
 s = dir(filename);
@@ -481,9 +483,8 @@ end
 
 EVENT.ChanInfo = amplifier_channels;
 EVENT.Freq = frequency_parameters.amplifier_sample_rate;
-MatFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
 if isempty(matfilename)
-     matfilename = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
+     matfilename = fullfile(EVENT.Mytank,EVENT.Myblock,[EVENT.Myblock '.mat']);
 end
 
 logmsg(['Saving data to matlab file ' matfilename]);
