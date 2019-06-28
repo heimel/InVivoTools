@@ -144,7 +144,7 @@ switch vers
             otherwise
                 f = filesep; % faster than fullfile
                 lpb = localpathbase(vers);
-                if ~contains(lpb,'InVivo')
+                if isempty(strfind(lpb,'InVivo'))
                     lpb = [lpb f 'InVivo'];
                 end
                 datapath = [lpb f ...

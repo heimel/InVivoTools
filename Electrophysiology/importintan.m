@@ -74,7 +74,9 @@ y = filter(b,a,y);
 
 logmsg('Filtering SGolay');
 for j = 1:length(channels2analyze)
-    y(j,:) = sgolayfilt(y(j,:),3,11);
+    try % problem in Matlab R2015
+        y(j,:) = sgolayfilt(y(j,:),3,11);
+    end
 end
 
 HalfW = 16; % samples in downsampled data
