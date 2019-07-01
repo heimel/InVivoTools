@@ -1,19 +1,20 @@
-function datapath = experimentpath( record, include_test, create, vers, recurse )
+function datapath = experimentpath( record, include_test, create, vers, recurse, verbose )
 %EXPERIMENTPATH returns datapath for an experimental record
 %
-%  DATAPATH = EXPERIMENTPATH(RECORD, INCLUDE_TEST=true, CREATE=false, VERS='2004' )
+%  DATAPATH = EXPERIMENTPATH(RECORD, INCLUDE_TEST=true, CREATE=false, VERS='2004', VERBOSE=false )
 %
 %    if CREATE is true, then the path will be created if it doesn't exist
 %
 %
-% 2014-2015, Alexander Heimel
+% 2014-2019, Alexander Heimel
 %
 
+if nargin<6 || isempty(verbose)
+    verbose = false;
+end
 if nargin<5 || isempty(recurse)
     recurse = false;
 end
-
-
 if nargin<4 || isempty(vers) 
     vers = '2004';
     if isfield(record,'setup')
@@ -51,7 +52,7 @@ switch vers
         if isfield(record,'datatype')
             switch record.datatype
                 case {'tp','fret','ls'}
-                    datapath = tpdatapath(record,include_test);
+                    datapath = tpdatapath(record,include_test,verbose);
                 case {'ec','lfp','pupil'}
                     datapath = ecdatapath(record);
                     if include_test
@@ -66,9 +67,9 @@ switch vers
                 case {'oi','fp'}
                     datapath = oidatapath(record);
                 case 'wc'
-                    datapath = wcdatapath(record,create);
+                    datapath = wcdatapath(record,create,verbose);
                 otherwise
-                    errormsg(['Unknown datatype ' record.datatype ' in ' recordfilter(record)]);
+                    errormsg(['Unknown datatype ' record.datatype ' for ' recordfilter(record)]);
                     datapath = '';
             end
             
@@ -128,11 +129,8 @@ switch vers
             case {'pupil'}
                 datatype = 'Electrophys';
             otherwise
-                errormsg(['Unknown datatype ' record.datatype],true);
+                errormsg(['Unknown datatype ' record.datatype ' for ' recordfilter(record)],true);
         end
-        
-         
-       
         
         switch vers
             case '2015t'
@@ -145,8 +143,11 @@ switch vers
                     test);
             otherwise
                 f = filesep; % faster than fullfile
-                datapath = [localpathbase(vers) f...
-                    'InVivo' f ...
+                lpb = localpathbase(vers);
+                if isempty(strfind(lpb,'InVivo'))
+                    lpb = [lpb f 'InVivo'];
+                end
+                datapath = [lpb f ...
                     datatype f ...
                     setup f ...
                     experiment f ...
@@ -155,6 +156,9 @@ switch vers
                     test];
         end
         if ~exist(datapath,'dir')
+            if verbose
+                logmsg([datapath ' does not exist']);
+            end
             if create
                 mkdir(datapath);
             elseif  ~recurse

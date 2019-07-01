@@ -28,7 +28,7 @@ logmsg(msg,caller);
 
 if halt
     stack = dbstack;
-    errid = upper([stack(2).name ':' msg(1:min(end,20))]);
+    errid = upper(subst_ctlchars([stack(2).name ':' msg(1:min(end,20))]));
     error(errid,msg)
 end
 

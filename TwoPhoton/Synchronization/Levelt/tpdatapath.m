@@ -1,7 +1,7 @@
-function path=tpdatapath( record,include_test )
+function path=tpdatapath( record,include_test,verbose )
 %TPDATAPATH constructs a twophoton data path
 %
-% PATH = TPDATAPATH( RECORD )
+% PATH = TPDATAPATH( RECORD, INCLUDE_TEST=true, VERBOSE=false )
 %  by default PATH is the networkpath, unless a local data folder is
 %  present
 %
@@ -9,9 +9,12 @@ function path=tpdatapath( record,include_test )
 %
 % DEPRECATED: Use EXPERIMENTPATH instead
 %
-% 2008-2015, Alexander Heimel
+% 2008-2019, Alexander Heimel
 %
 
+if nargin<3 || isempty(verbose)
+    verbose = false;
+end
 if nargin<2 || isempty(include_test)
     include_test = true;
 end
@@ -38,6 +41,7 @@ end
 params = processparams_local(params);
 
 if ~exist(params.tpdatapath_localroot,'dir') % fall back on current folder
+    logmsg(['Check params.tpdatapath_localroot in processparams_local. Not existing ' params.tpdatapath_localroot]); 
     params.tpdatapath_localroot = '.';
 end
 

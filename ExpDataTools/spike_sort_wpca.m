@@ -52,11 +52,13 @@ XX=[cll1.spike_peak_height,...
      cll1.spike_lateslope
     ];
 
-[pc,score,latent,tsquare] = princomp(XX);
+
+%[pc,score,latent,tsquare] = princomp(XX);
+[pc,score,latent,tsquare] = pca(XX);
 
 %[IDX,f1,f2,D] = kmeans(score(:,1:3),NumClust);
 [IDX,f1,f2,D] = kmeans(score,NumClust);
-[IDX,f1,f2,D] = kmeans(XX,NumClust);
+%[IDX,f1,f2,D] = kmeans(XX,NumClust);
 
 if verbose
     figure('Name',['Spike PCs: ' record.test ', ' record.date ', channel=' num2str(cll1.channel) ] ,'Numbertitle','off');

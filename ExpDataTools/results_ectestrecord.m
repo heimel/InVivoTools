@@ -552,6 +552,7 @@ end
 
 ax=axis;
 ax([1 2])=[first_timepoint last_timepoint];
+ax(1) = max([first_timepoint processparams.pre_window(1)]); % for Pulse-Opto, 2019-06-28
 axis(ax);
 
 % spont rate

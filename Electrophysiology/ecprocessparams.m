@@ -159,10 +159,8 @@ switch lower(record.setup)
         % to not change previous analysis
         end
     case 'intan' % 
-        params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
-        params.secondsmultiplier = 1.000017000; % multiplification factor of electrophysical signal time 
-        warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
-        warning('off', 'ECPROCESSPARAMS:TIMING');
+        params.trial_ttl_delay = -0.01; % s delay of visual stimulus after trial start TTL
+        params.secondsmultiplier = 0.999981; % aligned on 2018-06-15
     case 'wall-e'
         params.trial_ttl_delay = 0.00; % s delay of visual stimulus after trial start TTL
         params.secondsmultiplier = 1; % multiplification factor of electrophysical signal time
@@ -180,6 +178,9 @@ switch lower(record.setup)
         warning('ECPROCESSPARAMS:TIMING','ECPROCESSPARAMS: Setup not time calibrated yet');
         warning('off', 'ECPROCESSPARAMS:TIMING');
 end
+
+params.ec_intan_spikethreshold = -50; % threshold of spike detection
+
 
 params.compute_fraction_overlapping_spikes = false;
 %switch experiment

@@ -11,11 +11,20 @@ datapath=experimentpath(record,false);
 EVENT.Mytank = datapath;
 EVENT.Myblock = record.test;
 % IsFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
-if 1
+matfilename = fullfile(EVENT.Mytank,EVENT.Myblock,[EVENT.Myblock '.mat']);
+
+if ~exist(matfilename,'file') 
     EVENT = load_intan(EVENT);
+    if isempty(EVENT)
+        cells = [];
+        return
+    end
 else
-    load(['D:\Data\InVivo\Electrophys\Intan\2016\04\12\Mouse\t-1\t-1.mat'])
+    logmsg(['Loading precomputed event file ' matfilename]);
+    load(matfilename,'EVENT');
 end
+
+logmsg(['Loaded event file for ' recordfilter(record)]);
 
 if ~isfield(EVENT,'strons')
     errormsg(['No triggers present in ' recordfilter(record)]);
@@ -43,17 +52,6 @@ end
 % Chans = [Chans,EVENT.ChanInfo(i).custom_order];
 % end
 
-% EVENT.ChanInfo = Chans;
-% EVENT.snips.Snip.channels = Chans;
-% if any(channels2analyze>max(EVENT.ChanInfo)) || any(channels2analyze<min(EVENT.ChanInfo))
-%     errormsg(['Did not record more than ' num2str(EVENT.snips.Snip.channels) ' channels.']);
-%     return
-% end
-
-
-% if isempty(channels2analyze)
-%     channels2analyze = 1:EVENT.ChanInfo;
-% end
 if isempty(channels2analyze)
     channels2analyze = EVENT.snips.Snip.channels;
 end
@@ -62,65 +60,55 @@ EVENT.CHAN = channels2analyze;
 WaveTime_Spikes = struct([]);
 
 logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
-total_length = EVENT.Snips.rawtime(end)-EVENT.strons.tril(1);
 clear('WaveTime_Fpikes');
 WaveTime_Fpikes = struct('time',[],'data',[]);
+
+
 %% Spike detection
+logmsg('Filtering between 300 Hz and 10 kHz');
 sF = EVENT.Freq;
 [b,a] = butter(5,300/(0.5*sF),'High');
-y=filter(b,a,EVENT.Snips.rawsig(channels2analyze,:));
+y = filter(b,a,EVENT.Snips.rawsig(channels2analyze,:));
 [b,a] = butter(5,10000/(0.5*sF),'Low');
-y=filter(b,a,y);
-k = 2; % k times downsampling
-HalfW = 7;
-WinWidth = 2*HalfW;
+y = filter(b,a,y);
 
-z=[];
+logmsg('Filtering SGolay');
 for j = 1:length(channels2analyze)
-    y(j,:) = sgolayfilt(y(j,:),3,11);
-    z(j,:) = downsample(y(j,:),k);
-end
-
-%%
-threshold = -50; % threshold of spike detection
-
-for j = 1:length(channels2analyze)
-    Spikes =[];
-    for i = 15:WinWidth:length(z)-15
-        if sum(z(j,i-HalfW:i+HalfW)<threshold)>0
-            [~,m2] = min(y(j,k*(i-HalfW):k*(i+HalfW)));
-            Spikes = [Spikes;[y(j,-(k*HalfW-m2)+k*(i-HalfW):-(k*HalfW-m2)+k*(i+HalfW)) -(k*HalfW-m2)+k*i]];
-        end
+    try % problem in Matlab R2015
+        y(j,:) = sgolayfilt(y(j,:),3,11);
     end
-    WaveTime_Fpikes(j,1).data = Spikes(:,1:end-1);
-    WaveTime_Fpikes(j,1).time = EVENT.Snips.rawtime(Spikes(:,end));
 end
 
-% %%
-% threshold = +80; % threshold of spike detection
-% 
-% for j = 1:length(channels2analyze)
-%     Spikes =[];
-%     for i = 15:WinWidth:length(z)-15
-%         if sum(z(j,i-HalfW:i+HalfW)>threshold)>0
-%             [~,m2] = min(y(j,k*(i-HalfW):k*(i+HalfW)));
-%             Spikes = [Spikes;[y(j,-(k*HalfW-m2)+k*(i-HalfW):-(k*HalfW-m2)+k*(i+HalfW)) -(k*HalfW-m2)+k*i]];
-%         end
-%     end
-%     WaveTime_Fpikes(j,1).data = Spikes(:,1:end-1);
-%     WaveTime_Fpikes(j,1).time = EVENT.Snips.rawtime(Spikes(:,end));
-% end
+HalfW = 16; % samples in downsampled data
+WinWidth = 2*HalfW;
+threshold = processparams.ec_intan_spikethreshold; % threshold of spike detection
 
-%%
+for j = 1:length(channels2analyze)
+    logmsg(['Detecting spikes on channel ' channels2analyze(j)]);
+    
+    if threshold<0
+        [~,locs] = findpeaks_fast(-y(j,:)','minpeakheight',abs(threshold),'minpeakdistance',HalfW);
+    else
+        [~,locs] = findpeaks_fast(y(j,:)','minpeakheight',abs(threshold),'minpeakdistance',HalfW);
+    end
+    if locs(1)<HalfW
+        locs(1) = [];
+    end
+    if locs(end)>size(y,2)-HalfW
+        locs(end) = [];
+    end
+    ind = repmat(locs,1,WinWidth) + repmat(1-HalfW:HalfW,length(locs),1);
+    x = y(j,:);
+    Spikes = x(ind);
+    
+    WaveTime_Fpikes(j,1).data = Spikes;
+    WaveTime_Fpikes(j,1).time = EVENT.Snips.rawtime(locs);
+end
        
 for ii=1:length(channels2analyze)
-    %logmsg(['Sorting channel ' num2str(channels2analyze(ii))]);
-    %clear kll
     if isempty(WaveTime_Fpikes(ii,1).time)
         continue
     end
-    %kll.sample_interval = 1/EVENT.snips.Snip.sampf;
-    %kll.data = WaveTime_Fpikes(ii,1).time;
 
     wtime_sp.data =  WaveTime_Fpikes(ii,1).data;
     wtime_sp.time = WaveTime_Fpikes(ii,1).time;
@@ -132,7 +120,6 @@ n_cells = length(WaveTime_Spikes);
 % load stimulus starttime
 stimsfile = getstimsfile( record );
 
-
 if isempty(stimsfile) 
     errormsg(['No stimsfile for record ' recordfilter(record) '. Use ''stiminterview(global_record)'' to generate stimsfile. Now no analysis']);
     intervals = [EVENT.Snips.rawtime(1) EVENT.Snips.rawtime(end)]; % arbitrary, no link to real stimulus
@@ -141,7 +128,6 @@ elseif isempty(stimsfile.MTI2{end}.frameTimes)
 else
     intervals = [stimsfile.start stimsfile.MTI2{end}.frameTimes(end)+10];
 end
-
 
 EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
 
