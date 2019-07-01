@@ -135,16 +135,16 @@ image( [1:5;6:10;11:15]);
 colormap(rc);axis image off
 saveas(h,fullfile(analysispath,'colormap.png'));
 
-join_manual_rois = true;
+imresp = max(-avg,[],3);
+imresp = imresp/max(imresp(:));
 
+join_manual_rois = true;
 if join_manual_rois
     jointroi = roi{1};
     for i=2:length(roi)
         jointroi = jointroi | roi{i};
     end
 else
-    imresp = max(-avg,[],3);
-    imresp = imresp/max(imresp(:));
     jointroi = ( spatialfilter(imresp,2,'pixel')  >0.3)';
     %jointroi = smoothen(jointroi,5)>0.5;
     % figure;imagesc(jointroi);
