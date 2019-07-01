@@ -48,8 +48,8 @@ avgresponse = cell(length(ind_db),1);
 for i = 1:length(ind_db)
     record = db(ind_db(i));
     
-   %record.blocks = 0;
-    record.blocks = 25:29;
+    record.blocks = 0;
+    %record.blocks = 25:29;
     
     [orgdata, fileinfo, experimentlist] = oi_read_all_data( record,[],[],verbose);
     
