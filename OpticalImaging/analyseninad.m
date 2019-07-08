@@ -45,11 +45,25 @@ ind_db = find_record(db,['mouse=' mouse ,',stim_type=retinotopy']);
 roi = cell(length(ind_db),1);
 avgresponse = cell(length(ind_db),1);
 
+analyse_first_blocks_only = false; %false
+
 for i = 1:length(ind_db)
     record = db(ind_db(i));
-    
-    record.blocks = 0;
+   
+    if analyse_first_blocks_only
+        record.blocks = record.blocks(1:3);
+    end
+   % record.blocks = 0:3; %15:29
     %record.blocks = 25:29;
+%     switch ind_db(i)
+%         case 1
+%             record.blocks = [0 1 2];
+%         case 2
+%             record.blocks = [ 3 4 5];
+%         case 3
+%             record.blocks = [10 11 12];
+%     end
+    
     
     [orgdata, fileinfo, experimentlist] = oi_read_all_data( record,[],[],verbose);
     
@@ -138,7 +152,7 @@ saveas(h,fullfile(analysispath,'colormap.png'));
 imresp = max(-avg,[],3);
 imresp = imresp/max(imresp(:));
 
-join_manual_rois = true;
+join_manual_rois = false;
 if join_manual_rois
     jointroi = roi{1};
     for i=2:length(roi)
