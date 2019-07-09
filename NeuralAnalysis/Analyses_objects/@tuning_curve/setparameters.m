@@ -14,8 +14,9 @@ end
 
 default_p = struct('res',0.010,'showrast',1,'interp',3,'drawspont',1,'int_meth',0,'interval',[0 0]);
 
-if isempty(parameters)||(ischar(parameters)&&strcmp(parameters,'default')),
-        parameters = default_p; end;
+if isempty(parameters)||(ischar(parameters)&&strcmp(parameters,'default'))
+        parameters = default_p; 
+end
 
 %[good,er]=verifyparameters(parameters,getinputs(tc));
 %if ~good,error(['PARAMETERS: ' er]);end;

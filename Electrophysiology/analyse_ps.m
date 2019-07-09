@@ -7,10 +7,7 @@ function measures=analyse_ps( inp , record, verbose)
 % 2007-2019, Alexander Heimel
 %
 
-if nargin<3
-    verbose = [];
-end
-if isempty(verbose)
+if nargin<3 || isempty(verbose)
     verbose = true;
 end
 
@@ -49,7 +46,7 @@ for i = 1:length(triggers)
     inp = inps(i);
     measures.triggers = triggers;
     
-    par = struct('res',0.01,'showrast',0,'interp',3,'drawspont',1,...
+    par = struct('res',processparams.ec_binwidth,'showrast',0,'interp',3,'drawspont',1,...
         'int_meth',0,'interval',[0 0]);
     
     if processparams.post_window(2)<Inf
@@ -59,9 +56,9 @@ for i = 1:length(triggers)
     end
     
     if verbose  % dont show for more than 5 cells
-        where.figure=figure;
-        where.rect=[0 0 1 1];
-        where.units='normalized';
+        where.figure = figure;
+        where.rect = [0 0 1 1];
+        where.units = 'normalized';
     else
         where = []; % turn off extra figure
     end
@@ -77,6 +74,15 @@ for i = 1:length(triggers)
     if isempty(curve)
         return
     end
+    
+    if processparams.post_window(2)<Inf
+        logmsg('For Koen')
+        ch = get(where.figure,'children');
+        set(ch(4),'xlim', [processparams.pre_window(1) processparams.post_window(2)]);
+        set(ch(5),'xlim', [processparams.pre_window(1) processparams.post_window(2)]);
+    end
+
+    
     measures.curve{i} = curve;
     measures.rate_spont{i} = out(i).spont(1);
     [measures.rate_max{i}, ind_pref] = max(curve(2,:));
