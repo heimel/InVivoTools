@@ -20,7 +20,7 @@ end
 
 % defaults
 params.ec_axon_default_filename = 'data.abf'; 
-params.ec_binwidth = 0.002; % binwidth in s for tuning_curve in analyse_ps
+params.ec_binwidth = 0.01; % binwidth in s for tuning_curve in analyse_ps
 params.pre_window = [-Inf 0]; % ignored for ec and tp
 params.post_window = [0 Inf]; % ignored for tp
 params.separation_from_prev_stim_off = 0.5;  % time (s) to stay clear of prev_stim_off
