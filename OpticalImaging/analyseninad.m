@@ -197,7 +197,8 @@ refim(:,:,2)=refim(:,:,2) + data(:,:,2).*jointroi.*imresp';
 refim(:,:,3)=refim(:,:,3) + data(:,:,3).*jointroi.*imresp';
 figure
 image(refim/255);
-
+imresppath = fullfile(analysispath,'Overlay.png');
+imwrite(refim/255,imresppath);
 
 % response only, with black background
 refim=zeros(size(refim));
