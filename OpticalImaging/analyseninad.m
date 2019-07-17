@@ -159,8 +159,8 @@ if join_manual_rois
         jointroi = jointroi | roi{i};
     end
 else
-    jointroi = ( spatialfilter(imresp,2,'pixel')  >0.3)';
-    %jointroi = smoothen(jointroi,5)>0.5;
+    jointroi = ( spatialfilter(imresp,2,'pixel')  >0.4)';
+    %jointroi = smoothen(jointroi,5)>0.6;
     % figure;imagesc(jointroi);
 end
 
@@ -197,3 +197,22 @@ refim(:,:,2)=refim(:,:,2) + data(:,:,2).*jointroi.*imresp';
 refim(:,:,3)=refim(:,:,3) + data(:,:,3).*jointroi.*imresp';
 figure
 image(refim/255);
+
+
+% response only, with black background
+refim=zeros(size(refim));
+jointroi = double(jointroi);
+data = double(data);
+%  refim(:,:,1)=refim(:,:,1).*(1-0.5*jointroi) ;
+%  refim(:,:,2)=refim(:,:,2).*(1-0.5*jointroi) ;
+%  refim(:,:,3)=refim(:,:,3).*(1-0.5*jointroi) ;
+
+refim(:,:,1)=refim(:,:,1) + data(:,:,1).*jointroi.*imresp';
+refim(:,:,2)=refim(:,:,2) + data(:,:,2).*jointroi.*imresp';
+refim(:,:,3)=refim(:,:,3) + data(:,:,3).*jointroi.*imresp';
+figure
+image(refim/255);
+imresppath = fullfile(analysispath,'imresp.png');
+imwrite(refim/255,imresppath);
+
+
