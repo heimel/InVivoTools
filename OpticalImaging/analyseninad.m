@@ -5,11 +5,11 @@ logmsg('Add data folder to processparams_local.m');
 logmsg('as e.g. params.oidatapath_localroot = ''E:\Dropbox (NIN)\Desktop\Ninad'';');
 
 
-mouse = 'mouse4';
+mouse = 'mouse2';
 verbose = false;
 rornorm  = true; % normalize by Region of Reference (ROR)
 filterwidth = 6; % pixels
-n_rows = 3;
+n_rows = 4;
 n_cols = 5;
 
 dbname = fullfile(getdesktopfolder,'testdb_pracownia.mat');
@@ -145,7 +145,7 @@ onlinemaps(avg,[],[],[],record);
 
 h = figure('Name','Colormap');
 rc = retinotopy_colormap(n_cols,n_rows);
-image( [1:5;6:10;11:15]);
+image( reshape( 1:n_cols*n_rows,n_cols,n_rows)')  %image( [1:5;6:10;11:15]);
 colormap(rc);axis image off
 saveas(h,fullfile(analysispath,'colormap.png'));
 
@@ -159,9 +159,9 @@ if join_manual_rois
         jointroi = jointroi | roi{i};
     end
 else
-    jointroi = ( spatialfilter(imresp,2,'pixel')  >0.4)';
-    %jointroi = smoothen(jointroi,5)>0.6;
-    % figure;imagesc(jointroi);
+    jointroi = ( spatialfilter(imresp,2,'pixel')  >0.38)';
+    %jointroi = smoothen(jointroi,5)>0.09;
+    %figure;imagesc(jointroi);
 end
 
 h = plotwta(avg,1:n_rows*n_cols,[],[],find(jointroi'),5,256,record,rc);
@@ -182,7 +182,7 @@ imwrite(jointroi,jointroipath);
 record.test = '*';
 record.roifile = 'jointroi.png';
 record.bvimage = 'bvimage.tif';
-record.stim_parameters = [5 3];
+record.stim_parameters = [n_cols n_rows];
 results_oitestrecord(record);
 
 refim=double( imread(fullfile(oidatapath(record),record.bvimage)));
