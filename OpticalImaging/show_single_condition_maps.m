@@ -100,6 +100,11 @@ if ~scaling
     immin = 0;
 end
 
+if ny*nx < n_maps
+    errormsg(['Loaded more single conditions maps than expected. Only showing ' num2str(ny*nx) '. Delete all single conditions maps from folder']);
+    n_maps = ny * nx;
+end
+    
 for i = 1:n_maps
     h.single_condition(i) = subplot(ny,nx,i);
     immap = imread(fullfile(filedir,maps(i).name));

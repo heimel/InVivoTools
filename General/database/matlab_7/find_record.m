@@ -132,7 +132,7 @@ ind=[];
 pos=sort([strfind(crit,'=') strfind(crit,'!') ...
     strfind(crit,'>') strfind(crit,'<') strfind(crit,'~')]);
 if length(pos)>1
-    logmsg(['Only uses first comparison in ' crit ]);
+    warning('FIND_RECORD:ONLY_FIRST_COMPARISON',['Only uses first comparison in ' crit ]);
     pos=pos(1);
 end
 if isempty(pos)

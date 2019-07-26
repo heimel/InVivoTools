@@ -7,7 +7,7 @@ function [db,ind,changed]=sort_db(db,alt_order,show_waitbar)
 %     ALT_ORDER is an optional alternative ordering of the fields to use,
 %     can be a subset of fields
 %
-%  2005-2015, Alexander Heimel
+%  2005-2019, Alexander Heimel
 %
 
 changed = false;
@@ -103,7 +103,7 @@ for i=1:length(fields)
     f2 = rec2.(fields{i});
     
     if ~isnumeric(f1)  % for Levelt Lab only
-        if strcmp(f1(1:min(5,end)),'mouse')==1
+        if strcmp(f1(1:min(5,end)),'mouse')==1 && strcmp(f2(1:min(5,end)),'mouse')==1
             % This is to sort mouse_E13 before mouse_E3
             % if a string contains digits, then ignore text and convert
             % to number.
