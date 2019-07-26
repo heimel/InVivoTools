@@ -9,14 +9,14 @@ if nargin<1 || isempty(record)
     
     % h = getwctestdbwindow
     
-    record.mouse = 'GFP_slide';
+    record.mouse = '31334_SST';
     record.date = datestr(now,'yyyy-mm-dd');
     record.experiment = '1820.fiberphoto';
     record.setup = 'fiberphoto';
     record.datatype = 'wc';
     record.epoch = 't00001';
     record.experimenter = 'ma';
-    record.comment = 'test';
+    record.comment = 'GCamp photometry in vlPAG Right with opto in ZI';
     record.measures = [];
 end
 
@@ -33,7 +33,7 @@ par.timeshift = 0.036; % calibrated on 2019-11-04 for NI USB-6001
 par.voltage_high = 3.3; % V
 par.voltage_low = 0; % V
 par.min_pulsesamples = 1024; % for some NI board
-par.sample_rate = 400; % Hz
+par.sample_rate = 100; % Hz
 
 triggerpulse = par.voltage_low * ones(5000,1);
 triggerpulse(1:round(par.sample_rate *0.1),1) = par.voltage_high; % trigger up samples
@@ -152,8 +152,7 @@ end
 src.queueOutputData(data);
 
 function [outdata,outtime] = plotData(src,event)
-persistent data time counter
-
+persistent data time counter ymin ymax
 
 n_channels = 2;
 
@@ -161,10 +160,13 @@ outdata = [];
 outtime = [];
 nbuffer = 1000000;
 
+
 if ischar(src)
     switch src
         case 'reset'
             data = [];
+            ymax =  -inf;
+            ymin =  inf;
             return
         case 'retrieve'
             outdata = data;
@@ -182,18 +184,25 @@ end
 n = size(event.Data,1);
 data(counter:counter+n-1,:) = event.Data;
 time(counter:counter+n-1,:) = event.TimeStamps;
+
+ymax = max([ymax max(data(counter:counter+n-1,1))*1.1]);
+ymin = min([ymin min(data(counter:counter+n-1,1))/1.1]);
+
 counter = counter + n;
 if counter+n > nbuffer
     counter = 1;
 end
+
+
 
 plot(time,data(:,1)); % plot fiber data
 
 xlabel('Time (s)');
 ylabel('Voltage')
 
-ylim([ 1 3]);
-xlim([max([0 time(counter-1)-2]) time(counter-1)]);
+
+ylim([ymin ymax]);
+xlim([max([0 time(counter-1)-20]) time(counter-1)]);
 
 
 function h = getwctestdbwindow
