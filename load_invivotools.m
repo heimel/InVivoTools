@@ -208,6 +208,7 @@ end
 
 % Histology and Allen Atlas matching
 if params.load_histology
+    addpath(fullfile(path2invivotools,'Histology'));
     addpath(fullfile(path2invivotools,'Histology','Allenatlasmatching'));
 end
     
