@@ -26,8 +26,11 @@ time = vid.CurrentTime;
 im = readFrame(vid);
 gim = uint8(double(im).^gamma / (255^gamma) * 255);
 image(gim);
-axis image 
-title([num2str(time,'%.2f') ' s' ]);
+axis image off
+set(gca,'clipping','off')
+text(-10,500,'Keys: left = previous frame, right = next frame, down = play until up, q = quit, +/- = increase/decrease gamma',...
+    'color',[0 0 0]);
+text(570,450,[num2str(time,'%.2f') ' s' ],'color',[1 1 1]);
 
 if ~isempty(record.measures) && isfield(record.measures,'body_trajectory') && ~isempty(record.measures.body_trajectory)
     ind = find(record.measures.frametimes>=time & ...
@@ -50,8 +53,6 @@ if ~isempty(record.measures) && isfield(record.measures,'body_trajectory') && ~i
     end
     hold off
 end
-
-
 
 draw_screen_outline(record)
 drawnow

@@ -5,6 +5,7 @@ function record = track_wctestrecord( record, verbose )
 %
 % 2015-2018, Alexander Heimel
 %
+% DEPRECATED BUT STILL USED FOR ARENA DRAWING
 
 if nargin<2 || isempty(verbose)
     verbose = true;

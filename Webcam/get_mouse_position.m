@@ -1,4 +1,4 @@
-function [mousepos,tailbase,snout,stimpos] = get_mouse_position(frame_bg_subtracted ,par,hfig,screenrect )
+function [mousepos,tailbase,snout,stimpos,mouseBoundary] = get_mouse_position(Frame,bg,par,hfig,screenrect )
 %GET_MOUSE_POSITION gets mouse centroid, tail, snout, stim in pixels
 %
 %  [POS,TAILBASE,SNOUT,STIMPOS] = get_mouse_position( FRAME_BG_SUBSTRACTED, PAR, HFIG )
@@ -8,7 +8,7 @@ function [mousepos,tailbase,snout,stimpos] = get_mouse_position(frame_bg_subtrac
 
 if nargin<4 || isempty(screenrect)
     % taking full frame as screen rectangle
-    screenrect = [0 0 size(frame_bg_subtracted,2) size(frame_bg_subtracted,1)];
+    screenrect = [0 0 size(Frame,2) size(Frame,1)];
 end
 
 if nargin<3
@@ -24,6 +24,17 @@ if nargin<2 || isempty(par)
     par.minComponentSize = 10; % pxl, Consider smaller components as noise
     par.dilation = ones(5); % for image dilation
 end
+
+bg = double(bg);
+frame_bg_subtracted = bg - double(Frame);
+frame_bg_subtracted = abs(frame_bg_subtracted);
+frame_bg_subtracted = frame_bg_subtracted ./ (bg + 40);
+
+
+% frame_bg_subtracted = bg16 - int16(Frame);
+% frame_bg_subtracted = abs(frame_bg_subtracted);
+% frame_bg_subtracted = double(frame_bg_subtracted);
+% frame_bg_subtracted = frame_bg_subtracted ./ (double(bg16) + 40);
 
 par.blackThreshold = 0.3;
 
@@ -64,14 +75,13 @@ imbw = frame_bg_subtracted> blackThreshold;
 imbw = imclose(imbw,par.dilation);
 
 
-boundary = bwboundaries(imbw);
-if ~isempty(hfig)
-    hold on
-    for i = 1:length(boundary)
-        plot(boundary{i}(:,2),boundary{i}(:,1),'w')
-    end
-    
-end
+% boundary = bwboundaries(imbw);
+% if ~isempty(hfig)
+%     hold on
+%      for i = 1:length(boundary)
+%          plot(boundary{i}(:,2),boundary{i}(:,1),'w')
+%     end
+% end
 
 % remove small components
 mouse = bwareaopen(imbw, par.minComponentSize);
@@ -122,11 +132,9 @@ if ~isempty(hfig)
     hold on
     for i = 1:length(mouseBoundary)
         plot(mouseBoundary{i}(:,2),mouseBoundary{i}(:,1),'y')
-        
     end
     hold off
 end
-
 
 br = 5;
 while length(mouseBoundary)>1 && br<30 % grow until single component

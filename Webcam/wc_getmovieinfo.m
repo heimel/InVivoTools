@@ -10,7 +10,7 @@ par = wcprocessparams(record);
 
 filename = [];
 d = dir(fullfile(experimentpath(record),'webcam*info.mat'));
-logmsg(['Found ' num2str(length(d)) ' webcam records in ' experimentpath(record)]);
+%logmsg(['Found ' num2str(length(d)) ' webcam records in ' experimentpath(record)]);
 if isempty(d)
     wcinfo = [];
     return
@@ -51,7 +51,6 @@ for i=1:length(d)
     end
 end
 
-
 % create mp4 wrappers
 parpath = fullfile(experimentpath(record),'..');
 
@@ -85,15 +84,11 @@ else
     logmsg(['Cannot create mp4 wrapper for ' fullfile(parpath,wcinfo(i).filename) '. Try on linux computer, or run sudo apt-get -y install gpac']);
 end
 
-real_stimstart = [];
 for i=1:length(wcinfo)
-    real_stimstart(i) = (wcinfo(i).stimstart)*par.wc_timemultiplier  + par.wc_timeshift ;
-    logmsg(['Recorded in ' fullfile(parpath,wcinfo(i).filename)]);
-    logmsg(['Stimulus started original: ' num2str(wcinfo(i).stimstart) ' s = '...
-        num2str(floor(wcinfo(i).stimstart/60)) ':' num2str(wcinfo(i).stimstart-60*floor(wcinfo(i).stimstart/60),'%02.2f')   ]);
-    logmsg(['Stimulus started corrected: ' num2str(real_stimstart) ' s = '...
-        num2str(floor(real_stimstart/60)) ':' num2str(real_stimstart-60*floor(real_stimstart/60),'%02.2f')   ]);
+    wcinfo(i).real_stimstart = (wcinfo(i).stimstart)*par.wc_timemultiplier  + par.wc_timeshift ;
+%    logmsg(['Recorded in ' fullfile(parpath,wcinfo(i).filename)]);
+%    logmsg(['Stimulus started original: ' num2str(wcinfo(i).stimstart) ' s, ' ...
+%        'corrected: ' num2str(wcinfo(i).real_stimstart) ' s' ]);
 end
-
 
 filename = fullfile(wcinfo.path,wcinfo.mp4name);

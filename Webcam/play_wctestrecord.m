@@ -41,7 +41,7 @@ else
     vid.CurrentTime = starttime;
 end
 
-disp('Keys: left = previous frame, right = next frame, down = play until up, q = quit, + = increase gamma, - = decrease gamma');
+%disp('Keys: left = previous frame, right = next frame, down = play until up, q = quit, + = increase gamma, - = decrease gamma');
 
 fig = figure('Name',['Play ' recordfilter(record)],'NumberTitle','off','MenuBar','none');
 changed = true;

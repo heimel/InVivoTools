@@ -9,15 +9,11 @@ global measures global_record
 
 global_record = record;
 
-experimentpath(record)
-
-measures = record.measures
-
+measures = record.measures;
 
 evalin('base','global measures');
 evalin('base','global global_record');
 logmsg('Measures available in workspace as ''measures'',, record as ''global_record''.');
-
 
 filename = fullfile(experimentpath(record),'firstframe.mat');
 if exist(filename,'file')
@@ -34,12 +30,17 @@ if ~isfield(record,'measures') || ~isfield(record.measures,'stimstart')
 end
 
 stimstart = measures.stimstart;
-frameRate = measures.frameRate;
-frame1 = firstframe;
 
-if isfield(record.measures,'arena')
+if isfield(record.measures,'brightness') 
     arena = measures.arena;
     brightness = measures.brightness;
+
+    [wcinfo,filename] = wc_getmovieinfo(record);
+    vid = VideoReader(filename);
+    %    stimstart = wc_getstimstart( record, vid.FrameRate );
+    vid.CurrentTime = stimstart;
+    frame1 = double(readFrame(vid));
+
     
     if showstimpeaks
         figure;
@@ -104,7 +105,16 @@ if isfield(record.measures,'arena')
             peakPointL = peakPoints(2,:);
         end
         
-        stimFrame = stimstart*frameRate;
+        if isfield(measures,'framerate')
+            framerate = measures.framerate;
+        elseif isfield(measures,'frameRate')
+            framerate = measures.frameRate; % deprecated
+        else
+            logmsg(['Reanalyse record ' recordfilter(record)]);
+            return
+        end
+        
+        stimFrame = stimstart*framerate;
         start_frame = stimFrame-30-10; %30:length of the stim, 10:for interval
         end_frame = stimFrame+90+30;
         frames = start_frame:end_frame;
@@ -125,43 +135,18 @@ if isfield(record.measures,'arena')
     end
 end
 
+
 % plots movement trajectory
 if isfield(measures,'mousemove') && ~isempty(measures.mousemove)
     mousemove = measures.mousemove ;
-else
-    errormsg('Mouse movement is not determined. Use "analyse" button')
-end
-
-if isfield(measures,'move2der') && ~isempty(measures.move2der)
     move2der = measures.move2der ;
-else
-    errormsg('Movement 2nd derivative is not determined. Use "analyse" button')
-end
-if isfield(measures,'trajectorylength') && ~isempty(measures.trajectorylength)
     trajectorylength = measures.trajectorylength ;
-else
-    errormsg('Trajectory length is not determined. Use "analyse" button')
-    
-end
-if isfield(measures,'averagemovement') && ~isempty(measures.averagemovement)
     averagemovement = measures.averagemovement ;
-else
-    errormsg('Average movement is not determined. Use "analyse" button')
-end
-if isfield(measures,'minimalmovement') && ~isempty(measures.minimalmovement)
     minimalmovement = measures.minimalmovement ;
-else
-    errormsg('Minimal movement is not determined. Use "analyse" button')
-end
-if isfield(measures,'diftreshold') && ~isempty(measures.diftreshold)
     diftreshold = measures.diftreshold ;
-else
-    errormsg('difference treshold is not determined. Use "analyse" button')
-end
-if isfield(measures,'deriv2tresh') && ~isempty(measures.deriv2tresh)
     deriv2tresh = measures.deriv2tresh ;
 else
-    errormsg('Difference treshold is not determined. Use "analyse" button')
+    logmsg(['Information missing. Reanalyse ' recordfilter(record)]);
 end
 
 my_blue = [0 0.2 0.6];
@@ -184,47 +169,37 @@ if exist('mousemove','var') && ~isempty(mousemove)
     set(gca, 'xtick', (0:30:600), 'XTickLabel', (-10:10),'xgrid','on');
     title('2nd derivative of the trajectory');
 else
-    disp('No trajectory data available');
+    logmsg('No trajectory data available');
 end
 
 
 showangles = true;
 
 % plots angles
-if isfield(measures,'nose') && ~isempty(measures.nose)
+if isfield(measures,'nose') && ~isempty(measures.nose) && ...
+        isfield(measures,'arse') && ~isempty(measures.arse)&& ...
+        isfield(measures,'head_theta') && ~isempty(measures.head_theta)
     nose = measures.nose;
-else
-    errormsg('nose coordinate is not available. Likely no freezing was detected. Use "analyse" button')
-    nose = NaN;
-    showangles = false;
-    
-end
-if isfield(measures,'arse') && ~isempty(measures.arse)
     arse = measures.arse;
-else
-    errormsg('arse coordinate is not determined. use "analyse" button')
-    showangles = false;
+    head_theta = measures.head_theta;
+    pos_theta = measures.pos_theta;
     
+    
+else
+    logmsg(['Body coordinates are not available. Analyse ' recordfilter(record)])
+    nose = NaN;
+    arse = NaN;
+    showangles = false;
 end
+
 if isfield(measures,'stim') && ~isempty(measures.stim)
     stim = measures.stim;
 else
-    errormsg('stim coordinate is not determined. use "analyse" button')
-    showangles = false;
-    
-end
-if isfield(measures,'head_theta') && ~isempty(measures.head_theta)
-    head_theta = measures.head_theta;
-else
-    errormsg('head_theta is not determined. use "analyse" button')
+    logmsg('Stim coordinate is not determined. use "analyse" button')
     showangles = false;
 end
-if isfield(measures,'pos_theta') && ~isempty(measures.pos_theta)
-    pos_theta = measures.pos_theta;
-else
-    errormsg('pos_theta is not determined. use "analyse" button')
-    showangles = false;
-end
+
+
 if showangles
     L = size(nose,1);
     sbrange=round(L/2);
@@ -269,7 +244,6 @@ if showangles
                     text(50,(extent(2)-50),sprintf('position \\theta = %.1f%c',pos_theta(k),...
                         char(176)),'color',my_purple, 'fontweight', 'b', 'BackgroundColor','w');
                     
-                    
                 end
             end
         else
@@ -278,4 +252,5 @@ if showangles
     end
 end
 
+wc_kinetogram(record);
 wc_plot_polar_trajectory(record);

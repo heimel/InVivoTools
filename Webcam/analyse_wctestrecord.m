@@ -12,13 +12,11 @@ end
 
 par = wcprocessparams( record );
 
-wcinfo = wc_getmovieinfo( record);
+[wcinfo,filename] = wc_getmovieinfo( record);
 if isempty(wcinfo)
     logmsg(['Could not get movie info for ' recordfilter(record)]);
     return
 end
-
-filename = fullfile(wcinfo.path,wcinfo.mp4name);
 
 stimsfile = getstimsfile(record);
 if isempty(stimsfile)
@@ -41,9 +39,7 @@ rec = 1;
 
 stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
 
-
 if par.use_legacy_videoreader
-    
     if isempty(record.stimstartframe)
         if isfield(record.measures,'peakPoints')
             peakPoints = record.measures.peakPoints;
@@ -54,7 +50,7 @@ if par.use_legacy_videoreader
         stimStart = record.stimstartframe / 30;
         peakPoints = [];
     end
-
+    
     [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
         averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] = ...
         trackmouseblack_pi_legacy(filename,false,stimStart,startside,peakPoints, record);
@@ -70,7 +66,6 @@ if par.use_legacy_videoreader
     record.measures.minimalmovement = minimalMovement;
     record.measures.diftreshold = difTreshold;
     record.measures.deriv2tresh = deriv2Tresh;
-    
     record.measures.freeze_duration = freeze_duration;
     record.measures.freezing_computed = ~isempty(freezeTimes);
     
@@ -94,16 +89,11 @@ if par.use_legacy_videoreader
         record.measures.head_theta = NaN;
         record.measures.pos_theta = NaN;
     end
-    
-    %     [freezeTimes, nose, arse, stim, mouse_move, move_2der, trajectory_length,...
-    %         averageMovement,minimalMovement,difTreshold,deriv2Tresh, freeze_duration] = ...
-    %         trackmouseblack_pi(filename,false,stimStart,startside,peakPoints, record);
 end
 
-try
-    record = wc_track_mouse(record, [], verbose);
-    record = wc_interpret_tracking(record,verbose);
-catch me
-    errormsg(me.message);
+if ~isfield(record.measures,'arena') || isempty(record.measures.arena)
+    record = wc_get_arena(record);
 end
+record = wc_track_mouse(record, [], verbose);
+record = wc_interpret_tracking(record,verbose);
 

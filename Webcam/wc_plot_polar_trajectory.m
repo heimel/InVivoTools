@@ -31,8 +31,6 @@ elevation = record.measures.elevation_trajectory;
 r.azimuth = azimuth;
 r.elevation = elevation;
 
-
-
 if verbose
     polarplot(azimuth,pi/2-elevation,'.','color',0.8*[1 1 1])
     set(gca,'ThetaDir','clockwise') % to fit with movie
@@ -54,6 +52,7 @@ t = record.measures.frametimes;
 if isfield(record.measures,'freezetimes')
     freezetimes = record.measures.freezetimes;
 else
+    logmsg(['Record is not manually analyzed, ' recordfilter(record)]);
     freezetimes = record.measures.freezetimes_aut;
 end
 
@@ -62,32 +61,26 @@ r.elevation_freezestart = [];
 r.azimuth_freeze = [];
 r.elevation_freeze = [];
 
-if isfield(record.measures,'pos_theta') % analysed by manual operator
-    for i = 1:size(freezetimes,1)
-        if  isnan( record.measures.pos_theta(i))
-            % not a proper freeze as determined by manual operator
-            continue
+for i = 1:size(freezetimes,1)
+    ind = find(t>=freezetimes(i,1) & t<=freezetimes(i,2));
+    if ~isempty(ind)
+        indind = find(~isnan(ind),1,'first');
+        if ~isempty(indind)
+            r.azimuth_freezestart = [r.azimuth_freezestart;azimuth(ind(indind))];
+            r.elevation_freezestart = [r.elevation_freezestart;elevation(ind(indind))];
         end
-        ind = find(t>=freezetimes(i,1) & t<=freezetimes(i,2));
-        if ~isempty(ind)
-            indind = find(~isnan(ind),1,'first');
-            if ~isempty(indind)
-                r.azimuth_freezestart = [r.azimuth_freezestart;azimuth(ind(indind))];
-                r.elevation_freezestart = [r.elevation_freezestart;elevation(ind(indind))];
-            end
-            r.azimuth_freeze = [r.azimuth_freeze;azimuth(ind)];
-            r.elevation_freeze = [r.elevation_freeze;elevation(ind)];
-            
-            if verbose
-                hf = polarplot(azimuth(ind),pi/2-elevation(ind),'r.-');
-                set(hf,'linewidth',3);
-            end
-            
-            azimuth(ind) = NaN;
-            elevation(ind) = NaN;
+        r.azimuth_freeze = [r.azimuth_freeze;azimuth(ind)];
+        r.elevation_freeze = [r.elevation_freeze;elevation(ind)];
+        
+        if verbose
+            hf = polarplot(azimuth(ind),pi/2-elevation(ind),'r.-');
+            set(hf,'linewidth',3);
         end
         
+        azimuth(ind) = NaN;
+        elevation(ind) = NaN;
     end
+    
 end
 
 r.azimuth_nonfreeze = azimuth;

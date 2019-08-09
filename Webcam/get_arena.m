@@ -5,6 +5,8 @@ function [frameRate, arena] = get_arena(filename, stimStart, record)
 %
 % 2016, Azadeh Tafreshiha
 % 2018-2019, Edited Alexander Heimel
+%
+% DEPRECATED, USE WC_GET_ARENA INSTEAD
 
 v = VideoReader(filename);
 frameRate = get(v, 'FrameRate');
