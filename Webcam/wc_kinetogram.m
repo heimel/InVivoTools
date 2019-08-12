@@ -36,7 +36,6 @@ for i=1:length(records)
     m =  m - min(m);
     mousemove(count,1:length(m)) = m;
 
-    
     freezetimes = record.measures.freezetimes_aut;
   %  freezetimes = record.measures.freezetimes;
     n_freezes = size(freezetimes,1);
@@ -83,5 +82,10 @@ xlabel('Time from stimulus onset (s)');
 ylabel('Trial number');
 set(gca,'ydir','reverse');
 h = colorbar;
-set(get(h,'label'),'string','Movement (pixels per frame)');
+set(get(h,'label'),'string','Pixel change per frame (a.u.)');
 smaller_font(-6);
+drawnow
+if count>1
+    yt = get(gca,'ytick');
+    set(gca,'ytick',[1 yt]);
+end

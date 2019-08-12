@@ -9,7 +9,17 @@ function record = wc_get_arena( record )
 
 vid = VideoReader(filename);
 stimstart = wc_getstimstart( record, vid.FrameRate );
-vid.CurrentTime = stimstart;
+try
+    vid.CurrentTime = stimstart;
+catch me
+    switch me.identifier
+        case 'MATLAB:set:notLessEqual'
+            errormsg(['Stimstart is too large for ' recordfilter(record)]);
+        otherwise
+            errormsg([me.message ' for ' recordfilter(record)]);
+    end
+    return
+end
 frame = double(readFrame(vid));
 
 frame = mean(frame,3); % convert to gray

@@ -8,10 +8,10 @@ function play_wctestrecord(record)
 %
 % 2015-2019, Alexander Heimel
 
-par = wcprocessparams( record );
+params = wcprocessparams( record );
 
-if isempty(par.wc_playercommand)
-    errormsg('No videoplayer found. Add line to processparms_local.m with par.wc_playercommand to set player.');
+if isempty(params.wc_playercommand)
+    errormsg('No videoplayer found. Add line to processparms_local.m with params.wc_playercommand to set player.');
     return
 end
 
@@ -22,7 +22,7 @@ if isempty(wcinfo)
     return
 end
 
-starttime = (wcinfo(1).stimstart-par.wc_playbackpretime) * par.wc_timemultiplier + par.wc_timeshift;
+starttime = (wcinfo(1).stimstart-params.wc_playbackpretime) * params.wc_timemultiplier + params.wc_timeshift;
 
 logmsg('Running video in matlab');
 if ~exist(filename,'file')
@@ -46,7 +46,7 @@ end
 fig = figure('Name',['Play ' recordfilter(record)],'NumberTitle','off','MenuBar','none');
 changed = true;
 
-gamma = 1;
+gamma = params.wc_play_gamma;
 
 play = false;
 

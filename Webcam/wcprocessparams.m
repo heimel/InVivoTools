@@ -80,6 +80,13 @@ params.wc_freeze_smoother = [5,5]; % Number of frames that freeze analysis is av
 params.wc_analyse_time_before_onset = 2; % s, time to analyse before stimulus starts
 params.wc_analyse_time_after_offset = 2; % s, time to analyse after stimulus ends
 
+params.wc_play_gamma = 1; % default gamma to use for showing mouse movies
+
+% freezing detection parameters
+params.wc_difScope = 50; % The range around mouse that is included in pixelchange analysis 
+params.wc_difThreshold = 0.3; % threshold + minimum movement for difference between frames
+% to be considered as no difference, fraction of average movement 
+params.wc_deriv2thres = 0.08; % Threshold for 2nd derivative of vidDif for detecting freezing
 
 
 

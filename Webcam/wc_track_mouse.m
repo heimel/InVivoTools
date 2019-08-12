@@ -14,14 +14,8 @@ params = wcprocessparams(record);
 
 % parameters
 makeVideo = false;
-gamma = 0.3; % for showing image
+gamma = params.wc_play_gamma; % for showing image
 
-difScope = 50; % The range around mouse that is included in pixelchange analysis %was 60
-% nestRange = [80 60]; % x, y in pixels, range from nestcenter at which
-% mouse is treated as in nest
-difTreshold = 0.3; % threshold + minimum movement for difference between frames
-% to be considered as no difference, fraction of average movement %was 0.3
-deriv2Tresh = 0.08; % Treshold for 2nd derivative of vidDif %was 0.05
 
 % defaults
 if isempty(record)
@@ -43,9 +37,8 @@ if ~isstruct(record)
     record.mouse = '';
     record.stimstartframe = [];
     stimduration = 3;
-    wcinfo = wc_getmovieinfo(record);
 else
-    [wcinfo,filename] = wc_getmovieinfo(record);
+    [~,filename] = wc_getmovieinfo(record);
     sf = getstimsfile(record);
     stimduration = duration(sf.saveScript);
 end
@@ -138,11 +131,11 @@ while vid.CurrentTime < timeRange(2) && hasFrame(vid)
         vidDif(i) = 0;
     else
         frameDif = abs(Frame - oldframe);
-        difScopex1 = max(1,round(body(i,1) - difScope));
-        difScopex2 = min(s(2),round(body(i,1)+ difScope));
-        difScopey1 = max(1,round(body(i,2) - difScope));
-        difScopey2 = min(s(1),round(body(i,2)+ difScope));
-        frameDifMouse = frameDif(difScopey1:difScopey2,difScopex1:difScopex2,:);
+        params.wc_difScopex1 = max(1,round(body(i,1) - params.wc_difScope));
+        params.wc_difScopex2 = min(s(2),round(body(i,1)+ params.wc_difScope));
+        params.wc_difScopey1 = max(1,round(body(i,2) - params.wc_difScope));
+        params.wc_difScopey2 = min(s(1),round(body(i,2)+ params.wc_difScope));
+        frameDifMouse = frameDif(params.wc_difScopey1:params.wc_difScopey2,params.wc_difScopex1:params.wc_difScopex2,:);
         vidDif(i) = mean(frameDifMouse(:));
     end
     
@@ -176,7 +169,7 @@ hitnr = 0;
 smoothVidDif = movmean(vidDif,2*params.wc_freeze_smoother);
 deriv2 = diff(smoothVidDif);
 minimalMovement = min(smoothVidDif);
-nomotion = smoothVidDif(1:end-1) < (minimalMovement + difTreshold) & abs(deriv2) < deriv2Tresh;
+nomotion = smoothVidDif(1:end-1) < (minimalMovement + params.wc_difThreshold) & abs(deriv2) < params.wc_deriv2thres;
 
 freezeTimes = [];
 freeze_duration = [];
