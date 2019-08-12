@@ -36,11 +36,14 @@ if isfield(record.measures,'brightness')
     brightness = measures.brightness;
 
     [wcinfo,filename] = wc_getmovieinfo(record);
-    vid = VideoReader(filename);
-    %    stimstart = wc_getstimstart( record, vid.FrameRate );
-    vid.CurrentTime = stimstart;
-    frame1 = double(readFrame(vid));
-
+    if ~isempty(filename)
+        vid = VideoReader(filename);
+        %    stimstart = wc_getstimstart( record, vid.FrameRate );
+        vid.CurrentTime = stimstart;
+        frame1 = double(readFrame(vid));
+    else
+        frame1 = zeros(480,640);
+    end
     
     if showstimpeaks
         figure;

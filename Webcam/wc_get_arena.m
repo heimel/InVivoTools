@@ -1,9 +1,13 @@
-function record = wc_get_arena( record )
+function record = wc_get_arena( record,verbose )
 %WC_GET_ARENA automatically fits a rectangular arena from a movie still
 %
 %  RECORD = WC_GET_ARENA( RECORD )
 %
 % 2019, Alexander Heimel
+
+if nargin<2 || isempty(verbose)
+    verbose = false;
+end
 
 [~,filename] = wc_getmovieinfo( record );
 
@@ -36,8 +40,9 @@ arena(4) = ind - arena(2);
 
 record.measures.arena = arena;
 
-% figure
-% imagesc(frame);
-% hold on
-% rectangle('pos',arena);
-
+if verbose
+    figure('Name','Arena','NumberTitle','off');
+    imagesc(frame);
+    hold on
+    rectangle('pos',arena);
+end

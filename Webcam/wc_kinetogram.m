@@ -27,6 +27,10 @@ for i=1:length(records)
         logmsg(['No stimstartframe and no stimstart field in ' recordfilter(record)]);
         continue
     end
+    if ~isfield(record.measures,'frametimes')
+        continue
+    end
+    
     frametimes = record.measures.frametimes - stimstart;
     if abs(median(diff(frametimes))- (1/30))>1E-7
         logmsg(['Framerate not 30 Hz in ' recordfilter(record)]);
@@ -50,6 +54,11 @@ for i=1:length(records)
 end
 
 count = count - 1;
+
+if count==0 % no data
+    return
+end
+
 mousemove = mousemove(1:count,:);
 
 figure('Name','Kinetogram','NumberTitle','off');
