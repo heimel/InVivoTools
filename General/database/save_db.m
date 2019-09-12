@@ -5,14 +5,14 @@ function [filename,lockfile]=save_db(db, filename , suggest,lockfile)
 %      if no FILENAME is given, then a dialog popups to select a name
 %      SUGGEST is what to suggest if no filename is given
 %
-% 2007-2017, Alexander Heimel
+% 2007-2019, Alexander Heimel
 %
 
 if nargin<4
-    lockfile='';
+    lockfile = '';
 end
 if nargin<3
-    suggest='';
+    suggest = '';
 end
 if nargin<2 || isempty(filename)
     if isempty(suggest)
@@ -26,7 +26,7 @@ if nargin<2 || isempty(filename)
     if filename==0
         return
     end
-    filename=fullfile(pathname,filename);
+    filename = fullfile(pathname,filename);
 end
 
 if exist(filename,'dir')
@@ -66,10 +66,10 @@ saveStructArray(filename,db,1,';',1);
 function [filename,lockfile] = save_mat(db,filename,lockfile)
 debug = 1;
 
-[res,newlockfile]=checklock(filename);
+[res,newlockfile] = checklock(filename);
 if res==1 % a lockfile exists
-    if newlockfile~=lockfile
-        [res,lockfile]=setlock(filename);
+    if ~structdiff(newlockfile,lockfile)
+        [res,lockfile] = setlock(filename);
         if res==0
             [filename,lockfile] = save_db(db, '',filename,lockfile);
             return
@@ -79,17 +79,17 @@ else % no lockfile exists yet
     [res,lockfile] = setlock(filename);
 end
 
-h=waitbar(0,'Saving database. Please wait...');
+h = waitbar(0,'Saving database. Please wait...');
 
 if debug
     tic
 end
 
-v=version;
-if v(1)<'5'
+v = version;
+if v(1)<'5' && ~isoctave
     errormsg('Cannot save in Version 5 matlab format',true);
 end
-if v(1)=='5'
+if v(1)=='5' && ~isoctave
     if exist(filename,'file')
         movefile(filename,[filename '_copy']);
     end
@@ -108,14 +108,23 @@ else
             tc = toc;
             logmsg(['Saved ' filename ' in v7 format in ' num2str(round(tc)) ' s.']);
         end
-    catch
-        [~,fname,ext] = fileparts(filename);
-        tempfile = fullfile(tempdir,[fname ext]);
-        save(tempfile,'db','-mat');
-        movefile(tempfile,filename,'f')
-        if debug
-            tc = toc;
-            logmsg(['Saved ' filename ' in format of ' version ' in ' num2str(round(tc)) ' s.']);
+    catch me
+        if isoctave && strcmp(me.message,'save: error compressing data element')
+            save(filename,'db','-v6');
+            if debug
+                tc = toc;
+                logmsg(['Saved ' filename ' in v6 format in ' num2str(round(tc)) ' s.']);
+            end
+        else                
+            logmsg(me.message);
+            [~,fname,ext] = fileparts(filename);
+            tempfile = fullfile(tempdir,[fname ext]);
+            save(tempfile,'db','-mat');
+            movefile(tempfile,filename,'f')
+            if debug
+                tc = toc;
+                logmsg(['Saved ' filename ' in format of ' version ' in ' num2str(round(tc)) ' s.']);
+            end
         end
     end
 end

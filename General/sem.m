@@ -6,6 +6,11 @@ function s=sem(x,dim)
 % Alexander Heimel?
 %
 
+if isempty(x)
+    s = [];
+    return
+end
+
 if nargin==1
   s=nanstd(x)./sqrt(sum(~isnan(x)));
 else  

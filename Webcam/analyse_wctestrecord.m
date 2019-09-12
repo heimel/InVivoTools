@@ -12,6 +12,8 @@ end
 
 par = wcprocessparams( record );
 
+record = wc_postanalysis( record,verbose ); % also run at the end. run here if the data cannot be found
+
 [wcinfo,filename] = wc_getmovieinfo( record);
 if isempty(wcinfo)
     logmsg(['Could not get movie info for ' recordfilter(record)]);
@@ -96,4 +98,5 @@ if ~isfield(record.measures,'arena') || isempty(record.measures.arena)
 end
 record = wc_track_mouse(record, [], verbose);
 record = wc_interpret_tracking(record,verbose);
+record = wc_postanalysis( record,verbose); 
 

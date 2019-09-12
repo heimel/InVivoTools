@@ -31,7 +31,7 @@ elevation = record.measures.elevation_trajectory;
 r.azimuth = azimuth;
 r.elevation = elevation;
 
-if verbose
+if verbose && ~isoctave
     polarplot(azimuth,pi/2-elevation,'.','color',0.8*[1 1 1])
     set(gca,'ThetaDir','clockwise') % to fit with movie
     hold on
@@ -42,7 +42,7 @@ ind = find(~isnan(azimuth),1,'first');
 r.azimuth_stimstart = azimuth(ind);
 r.elevation_stimstart = elevation(ind);
 
-if verbose
+if verbose && ~isoctave
     h = polarplot(r.azimuth_stimstart,pi/2-r.elevation_stimstart,'go');
     set(h,'MarkerFaceColor',get(h,'Color'));
 end
@@ -72,7 +72,7 @@ for i = 1:size(freezetimes,1)
         r.azimuth_freeze = [r.azimuth_freeze;azimuth(ind)];
         r.elevation_freeze = [r.elevation_freeze;elevation(ind)];
         
-        if verbose
+        if verbose && ~isoctave
             hf = polarplot(azimuth(ind),pi/2-elevation(ind),'r.-');
             set(hf,'linewidth',3);
         end

@@ -23,10 +23,18 @@ if isoctave
     warning('off', 'Octave:mixed-string-concat');
     try
         pkg load instrument-control
+        pkg load statistics % for ivt_graph
     catch me
        disp(me.message);
     end
-end
+%   try
+%        pkg load image % for imrect in results_wctestrecord
+%    catch me
+%       disp(me.message);
+%    end
+
+    
+ end
 
 disp([ upper(mfilename) ': Manual available at https://github.com/heimel/InVivoTools/wiki']);
 

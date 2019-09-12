@@ -3,7 +3,7 @@ function results_wctestrecord( record )
 %
 % RESULTS_WCTESTRECORD( RECORD )
 %
-% 2015-2016, Azadeh Tafreshiha, Alexander Heimel
+% 2015-2019, Azadeh Tafreshiha, Alexander Heimel
 
 global measures global_record
 
@@ -21,13 +21,22 @@ if exist(filename,'file')
 end
 
 % plots the arena
+if exist('OCTAVE_VERSION', 'builtin')
+    showstimpeaks = false;
+else 
+    showstimpeaks = true;
+end
 
-showstimpeaks = true;
+if isfield(record,'measures') && isfield(record.measures,'session')
+    logmsg(['Session = ' num2str(record.measures.session)]);
+end    
 
 if ~isfield(record,'measures') || ~isfield(record.measures,'stimstart')
     logmsg('stim start is not determined. use "track" button')
     return
 end
+
+
 
 stimstart = measures.stimstart;
 
@@ -45,7 +54,7 @@ if isfield(record.measures,'brightness')
         frame1 = zeros(480,640);
     end
     
-    if showstimpeaks
+    if showstimpeaks 
         figure;
         image(frame1);
         axis image
@@ -158,17 +167,17 @@ my_purple = [0.6 0.2 0.6];
 if exist('mousemove','var') && ~isempty(mousemove)
     figure;
     subplot(2,1,1);
-    plot((1:trajectorylength),averagemovement,'--k');hold on;
-    plot((1:trajectorylength),minimalmovement+diftreshold,'linestyle' ,'--');
+    plot([1 trajectorylength],averagemovement*[1 1],'--k');hold on;
+    plot([1 trajectorylength],(minimalmovement+diftreshold)*[1 1],'linestyle' ,'--');
     plot(mousemove,'color',my_blue,'linewidth',2);
     set(gca, 'xtick', (0:30:600), 'XTickLabel', (-10:10),'xgrid','off');
     title('Mouse movement trajectory');
-    
     subplot(2,1,2);
     plot([1,trajectorylength],[deriv2tresh,deriv2tresh], '--k'); hold on;
     plot([1,trajectorylength],[-deriv2tresh,-deriv2tresh], '--k');
     plot(move2der, 'color',[0.8 0 0.6],'linewidth',1.4);
-    xlabel('seconds'); ylim([-0.7 0.7]);
+    xlabel('seconds'); 
+    ylim([-0.7 0.7]);
     set(gca, 'xtick', (0:30:600), 'XTickLabel', (-10:10),'xgrid','on');
     title('2nd derivative of the trajectory');
 else
@@ -186,8 +195,6 @@ if isfield(measures,'nose') && ~isempty(measures.nose) && ...
     arse = measures.arse;
     head_theta = measures.head_theta;
     pos_theta = measures.pos_theta;
-    
-    
 else
     logmsg(['Body coordinates are not available. Analyse ' recordfilter(record)])
     nose = NaN;
@@ -205,30 +212,29 @@ end
 
 if showangles
     L = size(nose,1);
-    sbrange=round(L/2);
+    sbrange = round(L/2);
     figure
     for k = 1:L
         arse_a(k, :) = arse(k,:) - nose(k,:);  %THE COORDINATES ALIGNED TO NOSE
         nose_a(k, :) = nose(k,:) - nose(k,:);
         if ~isempty(nose) && ~isempty(arse)
-            %         figure(k+(fig_n));
             if sbrange ~= 1
                 subplot((round(L/2)),(round(L/2)),k);
             else
                 subplot(L,L,k);
             end
             plot([0, nose_a(k,1)], [0, nose_a(k,2)],'v','MarkerSize',8,...
-                'MarkerFaceColor', my_blue); hold on;
-            grid on;
+                'MarkerFaceColor', my_blue); 
+            hold on
+            grid on
             extent1 = abs(arse_a)+50;
             ax1 = max(max(extent1));
             plot([-ax1 ax1],[0 0],'--k',[0 0],[-ax1 ax1],'--k');
-            hold on;
-            text(-15,-30,'nose','color',my_blue, 'fontweight', 'b', 'BackgroundColor','w');
+            text(-15,-30,'nose','color',my_blue, 'BackgroundColor','w');
             plot([0, arse_a(k,1)], [0, arse_a(k,2)], 'linewidth',3,'color',my_blue);
-            hold on;
-            head_txt = text(50,(ax1-10),sprintf('head \\theta = %.1f%c',head_theta(k),...
-                char(176)),'color',my_blue, 'fontweight', 'b', 'BackgroundColor','w'); %char(176) is deg
+            head_txt = text(50,(ax1-10),...
+                sprintf('head \\theta = %.1f%c',head_theta(k),char(176)),...
+                'color',my_blue, 'BackgroundColor','w'); %char(176) is deg
             if ~isempty(stim)
                 stim_present = any(stim,2);
                 if stim_present(k)== 1
@@ -239,13 +245,15 @@ if showangles
                     end
                     stim_a(k, :) = stim(k,:) - nose(k,:);
                     plot([0, stim_a(k,1)], [0, stim_a(k,2)], 'linewidth',3,...
-                        'color',my_purple); hold on;
+                        'color',my_purple); 
+                    hold on;
                     grid on;
                     extent = abs(stim_a)+60; ax= max(max(extent));
                     plot([-ax ax],[0 0],'--k',[0 0],[-ax ax],'--k');
                     set(head_txt, 'Position',[50 (extent(2))] );
-                    text(50,(extent(2)-50),sprintf('position \\theta = %.1f%c',pos_theta(k),...
-                        char(176)),'color',my_purple, 'fontweight', 'b', 'BackgroundColor','w');
+                    text(50,(extent(2)-50),...
+                        sprintf('position \\theta = %.1f%c',pos_theta(k),char(176)),...
+                        'color',my_purple,'BackgroundColor','w');
                     
                 end
             end

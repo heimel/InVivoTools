@@ -24,6 +24,10 @@ max_freezing_starttime = 4; % s
 min_freezing_starttime = -0.5; % s
 min_freezing_duration = 0.6; % s
 
+if isfield(record,'measures') && isfield(record.measures,'session')
+    logmsg(['Session = ' num2str(record.measures.session)]);
+end
+
 
 switch exp
     case 14.13

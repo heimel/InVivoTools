@@ -5,7 +5,7 @@ function [c,flds] = structdiff(a,b,verbose)
 % C = STRUCTDIFF( A, B, VERBOSE )
 % [C,FLDS] = STRUCTDIFF( A, B, VERBOSE )
 %
-%    returns C=1 if all fields of A and B are identical
+%    returns C=1 if all fields of A and B are identical, C=0 otherwise
 %    FLDS contains all fieldnames which differ
 %
 % 200X, Steve VanHooser

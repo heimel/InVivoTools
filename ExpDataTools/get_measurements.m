@@ -105,7 +105,7 @@ end % g
 
 linehead = '';
 switch measuress.datatype
-    case {'oi','ec','lfp','tp','ls','fret','fp','pupil'}
+    case {'oi','ec','lfp','tp','ls','fret','fp','wc','pupil'}
         reload = false;
         if isempty(expdb_cache) || ...
                 ~isfield(expdb_cache,measuress.datatype) || ...
@@ -171,9 +171,9 @@ end
 
 % exclude groups for which we have too few points
 if exist('min_n','var')
-    min_n=str2double(min_n); %#ok<NODEF>
+    min_n = str2double(min_n); %#ok<NODEF>
 else
-    min_n=1;
+    min_n = 1;
 end
 
 results = cell(1,n_groups);
@@ -181,7 +181,7 @@ dresults = cell(1,n_groups);
 rawdata = cell(1,n_groups);
 
 for g=1:n_groups
-    newlinehead=[linehead groupss(g).name ': '];
+    newlinehead = [linehead groupss(g).name ': '];
     pooled.group = g;
     
     if exist('verbose','var') && verbose
@@ -189,7 +189,7 @@ for g=1:n_groups
     end
     
     [results{g},dresults{g}, rawdata{g}]=get_measurements_for_group( groupss(g),measuress,value_per,mousedb,testdb,extra_options,newlinehead);
-    n=sum(~isnan(results{g})) ;
+    n = sum(~isnan(results{g})) ;
     if n<min_n
         results{g}=nan;
         logmsg(['Fewer than ' num2str(min_n) ' datapoints.']);
@@ -507,7 +507,7 @@ if exist('reliable','var') && eval(reliable)==1 && length(testrecord.reliable)==
     end
 end
 
-if ~exist('reliable','var') && length(testrecord.reliable)==1
+if isfield(testrecord,'reliable') && ~exist('reliable','var') && length(testrecord.reliable)==1
     if isnumeric(testrecord.reliable)
         if testrecord.reliable==0
             return % no need to check individual cells

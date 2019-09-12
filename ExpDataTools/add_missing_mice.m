@@ -26,6 +26,11 @@ end
 % load database
 db = load_testdb( type, hostname );
 
+if isempty(db)
+    logmsg('Empty or no database');
+    return
+end
+
 mice = uniq(sort({db.mouse}));
 
 [mousedb,filename] = load_expdatabase('mousedb',[],[],[],false);

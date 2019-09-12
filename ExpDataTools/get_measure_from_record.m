@@ -222,7 +222,7 @@ for c=1:length(record.measures) % over all cells or ROIs
     end
     
     % only take reliable
-    if reliable==1 && ~isempty(record.reliable)
+    if isfield(record,'reliable') && reliable==1 && ~isempty(record.reliable)
         if ischar(record.reliable)
             warning('GET_MEASURE_FROM_RECORD:RELIABLE_TEXT','GET_MEASURE_FROM_RECORD: Reliable is text. Ignoring');
             warning('off','GET_MEASURE_FROM_RECORD:RELIABLE_TEXT');
