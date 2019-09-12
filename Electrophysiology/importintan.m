@@ -129,6 +129,11 @@ else
     intervals = [stimsfile.start stimsfile.MTI2{end}.frameTimes(end)+10];
 end
 
+if isempty(EVENT.strons.tril)
+    errormsg(['Missing trigger in ' recordfilter(record)]);
+    cells = {};
+    return
+end
 EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
 
 % shift time to fit with TTL and stimulustimes
