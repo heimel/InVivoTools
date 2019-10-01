@@ -91,7 +91,9 @@ xlabel('Time from stimulus onset (s)');
 ylabel('Trial number');
 set(gca,'ydir','reverse');
 h = colorbar;
-set(get(h,'label'),'string','Pixel change per frame (a.u.)');
+try
+    set(get(h,'label'),'string','Pixel change per frame (a.u.)');
+end
 smaller_font(-6);
 drawnow
 if count>1

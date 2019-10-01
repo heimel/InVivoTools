@@ -1,4 +1,4 @@
-function params = wcprocessparamsams( record )
+function params = wcprocessparams( record )
 %WCPROCESSPARAMS sets parameters for webcam recording
 %
 % 2015-2019, Alexander Heimel

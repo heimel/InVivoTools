@@ -10,29 +10,29 @@ function [db,filename,perm,lockfile]=open_db( filename, loadpath, filter)
 % for Windows novell network connections
 warning('off','MATLAB:dispatcher:pathWarning');
 
-if nargin<3; filter=''; end
-if nargin<2; loadpath='';end
-if nargin<1; filename='';end
 
-if isempty(filter)
-	filter={'*.mdb;*.mat','All databases (*.mat, *.mdb)';...
+if nargin<3 || isempty(filter)
+    filter = {'*.mdb;*.mat','All databases (*.mat, *.mdb)';...
         '*.mat','MATLAB databases (*.mat)';...
         '*.mdb','MS Access databases (*.mdb)'};
 end
-if isempty(loadpath)
-  loadpath=pwd;
+if nargin<2 || isempty(loadpath)
+  loadpath = pwd;
+end
+if nargin<1
+    filename = '';
 end
   
-curpath=pwd; % save working directory
+curpath = pwd; % save working directory
 				
 if ~isempty(filename)
-  [loadpath,name,ext]=fileparts(filename);
+  [loadpath,name,ext] = fileparts(filename);
   if ~isempty(loadpath) % i.e not in the current folder
       cd(loadpath);
   end
 else
   cd(loadpath);
-  [filename,pathname]=uigetfile(filter,'Load database');
+  [filename,pathname] = uigetfile(filter,'Load database');
   if isnumeric(filename) % i.e. unsuccessful
       db = [];
       filename = 0;
@@ -40,15 +40,15 @@ else
       lockfile = [];
       return
   end
-  filename=fullfile(pathname,filename);
+  filename = fullfile(pathname,filename);
 end
 
-[res,lockfile,button]=setlock(filename);
+[res,lockfile,button] = setlock(filename);
 if res==0 
   switch button
       case 'Open read-only'
           logmsg(['Cannot get lock on ' filename '. Opening as READ-ONLY']);
-          perm='ro';
+          perm = 'ro';
       case 'Cancel'
           db = [];
           filename = 0;

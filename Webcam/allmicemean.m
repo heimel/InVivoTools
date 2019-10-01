@@ -1,8 +1,8 @@
-% function [p_hawk, p_disc, p_all, p_comp_all] = allmicemean(exp)
+function [p_hawk, p_disc, p_all, p_comp_all] = allmicemean(exp)
 %% Draws the bar plots of the data from group 2 mice 14.13 and 172002
 % with the significance stars
 % Azadeh September 2017
-
+% 2019, pathchange by Alexander, adapted to octave
 
 pathstr =fileparts(mfilename('fullpath'));
 curdir = pwd;
@@ -59,8 +59,12 @@ switch exp
         bar_specs = struct('FaceColor', 'flat', 'edgecolor', grey_30,...
             'LineWidth', 2, 'barwidth', 0.8);
         bar_col = [my_burlywood;my_burlywood;my_burlywood;my_turquoiseblue];
-        
-        er_specs = struct('Marker', '.','color', grey_30, 'LineWidth', 2, 'YNegativeDelta', []);
+
+        er_specs = struct('Marker', '.','color', grey_30, 'LineWidth', 2);
+        if ~isoctave
+            er_specs.YNegativeDelta = [];
+        end
+
         
         % calculate groups for sig star function
         groups = {[bar_dist(1), bar_dist(2)],[bar_dist(1), bar_dist(3)],...
@@ -99,7 +103,9 @@ switch exp
         
         han = bar(bar_dist,mean_hawk_first_days);
         set(han,bar_specs);
-        han.CData = bar_col;
+        if ~isoctave
+            han.CData = bar_col;
+        end
         
         % works in Matlab 2014
         %         for i = 1:2
@@ -144,10 +150,12 @@ switch exp
         %         legend('boxoff')
         
         ax_hawk = gca;
-        ax_hawk.XTick = bar_dist;
+        set(ax_hawk,'XTick',bar_dist);
         set(gca, x_ax_st);
         set(gca, y_ax_st);
-        ytickangle(45)
+        if ~isoctave
+            ytickangle(45)
+        end
         %         set(fig, 'position', [360 171 396 751])
         
         hold off
@@ -173,8 +181,9 @@ switch exp
         
         han = bar(bar_dist,mean_disc_first_days);
         set(han,bar_specs);
-        han.CData = bar_col;
-        
+        if ~isoctave
+            han.CData = bar_col;
+        end
         % works in Matlab 2014
         %         for i = 1:2
         %             if i == 1
@@ -216,11 +225,12 @@ switch exp
         xlim(x_lim)
         
         ax_hawk = gca;
-        ax_hawk.XTick = bar_dist;
+        set(ax_hawk,'XTick',bar_dist);
         set(gca, x_ax_st);
         set(gca, y_ax_st);
-        ytickangle(45)
-        
+        if ~isoctave
+            ytickangle(45)
+        end
         
         %         legend({'disc','hawk'},'FontSize',15,'FontWeight','bold', 'Textcolor', grey_30);
         %         legend('boxoff')
@@ -250,8 +260,9 @@ switch exp
         subplot(1,3,3)
         han = bar(bar_dist,mean_all_days);
         set(han, bar_specs);
-        han.CData = bar_col;
-        
+        if ~isoctave
+            han.CData = bar_col;
+        end
         % works in Matlab 2014
         %         for i = 1:2
         %             if i == 1
@@ -292,11 +303,12 @@ switch exp
         xlim(x_lim)
         
         ax_hawk = gca;
-        ax_hawk.XTick = bar_dist;
+        set(ax_hawk,'XTick',bar_dist);
         set(gca, x_ax_st);
         set(gca, y_ax_st);
-        ytickangle(45)
-        
+        if ~isoctave
+            ytickangle(45)
+        end
         %         leg = legend(han,{'habituating','novel'},'FontName', 'Myriad Pro',...
         %             'FontSize',15,'FontWeight','normal', 'Textcolor', grey_30);
         %         legend('boxoff')
@@ -374,8 +386,9 @@ switch exp
         ax_comp.XTick = 1:length(comp_data);
         set(gca, x_ax_st);
         set(gca, y_ax_st);
-        ytickangle(45)
-        
+        if ~isoctave
+            ytickangle(45)
+        end
         
         leg_data = han_comp([3:5 8]);
         legend_str = {'dischab', 'hawknov','hawkhab', 'discnov'};
