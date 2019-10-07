@@ -88,7 +88,7 @@ params.wc_difThreshold = 0.3; % threshold + minimum movement for difference betw
 % to be considered as no difference, fraction of average movement 
 params.wc_deriv2thres = 0.08; % Threshold for 2nd derivative of vidDif for detecting freezing
 
-
+params.wc_raspivid_params = ' -t 0 --keypress -w 640 -h 480 -p 100,100,740,580 -fli 50hz ';
 
 if exist('processparams_local.m','file')
     params = processparams_local( params );
