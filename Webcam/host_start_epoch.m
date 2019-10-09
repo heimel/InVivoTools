@@ -1,7 +1,7 @@
-function record = host_start_trial( record, duration )
-%HOST_START_TRIAL writes acqReady and acqParams file and triggers trial start
+function record = host_start_epoch( record, duration )
+%HOST_START_EPOCH writes acqReady and acqParams file and triggers trial start
 %
-% RECORD =  HOST_START_TRIAL( RECORD, DURATION=10)
+% RECORD =  HOST_START_EPOCH( RECORD, DURATION=10)
 %
 %   Optional DURATION in seconds, to be written in acqParams_in
 % 
