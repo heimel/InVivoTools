@@ -123,7 +123,7 @@ while vid.CurrentTime < timeRange(2) && hasFrame(vid)
     end
     
     [body(i,:),arse(i,:),nose(i,:),stim(i,:)] = ...
-        get_mouse_position( Frame,bg,[],figRaw,screenrect);
+        get_mouse_position( Frame,bg,params,figRaw,screenrect);
     
     % This part defines the scope in which the difference between last
     % frame is calculated

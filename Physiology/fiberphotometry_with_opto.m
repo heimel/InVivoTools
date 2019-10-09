@@ -11,7 +11,6 @@ end
 
 logmsg('Set params.experimentpath_localroot in processparam_local.m for place to store data');
 
-
 remotecommglobals
 
 logmsg(['Communicating via ' Remote_Comm_dir]);
@@ -57,18 +56,6 @@ if verbose
     ylabel('Pulse (V)');
 end
 
-datapath = experimentpath(record,true,true,'2015t');
-d = dir(datapath);
-if length(d)>2
-    logmsg('Epoch exists. Increasing epoch number.');
-end
-while length(d)>2 % not empty
-    record.epoch = ['t' num2str(str2double(record.epoch(2:end))+1,'%05d')];
-    datapath = experimentpath(record,true,true,'2015t');
-    d = dir(datapath);
-end
-logmsg(['Writing data to ' datapath]);
-
 try
     session = daq.createSession('ni'); % National Instruments USB-6001
 catch me
@@ -78,6 +65,8 @@ catch me
             return
     end
 end
+
+[datapath,record] = find_unique_epochpath(record);
 
 % Write acqParams_in
 aqDat.name = 'fiber';

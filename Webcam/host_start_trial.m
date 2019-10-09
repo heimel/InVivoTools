@@ -1,0 +1,81 @@
+function record = host_start_trial( record, duration )
+%HOST_START_TRIAL writes acqReady and acqParams file and triggers trial start
+%
+% RECORD =  HOST_START_TRIAL( RECORD, DURATION=10)
+%
+%   Optional DURATION in seconds, to be written in acqParams_in
+% 
+% 2019, Alexander Heimel
+%
+
+NewStimGlobals;
+remotecommglobals;
+
+if nargin< 2 || isempty(duration)
+    duration = 10; % s
+end
+if nargin<1 || isempty(record)
+    record.mouse = 'testmouse';
+    record.experiment = '1920test';
+    record.epoch = 't00001';
+    record.datatype = 'wc';
+    record.date = datestr(now,'yyyy-mm-dd');
+    record.setup = host;
+end
+
+logmsg('Set params.experimentpath_localroot in processparam_local.m for place to store data');
+logmsg(['Communicating via ' Remote_Comm_dir]);
+logmsg('Change Remote_Comm_dir in NewStimConfiguration to change communication folder.');
+logmsg('Set trigger settings in NewStimConfiguration');
+
+if NSUseInitialSerialTrigger
+    OpenStimSerial
+    if ~StimSerialSerialPort
+        logmsg('Not triggering. Check Serial port settings in NewStimConfiguration');
+    else
+        StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+    end
+end
+
+params.delay_for_remote_computers = 2; % s
+params = processparams_local(params); 
+logmsg(['Using ' num2str(params.delay_for_remote_computers) ' s delay for communication. Set params.delay_for_remote_computers in processparams_local.m']);
+
+[datapath,record] = find_unique_epochpath(record);
+
+% Write acqParams_in
+aqDat.name = record.setup;
+aqDat.type = record.datatype;
+aqDat.fname = record.epoch;
+aqDat.samp_dt = NaN;
+aqDat.reps = ceil( (duration+1)/10); % 10s per rep, added communication delay
+aqDat.ref = 1;
+aqDat.ECGain = NaN;
+writeAcqStruct(fullfile(datapath,'acqParams_in'),aqDat);
+
+% wait to finish writing and write acqReady
+pause(0.3);
+write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
+
+% wait to let remote computers find acqReady
+pause(params.delay_for_remote_computers);
+
+if NSUseInitialSerialTrigger && StimSerialSerialPort
+    StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+    if exist('NSUseInitialSerialContinuous','var') && ~isempty(NSUseInitialSerialContinuous) && NSUseInitialSerialContinuous
+        logmsg([ StimSerialScriptOutPin ' pin flipped down for whole script']);
+    else
+        WaitSecs(0.001);
+        StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+    end
+end
+
+logmsg(['Started epoch ' record.epoch ' for ' num2str(duration) ' s.' ]);
+WaitSecs(duration);
+logmsg(['Finished epoch '  record.epoch]);
+
+if NSUseInitialSerialTrigger && StimSerialSerialPort
+    StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+end
+
+
