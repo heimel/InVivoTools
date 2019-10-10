@@ -109,11 +109,13 @@ fclose(fid);
 datapath = fullfile(datapath); % set right filesep
 logmsg(['Datapath set to ' datapath]);
 
-if ~isempty(datapath) && any(datapath==filesep)
+% for these store movie in actual datapath and not in parent folder
+if 0 && ~isempty(datapath) && any(datapath==filesep)
     recdatapath = datapath(1:find(datapath==filesep,1,'last'));
 else
     recdatapath = datapath;
 end
+
 
 [recstart,filename] = start_recording(recdatapath,params);
 
