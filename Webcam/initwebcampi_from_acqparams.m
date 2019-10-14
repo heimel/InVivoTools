@@ -122,33 +122,35 @@ end
 manually_triggered = false;
 
 if ~isa(s1,'octave_serial') && ~isa(s1,'serial')
-    logmsg('Could not find serial port of form /dev/ttyUSB*. Press key to stop recording.');
-    while ~KbCheck
-        pause(0.01);
-    end
+    logmsg('Could not find serial port of form /dev/ttyUSB*.');
     stop_recording(filename);
-else
-    if strcmp(devfolder,StimSerialScriptIn)
-        switch StimSerialScriptInPin
-            case 'dsr'
-                pin = 'DataSetReady';
-            case 'cts'
-                pin = 'ClearToSend';
-            otherwise
-                errormsg(['Unknown pin ' StimSerialScriptInPin '. Change in NewStimConfiguration.']);
-                return
-        end
-    else
-        pin = 'DataSetReady';
-    end
+    return
+ end
+ 
+
+ if strcmp(devfolder,StimSerialScriptIn)
+     switch StimSerialScriptInPin
+        case 'dsr'
+              pin = 'DataSetReady';
+        case 'cts'
+              pin = 'ClearToSend';
+        otherwise
+            errormsg(['Unknown pin ' StimSerialScriptInPin '. Change in NewStimConfiguration.']);
+            return
+     end
+ else
+     pin = 'DataSetReady';
+ end
     
-    logmsg(['Serial pin for script start: ' pin]);
+ logmsg(['Serial pin for script start: ' pin]);
     
-    optopin = 'ClearToSend';
-    logmsg(['Serial pin for optogenetics: ' optopin]);
+ optopin = 'ClearToSend';
+ logmsg(['Serial pin for optogenetics: ' optopin]);
     
-    fopen(s1);
-    %get(s1)
+ fopen(s1);
+
+ 
+ while 1
     
     %Compatible with two versions of instrument-control
     if isfield(get(s1),'pinstatus') || isfield(get(s1),'PinStatus') % difference between matlab and octave
@@ -244,14 +246,15 @@ else
             
             if keydown && (keycode(25) || keycode(81)) % 'q on pi and PC
                 logmsg('Pressed q');
-                stop_recording(filename);
                 fclose(s1);
                 break
             end
         end
     end
+    stop_recording(filename);
 end
-stop_recording(filename);
+
+
 fclose(s1);
 
 function [starttime,filename] = start_recording(datapath,params)
