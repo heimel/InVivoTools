@@ -89,45 +89,10 @@ logmsg(['Using serial port ' devfolder]);
 
 s1 = serial(devfolder);
 
-
-logmsg(['Checking for change in ' acqready]);
-while 1 && ~ready
-    acqready_props = dir(acqready);
-    if ~isempty(acqready_props) && acqready_props.datenum > acqready_props_prev.datenum
-        logmsg('acqReady changed');
-        acqready_props_prev = acqready_props;
-        ready  = 1;
-    else
-        pause(0.1);
-    end
-end
-
-fid = fopen(acqready,'r');
-fgetl(fid); % pathSpec line
-datapath = fgetl(fid);
-fclose(fid);
-datapath = fullfile(datapath); % set right filesep
-logmsg(['Datapath set to ' datapath]);
-
-% for these store movie in actual datapath and not in parent folder
-if 0 && ~isempty(datapath) && any(datapath==filesep)
-    recdatapath = datapath(1:find(datapath==filesep,1,'last'));
-else
-    recdatapath = datapath;
-end
-
-
-[recstart,filename] = start_recording(recdatapath,params);
-
-manually_triggered = false;
-
 if ~isa(s1,'octave_serial') && ~isa(s1,'serial')
-    logmsg('Could not find serial port of form /dev/ttyUSB*.');
-    stop_recording(filename);
+    logmsg('Could not find serial port of form /dev/ttyUSB*. Quitting');
     return
- end
- 
-
+end
  if strcmp(devfolder,StimSerialScriptIn)
      switch StimSerialScriptInPin
         case 'dsr'
@@ -149,29 +114,64 @@ if ~isa(s1,'octave_serial') && ~isa(s1,'serial')
     
  fopen(s1);
 
- 
- while 1
-    
-    %Compatible with two versions of instrument-control
-    if isfield(get(s1),'pinstatus') || isfield(get(s1),'PinStatus') % difference between matlab and octave
-        new_instr_contr = 1;
+
+
+while 1
+
+  logmsg(['Checking for change in ' acqready]);
+  while 1 && ~ready
+    acqready_props = dir(acqready);
+    if ~isempty(acqready_props) && acqready_props.datenum > acqready_props_prev.datenum
+        logmsg('acqReady changed');
+        acqready_props
+        acqready_props_prev = acqready_props;
+        ready  = 1;
     else
-        new_instr_contr = 0;
-        pin = lower(pin);
+        pause(0.05);
     end
+  end
+  ready = 0;
+
+  fid = fopen(acqready,'r');
+  fgetl(fid); % pathSpec line
+  datapath = fgetl(fid);
+  fclose(fid);
+  datapath = fullfile(datapath); % set right filesep
+  logmsg(['Datapath set to ' datapath]);
+
+  % for these store movie in actual datapath and not in parent folder
+  if 0 && ~isempty(datapath) && any(datapath==filesep)
+      recdatapath = datapath(1:find(datapath==filesep,1,'last'));
+  else
+      recdatapath = datapath;
+  end
+
+
+  [recstart,filename] = start_recording(recdatapath,params);
+
+  manually_triggered = false;
+  
+  %Compatible with two versions of instrument-control
+  if isfield(get(s1),'pinstatus') || isfield(get(s1),'PinStatus') % difference between matlab and octave
+    new_instr_contr = 1;
+  else
+    new_instr_contr = 0;
+    pin = lower(pin);
+  end
     
-    if new_instr_contr
-        s2 = get(s1,'PinStatus');
-        prev_cts = s2.(pin);
-    else
-        prev_cts = get(s1,pin);
-    end
+  if new_instr_contr
+    s2 = get(s1,'PinStatus');
+    prev_cts = s2.(pin);
+  else
+    prev_cts = get(s1,pin);
+  end
     
-    org_cts = prev_cts;
-    optogenetic_stimulation = false;
+  org_cts = prev_cts;
+  optogenetic_stimulation = false;
     
-    logmsg('Press q to quit. t for manual trigger');
-    while 1 % loop to find trigger
+  datapath = 'initialpath_waiting_for_change';
+  logmsg('Press q to quit. t for manual trigger');
+  while 1 % loop to find trigger
         
         if new_instr_contr
             s2 = get(s1,'PinStatus');
