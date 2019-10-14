@@ -12,7 +12,7 @@ NewStimGlobals;
 remotecommglobals;
 
 if nargin< 2 || isempty(duration)
-    duration = 10; % s
+    duration = 3; % s
 end
 if nargin<1 || isempty(record)
     record.mouse = 'testmouse';
@@ -63,6 +63,8 @@ aqDat.ref = 1;
 aqDat.ECGain = NaN;
 writeAcqStruct(fullfile(datapath,'acqParams_in'),aqDat);
 
+acqduration = aqDat.reps*10; % s 
+
 % wait to finish writing and write acqReady
 pause(0.3);
 write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
@@ -75,17 +77,23 @@ if NSUseInitialSerialTrigger && StimSerialSerialPort
     if exist('NSUseInitialSerialContinuous','var') && ~isempty(NSUseInitialSerialContinuous) && NSUseInitialSerialContinuous
         logmsg([ StimSerialScriptOutPin ' pin flipped down for whole script']);
     else
-        WaitSecs(0.001);
-        StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+        WaitSecs(0.010);
+        %StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+        logmsg(['Triggered on ' StimSerialScriptOutPin]);
     end
 end
 
-logmsg(['Started epoch ' record.epoch ' for ' num2str(duration) ' s.' ]);
-WaitSecs(duration);
+logmsg(['Started epoch ' record.epoch ' for ' num2str(acqduration) ' s.' ]);
+WaitSecs(acqduration);
 logmsg(['Finished epoch '  record.epoch]);
 
 if NSUseInitialSerialTrigger && StimSerialSerialPort
     StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
 end
+
+params.wc_postrecording_delay = 12;%s
+logmsg(['Safety post recording delay ' num2str(params.wc_postrecording_delay)]);
+WaitSecs(params.wc_postrecording_delay);
+
 
 
