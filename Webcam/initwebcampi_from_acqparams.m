@@ -82,10 +82,10 @@ end
 logmsg(['Using serial port ' devfolder]);
 
 % close port if accidently already open
-s1 = instrfind('Port',devfolder,'status','open' );
-if ~isempty(s1)
-    fclose(s1);
-end
+%s1 = instrfind('Port',devfolder,'status','open' );
+%if ~isempty(s1)
+%    fclose(s1);
+%end
 
 s1 = serial(devfolder);
 
@@ -233,7 +233,11 @@ else
         pause(0.01);
         if exist('KbCheck','file')
             [keydown,~,keycode] = KbCheck;
-            if keydown && keycode(84) % t on PC
+            if keydown
+                find(keycode)
+            end
+            
+            if keydown && (keycode(84) || keycode(29)) % t on PC and pi
                 logmsg('Manually triggered');
                 manually_triggered = true;
             end

@@ -42,6 +42,16 @@ params = processparams_local(params);
 logmsg(['Using ' num2str(params.delay_for_remote_computers) ' s delay for communication. Set params.delay_for_remote_computers in processparams_local.m']);
 
 [datapath,record] = find_unique_epochpath(record);
+if ~exist(datapath,'dir')
+  if isoctave
+    system(['mkdir -p ' datapath]);
+  else
+    mkdir(datapath)
+  end
+end
+if ~exist(datapath,'dir')
+  logmsg(['Unable to create folder ' datapath]);
+end
 
 % Write acqParams_in
 aqDat.name = record.setup;
