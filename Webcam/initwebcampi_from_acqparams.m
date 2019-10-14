@@ -233,23 +233,23 @@ while 1
         end
         prev_cts = cts;
         pause(0.001);
-        if exist('KbCheck','file')
-            [keydown,~,keycode] = KbCheck;
-            if keydown
-                find(keycode)
-            end
-            
-            if keydown && (keycode(84) || keycode(29)) % t on PC and pi
-                logmsg('Manually triggered');
-                manually_triggered = true;
-            end
-            
-            if keydown && (keycode(25) || keycode(81)) % 'q on pi and PC
-                logmsg('Pressed q');
-                fclose(s1);
-                break
-            end
-        end
+%        if exist('KbCheck','file')
+%            [keydown,~,keycode] = KbCheck;
+%            if keydown
+%                find(keycode)
+%            end
+%            
+%            if keydown && (keycode(84) || keycode(29)) % t on PC and pi
+%                logmsg('Manually triggered');
+%                manually_triggered = true;
+%            end
+%            
+%            if keydown && (keycode(25) || keycode(81)) % 'q on pi and PC
+%                logmsg('Pressed q');
+%                fclose(s1);
+%                break
+%            end
+%        end
     end
     stop_recording(filename);
 end
