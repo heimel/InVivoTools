@@ -232,7 +232,7 @@ while 1
             
         end
         prev_cts = cts;
-        pause(0.01);
+        pause(0.001);
         if exist('KbCheck','file')
             [keydown,~,keycode] = KbCheck;
             if keydown
@@ -258,6 +258,7 @@ end
 fclose(s1);
 
 function [starttime,filename] = start_recording(datapath,params)
+killraspivid;
 mkdir(datapath);
 filename = fullfile(datapath,['webcam_' host '_' subst_filechars(datestr(now,31)) '.h264'] );
 if ~isunix % then definitely not a raspberry pi
@@ -273,17 +274,33 @@ system(cmd,false,'async' );
 starttime = now;
 
 function stop_recording(filename)
-logmsg('Stop recording');
-if isunix
-    system('pkill raspivid',false,'async');
-    
-    % possibly need to wrap to mp4
-    % sudo apt-get install gpac
-    
-    cmd = ['MP4Box -fps 30 -add "' filename '" "' filename '.mp4"'];
-    logmsg(['Trying: ' cmd]);
-    system(cmd,false,'async');
-    %or
-    % avconv -i ...h264 -vcodec copy ...mp4
-    % play video with omxplayer
+logmsg('Stopping recording');
+killraspivid;
+%if isunix
+%    %    system('pkill raspivid',false,'async');
+%    system('pkill raspivid',true);
+%    logmsg('Stopped recording');
+%    % possibly need to wrap to mp4
+%    % sudo apt-get install gpac
+%    
+%%    cmd = ['MP4Box -fps 30 -add "' filename '" "' filename '.mp4"'];
+%%    logmsg(['Trying: ' cmd]);
+%%    system(cmd,false,'async');
+%    %or
+%    % avconv -i ...h264 -vcodec copy ...mp4
+%    % play video with omxplayer
+%end
+
+function killraspivid
+system('pkill raspivid');
+output = 'running';
+timeout = 15; %s
+while ~isempty(output) && timeout>0
+  [status,output] = system('pgrep raspivid');
+  pause(1);
+  timeout = timeout - 1;
 end
+[status,output] = system('pgrep raspivid');
+if ~isempty(output)
+  logmsg('Unable to kill other raspivid');
+end  
