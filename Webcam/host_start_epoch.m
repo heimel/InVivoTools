@@ -12,7 +12,7 @@ NewStimGlobals;
 remotecommglobals;
 
 if nargin< 2 || isempty(duration)
-    duration = 10; % s
+    duration = 3; % s
 end
 if nargin<1 || isempty(record)
     record.mouse = 'testmouse';
@@ -42,6 +42,16 @@ params = processparams_local(params);
 logmsg(['Using ' num2str(params.delay_for_remote_computers) ' s delay for communication. Set params.delay_for_remote_computers in processparams_local.m']);
 
 [datapath,record] = find_unique_epochpath(record);
+if ~exist(datapath,'dir')
+  if isoctave
+    system(['mkdir -p ' datapath]);
+  else
+    mkdir(datapath)
+  end
+end
+if ~exist(datapath,'dir')
+  logmsg(['Unable to create folder ' datapath]);
+end
 
 % Write acqParams_in
 aqDat.name = record.setup;
@@ -52,6 +62,8 @@ aqDat.reps = ceil( (duration+1)/10); % 10s per rep, added communication delay
 aqDat.ref = 1;
 aqDat.ECGain = NaN;
 writeAcqStruct(fullfile(datapath,'acqParams_in'),aqDat);
+
+acqduration = aqDat.reps*10; % s 
 
 % wait to finish writing and write acqReady
 pause(0.3);
@@ -65,17 +77,23 @@ if NSUseInitialSerialTrigger && StimSerialSerialPort
     if exist('NSUseInitialSerialContinuous','var') && ~isempty(NSUseInitialSerialContinuous) && NSUseInitialSerialContinuous
         logmsg([ StimSerialScriptOutPin ' pin flipped down for whole script']);
     else
-        WaitSecs(0.001);
-        StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+        WaitSecs(0.010);
+        %StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+        logmsg(['Triggered on ' StimSerialScriptOutPin]);
     end
 end
 
-logmsg(['Started epoch ' record.epoch ' for ' num2str(duration) ' s.' ]);
-WaitSecs(duration);
+logmsg(['Started epoch ' record.epoch ' for ' num2str(acqduration) ' s.' ]);
+WaitSecs(acqduration);
 logmsg(['Finished epoch '  record.epoch]);
 
 if NSUseInitialSerialTrigger && StimSerialSerialPort
     StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
 end
+
+params.wc_postrecording_delay = 12;%s
+logmsg(['Safety post recording delay ' num2str(params.wc_postrecording_delay)]);
+WaitSecs(params.wc_postrecording_delay);
+
 
 

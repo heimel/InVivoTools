@@ -82,94 +82,96 @@ end
 logmsg(['Using serial port ' devfolder]);
 
 % close port if accidently already open
-s1 = instrfind('Port',devfolder,'status','open' );
-if ~isempty(s1)
-    fclose(s1);
-end
+%s1 = instrfind('Port',devfolder,'status','open' );
+%if ~isempty(s1)
+%    fclose(s1);
+%end
 
 s1 = serial(devfolder);
 
+if ~isa(s1,'octave_serial') && ~isa(s1,'serial')
+    logmsg('Could not find serial port of form /dev/ttyUSB*. Quitting');
+    return
+end
+ if strcmp(devfolder,StimSerialScriptIn)
+     switch StimSerialScriptInPin
+        case 'dsr'
+              pin = 'DataSetReady';
+        case 'cts'
+              pin = 'ClearToSend';
+        otherwise
+            errormsg(['Unknown pin ' StimSerialScriptInPin '. Change in NewStimConfiguration.']);
+            return
+     end
+ else
+     pin = 'DataSetReady';
+ end
+    
+ logmsg(['Serial pin for script start: ' pin]);
+    
+ optopin = 'ClearToSend';
+ logmsg(['Serial pin for optogenetics: ' optopin]);
+    
+ fopen(s1);
 
-logmsg(['Checking for change in ' acqready]);
-while 1 && ~ready
+
+
+while 1
+
+  logmsg(['Checking for change in ' acqready]);
+  while 1 && ~ready
     acqready_props = dir(acqready);
     if ~isempty(acqready_props) && acqready_props.datenum > acqready_props_prev.datenum
         logmsg('acqReady changed');
+        acqready_props
         acqready_props_prev = acqready_props;
         ready  = 1;
     else
-        pause(0.1);
+        pause(0.05);
     end
-end
+  end
+  ready = 0;
 
-fid = fopen(acqready,'r');
-fgetl(fid); % pathSpec line
-datapath = fgetl(fid);
-fclose(fid);
-datapath = fullfile(datapath); % set right filesep
-logmsg(['Datapath set to ' datapath]);
+  fid = fopen(acqready,'r');
+  fgetl(fid); % pathSpec line
+  datapath = fgetl(fid);
+  fclose(fid);
+  datapath = fullfile(datapath); % set right filesep
+  logmsg(['Datapath set to ' datapath]);
 
-% for these store movie in actual datapath and not in parent folder
-if 0 && ~isempty(datapath) && any(datapath==filesep)
-    recdatapath = datapath(1:find(datapath==filesep,1,'last'));
-else
-    recdatapath = datapath;
-end
+  % for these store movie in actual datapath and not in parent folder
+  if 0 && ~isempty(datapath) && any(datapath==filesep)
+      recdatapath = datapath(1:find(datapath==filesep,1,'last'));
+  else
+      recdatapath = datapath;
+  end
 
 
-[recstart,filename] = start_recording(recdatapath,params);
+  [recstart,filename] = start_recording(recdatapath,params);
 
-manually_triggered = false;
-
-if ~isa(s1,'octave_serial') && ~isa(s1,'serial')
-    logmsg('Could not find serial port of form /dev/ttyUSB*. Press key to stop recording.');
-    while ~KbCheck
-        pause(0.01);
-    end
-    stop_recording(filename);
-else
-    if strcmp(devfolder,StimSerialScriptIn)
-        switch StimSerialScriptInPin
-            case 'dsr'
-                pin = 'DataSetReady';
-            case 'cts'
-                pin = 'ClearToSend';
-            otherwise
-                errormsg(['Unknown pin ' StimSerialScriptInPin '. Change in NewStimConfiguration.']);
-                return
-        end
-    else
-        pin = 'DataSetReady';
-    end
+  manually_triggered = false;
+  
+  %Compatible with two versions of instrument-control
+  if isfield(get(s1),'pinstatus') || isfield(get(s1),'PinStatus') % difference between matlab and octave
+    new_instr_contr = 1;
+  else
+    new_instr_contr = 0;
+    pin = lower(pin);
+  end
     
-    logmsg(['Serial pin for script start: ' pin]);
+  if new_instr_contr
+    s2 = get(s1,'PinStatus');
+    prev_cts = s2.(pin);
+  else
+    prev_cts = get(s1,pin);
+  end
     
-    optopin = 'ClearToSend';
-    logmsg(['Serial pin for optogenetics: ' optopin]);
+  org_cts = prev_cts;
+  optogenetic_stimulation = false;
     
-    fopen(s1);
-    %get(s1)
-    
-    %Compatible with two versions of instrument-control
-    if isfield(get(s1),'pinstatus') || isfield(get(s1),'PinStatus') % difference between matlab and octave
-        new_instr_contr = 1;
-    else
-        new_instr_contr = 0;
-        pin = lower(pin);
-    end
-    
-    if new_instr_contr
-        s2 = get(s1,'PinStatus');
-        prev_cts = s2.(pin);
-    else
-        prev_cts = get(s1,pin);
-    end
-    
-    org_cts = prev_cts;
-    optogenetic_stimulation = false;
-    
-    logmsg('Press q to quit. t for manual trigger');
-    while 1 % loop to find trigger
+  datapath = 'initialpath_waiting_for_change';
+  logmsg('Press q to quit. t for manual trigger');
+  while 1 % loop to find trigger
         
         if new_instr_contr
             s2 = get(s1,'PinStatus');
@@ -230,27 +232,33 @@ else
             
         end
         prev_cts = cts;
-        pause(0.01);
-        if exist('KbCheck','file')
-            [keydown,~,keycode] = KbCheck;
-            if keydown && keycode(84) % t on PC
-                logmsg('Manually triggered');
-                manually_triggered = true;
-            end
-            
-            if keydown && (keycode(25) || keycode(81)) % 'q on pi and PC
-                logmsg('Pressed q');
-                stop_recording(filename);
-                fclose(s1);
-                break
-            end
-        end
+        pause(0.001);
+%        if exist('KbCheck','file')
+%            [keydown,~,keycode] = KbCheck;
+%            if keydown
+%                find(keycode)
+%            end
+%            
+%            if keydown && (keycode(84) || keycode(29)) % t on PC and pi
+%                logmsg('Manually triggered');
+%                manually_triggered = true;
+%            end
+%            
+%            if keydown && (keycode(25) || keycode(81)) % 'q on pi and PC
+%                logmsg('Pressed q');
+%                fclose(s1);
+%                break
+%            end
+%        end
     end
+    stop_recording(filename);
 end
-stop_recording(filename);
+
+
 fclose(s1);
 
 function [starttime,filename] = start_recording(datapath,params)
+killraspivid;
 mkdir(datapath);
 filename = fullfile(datapath,['webcam_' host '_' subst_filechars(datestr(now,31)) '.h264'] );
 if ~isunix % then definitely not a raspberry pi
@@ -266,17 +274,33 @@ system(cmd,false,'async' );
 starttime = now;
 
 function stop_recording(filename)
-logmsg('Stop recording');
-if isunix
-    system('pkill raspivid',false,'async');
-    
-    % possibly need to wrap to mp4
-    % sudo apt-get install gpac
-    
-    cmd = ['MP4Box -fps 30 -add "' filename '" "' filename '.mp4"'];
-    logmsg(['Trying: ' cmd]);
-    system(cmd,false,'async');
-    %or
-    % avconv -i ...h264 -vcodec copy ...mp4
-    % play video with omxplayer
+logmsg('Stopping recording');
+killraspivid;
+%if isunix
+%    %    system('pkill raspivid',false,'async');
+%    system('pkill raspivid',true);
+%    logmsg('Stopped recording');
+%    % possibly need to wrap to mp4
+%    % sudo apt-get install gpac
+%    
+%%    cmd = ['MP4Box -fps 30 -add "' filename '" "' filename '.mp4"'];
+%%    logmsg(['Trying: ' cmd]);
+%%    system(cmd,false,'async');
+%    %or
+%    % avconv -i ...h264 -vcodec copy ...mp4
+%    % play video with omxplayer
+%end
+
+function killraspivid
+system('pkill raspivid');
+output = 'running';
+timeout = 15; %s
+while ~isempty(output) && timeout>0
+  [status,output] = system('pgrep raspivid');
+  pause(1);
+  timeout = timeout - 1;
 end
+[status,output] = system('pgrep raspivid');
+if ~isempty(output)
+  logmsg('Unable to kill other raspivid');
+end  
