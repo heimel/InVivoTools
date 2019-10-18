@@ -159,7 +159,9 @@ record.measures.arse_trajectory = arse;
 record.measures.nose_trajectory = nose;
 record.measures.stim_trajectory_raw = stim;
 
-record = wc_cleanup_stimulus_trajectory(record,verbose);
+if ~strcmp(record.stim_type,'gray_screen')
+    record = wc_cleanup_stimulus_trajectory(record,verbose);
+end
 
 % Freezing detection
 freezePeriodNr = 0;

@@ -1,4 +1,4 @@
-function [rm,b,n,explained_variance,c50,r_at_c50] = naka_rushton(c,data,xo)
+function [rm,b,n,explained_variance,c50,r_at_c50] = naka_rushton(c,data,xo,verbose)
 % NAKA_RUSHTON Naka-Rushton fit (for contrast curves)
 %
 %  [RM,B,EXPLAINED_VARIANCE,C50] = NAKA_RUSHTON(C,DATA,[XO])
@@ -30,6 +30,9 @@ function [rm,b,n,explained_variance,c50,r_at_c50] = naka_rushton(c,data,xo)
 
 if nargin<3
     xo = [];
+end
+if nargin<4 || isempty(verbose)
+    verbose = false;
 end
 
 rescaled = false;
@@ -91,14 +94,14 @@ if rescaled
     c50 = c50 * 100;
 end
 
-if 0
-    figure; %#ok<UNRCH>
+if verbose
+    figure; 
     plot(c,data,'+');
     hold on
     cn = (0:0.01:1);
     r = rm* (cn.^n)./ (b^n+cn.^n) ; % without spont
     plot(cn,r);
     plot([c50 c50],[0 r_at_c50],'m');
-    
+    xlabel('Contrast');
 end
 

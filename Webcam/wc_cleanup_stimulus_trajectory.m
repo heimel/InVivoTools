@@ -63,7 +63,7 @@ if verbose
     vid.CurrentTime = stimStart;
     Frame = readFrame(vid);
     
-    figure
+    figure('Name','Stimulus','NumberTitle','off');
     subplot(1,2,1)
     image(Frame);
     axis image off

@@ -63,34 +63,22 @@ if ~isempty(hfig)
     colormap gray
 end
 
-
 while (length(pos)<2 || max([pos.Area])<par.wc_minAreaSize ...
         || sum([pos.Area])<par.wc_minMouseSize || min([pos.Area]<par.wc_minStimSize) )...
         && blackThreshold>0.01
     imbw = (frame_bg_subtracted > blackThreshold);
     imbw = imclose(imbw,par.wc_dilation);
-    
-    % remove small components
-    % imbw = bwareaopen(imbw, par.wc_minComponentSize);
-    
-    % Find mouse position
-    pos = regionprops(imbw, 'Centroid', 'Area');
-    
-    %blackThreshold = blackThreshold - 0.02; % lower threshold
+    cc = bwconncomp(imbw);
+    pos = regionprops(cc,'Area');
     blackThreshold = 0.9*blackThreshold; % lower threshold
 end
-
-
-% lower threshold to not miss stimulus
-% blackThreshold = 0.9*blackThreshold; % lower threshold
 
 imbw = frame_bg_subtracted> blackThreshold;
 imbw = imclose(imbw,par.wc_dilation);
 
-% remove small components
-%mouse = bwareaopen(imbw, par.wc_minComponentSize);
 mouse = imbw;
-pos = regionprops(mouse, 'Centroid', 'Area');
+cc = bwconncomp(imbw);
+pos = regionprops(cc,'Centroid','Area');
 if isempty(pos) || not(any([pos.Area]>par.wc_minAreaSize))
     logmsg('Could not find any changed components');
     return
@@ -118,9 +106,6 @@ if ~isempty(indstim)
     end
 end
 
-
-
-% Mouse boundaries
 % Get mouse boundaries
 % design new binary image with 1 shape, the mouse. Also make new
 % mouseBoundaries
@@ -132,7 +117,6 @@ mouseBinary = false(size(mouse));
 for i = indmouse(:)'
     mouseBinary = mouseBinary | poly2mask(boundary{i}(:,2), boundary{i}(:,1), M, N);
 end
-%mouseBoundary = bwboundaries(mouseBinary);
 mouseBoundary = boundary(indmouse);
 
 if ~isempty(hfig)
@@ -144,19 +128,22 @@ if ~isempty(hfig)
 end
 
 d = 1;
-while length(mouseBoundary)>1 && d <length(sedisk) % grow until single component
-    mouseBinary = imclose(mouseBinary,sedisk{d});
+if length(indmouse)>1 % mouse is multiple components
+    cc.NumObjects = length(indmouse);
+    while cc.NumObjects && d <length(sedisk) % grow until single component
+        mouseBinary = imclose(mouseBinary,sedisk{d});
+        cc = bwconncomp(mouseBinary);
+        d = d + 1;
+    end
+    %    mouseBoundary = bwboundaries(mouseBinary);
     mouseBoundary = bwboundaries(mouseBinary);
-    d = d + 1;
 end
+
+
 A = cellfun('size', mouseBoundary, 1);
 [~, ind] = max(A);
 mouseBoundary = mouseBoundary{ind};
 row = size(mouseBoundary,1);
-
-%mouseBinary = bwmorph(mouseBinary, 'bridge', Inf);
-%mouseBinary = bwmorph(mouseBinary, 'thicken');
-
 
 if ~isempty(hfig)
     hold on
