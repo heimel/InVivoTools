@@ -314,7 +314,8 @@ if ~( length(signif_y)==1 && signif_y==0) % compute pairwise stats
                     end
                 end
             case 'tukey-kramer'
-                correctionstr = 'Post-hoc Tukey-Kramer corrected ';
+                correctionstr = '';
+                testperformed = 'Tukey-Kramer (parametric) test ';
                 for i=1:size(h.p_sig,1)
                     for j =1:size(h.p_sig,2)
                         nsig=(i-1)*length(y)+j;

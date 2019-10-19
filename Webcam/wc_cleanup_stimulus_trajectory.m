@@ -58,7 +58,7 @@ if isempty(stimduration) || stimduration==0
 end
 
 if verbose
-    [~,filename] = wc_getmovieinfo(record);    
+    [~,filename] = wc_getmovieinfo(record);
     vid = VideoReader(filename);
     vid.CurrentTime = stimStart;
     Frame = readFrame(vid);
@@ -86,6 +86,20 @@ end
 ind = find(~isnan(stim(:,1)) & ~isnan(stim(:,2))...
     & frametimes>(stimStart-slackstimtime) ...
     & frametimes<(stimStart+stimduration+slackstimtime));
+if length(ind)<3
+    errormsg(['No stimulus consistently found in ' recordfilter(record)]);
+    stimpos = NaN(size(stim));
+    indstartstim = find(frametimes>stimStart,1);
+    indstopstim = find(frametimes<stimStart+stimduration,1,'last');
+    
+    stimpos(indstartstim:indstopstim,1) = arena(1) + ...
+        arena(3)*linspace(0,1,indstopstim-indstartstim+1);
+    stimpos(indstartstim:indstopstim,2) = arena(2)+arena(4)/2*ones(indstopstim-indstartstim+1,1);
+    
+    record.measures.stim_trajectory = stimpos;
+    return
+end
+
 x = frametimes(ind);
 y1 = stim(ind,1);
 y2 = stim(ind,2);
