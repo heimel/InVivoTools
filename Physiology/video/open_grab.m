@@ -22,7 +22,7 @@ function open_grab(recording_time,output)
 %-------------------------------------------------------------------------%
 
 if nargin<1 || isempty(recording_time)
-    recording_time = 60; % s
+    recording_time = 30; % s
     logmsg(['Defaulting recording time to ' num2str(recording_time)]);
 end
 

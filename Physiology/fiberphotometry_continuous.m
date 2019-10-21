@@ -9,14 +9,14 @@ if nargin<1 || isempty(record)
     
     % h = getwctestdbwindow
     
-    record.mouse = '31334_SST';
+    record.mouse = 'xxx';
     record.date = datestr(now,'yyyy-mm-dd');
     record.experiment = '1820.fiberphoto';
     record.setup = 'fiberphoto';
     record.datatype = 'wc';
     record.epoch = 't00001';
     record.experimenter = 'ma';
-    record.comment = 'GCamp photometry in vlPAG Right with opto in ZI';
+    record.comment = 'GCaMP6s_flex_AAV9 in ZI Left';
     record.measures = [];
 end
 
@@ -84,7 +84,7 @@ addAnalogInputChannel(session,'Photometry', 1 , 'Voltage'); % measuring optopuls
 queueOutputData(session,triggerpulse);
 
 lhoutput = addlistener(session,'DataRequired', @queuedata);
-    
+
 figure
 lh = addlistener(session,'DataAvailable', @plotData);
 session.IsContinuous = true;
@@ -113,8 +113,8 @@ record.measures.parameters = par;
 
 time = time + par.timeshift; % to match calibration
 
-delete(lh); 
-delete(lhoutput); 
+delete(lh);
+delete(lhoutput);
 
 save(fullfile(datapath,'fiberphotometry.mat'),'time','data','par');
 save(fullfile(datapath,'record.mat'),'record','-mat');
@@ -145,7 +145,7 @@ end
 if isempty(data)
     data = 0 * ones(5000,1);
     data(1:100,1) = 3.3;
-%    data(1:1000,1) = 3.3;
+    %    data(1:1000,1) = 3.3;
 else
     data = 0 * ones(5000,1);
 end
