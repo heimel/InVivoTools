@@ -99,8 +99,7 @@ params.wc_tailToMiddle = 70; % pxl
 params.wc_minComponentSize = 6; % pxl, Consider smaller components as noise
 params.wc_dilation = ones(5); % for image dilation
 
-
-params.wc_raspivid_params = ' -t 0 --keypress -w 640 -h 480 -p 100,100,740,580 -fli 50hz ';
+params.wc_raspivid_params = ' -t 0 -w 1280 -h 960 -b 3500000 -fps 30 -p 100,100,740,580 -fli 50hz ';
 
 if exist('processparams_local.m','file')
     params = processparams_local( params );
