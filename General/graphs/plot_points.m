@@ -47,8 +47,13 @@ function x = spacepoints( y,dmin,yl,xl,xw)
 
 maxsteps = 1000;
 
-scurr = rng; % store current random seed
-rng(0); % make plot reproducible
+if ~isoctave
+    scurr = rng; % store current random seed
+    rng(0); % make plot reproducible
+else 
+    scurr = rand('state');
+    rand('state',0);
+end
 
 if nargin<5 || isempty(xw)
     xw = 0.8;
@@ -111,7 +116,12 @@ if steps == maxsteps
 end
 
 x(ind) = x;
-rng(scurr); % re-set random seed
 
+if ~isoctave
+    rng(scurr); % re-set random seed
+else
+    rand('state',scurr);
+end
+    
 
 

@@ -100,7 +100,7 @@ switch record.stim_type
         end
         
         if 0
-            switch record.stim_type
+            switch record.stim_type %#ok<UNRCH>
                 case 'orientation'
                     file = fullfile(experimentpath(record),[record.test '_B' ...
                         mat2str([min(record.blocks) max(record.blocks)]) ...

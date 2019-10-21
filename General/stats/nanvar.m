@@ -47,7 +47,7 @@ end
 tile = ones(size(sz));
 tile(dim) = sz(dim);
 
-if isequal(w,0) | isequal(w,1)
+if isequal(w,0) || isequal(w,1)
     % Count up non-NaNs.
     n = sum(~isnan(x),dim);
 

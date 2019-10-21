@@ -21,8 +21,8 @@ if StimSerialSerialPort
     end
     
     if ~isa(StimSerialStim,'serial') && ~isa(StimSerialStim,'octave_serial') 
-        if strcmp(StimSerialScriptIn,StimSerialStimIn)&&...
-                strcmp(StimSerialScriptOut,StimSerialStimOut),
+        if strcmp(StimSerialScriptIn,StimSerialStimIn) && ...
+                strcmp(StimSerialScriptOut,StimSerialStimOut)
             StimSerialStim = StimSerialScript;
         else
             try

@@ -7,6 +7,11 @@ function allenatlasmatching(slice_name)
 %  Annotation http://api.brain-map.org/api/v2/structure_graph_download/1.json
 %
 %  2016 Alexander Heimel, based on Allen Institute
+%
+% DEPRECATED: USE ALLENATLAS INSTEAD
+
+disp('DEPRECATED: Use allenatlas instead');
+
 
 if nargin<1
     slice_name = '';

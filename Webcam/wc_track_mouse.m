@@ -1,4 +1,4 @@
-function record = wc_track_mouse(record, stimStart, verbose)
+function record = wc_track_mouse(record, stimstart, verbose)
 %WC_TRACK_MOUSE tracks mouse in movie from record or filename
 %
 % 2019, Alexander Heimel
@@ -6,38 +6,21 @@ function record = wc_track_mouse(record, stimStart, verbose)
 if nargin<3 || isempty(verbose)
     verbose = true;
 end
-
-% parameters
-secBefore = 2; % s
-makeVideo = false;
-step = false;
-gamma = 0.3; % for showing image
-
-
-difScope = 50; % The range around mouse that is included in pixelchange analysis %was 60
-% nestRange = [80 60]; % x, y in pixels, range from nestcenter at which
-% mouse ist reated as in nest
-freezeSmoother = [5,5]; % Amount of frames that freeze analysis is averaging
-% over before and after current frame
-difTreshold = 0.3; % treshold + minimum movement for difference between frames
-% to be considered as no difference, fraction of average movement %was 0.3
-freezeTreshold = 0.5; % in seconds, treshold for %was 1
-deriv2Tresh = 0.08; % Treshold for 2nd derivative of vidDif %was 0.05
-
 if nargin<2
-    stimStart = [];
+    stimstart = [];
 end
 
+params = wcprocessparams(record);
+
+% parameters
+makeVideo = false;
+gamma = params.wc_play_gamma; % for showing image
+
+
 % defaults
-%stimStart = 9*60 + 28 +3;
 if isempty(record)
-    stimStart = 571.6-10;
-    %stimStart = 564.5+10;
-    record = '\\vs01\MVP\Shared\InVivo\Experiments\172005\172005.1.16\2018-12-04\tinyhat\t00018\..\webcam_picam01_2018-12-04_15_14_15.h264.mp4';
-    %    record = db(find_record(db,'mouse=172005.1.16,date=2018-12-04,epoch=t00018'))
-    %    record = db(find_record(db,'mouse=172005.1.16,date=2018-12-04,epoch=t00004'))
+    stimstart = 571.6-10;
     record = db(find_record(db,'mouse=172005.1.14,date=2018-11-19,epoch=t00002'));
-    
 end
 
 if ~exist('record','var') || isempty(record)
@@ -60,9 +43,6 @@ else
     stimduration = duration(sf.saveScript);
 end
 
-secAfter = stimduration ; % two seconds after stimulus
-
-
 if isempty(filename) || ~exist(filename,'file')
     logmsg(['Cannot find movie for ' recordfilter(record)]);
     return
@@ -71,60 +51,34 @@ end
 logmsg(['Analyzing ' filename]);
 vid = VideoReader(filename);
 
-frameRate = get(vid, 'FrameRate');
+framerate = get(vid, 'FrameRate');
 
 Frame = readFrame(vid);
 s = size(Frame);
 
-
-if isempty(stimStart)
-    if ~isempty(record.stimstartframe)
-        stimStart = record.stimstartframe / frameRate;
-    else
-        stimStart = 0;
-    end
+if isempty(stimstart)
+    stimstart = wc_getstimstart( record, framerate );
 end
 
-% what about the line below. Is this in record.stimstarframe already
-%starttime = (wcinfo(1).stimstart-par.wc_playbackpretime) * par.wc_timemultiplier + par.wc_timeshift;
-
-
 % Time range that needs to be analyzed
-timeRange = [max(0,stimStart-secBefore) stimStart+secAfter];
+timeRange = [max(0,stimstart-params.wc_analyse_time_before_onset) ...
+    stimstart + stimduration + params.wc_analyse_time_after_offset];
 
 if verbose
     figRaw = figure('Name','Raw');
-    logmsg('Press + or - to change gamma');
-
     if makeVideo
         writerObj = VideoWriter('mousetracking1.avi'); %#ok<UNRCH>
-        writerObj.FrameRate = frameRate;
+        writerObj.FrameRate = framerate;
         open(writerObj);
     end
 else
     figRaw = [];
 end
 
-
 % Make a background by averageing frames in bgframes
 % The background is complemented so black shapes become white and can be
 % substracted from each other.
-logmsg('Computing background');
-f = 1;
-n_samples = 50;
-bgtimeRange(1) = max(0,timeRange(1)-120); % extend by 2 minute
-bgtimeRange(2) = min(vid.Duration,timeRange(2)+120); % add 2 minute
-skip = diff(bgtimeRange)/n_samples;
-bg = zeros([size(Frame) n_samples ],class(Frame));
-vid.CurrentTime = bgtimeRange(1);
-while vid.CurrentTime<= (bgtimeRange(2)-skip) && hasFrame(vid)
-    Frame = readFrame(vid);
-    bg(:,:,:,f) = Frame;
-    vid.CurrentTime = vid.CurrentTime + skip; % jump 3s
-    f = f+1;
-end
-bg = median(bg,4); % mode better?
-bg16 = int16(bg);
+bg = double(wc_compute_background(record,vid,timeRange));
 
 % The actual videoanalysis part
 % Runs a for loop trough all frames that need to be analysed specified by
@@ -134,10 +88,10 @@ bg16 = int16(bg);
 % Around this position the mean pixelvalue change is calculated that is
 % used later for freeze detection.
 
-logmsg('Detecting mouse');
+logmsg(['Detecting mouse starting from ' num2str(timeRange(1)) ' s.']);
 vid.CurrentTime = timeRange(1);
 
-n_frames = ceil((timeRange(2)-timeRange(1)) * frameRate);
+n_frames = ceil((timeRange(2)-timeRange(1)) * framerate);
 frametimes = NaN(n_frames,1);
 stim = NaN(n_frames,2);
 body = NaN(n_frames,2);
@@ -148,6 +102,12 @@ Frame = [];
 i = 1;
 
 DisableKeysForKbCheck(231); % ignore for laptop Alexander
+
+if isfield(record.measures,'arena') 
+    screenrect = record.measures.arena;
+else
+    screenrect = [];
+end
 
 while vid.CurrentTime < timeRange(2) && hasFrame(vid)
     frametimes(i) = vid.CurrentTime;
@@ -162,20 +122,8 @@ while vid.CurrentTime < timeRange(2) && hasFrame(vid)
         hold on
     end
     
-    frame_bg_subtracted = bg16 - int16(Frame);
-    
-    frame_bg_subtracted = abs(frame_bg_subtracted);
-    frame_bg_subtracted = double(frame_bg_subtracted);
-    frame_bg_subtracted = frame_bg_subtracted ./ (double(bg16) + 40);
-    
-    if isfield(record.measures,'arena')
-        screenrect = record.measures.arena;
-    else
-        screenrect = [];
-    end
-    
     [body(i,:),arse(i,:),nose(i,:),stim(i,:)] = ...
-        get_mouse_position( frame_bg_subtracted,[],figRaw,screenrect);
+        get_mouse_position( Frame,bg,params,figRaw,screenrect);
     
     % This part defines the scope in which the difference between last
     % frame is calculated
@@ -183,11 +131,11 @@ while vid.CurrentTime < timeRange(2) && hasFrame(vid)
         vidDif(i) = 0;
     else
         frameDif = abs(Frame - oldframe);
-        difScopex1 = max(1,round(body(i,1) - difScope));
-        difScopex2 = min(s(2),round(body(i,1)+ difScope));
-        difScopey1 = max(1,round(body(i,2) - difScope));
-        difScopey2 = min(s(1),round(body(i,2)+ difScope));
-        frameDifMouse = frameDif(difScopey1:difScopey2,difScopex1:difScopex2,:);
+        params.wc_difScopex1 = max(1,round(body(i,1) - params.wc_difScope));
+        params.wc_difScopex2 = min(s(2),round(body(i,1)+ params.wc_difScope));
+        params.wc_difScopey1 = max(1,round(body(i,2) - params.wc_difScope));
+        params.wc_difScopey2 = min(s(1),round(body(i,2)+ params.wc_difScope));
+        frameDifMouse = frameDif(params.wc_difScopey1:params.wc_difScopey2,params.wc_difScopex1:params.wc_difScopex2,:);
         vidDif(i) = mean(frameDifMouse(:));
     end
     
@@ -196,41 +144,14 @@ while vid.CurrentTime < timeRange(2) && hasFrame(vid)
     if verbose
         text(s(2)-70,s(1)-20,[num2str(vid.CurrentTime,'%0.2f') ' s'],'Color','white','horizontalalignment','right');
         drawnow
-
         if makeVideo
             frame = getframe; %#ok<UNRCH>
             writeVideo(writerObj,frame);
-        end
-        
-        % detect keys
-        [ keyIsDown, ~, keyCode ] = KbCheck;
-        if keyIsDown
-            disp(['Pressed: ' num2str(find(keyCode))]);
-            if keyCode(160)
-                if gamma>0.1
-                    gamma = gamma - 0.1;
-                    logmsg(['Gamma = ' num2str(gamma)]);
-                end
-            end
-            if keyCode(189)
-                gamma = gamma + 0.1;
-                logmsg(['Gamma = ' num2str(gamma)]);
-            end
-            if keyCode(32) % space
-                step = not(step);
-            end
-            if keyCode(68) % d
-                keyboard
-            end
-        end
-        if step
-            pause
         end
     end
     
     i = i + 1;
 end
-logmsg('Video analysis is done');
 
 record.measures.frametimes = frametimes;
 record.measures.body_trajectory = body;
@@ -238,18 +159,19 @@ record.measures.arse_trajectory = arse;
 record.measures.nose_trajectory = nose;
 record.measures.stim_trajectory_raw = stim;
 
-record = wc_cleanup_stimulus_trajectory(record,verbose);
-
+if ~strcmp(record.stim_type,'gray_screen')
+    record = wc_cleanup_stimulus_trajectory(record,verbose);
+end
 
 % Freezing detection
 freezePeriodNr = 0;
 firstHit = 1;
 hitnr = 0;
 
-smoothVidDif = movmean(vidDif,2*freezeSmoother);
+smoothVidDif = movmean(vidDif,2*params.wc_freeze_smoother);
 deriv2 = diff(smoothVidDif);
 minimalMovement = min(smoothVidDif);
-nomotion = smoothVidDif(1:end-1) < (minimalMovement + difTreshold) & abs(deriv2) < deriv2Tresh;
+nomotion = smoothVidDif(1:end-1) < (minimalMovement + params.wc_difThreshold) & abs(deriv2) < params.wc_deriv2thres;
 
 freezeTimes = [];
 freeze_duration = [];
@@ -266,23 +188,38 @@ for i = 1:length(nomotion)
             hitnr = hitnr + 1;
         end
     else % motion again
-        if hitnr/frameRate > freezeTreshold
+        if hitnr/framerate > params.wc_freezeduration_threshold
             stopFreezeTime = frametimes(i-1);
             freezePeriodNr = freezePeriodNr + 1;
             freezeTimes(freezePeriodNr,1:2) = [startFreezeTime stopFreezeTime]; %#ok<AGROW>
             freeze_duration(freezePeriodNr) = stopFreezeTime-startFreezeTime; %#ok<AGROW>
-            arse(freezePeriodNr,:) = record.measures.arse_trajectory(i,:);
-            nose(freezePeriodNr,:) = record.measures.nose_trajectory(i,:);
+            arse(freezePeriodNr,:) = record.measures.arse_trajectory(i,:); %#ok<AGROW>
+            nose(freezePeriodNr,:) = record.measures.nose_trajectory(i,:); %#ok<AGROW>
             if isfield(record.measures,'stim_trajectory') && ~isempty(record.measures.stim_trajectory)
-                stim(freezePeriodNr,:) = record.measures.stim_trajectory(i,:);
+                stim(freezePeriodNr,:) = record.measures.stim_trajectory(i,:); %#ok<AGROW>
             else
-                stim(freezePeriodNr,:) = [NaN NaN];
+                stim(freezePeriodNr,:) = [NaN NaN]; %#ok<AGROW>
             end
         end
         firstHit = true;
         hitnr = 0;
     end
 end
+% check if freezing was continuing
+if hitnr/framerate > params.wc_freezeduration_threshold
+    stopFreezeTime = frametimes(i-1);
+    freezePeriodNr = freezePeriodNr + 1;
+    freezeTimes(freezePeriodNr,1:2) = [startFreezeTime stopFreezeTime]; 
+    freeze_duration(freezePeriodNr) = stopFreezeTime-startFreezeTime; 
+    arse(freezePeriodNr,:) = record.measures.arse_trajectory(i,:); 
+    nose(freezePeriodNr,:) = record.measures.nose_trajectory(i,:); 
+    if isfield(record.measures,'stim_trajectory') && ~isempty(record.measures.stim_trajectory)
+        stim(freezePeriodNr,:) = record.measures.stim_trajectory(i,:); 
+    else
+        stim(freezePeriodNr,:) = [NaN NaN]; 
+    end
+end
+
 if isempty(freezeTimes)
     logmsg('No freezing detected');
 end
@@ -298,6 +235,6 @@ record.measures.arse_aut = arse;
 record.measures.nose_aut = nose;
 record.measures.stim_aut = stim;
 record.measures.mousemove_aut = smoothVidDif;
-
+record.measures.framerate = framerate;
 
 

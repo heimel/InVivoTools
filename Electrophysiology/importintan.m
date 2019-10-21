@@ -35,7 +35,8 @@ end
 % EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
 % EVENT.strons.tril(1) =EVENT.strons(1,1);
 
-if 0 && strncmp(record.stim_type,'background',10)==1
+% if 0 && strncmp(record.stim_type,'background',10)==1   original
+if strncmp(record.analysis,'OFF',3)==1 && strncmp(record.stim_type,'bglumin',10)==1
     EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.55;
 end
 if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
@@ -72,12 +73,38 @@ y = filter(b,a,EVENT.Snips.rawsig(channels2analyze,:));
 [b,a] = butter(5,10000/(0.5*sF),'Low');
 y = filter(b,a,y);
 
-logmsg('Filtering SGolay');
+% bpfilt = designfilt('bandpassfir', 'StopbandFrequency1', 200, 'PassbandFrequency1', 300,...
+%     'PassbandFrequency2', 10000, 'StopbandFrequency2', 12000, ...
+%     'StopbandAttenuation1', 60, 'PassbandRipple', 1, 'StopbandAttenuation2', 60,...
+%     'SampleRate', 25000);
+% y = filter(bpfilt,EVENT.Snips.rawsig(channels2analyze,:));
+
+% All frequency values are in Hz.
+Fs = 25000;  % Sampling Frequency
+Fstop1 = 200;         % First Stopband Frequency
+Fpass1 = 300;         % First Passband Frequency
+Fpass2 = 10000;       % Second Passband Frequency
+Fstop2 = 12000;       % Second Stopband Frequency
+Astop1 = 60;          % First Stopband Attenuation (dB)
+Apass  = 1;           % Passband Ripple (dB)
+Astop2 = 80;          % Second Stopband Attenuation (dB)
+match  = 'stopband';  % Band to match exactly
+h  = fdesign.bandpass(Fstop1, Fpass1, Fpass2, Fstop2, Astop1, Apass, ...
+                      Astop2, Fs);
+Hd = design(h, 'butter', 'MatchExactly', match);
+y = [];
 for j = 1:length(channels2analyze)
-    try % problem in Matlab R2015
-        y(j,:) = sgolayfilt(y(j,:),3,11);
-    end
+    y(j,:) = filter(Hd,EVENT.Snips.rawsig(channels2analyze(j),:));
 end
+%y = filter(Hd,EVENT.Snips.rawsig(channels2analyze,:));
+
+
+% logmsg('Filtering SGolay');
+% for j = 1:length(channels2analyze)
+%     try % problem in Matlab R2015
+%         y(j,:) = sgolayfilt(y(j,:),3,11);
+%     end
+% end
 
 HalfW = 16; % samples in downsampled data
 WinWidth = 2*HalfW;
@@ -85,11 +112,17 @@ threshold = processparams.ec_intan_spikethreshold; % threshold of spike detectio
 
 for j = 1:length(channels2analyze)
     logmsg(['Detecting spikes on channel ' channels2analyze(j)]);
-    
-    if threshold<0
-        [~,locs] = findpeaks_fast(-y(j,:)','minpeakheight',abs(threshold),'minpeakdistance',HalfW);
+
+    if abs(threshold)<10 % assume stds
+        chanthreshold = std(y(j,1:100000))*threshold;
     else
-        [~,locs] = findpeaks_fast(y(j,:)','minpeakheight',abs(threshold),'minpeakdistance',HalfW);
+        chanthreshold = threshold;
+    end
+    
+    if chanthreshold<0
+        [~,locs] = findpeaks_fast(-y(j,:)','minpeakheight',abs(chanthreshold),'minpeakdistance',HalfW);
+    else
+        [~,locs] = findpeaks_fast(y(j,:)','minpeakheight',abs(chanthreshold),'minpeakdistance',HalfW);
     end
     if locs(1)<HalfW
         locs(1) = [];
@@ -129,6 +162,11 @@ else
     intervals = [stimsfile.start stimsfile.MTI2{end}.frameTimes(end)+10];
 end
 
+if isempty(EVENT.strons.tril)
+    errormsg(['Missing trigger in ' recordfilter(record)]);
+    cells = {};
+    return
+end
 EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
 
 % shift time to fit with TTL and stimulustimes

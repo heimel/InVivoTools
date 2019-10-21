@@ -1,22 +1,19 @@
 function handle = show_record( record, h_fig, h_control_fig, name )
 %SHOW_RECORD used in database tools to show record figure
 %
+% HANDLE = SHOW_RECORD( RECORD,H_FIG,H_CONTROL_FIG,NAME)
+%
 % 2004-2014, Alexander Heimel
-if nargin<4
-    name = '';
-end
-if isempty(name)
+
+if nargin<4 || isempty(name)
     name = 'Record';
 end
 
 if nargin<2
-    h_fig=[];
+    h_fig = [];
 end
-if nargin<3
-    h_control_fig = [];
-end
-if isempty(h_control_fig)
-    bc=0.8*[1 1 1];
+if nargin<3 || isempty(h_control_fig)
+    bc = 0.8*[1 1 1];
 else
     bc = get(h_control_fig,'Color');
 end
@@ -154,6 +151,11 @@ op = get(h_fig,'outerposition');
 windowvbordersize = op(4)-p(4);
 windowhbordersize = op(3)-p(3);
 
+if isoctave
+    windowvbordersize = 44;
+    windowhbordersize = 6;
+end    
+
 % switch computer
 %     case {'PCWIN','PCWIN64'}
 %         windowvbordersize=26;
@@ -166,10 +168,10 @@ windowhbordersize = op(3)-p(3);
 if isfield(ud,'db_form')
     posdb=get(ud.db_form,'Position');
     posfrm=get(h_fig,'Position');
-    if posdb(2)-posfrm(4)>0  % if not too high
-        set(h_fig,    'Position',[posdb(1) posdb(2)-posfrm(4)-windowvbordersize posfrm(3) posfrm(4)])
+    if posdb(2)-posfrm(4)>0 || isoctave % if not too high
+        set(h_fig,'Position',[posdb(1) posdb(2)-posfrm(4)-windowvbordersize posfrm(3) posfrm(4)])
     else
-        set(h_fig,    'Position',[posdb(1)+posdb(3)+windowhbordersize posdb(2) posfrm(3) posfrm(4)])
+        set(h_fig,'Position',[posdb(1)+posdb(3)+windowhbordersize posdb(2) posfrm(3) posfrm(4)])
     end
     
     % set color

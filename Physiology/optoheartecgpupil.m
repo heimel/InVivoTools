@@ -117,7 +117,7 @@ start(ai);
 start(ao);
 trigger(ai);
 logmsg(['Started optopulse and triggerpulse at ' datestr(now,'hh:mm:ss')]);
-
+logmsg(['Recording for ' num2str(ai.SamplesPerTrigger/ai.SampleRate)]);
 pause(ai.SamplesPerTrigger/ai.SampleRate);
 stop(ai);
 stop(ao);

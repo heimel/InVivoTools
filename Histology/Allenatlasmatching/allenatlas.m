@@ -7,7 +7,7 @@ function [intensity,x_mm] = allenatlas(slice_name,separate_figures)
 %
 %  Annotation http://api.brain-map.org/api/v2/structure_graph_download/1.json
 %
-%  2016-2018, Alexander Heimel, based on Allen Institute
+%  2016-2019, Alexander Heimel, based on Allen Institute
 
 if nargin<1
     slice_name = '';
@@ -27,12 +27,19 @@ ud = get(fig,'userdata');
 ud.separate_figures = separate_figures;
 set(fig,'Position',[20 screensize(4)/2-40 screensize(3)-2*20 screensize(4)/2-2*40]);
 
+params = histprocessparams; % edit processparams_local to set alternate locations for slices and atlas
+
+
 % load slice
 if ~isfield(ud,'slice_name') || (~isempty(slice_name) && ~strcmp(ud.slice_name,slice_name))
-    filename = fullfile('Slices',[slice_name '.jpg']);
+
+    filename = fullfile(params.hist_sliceslocation,[slice_name '.jpg']);
     if ~exist(filename,'file')
         disp('Choose a slice image');
+        savedir = pwd;
+        cd(params.hist_sliceslocation);
         [filename,pathname] = uigetfile({'*.*','All Files (*.*)'},'Choose a slice image');
+        cd(savedir);
         if filename==0
             return
         end
@@ -48,7 +55,7 @@ if ~isfield(ud,'slice_name') || (~isempty(slice_name) && ~strcmp(ud.slice_name,s
 end
 
 if ~isfield(ud,'VOL') || ~isfield(ud,'ANO') || isempty(ud.VOL) || isempty(ud.ANO)
-    atlasfolder = fullfile(fileparts(mfilename('fullpath')),'Atlas');
+    atlasfolder = params.hist_allenmaplocation;
     
     % 25 micron volume size
     blocksize = [528 320 456]; % Anterior-posterior, dorsal-ventral, left-right
@@ -57,7 +64,7 @@ if ~isfield(ud,'VOL') || ~isfield(ud,'ANO') || isempty(ud.VOL) || isempty(ud.ANO
     ud.size_lr = blocksize(3);
     % VOL = 3-D matrix of atlas Nissl volume
     atlasfilename = fullfile(atlasfolder,'atlasVolume.raw');
-    if ~exist(atlasfilename,'dir')
+    if ~exist(atlasfilename,'file')
         disp('Select atlasVolume.raw');
         [atlasfilename,atlasfolder] = uigetfile({'*.raw','Raw Files (*.raw)'},'Locate atlasVolume.raw');
         atlasfilename = fullfile(atlasfolder,atlasfilename);
@@ -345,7 +352,7 @@ for i=1:size(ud.slice_diis,1)
     d = (d<ud.slice_diis(i,3));
     imslice(d) = ud.slice_base; % will become NaN
 end
-figure;
+figure('Name',['Profile ' ud.slice_name],'NumberTitle','off');
 imagesc(imslice);
 
 imslice(imslice==0) = NaN;

@@ -4,9 +4,6 @@
 [submodule "NoRMCorre"]
 	path = NoRMCorre
 	url = https://github.com/flatironinstitute/NoRMCorre
-[submodule "Scanbox_Yeti"]
-	path = Scanbox_Yeti
-	url = https://github.com/Leveltlab/Scanbox_Yeti
 [submodule "Externals/jsonlab"]
 	path = Externals/jsonlab
 	url = git://github.com/fangq/jsonlab

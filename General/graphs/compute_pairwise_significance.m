@@ -134,7 +134,7 @@ if length(r1)>1 && length(r2)>1
             h = (p<0.05);
             testperformed = 'Chi2 test';
     end
-elseif ~isempty(r1std) && ~isempty(r2std) && strcmp(test,'ttest')==1
+elseif ~isempty(r1std) && (n1+n2-2)>0 && ~isempty(r2std) && strcmp(test,'ttest')==1
     s_X1_X2=sqrt( ((n1-1)*r1std^2 + (n2-1)*r2std^2) /...
         (n1+n2-2)*(1/n1+1/n2));
     statistic=-abs(r1-r2)/s_X1_X2;
