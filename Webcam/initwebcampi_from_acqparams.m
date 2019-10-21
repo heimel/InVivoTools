@@ -171,6 +171,7 @@ while 1
     
   datapath = 'initialpath_waiting_for_change';
   logmsg('Press q to quit. t for manual trigger');
+  waiting_for_stop = false;
   while 1 % loop to find trigger
         
         if new_instr_contr
@@ -198,6 +199,13 @@ while 1
         end
         
         if (cts(2)~=prev_cts(2) && cts(2)~=org_cts(2)) || manually_triggered  % i.e. changed and not same as original
+            if waiting_for_stop
+              logmsg('Received stop trigger');
+              waiting_for_stop = false;
+              break
+            end
+              
+        
             stimstart =  (now - recstart)*24*3600; % in seconds
             logmsg(['Stimulus started at ' num2str(stimstart) ' s.']);
             
@@ -212,7 +220,6 @@ while 1
             mkdir(datapath);
             save('-v7',recording_name,'filename','stimstart');
             logmsg(['Saved timing info in ' recording_name]);
-            logmsg('Press q to quit');
             
             acqparams_in = fullfile(datapath,'acqParams_in');
             if exist(acqparams_in,'file')
@@ -222,7 +229,13 @@ while 1
                     logmsg(['Stopping in '  num2str(duration) ' s.']);
                     WaitSecs(duration);
                     break;
+                else
+                    logmsg('Recording until another trigger is received (duration = NaN)');
+                    waiting_for_stop = true;
                 end                
+            else
+              logmsg('Recording until another trigger is received (no acqparams_in file)');
+              waiting_for_stop = true;
             end
             
             if manually_triggered
