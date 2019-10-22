@@ -106,15 +106,26 @@ end
 stop(session);
 %wait(session);
 
+
 logmsg(['Stopped recording ' datestr(now,'hh:mm:ss')]);
-record.measures.parameters = par;
-
-[data,time] = plotData('retrieve',[]);
-
-time = time + par.timeshift; % to match calibration
-
 delete(lh);
 delete(lhoutput);
+
+% send a stopping trigger
+logmsg('Sending stop pulse');
+removeChannel(session,3);
+removeChannel(session,2);
+addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
+session.IsContinuous = false;
+triggerpulse = par.voltage_low * ones(round(par.sample_rate*1),1);
+triggerpulse(round(par.sample_rate *0.1):round(par.sample_rate *0.2),1) = par.voltage_high; % trigger up samples
+queueOutputData(session,triggerpulse);
+startForeground(session);
+
+record.measures.parameters = par;
+[data,time] = plotData('retrieve',[]);
+time = time + par.timeshift; % to match calibration
+
 
 save(fullfile(datapath,'fiberphotometry.mat'),'time','data','par');
 save(fullfile(datapath,'record.mat'),'record','-mat');
