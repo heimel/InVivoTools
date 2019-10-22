@@ -77,7 +77,6 @@ queuedata('reset');
 plotData('reset',[]);
 
 session.Rate = par.sample_rate;
-%session.NumberOfScans = duration * session.Rate;
 addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
 addAnalogInputChannel(session,'Photometry', 0 , 'Voltage'); % photometry
 addAnalogInputChannel(session,'Photometry', 1 , 'Voltage'); % measuring optopulse from raspipi
@@ -88,7 +87,6 @@ lhoutput = addlistener(session,'DataRequired', @queuedata);
 figure
 lh = addlistener(session,'DataAvailable', @plotData);
 session.IsContinuous = true;
-
 prepare(session);
 
 pause(2); % add some time for other computers to prepare
@@ -110,17 +108,16 @@ stop(session);
 logmsg(['Stopped recording ' datestr(now,'hh:mm:ss')]);
 delete(lh);
 delete(lhoutput);
+clear session
+
+
 
 % send a stopping trigger
-logmsg('Sending stop pulse');
-removeChannel(session,3);
-removeChannel(session,2);
-addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
-session.IsContinuous = false;
-triggerpulse = par.voltage_low * ones(round(par.sample_rate*1),1);
-triggerpulse(round(par.sample_rate *0.1):round(par.sample_rate *0.2),1) = par.voltage_high; % trigger up samples
-queueOutputData(session,triggerpulse);
-startForeground(session);
+logmsg('Sending stop trigger');
+send_trigger();
+
+logmsg('Giving raspberry pi 5 seconds to stop recording.');
+pause(5);
 
 record.measures.parameters = par;
 [data,time] = plotData('retrieve',[]);
@@ -142,6 +139,21 @@ ind = find(isnan(data(:,1)),1,'first');
 figure;
 pwelch(data(1:min([ind-1 10000 end]),1),[],[],[],par.sample_rate)
 
+function send_trigger()
+par.voltage_high = 3.3; % V
+par.voltage_low = 0; % V
+par.min_pulsesamples = 1024; % for some NI board
+par.sample_rate = 1024; % Hz
+session = daq.createSession('ni'); % National Instruments USB-6001
+session.Rate = par.sample_rate;
+addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); 
+triggerpulse = [ par.voltage_high * ones(round(session.Rate*0.5),1)]; % half a second
+triggerpulse = [triggerpulse; par.voltage_low * ones(2*par.min_pulsesamples,1)];
+queueOutputData(session,triggerpulse);
+startForeground(session);
+logmsg('Sent trigger');
+stop(session);
+clear session
 
 function queuedata(src,event) %#ok<INUSD>
 persistent data
@@ -220,7 +232,7 @@ function h = getwctestdbwindow
 % gets open testdbwindow
 children = get(0,'children');
 h = [];
-c = 1
+c = 1;
 while isempty(h) && c<=length(children)
     if ~isempty(strfind(get(children(c),'Name'),'Wc database'))
         h = children(c);
