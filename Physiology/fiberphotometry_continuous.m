@@ -9,7 +9,7 @@ if nargin<1 || isempty(record)
     
     % h = getwctestdbwindow
     
-    record.mouse = 'xxx';
+    record.mouse = 'test';
     record.date = datestr(now,'yyyy-mm-dd');
     record.experiment = '1820.fiberphoto';
     record.setup = 'fiberphoto';
@@ -80,7 +80,8 @@ session.Rate = par.sample_rate;
 addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
 addAnalogInputChannel(session,'Photometry', 0 , 'Voltage'); % photometry
 addAnalogInputChannel(session,'Photometry', 1 , 'Voltage'); % measuring optopulse from raspipi
-queueOutputData(session,triggerpulse);
+%queueOutputData(session,triggerpulse);
+queuedata(session);
 
 lhoutput = addlistener(session,'DataRequired', @queuedata);
 
@@ -116,8 +117,8 @@ clear session
 logmsg('Sending stop trigger');
 send_trigger();
 
-logmsg('Giving raspberry pi 5 seconds to stop recording.');
-pause(5);
+logmsg('Giving raspberry pi 7 seconds to stop recording.');
+pause(7);
 
 record.measures.parameters = par;
 [data,time] = plotData('retrieve',[]);
@@ -166,10 +167,12 @@ if ischar(src)
     end
 end
 if isempty(data)
+    disp('PULSSSSSSSSSSSSSSSSSSSSSSSSSSSSS');
     data = 0 * ones(5000,1);
     data(1:100,1) = 3.3;
     %    data(1:1000,1) = 3.3;
 else
+    disp('NOOOOOOOOOOPULLLLLLS');
     data = 0 * ones(5000,1);
 end
 src.queueOutputData(data);
