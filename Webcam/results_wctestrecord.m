@@ -48,6 +48,11 @@ if isfield(record.measures,'brightness')
     if ~isempty(filename)
         vid = VideoReader(filename);
         %    stimstart = wc_getstimstart( record, vid.FrameRate );
+        if stimstart>vid.Duration
+            errormsg(['Video stops before stimulus starts in ' recordfilter(record)]);
+            return
+        end
+            
         vid.CurrentTime = stimstart;
         frame1 = double(readFrame(vid));
     else

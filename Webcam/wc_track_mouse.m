@@ -49,7 +49,13 @@ if isempty(filename) || ~exist(filename,'file')
 end
 
 logmsg(['Analyzing ' filename]);
-vid = VideoReader(filename);
+try
+    vid = VideoReader(filename);
+catch me
+    logmsg([me.message ' for ' recordfilter(record)]);
+    return
+end
+    
 
 framerate = get(vid, 'FrameRate');
 
@@ -64,6 +70,11 @@ end
 timeRange = [max(0,stimstart-params.wc_analyse_time_before_onset) ...
     stimstart + stimduration + params.wc_analyse_time_after_offset];
 
+if vid.Duration<timeRange(2)
+    errormsg(['Video shorter than stimulus in ' recordfilter(record)]);
+    return
+end
+    
 if verbose
     figRaw = figure('Name','Raw');
     if makeVideo
@@ -79,6 +90,10 @@ end
 % The background is complemented so black shapes become white and can be
 % substracted from each other.
 bg = double(wc_compute_background(record,vid,timeRange));
+if isempty(bg)
+    logmsg(['Could not compute background in ' recordfilter(record)]);
+    return
+end
 
 % The actual videoanalysis part
 % Runs a for loop trough all frames that need to be analysed specified by
@@ -89,7 +104,12 @@ bg = double(wc_compute_background(record,vid,timeRange));
 % used later for freeze detection.
 
 logmsg(['Detecting mouse starting from ' num2str(timeRange(1)) ' s.']);
-vid.CurrentTime = timeRange(1);
+try
+    vid.CurrentTime = timeRange(1);
+catch me
+    logmsg([me.message ' in ' recordfilter(record)]);
+    return
+end
 
 n_frames = ceil((timeRange(2)-timeRange(1)) * framerate);
 frametimes = NaN(n_frames,1);

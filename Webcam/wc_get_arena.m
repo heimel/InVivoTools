@@ -11,7 +11,12 @@ end
 
 [~,filename] = wc_getmovieinfo( record );
 
-vid = VideoReader(filename);
+try
+    vid = VideoReader(filename);
+catch me
+   logmsg([me.message ' for ' recordfilter(record)]);
+   return
+end
 stimstart = wc_getstimstart( record, vid.FrameRate );
 try
     vid.CurrentTime = stimstart;

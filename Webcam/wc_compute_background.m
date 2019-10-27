@@ -37,11 +37,24 @@ bgtimeRange(2) = min(vid.Duration,timeRange(2)+120); % add 2 minutes later
 skip = diff(bgtimeRange)/n_samples;
 Frame = readFrame(vid);
 bg = zeros([size(Frame) n_samples ],class(Frame));
-vid.CurrentTime = bgtimeRange(1);
+try
+    vid.CurrentTime = bgtimeRange(1);
+catch me
+    logmsg([me.message ' in ' recordfilter(record)]);
+    bg16 = [];
+    return
+end
+    
+    
 while vid.CurrentTime<= (bgtimeRange(2)-skip) && hasFrame(vid)
     Frame = readFrame(vid);
     bg(:,:,:,f) = Frame;
-    vid.CurrentTime = vid.CurrentTime + skip; % jump 3s
+    try
+        vid.CurrentTime = vid.CurrentTime + skip; % jump 3s
+    catch me
+        logmsg(me.message);
+        break
+    end
     f = f+1;
 end
 bg = median(bg,4); % mode better?
