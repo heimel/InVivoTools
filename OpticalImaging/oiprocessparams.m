@@ -104,10 +104,13 @@ params.oi_response_center_threshold = 0.003;
 
 params.oi_monitor_size_cm = [NaN NaN];
 params.oi_monitor_size_pxl = [NaN NaN];
-switch record.setup
-    case 'jander' % correct on 2014-08-16
-        params.oi_monitor_size_cm = [92 52];
-        params.oi_monitor_size_pxl = [1920 1080];
+
+if isfield(record,'setup')
+    switch record.setup
+        case 'jander' % correct on 2014-08-16
+            params.oi_monitor_size_cm = [92 52];
+            params.oi_monitor_size_pxl = [1920 1080];
+    end
 end
 
 %%%%

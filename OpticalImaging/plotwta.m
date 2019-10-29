@@ -133,7 +133,7 @@ if 0   % changed to zero 2006-10-20
     meanimg=mean(-data(:,:,2:end),3);
     intensity=maximg-meanimg;
     intensity=clip(intensity);
-    image_intensity(wtaimg',intensity',retinotopy_colors);
+    image_intensity(wtaimg',intensity',retinotopy_colormap(size(data,3)) );
     axis equal off;
 end
 
