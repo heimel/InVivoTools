@@ -26,6 +26,9 @@ end
 params.average_image_normmethod = 'subtractframe_ror'; % Delta R/R_baseline / (1+delta R_ROR/ROR_baseline)
 
 params.wta_equalize_area = false;
+params.wta_normalize_each_condition = false;
+params.wta_clipping = 3; % standard deviation from median
+params.wta_range = [];
 params.wta_show_roi = true;
 params.wta_show_ror = true;
 params.wta_show_monitor_center = true;
