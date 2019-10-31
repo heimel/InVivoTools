@@ -120,6 +120,6 @@ if ~isempty(params.wta_clipping) && params.wta_clipping>0
     maximg = clip(maximg,nanmedian(maximg(:)),3*nanstd(maximg(:)));
 end
 
-h = image_intensity(wtaimg',maximg',cmap,params.wta_range);
+[h,wtaimg] = image_intensity(wtaimg',maximg',cmap,params.wta_range);
 
 

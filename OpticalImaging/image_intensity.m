@@ -1,7 +1,14 @@
-function h=image_intensity(img,intensity,colmap,scalerange)
+function [h,complexmap] = image_intensity(img,intensity,colmap,scalerange)
 %IMAGE_INTENSITY
 %
-%  H = IMAGE_INTENSITY(IMG,INTENSITY,COLMAP)
+%  [H, COMPLEXMAP] = IMAGE_INTENSITY(IMG,INTENSITY,COLMAP,SCALERANGE)
+%
+%   IMG is the winner-take-all map with the number of winning conditions
+%       for each pixel
+%   INTENSITY is a map of the response strength
+%   COLMAP is the colormap to use
+%   SCALERANGE is the range of normalized intensities to use. [0,1] by
+%       default
 %
 %  2004-2019, Alexander Heimel
 %
@@ -37,5 +44,5 @@ complexmap(:) = min(complexmap(:),1);
 complexmap(:) = max(complexmap(:),0);
 
 h = figure('Name','WTA map');
-image( complexmap);
+image(complexmap);
 axis equal off
