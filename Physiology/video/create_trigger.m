@@ -53,5 +53,7 @@ set(trigger_vid, 'SamplesPerTrigger', required_samples);
 % Add channel to run AI (mandatory)
 addchannel(trigger_vid,0);  
 
+logmsg('Set trigger');
+disp(trigger_vid)
 
 end

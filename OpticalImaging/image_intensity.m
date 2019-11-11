@@ -1,49 +1,48 @@
-function h=image_intensity(img,intensity,colmap)
+function [h,complexmap] = image_intensity(img,intensity,colmap,scalerange)
 %IMAGE_INTENSITY
 %
-%  IMAGE_INTENSITY(IMG,INTENSITY,COLMAP)
+%  [H, COMPLEXMAP] = IMAGE_INTENSITY(IMG,INTENSITY,COLMAP,SCALERANGE)
 %
-%  2004, Alexander Heimel
+%   IMG is the winner-take-all map with the number of winning conditions
+%       for each pixel
+%   INTENSITY is a map of the response strength
+%   COLMAP is the colormap to use
+%   SCALERANGE is the range of normalized intensities to use. [0,1] by
+%       default
 %
-  
- if nargin<3
-    colmap=hsv(5);
-  end
-  n_colors=size(colmap,1);
+%  2004-2019, Alexander Heimel
+%
 
-%  img=img-min(img(:));
-%  img=img./max(img(:));
-%  img=ceil(img*(n_colors-1));
-  
-  huemap=ind2rgb( img, colmap );
-  
+if nargin<4 || isempty(scalerange)
+   scalerange = [0 1]; 
+end
 
-  ind=find(isinf(intensity) & intensity>0);
-  intensity(ind)=max(intensity(find(~isinf(intensity))));
-  ind=find(isinf(intensity) & intensity<0);
-  intensity(ind)=min(intensity(find(~isinf(intensity))));
-  intensity=intensity-min(intensity(:));
-  intensity=intensity./max(intensity(:));
-  
-  
-  if 0
-  % normalizing log absolute values
-  intensity=log(intensity);
-  intensity(:)=intensity(:)-mean(intensity(:));
-  intensity(:)=intensity(:)/std(intensity(:));
-  intensity=0.2*intensity+0.7;
-  % figure; hist(intensity(:),40);
-  end
-  
-  %imagesc(intensity);colormap(gray);
-  %axis equal off;
-  
-  h=figure;
-  complexmap=huemap;
-  complexmap(:,:,1)=huemap(:,:,1).*intensity;
-  complexmap(:,:,2)=huemap(:,:,2).*intensity;
-  complexmap(:,:,3)=huemap(:,:,3).*intensity;
-  complexmap(:)=min(complexmap(:),1);
-  complexmap(:)=max(complexmap(:),0);
-  image( complexmap);
-  axis equal off;
+if nargin<3 || isempty(colmap)
+    colmap = hsv(5);
+end
+
+huemap = ind2rgb( img, colmap );
+
+% remove infinities
+intensity( isinf(intensity) & intensity>0 ) = max(intensity(~isinf(intensity)));
+intensity( isinf(intensity) & intensity<0 ) = min(intensity(~isinf(intensity)));
+
+intensity = intensity - min(intensity(:));
+maxintensity = max(intensity(:)) * scalerange(2);
+minintensity = maxintensity * scalerange(1);
+
+% rescale intensity within range to [0,1]
+intensity( intensity>maxintensity ) = maxintensity;
+intensity( intensity<minintensity ) = minintensity;
+intensity = (intensity - minintensity)/(maxintensity-minintensity);
+
+% compute intensity scale map
+complexmap = huemap .* repmat(intensity,1,1,3);
+
+% clip final color map (should be superfluous after scaling intensity)
+complexmap(:) = min(complexmap(:),1);
+complexmap(:) = max(complexmap(:),0);
+
+h = figure('Name','WTA map');
+image(complexmap);
+axis equal off

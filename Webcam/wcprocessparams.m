@@ -88,7 +88,18 @@ params.wc_difThreshold = 0.3; % threshold + minimum movement for difference betw
 % to be considered as no difference, fraction of average movement 
 params.wc_deriv2thres = 0.08; % Threshold for 2nd derivative of vidDif for detecting freezing
 
+% mouse tracking parameters
+params.wc_blackThreshold = 0.3;
+params.wc_maxAreaSize = 8000; % pxl, Max area that could be mouse
+params.wc_minAreaSize = 200; % pxl, Minimal area for region that is tracked as mouse
+params.wc_minMouseSize = 50^2; % pxl, Minimal area a mouse could be
+params.wc_minStimSize = 10; % pxl, Minimal area for region that might be stimulus
+params.wc_tailWidth = 12; % pxl
+params.wc_tailToMiddle = 70; % pxl
+params.wc_minComponentSize = 6; % pxl, Consider smaller components as noise
+params.wc_dilation = ones(5); % for image dilation
 
+params.wc_raspivid_params = ' -t 0 -w 1280 -h 960 -b 3500000 -fps 30 -p 100,100,740,580 -fli 50hz ';
 
 if exist('processparams_local.m','file')
     params = processparams_local( params );

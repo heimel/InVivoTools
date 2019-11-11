@@ -25,9 +25,9 @@ switch length(p)
     fitr = p(1)*c./(p(2)^p(3)+c);
     d = (data-repmat(fitr,size(data,1),1));
     err = err + sum(sum(d.*d));
-    err = err + 0.01*(p(3)-2)^2; % exponent should be around 2
-    err = err + 0.01*p(2)^2; % b should not explode
-    err = err + thresholdlinear(-p(1)) + thresholdlinear(-p(3));
+    err = err + 0.001*(p(3)-2)^2 * (data*data') ; % exponent should be around 2
+    err = err + 0.001*p(2)^2 * (data*data') ; % b should not explode
+    err = err + thresholdlinear(-p(1)) + thresholdlinear(-p(3)); % to get positive parameters
   case 4 % p=[rm b n m]
     fitr = p(1)*c.^p(3)./(p(2)^p(4)+c.^p(4));
     d = (data-repmat(fitr,size(data,1),1));

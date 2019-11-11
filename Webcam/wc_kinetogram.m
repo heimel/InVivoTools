@@ -62,16 +62,16 @@ end
 mousemove = mousemove(1:count,:);
 
 figure('Name','Kinetogram','NumberTitle','off');
-h=imagesc('XData',t,'YData',1:count,'CData',mousemove);
+h = imagesc('XData',t,'YData',1:count,'CData',mousemove);
 box off
 axis square
 set(gca,'Clim',[0 max(mousemove(:))]);
 hold on
 for i=1:size(freezestarts,1)
     plot(freezestarts(i,2) +[0  0],...
-        freezestarts(i,1) +[-0.5 0.5] ,'-y');
+        freezestarts(i,1) +[-0.5 0.5] ,'-y','linewidth',3);
     plot(freezestops(i,2) +[0  0],...
-        freezestops(i,1) +[-0.5 0.5] ,'-r');
+        freezestops(i,1) +[-0.5 0.5] ,'-r','linewidth',3);
 end
 
 f = linspace(0,1,64)';

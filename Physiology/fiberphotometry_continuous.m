@@ -9,14 +9,14 @@ if nargin<1 || isempty(record)
     
     % h = getwctestdbwindow
     
-    record.mouse = '31334_SST';
+    record.mouse = 'test';
     record.date = datestr(now,'yyyy-mm-dd');
     record.experiment = '1820.fiberphoto';
     record.setup = 'fiberphoto';
     record.datatype = 'wc';
     record.epoch = 't00001';
     record.experimenter = 'ma';
-    record.comment = 'GCamp photometry in vlPAG Right with opto in ZI';
+    record.comment = 'GCaMP6s_flex_AAV9 in ZI Left';
     record.measures = [];
 end
 
@@ -77,18 +77,17 @@ queuedata('reset');
 plotData('reset',[]);
 
 session.Rate = par.sample_rate;
-%session.NumberOfScans = duration * session.Rate;
 addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); % triggerpulse
 addAnalogInputChannel(session,'Photometry', 0 , 'Voltage'); % photometry
 addAnalogInputChannel(session,'Photometry', 1 , 'Voltage'); % measuring optopulse from raspipi
-queueOutputData(session,triggerpulse);
+%queueOutputData(session,triggerpulse);
+queuedata(session);
 
 lhoutput = addlistener(session,'DataRequired', @queuedata);
-    
+
 figure
 lh = addlistener(session,'DataAvailable', @plotData);
 session.IsContinuous = true;
-
 prepare(session);
 
 pause(2); % add some time for other computers to prepare
@@ -106,15 +105,25 @@ end
 stop(session);
 %wait(session);
 
+
 logmsg(['Stopped recording ' datestr(now,'hh:mm:ss')]);
+delete(lh);
+delete(lhoutput);
+clear session
+
+
+
+% send a stopping trigger
+logmsg('Sending stop trigger');
+send_trigger();
+
+logmsg('Giving raspberry pi 7 seconds to stop recording.');
+pause(7);
+
 record.measures.parameters = par;
-
 [data,time] = plotData('retrieve',[]);
-
 time = time + par.timeshift; % to match calibration
 
-delete(lh); 
-delete(lhoutput); 
 
 save(fullfile(datapath,'fiberphotometry.mat'),'time','data','par');
 save(fullfile(datapath,'record.mat'),'record','-mat');
@@ -131,6 +140,21 @@ ind = find(isnan(data(:,1)),1,'first');
 figure;
 pwelch(data(1:min([ind-1 10000 end]),1),[],[],[],par.sample_rate)
 
+function send_trigger()
+par.voltage_high = 3.3; % V
+par.voltage_low = 0; % V
+par.min_pulsesamples = 1024; % for some NI board
+par.sample_rate = 1024; % Hz
+session = daq.createSession('ni'); % National Instruments USB-6001
+session.Rate = par.sample_rate;
+addAnalogOutputChannel(session,'Photometry', 'ao1', 'Voltage'); 
+triggerpulse = [ par.voltage_high * ones(round(session.Rate*0.5),1)]; % half a second
+triggerpulse = [triggerpulse; par.voltage_low * ones(2*par.min_pulsesamples,1)];
+queueOutputData(session,triggerpulse);
+startForeground(session);
+logmsg('Sent trigger');
+stop(session);
+clear session
 
 function queuedata(src,event) %#ok<INUSD>
 persistent data
@@ -143,10 +167,12 @@ if ischar(src)
     end
 end
 if isempty(data)
+    disp('PULSSSSSSSSSSSSSSSSSSSSSSSSSSSSS');
     data = 0 * ones(5000,1);
     data(1:100,1) = 3.3;
-%    data(1:1000,1) = 3.3;
+    %    data(1:1000,1) = 3.3;
 else
+    disp('NOOOOOOOOOOPULLLLLLS');
     data = 0 * ones(5000,1);
 end
 src.queueOutputData(data);
@@ -209,7 +235,7 @@ function h = getwctestdbwindow
 % gets open testdbwindow
 children = get(0,'children');
 h = [];
-c = 1
+c = 1;
 while isempty(h) && c<=length(children)
     if ~isempty(strfind(get(children(c),'Name'),'Wc database'))
         h = children(c);

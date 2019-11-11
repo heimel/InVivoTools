@@ -30,7 +30,7 @@ p = [];
 
 for i=1:m,
 	x = varargin{i};
-	if size(x,1)~=1&size(x,2)~=1,
+	if size(x,1)~=1 && size(x,2)~=1,
 		error('kruskal_wallis_test: all arguments must be vectors');
 	end;
 	l = length(x);

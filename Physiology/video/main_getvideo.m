@@ -143,6 +143,8 @@ catch me
         case 'daq:daqmex:unexpected'
             logmsg(me.message);
             stop(trigger_vid);
+        otherwise
+            logmsg(me.message);
     end
 end
     
@@ -170,12 +172,14 @@ try
             logmsg('Acquisition ended, returning to init_getvideo()');
             break
         end
+
         
     end
-catch
+catch me
     stop(trigger_vid);       % Stops (all active processes on) analog input object
     delete(trigger_vid);     % Deletes analog input object
     clear trigger            % Removes analog input object from workspace
+    logmsg(me.message);
 end
 
 % Destroy trigger (Analog Input object) to prevent faulty results when

@@ -26,6 +26,9 @@ end
 params.average_image_normmethod = 'subtractframe_ror'; % Delta R/R_baseline / (1+delta R_ROR/ROR_baseline)
 
 params.wta_equalize_area = false;
+params.wta_normalize_each_condition = false;
+params.wta_clipping = 3; % standard deviation from median
+params.wta_range = [];
 params.wta_show_roi = true;
 params.wta_show_ror = true;
 params.wta_show_monitor_center = true;
@@ -104,10 +107,13 @@ params.oi_response_center_threshold = 0.003;
 
 params.oi_monitor_size_cm = [NaN NaN];
 params.oi_monitor_size_pxl = [NaN NaN];
-switch record.setup
-    case 'jander' % correct on 2014-08-16
-        params.oi_monitor_size_cm = [92 52];
-        params.oi_monitor_size_pxl = [1920 1080];
+
+if isfield(record,'setup')
+    switch record.setup
+        case 'jander' % correct on 2014-08-16
+            params.oi_monitor_size_cm = [92 52];
+            params.oi_monitor_size_pxl = [1920 1080];
+    end
 end
 
 %%%%

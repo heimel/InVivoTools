@@ -1,4 +1,4 @@
-function [h,wtaimg]=plotwta(data,stimlist,blank_stim,colortab_0,maskinds,maskcoltab_0,...
+function [h,wtaimg] = plotwta(data,stimlist,blank_stim,colortab_0,maskinds,maskcoltab_0,...
     maskcoltab_1,record,cmap)
 
 % PLOTWTA - Plots winner-take-all plot of intrinsic imaging data
@@ -40,13 +40,21 @@ end
 if nargin<9 || isempty(cmap)
     cmap = retinotopy_colormap(length(stimlist),1);
 end
-processparams = oiprocessparams(record);
+params = oiprocessparams(record);
 
-if processparams.wta_equalize_area
-    max_count = processparams.wta_max_equalizing_steps;
+if params.wta_equalize_area
+    max_count = params.wta_max_equalizing_steps;
     logmsg('Equalizing area');
 else
     max_count = 1;
+end
+
+if params.wta_normalize_each_condition
+    data = double(data);
+    for c = 1:size(data,3)
+        data(:,:,c) = data(:,:,c) - min(min(data(:,:,c)));
+        data(:,:,c) = data(:,:,c) ./ max(max(data(:,:,c)));
+    end
 end
 
 orgdata = data; % for original intensity scaling
@@ -65,31 +73,28 @@ while count<=max_count % equalizing area
     for i=stimlist
         ind = find(max_img==data(:,:,i));
         max_inds(ind) = i;
-        
         ind = intersect(ind,maskinds);
         area_condition(i) = length(ind);
     end
     if max_count>1
-        switch  processparams.wta_equalizing
+        switch  params.wta_equalizing
             case 'max'
                 [~,ind_area] = max(area_condition);
-                equalizing_factors(ind_area) = equalizing_factors(ind_area) * processparams.wta_equalizing_factor;
-                data(:,:,ind_area) =  data(:,:,ind_area)*processparams.wta_equalizing_factor;
+                equalizing_factors(ind_area) = equalizing_factors(ind_area) * params.wta_equalizing_factor;
+                data(:,:,ind_area) =  data(:,:,ind_area)*params.wta_equalizing_factor;
             case 'min'
                 [~,ind_area] = min(area_condition);
-                equalizing_factors(ind_area) = equalizing_factors(ind_area) / processparams.wta_equalizing_factor;
-                data(:,:,ind_area) =  data(:,:,ind_area)/processparams.wta_equalizing_factor;
+                equalizing_factors(ind_area) = equalizing_factors(ind_area) / params.wta_equalizing_factor;
+                data(:,:,ind_area) =  data(:,:,ind_area)/params.wta_equalizing_factor;
         end
     end
     
     if any(equalizing_factors<0.1)
         break
     end
-    
-    % logmsg(['Step' num2str(count) 'Adjusting response of condition ' num2str(ind_area)]);
     count = count+1;
 end
-if processparams.wta_equalize_area
+if params.wta_equalize_area
     logmsg(['Equalizing steps: ' num2str(count)]);
     logmsg(['Equalizing factors: ' mat2str(equalizing_factors',2)]);
 end
@@ -102,38 +107,19 @@ end
 
 wtaimg = wtaimg-min(min(wtaimg));
 wtaimg = (maskcoltab_1-maskcoltab_0)*wtaimg/max(max(wtaimg))+maskcoltab_0;
-img0 = wtaimg;
 
-for i=stimlist
+for i = stimlist
     wtaimg(max_inds==i) = colortab_0 + i;
 end
 
-% to make bloodvessel mask gray
-if 0
-    wtaimg(find(maskinds)) = img0(find(maskinds));
-end
-
 % show with intensity based on maximum
-%maximg = maxintensity(-data(:,:,1:end));
 maximg = maxintensity(-orgdata(:,:,1:end));
 
-mask = zeros(size(maximg));
-mask(maskinds) = maximg(maskinds);
-
-maximg = clip(maximg,nanmedian(maximg(:)),3*nanstd(maximg(:)));
-
-h = image_intensity(wtaimg',maximg',cmap);
-
-% show with intensity based on difference of maximum and mean
-% this is not very good, because it will create boundaries between good
-% response zones
-if 0   % changed to zero 2006-10-20
-    %figure;
-    maximg=maxintensity(-data(:,:,2:end));
-    meanimg=mean(-data(:,:,2:end),3);
-    intensity=maximg-meanimg;
-    intensity=clip(intensity);
-    image_intensity(wtaimg',intensity',retinotopy_colors);
-    axis equal off;
+% clip
+if ~isempty(params.wta_clipping) && params.wta_clipping>0
+    maximg = clip(maximg,nanmedian(maximg(:)),3*nanstd(maximg(:)));
 end
+
+[h,wtaimg] = image_intensity(wtaimg',maximg',cmap,params.wta_range);
+
 
