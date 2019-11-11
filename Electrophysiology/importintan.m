@@ -26,6 +26,13 @@ end
 
 logmsg(['Loaded event file for ' recordfilter(record)]);
 
+figure('Name','Raw','Numbertitle','off');
+hold on;
+for i = 1:16
+    plot(EVENT.Snips.rawtime(1,1:100000),EVENT.Snips.rawsig(i,1:100000));
+end
+
+
 if ~isfield(EVENT,'strons')
     errormsg(['No triggers present in ' recordfilter(record)]);
     cells = [];
@@ -64,14 +71,22 @@ logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
 clear('WaveTime_Fpikes');
 WaveTime_Fpikes = struct('time',[],'data',[]);
 
+% substract common signal from all channels
+logmsg('Subtracting common signal from all channels');
+commonsignal = mean(EVENT.Snips.rawsig,1);
+for i=1:16
+    EVENT.Snips.rawsig(i,:) = EVENT.Snips.rawsig(i,:) - commonsignal;
+end
+
+
 
 %% Spike detection
 logmsg('Filtering between 300 Hz and 10 kHz');
-sF = EVENT.Freq;
-[b,a] = butter(5,300/(0.5*sF),'High');
-y = filter(b,a,EVENT.Snips.rawsig(channels2analyze,:));
-[b,a] = butter(5,10000/(0.5*sF),'Low');
-y = filter(b,a,y);
+% sF = EVENT.Freq;
+% [b,a] = butter(5,300/(0.5*sF),'High');
+% y = filter(b,a,EVENT.Snips.rawsig(channels2analyze,:));
+% [b,a] = butter(5,10000/(0.5*sF),'Low');
+% y = filter(b,a,y);
 
 % bpfilt = designfilt('bandpassfir', 'StopbandFrequency1', 200, 'PassbandFrequency1', 300,...
 %     'PassbandFrequency2', 10000, 'StopbandFrequency2', 12000, ...
@@ -92,11 +107,13 @@ match  = 'stopband';  % Band to match exactly
 h  = fdesign.bandpass(Fstop1, Fpass1, Fpass2, Fstop2, Astop1, Apass, ...
                       Astop2, Fs);
 Hd = design(h, 'butter', 'MatchExactly', match);
-y = [];
+y = zeros(length(channels2analyze),size(EVENT.Snips.rawsig,2));
 for j = 1:length(channels2analyze)
+    logmsg(['Filtering channel ' num2str(channels2analyze(j))]);
     y(j,:) = filter(Hd,EVENT.Snips.rawsig(channels2analyze(j),:));
 end
 %y = filter(Hd,EVENT.Snips.rawsig(channels2analyze,:));
+
 
 
 % logmsg('Filtering SGolay');
@@ -110,8 +127,12 @@ HalfW = 16; % samples in downsampled data
 WinWidth = 2*HalfW;
 threshold = processparams.ec_intan_spikethreshold; % threshold of spike detection
 
+
+
+
 for j = 1:length(channels2analyze)
-    logmsg(['Detecting spikes on channel ' channels2analyze(j)]);
+    logmsg(['Detecting spikes on channel ' num2str(channels2analyze(j))]);
+    
 
     if abs(threshold)<10 % assume stds
         chanthreshold = std(y(j,1:100000))*threshold;
@@ -133,9 +154,16 @@ for j = 1:length(channels2analyze)
     ind = repmat(locs,1,WinWidth) + repmat(1-HalfW:HalfW,length(locs),1);
     x = y(j,:);
     Spikes = x(ind);
+
+
     
     WaveTime_Fpikes(j,1).data = Spikes;
     WaveTime_Fpikes(j,1).time = EVENT.Snips.rawtime(locs);
+    
+    figure('Name','Filtered','Numbertitle','off');
+    hold on
+    plot(EVENT.Snips.rawtime(1,1:100000),y(j,1:100000));
+    plot(WaveTime_Fpikes(j,1).time,chanthreshold*ones(size(WaveTime_Fpikes(j,1).time)),'o');
 end
        
 for ii=1:length(channels2analyze)
