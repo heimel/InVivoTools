@@ -46,9 +46,9 @@ elseif ~ischar(figNum)  % is the call described above
 else % it is a callback
     command = figNum;
     theFig = gcbf;
-    if nargin==2, 
+    if nargin==2
         theFig = soefig;
-    elseif isempty(theFig),
+    elseif isempty(theFig)
         theFig = gcbf;
     else
         theFig = gcf;
@@ -64,24 +64,21 @@ else % it is a callback
             set(lbloc,'String',g,'value',[]);
             RemoteScriptEditor('EnableDisable',theFig);
         case 'UpdateRem'
-            save_str={'cd(pwd);try;save(''fromremote'',''s'',''-v7'');catch;pause(0.1);save(''fromremote'',''s'',''-v7'');end;' 
-                'try;delete(''gotit'');end;'
-                'save(''gotit'',''g'',''-v7'');'};
+            save_str={'cd(pwd);try;save(''fromremote.mat'',''s'',''-v7'');catch;pause(0.1);save(''fromremote.mat'',''s'',''-v7'');end;' 
+                'try;delete(''gotit*'');end;'
+                'save(''gotit.mat'',''g'',''-v7'');'};
             str = cat(1,update_str,save_str);
             b = sendremotecommand(str);
             if b  % we know pathname is good
                 pathn = rempath;
-                fname = [pathn 'fromremote'];
-                if ~exist(fname,'file')
-                    fname = [fname '.mat'];
-                end
+                fname = [pathn 'fromremote.mat'];
                 s = load(fname,'-mat'); 
                 s = s.s;
                 handleupdate(s,lbrem);
                 RemoteScriptEditor('EnableDisable',theFig);
             end
         case 'Toremote'
-            unloadstr={'names=load(''toremote'',''-mat'');fnames=fieldnames(names);',...
+            unloadstr={'names=load(''toremote.mat'',''-mat'');fnames=fieldnames(names);',...
                 'for i=1:length(fnames),'...
                 'if exist(fnames{i}),'...
                 'eval([''b=isa('' fnames{i} '', ''''stimscript'''');'']);',...
@@ -90,20 +87,20 @@ else % it is a callback
                 'if b,eval([fnames{i} '' = unloadstim('' fnames{i} '');'']);end;'...
                 'end;'...
                 'end;'}';
-            trans_str =cat(1,{'load(''toremote'',''-mat'');'},update_str);
-            save_str= {'save(''fromremote'',''s'',''-mat'');'
-                'try;delete(''gotit'');end;'
-                'save(''gotit'',''g'',''-mat'');'};
+            trans_str =cat(1,{'load(''toremote.mat'',''-mat'');'},update_str);
+            save_str= {'save(''fromremote.mat'',''s'',''-mat'');'
+                'try;delete(''gotit*'');end;'
+                'save(''gotit.mat'',''g'',''-mat'');'};
             trans_str = cat(1,trans_str,save_str);
             trans_str = cat(1,unloadstr,trans_str);
             b= checkremdir;
             if b
                 strs = lb_getselected(lbloc);
-                if length(strs)>0,
+                if ~isempty(strs)
                     biglist = [];
                     for i=1:length(strs)
                         g = char(strs(i));
-                        biglist=[biglist ' ''' g ''','];
+                        biglist=[biglist ' ''' g ''',']; %#ok<AGROW>
                     end
                     if ~isempty(biglist)
                         biglist=biglist(1:end-1);
@@ -113,13 +110,14 @@ else % it is a callback
                         biglist = [biglist ',''-V6'' '];
                     end
                     pathn=rempath;
-                    fname = [pathn 'toremote'];
+                    fname = [pathn 'toremote.mat'];
                     evalin('base',['save(''' fname ''',' biglist ',''-mat'');']);
                     b=sendremotecommand(trans_str);
                     if b
                         pathn = rempath;
-                        fname = [pathn 'fromremote'];
-                        s=load(fname,'-mat'); s = s.s;
+                        fname = [pathn 'fromremote.mat'];
+                        s=load(fname,'-mat');
+                        s = s.s;
                         %s(1),
                         handleupdate(s,lbrem);
                         RemoteScriptEditor('EnableDisable',theFig);
@@ -127,7 +125,7 @@ else % it is a callback
                 end
             end
         case 'Toremoteload'
-            unloadstr={'names=load(''toremote'',''-mat'');fnames=fieldnames(names);',...
+            unloadstr={'names=load(''toremote.mat'',''-mat'');fnames=fieldnames(names);',...
                 'for i=1:length(fnames),'...
                 'if exist(fnames{i}),'...
                 'eval([''b=isa('' fnames{i} '', ''''stimscript'''');'']);',...
@@ -144,40 +142,37 @@ else % it is a callback
                 'if b,eval([fnames{i} '' = loadstim('' fnames{i} '');'']);end;'...
                 'end;'...
                 'end;'}';
-            trans_str =cat(1,{'load(''toremote'',''-mat'');'},loadstr);
-            save_str= {'save(''fromremote'',''s'',''-mat'');'
-                'try;delete(''gotit'');end;'
-                'save(''gotit'',''g'',''-mat'');'};
+            trans_str =cat(1,{'load(''toremote.mat'',''-mat'');'},loadstr);
+            save_str= {'save(''fromremote.mat'',''s'',''-mat'');'
+                'try;delete(''gotit*'');end;'
+                'save(''gotit.mat'',''g'',''-mat'');'};
             trans_str = cat(1,trans_str,update_str);
             trans_str = cat(1,trans_str,save_str);
             trans_str = cat(1,unloadstr,trans_str);
             b= checkremdir;
             if b
                 strs = lb_getselected(lbloc);
-                if length(strs)>0
+                if ~isempty(strs)
                     biglist = [];
                     for i=1:length(strs)
                         g = char(strs(i));
-                        biglist=[biglist ' ''' g ''','];
+                        biglist=[biglist ' ''' g ''',']; %#ok<AGROW>
                     end
                     if ~isempty(biglist)
                         biglist=biglist(1:end-1);
                     end
                     pathn=rempath;
-                    v = str2num(version('-release'));
+                    v = str2num(version('-release')); %#ok<ST2NM>
                     if v>13
                         biglist = [biglist ', ''-V6'' '];
                     end
-                    fname = [pathn 'toremote'];
+                    fname = [pathn 'toremote.mat'];
                     evalin('base',['save(''' fname ''',' biglist ',''-mat'');']);
                     b=sendremotecommand(trans_str);
                     if b
                         pathn = rempath;
-                        fname = [pathn 'fromremote'];
-                        if ~exist(fname,'file')
-                            fname = [fname '.mat'];
-                        end
-                        s=load(fname,'-mat'); 
+                        fname = [pathn 'fromremote.mat'];
+                        s = load(fname,'-mat'); 
                         s = s.s;
                         handleupdate(s,lbrem);
                         RemoteScriptEditor('EnableDisable',theFig);
@@ -187,7 +182,7 @@ else % it is a callback
         case 'Tolocal'
             remsavestr = {};
             strs = lb_getselected(lbrem);
-            if length(strs)>0
+            if ~isempty(strs)
                 ts=[];
                 for i=1:length(strs)
                     g = char(strs(i));
@@ -197,14 +192,14 @@ else % it is a callback
                     ts =  [ts ' ' g] ;
                 end
             end
-            save_str= {['save fromremote ' ts ' -mat']
-                'try;delete(''gotit'');end;'
-                'save(''gotit'',''g'',''-mat'');'};
+            save_str= {['save fromremote.mat ' ts ' -mat']
+                'try;delete(''gotit*'');end;'
+                'save(''gotit.mat'',''g'',''-mat'');'};
             remsavestr = cat(1,{'g=5;'},save_str);
-            b=sendremotecommand(remsavestr);
+            b = sendremotecommand(remsavestr);
             if b
                 pathn = rempath;
-                fname = [pathn 'fromremote'];
+                fname = [pathn 'fromremote.mat'];
                 evalin('base',['load ' fname ' -mat;']);
                 z=geteditor('RemoteScriptEditor');
                 if z
@@ -220,9 +215,9 @@ else % it is a callback
             textbox('RemoteScriptEditor help',g);
         case 'Load'
             loadstr = {};
-            save_str= {'save(''fromremote'',''s'',''-mat'');'
-                'try;delete(''gotit'');end;'
-                'save(''gotit'',''g'',''-mat'');'};
+            save_str= {'save(''fromremote.mat'',''s'',''-mat'');'
+                'try;delete(''gotit*'');end;'
+                'save(''gotit.mat'',''g'',''-mat'');'};
             strs = lb_getselected(lbrem);
             if length(strs)>0
                 for i=1:length(strs)
@@ -239,152 +234,162 @@ else % it is a callback
             b=sendremotecommand(loadstr);
             if b
                 pathn = rempath;
-                fname = [pathn 'fromremote'];
-                s=load(fname,'-mat'); s = s.s;
-                %s(1),
+                fname = [pathn 'fromremote.mat'];
+                s=load(fname,'-mat'); 
+                s = s.s;
                 handleupdate(s,lbrem);
                 RemoteScriptEditor('EnableDisable',theFig);
             end
-        case 'Unload',
+        case 'Unload'
             loadstr = {};
-            save_str= {'save(''fromremote'',''s'',''-mat'');'
-                'try;delete(''gotit'');end;'
-                'save(''gotit'',''g'',''-mat'');'};
+            save_str= {'save(''fromremote.mat'',''s'',''-mat'');'
+                'try;delete(''gotit*'');end;'
+                'save(''gotit.mat'',''g'',''-mat'');'};
             strs = lb_getselected(lbrem);
-            if length(strs)>0,
-                for i=1:length(strs),
+            if length(strs)>0
+                for i=1:length(strs)
                     g = char(strs(i));
-                    if g(end)=='*', g=g(1:end-1);end;
+                    if g(end)=='*'
+                        g=g(1:end-1);
+                    end
                     ts = { [g '=unloadStimScript(' g ');'] };
                     loadstr = cat(1,loadstr,ts);
-                end;
-            end;
+                end
+            end
             loadstr = cat(1,loadstr,update_str);
             loadstr = cat(1,loadstr,save_str);
             b=sendremotecommand(loadstr);
-            if b,
+            if b
                 pathn = rempath;
-                fname = [pathn 'fromremote'];
-                s=load(fname,'-mat'); s = s.s;
-                %s(1),
+                fname = [pathn 'fromremote.mat'];
+                s = load(fname,'-mat');
+                s = s.s;
                 handleupdate(s,lbrem);
                 RemoteScriptEditor('EnableDisable',theFig);
-            end;
-        case 'Strip',
+            end
+        case 'Strip'
             loadstr = {};
-            save_str= {'save(''fromremote'',''s'',''-mat'');'
-                                'try;delete(''gotit'');end;'
-                'save(''gotit'',''g'',''-mat'');'};
+            save_str= {'save(''fromremote.mat'',''s'',''-mat'');'
+                                'try;delete(''gotit*'');end;'
+                'save(''gotit.mat'',''g'',''-mat'');'};
             strs = lb_getselected(lbrem);
-            if length(strs)>0,
-                for i=1:length(strs),
+            if length(strs)>0
+                for i=1:length(strs)
                     g = char(strs(i));
-                    if g(end)=='*', g=g(1:end-1);end;
+                    if g(end)=='*'
+                        g=g(1:end-1);
+                    end
                     ts = { [g '=strip(' g ');'] };
                     loadstr = cat(1,loadstr,ts);
-                end;
-            end;
+                end
+            end
             loadstr = cat(1,loadstr,update_str);
             loadstr = cat(1,loadstr,save_str);
             b=sendremotecommand(loadstr);
-            if b,
+            if b
                 pathn = rempath;
-                fname = [pathn 'fromremote'];
-                s=load(fname,'-mat'); s = s.s;
-                %s(1),
+                fname = [pathn 'fromremote.mat'];
+                s=load(fname,'-mat');
+                s = s.s;
                 handleupdate(s,lbrem);
                 RemoteScriptEditor('EnableDisable',theFig);
-            end;
-        case 'Edit', % should only occur when 1 script is selected
+            end
+        case 'Edit' % should only occur when 1 script is selected
             strs = char(lb_getselected(lb));
             evalin('base',['ScriptObjEditor(''' strs ''');']);
-        case 'Duplicate',
+        case 'Duplicate'
             % should only occur when 1 stimulus is selected
             namenotfound=1;
             prompt={'Name of new script:'}; def = {''};
             dlgTitle = 'New script name...';lineNo=1;
-            while (namenotfound),
+            while (namenotfound)
                 answ=inputdlg(prompt,dlgTitle,lineNo,def);
                 an = char(answ);
                 if isempty(answ), namenotfound = 0; %cancelled
-                elseif isempty(an),
+                elseif isempty(an)
                     uiwait(errordlg('Syntax error in name'));
-                elseif ~isvarname(an), % syntax err
+                elseif ~isvarname(an)% syntax err
                     uiwait(errordlg('Syntax error in name'));
-                else, % okay, make the stim
+                else % okay, make the stim
                     namenotfound = 0;
                     g = lb_getselected(lbrem); g = char(g);
-                    if g(end)=='*', g=g(1:end-1); end;
+                    if g(end)=='*'
+                        g = g(1:end-1);
+                    end
                     dupstr={[char(answ) '=' g ';']};
-                    save_str= {'save(''fromremote'',''s'',''-mat'');'
-                                        'try;delete(''gotit'');end;'
-                        'save(''gotit'',''g'',''-mat'');'};
+                    save_str= {'save(''fromremote.mat'',''s'',''-mat'');'
+                                        'try;delete(''gotit*'');end;'
+                        'save(''gotit.mat'',''g'',''-mat'');'};
                     dupstr=cat(1,dupstr,update_str);
                     dupstr=cat(1,dupstr,save_str);
                     b=sendremotecommand(dupstr);
-                    if b,
+                    if b
                         pathn = rempath;
-                        fname = [pathn 'fromremote'];
-                        s=load(fname,'-mat'); s = s.s;
+                        fname = [pathn 'fromremote.mat'];
+                        s = load(fname,'-mat'); 
+                        s = s.s;
                         set(lbrem,'Value',[]);
                         handleupdate(s,lbrem);
                         z=geteditor('RemoteScriptEditor');
-                        if z,
+                        if z
                             RemoteScriptEditor('EnableDisable',z);
-                        end;
-                    end;
-                end;
-            end;
-        case 'Delete',
+                        end
+                    end
+                end
+            end
+        case 'Delete'
             loadstr = {};
-            save_str= {'save(''fromremote'',''s'',''-mat'');'
-                'try;delete(''gotit'');end;'
-                'save(''gotit'',''g'',''-mat'');'};
+            save_str= {'save(''fromremote.mat'',''s'',''-mat'');'
+                'try;delete(''gotit*'');end;'
+                'save(''gotit.mat'',''g'',''-mat'');'};
             strs = lb_getselected(lbrem);
-            if length(strs)>0,
-                for i=1:length(strs),
+            if ~isempty(strs)
+                for i=1:length(strs)
                     g = char(strs(i));
-                    if g(end)=='*', g=g(1:end-1);end;
+                    if g(end)=='*'
+                        g=g(1:end-1);
+                    end
                     ts = { ['clear ' g ] };
                     loadstr = cat(1,loadstr,ts);
-                end;
-            end;
+                end
+            end
             loadstr = cat(1,loadstr,update_str);
             loadstr = cat(1,loadstr,save_str);
             b=sendremotecommand(loadstr);
-            if b,
+            if b
                 pathn = rempath;
-                fname = [pathn 'fromremote'];
-                s=load(fname,'-mat'); s = s.s;
+                fname = [pathn 'fromremote.mat'];
+                s = load(fname,'-mat');
+                s = s.s;
                 %s(1),
                 set(lbrem,'Value',[]);
                 handleupdate(s,lbrem);
                 RemoteScriptEditor('EnableDisable',theFig);
-            end;
+            end
         case 'EnableDisable'
             strs = lb_getselected(lbloc);
-            if length(strs)>0,
+            if ~isempty(strs)
                 set(scriptedstruct.toremote,'enable','on');
                 set(scriptedstruct.toremoteload,'enable','on');
-            else,
+            else
                 set(scriptedstruct.toremote,'enable','off');
                 set(scriptedstruct.toremoteload,'enable','off');
-            end;
+            end
             strs = lb_getselected(lbrem);
-            if length(strs)>0,
-                if length(strs)==1,
+            if length(strs)>0
+                if length(strs)==1
                     set(scriptedstruct.edit,'enable','on');
                     set(scriptedstruct.duplicate,'enable','on');
-                else,
+                else
                     set(scriptedstruct.edit,'enable','off');
                     set(scriptedstruct.duplicate,'enable','off');
-                end;
+                end
                 set(scriptedstruct.delete,'enable','on');
                 set(scriptedstruct.load,'enable','on');
                 set(scriptedstruct.unload,'enable','on');
                 set(scriptedstruct.strip,'enable','on');
                 set(scriptedstruct.fromremote,'enable','on');
-            else,
+            else
                 set(scriptedstruct.delete,'enable','off');
                 set(scriptedstruct.edit,'enable','off');
                 set(scriptedstruct.load,'enable','off');
@@ -392,10 +397,9 @@ else % it is a callback
                 set(scriptedstruct.strip,'enable','off');
                 set(scriptedstruct.duplicate,'enable','off');
                 set(scriptedstruct.fromremote,'enable','off');
-            end;
-            %set(scriptedstruct.fromremote,'enable','off');
-    end;
-end;
+            end
+    end
+end
 
 function str = update_str
 str = {	'g = listofvars(''stimscript'');'
@@ -408,31 +412,34 @@ str = {	'g = listofvars(''stimscript'');'
 
 function handleupdate(s,lbrem)
 strs=cell(length(s),1);
-for i=1:length(s),
+for i=1:length(s)
     ad = '';
-    if s(i).loaded(i), ad = '*'; end;
+    if s(i).loaded(i)
+        ad = '*';
+    end
     strs(i) = { [s(i).scripts ad] };
-end;
+end
 set(lbrem,'Value',[]);
 set(lbrem,'String',strs);
 z=geteditor('RunExperiment');
-if ~isempty(z),
+if ~isempty(z)
     ud = get(z,'UserData');
     set(ud.rslb,'Value',1);
     set(ud.rslb,'String',strs);
     runexpercallbk('EnDis',z);
-end;
+end
 
 function pathn = rempath
 remotecommglobals;
 pathn = fixpath(Remote_Comm_dir);
 
-function b= checkremdir;
-pathn=rempath;
+function b = checkremdir
+pathn = rempath;
 b = checkremotedir(pathn);
 
 function drawScriptEditor(h0)
-sh=00;s2=30;
+sh = 00;
+s2 = 30;
 set(h0,'Units','points', ...
     'Color',[0.8 0.8 0.8], ...
     'MenuBar','none', ...

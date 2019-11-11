@@ -12,25 +12,27 @@ NewStimGlobals;
 remotecommglobals;
 
 b = checkremotedir(Remote_Comm_dir);
-if ~b, return; end;
+if ~b
+    return;
+end
 
 biglist = [];
-for i=1:length(scriptnames),
+for i=1:length(scriptnames)
   eval([scriptnames{i} '=scriptlist{i};']);
   biglist = [biglist ' ''' scriptnames{i} ''','];
-end;
+end
 pathn = fixpath(Remote_Comm_dir);
-fname = [pathn 'toremote']; 
-if ~isempty(biglist), biglist = biglist(1:end-1); end;
+fname = [pathn 'toremote.mat']; 
+if ~isempty(biglist), biglist = biglist(1:end-1); end
 v = str2mat(version('-release'));
-if v>13,
+if v>13
 	biglist = [biglist ',''-V6'',''-mat'' '];
 	else, biglist = [biglist ',''-mat'' '];
-end;
+end
 eval(['save (fname,' biglist ');']);
 
 
-strs = {      'names=load(''toremote'',''-mat'');fnames=fieldnames(names);'...
+strs = {      'names=load(''toremote.mat'',''-mat'');fnames=fieldnames(names);'...
              'finished=zeros(1,length(fnames));'...
              'for i=1:length(fnames),'...
                'if exist(fnames{i})==1,'...
@@ -60,12 +62,16 @@ strs = {      'names=load(''toremote'',''-mat'');fnames=fieldnames(names);'...
                  'finished(i)=1;'...
                'end;'...
              'end;'...
-             'save(''gotit'',''fnames'',''-mat'');',...   
-             'save(''fromremote'',''fnames'',''-mat'');'};    
+             'save(''gotit.mat'',''fnames'',''-mat'');',...   
+             'save(''fromremote.mat'',''fnames'',''-mat'');'};    
                    
 b = sendremotecommand(strs);
-if b,
+if b
   dowait(1);
   thefig = geteditor('RemoteScriptEditor');
-  if isempty(thefig), RemoteScriptEditor; else, RemoteScriptEditor('Update',thefig); end;
-end;
+  if isempty(thefig)
+      RemoteScriptEditor; 
+  else
+      RemoteScriptEditor('Update',thefig);
+  end
+end
