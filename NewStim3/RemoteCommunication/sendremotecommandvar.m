@@ -77,18 +77,22 @@ if checkremotedir(pathstring) % directory exists
                     pnet(Remote_Comm_conn,'setreadtimeout',5),
                     str = '';
                     B = 0;
-                    while ~B,
+                    while ~B
                         str = pnet(Remote_Comm_conn,'readline'),
-                        if length(str>=12)&strcmp(str(1:12),'RECEIVE FILE'),
+                        if length(str>=12) && strcmp(str(1:12),'RECEIVE FILE')
                             [sz,dum1,dum2,ind]=sscanf(str,'RECEIVE FILE %d',1);
                             recvname = str(ind+1:end); % maybe end-1
                             pnet(Remote_Comm_conn,'readtofile',[pathn recvname],sz);
                         end
                         A=length(str)>=13;
-                        if A, B=strcmp(str(1:13),'TRANSFER DONE'); else,B=0;end;
+                        if A
+                            B=strcmp(str(1:13),'TRANSFER DONE'); 
+                        else
+                            B=0;
+                        end
                     end
                     pnet(Remote_Comm_conn,'close');
-                elseif length(str)>=12&strcmp(str(1:12),'SCRIPT ERROR')
+                elseif length(str)>=12 && strcmp(str(1:12),'SCRIPT ERROR')
                     errordesc = str(14:end);
                     errordlg(['Error: remote script failed with error ' errordesc '.']);
                     scriptdone = 1; errorflag = 1;
@@ -96,9 +100,11 @@ if checkremotedir(pathstring) % directory exists
                 end
             end
         end
-        if ishandle(g), delete(g); end;
+        if ishandle(g)
+            delete(g); 
+        end
         b = scriptdone & ~errorflag;
-        if b && exist(fout)==2
+        if b && exist(fout,'file')
             vars = load(fout,'-mat'); 
         else
             vars = [];
@@ -119,7 +125,7 @@ end
 function savenames(fin,invar,invarnames)
 evstr = [];
 for i_________=1:length(invar)
-    evstr = [evstr ' ' invarnames{i_________} ];
+    evstr = [evstr ' ' invarnames{i_________} ]; %#ok<AGROW>
     eval([invarnames{i_________} '=invar{i_________};']);
 end
 v = str2num(version('-release'));

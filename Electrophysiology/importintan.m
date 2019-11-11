@@ -1,8 +1,12 @@
-function cells = importintan(record, channels2analyze)
+function cells = importintan(record, channels2analyze, verbose)
 %IMPORTINTAN
 %
-% 2016, Mehran Ahmadlou, Alexander Heimel
+% 2016-2019, Mehran Ahmadlou, Alexander Heimel
 %
+
+if nargin<3 || isempty(verbose)
+    verbose = true;
+end
 
 processparams = ecprocessparams(record);
 
@@ -10,7 +14,6 @@ datapath=experimentpath(record,false);
 
 EVENT.Mytank = datapath;
 EVENT.Myblock = record.test;
-% IsFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
 matfilename = fullfile(EVENT.Mytank,EVENT.Myblock,[EVENT.Myblock '.mat']);
 
 if ~exist(matfilename,'file') 
@@ -26,10 +29,12 @@ end
 
 logmsg(['Loaded event file for ' recordfilter(record)]);
 
-figure('Name','Raw','Numbertitle','off');
-hold on;
-for i = 1:16
-    plot(EVENT.Snips.rawtime(1,1:100000),EVENT.Snips.rawsig(i,1:100000));
+if verbose
+    figure('Name','Raw','Numbertitle','off');
+    hold on;
+    for i = 1:16
+        plot(EVENT.Snips.rawtime(1,1:100000),EVENT.Snips.rawsig(i,1:100000));
+    end
 end
 
 
@@ -46,6 +51,7 @@ end
 if strncmp(record.analysis,'OFF',3)==1 && strncmp(record.stim_type,'bglumin',10)==1
     EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.55;
 end
+
 if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
     errormsg(['Shifted time by ' num2str(processparams.ec_temporary_timeshift) ' s to check laser response']);
     EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
@@ -72,18 +78,25 @@ clear('WaveTime_Fpikes');
 WaveTime_Fpikes = struct('time',[],'data',[]);
 
 % substract common signal from all channels
-logmsg('Subtracting common signal from all channels');
-commonsignal = mean(EVENT.Snips.rawsig,1);
-for i=1:16
-    EVENT.Snips.rawsig(i,:) = EVENT.Snips.rawsig(i,:) - commonsignal;
+if 1
+    logmsg('Subtracting common signal from all channels');
+    commonsignal = mean(EVENT.Snips.rawsig,1);
+    for i=1:16
+        EVENT.Snips.rawsig(i,:) = EVENT.Snips.rawsig(i,:) - commonsignal;
+    end
 end
 
 
 
 %% Spike detection
 logmsg('Filtering between 300 Hz and 10 kHz');
-% sF = EVENT.Freq;
-% [b,a] = butter(5,300/(0.5*sF),'High');
+ sF = EVENT.Freq;
+ [b,a] = butter(5,300/(0.5*sF),'High');
+ y = [];
+ for j = length(channels2analyze):-1:1 % to avoid prealloc
+     y(j,:) = filter(b,a,EVENT.Snips.rawsig(channels2analyze(j),:));
+ end
+ 
 % y = filter(b,a,EVENT.Snips.rawsig(channels2analyze,:));
 % [b,a] = butter(5,10000/(0.5*sF),'Low');
 % y = filter(b,a,y);
@@ -95,23 +108,23 @@ logmsg('Filtering between 300 Hz and 10 kHz');
 % y = filter(bpfilt,EVENT.Snips.rawsig(channels2analyze,:));
 
 % All frequency values are in Hz.
-Fs = 25000;  % Sampling Frequency
-Fstop1 = 200;         % First Stopband Frequency
-Fpass1 = 300;         % First Passband Frequency
-Fpass2 = 10000;       % Second Passband Frequency
-Fstop2 = 12000;       % Second Stopband Frequency
-Astop1 = 60;          % First Stopband Attenuation (dB)
-Apass  = 1;           % Passband Ripple (dB)
-Astop2 = 80;          % Second Stopband Attenuation (dB)
-match  = 'stopband';  % Band to match exactly
-h  = fdesign.bandpass(Fstop1, Fpass1, Fpass2, Fstop2, Astop1, Apass, ...
-                      Astop2, Fs);
-Hd = design(h, 'butter', 'MatchExactly', match);
-y = zeros(length(channels2analyze),size(EVENT.Snips.rawsig,2));
-for j = 1:length(channels2analyze)
-    logmsg(['Filtering channel ' num2str(channels2analyze(j))]);
-    y(j,:) = filter(Hd,EVENT.Snips.rawsig(channels2analyze(j),:));
-end
+% Fs = 25000;  % Sampling Frequency
+% Fstop1 = 200;         % First Stopband Frequency
+% Fpass1 = 300;         % First Passband Frequency
+% Fpass2 = 10000;       % Second Passband Frequency
+% Fstop2 = 12000;       % Second Stopband Frequency
+% Astop1 = 60;          % First Stopband Attenuation (dB)
+% Apass  = 1;           % Passband Ripple (dB)
+% Astop2 = 80;          % Second Stopband Attenuation (dB)
+% match  = 'stopband';  % Band to match exactly
+% h  = fdesign.bandpass(Fstop1, Fpass1, Fpass2, Fstop2, Astop1, Apass, ...
+%                       Astop2, Fs);
+% Hd = design(h, 'butter', 'MatchExactly', match);
+% y = zeros(length(channels2analyze),size(EVENT.Snips.rawsig,2));
+% for j = 1:length(channels2analyze)
+%     logmsg(['Filtering channel ' num2str(channels2analyze(j))]);
+%     y(j,:) = filter(Hd,EVENT.Snips.rawsig(channels2analyze(j),:));
+% end
 %y = filter(Hd,EVENT.Snips.rawsig(channels2analyze,:));
 
 
@@ -127,7 +140,10 @@ HalfW = 16; % samples in downsampled data
 WinWidth = 2*HalfW;
 threshold = processparams.ec_intan_spikethreshold; % threshold of spike detection
 
-
+% if verbose
+%     figure('Name','Filtered')
+%     plot(EVENT.Snips.rawtime(1,1:100000),y(:,1:100000));
+% end
 
 
 for j = 1:length(channels2analyze)
@@ -163,7 +179,9 @@ for j = 1:length(channels2analyze)
     figure('Name','Filtered','Numbertitle','off');
     hold on
     plot(EVENT.Snips.rawtime(1,1:100000),y(j,1:100000));
-    plot(WaveTime_Fpikes(j,1).time,chanthreshold*ones(size(WaveTime_Fpikes(j,1).time)),'o');
+    max_t = EVENT.Snips.rawtime(1,100000);
+    ind = find(WaveTime_Fpikes(j,1).time<max_t);
+    plot(WaveTime_Fpikes(j,1).time(ind),chanthreshold*ones(length(ind),1),'o');
 end
        
 for ii=1:length(channels2analyze)
