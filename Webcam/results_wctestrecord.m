@@ -27,8 +27,15 @@ else
     showstimpeaks = true;
 end
 
-if isfield(record,'measures') && isfield(record.measures,'session')
-    logmsg(['Session = ' num2str(record.measures.session)]);
+if isfield(record,'measures')
+    if isfield(record.measures,'session')
+        logmsg(['Session = ' num2str(record.measures.session)]);
+    end
+    if isfield(record.measures,'session_type_first')
+        logmsg(['Session type first =' num2str(record.measures.session_type_first) ...
+            ', last = ' num2str(record.measures.session_type_last) ...
+            ', n_stims = ' num2str(record.measures.session_n_stim)]); 
+    end
 end    
 
 if ~isfield(record,'measures') || ~isfield(record.measures,'stimstart')

@@ -9,7 +9,6 @@ if nargin<2 || isempty(verbose)
     verbose = true;
 end
 
-
 logmsg(['Doing postanalysis for ' recordfilter(record)]);
 
 if isfield(record.measures,'freezetimes') % manually analyzed
@@ -49,9 +48,9 @@ record.measures.freezing_from_comment = man_frzs;
 if 1 %~isfield(record.measures,'session') || isempty(record.measures.session) || ...
    % ~isfield(record.measures,'stim_seqnr') || isempty(record.measures.stim_seqnr)
     [db,h_db] = getdb( record.datatype );
-    if isempty(h_db)
-        logmsg('Cannot find open wctestdb');
-    end
+    %     if isempty(h_db)
+    %         logmsg('Cannot find open wctestdb');
+    %     end
     if isempty(db)
         logmsg('Could not open wctestdb. Not setting session and stim_seqnr info');
     end
@@ -66,19 +65,42 @@ if 1 %~isfield(record.measures,'session') || isempty(record.measures.session) ||
     [~,ind] = sort({records.date});
     records = records(ind);
     stim_types = {};
+    session_n_stim = zeros(length(dates),1);
     for i=1:length(records)
         stim_type = strtrim(records(i).stim_type);
         switch stim_type
             case 'gray_screen'
-                continue % ignoring
+                % ignoring
             case ''
-                continue % ignoring
+                % ignoring
+            otherwise
+                stim_type = strip_direction( stim_type);
+                if isempty(strmatch(stim_type,stim_types(:),'exact'))
+                    stim_types{end+1} = stim_type; %#ok<AGROW>
+                end
         end
-        stim_type = strip_direction( stim_type);
-        if isempty(strmatch(stim_type,stim_types(:),'exact'))
-            stim_types{end+1} = stim_type;
-        end
+        
+        d = strmatch(records(i).date,dates(:),'exact');
+        session_n_stim(d) = length(stim_types);
     end % record i
+    
+    if verbose
+        logmsg(cell2str(stim_types));
+        logmsg(mat2str(session_n_stim));
+    end
+    
+    session_type_first = [1; diff(session_n_stim)];
+    session_type_last = [diff(session_n_stim); 1];    
+    
+    ind_date = strmatch(record.date,dates,'exact');
+    if length(ind_date)==1
+        record.measures.session_type_first = session_type_first(ind_date);
+        record.measures.session_type_last = session_type_last(ind_date);
+        record.measures.session_n_stim = session_n_stim(ind_date);
+    else
+        errormsg(['Cannot find unique date for record ' recordfilter(record)]);
+    end
+    
     record.measures.stim_seqnr = strmatch(strip_direction(record.stim_type),stim_types,'exact');
     if isempty(record.measures.stim_seqnr)
         switch record.stim_type
@@ -93,7 +115,14 @@ end
 
 
 function stim_type = strip_direction( stim_type)
-directions = {'_L','_R','_left','_right','_left_106deg','_right_106deg','left','right'};
+directions = {...
+    '90_fullleft','90_fulllright',...
+    '_109_left','_109_right',...
+    '_left_106deg','_right_106deg',...
+    '_left','_right','-right',...
+    'left','right',...
+    '_L','_R',...
+    '_l','_r'};
 for i = 1:length(directions)
     len = length(directions{i});
     if strcmp(stim_type( max(1,(end-len+1)):end),directions{i})
@@ -103,6 +132,7 @@ for i = 1:length(directions)
 end
 
 function [db,h_db] = getdb( datatype )
+
 if strcmp(datatype,'fret')
     datatype = 'tp';
 end

@@ -13,6 +13,8 @@ freezestarts = [];
 freezestops = [];
 count = 1;
 
+session_limits = [];
+cur_session = 0;
 for i=1:length(records)
     record = records(i);
     if isempty(record.measures)
@@ -40,15 +42,30 @@ for i=1:length(records)
     m =  m - min(m);
     mousemove(count,1:length(m)) = m;
 
-    freezetimes = record.measures.freezetimes_aut;
-  %  freezetimes = record.measures.freezetimes;
+ %   freezetimes = record.measures.freezetimes_aut - stimstart;
+    freezetimes = record.measures.freezetimes - stimstart; % taking manually detected
+
+    % only show freezetimes after stimulus starts
+    ind = find(freezetimes(:,1)>0);
+    freezetimes = freezetimes(ind,:);
+    
+    % only show first freezetimes 
+    if ~isempty(freezetimes)
+        freezetimes = freezetimes(1,:);
+    end
+    
     n_freezes = size(freezetimes,1);
     if n_freezes>0
-        newfreezes = [count*ones(n_freezes,1) freezetimes(:,1)- stimstart];
+        newfreezes = [count*ones(n_freezes,1) freezetimes(:,1)];
         freezestarts = cat(1,freezestarts,newfreezes);
 
-        newfreezes = [count*ones(n_freezes,1) freezetimes(:,2)- stimstart];
+        newfreezes = [count*ones(n_freezes,1) freezetimes(:,2)];
         freezestops = cat(1,freezestops,newfreezes);
+    end
+    
+    if record.measures.session~=cur_session
+        session_limits(end+1) = count - 0.5;
+        cur_session = record.measures.session;
     end
     count = count+1;
 end
@@ -69,9 +86,12 @@ set(gca,'Clim',[0 max(mousemove(:))]);
 hold on
 for i=1:size(freezestarts,1)
     plot(freezestarts(i,2) +[0  0],...
-        freezestarts(i,1) +[-0.5 0.5] ,'-y','linewidth',3);
+        freezestarts(i,1) +[-0.5 0.5] ,'-r','linewidth',3);
     plot(freezestops(i,2) +[0  0],...
-        freezestops(i,1) +[-0.5 0.5] ,'-r','linewidth',3);
+        freezestops(i,1) +[-0.5 0.5] ,'-g','linewidth',3);
+end
+for i = 1:length(session_limits)
+    plot([-1 2.7],session_limits(i)*[1 1],'-w');
 end
 
 f = linspace(0,1,64)';

@@ -515,9 +515,7 @@ if n_measures==1
     group_by = 'measure';
 end
 
-
 % call graph
-%clear('gx','gy');
 glabel = {};
 ny = {};
 ystd = {};

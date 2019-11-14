@@ -164,7 +164,8 @@ if length(y)>2 % multigroup comparison
         logmsg(['Welch unequal variance ANOVA p = ' num2str(h.p_groupwelchanova,2) ...
             ', F[' num2str(df) ']=' num2str(f)]);
     end
-    if ~nonparametric && (h.p_groupanova<0.05 || (isfield(h,'p_groupwelchanova') && h.p_groupwelchanova<0.05) )
+    if ~nonparametric && stats.df>0 && ...
+            (h.p_groupanova<0.05 || (isfield(h,'p_groupwelchanova') && h.p_groupwelchanova<0.05) )
         p = dunnett(stats);
         for i=2:length(p)
             logmsg(['Post-hoc parametric Dunnett (first group is common control) group ' num2str(i) ': p = ' num2str(p(i),2)]);
