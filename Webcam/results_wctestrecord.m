@@ -34,7 +34,8 @@ if isfield(record,'measures')
     if isfield(record.measures,'session_type_first')
         logmsg(['Session type first =' num2str(record.measures.session_type_first) ...
             ', last = ' num2str(record.measures.session_type_last) ...
-            ', n_stims = ' num2str(record.measures.session_n_stim)]); 
+            ', n_stims = ' num2str(record.measures.session_n_stim) ...
+            ', stim_seqnr = ' num2str(record.measures.stim_seqnr)]); 
     end
 end    
 
@@ -51,7 +52,7 @@ if isfield(record.measures,'brightness')
     arena = measures.arena;
     brightness = measures.brightness;
 
-    [wcinfo,filename] = wc_getmovieinfo(record);
+    [~,filename] = wc_getmovieinfo(record);
     if ~isempty(filename)
         vid = VideoReader(filename);
         %    stimstart = wc_getstimstart( record, vid.FrameRate );
@@ -274,6 +275,9 @@ if showangles
         end
     end
 end
-
-wc_kinetogram(record);
+try
+    wc_kinetogram(record);
+catch me
+    logmsg(me.message);
+end
 wc_plot_polar_trajectory(record);

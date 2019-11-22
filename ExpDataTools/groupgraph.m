@@ -662,6 +662,9 @@ switch style
         end
 end
 
+if exist('xmanual','var')
+    gx = eval(xmanual);
+end
 
 % legend
 if ~isempty(strfind(lower(legnd),'on')) %#ok<*NODEF> %i.e. 'on' or 'location'

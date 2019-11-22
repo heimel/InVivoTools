@@ -52,6 +52,7 @@ end
 frametimes = record.measures.frametimes;
 sf = getstimsfile(record);
 stimduration = duration(sf.saveScript);
+stimduration = 3; % s, BAD HERE, BUT LOUSY STIMULUS FILE
 if isempty(stimduration) || stimduration==0
     logmsg(['Missing stimulus duration for ' recordfilter(record)]);
     stimduration = 3; % temp

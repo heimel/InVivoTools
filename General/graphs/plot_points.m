@@ -4,13 +4,15 @@ function hp = plot_points(x,r,spaced)
 %  HP = PLOT_POINTS(X, R, SPACED)
 %
 %     SPACED = 0, not spaced
+%              0.5, not spaced, with separate colors
 %              1, spaced, skipping NaNs
 %              2, spaced, not skippping nans?
+%              2.5, spaced, with separate colors
 %              3, randomly spaced as close as possible to central axis
 %
-% 200X-2017, Alexander Heimel
+% 200X-2019, Alexander Heimel
 
-rnonnan=r(~isnan(r));
+rnonnan = r(~isnan(r));
 if length(r)==1
     spaced = 0; % to center
 end
@@ -20,22 +22,40 @@ if ~isempty(rnonnan)
     switch(spaced)
         case 0
             hp = plot(x(:),r(:),options);
+        case 0.5 % not spaced, separate colors
+            if length(x)==1
+                for i=1:length(r)
+                    hp(i) = plot(x,r(i),'o'); %#ok<AGROW>
+                end
+            else
+                for i=1:length(r)
+                    hp(i) = plot(x(i),r(i),'o'); %#ok<AGROW>
+                end
+            end                
         case 1 % show spaced
             w = 0.3;
             hp = plot(x+linspace(-w,w,length(rnonnan)),rnonnan,'ok');
+        case 1.5 % show spaced, separate color
+            w = 0.3;
+            x = x+linspace(-w,w,length(rnonnan));
+            for i=1:length(rnonnan)
+                hp(i) = plot(x(i),rnonnan(i),'o'); %#ok<AGROW>
+            end
         case 2 % show spaced keeping relatively position of points in place
             w = 0.3;
             hp = plot(x+linspace(-w,w,length(r)),r,'ok');
         case 3 % randomly spaced as close as possible to central axis
             x = x + spacepoints( r);
             hp = plot(x,r,'ok');
+        case 3.5 % randomly spaced as close as possible to central axis, separate color
+            x = x + spacepoints( r);
+            for i=1:length(r)
+                hp(i) = plot(x(i),r(i),'o'); %#ok<AGROW>
+            end
         otherwise
-            disp( ['Option spaced=' num2str(spaced) ' is unknown.']);
+            logmsg( ['Option spaced=' num2str(spaced) ' is unknown.']);
     end
 end
-
-
-
 
 function x = spacepoints( y,dmin,yl,xl,xw)
 % Y is a single column vector

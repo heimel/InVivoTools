@@ -67,9 +67,12 @@ if 1 %~isfield(record.measures,'session') || isempty(record.measures.session) ||
     stim_types = {};
     session_n_stim = zeros(length(dates),1);
     for i=1:length(records)
+        
         stim_type = strtrim(records(i).stim_type);
         switch stim_type
             case 'gray_screen'
+                % ignoring
+            case 'white_rectangle'
                 % ignoring
             case ''
                 % ignoring
@@ -82,20 +85,27 @@ if 1 %~isfield(record.measures,'session') || isempty(record.measures.session) ||
         
         d = strmatch(records(i).date,dates(:),'exact');
         session_n_stim(d) = length(stim_types);
+
+        if verbose
+            logmsg([num2str(i) ', ' num2str(d) ', '  records(i).date ...
+                ', ' stim_type ', ' num2str(session_n_stim(d))]);
+        end
     end % record i
     
     if verbose
         logmsg(cell2str(stim_types));
+        logmsg(cell2str(dates));
         logmsg(mat2str(session_n_stim));
     end
     
-    session_type_first = [1; diff(session_n_stim)];
-    session_type_last = [diff(session_n_stim); 1];    
+    session_type_first = [1; diff(session_n_stim)>0];
+    session_type_last = [diff(session_n_stim)>0; 1];    
     
     ind_date = strmatch(record.date,dates,'exact');
     if length(ind_date)==1
         record.measures.session_type_first = session_type_first(ind_date);
         record.measures.session_type_last = session_type_last(ind_date);
+        
         record.measures.session_n_stim = session_n_stim(ind_date);
     else
         errormsg(['Cannot find unique date for record ' recordfilter(record)]);
@@ -116,13 +126,14 @@ end
 
 function stim_type = strip_direction( stim_type)
 directions = {...
-    '90_fullleft','90_fulllright',...
+    '90_fullleft','90_fullright',...
     '_109_left','_109_right',...
     '_left_106deg','_right_106deg',...
     '_left','_right','-right',...
     'left','right',...
     '_L','_R',...
     '_l','_r'};
+%logmsg(['Before strip: ' stim_type]);
 for i = 1:length(directions)
     len = length(directions{i});
     if strcmp(stim_type( max(1,(end-len+1)):end),directions{i})
@@ -130,6 +141,8 @@ for i = 1:length(directions)
         break
     end
 end
+%logmsg(['After strip: ' stim_type]);
+
 
 function [db,h_db] = getdb( datatype )
 

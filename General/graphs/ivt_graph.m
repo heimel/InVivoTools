@@ -26,7 +26,7 @@ function h=ivt_graph(y,x,varargin)
 %     'rotate_xticklabels',[0] % is the rotation in degrees
 %     'markers', {'none','open_triangle','closed_triangle','open_circle',['closed_circle']}
 %     'markersize',[8]
-%     'fontsize',[20]
+%     'fontsize',[14]
 %     'fontname',['arial']
 %     'linestyles',''
 %     'linewidth',[3]
@@ -92,7 +92,7 @@ pos_args={...
     'rotate_xticklabels','0',...
     'markers','closed_circle',... % {'none','open_triangle','closed_triangle','open_circle','closed_circle'}
     'markersize',8,...
-    'fontsize',20,...
+    'fontsize',14,...
     'fontname','arial',...
     'linestyles','',...
     'linewidth',[],...
@@ -189,7 +189,6 @@ else
     outlierremoval = 0;
 end
 
-
 if exist('linewidth','var')
     if ischar(linewidth) && ~isempty(linewidth)
         linewidth = str2double(linewidth);
@@ -239,6 +238,9 @@ else
 end
 h.p_sig = {};
 hold on;
+if exist('fontsize','var')
+    set(gca,'FontSize',fontsize);
+end
 
 if length(prefax)==4
     axis(prefax);
@@ -369,22 +371,12 @@ switch style
             end
         else
             % default
-            if 0 % for friederike
-                for i=1:length(y)
-                    [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins); %%%????
-                    h.polar(i) = polar( rose_theta(i,:)-pi/bins, rose_r(i,:));
-                    hold on
-                    set(h.polar(i),'Color',color{i});
-                end
-            else
-                for i=1:length(y)
-                    [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins);
-                    h.polar(i) = polar( rose_theta(i,:)-pi/bins, rose_r(i,:));
-                    hold on
-                    set(h.polar(i),'Color',color{i});
-                end
+            for i=1:length(y)
+                [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins);
+                h.polar(i) = polar( rose_theta(i,:)-pi/bins, rose_r(i,:));
+                hold on
+                set(h.polar(i),'Color',color{i});
             end
-            
         end
         if strcmp(test,'chi2') % calculate significance
             for i = 1:length(y)
@@ -491,14 +483,14 @@ switch style
             end
             y = y(ind);
             color = color(ind);
-            xticklabels = {xticklabels{ind}};
+            xticklabels = xticklabels(ind);
         end
         
         % plot errors
         if ~exist('errorbars_sides','var')
-            errorbars_sides='away';
+            errorbars_sides = 'away';
         end
-        h.errorbar=plot_errorbars(y,x,ystd,ny,means,...
+        h.errorbar = plot_errorbars(y,x,ystd,ny,means,...
             errorbars,errorbars_sides,errorbars_tick,color); %#ok<*NODEF>
         
         % plot bars
@@ -539,8 +531,10 @@ switch style
             end
         end
         
-        if showpairing
-            plot(repmat(x,numel(y{1}),1)',reshape([y{:}],numel(y{1}),length(y))','linewidth',3)
+        if showpairing           
+            plot(repmat(x,numel(y{1}),1)',...
+                reshape([y{:}],numel(y{1}),length(y))',...
+                linestyles,'linewidth',1) 
         end
         
         % compute and plot significances
@@ -597,10 +591,7 @@ switch style
                 uniqystd=zeros(1,length(uniqx));
                 
                 if ~isempty(merge_x)
-                    
-%                    dx = diff(uniqx)./uniqx(1:end-1);
                     dx = diff(uniqx)/(uniqx(end)-uniqx(1));
-                    
                     ind = find(dx<merge_x);
                     for j = ind
                         x{i}(x{i}==uniqx(j)) = uniqx(j+1);
@@ -641,7 +632,6 @@ switch style
                 y{i}=y{i}(:)';
             end
         end
-        
         
         % plot errors
         if ~exist('errorbars_sides','var')
@@ -790,7 +780,7 @@ switch style
                         c = rx{i}(~isnan(rx{i}));
                         r = ry{i}(~isnan(rx{i}));
                         
-                        [nk_rm,nk_b,nk_n,~,c50,r_at_c50] = naka_rushton(c,r);
+                        [nk_rm,nk_b,nk_n] = naka_rushton(c,r);
                         fity{i} = nk_rm* (fitx.^nk_n)./ ...
                             (nk_b^nk_n+fitx.^nk_n) ;
                         
