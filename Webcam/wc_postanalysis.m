@@ -78,6 +78,8 @@ if 1 %~isfield(record.measures,'session') || isempty(record.measures.session) ||
                 % ignoring
             otherwise
                 stim_type = strip_direction( stim_type);
+          
+                
                 if isempty(strmatch(stim_type,stim_types(:),'exact'))
                     stim_types{end+1} = stim_type; %#ok<AGROW>
                 end
@@ -142,6 +144,10 @@ for i = 1:length(directions)
     end
 end
 %logmsg(['After strip: ' stim_type]);
+switch stim_type
+    case {'full','disc-ori'}
+        stim_type = 'disc';
+end
 
 
 function [db,h_db] = getdb( datatype )

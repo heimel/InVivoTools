@@ -1,7 +1,7 @@
-function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transform, h, correction, normality_test)
+function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transform, h, correction, normality_test, height)
 %COMPUTE_SIGNIFICANCES performs standard set of tests on data, and plots stars
 %
-% H = COMPUTE_SIGNIFICANCES(X,Y,TEST,SIGNIF_Y,YSTD,NY,TAIL,TRANSFORM,H,CORRECTION,NORMALITY_TEST)
+% H = COMPUTE_SIGNIFICANCES(X,Y,TEST,SIGNIF_Y,YSTD,NY,TAIL,TRANSFORM,H,CORRECTION,NORMALITY_TEST,HEIGHT)
 %
 %    H is result struct
 %
@@ -9,7 +9,12 @@ function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transfo
 %    NORMALITY_TEST can be
 %    'anderson-darling','ad','lilliefors','sw','shapiro-wilk'
 %
-% 2014-2017, Alexander Heimel
+% 2014-2019, Alexander Heimel
+
+ax = axis;
+if nargin<12 || isempty(height)
+    height=(ax(4)-ax(3))/20;
+end
 
 if nargin<11 || isempty(normality_test)
     normality_test = 'shapiro-wilk';
@@ -57,8 +62,7 @@ if  strcmp(test,'chi2')
         ' over all groups. chi2-statistic = ' num2str(chi2)]);
 end
 
-ax=axis;
-height=(ax(4)-ax(3))/20;
+
 w=0.1;
 
 

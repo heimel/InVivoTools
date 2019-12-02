@@ -1,4 +1,4 @@
-function hp = plot_points(x,r,spaced)
+function [hp,x] = plot_points(x,r,spaced)
 %PLOT_POINTS plots points in bar plot, helper function for IVT_GRAPH
 %
 %  HP = PLOT_POINTS(X, R, SPACED)
@@ -23,19 +23,24 @@ if ~isempty(rnonnan)
         case 0
             hp = plot(x(:),r(:),options);
         case 0.5 % not spaced, separate colors
+            set(gca,'ColorOrderIndex', 1);
+            
             if length(x)==1
+                x = repmat(x,size(r));
                 for i=1:length(r)
-                    hp(i) = plot(x,r(i),'o'); %#ok<AGROW>
+                    hp(i) = plot(x(i),r(i),'o'); %#ok<AGROW>
                 end
             else
                 for i=1:length(r)
                     hp(i) = plot(x(i),r(i),'o'); %#ok<AGROW>
                 end
-            end                
+            end
         case 1 % show spaced
             w = 0.3;
             hp = plot(x+linspace(-w,w,length(rnonnan)),rnonnan,'ok');
         case 1.5 % show spaced, separate color
+            set(gca,'ColorOrderIndex', 1);
+            
             w = 0.3;
             x = x+linspace(-w,w,length(rnonnan));
             for i=1:length(rnonnan)
@@ -48,6 +53,8 @@ if ~isempty(rnonnan)
             x = x + spacepoints( r);
             hp = plot(x,r,'ok');
         case 3.5 % randomly spaced as close as possible to central axis, separate color
+            set(gca,'ColorOrderIndex', 1);
+            
             x = x + spacepoints( r);
             for i=1:length(r)
                 hp(i) = plot(x(i),r(i),'o'); %#ok<AGROW>
@@ -56,6 +63,7 @@ if ~isempty(rnonnan)
             logmsg( ['Option spaced=' num2str(spaced) ' is unknown.']);
     end
 end
+
 
 function x = spacepoints( y,dmin,yl,xl,xw)
 % Y is a single column vector
@@ -70,7 +78,7 @@ maxsteps = 1000;
 if ~isoctave
     scurr = rng; % store current random seed
     rng(0); % make plot reproducible
-else 
+else
     scurr = rand('state');
     rand('state',0);
 end
@@ -87,7 +95,7 @@ if nargin<3 || isempty(yl)
     yl = ylim;
 end
 if nargin<2 || isempty(dmin)
-    dmin = 0.03;
+    dmin = 0.05; % 0.03
 end
 
 if size(y,2)>size(y,1)
@@ -142,6 +150,6 @@ if ~isoctave
 else
     rand('state',scurr);
 end
-    
+
 
 

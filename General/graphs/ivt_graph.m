@@ -110,7 +110,8 @@ pos_args={...
     'barwidth',[],...
     'correction',[],...
     'outlierremoval',false,...
-    'normalitytest',''...
+    'normalitytest','',...
+    'wingtipheight',[],...
     };
 
 assign(pos_args{:});
@@ -220,6 +221,12 @@ if exist('linestyles','var')
     end
 end
 
+if exist('wingtipheight','var')
+    if ischar(wingtipheight)
+        wingtipheight = str2double(wingtipheight);
+    end
+end
+
 if ~iscell(color)
     tmpcolor = color;
     color = cell(length(y),1);
@@ -261,35 +268,35 @@ end
 
 % flatten y,x,color
 if iscell(y{1})
-    orgy=y;
-    n_measures=length(y);
-    y={};
+    orgy = y;
+    n_measures = length(y);
+    y = {};
     for i=1:n_measures
-        y={y{:},orgy{i}{:}};
+        y = {y{:},orgy{i}{:}};
     end
     if iscell(x)
-        orgx=x;
-        x=[];
-        for i=1:n_measures
-            x=[x orgx{i}];
+        orgx = x;
+        x = [];
+        for i = 1:n_measures
+            x = [x orgx{i}];
         end
     end
     if iscell(color)
         if iscell(color{1})
-            orgcolor=color;
-            color={};
-            for i=1:n_measures
-                color={color{:},orgcolor{i}{:}};
+            orgcolor = color;
+            color = {};
+            for i = 1:n_measures
+                color = {color{:},orgcolor{i}{:}};
             end
         end
     end
     if ~isempty(ystd)
         if iscell(ystd)
             if iscell(ystd{1})
-                orgystd=ystd;
-                ystd={};
-                for i=1:n_measures
-                    ystd={ystd{:},orgystd{i}{:}};
+                orgystd = ystd;
+                ystd = {};
+                for i = 1:n_measures
+                    ystd = {ystd{:},orgystd{i}{:}};
                 end
             end
         end
@@ -313,7 +320,6 @@ if iscell(y{1})
         end
     end
 end
-
 
 if outlierremoval
     logmsg('Removing outliers');
@@ -354,7 +360,7 @@ switch style
         imagesc( y{1} );
     case 'rose'
         hold off % to clear settings from rectangular graphs
-        if exist('bins','var') && ~isempty(bins) && ischar(bins) 
+        if exist('bins','var') && ~isempty(bins) && ischar(bins)
             bins=eval(bins);
         else
             bins = 16;
@@ -392,8 +398,7 @@ switch style
             bins=eval(bins);
         end
         for i=1:length(y)
-            % remove NaNs
-            y{i} = y{i}(~isnan(y{i}));
+            y{i} = y{i}(~isnan(y{i})); % remove NaNs
             
             [cf_mean,histbin_centers,h.cumul(i)]=plot_cumulative( y{i},bins,color{i},1,prefax,1);
             set(h.cumul(i),'linewidth',linewidth);
@@ -517,28 +522,37 @@ switch style
         
         % plot points
         if showpoints
+
+            x_spaced = cell(length(y),1);
             for i=1:length(y)
-                hp = plot_points(x(i),y{i},spaced);
+                [hp,x_spaced{i}] = plot_points(x(i),y{i},spaced);
                 switch markers
                     case 'none'
                         set(hp,'marker','none');
                     case 'closed_circle'
                         set(hp,'marker','o');
-                        set(hp,'markerfacecolor',color{mod(i-1,end)+1});   
+                        set(hp,'markerfacecolor',color{mod(i-1,end)+1});
                     case 'open_circle'
                         set(hp,'marker','o');
                 end
             end
         end
         
-        if showpairing           
-            plot(repmat(x,numel(y{1}),1)',...
-                reshape([y{:}],numel(y{1}),length(y))',...
-                linestyles,'linewidth',1) 
+        if showpairing
+            set(gca,'ColorOrderIndex', 1);
+            if exist('x_spaced','var')
+                plot(reshape([x_spaced{:}],numel(y{1}),length(y))',...
+                    reshape([y{:}],numel(y{1}),length(y))',...
+                    linestyles,'linewidth',1)
+            else
+                plot(repmat(x,numel(y{1}),1)',...
+                    reshape([y{:}],numel(y{1}),length(y))',...
+                    linestyles,'linewidth',1)
+            end
         end
         
         % compute and plot significances
-        h = compute_significances( y,x, test, signif_y, ystd, ny, tail,transform, h,correction,normalitytest );
+        h = compute_significances( y,x, test, signif_y, ystd, ny, tail,transform, h,correction,normalitytest,wingtipheight );
         
         % tighten x-axis
         ax = axis;
@@ -572,6 +586,7 @@ switch style
             end
         end
         if showpoints==2 % replace y by means
+            ystd = cell(length(y),1);
             for i=1:length(y)
                 if length(x{i})~=length(y{i})
                     errormsg(['Unequal number of x and y values for set ' num2str(i)]);
@@ -605,9 +620,9 @@ switch style
                         uniqy(j) = nanmean(y{i}(x{i}==uniqx(j)));
                         switch errorbars
                             case 'sem'
-                                uniqystd(j) = nansem(y{i}(x{i}==uniqx(j))); 
+                                uniqystd(j) = nansem(y{i}(x{i}==uniqx(j)));
                             otherwise
-                                uniqystd(j) = nanstd(y{i}(x{i}==uniqx(j))); 
+                                uniqystd(j) = nanstd(y{i}(x{i}==uniqx(j)));
                         end
                         pointsy{i}{j} = (y{i}(x{i}==uniqx(j)));   % for significance calculations
                     else
@@ -623,7 +638,7 @@ switch style
             end
             if strcmp(errorbars,'sem')
                 errorbars = 'std'; % to avoid trouble later when plotting
-            end    
+            end
         end
         
         if exist('smoothing','var') && smoothing>0
@@ -665,11 +680,11 @@ switch style
                         try
                             [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,test]=...
                                 compute_significance(pointsy{i}{k},...
-                                pointsy{j}{k},test,[],[],[],[],tail,transform,[],correction,normalitytest);
+                                pointsy{j}{k},test,[],[],[],[],tail,transform,[],correction,normalitytest,wingtipheight);
                             
                             
-                            plot_significance(  x{i}(k),...
-                                x{j}(k),max([y{i}(k)+ystd{i}(k) y{j}(k)+ystd{j}(k)]),p,0,0);
+                            plot_significance(  x{i}(k),x{j}(k),...
+                                max([y{i}(k)+ystd{i}(k) y{j}(k)+ystd{j}(k)]),p,0,0);
                         catch
                             h.h_sig{i,j}=nan;
                             h.p_sig{i,j}=nan;
@@ -691,7 +706,7 @@ switch style
             if ~exist('fit','var')
                 fit = '';
             end
-            if ~isempty(strfind(fit,'together'))
+            if ~isempty(strfind(fit,'together')) %#ok<*STREMP>
                 % make one fit for all groups together
                 rx={[x{:}]};
                 ry={[y{:}]};
@@ -707,13 +722,13 @@ switch style
                     h.points(i) = nan;
                     continue
                 end
-                h.points(i)=plot(x{i},y{i},'o');
+                h.points(i) = plot(x{i},y{i},'o');
                 set(h.points(i),'color',color{i},'clipping','off');
                 set(h.points(i),'marker','none');
             end
-            fity={};fity{length(ry)}=[];
-            ax=axis;
-            fitx=linspace(ax(1)-5*(ax(2)-ax(1)),ax(1)+5*(ax(2)-ax(1)),1000);
+            fity = {};fity{length(ry)}=[];
+            ax = axis;
+            fitx = linspace(ax(1)-5*(ax(2)-ax(1)),ax(1)+5*(ax(2)-ax(1)),1000);
             
             switch fit
                 case ''
@@ -768,7 +783,7 @@ switch style
                         logmsg([' fit: thresholdlinear rc = ' num2str(rc) ', offset = ' num2str(offset) ]);
                     end
                 case {'nakarushton','naka_rushton'}
-                    fitx=fitx(fitx>0);
+                    fitx = fitx(fitx>0);
                     if max(rx{1})>1
                         fitx = fitx/100;
                         rescale_to_1 = true;
@@ -789,7 +804,7 @@ switch style
                         fitx = fitx*100;
                     end
                 case 'dog'
-                    for i=1:length(ry)
+                    for i = 1:length(ry)
                         par = dog_fit(rx{i},ry{i});
                         fity{i} = dog(par,fitx);
                         logmsg([' fit: dog par = ' num2str(par)  ]);
@@ -802,12 +817,12 @@ switch style
                     end
                 otherwise
                     logmsg([' Fit type ' fit ' is not implemented.']);
-                    fit='';
+                    fit = '';
             end
             if ~isempty(fit)
                 for i=1:length(ry)
                     if ~isempty(fity{i})
-                        h.fit(i)=plot(fitx,fity{i},'-');
+                        h.fit(i) = plot(fitx,fity{i},'-');
                         set(h.fit(i),'Color',color{i});
                     end
                 end
@@ -829,9 +844,6 @@ switch style
                 end
                 axis(ax);
             end
-            
-            
-            
         end
         % plot points
         for i=1:length(y)
@@ -853,10 +865,10 @@ switch style
                     linestyle = linestyle{i};
                 end
                 set(h.points(i),'linestyle',linestyle);
-
+                
             end
             set(h.points(i),'linewidth',linewidth);
-
+            
             if exist('markers','var')
                 if ~iscell(markers)
                     marker = markers;
@@ -874,10 +886,10 @@ switch style
                         set(h.points(i),'markerfacecolor',color{i});
                     case 'open_circle'
                         set(h.points(i),'marker','o');
-                       % set(h.points(i),'markerfacecolor',[1 1 1]);
+                        % set(h.points(i),'markerfacecolor',[1 1 1]);
                         hm = h.points(i).MarkerHandle;
                         if ~isempty(hm)
-                        hm.FaceColorData=uint8([255; 255; 255; 255]);
+                            hm.FaceColorData=uint8([255; 255; 255; 255]);
                         end
                     case 'closed_circle'
                         set(h.points(i),'marker','o');
@@ -892,7 +904,6 @@ switch style
         errormsg(['graph style ' style ' is not implemented']);
         return
 end
-
 
 % set ylabel
 if ~isempty(ylab)
@@ -922,7 +933,7 @@ switch style
             case 'none'
                 set(gca,'xcolor',[1 1 1])
             otherwise
-                ax=axis;
+                ax = axis;
                 line([ ax(1) ax(2)],[ax(3) ax(3)],'Color','k');
         end
 end
@@ -955,8 +966,6 @@ if ~isempty(xticklabels)
         
     end
 end
-
-
 
 if ~isempty(extra_code)
     %evaluate_extra_code(extra_code);
@@ -1086,7 +1095,7 @@ switch errorbars
             case 'none'
                 h=errorbar(x,means,0*dyeb,0*dyeb,'k.');
                 
-            case  'topline'   
+            case  'topline'
                 for i=1:length(x)
                     if means(i)<0
                         dyeb(i) = -dyeb(i);
