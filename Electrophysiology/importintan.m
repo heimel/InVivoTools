@@ -108,10 +108,24 @@ spikedata = struct('time',[],'data',[]);
 
 HalfW = 16; % samples in downsampled data
 WinWidth = 2*HalfW;
-threshold = processparams.ec_intan_spikethreshold; % threshold of spike detection
+common_threshold = processparams.ec_intan_spikethreshold; % threshold of spike detection
 
 logmsg(['Detecting spikes on channels ' mat2str(channels2analyze)]);
+
+if ~isempty(record.channels)
+    manual_thresholds = record.channels;
+else
+    manual_thresholds = [NaN NaN];
+end
+
 for j = 1:length(channels2analyze)
+    ind = find(manual_thresholds(:,1)==channels2analyze(j));
+    if ~isempty(ind)
+        threshold = manual_thresholds(ind,2);
+    else
+        threshold = common_threshold;
+    end
+    
     if abs(threshold)<10 % assume stds
         chanthreshold = std(filtsig(j,1:100000))*threshold;
     else
