@@ -1,5 +1,7 @@
 function cells = importintan(record, channels2analyze, verbose)
-%IMPORTINTAN
+%IMPORTINTAN filters and detects spikes in intan-acquired data
+%
+%  CELLS = IMPORTTAN(RECORD,CHANNELS2ANALYZE,VERBOSE)
 %
 % 2016-2019, Mehran Ahmadlou, Alexander Heimel
 %
@@ -7,16 +9,17 @@ function cells = importintan(record, channels2analyze, verbose)
 if nargin<3 || isempty(verbose)
     verbose = true;
 end
+if nargin<2
+    channels2analyze = [];
+end
 
 processparams = ecprocessparams(record);
-
-datapath=experimentpath(record,false);
-
+datapath = experimentpath(record,false);
 EVENT.Mytank = datapath;
 EVENT.Myblock = record.test;
 matfilename = fullfile(EVENT.Mytank,EVENT.Myblock,[EVENT.Myblock '.mat']);
 
-if ~exist(matfilename,'file') 
+if ~exist(matfilename,'file')
     EVENT = load_intan(EVENT);
     if isempty(EVENT)
         cells = [];
@@ -26,17 +29,16 @@ else
     logmsg(['Loading precomputed event file ' matfilename]);
     load(matfilename,'EVENT');
 end
-
 logmsg(['Loaded event file for ' recordfilter(record)]);
 
-if verbose
-    figure('Name','Raw','Numbertitle','off');
-    hold on;
-    for i = 1:16
-        plot(EVENT.Snips.rawtime(1,1:100000),EVENT.Snips.rawsig(i,1:100000));
-    end
+if isempty(channels2analyze)
+    channels2analyze = EVENT.snips.Snip.channels;
 end
+EVENT.CHAN = channels2analyze;
 
+if verbose && processparams.ec_show_spikedetection
+    plot_data(EVENT.Snips.rawtime,EVENT.Snips.rawsig,EVENT,'Raw')
+end
 
 if ~isfield(EVENT,'strons')
     errormsg(['No triggers present in ' recordfilter(record)]);
@@ -44,11 +46,8 @@ if ~isfield(EVENT,'strons')
     return
 end
 
-% EVENT.strons.tril(1) = use_right_trigger(record,EVENT);
-% EVENT.strons.tril(1) =EVENT.strons(1,1);
-
-% if 0 && strncmp(record.stim_type,'background',10)==1   original
 if strncmp(record.analysis,'OFF',3)==1 && strncmp(record.stim_type,'bglumin',10)==1
+    logmsg('Analyzing OFF response. Shifted time by 1.55 s');
     EVENT.strons.tril(1) = EVENT.strons.tril(1) + 1.55;
 end
 
@@ -57,155 +56,39 @@ if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
     EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
 end
 
-% EVENT.Myevent = 'Snip';
-% EVENT.type = 'snips';
-% EVENT.Start = 0;
-
-% Chans = [];
-% for i=1:length(EVENT.ChanInfo)
-% Chans = [Chans,EVENT.ChanInfo(i).custom_order];
-% end
-
-if isempty(channels2analyze)
-    channels2analyze = EVENT.snips.Snip.channels;
-end
-EVENT.CHAN = channels2analyze;
-
-WaveTime_Spikes = struct([]);
-
 logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
-clear('WaveTime_Fpikes');
-WaveTime_Fpikes = struct('time',[],'data',[]);
 
+%% Rereferencing
 % substract common signal from all channels
-if 1
-    logmsg('Subtracting common signal from all channels');
+if processparams.ec_subtract_common_reference
+    logmsg('Subtracting common signal from all channels (params.ec_subtract_common_reference = true');
     commonsignal = mean(EVENT.Snips.rawsig,1);
-    for i=1:16
+    for i=1:size(EVENT.Snips.rawsig,1)
         EVENT.Snips.rawsig(i,:) = EVENT.Snips.rawsig(i,:) - commonsignal;
     end
 end
 
-
-
-%% Spike detection
-logmsg('Filtering between 300 Hz and 10 kHz');
- sF = EVENT.Freq;
- [b,a] = butter(5,300/(0.5*sF),'High');
- y = [];
- for j = length(channels2analyze):-1:1 % to avoid prealloc
-     y(j,:) = filter(b,a,EVENT.Snips.rawsig(channels2analyze(j),:));
- end
- 
-% y = filter(b,a,EVENT.Snips.rawsig(channels2analyze,:));
-% [b,a] = butter(5,10000/(0.5*sF),'Low');
-% y = filter(b,a,y);
-
-% bpfilt = designfilt('bandpassfir', 'StopbandFrequency1', 200, 'PassbandFrequency1', 300,...
-%     'PassbandFrequency2', 10000, 'StopbandFrequency2', 12000, ...
-%     'StopbandAttenuation1', 60, 'PassbandRipple', 1, 'StopbandAttenuation2', 60,...
-%     'SampleRate', 25000);
-% y = filter(bpfilt,EVENT.Snips.rawsig(channels2analyze,:));
-
-% All frequency values are in Hz.
-% Fs = 25000;  % Sampling Frequency
-% Fstop1 = 200;         % First Stopband Frequency
-% Fpass1 = 300;         % First Passband Frequency
-% Fpass2 = 10000;       % Second Passband Frequency
-% Fstop2 = 12000;       % Second Stopband Frequency
-% Astop1 = 60;          % First Stopband Attenuation (dB)
-% Apass  = 1;           % Passband Ripple (dB)
-% Astop2 = 80;          % Second Stopband Attenuation (dB)
-% match  = 'stopband';  % Band to match exactly
-% h  = fdesign.bandpass(Fstop1, Fpass1, Fpass2, Fstop2, Astop1, Apass, ...
-%                       Astop2, Fs);
-% Hd = design(h, 'butter', 'MatchExactly', match);
-% y = zeros(length(channels2analyze),size(EVENT.Snips.rawsig,2));
-% for j = 1:length(channels2analyze)
-%     logmsg(['Filtering channel ' num2str(channels2analyze(j))]);
-%     y(j,:) = filter(Hd,EVENT.Snips.rawsig(channels2analyze(j),:));
-% end
-%y = filter(Hd,EVENT.Snips.rawsig(channels2analyze,:));
-
-
-
-% logmsg('Filtering SGolay');
-% for j = 1:length(channels2analyze)
-%     try % problem in Matlab R2015
-%         y(j,:) = sgolayfilt(y(j,:),3,11);
-%     end
-% end
-
-HalfW = 16; % samples in downsampled data
-WinWidth = 2*HalfW;
-threshold = processparams.ec_intan_spikethreshold; % threshold of spike detection
-
-% if verbose
-%     figure('Name','Filtered')
-%     plot(EVENT.Snips.rawtime(1,1:100000),y(:,1:100000));
-% end
-
-
-for j = 1:length(channels2analyze)
-    logmsg(['Detecting spikes on channel ' num2str(channels2analyze(j))]);
-    
-
-    if abs(threshold)<10 % assume stds
-        chanthreshold = std(y(j,1:100000))*threshold;
-    else
-        chanthreshold = threshold;
-    end
-    
-    if chanthreshold<0
-        [~,locs] = findpeaks_fast(-y(j,:)','minpeakheight',abs(chanthreshold),'minpeakdistance',HalfW);
-    else
-        [~,locs] = findpeaks_fast(y(j,:)','minpeakheight',abs(chanthreshold),'minpeakdistance',HalfW);
-    end
-    if locs(1)<HalfW
-        locs(1) = [];
-    end
-    if locs(end)>size(y,2)-HalfW
-        locs(end) = [];
-    end
-    ind = repmat(locs,1,WinWidth) + repmat(1-HalfW:HalfW,length(locs),1);
-    x = y(j,:);
-    Spikes = x(ind);
-
-
-    
-    WaveTime_Fpikes(j,1).data = Spikes;
-    WaveTime_Fpikes(j,1).time = EVENT.Snips.rawtime(locs);
-    
-    figure('Name','Filtered','Numbertitle','off');
-    hold on
-    plot(EVENT.Snips.rawtime(1,1:100000),y(j,1:100000));
-    max_t = EVENT.Snips.rawtime(1,100000);
-    ind = find(WaveTime_Fpikes(j,1).time<max_t);
-    plot(WaveTime_Fpikes(j,1).time(ind),chanthreshold*ones(length(ind),1),'o');
+%% Filtering
+logmsg('High pass filtering from 300 Hz');
+% signal is already lowpass filtered by intan
+if ~isempty(record.filter)
+    highpass = record.filter(1);
 end
-       
-for ii=1:length(channels2analyze)
-    if isempty(WaveTime_Fpikes(ii,1).time)
-        continue
-    end
+[b,a] = butter(5,highpass/(0.5*EVENT.Freq),'High');
+filtsig = [];
+for j = length(channels2analyze):-1:1 % to avoid prealloc
+    filtsig(j,:) = filter(b,a,EVENT.Snips.rawsig(channels2analyze(j),:));
+end
 
-    wtime_sp.data =  WaveTime_Fpikes(ii,1).data;
-    wtime_sp.time = WaveTime_Fpikes(ii,1).time;
-    wtime_sp.channel = channels2analyze(ii);
-    WaveTime_Spikes = [WaveTime_Spikes wtime_sp]; %#ok<AGROW>
-end %% channel channels2analyze(ii)
-n_cells = length(WaveTime_Spikes);
-
-% load stimulus starttime
+%% adjust time to stimulus 
 stimsfile = getstimsfile( record );
-
-if isempty(stimsfile) 
+if isempty(stimsfile)
     errormsg(['No stimsfile for record ' recordfilter(record) '. Use ''stiminterview(global_record)'' to generate stimsfile. Now no analysis']);
     intervals = [EVENT.Snips.rawtime(1) EVENT.Snips.rawtime(end)]; % arbitrary, no link to real stimulus
 elseif isempty(stimsfile.MTI2{end}.frameTimes)
-    intervals = [stimsfile.start stimsfile.start+60*60];
+    intervals = [stimsfile.start stimsfile.start+60*60]; % use one hour
 else
-    intervals = [stimsfile.start stimsfile.MTI2{end}.frameTimes(end)+10];
+    intervals = [stimsfile.start stimsfile.MTI2{end}.frameTimes(end)+10]; % end of stim + 10s
 end
 
 if isempty(EVENT.strons.tril)
@@ -213,12 +96,54 @@ if isempty(EVENT.strons.tril)
     cells = {};
     return
 end
-EVENT.strons.tril = EVENT.strons.tril * processparams.secondsmultiplier;
+tril = use_right_trigger(record,EVENT)* processparams.secondsmultiplier;
+timeshift = intervals(1) - tril;
+timeshift = timeshift + processparams.trial_ttl_delay;
+time = EVENT.Snips.rawtime * processparams.secondsmultiplier + timeshift;
 
-% shift time to fit with TTL and stimulustimes
 
-timeshift = intervals(1)-EVENT.strons.tril(1);
-timeshift = timeshift+ processparams.trial_ttl_delay; % added on 24-1-2007 to account for delay in ttl
+%% Spike detection
+%clear('spikedata');
+spikedata = struct('time',[],'data',[]);
+
+HalfW = 16; % samples in downsampled data
+WinWidth = 2*HalfW;
+threshold = processparams.ec_intan_spikethreshold; % threshold of spike detection
+
+logmsg(['Detecting spikes on channels ' mat2str(channels2analyze)]);
+for j = 1:length(channels2analyze)
+    if abs(threshold)<10 % assume stds
+        chanthreshold = std(filtsig(j,1:100000))*threshold;
+    else
+        chanthreshold = threshold;
+    end
+    
+    if chanthreshold<0
+        [~,locs] = findpeaks_fast(-filtsig(j,:)','minpeakheight',abs(chanthreshold),'minpeakdistance',HalfW);
+    else
+        [~,locs] = findpeaks_fast(filtsig(j,:)','minpeakheight',abs(chanthreshold),'minpeakdistance',HalfW);
+    end
+    if ~isempty(locs) && locs(1)<HalfW
+        locs(1) = [];
+    end
+    if ~isempty(locs) && locs(end)>size(filtsig,2)-HalfW
+        locs(end) = [];
+    end
+    if ~isempty(locs)
+        ind = repmat(locs,1,WinWidth) + repmat(1-HalfW:HalfW,length(locs),1);
+    else
+        ind = [];
+    end
+    x = filtsig(j,:);
+    spikedata(j).data = x(ind);
+    spikedata(j).time = time(locs);
+    spikedata(j).channel = channels2analyze(j);
+    spikedata(j).threshold = chanthreshold;
+end
+
+if verbose && processparams.ec_show_spikedetection
+    plot_spike_data(time,filtsig,spikedata,record,intervals(1))
+end
 
 cells = struct([]);
 cll.name = '';
@@ -229,24 +154,26 @@ cll.trial = record.test;
 cll.desc_long = fullfile(datapath,record.test);
 cll.desc_brief = record.test;
 channels_new_index = (0:1000)*10+1; % works for up to 1000 channels, and max 10 cells per channel
-for c = 1:n_cells
-    if isempty(WaveTime_Spikes(c))
+for c = 1:length(spikedata)
+    if isempty(spikedata(c).data) %only include channels with spikes
+        logmsg(['No spikes on channel ' num2str(spikedata(c).channel)]);
         continue
     end
-    cll.channel = WaveTime_Spikes(c).channel;
+    cll.channel = spikedata(c).channel;
     cll.index = channels_new_index(cll.channel); % used to identify cell
     channels_new_index(cll.channel) = channels_new_index(cll.channel) + 1;
     cll.name = sprintf('cell_%s_%.3d',...
         subst_specialchars(record.test),cll.index);
-    GG = WaveTime_Spikes(c).time * processparams.secondsmultiplier + timeshift;
-    cll.data = GG';
-    spikes = WaveTime_Spikes(c).data; % spikes x samples
+    cll.data = spikedata(c).time';
+    spikes = spikedata(c).data; % spikes x samples
     cll.wave = mean(spikes,1);
     cll.std = std(spikes,1);
-    cll.spikes = spikes; 
+    cll.spikes = spikes;
     cll.ind_spike = [];
     cells = [cells,cll]; %#ok<AGROW>
 end
+
+
 
 
 function  tril = use_right_trigger(record,EVENT)
@@ -287,3 +214,99 @@ else
     end
     tril = EVENT.strons.tril(usetril);
 end
+
+
+
+
+function plot_spike_data(time,filtsig,spikedata,record,stimstart)
+figure('Name','Spikes','Numbertitle','off');
+n_channels = length(spikedata);
+for j = 1:n_channels
+    % Example filtered data
+    if ~isempty(spikedata(j).time) % some spikes
+        example_spiketime = spikedata(j).time(ceil(end/2));
+    else
+        example_spiketime = time(ceil(end/2));
+    end
+    width = 5; % s
+    ind1 = find(time(:)>example_spiketime-width,1,'first');
+    ind2 = find(time(:)<example_spiketime+width,1,'last');
+    subplot(n_channels,3,1+(j-1)*3)
+    hold on
+    plot(time(ind1:ind2)-stimstart,filtsig(j,ind1:ind2));
+    plot(time([ind1 ind2])-stimstart,[1 1]*spikedata(j).threshold,'color',0.7*[1 1 1]);
+    ind = find(spikedata(j).time>time(ind1) & ...
+        spikedata(j).time<time(ind2));
+    if ~isempty(ind)
+        plot(spikedata(j).time(ind)-stimstart,spikedata(j).data(ind,ceil(end/2)),'o');
+    end
+    if j == n_channels
+        xlabel('Time (s)');
+    end
+    ylabel(num2str(spikedata(j).channel));
+    xlim(time([ind1 ind2])-stimstart);
+    
+    % Example spike zoom
+    subplot(n_channels,3,2+(j-1)*3)
+    width = 0.010; % s
+    ind1 = find(time > example_spiketime-width,1,'first');
+    ind2 = find(time < example_spiketime+width,1,'last');
+    plot(time(ind1:ind2)-stimstart,filtsig(j,ind1:ind2));
+    hold on
+    plot(time([ind1 ind2])-stimstart,[1 1]*spikedata(j).threshold,'color',0.7*[1 1 1]);
+    if j == n_channels
+        xlabel('Time (s)');
+    end
+    xlim(time([ind1 ind2])-stimstart);
+    
+    % Relative spike rate during trial
+    if length(spikedata(j).time)>1
+        subplot(n_channels,3,3+(j-1)*3);
+        hold off
+        isi = diff(spikedata(j).time);
+        t = (spikedata(j).time(1:end-1)+spikedata(j).time(2:end))/2 - stimstart;
+        if length(isi)>1
+            [isi,t] = slidingwindowfunc(t, isi, [], 0.2, [], 4,'mean',0);
+        end
+        plot(t,1./isi);
+        hold on
+        set(gca,'yscale','log');
+        plot_stimulus_timeline(record);
+        hold on
+        ylabel('Rate (Hz)');
+        % h = plot_stimulus_timeline(record,xlims,variable,show_icons,stepped)
+        xlim([t(1)-0.5 t(end)+0.5]);
+        ylim([min(1./isi) max(1./isi)]);
+    end
+    if j == n_channels
+        xlabel('Time (s)');
+    end
+end
+
+
+function plot_data(rawtime,sig,EVENT,label)
+figure('Name',label,'Numbertitle','off');
+subplot(1,2,1);
+hold on;
+for i = setdiff(EVENT.snips.Snip.channels,EVENT.CHAN)
+    plot(rawtime(1,1:100000),sig(i,1:100000),'color',0.7*[1 1 1]);
+end
+for i = EVENT.CHAN
+    plot(rawtime(1,1:100000),sig(i,1:100000));
+end
+xlabel('Time (s)');
+ylabel('Voltage (?)');
+
+subplot(1,2,2);
+hold on;
+ind1 = round(EVENT.Freq * 1); % from 1s
+ind2 = round(EVENT.Freq * 1.2); % to 1.2s
+for i = setdiff(EVENT.snips.Snip.channels,EVENT.CHAN)
+    plot(rawtime(1,ind1:ind2),sig(i,ind1:ind2),'color',0.7*[1 1 1]);
+end
+for i = EVENT.CHAN
+    plot(rawtime(1,ind1:ind2),sig(i,ind1:ind2));
+end
+xlabel('Time (s)');
+ylabel('Voltage (?)');
+

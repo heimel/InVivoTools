@@ -79,7 +79,7 @@ for ch = channels
     fclose(fidt);
     
     n_spikes = 0;
-    for i=1:length(orgcells);
+    for i=1:length(orgcells)
         n_spikes = n_spikes+ length(orgcells(i).data);
     end
     
