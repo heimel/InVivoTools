@@ -59,25 +59,75 @@ end
 logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
 
 %% Rereferencing
-% substract common signal from all channels
-if processparams.ec_subtract_common_reference
-    logmsg('Subtracting common signal from all channels (params.ec_subtract_common_reference = true');
-    commonsignal = mean(EVENT.Snips.rawsig,1);
-    for i=1:size(EVENT.Snips.rawsig,1)
-        EVENT.Snips.rawsig(i,:) = EVENT.Snips.rawsig(i,:) - commonsignal;
-    end
+
+
+switch processparams.ec_rereference
+    case 'subtract_average_channel'
+        logmsg('Subtracting common signal from all channels (params.ec_rereference = ''subtract_average_channel''');
+        commonsignal = mean(EVENT.Snips.rawsig,1);
+        for i=1:size(EVENT.Snips.rawsig,1)
+            EVENT.Snips.rawsig(i,:) = EVENT.Snips.rawsig(i,:) - commonsignal;
+        end
+    case {'remove_first_pc','remove_first_two_pcs'}
+        logmsg(['Removing first principal component as rerefercing (params.ec_rereference = ''' processparams.ec_rereference '''']);
+        n= 100000;
+        ind = 1:n;
+        
+        [coeff,score]= pca(EVENT.Snips.rawsig(:,ind)');
+%         plot_data(EVENT.Snips.rawtime,EVENT.Snips.rawsig,EVENT,'Rereferenced')
+        pca1 = coeff(1,:)*EVENT.Snips.rawsig(:,1:n);
+        pca2 = coeff(2,:)*EVENT.Snips.rawsig(:,1:n);
+%         subplot(1,2,1);
+%         hold on;
+%         plot(EVENT.Snips.rawtime(1:n),-pca1);
+%         plot(EVENT.Snips.rawtime(1:n),pca2);
+
+        score2 = (EVENT.Snips.rawsig' * coeff);
+        switch processparams.ec_rereference
+            case 'remove_first_two_pcs'
+                score2(:,3:end) = 0; % remove everything except first two PCs
+            otherwise
+                score2(:,2:end) = 0; % remove everything except first  PCs
+        end
+        
+        pcas = coeff * score2';
+        EVENT.Snips.rawsig = EVENT.Snips.rawsig - pcas;
+    otherwise
+        logmsg('Not rereferencing');
 end
 
+
+if verbose && processparams.ec_show_spikedetection
+    plot_data(EVENT.Snips.rawtime,EVENT.Snips.rawsig,EVENT,'Rereferenced')
+end
+
+
+
+
 %% Filtering
+% 50 Hz Notch filter
+filtsig = zeros(length(channels2analyze),size(EVENT.Snips.rawsig,2));
+if processparams.ec_apply_notchfilter
+    logmsg('50 Hz notch filter');
+    d = designfilt('bandstopiir','FilterOrder',2, ...
+               'HalfPowerFrequency1',49,'HalfPowerFrequency2',51, ...
+               'DesignMethod','butter','SampleRate',EVENT.Freq);
+           
+    for j = 1:length(channels2analyze) % to avoid prealloc
+        filtsig(j,:) = filtfilt(d,EVENT.Snips.rawsig(channels2analyze(j),:));
+    end
+else
+    filtsig = EVENT.Snips.rawsig(channels2analyze,:);
+end
+
 logmsg('High pass filtering from 300 Hz');
 % signal is already lowpass filtered by intan
 if ~isempty(record.filter)
     highpass = record.filter(1);
 end
 [b,a] = butter(5,highpass/(0.5*EVENT.Freq),'High');
-filtsig = [];
 for j = length(channels2analyze):-1:1 % to avoid prealloc
-    filtsig(j,:) = filter(b,a,EVENT.Snips.rawsig(channels2analyze(j),:));
+    filtsig(j,:) = filter(b,a,filtsig(j,:));
 end
 
 %% adjust time to stimulus 
@@ -153,6 +203,7 @@ for j = 1:length(channels2analyze)
     spikedata(j).time = time(locs);
     spikedata(j).channel = channels2analyze(j);
     spikedata(j).threshold = chanthreshold;
+    logmsg(['Detected ' num2str(length(locs)) ]);
 end
 
 if verbose && processparams.ec_show_spikedetection
@@ -290,7 +341,7 @@ for j = 1:n_channels
         ylabel('Rate (Hz)');
         % h = plot_stimulus_timeline(record,xlims,variable,show_icons,stepped)
         xlim([t(1)-0.5 t(end)+0.5]);
-        ylim([min(1./isi) max(1./isi)]);
+        ylim([min(1./isi) max(1.05 ./isi)]);
     end
     if j == n_channels
         xlabel('Time (s)');

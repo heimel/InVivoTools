@@ -180,7 +180,8 @@ switch lower(record.setup)
 end
 
 params.ec_intan_spikethreshold = -50; % threshold of spike detection
-params.ec_subtract_common_reference = true; % currently only implemented for intan
+params.ec_apply_notchfilter = true; % only implemented for importintan
+params.ec_rereference = 'remove_first_pc'; % currently only implemented for intan
 params.ec_show_spikedetection = true; % only implemented for importintan
 params.compute_fraction_overlapping_spikes = false;
 

@@ -49,11 +49,11 @@ for i = 1:length(triggers)
     par = struct('res',processparams.ec_binwidth,'showrast',0,'interp',3,'drawspont',1,...
         'int_meth',0,'interval',[0 0]);
     
-    if processparams.post_window(2)<Inf
-        logmsg('For Koen')
-        par.interval = [0 processparams.post_window(2)];
-        par.int_meth = 1;
-    end
+%     if processparams.post_window(2)<Inf
+%         logmsg('For Koen')
+%         par.interval = [0 processparams.post_window(2)];
+%         par.int_meth = 1;
+%     end
     
     if verbose  % dont show for more than 5 cells
         where.figure = figure;
@@ -75,12 +75,12 @@ for i = 1:length(triggers)
         return
     end
     
-    if processparams.post_window(2)<Inf
-        logmsg('For Koen')
-        ch = get(where.figure,'children');
-        set(ch(4),'xlim', [processparams.pre_window(1) processparams.post_window(2)]);
-        set(ch(5),'xlim', [processparams.pre_window(1) processparams.post_window(2)]);
-    end
+%     if processparams.post_window(2)<Inf
+%         logmsg('For Koen')
+%         ch = get(where.figure,'children');
+%         set(ch(4),'xlim', [processparams.pre_window(1) processparams.post_window(2)]);
+%         set(ch(5),'xlim', [processparams.pre_window(1) processparams.post_window(2)]);
+%     end
 
     
     measures.curve{i} = curve;

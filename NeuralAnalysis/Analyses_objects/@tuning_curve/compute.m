@@ -98,10 +98,10 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
             interval(s,:) = Cinterval(s,:);
         end
         
-        if processparams.post_window(2)<Inf
-            logmsg('FOR KOEN: Should not change computation, only showing');
-            interval( interval(:,2)<processparams.post_window(2),2) = processparams.post_window(2);
-        end
+%         if processparams.post_window(2)<Inf
+%             logmsg('FOR KOEN: Should not change computation, only showing');
+%             interval( interval(:,2)<processparams.post_window(2),2) = processparams.post_window(2);
+%         end
         
         s = s + 1;
     end % j

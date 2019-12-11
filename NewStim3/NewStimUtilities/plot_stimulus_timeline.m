@@ -1,8 +1,13 @@
 function h = plot_stimulus_timeline(record,xlims,variable,show_icons,stepped)
 %PLOT_STIMULUS_TIMELINE plots onsets and offset of the stimuli from stimsfile
 %
-%  H = PLOT_STIMULUS_TIMELINE(RECORD,XLIMS,VARIABLE,SHOW_ICONS,STEPPED)
-%\
+%  H = PLOT_STIMULUS_TIMELINE(RECORD,XLIMS,VARIABLE,SHOW_ICONS=false,STEPPED)
+%
+%     RECORD contains record info to find stims.mat file
+%     XLIMS x-limit to show
+%     VARIABLE to use as label
+%     SHOW_ICONS 
+%
 % 2014-2017, Alexander Heimel
 %
 
@@ -29,7 +34,7 @@ if isempty(stimsfile)
 end
 stims = get(stimsfile.saveScript);
 
-if isempty(variable) && isfield(record,'measures') && isfield(record.measures(1),'variable')
+if isempty(variable) && isfield(record,'measures') && ~isempty(record.measures) && isfield(record.measures(1),'variable')
     variable = record.measures(1).variable;
 end
 if isempty(variable)
