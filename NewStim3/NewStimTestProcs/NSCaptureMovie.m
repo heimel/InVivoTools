@@ -39,7 +39,7 @@ else % make script out of stim
             end
         else
             myscript = append(myscript,mystim);
-        end;
+        end
     else
         myscript = mystim;
     end

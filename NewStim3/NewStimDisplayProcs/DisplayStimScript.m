@@ -160,6 +160,7 @@ end
 
 if capture_movie
     Screen('FinalizeMovie',moviePtr);
+    logmsg(['Wrote movie ' moviefilename]);
 end
 
 ShowCursor;

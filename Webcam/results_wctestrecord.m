@@ -5,7 +5,7 @@ function results_wctestrecord( record )
 %
 % 2015-2019, Azadeh Tafreshiha, Alexander Heimel
 
-global measures global_record
+global measures global_record analysed_script
 
 global_record = record;
 
@@ -13,7 +13,15 @@ measures = record.measures;
 
 evalin('base','global measures');
 evalin('base','global global_record');
-logmsg('Measures available in workspace as ''measures'',, record as ''global_record''.');
+evalin('base','global analysed_script');
+analysed_stimulus = getstimsfile(record);
+if ~isempty(analysed_stimulus) && isfield(analysed_stimulus,'saveScript')
+    analysed_script = analysed_stimulus.saveScript; %#ok<NASGU>
+else
+    logmsg('No savedscript');
+end
+
+logmsg('Measures available in workspace as ''measures'', stimulus as ''analysed_script'', record as ''global_record''.');
 
 filename = fullfile(experimentpath(record),'firstframe.mat');
 if exist(filename,'file')

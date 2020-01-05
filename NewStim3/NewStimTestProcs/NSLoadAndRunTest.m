@@ -1,8 +1,11 @@
 function [MTI,MTI2]=NSLoadAndRunTest(stimclass,output)
+%NSLOADANDRUNTEST shows stimulus or script
+%
+% 200X, Steve Van Hooser
+
 if nargin<2
     output = usejava('jvm');
 end
-
 
 NewStimGlobals;
 StimWindowGlobals;
@@ -29,11 +32,11 @@ else
             for i=1:length(mystim), myscript = append(myscript,mystim{i}); end;
         else
             myscript = append(myscript,mystim);
-        end;
+        end
     else
         myscript = mystim;
-    end;
-end;
+    end
+end
 
 ShowStimScreen;
 disp('Got past ShowStimScreen');

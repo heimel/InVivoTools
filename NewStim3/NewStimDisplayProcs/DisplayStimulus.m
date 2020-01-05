@@ -5,18 +5,21 @@ function [startStopTimes,frameTimes] = DisplayStimulus(MTI, thestim, trigger, ca
 %
 %  Displays a stimulus STIM using data in the Measured Timing Index variable MTI.  Returns
 %  timestamp entries startStopTimes and frameTimes.
+%
+% 200X, Steve Van Hooser
+% 200X-2019, Alexander Heimel
 
-if nargin<4;capture_movie=[];end
-if isempty(capture_movie);capture_movie=false;end
+
+
+if nargin<4 || isempty(capture_movie)
+    capture_movie = false;
+end
 if nargin<2
     stim = [];  %#ok<NASGU>
 else
     stim = thestim;  %#ok<NASGU>
 end
-if nargin<3
-    trigger = [];
-end
-if isempty(trigger)
+if nargin<3 || isempty(trigger)
     trigger = 0;
 end
 
@@ -33,15 +36,15 @@ else
     show_background(StimWindow,MTI,[],2);
 end
 
-masktexture = -1;
+%masktexture = -1;
 
 if MTI.ds.makeClip % make a clipping region
     if NS_PTBv<3 %use clipping region, can call routine directly
         Screen(StimWindow,'SetDrawingRegion',MTI.ds.clipRect,MTI.ds.makeClip-1);
     else % make a clipping region or use the one provided
-        if MTI.ds.makeClip==4||MTI.ds.makeClip==5
-            masktexture = MTI.ds.clipRect;
-        end
+        %         if MTI.ds.makeClip==4||MTI.ds.makeClip==5
+        %             masktexture = MTI.ds.clipRect;
+        %         end
     end
 end
 
@@ -54,18 +57,18 @@ if trigger
     StimSerialGlobals
     disp(['DISPLAYSTIMULUS: trigger down on pin ' StimSerialScriptOutPin ' for 1 ms']);
     StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
-
+    
     WaitSecs(0.001);
     StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
     
     % turn on separate trigger channel
-    %logmsg('Turning on RTS'); 
+    %logmsg('Turning on RTS');
     StimSerial('rts',StimSerialStim,1);
-    disp(['DISPLAYSTIMULUS: trigger up on pin ReadyToSend for whole stimulus']);
+    disp('DISPLAYSTIMULUS: trigger up on pin ReadyToSend for whole stimulus');
 else
     StimSerialGlobals
     % turn off separate trigger channel
-    % logmsg('Turning off RTS'); 
+    % logmsg('Turning off RTS');
     StimSerial('rts',StimSerialStim,0);
 end
 
@@ -86,7 +89,7 @@ end
 
 
 if strcmp(MTI.ds.displayType,'CLUTanim')&&strcmp(MTI.ds.displayProc,'standard')
-    s0 = GetSecs();
+    %s0 = GetSecs();
     startStopTimes(2) = StimTriggerAct('Stim_ONSET_trigger',MTI.stimid);
     rect = Screen(MTI.ds.offscreen(1),'Rect');
     if NS_PTBv<3
@@ -131,14 +134,14 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
         for frameNum=2:length(MTI.df.frames)
             Screen(StimWindow,'WaitBlanking',MTI.pauseRefresh(frameNum-1));
             StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,frameNum);
-            rectnum = 1+mod(MTI.df.frames(frameNum),length(MTI.ds.offscreen));
+            %rectnum = 1+mod(MTI.df.frames(frameNum),length(MTI.ds.offscreen));
             Screen('CopyWindow',MTI.ds.offscreen(MTI.df.frames(frameNum)),StimWindow,MTI.MovieParams.Movie_sourcerect(frameNum,:), MTI.df.rect,'srcCopyQuickly');
             frameTimes(frameNum) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,frameNum);
         end
         Screen(StimWindow,'WaitBlanking',MTI.pauseRefresh(end));
     else
         Screen('LoadNormalizedGammaTable',StimWindow,MTI.ds.clut,1); % this seems to be no longer necessary or correct, the textures already have colors
-         Screen('FillRect',StimWindow,round(MTI.ds.bg_gammauncorrected));
+        Screen('FillRect',StimWindow,round(MTI.ds.bg_gammauncorrected));
         frameNum = 1;
         textures = MTI.MovieParams.Movie_textures{frameNum};
         Screen('DrawTextures',StimWindow,MTI.ds.offscreen(textures),...
@@ -148,15 +151,17 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
             squeeze(MTI.MovieParams.Movie_globalalphas(:,frameNum,textures)),... % globalAlpha
             [],[],[], ... % modulateColor,textureShader,specialFlags
             squeeze(MTI.MovieParams.Movie_auxparameters(:,frameNum,textures))); % auxParameters
-             
-        if StimWindowUseCLUTMapping, Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1); end;
+        
+        if StimWindowUseCLUTMapping
+            Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1);
+        end
         
         vbl = Screen('Flip',StimWindow,0);
         frameTimes(1) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,1);
-
+        
         capture_image = false;
         if capture_image
-            imageArray = Screen('GetImage', StimWindow);
+            imageArray = Screen('GetImage', StimWindow); %#ok<UNRCH>
             imwrite(imageArray,fullfile(getdesktopfolder,'stimulus_frame.png'),'png')
         end
         
@@ -164,34 +169,40 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
         StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,1);
         
         for frameNum=2:length(MTI.df.frames)
-            textures = MTI.MovieParams.Movie_textures{frameNum};            
+            textures = MTI.MovieParams.Movie_textures{frameNum};
             Screen('DrawTextures',StimWindow,MTI.ds.offscreen(textures),...
-            squeeze(MTI.MovieParams.Movie_sourcerects(:,frameNum,textures)),...  % sourceRects
-            squeeze(MTI.MovieParams.Movie_destrects(:,frameNum,textures)),...    % destinationRects
-            squeeze(MTI.MovieParams.Movie_angles(:,frameNum,textures)),1,...       % rotationAngle, filterMode
-            squeeze(MTI.MovieParams.Movie_globalalphas(:,frameNum,textures)),... % globalAlpha
-            [],[],[], ... % modulateColor,textureShader,specialFlags
-            squeeze(MTI.MovieParams.Movie_auxparameters(:,frameNum,textures))); % auxParameters
-         
-            if StimWindowUseCLUTMapping, Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1); end;
-            vbl=Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(frameNum-1)-0.5)/StimWindowRefresh);
-            if capture_movie; Screen('AddFrameToMovie', StimWindow); end
-           frameTimes(frameNum) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,frameNum);
+                squeeze(MTI.MovieParams.Movie_sourcerects(:,frameNum,textures)),...  % sourceRects
+                squeeze(MTI.MovieParams.Movie_destrects(:,frameNum,textures)),...    % destinationRects
+                squeeze(MTI.MovieParams.Movie_angles(:,frameNum,textures)),1,...       % rotationAngle, filterMode
+                squeeze(MTI.MovieParams.Movie_globalalphas(:,frameNum,textures)),... % globalAlpha
+                [],[],[], ... % modulateColor,textureShader,specialFlags
+                squeeze(MTI.MovieParams.Movie_auxparameters(:,frameNum,textures))); % auxParameters
+            
+            if StimWindowUseCLUTMapping
+                Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1);
+            end
+            vbl = Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(frameNum-1)-0.5)/StimWindowRefresh);
+            if capture_movie
+                Screen('AddFrameToMovie', StimWindow);
+            end
+            frameTimes(frameNum) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,frameNum);
             WaitSecs(1/10000);
             StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,frameNum);
         end
-        if StimWindowUseCLUTMapping, Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1); end;
-        switch host
-%             case 'barney'
-%                 % dont flip to background gray
-            otherwise
-                Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(end)-0.5)/StimWindowRefresh);
+        if StimWindowUseCLUTMapping
+            Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1);
         end
-        if capture_movie; Screen('AddFrameToMovie', StimWindow); end
+        Screen('Flip',StimWindow,vbl+(MTI.pauseRefresh(end)-0.5)/StimWindowRefresh);
+        if capture_movie
+            Screen('AddFrameToMovie', StimWindow);
+        end
     end
     
 elseif strcmp(MTI.ds.displayType,'custom')
-    done=0; stamp=0; info=[]; stampNum=1; %#ok<NASGU>
+    done = 0;
+    stamp = 0;
+    info = [];  %#ok<NASGU>
+    stampNum = 1;
     startStopTimes(2) = StimTriggerAct('Stim_ONSET_trigger',MTI.stimid);
     while(done==0)
         eval(['[done,stamp,info]=' MTI.ds.displayProc '(info,StimWindow,MTI.ds,MTI.df);']);
@@ -203,21 +214,23 @@ elseif strcmp(MTI.ds.displayType,'custom')
     end
     
 elseif strcmp(MTI.ds.displayProc,'customdraw') % calls the stim's 'customdraw' function
-    done=0; stamp=0; info=[]; stampNum=1; %#ok<NASGU>
+    done = 0;
+    stamp = 0;
+    info = [];  %#ok<NASGU>
+    stampNum = 1;
     startStopTimes(2) = StimTriggerAct('Stim_ONSET_trigger',MTI.stimid);
     while(done==0)
-        eval('[done,stamp,info]=customdraw(stim,info,MTI);');
+        eval('[done,stamp,info]=customdraw(stim,info,MTI,capture_movie);');
         if stamp==1 % make a time stamp
             frameTimes(stampNum) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,stampNum);
             stampNum = stampNum + 1;
             StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,stampNum);
         end
     end
-    %frameTimes
 elseif strcmpi(MTI.ds.displayType,'QUICKTIME')   % note, quicktime play only supported in PTB-3
     Screen('LoadNormalizedGammaTable',StimWindow,StimWindowPreviousCLUT);
     Screen('SetMovieTimeIndex', MTI.ds.userfield.movie, 0); % play from beginning, regardless of where we played last time
-    done = 0; 
+    done = 0;
     frameNum = 0;
     startStopTimes(2) = StimTriggerAct('Stim_ONSET_trigger',MTI.stimid);
     Screen('PlayMovie',MTI.ds.userfield.movie,1);
@@ -227,12 +240,13 @@ elseif strcmpi(MTI.ds.displayType,'QUICKTIME')   % note, quicktime play only sup
         end
         tex = Screen('GetMovieImage',StimWindow,MTI.ds.userfield.movie);
         if tex<=0
-            done = 1; 
-            break; % detect hitting the end of the movie
+            done = 1; % detect hitting the end of the movie
         else
             frameNum = frameNum + 1;
             Screen('DrawTexture',StimWindow,tex,[],MTI.df.rect);
-            if StimWindowUseCLUTMapping, Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1); end;
+            if StimWindowUseCLUTMapping
+                Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1);
+            end
             Screen('Flip',StimWindow);
             frameTimes(frameNum) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,frameNum);
             Screen('Close',tex);
@@ -268,8 +282,8 @@ if MTI.postBGframes>0
             vbl = Screen('Flip', StimWindow, 0); % wait for blanking
             Screen('FillRect',StimWindow,round(255*MTI.ds.clut_bg(1,:,:))); % make sure background is installed
             WaitSecs(0.2);
-            if StimWindowUseCLUTMapping 
-                Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1); 
+            if StimWindowUseCLUTMapping
+                Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1);
             end
         end
         startStopTimes(3) = StimTriggerAct('Stim_OFFSET_trigger',MTI.stimid);
@@ -289,7 +303,7 @@ StimSerial('rts',StimSerialStim,0);
 startStopTimes(4) = StimTriggerAct('Stim_BGpost_trigger',MTI.stimid);
 
 if strcmp(MTI.ds.displayType,'Sound')
-    Snd('Close'); 
+    Snd('Close');
 end
 
 
