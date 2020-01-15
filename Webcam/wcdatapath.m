@@ -25,8 +25,8 @@ if nargin<1 || isempty(record)
 end
 
 % set default root
-params.wcdatapath_networkroot = fullfile(networkpathbase ,'Experiments');
-params.wcdatapath_localroot = fullfile(localpathbase,'Experiments');
+params.wcdatapath_networkroot = [networkpathbase filesep 'Experiments']; % much faster than fullfile
+params.wcdatapath_localroot = [localpathbase filesep 'Experiments'];% much faster than fullfile
 
 % check for local overrides
 params = processparams_local(params);

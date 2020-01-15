@@ -1,18 +1,14 @@
-function base=localpathbase(vers)
+function base = localpathbase
 %LOCALPATHBASE return base of local data path
 %
-% BASE = LOCALPATHBASE(VERS='2004')
+% BASE = LOCALPATHBASE
 %
-% 2012-2018, Alexander Heimel
+% 2012-2020, Alexander Heimel
 %
 
-persistent vers_pers base_pers
+persistent base_pers
 
-if nargin<1 || isempty(vers)
-    vers = '2004';
-end
-
-if strcmp(vers_pers,vers)
+if ~isempty(base_pers)
     base = base_pers;
     return
 end   
@@ -39,4 +35,3 @@ if ~exist(base,'dir')
 end
 
 base_pers = base;
-vers_pers = vers;

@@ -1,9 +1,10 @@
-function base=networkpathbase
+function base = networkpathbase
 %NETWORKPATHBASE return base of network data path
 %
 % BASE = NETWORKPATHBASE
 %
 %  LEVELTLAB dependent, returns path to levelt storage share 
+%    should be without trailing fileseparator
 %
 % 2009-2017, Alexander Heimel
 %

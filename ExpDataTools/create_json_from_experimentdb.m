@@ -29,12 +29,34 @@ for i=1:length(db)
         json.project = experiment();
     end
     
+    % need to remove periods from project
+    json.project(json.project=='.') = '';
+        
     json.dataset = json.project; % for new records this should be distinct from project
     json.subject = record.mouse;
+
+    % replace period in subject by 'p' 
+    json.subject(json.subject=='.') = 'p';
+    
     json.date = record.date;
     json.setup = record.setup;
-    json.investigator = record.experimenter;
-    json.condition = ''; % not used in experimentdb
+    switch lower(strtrim(record.experimenter))
+        case {'at','at sb','sb','sb at'}
+            json.investigator = 'Azadeh_Tafreshiha'; % and Sven van den Burg
+        case 'ah'
+            json.investigator = 'Alexander_Heimel';
+        case 'ma'
+            json.investigator = 'Mehran_Ahmadlou';
+        case 'dc'
+            json.investigator = 'Daniela_Camillo';
+        case 'lc'
+            json.investigator = 'Leonie_Cazemier';
+        otherwise
+            json.investigator = record.experimenter;
+    end
+    
+    json.condition = 'none'; % not used in experimentdb
+    json.stimulus = 'unspecified'; % not taken from experimentdb at the moment
     json.version = '1.0';
     
     json.session = '0001';
@@ -78,7 +100,7 @@ for i=1:length(db)
     
     jsonfilename = fullfile(datapath,[sessionname '_session.json']);
 
-    if exist(jsonfilename,'file') && ~overwrite_existing_jsonfiles
+    if ~overwrite_existing_jsonfiles && exist(jsonfilename,'file') 
         if verbose
             logmsg(['Not overwriting existing json file for ' recordfilter(record)]);
         end
