@@ -63,7 +63,7 @@ logmsg('Set video parameters with params.wc_raspivid_params in processparams_loc
 acqready_props_prev = dir(acqready);
 if isempty(acqready_props_prev)
     acqready_props_prev = [];
-    acqready_props_prev.datenum = datenum('01/01/2001');
+    acqready_props_prev.datenum = datenum('01/01/2001 14:00');
 end
 
 logmsg('Finding serial port')
@@ -123,12 +123,14 @@ while 1
   logmsg(['Checking for change in ' acqready]);
   while 1 && ~ready
     acqready_props = dir(acqready);
-    if ~isempty(acqready_props) && acqready_props.datenum > acqready_props_prev.datenum
-        logmsg('acqReady changed');
-        acqready_props
+    % give it some slacktime 0.0002 is about 16 s
+    if ~isempty(acqready_props) && acqready_props.datenum > acqready_props_prev.datenum + 0.0002
+        logmsg(['acqReady changed at ' datestr(acqready_props.datenum)]);
+        %acqready_props
         acqready_props_prev = acqready_props;
         ready  = 1;
     else
+        pause(0.05);
         pause(0.05);
     end
   end
@@ -174,7 +176,7 @@ while 1
   datapath = 'initialpath_waiting_for_change';
   logmsg('Press q to quit. t for manual trigger');
   waiting_for_stop = false;
-  while 1 % loop to find trigger
+  while 1  % loop to find trigger
         
         if new_instr_contr
             s2 = get(s1,'PinStatus');
@@ -228,9 +230,9 @@ while 1
                 acqinfo = loadStructArray(acqparams_in);
                 duration = acqinfo.reps * 10; % each rep is 10s
                 if ~isnan(duration)
-                    logmsg(['Stopping in '  num2str(duration) ' s.']);
-                    WaitSecs(duration);
+                    logmsg(['Recording for '  num2str(duration) ' s.']);
                     break;
+                    waiting_for_stop = false;
                 else
                     logmsg('Recording until another trigger is received (duration = NaN)');
                     waiting_for_stop = true;
@@ -248,26 +250,39 @@ while 1
         end
         prev_cts = cts;
         pause(0.001);
-%        if exist('KbCheck','file')
-%            [keydown,~,keycode] = KbCheck;
-%            if keydown
-%                find(keycode)
-%            end
-%            
-%            if keydown && (keycode(84) || keycode(29)) % t on PC and pi
-%                logmsg('Manually triggered');
-%                manually_triggered = true;
-%            end
-%            
-%            if keydown && (keycode(25) || keycode(81)) % 'q on pi and PC
-%                logmsg('Pressed q');
-%                fclose(s1);
-%                break
-%            end
-%        end
+        if exist('KbCheck','file')
+            [keydown,~,keycode] = KbCheck;
+            if keydown
+                disp(['Key pressed. Key code ' find(keycode)]);
+            end
+            
+            if keydown && (keycode(84) || keycode(29)) % t on PC and pi
+                logmsg('Manually triggered');
+                manually_triggered = true;
+            end
+            
+            if keydown && (keycode(25) || keycode(81)) % 'q on pi and PC
+                logmsg('Pressed q');
+                fclose(s1);
+                break
+            end
+        end
+    end
+    if ~waiting_for_stop 
+       for t=1:ceil(duration)
+           WaitSecs(1);
+           disp([num2str(t) 's'])
+           if exist('KbCheck','file')
+              [keydown,~,keycode] = KbCheck;
+              if keydown && (keycode(25) || keycode(81)) % 'q on pi and PC
+                  logmsg('Pressed q');
+                break
+              end
+           end
+        end
     end
     stop_recording(filename);
-end
+end % while
 
 
 fclose(s1);
