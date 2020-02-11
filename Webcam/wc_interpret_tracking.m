@@ -3,7 +3,7 @@ function record = wc_interpret_tracking( record, verbose)
 %
 %  RECORD = WC_INTERPRET_TRACKING(RECORD, VERBOSE)
 %
-% 2019, Alexander Heimel
+% 2019-2020, Alexander Heimel
 
 if nargin<2 || isempty(verbose)
     verbose = true;
@@ -22,11 +22,19 @@ if ~isfield(record.measures,'stim_trajectory')
     logmsg(['No stim_trajectory field in ' recordfilter(record)]);
     return
 end
-    
+
+if ~isfield(record.measures,'framesize')
+    [~,filename] = wc_getmovieinfo(record);
+    vid = VideoReader(filename);
+    im = readFrame(vid);
+    record.measures.framesize = size(im);
+end
+   
+if ~isfield(record.measures,'framerate') && isfield(record.measures,'frameRate')
+    record.measures.framerate = record.measures.frameRate;
+end
+
 t = record.measures.frametimes;
-nose_pxl = record.measures.nose_trajectory;
-arse_pxl = record.measures.arse_trajectory;
-stim_pxl = record.measures.stim_trajectory;
 
 % correct with manual detection
 if isfield(record.measures,'stim') && ~isempty(record.measures.stim)
@@ -41,25 +49,14 @@ if isfield(record.measures,'stim') && ~isempty(record.measures.stim)
                 plot(record.measures.nose(i,1),record.measures.nose(i,2),'go')
                 plot(record.measures.arse(i,1),record.measures.arse(i,2),'ro')
             end
-            nose_pxl(ind,:) = repmat(record.measures.nose(i,:),length(ind),1);
-            arse_pxl(ind,:) = repmat(record.measures.arse(i,:),length(ind),1);
+            record.measures.nose_trajectory(ind,:) = repmat(record.measures.nose(i,:),length(ind),1);
+            record.measures.arse_trajectory(ind,:) = repmat(record.measures.arse(i,:),length(ind),1);
         end
     end
 else
     logmsg(['Manual detection not done yet for ' recordfilter(record)]);
 end
 
-nose_pxl = movmedian(nose_pxl,5,'omitnan');
-arse_pxl = movmedian(arse_pxl,5,'omitnan');
-%stim_pxl = movmedian(stim_pxl,3);
-
-[azimuth,elevation,~] = wc_compute_overheadstim_angles( nose_pxl,arse_pxl,stim_pxl);
-
-record.measures.azimuth_trajectory = azimuth;
-record.measures.elevation_trajectory = elevation;
-
-if verbose
-    wc_plot_polar_trajectory(record);
-end
+record = wc_compute_overheadstim_angles(  record, verbose);
 
 logmsg(['Interpreted tracking of ' recordfilter(record)]);

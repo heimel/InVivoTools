@@ -55,8 +55,6 @@ else
 end
 
 params.wc_playbackpretime = 0; % s to show before stim onset
-
-
 % params.wc_timemultiplier = 1.01445;
 
 if isfield(record,'date') && datenum(record.date)<=datenum('2018-04-28')
@@ -67,13 +65,11 @@ else % something was changed in the timing of the movies between 2018-04-28 and 
     params.wc_timeshift = -0.5;
 end
 
-
 if ismac
     params.use_legacy_videoreader = false;
 else
     params.use_legacy_videoreader = true;
 end
-
 
 params.wc_freezeduration_threshold = 0.5; %s minimum duration to call lack of movement a freeze
 params.wc_freeze_smoother = [5,5]; % Number of frames that freeze analysis is averaging over before and after current frame
@@ -100,6 +96,12 @@ params.wc_minComponentSize = 6; % pxl, Consider smaller components as noise
 params.wc_dilation = ones(5); % for image dilation
 
 params.wc_raspivid_params = ' -t 0 -w 1280 -h 960 -b 3500000 -fps 30 -p 100,100,740,580 -fli 50hz ';
+
+params.wc_screen_distance_cm = 35; % cm, (vertical) distance of screen to mouse
+params.wc_cagefloor_width_cm = 47; % cm
+params.wc_screenwidth_cm = 47; % cm, screen same size as floor
+
+params.wc_retrack = true; % always retrack the mouse and stimulus
 
 if exist('processparams_local.m','file')
     params = processparams_local( params );

@@ -41,8 +41,10 @@ for i=1:length(db)
     json.date = record.date;
     json.setup = record.setup;
     switch lower(strtrim(record.experimenter))
-        case {'at','at sb','sb','sb at'}
-            json.investigator = 'Azadeh_Tafreshiha'; % and Sven van den Burg
+        case {'at','at sb','sb','sb at','at, sb','sb ab','ks','ks, at','at, ks','at, ma'}
+            % sb = Sven van den Burg
+            % ks = Kato Smits
+            json.investigator = 'Azadeh_Tafreshiha'; 
         case 'ah'
             json.investigator = 'Alexander_Heimel';
         case 'ma'

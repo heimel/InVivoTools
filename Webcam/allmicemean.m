@@ -2,6 +2,9 @@ function [p_hawk, p_disc, p_all, p_comp_all] = allmicemean(exp)
 %% Draws the bar plots of the data from group 2 mice 14.13 and 172002
 % with the significance stars
 % Azadeh September 2017
+%
+% might need to be preceded by call to MANUALFRZDATA
+%
 % 2019, pathchange by Alexander, adapted to octave
 
 pathstr =fileparts(mfilename('fullpath'));

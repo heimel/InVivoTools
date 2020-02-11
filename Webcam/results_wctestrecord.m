@@ -170,43 +170,43 @@ end
 
 
 % plots movement trajectory
-if isfield(measures,'mousemove') && ~isempty(measures.mousemove)
-    mousemove = measures.mousemove ;
-    move2der = measures.move2der ;
-    trajectorylength = measures.trajectorylength ;
-    averagemovement = measures.averagemovement ;
-    minimalmovement = measures.minimalmovement ;
-    diftreshold = measures.diftreshold ;
-    deriv2tresh = measures.deriv2tresh ;
-else
-    logmsg(['Information missing. Reanalyse ' recordfilter(record)]);
-end
+% if isfield(measures,'mousemove') && ~isempty(measures.mousemove)
+%     mousemove = measures.mousemove ;
+%     move2der = measures.move2der ;
+%     trajectorylength = measures.trajectorylength ;
+%     averagemovement = measures.averagemovement ;
+%     minimalmovement = measures.minimalmovement ;
+%     diftreshold = measures.diftreshold ;
+%     deriv2tresh = measures.deriv2tresh ;
+% else
+%     logmsg(['Information missing. Reanalyse ' recordfilter(record)]);
+% end
 
 my_blue = [0 0.2 0.6];
 my_purple = [0.6 0.2 0.6];
 
-if exist('mousemove','var') && ~isempty(mousemove)
-    figure;
-    subplot(2,1,1);
-    plot([1 trajectorylength],averagemovement*[1 1],'--k');hold on;
-    plot([1 trajectorylength],(minimalmovement+diftreshold)*[1 1],'linestyle' ,'--');
-    plot(mousemove,'color',my_blue,'linewidth',2);
-    set(gca, 'xtick', (0:30:600), 'XTickLabel', (-10:10),'xgrid','off');
-    title('Mouse movement trajectory');
-    subplot(2,1,2);
-    plot([1,trajectorylength],[deriv2tresh,deriv2tresh], '--k'); hold on;
-    plot([1,trajectorylength],[-deriv2tresh,-deriv2tresh], '--k');
-    plot(move2der, 'color',[0.8 0 0.6],'linewidth',1.4);
-    xlabel('seconds'); 
-    ylim([-0.7 0.7]);
-    set(gca, 'xtick', (0:30:600), 'XTickLabel', (-10:10),'xgrid','on');
-    title('2nd derivative of the trajectory');
-else
-    logmsg('No trajectory data available');
-end
+% if exist('mousemove','var') && ~isempty(mousemove)
+%     figure;
+%     subplot(2,1,1);
+%     plot([1 trajectorylength],averagemovement*[1 1],'--k');hold on;
+%     plot([1 trajectorylength],(minimalmovement+diftreshold)*[1 1],'linestyle' ,'--');
+%     plot(mousemove,'color',my_blue,'linewidth',2);
+%     set(gca, 'xtick', (0:30:600), 'XTickLabel', (-10:10),'xgrid','off');
+%     title('Mouse movement trajectory');
+%     subplot(2,1,2);
+%     plot([1,trajectorylength],[deriv2tresh,deriv2tresh], '--k'); hold on;
+%     plot([1,trajectorylength],[-deriv2tresh,-deriv2tresh], '--k');
+%     plot(move2der, 'color',[0.8 0 0.6],'linewidth',1.4);
+%     xlabel('seconds'); 
+%     ylim([-0.7 0.7]);
+%     set(gca, 'xtick', (0:30:600), 'XTickLabel', (-10:10),'xgrid','on');
+%     title('2nd derivative of the trajectory');
+% else
+%     logmsg('No trajectory data available');
+% end
 
 
-showangles = true;
+showangles = false;
 
 % plots angles
 if isfield(measures,'nose') && ~isempty(measures.nose) && ...
@@ -283,6 +283,8 @@ if showangles
         end
     end
 end
+
+
 try
     wc_kinetogram(record);
 catch me

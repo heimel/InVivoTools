@@ -78,11 +78,9 @@ switch windowname
                         set(ud.h.save,'Enable','on');
                     else
                         set(ud.h.save,'Enable','off');
-                        
                     end
                 end
                 set(h_fig,'Userdata',ud);
-                % drawnow
             case 'next'
                 i=findclosest( ud.ind,ud.current_record);
                 if ud.current_record<ud.ind(i)
@@ -242,7 +240,6 @@ switch windowname
                 end
                 [ud.db,ud.filename,ud.perm,ud.lockfile]=open_db( '',fileparts(ud.filename));
                 if ~isempty(ud.db) && ~isnumeric(ud.filename)
-                    %close(ud.record_form);
                     delete(ud.record_form);
                     ud.record_form=[];
                     set(ud.h.current_record,'String','1');

@@ -10,7 +10,7 @@ if nargin<2 || isempty(verbose)
     verbose = true;
 end
 
-par = wcprocessparams( record );
+params = wcprocessparams( record );
 
 record = wc_postanalysis( record,verbose ); % also run at the end. run here if the data cannot be found
 
@@ -39,9 +39,9 @@ else
 end
 rec = 1;
 
-stimStart = wcinfo(rec).stimstart * par.wc_timemultiplier;
+stimStart = wcinfo(rec).stimstart * params.wc_timemultiplier;
 
-if par.use_legacy_videoreader
+if params.use_legacy_videoreader
     if isempty(record.stimstartframe)
         if isfield(record.measures,'peakPoints')
             peakPoints = record.measures.peakPoints;
@@ -96,7 +96,9 @@ end
 if ~isfield(record.measures,'arena') || isempty(record.measures.arena)
     record = wc_get_arena(record);
 end
-record = wc_track_mouse(record, [], verbose);
+if ~isfield(record.measures,'frametimes') || params.wc_retrack
+    record = wc_track_mouse(record, [], verbose);
+end
 record = wc_interpret_tracking(record,verbose);
 record = wc_postanalysis( record,verbose); 
 

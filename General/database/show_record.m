@@ -103,10 +103,7 @@ if isempty(h_fig)
                 'Tag',[ fields{i} ]);
             top=top-1*lineheight;
         end
-        
-        
-        
-    end
+    end % for fields i
     ud.h_edit=h_edit;
     set(h_fig,'Userdata',ud);
 end
@@ -114,20 +111,17 @@ end
 % fill form
 fields=fieldnames(record);
 for i=1:length(fields)
-    ud=get(h_fig,'Userdata');
-    h_edit=ud.h_edit;
-    content=getfield(record,fields{i});
-    
-    
+    ud = get(h_fig,'Userdata');
+    h_edit = ud.h_edit;
+    content = getfield(record,fields{i});
     if islogical(content)
         content = double(content);
     end
     if isnumeric(content)
-        %content=num2str(content,' %1g');
         if ~isempty(content)
-            content=mat2str(content,10);
+            content = mat2str(content,10);
         else
-            content='';
+            content = '';
         end
     end
     if ~ischar(content)
@@ -168,11 +162,11 @@ end
 if isfield(ud,'db_form')
     posdb=get(ud.db_form,'Position');
     posfrm=get(h_fig,'Position');
-    if posdb(2)-posfrm(4)>0 || isoctave % if not too high
+    %if posdb(2)-posfrm(4)>0 || isoctave % if not too high
         set(h_fig,'Position',[posdb(1) posdb(2)-posfrm(4)-windowvbordersize posfrm(3) posfrm(4)])
-    else
-        set(h_fig,'Position',[posdb(1)+posdb(3)+windowhbordersize posdb(2) posfrm(3) posfrm(4)])
-    end
+    %else
+    %    set(h_fig,'Position',[posdb(1)+posdb(3)+windowhbordersize posdb(2) posfrm(3) posfrm(4)])
+    %end
     
     % set color
     set(h_fig,'Color',get(ud.db_form,'Color'));

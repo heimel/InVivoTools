@@ -3,23 +3,23 @@ function fig=group_db
 %
 %  FIG=GROUP_DB
 %
-% 2007-2015, Alexander Heimel
+% 2007-2020, Alexander Heimel
 %
 
-[groupdb,filename]=load_groupdb;
+[groupdb,filename] = load_groupdb;
 
-h_fig=control_db(filename,[1 0.5 0.5]); % which will load the file again
+h_fig = control_db(filename,[1 0.5 0.5]); % which will load the file again
 set(h_fig,'Name','Group database');
 
 if nargout==1
     fig=h_fig;
 end
 
-left=10;
-buttonwidth=70;
-colsep=3;
-buttonheight=30;
-top=10;
+left = 10;
+%ud.buttonwidth=70;
+colsep = 3;
+%ud.buttonheight=30;
+top = 10;
 
 % extra buttons:
 ud=get(h_fig,'UserData');
@@ -31,10 +31,10 @@ h.list_group = ...
     'BackgroundColor',0.8*[1 1 1],...
     'Callback','genercallback', ...
     'ListboxTop',0, ...
-    'Position',[left top buttonwidth buttonheight], ...
+    'Position',[left top ud.buttonwidth ud.buttonheight], ...
     'String','List', ...
     'Tag','list_group');
-left=left+buttonwidth+colsep;
+left=left+ud.buttonwidth+colsep;
 
 ud.h=h;
 set(h_fig,'UserData',ud);

@@ -19,11 +19,16 @@ end
 
 if nargin<2 || isempty(h)
     if verbose
-        h = figure('name','Stim trajectory');
+        h = figure('name','Stim trajectory','NumberTitle','off');
     else
         h = [];
     end
 end
+
+if ~isempty(h)
+    subplot(1,2,1);
+end
+
 
 azimuth = record.measures.azimuth_trajectory;
 elevation = record.measures.elevation_trajectory;
@@ -34,6 +39,8 @@ r.elevation = elevation;
 if verbose && ~isoctave
     polarplot(azimuth,pi/2-elevation,'.','color',0.8*[1 1 1])
     set(gca,'ThetaDir','clockwise') % to fit with movie
+    set(gca,'RtickLabel',[]);
+    set(gca,'ThetatickLabel',[]);
     hold on
 end
 
@@ -85,3 +92,54 @@ end
 
 r.azimuth_nonfreeze = azimuth;
 r.elevation_nonfreeze = elevation;
+
+if verbose && isfield(record.measures,'stim_nose_centered_rotated_cm')
+    
+    
+    ind = find(~isnan(record.measures.stim_nose_centered_rotated_cm(:,1)));
+    %cmap = jet(length(ind));
+    cmap = parula(length(ind));
+
+    subplot(1,2,2)
+       hold on;
+    set(gca,'ydir','reverse')
+    axis image
+    xlim([-47 47]);
+    ylim([-47 47]);
+    for i=1:length(ind)
+        plot([record.measures.stim_nose_centered_rotated_cm(ind(i),1) record.measures.stim_nose_centered_rotated_cm(ind(i)+1,1)],...
+            [record.measures.stim_nose_centered_rotated_cm(ind(i),2) record.measures.stim_nose_centered_rotated_cm(ind(i)+1,2)],'color',cmap(i,:));
+    end
+    
+    if 0
+        for i=1:10:length(ind) % plot stim direction
+            plot([record.measures.stim_nose_centered_rotated_cm(ind(i),1) record.measures.stim_nose_centered_rotated_cm(ind(i),1)+record.measures.stim_direction_rotated_cm_per_s(ind(i),1)/10],...
+                [record.measures.stim_nose_centered_rotated_cm(ind(i),2) record.measures.stim_nose_centered_rotated_cm(ind(i),2)+record.measures.stim_direction_rotated_cm_per_s(ind(i),2)/10],'-r');
+            
+        end
+    end
+
+    for i=1:10:length(ind) % plot stim x axis
+        plot(record.measures.stim_nose_centered_rotated_cm(ind(i),1)+[-0.5 0.5]*record.measures.stim_x_axis_rotated_cm(ind(i),1),...
+            record.measures.stim_nose_centered_rotated_cm(ind(i),2)+[-0.5 0.5]*record.measures.stim_x_axis_rotated_cm(ind(i),2),'-k');
+        
+    end
+    for i=1:10:length(ind) % plot stim y axis
+        plot(record.measures.stim_nose_centered_rotated_cm(ind(i),1)+[-0.5 0.5]*record.measures.stim_y_axis_rotated_cm(ind(i),1),...
+            record.measures.stim_nose_centered_rotated_cm(ind(i),2)+[-0.5 0.5]*record.measures.stim_y_axis_rotated_cm(ind(i),2),'-k');
+        
+    end
+
+    
+    h= plot(record.measures.stim_nose_centered_rotated_cm(ind(1),1),...
+        record.measures.stim_nose_centered_rotated_cm(ind(1),2),'go');
+    set(h,'MarkerFaceColor',get(h,'Color'));
+
+    
+%     text(record.measures.stim_nose_centered_rotated_cm(ind(1),1),...
+%         record.measures.stim_nose_centered_rotated_cm(ind(1),2),'B','horizontalalignment','Center')
+%     text(record.measures.stim_nose_centered_rotated_cm(ind(end),1),...
+%         record.measures.stim_nose_centered_rotated_cm(ind(end),2),'E','horizontalalignment','Center')
+%     
+end
+
