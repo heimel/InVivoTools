@@ -69,17 +69,19 @@ end
 logmsg('Finding serial port')
 foundserial = false;
 s1 = [];
-for i = 1:10
-    devfolder = strcat('/dev/ttyUSB',num2str(i-1));
-    if ~isempty(dir(devfolder))
-        foundserial = true;
-        break
-    end
+d = dir('/dev/ttyUSB*');
+if isempty(d)
+    logmsg('No serial ports found in /dev/ttyUSB*');
+    return
 end
-if ~foundserial
+foundserial = true;
+if length(d)==1
+    devfolder = ['/dev/' d(1).name];
+    logmsg(['Using unique serial port ' devfolder]);
+else
     devfolder = StimSerialScriptIn;
+    logmsg(['Using serial port ' devfolder ' set in NewStimConfiguration StimSerialScriptIn']);
 end
-logmsg(['Using serial port ' devfolder]);
 
 % close port if accidently already open
 %s1 = instrfind('Port',devfolder,'status','open' );

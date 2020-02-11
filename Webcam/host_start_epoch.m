@@ -10,6 +10,7 @@ function record = host_start_epoch( record, duration )
 
 NewStimGlobals;
 remotecommglobals;
+StimSerialGlobals;
 
 if nargin< 2 || isempty(duration)
     duration = 3; % s
@@ -29,13 +30,16 @@ logmsg('Change Remote_Comm_dir in NewStimConfiguration to change communication f
 logmsg('Set trigger settings in NewStimConfiguration');
 
 if NSUseInitialSerialTrigger
-    OpenStimSerial
-    if ~StimSerialSerialPort
-        logmsg('Not triggering. Check Serial port settings in NewStimConfiguration');
-    else
-        StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+    try
+       serial_out = serial(StimSerialScriptOut);
+    catch
+        logmsg(['Cannot find ' StimSerialScriptOut '. Check StimSerialScriptOut settings in NewStimConfiguration']);
+        return
     end
 end
+fopen(serial_out);
+set(serial_out,'dataterminalready','on');
+set(serial_out,'requesttosend','on');
 
 params.delay_for_remote_computers = 2; % s
 params = processparams_local(params); 
@@ -73,13 +77,21 @@ write_pathfile(fullfile(Remote_Comm_dir,'acqReady'),localpath2remote(datapath));
 pause(params.delay_for_remote_computers);
 
 if NSUseInitialSerialTrigger && StimSerialSerialPort
-    StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
+    switch(StimSerialScriptOutPin)
+       case 'dtr'
+          outpin = 'dataterminalready';
+       case 'rts'
+          outpin = 'requesttosend';
+    end
+    set(serial_out,outpin,'off');
+    %StimSerial(StimSerialScriptOutPin,StimSerialScript,0);
     if exist('NSUseInitialSerialContinuous','var') && ~isempty(NSUseInitialSerialContinuous) && NSUseInitialSerialContinuous
         logmsg([ StimSerialScriptOutPin ' pin flipped down for whole script']);
     else
         WaitSecs(0.010);
+        set(serial_out,outpin,'on');
         %StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
-        logmsg(['Triggered on ' StimSerialScriptOutPin]);
+        logmsg(['Triggered on pin ' StimSerialScriptOutPin ' of ' StimSerialScriptOut]);
     end
 end
 
@@ -88,12 +100,13 @@ WaitSecs(acqduration);
 logmsg(['Finished epoch '  record.epoch]);
 
 if NSUseInitialSerialTrigger && StimSerialSerialPort
-    StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
+    set(serial_out,outpin,'on');
+    %    StimSerial(StimSerialScriptOutPin,StimSerialScript,1);
 end
 
 params.wc_postrecording_delay = 12;%s
 logmsg(['Safety post recording delay ' num2str(params.wc_postrecording_delay)]);
 WaitSecs(params.wc_postrecording_delay);
 
-
+fclose(serial_out);
 
