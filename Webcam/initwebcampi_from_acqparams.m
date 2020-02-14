@@ -11,6 +11,16 @@ if isoctave
     pkg load instrument-control
 end
 
+psychtoolbox_working = true;
+try
+   KbCheck;
+catch
+   % probably no graphical display possibility
+   psychtoolbox_working = false;
+   logmsg('Problem with KbCheck. No keyboard catching during script');
+end   
+
+
 NewStimConfiguration
 StimSerialGlobals
 
@@ -250,7 +260,7 @@ while 1
         end
         prev_cts = cts;
         pause(0.001);
-        if exist('KbCheck','file')
+        if psychtoolbox_working 
             [keydown,~,keycode] = KbCheck;
             if keydown
                 disp(['Key pressed. Key code ' find(keycode)]);
@@ -272,7 +282,7 @@ while 1
        for t=1:ceil(duration)
            WaitSecs(1);
            disp([num2str(t) 's'])
-           if exist('KbCheck','file')
+           if psychtoolbox_working 
               [keydown,~,keycode] = KbCheck;
               if keydown && (keycode(25) || keycode(81)) % 'q on pi and PC
                   logmsg('Pressed q');
