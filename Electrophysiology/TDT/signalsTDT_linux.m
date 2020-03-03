@@ -1,4 +1,4 @@
-function SIG = signalsTDT_linux(EVENT, Trials)
+function [SIG,TIM] = signalsTDT_linux(EVENT, Trials)
 %SIG = signalsTDT_linux(EVENT, Trials)
 %
 %Called by invivotools to retrieve lfp data (only stream data) after
@@ -74,8 +74,10 @@ end
 TrlSz = round(EVENT.Triallngth*Sampf);
 
 SIG = cell(length(Chans), 1);
+TIM = cell(length(Chans), 1);
 for i = 1:length(Chans)
     SIG{i} = nan(TrlSz, size(Trials,1));
+    TIM{i} = nan(TrlSz, size(Trials,1));
 end
 
 for j = 1:size(Trials,1)
@@ -108,6 +110,9 @@ for j = 1:size(Trials,1)
             flatten(strm.sample_point(chanind(first_epoch_ind+1:last_epoch_ind-1),:)') ; ...
             strm.sample_point(chanind(last_epoch_ind),1:Se)'   ];
         
+        TIM{Nc,j} = first_epoch_start + (Sb-1) / Sampf + (0: (length(SIG{Nc,j})-1))/Sampf;
+
+        
         Nc = Nc + 1;
     end % channel ch
 end % trial j
@@ -124,7 +129,13 @@ end
 
 strm = [];
 
-filebase = fullfile( EVENT.Mytank,EVENT.Myblock,['Mouse_' EVENT.Myblock]);
+if ~isempty(EVENT.Mytank) && EVENT.Mytank(end)==filesep
+    [~,preamble] = fileparts(EVENT.Mytank(1:end-1));
+else
+    preamble = '';
+end
+filebase = fullfile( EVENT.Mytank,EVENT.Myblock,[preamble '_' EVENT.Myblock]);
+
 tev_path = [filebase '.tev'];
 if ~exist(tev_path,'file')
     filebase = fullfile( EVENT.Mytank,EVENT.Myblock);

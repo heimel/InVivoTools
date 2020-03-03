@@ -74,6 +74,7 @@ end
 TrlSz = round(EVENT.Triallngth*Sampf);
 
 SIG = cell(length(Chans), 1);
+TIM = cell(length(Chans), 1);
 for i = 1:length(Chans)
     SIG{i} = nan(TrlSz, size(Trials,1));
     TIM{i} = nan(TrlSz, size(Trials,1));
@@ -128,7 +129,13 @@ end
 
 strm = [];
 
-filebase = fullfile( EVENT.Mytank,EVENT.Myblock,['test2_' EVENT.Myblock]);
+
+if ~isempty(EVENT.Mytank) && EVENT.Mytank(end)==filesep
+    [~,preamble] = fileparts(EVENT.Mytank(1:end-1));
+else
+    preamble = '';
+end
+filebase = fullfile( EVENT.Mytank,EVENT.Myblock,[preamble '_' EVENT.Myblock]);
 tev_path = [filebase '.tev'];
 if ~exist(tev_path,'file')
     filebase = fullfile( EVENT.Mytank,EVENT.Myblock);
@@ -146,7 +153,7 @@ fseek(tsq, 0, 'eof');
 ntsq = ftell(tsq)/40;
 
 logmsg('TEMP SHORTING NUMBER OF DATA SAMPLES' );
-ntsq = 200000;
+ntsq = 400000;
 
 fseek(tsq, 0, 'bof') ; data.size      = int32(fread(tsq, [ntsq 1], 'int32',  36));
 fseek(tsq,  4, 'bof'); data.type      = int32(fread(tsq, [ntsq 1], 'int32',  36));
