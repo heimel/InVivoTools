@@ -1,145 +1,124 @@
-function [h,r] = wc_plot_polar_trajectory(record,h,verbose)
+function [h,r] = wc_plot_polar_trajectory(record,h,verbose,plotoptions)
 %WC_PLOT_POLAR_TRAJECTORY plots position of stims in retinal coordinates
 %
-%  [H,R] = WC_PLOT_POLAR_TRAJECTORY(RECORD, H)
+%  [H,R] = WC_PLOT_POLAR_TRAJECTORY(RECORDS, H, VERBOSE, PLOTOPTIONS)
 %
 % H is figure handle
 % R is a structure with the azimuths and elevations
+% VERBOSE
+% PLOTOPTIONS
+%    plotoptions.show_stim = true; % gray points
+%    plotoptions.show_stimstart = true; % green disks
+%    plotoptions.show_freeze = true; % red points
+%    plotoptions.show_freezestart = false;
 %
-% 2019, Alexander Heimel
+% 2019-2020, Alexander Heimel
 
 if nargin<3 || isempty(verbose)
     verbose = true;
 end
+if nargin<2
+    h = [];
+end
+if nargin<4 || isempty(plotoptions)
+    plotoptions.show_stim = true; % gray points
+    plotoptions.show_stimstart = true; % green disks
+    plotoptions.show_freeze = true; % red points
+    plotoptions.show_freezestart = true;
+end
 
-if ~isfield(record,'measures') || ~isfield(record.measures,'azimuth_trajectory')
-    logmsg(['No trajectory info for ' recordfilter(record)]);
+r = [];
+if isempty(record)
     return
 end
 
-if nargin<2 || isempty(h)
-    if verbose
-        h = figure('name','Stim trajectory','NumberTitle','off');
-    else
-        h = [];
+if length(record)>1
+    [h,results(1)] = wc_plot_polar_trajectory(record(1),h,verbose,plotoptions);
+    for i=2:length(record)
+        [h,results(i)] = wc_plot_polar_trajectory(record(i),h,verbose,plotoptions); %#ok<AGROW>
     end
+    flds = fields(results);
+    for f = 1:length(flds)
+        r.(flds{f}) = vertcat(results.(flds{f}));
+    end
+    return
 end
 
-if ~isempty(h)
-    subplot(1,2,1);
-end
+params = wcprocessparams(record);
 
-
-azimuth = record.measures.azimuth_trajectory;
-elevation = record.measures.elevation_trajectory;
-
-r.azimuth = azimuth;
-r.elevation = elevation;
-
-if verbose && ~isoctave
-    polarplot(azimuth,pi/2-elevation,'.','color',0.8*[1 1 1])
-    set(gca,'ThetaDir','clockwise') % to fit with movie
-    set(gca,'RtickLabel',[]);
-    set(gca,'ThetatickLabel',[]);
-    hold on
-end
-
-ind = find(~isnan(azimuth),1,'first');
-
-r.azimuth_stimstart = azimuth(ind);
-r.elevation_stimstart = elevation(ind);
-
-if verbose && ~isoctave
-    h = polarplot(r.azimuth_stimstart,pi/2-r.elevation_stimstart,'go');
-    set(h,'MarkerFaceColor',get(h,'Color'));
-end
-
-
-t = record.measures.frametimes;
-if isfield(record.measures,'freezetimes')
-    freezetimes = record.measures.freezetimes;
-else
-    logmsg(['Record is not manually analyzed, ' recordfilter(record)]);
-    freezetimes = record.measures.freezetimes_aut;
-end
-
+r.azimuth = [];
+r.elevation = [];
+% r.azimuth_stimstart = [];
+% r.elevation_stimstart = [];
 r.azimuth_freezestart = [];
 r.elevation_freezestart = [];
 r.azimuth_freeze = [];
 r.elevation_freeze = [];
 
-for i = 1:size(freezetimes,1)
-    ind = find(t>=freezetimes(i,1) & t<=freezetimes(i,2));
-    if ~isempty(ind)
-        indind = find(~isnan(ind),1,'first');
-        if ~isempty(indind)
-            r.azimuth_freezestart = [r.azimuth_freezestart;azimuth(ind(indind))];
-            r.elevation_freezestart = [r.elevation_freezestart;elevation(ind(indind))];
-        end
-        r.azimuth_freeze = [r.azimuth_freeze;azimuth(ind)];
-        r.elevation_freeze = [r.elevation_freeze;elevation(ind)];
-        
-        if verbose && ~isoctave
-            hf = polarplot(azimuth(ind),pi/2-elevation(ind),'r.-');
-            set(hf,'linewidth',3);
-        end
-        
-        azimuth(ind) = NaN;
-        elevation(ind) = NaN;
+if ~isfield(record,'measures')
+    logmsg(['Not analyzed record ' recordfilter(record)]);
+    return
+end
+if isfield(record,'measures') && isnan(record.measures.stim_seqnr) % problem with stim
+    return
+end
+
+if isfield(record,'measures') && record.measures.stim_seqnr == 0 % % gray stim
+    return
+end
+
+if ~isfield(record.measures,'azimuth_trajectory')
+    logmsg(['No trajectory info for ' recordfilter(record)]);
+    return
+end
+
+if ~isfield(record.measures,'ind_freeze')
+    record = wc_add_freezing_ind( record, verbose);
+end
+
+
+r.azimuth = record.measures.azimuth_trajectory;
+r.elevation = record.measures.elevation_trajectory;
+
+ind_stimstart = find(~isnan(r.azimuth),1,'first');
+
+ind_freeze = record.measures.ind_freeze;
+if ~isempty(ind_freeze)
+    r.azimuth_freezestart = r.azimuth(ind_freeze(1));
+    r.elevation_freezestart = r.elevation(ind_freeze(1));
+end
+r.azimuth_freeze =  r.azimuth(ind_freeze);
+r.elevation_freeze =  r.elevation(ind_freeze);
+
+
+if verbose && ~isoctave
+    if isempty(h)
+        h = figure('name','Polar trajectory','NumberTitle','off');
+    end
+    
+    polarplot(0,0,'.','color',[1 1 1])
+    set(gca,'ThetaDir','clockwise') % to fit with movie
+    set(gca,'RtickLabel',[]);
+    set(gca,'ThetatickLabel',[]);
+    hold on
+    set(gca,'rlim',[0 atan(55/25)]);
+    set(gca,'rticklabelmode','auto');
+    set(gca,'rtick',[30 45 60]/180*pi);
+    set(gca,'rticklabel',{'60^o','45^o','30^o'});
+    set(gca,'RAxisLocation',-60);
+    
+    
+    if plotoptions.show_stim
+        polarplot(r.azimuth,pi/2-r.elevation,'o','color',0.8*[1 1 1],'markerfacecolor',0.8*[1 1 1],'markersize',3)
+    end
+    if plotoptions.show_stimstart
+        polarplot(r.azimuth(ind_stimstart),pi/2-r.elevation(ind_stimstart),'go','markersize',4,'markerfacecolor',[0 1 0]);
+    end
+    if plotoptions.show_freeze
+        polarplot(r.azimuth_freeze,pi/2-r.elevation_freeze,'ro','markerfacecolor',[1 0 0],'markersize',3);
+    end
+    if plotoptions.show_freezestart
+        polarplot(r.azimuth_freezestart,pi/2-r.elevation_freezestart,'ro','markerfacecolor',[1 0 0],'markersize',4);
     end
     
 end
-
-r.azimuth_nonfreeze = azimuth;
-r.elevation_nonfreeze = elevation;
-
-if verbose && isfield(record.measures,'stim_nose_centered_rotated_cm')
-    
-    
-    ind = find(~isnan(record.measures.stim_nose_centered_rotated_cm(:,1)));
-    %cmap = jet(length(ind));
-    cmap = parula(length(ind));
-
-    subplot(1,2,2)
-       hold on;
-    set(gca,'ydir','reverse')
-    axis image
-    xlim([-47 47]);
-    ylim([-47 47]);
-    for i=1:length(ind)
-        plot([record.measures.stim_nose_centered_rotated_cm(ind(i),1) record.measures.stim_nose_centered_rotated_cm(ind(i)+1,1)],...
-            [record.measures.stim_nose_centered_rotated_cm(ind(i),2) record.measures.stim_nose_centered_rotated_cm(ind(i)+1,2)],'color',cmap(i,:));
-    end
-    
-    if 0
-        for i=1:10:length(ind) % plot stim direction
-            plot([record.measures.stim_nose_centered_rotated_cm(ind(i),1) record.measures.stim_nose_centered_rotated_cm(ind(i),1)+record.measures.stim_direction_rotated_cm_per_s(ind(i),1)/10],...
-                [record.measures.stim_nose_centered_rotated_cm(ind(i),2) record.measures.stim_nose_centered_rotated_cm(ind(i),2)+record.measures.stim_direction_rotated_cm_per_s(ind(i),2)/10],'-r');
-            
-        end
-    end
-
-    for i=1:10:length(ind) % plot stim x axis
-        plot(record.measures.stim_nose_centered_rotated_cm(ind(i),1)+[-0.5 0.5]*record.measures.stim_x_axis_rotated_cm(ind(i),1),...
-            record.measures.stim_nose_centered_rotated_cm(ind(i),2)+[-0.5 0.5]*record.measures.stim_x_axis_rotated_cm(ind(i),2),'-k');
-        
-    end
-    for i=1:10:length(ind) % plot stim y axis
-        plot(record.measures.stim_nose_centered_rotated_cm(ind(i),1)+[-0.5 0.5]*record.measures.stim_y_axis_rotated_cm(ind(i),1),...
-            record.measures.stim_nose_centered_rotated_cm(ind(i),2)+[-0.5 0.5]*record.measures.stim_y_axis_rotated_cm(ind(i),2),'-k');
-        
-    end
-
-    
-    h= plot(record.measures.stim_nose_centered_rotated_cm(ind(1),1),...
-        record.measures.stim_nose_centered_rotated_cm(ind(1),2),'go');
-    set(h,'MarkerFaceColor',get(h,'Color'));
-
-    
-%     text(record.measures.stim_nose_centered_rotated_cm(ind(1),1),...
-%         record.measures.stim_nose_centered_rotated_cm(ind(1),2),'B','horizontalalignment','Center')
-%     text(record.measures.stim_nose_centered_rotated_cm(ind(end),1),...
-%         record.measures.stim_nose_centered_rotated_cm(ind(end),2),'E','horizontalalignment','Center')
-%     
-end
-

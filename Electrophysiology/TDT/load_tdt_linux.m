@@ -16,7 +16,7 @@ function [EVENT, CSnip] = load_tdt_linux( EVENT, start )
 % based on code from Jaewon 2013
 % http://jaewon.mine.nu/jaewon/2010/10/04/how-to-import-tdt-tank-into-matlab/
 %
-% 2013-2014, Adapted by Alexander Heimel
+% 2013-2020, Adapted by Alexander Heimel
 %
 
 if nargin<2 
@@ -56,8 +56,12 @@ if isempty(blockname)
     return
 end
 
-
-filebase = fullfile( tank,blockname,['Mouse_' blockname]);
+if ~isempty(tank) && tank(end)==filesep
+    [~,preamble] = fileparts(tank(1:end-1));
+else
+    preamble = '';
+end
+filebase = fullfile( tank,blockname,[preamble '_' blockname]);
 tev_path = [filebase '.tev'];
 tsq_path = [filebase '.tsq'];
 
@@ -114,8 +118,6 @@ for i=1:length(namecodes)
     s = s+1;
 end % i
 
-
-
 % get snips
 ind = find(data.type == E.SNIP);
 if isempty(ind)
@@ -142,10 +144,6 @@ end
 
 % get strons
 ind = find(data.type == E.STRON);
-%     if length(ind)>1
-%         errormsg([ num2str(length(ind)) ' triggers present. Taking last.']);
-%         ind = ind(end);
-%     end
 
 for i = ind'
     if isfield(EVENT,'strons') && isfield(EVENT.strons,code2string(data.namecode(i)))
@@ -159,7 +157,6 @@ end
 EVENT.timerange = [data.timestamp(2) data.timestamp(end)];
 
 logmsg(['Finished reading ' blockname ' in tank ' tank]);
-
 
 if nargout>1
     %an example of reading A/D samples from tev. You can use the same code to read
@@ -209,7 +206,6 @@ if nargout>1
     end
     fclose(tev);
     
-    
     % Channels stuff if temporary copied
     if iscell(EVENT.snips.Snip.channels)
         ChaNm = length(EVENT.snips.Snip.channels); %channels in block is a cell
@@ -245,7 +241,6 @@ if nargout>1
     
 end
 
-
 % data =
 %
 %          size: [176378x1 int32]
@@ -266,29 +261,6 @@ end
 %     frequency: [176378x1 double] [ 0 0 48x763 0 4x48x763 0 XXx763 ..     24414 ...
 
 
-% for debugging
-if 0
-    tdt2ml = load('/home/data/InVivo/Electrophys/Antigua/2013/12/18/Mouse/t-2/t-2.mat');
-    for i=1:length(EVENT.strms)
-        disp('tdtread')
-        EVENT.strms(i)
-        disp('tdt2ml')
-        tdt2ml.EVENT.strms(i)
-    end
-    disp('tdtread')
-    EVENT.snips.Snip
-    disp('tdt2ml')
-    tdt2ml.EVENT.snips.Snip
-    
-    disp('tdtread')
-    EVENT.strons
-    disp('tdt2ml')
-    tdt2ml.EVENT.strons
-end
-
-
-
-
 function str = code2string( code )
 str(4) = floor(code/(256^3));
 code = code - str(4)*256^3;
@@ -297,7 +269,6 @@ code = code - str(3)*256^2;
 str(2) = floor(code/(256^1));
 code = code - str(2)*256^1;
 str(1) = floor(code/(256^0));
-code = code - str(1)*256^0;
 str = char(str);
 
 

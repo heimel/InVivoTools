@@ -145,6 +145,10 @@ while vid.CurrentTime < timeRange(2) && hasFrame(vid)
     [body(i,:),arse(i,:),nose(i,:),stim(i,:)] = ...
         get_mouse_position( Frame,bg,params,figRaw,screenrect);
     
+%     if frametimes(i)>stimstart
+%         keyboard
+%     end
+    
     % This part defines the scope in which the difference between last
     % frame is calculated
     if any(isnan(body(i,:))) || i==1

@@ -17,7 +17,7 @@ function SIG = signalsTDT_linux(EVENT, Trials)
 %        EVENT.CHAN = (string) channel numbers
 %       Trials : (double)stimulus onset time determined in analyse_veps
 %
-% 2014, Alexander Heimel
+% 2014-2020, Alexander Heimel
 
 SIG = {};
 
@@ -126,6 +126,15 @@ strm = [];
 
 filebase = fullfile( EVENT.Mytank,EVENT.Myblock,['Mouse_' EVENT.Myblock]);
 tev_path = [filebase '.tev'];
+if ~exist(tev_path,'file')
+    filebase = fullfile( EVENT.Mytank,EVENT.Myblock);
+    tev_path = [filebase '.tev'];
+    if ~exist(tev_path,'file')
+        logmsg(['Cannot find block ' EVENT.Myblock ' in tank ' EVENT.Mytank]);
+        return
+    end
+end
+    
 tsq_path = [filebase '.tsq'];
 
 tsq = fopen(tsq_path);

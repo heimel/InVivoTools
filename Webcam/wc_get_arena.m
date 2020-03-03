@@ -32,13 +32,13 @@ end
 frame = double(readFrame(vid));
 
 frame = mean(frame,3); % convert to gray
-hor = diff(mean(frame,1));
+hor = diff(smooth(mean(frame,1),10));
 [~,ind] = max(hor);
 arena(1) = ind;
 [~,ind] = min(hor);
 arena(3) = ind - arena(1);
 
-ver = diff(mean(frame,2));
+ver = diff(smooth(mean(frame,2),10));
 [~,arena(2)] = max(ver);
 [~,ind] = min(ver);
 arena(4) = ind - arena(2);

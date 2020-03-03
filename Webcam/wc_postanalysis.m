@@ -11,6 +11,7 @@ end
 
 logmsg(['Doing postanalysis for ' recordfilter(record)]);
 
+
 if isfield(record.measures,'freezetimes') % manually analyzed
     record.measures.reliable = 1;
 else
@@ -88,10 +89,10 @@ if 1 %~isfield(record.measures,'session') || isempty(record.measures.session) ||
         d = strmatch(records(i).date,dates(:),'exact');
         session_n_stim(d) = length(stim_types);
 
-        if verbose
-            logmsg([num2str(i) ', ' num2str(d) ', '  records(i).date ...
-                ', ' stim_type ', ' num2str(session_n_stim(d))]);
-        end
+%         if verbose
+%             logmsg([num2str(i) ', ' num2str(d) ', '  records(i).date ...
+%                 ', ' stim_type ', ' num2str(session_n_stim(d))]);
+%         end
     end % record i
     
     if verbose

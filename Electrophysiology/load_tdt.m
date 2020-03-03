@@ -188,7 +188,12 @@ H.ReleaseServer;
 close(F)
 
 if allowchanges
-    MatFile = fullfile(EVENT.Mytank,EVENT.Myblock,EVENT.Myblock);
+    storepath = fullfile(EVENT.Mytank,EVENT.Myblock);
+    if ~exist(storepath,'dir') % temporary addition
+        logmsg(['Path ' storepath ' does not exist. Saving on desktop']);
+        storepath = getdesktopfolder;
+    end
+    MatFile = fullfile(storepath,EVENT.Myblock);
     save(MatFile, 'EVENT','-v7')
 end
 

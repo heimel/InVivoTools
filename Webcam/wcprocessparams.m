@@ -4,7 +4,7 @@ function params = wcprocessparams( record )
 % 2015-2019, Alexander Heimel
 
 if nargin<1
-    record = [];
+    record.mouse = 'unknown';
 end
 
 % set player
@@ -30,13 +30,11 @@ else
     params.wc_playercommand = 'C:\Program Files (x86)\VideoLAN\VLC\vlc.exe' ;
     if ~exist(params.wc_playercommand,'file')
         params.wc_playercommand = 'C:\Program Files\VideoLAN\VLC\vlc.exe' ;
+        if ~exist(params.wc_playercommand,'file')
+            params.wc_playercommand = '';
+        end
     end
-    if ~exist(params.wc_playercommand,'file')
-        params.wc_playercommand = '';
-    end
-    if exist(params.wc_playercommand,'file')
-        params.wc_playercommand=['"' params.wc_playercommand '"'];
-    end
+    params.wc_playercommand=['"' params.wc_playercommand '"'];
 end
 
 % set mp4 wrapper
@@ -57,7 +55,8 @@ end
 params.wc_playbackpretime = 0; % s to show before stim onset
 % params.wc_timemultiplier = 1.01445;
 
-if isfield(record,'date') && datenum(record.date)<=datenum('2018-04-28')
+%if isfield(record,'date') && datenum(record.date)<=datenum('2018-04-28')
+if isfield(record,'date') && lt(string(record.date),"2018-04-29")
     params.wc_timemultiplier = 1.015355;
     params.wc_timeshift = -0.5;
 else % something was changed in the timing of the movies between 2018-04-28 and 2018-04-30
@@ -95,13 +94,28 @@ params.wc_tailToMiddle = 70; % pxl
 params.wc_minComponentSize = 6; % pxl, Consider smaller components as noise
 params.wc_dilation = ones(5); % for image dilation
 
+switch record.mouse
+    case '14.13.2.01'
+        switch record.date
+            case {'2016-10-27','2016-10-31','2016-11-02','2016-11-07'}
+                params.wc_blackThreshold = 0.2;
+        end
+end
+
+
 params.wc_raspivid_params = ' -t 0 -w 1280 -h 960 -b 3500000 -fps 30 -p 100,100,740,580 -fli 50hz ';
 
-params.wc_screen_distance_cm = 35; % cm, (vertical) distance of screen to mouse
-params.wc_cagefloor_width_cm = 47; % cm
-params.wc_screenwidth_cm = 47; % cm, screen same size as floor
+% for Azadeh's experiments
+params.wc_screen_distance_cm = 25; % cm, (vertical) distance of screen to mouse
+params.wc_cagefloor_width_cm = 51; % cm
+params.wc_screenwidth_cm = 51; % cm, screen same size as floor
+
+params.wc_plot_stim_nose_centered_rotated = true;
+params.wc_plot_trajectory_line = false;
+params.wc_plot_stimulus_in_trajectory = false;
 
 params.wc_retrack = true; % always retrack the mouse and stimulus
+params.wc_redraw_arena = false; % redraw arena
 
 if exist('processparams_local.m','file')
     params = processparams_local( params );

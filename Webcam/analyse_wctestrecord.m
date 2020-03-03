@@ -93,7 +93,7 @@ if params.use_legacy_videoreader
     end
 end
 
-if ~isfield(record.measures,'arena') || isempty(record.measures.arena)
+if params.wc_redraw_arena || ~isfield(record.measures,'arena') || isempty(record.measures.arena)
     record = wc_get_arena(record);
 end
 if ~isfield(record.measures,'frametimes') || params.wc_retrack
