@@ -49,9 +49,22 @@ if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
     EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
 end
 
-EVENT.Myevent = 'Snip';
-EVENT.type = 'snips';
-EVENT.Start = 0;
+if ~strcmpi(processparams.spike_sorting_routine, 'Kilosort')
+    EVENT.Myevent = 'Snip';
+    EVENT.type = 'snips';
+    EVENT.Start = 0;
+else
+    EVENT.Myevent = 'RAW_';
+    EVENT.Start = 0; %s
+%     EVENT.type = 'raw';
+    EVENT = getMetaDataTDT(EVENT);
+    [vecTimestamps,matData,vecChannels] = getRawDataTDT(EVENT);
+
+
+end
+
+
+
 
 if any(channels2analyze>EVENT.snips.Snip.channels)
     errormsg(['Did not record more than ' num2str(EVENT.snips.Snip.channels) ' channels.']);
