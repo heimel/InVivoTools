@@ -54,6 +54,11 @@ if ~strcmpi(processparams.spike_sorting_routine, 'Kilosort')
     EVENT.type = 'snips';
     EVENT.Start = 0;
 else
+    %check if npy-matlab is in path
+    pathCell = regexp(path, pathsep, 'split');
+    if ~any(contains(pathCell, 'npy-matlab'))
+        f=msgbox('Kilosort requires npy-matlab! Add it to your path or get it from https://github.com/kwikteam/npy-matlab');
+    end
     strTarget = fullfile(EVENT.Mytank, EVENT.Myblock);
     fs = dir(fullfile(strTarget, '*groups.csv'));
     if isempty(fs) %no sorted/curated files in folder
