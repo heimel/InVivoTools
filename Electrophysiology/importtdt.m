@@ -54,13 +54,29 @@ if ~strcmpi(processparams.spike_sorting_routine, 'Kilosort')
     EVENT.type = 'snips';
     EVENT.Start = 0;
 else
-    EVENT.Myevent = 'RAW_';
-    EVENT.Start = 0; %s
-%     EVENT.type = 'raw';
-    EVENT = getMetaDataTDT(EVENT);
-    [vecTimestamps,matData,vecChannels] = getRawDataTDT(EVENT);
-
-
+    strTarget = fullfile(EVENT.Mytank, EVENT.Myblock);
+    fs = dir(fullfile(strTarget, '*groups.csv'));
+    if isempty(fs) %no sorted/curated files in folder
+        % get raw data
+        EVENT.Myevent = 'RAW_';
+        EVENT.Start = 0; %s
+        EVENT = getMetaDataTDT(EVENT);
+        [vecTimestamps,matData,vecChannels] = getRawDataTDT(EVENT);
+        %write raw data to binary file
+        strTargetFile = fullfile(EVENT.Mytank, EVENT.Myblock,'RawBinData.bin');
+        ptrFile = fopen(strTargetFile,'w');
+        fprintf('Writing data to binary file "%s"... \n',strTargetFile);
+        intCount = fwrite(ptrFile, matData,'int16');
+        fclose(ptrFile);
+        fprintf('Done! Output is %d \n',intCount);
+        %now run kilosort
+        fprintf('Now running spike sorting on Kilosort.. \n')
+        runKilosort_invivo(EVENT, strTarget)
+        f = msgbox([ 'Kilosort has sorted the spikes. They still need to be manually '...
+            'curated. Use python to curate the spikes and click the analysis button again to plot the results']);
+    
+    else % doorgaan met spikes laden
+    end
 end
 
 
