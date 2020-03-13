@@ -76,12 +76,7 @@ if ~isfield(record.measures,'ind_freeze')
     record = wc_add_freezing_ind( record, verbose);
 end
 
-ind_stimstart = find(~isnan(r.azimuth),1,'first');
 ind_freeze = record.measures.ind_freeze;
-ind_freezestart = [];
-if ~isempty(ind_freeze)
-    ind_freezestart = ind_freeze(1);
-end
 
 if verbose && ~isoctave && isfield(record.measures,'stim_nose_centered_rotated_cm') && params.wc_plot_stim_nose_centered_rotated
     if isempty(h)
@@ -94,12 +89,21 @@ if verbose && ~isoctave && isfield(record.measures,'stim_nose_centered_rotated_c
     ind = find(~isnan(record.measures.stim_nose_centered_rotated_cm(:,1)));
     
     hold on;
+    
+    rectangle('Position',[-25 -25 2*25 2*25],'Curvature',[1 1],'edgecolor',0.7*[1 1 1],'linewidth',0.25)
+    text(20,-20,'25 cm','Fontsize',18);
+        
+    rectangle('Position',[-50 -50 2*50 2*50],'Curvature',[1 1],'edgecolor',0.7*[1 1 1],'linewidth',0.25)
+    text(37,-37,'50 cm','Fontsize',18);
+
     set(gca,'ydir','reverse')
     axis image
     set(gca,'xaxislocation','origin');
     set(gca,'yaxislocation','origin');
-    xlim([-52 52]);
-    ylim([-52 52]);
+    set(gca,'xtick',[]);
+    set(gca,'ytick',[]);
+    xlim([-58 58]);
+    ylim([-58 58]);
     
     if plotoptions.show_stim
         if params.wc_plot_trajectory_line
@@ -137,7 +141,7 @@ if verbose && ~isoctave && isfield(record.measures,'stim_nose_centered_rotated_c
         end
     end   
     
-    if  plotoptions.show_stimstart
+    if  plotoptions.show_stimstart && ~isempty(ind)
         plot(record.measures.stim_nose_centered_rotated_cm(ind(1),1),...
             record.measures.stim_nose_centered_rotated_cm(ind(1),2),...
             'o','color',[0 1 0],'markersize',3,'markerfacecolor',[0 1 0]);

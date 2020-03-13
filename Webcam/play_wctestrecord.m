@@ -22,7 +22,8 @@ if isempty(wcinfo)
     return
 end
 
-starttime = (wcinfo(1).stimstart-params.wc_playbackpretime) * params.wc_timemultiplier + params.wc_timeshift;
+%starttime = (wcinfo(1).stimstart-params.wc_playbackpretime) * params.wc_timemultiplier + params.wc_timeshift;
+starttime = wc_get_stimstart(record);
 
 logmsg('Running video in matlab');
 if ~exist(filename,'file')
@@ -32,14 +33,15 @@ end
 
 vid = VideoReader(filename);
 
+if starttime > vid.duration
+    errormsg(['Starttime larger than video duration in ' recordfilter(record)]);
+    starttime = 0;
+end
+
 %Get paramters of video
 frameRate = get(vid, 'FrameRate'); %30 frames/sec
 
-if isfield(record,'stimstartframe') && ~isempty(record.stimstartframe)
-    vid.CurrentTime = record.stimstartframe / frameRate;
-else
-    vid.CurrentTime = starttime;
-end
+vid.CurrentTime = starttime;
 
 %disp('Keys: left = previous frame, right = next frame, down = play until up, q = quit, + = increase gamma, - = decrease gamma');
 

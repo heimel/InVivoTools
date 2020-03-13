@@ -25,6 +25,11 @@ if ~isfield(stimparams,'extent_deg')
    return
 end
 
+if ~isfield(record.measures,'arena')
+    logmsg(['Arena missing in ' recordfilter(record)]);
+    return
+end
+
 stim_extent_deg = stimparams.extent_deg;
 % correction because screen height was wrongly set on stimulus computer
 if length(stim_extent_deg)==1 % i.e. disk

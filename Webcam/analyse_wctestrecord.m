@@ -99,6 +99,9 @@ end
 if ~isfield(record.measures,'frametimes') || params.wc_retrack
     record = wc_track_mouse(record, [], verbose);
 end
+if ~strcmp(record.stim_type,'gray_screen') && ~isempty(record.stim_type)
+    record = wc_cleanup_stimulus_trajectory(record,verbose);
+end
 record = wc_interpret_tracking(record,verbose);
 record = wc_postanalysis( record,verbose); 
 

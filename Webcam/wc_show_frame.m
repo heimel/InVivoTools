@@ -36,11 +36,14 @@ if ~isempty(record.measures) && isfield(record.measures,'body_trajectory') && ~i
     ind = find(record.measures.frametimes>=time & ...
         record.measures.frametimes<=time+vid.FrameRate,1);
     hold on
-    plot(record.measures.stim_trajectory(ind,1),record.measures.stim_trajectory(ind,2),'or');
-    plot(record.measures.body_trajectory(ind,1),record.measures.body_trajectory(ind,2),'ob');
-    plot(record.measures.nose_trajectory(ind,1),record.measures.nose_trajectory(ind,2),'*w');
-    plot(record.measures.arse_trajectory(ind,1),record.measures.arse_trajectory(ind,2),'*r');
-    
+    if isfield(record.measures,'stim_trajectory')
+        plot(record.measures.stim_trajectory(ind,1),record.measures.stim_trajectory(ind,2),'or');
+    end
+    if isfield(record.measures,'body_trajectory') 
+        plot(record.measures.body_trajectory(ind,1),record.measures.body_trajectory(ind,2),'ob');
+        plot(record.measures.nose_trajectory(ind,1),record.measures.nose_trajectory(ind,2),'*w');
+        plot(record.measures.arse_trajectory(ind,1),record.measures.arse_trajectory(ind,2),'*r');
+    end
     
     if isfield(record.measures,'azimuth_trajectory')
         text(10,10,['Azimuth = ' num2str(record.measures.azimuth_trajectory(ind,1))],...
