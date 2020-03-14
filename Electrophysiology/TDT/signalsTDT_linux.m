@@ -19,6 +19,9 @@ function [SIG,TIM] = signalsTDT_linux(EVENT, Trials)
 %
 % 2014-2020, Alexander Heimel
 
+warning('SIGNALSTDT_LINUX:MEMMAPFILE','Loading TDT can be made faster by using MEMMAPFILE');
+warning('off','SIGNALSTDT_LINUX:MEMMAPFILE');
+
 SIG = {};
 
 if nargin<1

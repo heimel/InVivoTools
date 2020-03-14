@@ -19,6 +19,9 @@ function [EVENT, CSnip] = load_tdt_linux( EVENT, start )
 % 2013-2020, Adapted by Alexander Heimel
 %
 
+warning('SIGNALSTDT_LINUX:MEMMAPFILE','Loading TDT can be made faster by using MEMMAPFILE');
+warning('off','SIGNALSTDT_LINUX:MEMMAPFILE');
+
 if nargin<2 
     start = [];
 end
