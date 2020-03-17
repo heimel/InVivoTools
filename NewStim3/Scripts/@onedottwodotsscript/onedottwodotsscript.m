@@ -43,7 +43,7 @@ finish = 1;
 if nargin==1
     oldscript = [];
 else
-    if ~isa(OLDSCRIPT,'onedotstwodotsscript')
+    if ~isa(OLDSCRIPT,'onedottwodotsscript')
         error('OLDSCRIPT must be a onedottwodotsscript.');
     end
     oldscript = OLDSCRIPT;

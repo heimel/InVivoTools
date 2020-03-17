@@ -124,11 +124,14 @@ for i=1:length(fields)
             content = '';
         end
     end
+    if iscell(content)
+        content = wimpcell2str(content);
+    end
     if ~ischar(content)
-        % next line is to recover content when browsing or saving
-        set(h_edit(i),'UserData',content);
-        set(h_edit(i),'Enable','off');
-        content='CANNOT DISPLAY';
+            % next line is to recover content when browsing or saving
+            set(h_edit(i),'UserData',content);
+            set(h_edit(i),'Enable','off');
+            content='CANNOT DISPLAY';
     else
         set(h_edit(i),'Enable','on');
     end
@@ -203,3 +206,16 @@ for h = ud.h_edit(:)'
 end
 set(fig,'Units',oldunits);
 
+%%% WIMPCELL2STR function %%%
+
+function str = wimpcell2str(theCell)
+%1-dim cells only, only chars and matricies
+str = '{  ';
+for i=1:length(theCell),
+    if ischar(theCell{i})
+        str = [str '''' theCell{i} ''', '];
+    elseif isnumeric(theCell{i}),
+        str = [str mat2str(theCell{i}) ', '];
+    end;
+end;
+str = [str(1:end-2) '}'];

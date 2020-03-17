@@ -22,7 +22,7 @@ default.backdrop = [0.5 0.5 0.5];
 %dot_distances: if Nnan - no extra dots
 % if one or multiple inputs, will combine the dots but also show them separately
 default.dot_distances = [15];
-default.dispprefs = '{''BGpretime'',0}';
+default.dispprefs = {'BGpretime',0};
 if isempty(oldstim)
     oldstimpar = default;
 else
