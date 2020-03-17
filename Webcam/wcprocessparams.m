@@ -117,6 +117,24 @@ params.wc_plot_stimulus_in_trajectory = false;
 params.wc_retrack = true; % always retrack the mouse and stimulus
 params.wc_redraw_arena = false; % redraw arena
 
+if contains(record.comment,'params.')
+    p = strfind(record.comment,'params.');
+    for i = 1:length(p)
+        if i<length(p)
+            str = record.comment(p(i):p(i+1)-1);
+            str = strtrim(str);
+            str = str(1:end-1); % remove ','
+        else
+            str = record.comment(p(i):end);
+        end
+        try
+            eval(str)
+        catch me
+            logmsg(['Error in comment of ' recordfilter(record)])
+        end
+    end
+end
+
 if exist('processparams_local.m','file')
     params = processparams_local( params );
 end

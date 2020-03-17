@@ -183,7 +183,7 @@ record.measures.arse_trajectory = arse;
 record.measures.nose_trajectory = nose;
 record.measures.stim_trajectory_raw = stim;
 
-if ~strcmp(record.stim_type,'gray_screen')
+if ~strcmp(record.stim_type,'gray_screen') && ~isempty(record.stim_type)
     record = wc_cleanup_stimulus_trajectory(record,verbose);
 end
 

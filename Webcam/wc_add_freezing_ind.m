@@ -18,5 +18,6 @@ for i = 1:size(freezetimes,1)
 end
 record.measures.ind_freeze = ind_freeze;
 if ~isempty(ind_freeze)
-    record.measures.ind_freezestart = ind_freeze(1);
+    record.measures.ind_freezestart =...
+        ind_freeze( find(~isnan(record.measures.azimuth_trajectory(record.measures.ind_freeze)),1,'first'));
 end

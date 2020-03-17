@@ -11,18 +11,21 @@ if nargin<3 || isempty(azimuthedges)
     azimuthedges = -pi:d_azimuths:pi;
 end
 if nargin<4 || isempty(elevationedges)
-    d_elevation = 0.4; % 0.4
-    elevationedges = [];
-    elevationedges(1) = 0;
-    elevationedges(2) = d_elevation;
-    while elevationedges(end)<1.0
-        elevationedges(end+1) = acos(2*cos(elevationedges(end))-cos(elevationedges(end-1))); %#ok<AGROW>
+    elevationedges = 4;
+end
+
+if numel(elevationedges)==1 % number of areas specified
+    n_elevationedges = elevationedges;
+    elevationedges = zeros(1,n_elevationedges);
+    for i=0:n_elevationedges-1
+        elevationedges(i+1) = asin(i / (n_elevationedges-1));
     end
 end
+
 
 
 ind = ~isnan(azimuth) & ~isnan(elevation);
 % n = histcounts2(azimuth(ind),pi/2-elevation(ind),...
 %     'xbinedges',azimuthedges,'ybinedges',elevationedges);
 
-n = histcounts2(azimuth(ind),pi/2-elevation(ind),azimuthedges,elevationedges);
+n = histcounts2(azimuth(ind),elevation(ind),azimuthedges,elevationedges);
