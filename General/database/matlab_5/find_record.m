@@ -42,7 +42,7 @@ function ind=find_record(db,crit)
   end
   
   % at this point crit is certainly a non-empty string
-  crit=trim(crit);
+  crit=strtrim(crit);
   
   ind=[];
   if crit(1)=='('
@@ -70,7 +70,7 @@ function ind=find_record(db,crit)
     else
       head=crit(2:p-1);
       tail=crit(p+1:end);
-      tail=trim(tail);
+      tail=strtrim(tail);
       switch tail(1)
         case ',' % AND
           ind=find_record(db,{head,tail(2:end)});
@@ -109,8 +109,8 @@ function ind=find_record(db,crit)
   end
   if ~isempty(pos)
     comp=crit( pos ); % get which comparison
-    field=trim( crit(1:pos-1) );
-    expr=trim( crit(pos+1:end) );
+    field=strtrim( crit(1:pos-1) );
+    expr=strtrim( crit(pos+1:end) );
     expn=str2num(expr);
     for i=1:length(db)
       try
