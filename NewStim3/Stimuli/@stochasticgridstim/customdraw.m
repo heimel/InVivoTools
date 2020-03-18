@@ -1,4 +1,4 @@
-function [done,stamp,infoO] = customdraw(sgs, info, MTI)
+function [done,stamp,infoO] = customdraw(sgs, info, MTI, capture_movie)
 
 % CUSTOMDRAW - Custom draw routine for stochasticgridstim
 %
