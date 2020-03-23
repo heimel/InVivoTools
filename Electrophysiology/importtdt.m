@@ -49,6 +49,10 @@ if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
     EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
 end
 
+%clean data struct
+clear('WaveTime_Fpikes');
+WaveTime_Fpikes = struct('time',[],'data',[]);
+
 if ~strcmpi(processparams.spike_sorting_routine, 'Kilosort')
     EVENT.Myevent = 'Snip';
     EVENT.type = 'snips';
@@ -62,30 +66,13 @@ else
     strTarget = fullfile(EVENT.Mytank, EVENT.Myblock);
     fs = dir(fullfile(strTarget, '*groups.csv'));
     if isempty(fs) %no sorted/curated files in folder
-        % get raw data
-        EVENT.Myevent = 'RAW_';
-        EVENT.Start = 0; %s
-        EVENT = getMetaDataTDT(EVENT);
-        [vecTimestamps,matData,vecChannels] = getRawDataTDT(EVENT);
-        %write raw data to binary file
-        strTargetFile = fullfile(EVENT.Mytank, EVENT.Myblock,'RawBinData.bin');
-        ptrFile = fopen(strTargetFile,'w');
-        fprintf('Writing data to binary file "%s"... \n',strTargetFile);
-        intCount = fwrite(ptrFile, matData,'int16');
-        fclose(ptrFile);
-        fprintf('Done! Output is %d \n',intCount);
-        %now run kilosort
-        fprintf('Now running spike sorting on Kilosort.. \n')
-        runKilosort_invivo(EVENT, strTarget)
-        f = msgbox([ 'Kilosort has sorted the spikes. They still need to be manually '...
-            'curated. Use python to curate the spikes and click the analysis button again to plot the results']);
-    
-    else % doorgaan met spikes laden
+        % make file that kilosort can use and sort it! 
+        [~] = make_kilosort_data(EVENT, strTarget);
+        return
+    else  %load the sorted data
+        WaveTime_Fpikes = load_kilosort_data(strTarget, EVENT);
     end
 end
-
-
-
 
 if any(channels2analyze>EVENT.snips.Snip.channels)
     errormsg(['Did not record more than ' num2str(EVENT.snips.Snip.channels) ' channels.']);
@@ -98,12 +85,22 @@ if isempty(channels2analyze)
 end
 EVENT.CHAN = channels2analyze;
 
+if 1 %niet kilosort
+    
+    
+    
+    
+    
+end 
 WaveTime_Spikes = struct([]);
+
+%also make variable like channels2analyze only with units2analyze
+
+% Be sure to also save channel of each cell 
 
 logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
 total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
-clear('WaveTime_Fpikes');
-WaveTime_Fpikes = struct('time',[],'data',[]);
+
 if ~use_matlab_tdt
     % cut in 60s blocks
     for i=1:length(channels2analyze)
