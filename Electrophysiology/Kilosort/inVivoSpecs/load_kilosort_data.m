@@ -52,7 +52,7 @@ for cl = 1:length(allclu)
     for i=1:nWFsToLoad
         tempWF = ...
         mmf.Data.x(mySpikeSite,spikesToExtract(i)+wfWin(1):spikesToExtract(i)+wfWin(end));
-        WaveTime_Fpikes(unitCounter).data(i,:) = tempWF;
+        WaveTime_Fpikes(unitCounter).data(i,:) = double(tempWF);
     end
     
 end

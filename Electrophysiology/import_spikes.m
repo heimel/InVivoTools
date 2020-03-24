@@ -39,47 +39,54 @@ else
     logmsg(['Imported ' num2str(length(cells)) ' cells with ' num2str(n_spikes ) ' spikes.']);
 end
 
-switch processparams.ec_spike_smoothing
-    case 'wavelet'
-        for c=1:length(cells)
-            n_spikes = size(cells(c).spikes,1);
-            n_samples = size(cells(c).spikes,2);
-            for i=1:n_spikes
-                A = wavelet_decompose(cells(c).spikes(i,:),3,'db4');
-                cells(c).spikes(i,:) = A(1:n_samples,1);
+if ~strcmpi(processparams.spike_sorting_routine, 'Kilosort') %sorting the snippets
+    switch processparams.ec_spike_smoothing
+        case 'wavelet'
+            for c=1:length(cells)
+                n_spikes = size(cells(c).spikes,1);
+                n_samples = size(cells(c).spikes,2);
+                for i=1:n_spikes
+                    A = wavelet_decompose(cells(c).spikes(i,:),3,'db4');
+                    cells(c).spikes(i,:) = A(1:n_samples,1);
+                end
             end
-        end
-    case 'sgolay'
-        for c=1:length(cells)
-            if ~isempty(cells(c).spikes)
-                cells(c).spikes = sgolayfilt(double(cells(c).spikes)',3,11)';
+        case 'sgolay'
+            for c=1:length(cells)
+                if ~isempty(cells(c).spikes)
+                    cells(c).spikes = sgolayfilt(double(cells(c).spikes)',3,11)';
+                end
             end
-        end
-end
-
-% feature extraction
-cells = get_spike_features(cells, record);
-
-switch processparams.spike_sorting_routine
-    case 'klustakwik'
-        if allowchanges
-            cells = sort_with_klustakwik(cells,record);
-        else
-            logmsg('Klustakwik sorting cannot be done without changing data on disk. Change ALLOWCHANGES option if necessary.');
-        end
-    case 'wpca'
-        cells = sort_with_wpca(cells,record,verbose);
-    case ''
-        % don't sort
-    otherwise
-        logmsg(['Unknown spike sorting routine ' processparams.spike_sorting_routine]);
-end
-
-if processparams.compare_with_klustakwik
-    kkcells = sort_with_klustakwik(cells,record);
-    if ~isempty(kkcells)
-        cells = compare_spike_sortings( cells, kkcells);
     end
+    
+    % feature extraction
+    cells = get_spike_features(cells, record);
+    
+    switch processparams.spike_sorting_routine
+        case 'klustakwik'
+            if allowchanges
+                cells = sort_with_klustakwik(cells,record);
+            else
+                logmsg('Klustakwik sorting cannot be done without changing data on disk. Change ALLOWCHANGES option if necessary.');
+            end
+        case 'wpca'
+            cells = sort_with_wpca(cells,record,verbose);
+        case {'kilosort',''}
+            % don't sort
+        otherwise
+            logmsg(['Unknown spike sorting routine ' processparams.spike_sorting_routine]);
+    end
+    
+    if processparams.compare_with_klustakwik
+        kkcells = sort_with_klustakwik(cells,record);
+        if ~isempty(kkcells)
+            cells = compare_spike_sortings( cells, kkcells);
+        end
+    end
+else %just get properties
+       
+    % feature extraction
+    cells = get_spike_features(cells, record); 
+    
 end
 
 logmsg(['After sorting ' num2str(length(cells)) ' cells.']);
@@ -91,7 +98,7 @@ if allowchanges
 else
     logmsg('Imported cells not saved to experiment file because of ALLOWCHANGES setting.');
 end
-    
+
 spikesfile = fullfile(experimentpath(record), '_spikes.mat');
 
 isi = [];

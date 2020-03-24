@@ -66,13 +66,14 @@ else
     strTarget = fullfile(EVENT.Mytank, EVENT.Myblock);
     fs = dir(fullfile(strTarget, '*groups.csv'));
     if isempty(fs) %no sorted/curated files in folder
-        % make file that kilosort can use and sort it! 
+        % make file that kilosort can use and sort it!
         [~] = make_kilosort_data(EVENT, strTarget);
         return
     else  %load the sorted data
         WaveTime_Fpikes = load_kilosort_data(strTarget, EVENT);
     end
 end
+
 
 if any(channels2analyze>EVENT.snips.Snip.channels)
     errormsg(['Did not record more than ' num2str(EVENT.snips.Snip.channels) ' channels.']);
@@ -85,59 +86,58 @@ if isempty(channels2analyze)
 end
 EVENT.CHAN = channels2analyze;
 
-if 1 %niet kilosort
-    
-    
-    
-    
-    
-end 
 WaveTime_Spikes = struct([]);
 
-%also make variable like channels2analyze only with units2analyze
-
-% Be sure to also save channel of each cell 
-
-logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
-total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
-
-if ~use_matlab_tdt
-    % cut in 60s blocks
-    for i=1:length(channels2analyze)
-        WaveTime_Fpikes(i,1) = struct('time',[],'data',[]);
-    end
-    for kk=1:ceil(total_length/60)
-        EVENT.Triallngth = min(60,total_length-60*(kk-1));
-        WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1),use_matlab_tdt);
+%remove sorted spikes that are not on channels2analyze
+if strcmpi(processparams.spike_sorting_routine, 'Kilosort') %kilosort
+    chanLocs = [WaveTime_Fpikes.channel];
+    WaveTime_Fpikes(~ismember(chanLocs,channels2analyze)) = [];
+    chanLocs_new = [WaveTime_Fpikes.channel];
+    [sorted, idx] = sort(chanLocs_new);
+    WaveTime_Spikes = WaveTime_Fpikes(idx);
+else %load snips (non-kilosort)
+    logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
+    total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
+    
+    if ~use_matlab_tdt
+        % cut in 60s blocks
         for i=1:length(channels2analyze)
-            WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(i,1).time];
-            WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(i,1).data];
+            WaveTime_Fpikes(i,1) = struct('time',[],'data',[]);
         end
+        for kk=1:ceil(total_length/60)
+            EVENT.Triallngth = min(60,total_length-60*(kk-1));
+            WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1),use_matlab_tdt);
+            for i=1:length(channels2analyze)
+                WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(i,1).time];
+                WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(i,1).data];
+            end
+        end
+    else
+        WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1),use_matlab_tdt);
     end
-else
-    WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1),use_matlab_tdt);
+    for ii=1:length(channels2analyze)
+        %logmsg(['Sorting channel ' num2str(channels2analyze(ii))]);
+        %clear kll
+        if isempty(WaveTime_Fpikes(ii).time)
+            continue
+        end
+        %kll.sample_interval = 1/EVENT.snips.Snip.sampf;
+        %kll.data = WaveTime_Fpikes(ii,1).time;
+        
+        wtime_sp.data =  WaveTime_Fpikes(ii).data;
+        wtime_sp.time = WaveTime_Fpikes(ii).time;
+        wtime_sp.channel = channels2analyze(ii);
+        WaveTime_Spikes = [WaveTime_Spikes wtime_sp]; %#ok<AGROW>
+    end %% channel channels2analyze(ii)
 end
 
-for ii=1:length(channels2analyze)
-    %logmsg(['Sorting channel ' num2str(channels2analyze(ii))]);
-    %clear kll
-    if isempty(WaveTime_Fpikes(ii,1).time)
-        continue
-    end
-    %kll.sample_interval = 1/EVENT.snips.Snip.sampf;
-    %kll.data = WaveTime_Fpikes(ii,1).time;
 
-    wtime_sp.data =  WaveTime_Fpikes(ii,1).data;
-    wtime_sp.time = WaveTime_Fpikes(ii,1).time;
-    wtime_sp.channel = channels2analyze(ii);
-    WaveTime_Spikes = [WaveTime_Spikes wtime_sp]; %#ok<AGROW>
-end %% channel channels2analyze(ii)
 n_cells = length(WaveTime_Spikes);
 
 % load stimulus starttime
 stimsfile = getstimsfile( record );
 
-if isempty(stimsfile) 
+if isempty(stimsfile)
     errormsg(['No stimsfile for record ' recordfilter(record) '. Use ''stiminterview(global_record)'' to generate stimsfile. Now no analysis']);
     intervals = [EVENT.timerange(1) EVENT.timerange(2)]; % arbitrary, no link to real stimulus
 elseif isempty(stimsfile.MTI2{end}.frameTimes)
@@ -183,7 +183,7 @@ for c = 1:n_cells
     spikes = WaveTime_Spikes(c).data; % spikes x samples
     cll.wave = mean(spikes,1);
     cll.std = std(spikes,1);
-    cll.spikes = spikes; 
+    cll.spikes = spikes;
     cll.ind_spike = [];
     cells = [cells,cll]; %#ok<AGROW>
 end
