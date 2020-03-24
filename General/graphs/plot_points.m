@@ -37,7 +37,8 @@ if ~isempty(rnonnan)
             end
         case 1 % show spaced
             w = 0.3;
-            hp = plot(x+linspace(-w,w,length(rnonnan)),rnonnan,'ok');
+            x = x + linspace(-w,w,length(rnonnan));
+            hp = plot(x,rnonnan,'ok');
         case 1.5 % show spaced, separate color
             set(gca,'ColorOrderIndex', 1);
             
@@ -48,7 +49,8 @@ if ~isempty(rnonnan)
             end
         case 2 % show spaced keeping relatively position of points in place
             w = 0.3;
-            hp = plot(x+linspace(-w,w,length(r)),r,'ok');
+            x = x + linspace(-w,w,length(r));
+            hp = plot(x,r,'ok');
         case 3 % randomly spaced as close as possible to central axis
             x = x + spacepoints( r);
             hp = plot(x,r,'ok');

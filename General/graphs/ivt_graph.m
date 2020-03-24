@@ -535,19 +535,27 @@ switch style
                     case 'open_circle'
                         set(hp,'marker','o');
                 end
+                
+                if markersize>0
+                    set(hp,'markersize',markersize);
+                end
             end
         end
         
         if showpairing
-            set(gca,'ColorOrderIndex', 1);
-            if exist('x_spaced','var')
-                plot(reshape([x_spaced{:}],numel(y{1}),length(y))',...
-                    reshape([y{:}],numel(y{1}),length(y))',...
-                    linestyles,'linewidth',1)
+            if ~all(cellfun(@numel,y)==numel(y{1}))
+                logmsg('Not all y have same number of elements. Not showing pairing')
             else
-                plot(repmat(x,numel(y{1}),1)',...
-                    reshape([y{:}],numel(y{1}),length(y))',...
-                    linestyles,'linewidth',1)
+                set(gca,'ColorOrderIndex', 1);
+                if exist('x_spaced','var')
+                    plot(reshape([x_spaced{:}],numel(y{1}),length(y))',...
+                        reshape([y{:}],numel(y{1}),length(y))',...
+                        linestyles,'linewidth',1)
+                else
+                    plot(repmat(x,numel(y{1}),1)',...
+                        reshape([y{:}],numel(y{1}),length(y))',...
+                        linestyles,'linewidth',1)
+                end
             end
         end
         

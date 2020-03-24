@@ -443,7 +443,7 @@ switch exp
         set(gca,'XTickLabel', {'hawk'}, 'Xcolor', grey_30,'Ycolor', grey_30,'LineWidth',3, 'FontWeight','bold');
         
     case 172002.1
-        expname = 'aspect_ratio';%'2ellipse';
+        expname = 'acicularity';%'aspect_ratio';%'2ellipse';
         switch expname
             case 'aspect_ratio'
                 allmice_num = [1:2,5:12];
