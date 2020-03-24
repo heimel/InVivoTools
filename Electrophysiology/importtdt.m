@@ -49,6 +49,10 @@ if processparams.ec_temporary_timeshift~=0 % to check gad2 cells
     EVENT.strons.tril(1) = EVENT.strons.tril(1) + processparams.ec_temporary_timeshift;
 end
 
+%clean data struct
+clear('WaveTime_Fpikes');
+WaveTime_Fpikes = struct('time',[],'data',[]);
+
 if ~strcmpi(processparams.spike_sorting_routine, 'Kilosort')
     EVENT.Myevent = 'Snip';
     EVENT.type = 'snips';
@@ -62,29 +66,13 @@ else
     strTarget = fullfile(EVENT.Mytank, EVENT.Myblock);
     fs = dir(fullfile(strTarget, '*groups.csv'));
     if isempty(fs) %no sorted/curated files in folder
-        % get raw data
-        EVENT.Myevent = 'RAW_';
-        EVENT.Start = 0; %s
-        EVENT = getMetaDataTDT(EVENT);
-        [vecTimestamps,matData,vecChannels] = getRawDataTDT(EVENT);
-        %write raw data to binary file
-        strTargetFile = fullfile(EVENT.Mytank, EVENT.Myblock,'RawBinData.bin');
-        ptrFile = fopen(strTargetFile,'w');
-        fprintf('Writing data to binary file "%s"... \n',strTargetFile);
-        intCount = fwrite(ptrFile, matData,'int16');
-        fclose(ptrFile);
-        fprintf('Done! Output is %d \n',intCount);
-        %now run kilosort
-        fprintf('Now running spike sorting on Kilosort.. \n')
-        runKilosort_invivo(EVENT, strTarget)
-        f = msgbox([ 'Kilosort has sorted the spikes. They still need to be manually '...
-            'curated. Use python to curate the spikes and click the analysis button again to plot the results']);
-    
-    else % doorgaan met spikes laden
+        % make file that kilosort can use and sort it!
+        [~] = make_kilosort_data(EVENT, strTarget);
+        return
+    else  %load the sorted data
+        WaveTime_Fpikes = load_kilosort_data(strTarget, EVENT);
     end
 end
-
-
 
 
 if any(channels2analyze>EVENT.snips.Snip.channels)
@@ -100,47 +88,56 @@ EVENT.CHAN = channels2analyze;
 
 WaveTime_Spikes = struct([]);
 
-logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
-total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
-clear('WaveTime_Fpikes');
-WaveTime_Fpikes = struct('time',[],'data',[]);
-if ~use_matlab_tdt
-    % cut in 60s blocks
-    for i=1:length(channels2analyze)
-        WaveTime_Fpikes(i,1) = struct('time',[],'data',[]);
-    end
-    for kk=1:ceil(total_length/60)
-        EVENT.Triallngth = min(60,total_length-60*(kk-1));
-        WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1),use_matlab_tdt);
+%remove sorted spikes that are not on channels2analyze
+if strcmpi(processparams.spike_sorting_routine, 'Kilosort') %kilosort
+    chanLocs = [WaveTime_Fpikes.channel];
+    WaveTime_Fpikes(~ismember(chanLocs,channels2analyze)) = [];
+    chanLocs_new = [WaveTime_Fpikes.channel];
+    [sorted, idx] = sort(chanLocs_new);
+    WaveTime_Spikes = WaveTime_Fpikes(idx);
+else %load snips (non-kilosort)
+    logmsg(['Analyzing channels: ' num2str(channels2analyze)]);
+    total_length = EVENT.timerange(2)-EVENT.strons.tril(1);
+    
+    if ~use_matlab_tdt
+        % cut in 60s blocks
         for i=1:length(channels2analyze)
-            WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(i,1).time];
-            WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(i,1).data];
+            WaveTime_Fpikes(i,1) = struct('time',[],'data',[]);
         end
+        for kk=1:ceil(total_length/60)
+            EVENT.Triallngth = min(60,total_length-60*(kk-1));
+            WaveTime_chspikes = ExsnipTDT(EVENT,EVENT.strons.tril(1)+60*(kk-1),use_matlab_tdt);
+            for i=1:length(channels2analyze)
+                WaveTime_Fpikes(i,1).time = [WaveTime_Fpikes(i,1).time; WaveTime_chspikes(i,1).time];
+                WaveTime_Fpikes(i,1).data = [WaveTime_Fpikes(i,1).data; WaveTime_chspikes(i,1).data];
+            end
+        end
+    else
+        WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1),use_matlab_tdt);
     end
-else
-    WaveTime_Fpikes = ExsnipTDT(EVENT,EVENT.strons.tril(1),use_matlab_tdt);
+    for ii=1:length(channels2analyze)
+        %logmsg(['Sorting channel ' num2str(channels2analyze(ii))]);
+        %clear kll
+        if isempty(WaveTime_Fpikes(ii).time)
+            continue
+        end
+        %kll.sample_interval = 1/EVENT.snips.Snip.sampf;
+        %kll.data = WaveTime_Fpikes(ii,1).time;
+        
+        wtime_sp.data =  WaveTime_Fpikes(ii).data;
+        wtime_sp.time = WaveTime_Fpikes(ii).time;
+        wtime_sp.channel = channels2analyze(ii);
+        WaveTime_Spikes = [WaveTime_Spikes wtime_sp]; %#ok<AGROW>
+    end %% channel channels2analyze(ii)
 end
 
-for ii=1:length(channels2analyze)
-    %logmsg(['Sorting channel ' num2str(channels2analyze(ii))]);
-    %clear kll
-    if isempty(WaveTime_Fpikes(ii,1).time)
-        continue
-    end
-    %kll.sample_interval = 1/EVENT.snips.Snip.sampf;
-    %kll.data = WaveTime_Fpikes(ii,1).time;
 
-    wtime_sp.data =  WaveTime_Fpikes(ii,1).data;
-    wtime_sp.time = WaveTime_Fpikes(ii,1).time;
-    wtime_sp.channel = channels2analyze(ii);
-    WaveTime_Spikes = [WaveTime_Spikes wtime_sp]; %#ok<AGROW>
-end %% channel channels2analyze(ii)
 n_cells = length(WaveTime_Spikes);
 
 % load stimulus starttime
 stimsfile = getstimsfile( record );
 
-if isempty(stimsfile) 
+if isempty(stimsfile)
     errormsg(['No stimsfile for record ' recordfilter(record) '. Use ''stiminterview(global_record)'' to generate stimsfile. Now no analysis']);
     intervals = [EVENT.timerange(1) EVENT.timerange(2)]; % arbitrary, no link to real stimulus
 elseif isempty(stimsfile.MTI2{end}.frameTimes)
@@ -186,7 +183,7 @@ for c = 1:n_cells
     spikes = WaveTime_Spikes(c).data; % spikes x samples
     cll.wave = mean(spikes,1);
     cll.std = std(spikes,1);
-    cll.spikes = spikes; 
+    cll.spikes = spikes;
     cll.ind_spike = [];
     cells = [cells,cll]; %#ok<AGROW>
 end
