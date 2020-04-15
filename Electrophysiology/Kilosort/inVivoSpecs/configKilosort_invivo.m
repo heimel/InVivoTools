@@ -29,7 +29,9 @@ ops.sigmaMask = 30;
 ops.ThPre = 8; 
 %% danger, changing these settings can lead to fatal errors
 % options for determining PCs
-ops.spkTh           = -1.5;      % spike threshold in standard deviations (-6)
+%NOTE INVIVO: low threshold to detect many spikes! needs manual curation
+
+ops.spkTh           = 1;      % spike threshold in standard deviations (-6)
 ops.reorder         = 1;       % whether to reorder batches for drift correction. 
 ops.nskip           = 25;  % how many batches to skip for determining spike PCs
 
@@ -37,7 +39,7 @@ ops.GPU                 = 1; % has to be 1, no CPU version yet, sorry
 % ops.Nfilt               = 1024; % max number of clusters
 ops.nfilt_factor        = 6; % max number of clusters per good channel (even temporary ones)
 ops.ntbuff              = 64;    % samples of symmetrical buffer for whitening and spike detection
-ops.NT                  = 64*1024+ ops.ntbuff; % must be multiple of 32 + ntbuff. This is the batch size (try decreasing if out of memory). 
+ops.NT                  = 128*1024+ ops.ntbuff; % must be multiple of 32 + ntbuff. This is the batch size (try decreasing if out of memory). 
 ops.whiteningRange      = 32; % number of channels to use for whitening each channel
 ops.nSkipCov            = 25; % compute whitening matrix from every N-th batch
 ops.scaleproc           = 200;   % int16 scaling of whitened data

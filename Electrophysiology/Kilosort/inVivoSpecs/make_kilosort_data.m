@@ -21,3 +21,5 @@ runKilosort_invivo(EVENT, strTarget)
 %message
 f = msgbox([ 'Kilosort has sorted the spikes. They still need to be manually '...
     'curated. Use python to curate the spikes and click the analysis button again to plot the results']);
+
+return
