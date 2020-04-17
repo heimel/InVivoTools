@@ -64,11 +64,7 @@ else % something was changed in the timing of the movies between 2018-04-28 and 
     params.wc_timeshift = -0.5;
 end
 
-if ismac
-    params.use_legacy_videoreader = false;
-else
-    params.use_legacy_videoreader = true;
-end
+params.use_legacy_videoreader = false;
 
 params.wc_freezeduration_threshold = 0.5; %s minimum duration to call lack of movement a freeze
 params.wc_freeze_smoother = [5,5]; % Number of frames that freeze analysis is averaging over before and after current frame
