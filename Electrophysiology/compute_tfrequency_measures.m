@@ -128,6 +128,18 @@ for t = 1:n_triggers
     measures.tf_fit_optimal{t} = fit_optimal;
     measures.tf_fit_bandwidth{t} = fit_bandwidth;
     measures.tf_fit_lowpass{t} = fit_lowpass;
+    
+    fit = dog(par,measures.range{t});    
+    if par(1)==0
+        measures.fit_explained_variance{t} = 1 - std([fit 0]-[response 0])^2/std([response 0])^2;
+        
+    else
+        measures.fit_explained_variance{t} = 1 - std(fit-response)^2/std(response)^2;
+    end
+    
+    if measures.fit_explained_variance{t}<0
+        keyboard
+    end
 end
 
 
