@@ -5,6 +5,8 @@ EVENT.Myevent = 'RAW_';
 EVENT.Start = 0; %s
 EVENT = getMetaDataTDT(EVENT);
 [vecTimestamps,matData,vecChannels] = getRawDataTDT(EVENT);
+%correct voltage dir
+matData = -matData;
 
 %write raw data to binary file
 strTargetFile = fullfile(EVENT.Mytank, EVENT.Myblock,'RawBinData.bin');

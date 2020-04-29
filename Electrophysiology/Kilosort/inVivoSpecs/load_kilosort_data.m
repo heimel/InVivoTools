@@ -13,10 +13,19 @@ unitspecs = table2cell(unitspecs);
 sp = loadKSdir(strTarget);
 locSpikesOnly = false;
 [spikeTimes, spikeAmps, spikeDepths, spikeSites] = ksDriftmap(strTarget, locSpikesOnly);
+
+
 %put spikes in data struct
 allclu = sort(unique(sp.clu));
 unitCounter = 0;
 checkchan = 1;
+
+%get corrfac if present
+files = dir(strTarget);
+if ~isempty(find(strcmpi({files.name},'corrfac.mat')));
+    load(fullfile(strTarget,'corrfac.mat'));  
+end
+
 for cl = 1:length(allclu)
     clus = allclu(cl);
     specInd = find([unitspecs{:,1}]==clus);
@@ -26,6 +35,8 @@ for cl = 1:length(allclu)
     end
     
     unitCounter = unitCounter +1 ;
+    
+    
     
     % get the spike times etc. only for desired cluster
     mySpikeSites = spikeSites(sp.clu ==clus);

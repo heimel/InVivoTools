@@ -31,7 +31,7 @@ ops.ThPre = 8;
 % options for determining PCs
 %NOTE INVIVO: low threshold to detect many spikes! needs manual curation
 
-ops.spkTh           = 1;      % spike threshold in standard deviations (-6)
+ops.spkTh           = -2;      % spike threshold in standard deviations (-6)
 ops.reorder         = 1;       % whether to reorder batches for drift correction. 
 ops.nskip           = 25;  % how many batches to skip for determining spike PCs
 
