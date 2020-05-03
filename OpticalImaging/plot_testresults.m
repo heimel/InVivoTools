@@ -1,8 +1,13 @@
 function h = plot_testresults(fname,response,response_sem,response_all,tc_roi,tc_ror,ratio,roi,ror,record)
 %PLOT_TESTRESULTS plots results of a testrecord
 %
-% 2005-2019, Alexander Heimel
+%  H =  PLOT_TESTRESULTS(FNAME,RESPONSE,RESPONSE_SEM,RESPONSE_ALL,...
+%          TIMECOURSE_ROI,TIMECOURSE_ROR,TIMECOURSE_RATIO,...
+%          ROI,ROR,RECORD)
 %
+% 2005-2020, Alexander Heimel
+%
+
 if nargin<9
     record = [];
     stim_onset = 3;
@@ -31,17 +36,16 @@ if n_stims>15
 end
 
 % get file info
-
 filename = [fname{1} 'B0.BLK'];
 fileinfo = imagefile_info( filename );
 
 if isempty(fileinfo.name)
     logmsg(['Cannot open ' filename ]);
-    fileinfo.n_conditions=length(conditions);
-    fileinfo.cameraframes_per_frame=15;
+    fileinfo.n_conditions = length(conditions);
+    fileinfo.cameraframes_per_frame = 15;
     logmsg('Number of cameraframes per frames may be wrong');
-    fileinfo.xbin=1;
-    fileinfo.ybin=1;
+    fileinfo.xbin = 1;
+    fileinfo.ybin = 1;
     logmsg('Spatial binning may be wrong');
 end
 
@@ -52,7 +56,7 @@ end
 
 if ~isfield(fileinfo,'frameduration')
     logmsg('Defaulting frameduration to 0.6s');
-    fileinfo.frameduration=0.6;
+    fileinfo.frameduration = 0.6;
 end
 
 if length(conditions)~=fileinfo.n_conditions
@@ -76,10 +80,10 @@ switch record.stim_type
         tit = [tit ' ' record.eye];
 end
 
-tit(tit=='_')='-';
+tit(tit=='_') = '-';
 
-mousedb=load_mousedb;
-ind=find_record(mousedb,['mouse=' record.mouse]);
+mousedb = load_mousedb;
+ind = find_record(mousedb,['mouse=' record.mouse]);
 if length(ind)>1
     errormsg(['Two mice with name ' record.mouse ...
         ' in mouse_db']);
@@ -91,19 +95,19 @@ if isempty(ind)
     return
 end
 
-mouse=mousedb(ind);
-tit=[tit ' \newline ' mouse.strain];
+mouse = mousedb(ind);
+tit = [tit ' \newline ' mouse.strain];
 if ~isempty(mouse.type)
-    tit=[tit ', ' mouse.type];
+    tit = [tit ', ' mouse.type];
 end
 if mouse.typing_lsl>0
-    tit=[tit ' ' mouse.lsl ':' typing2str(mouse.typing_lsl)];
+    tit = [tit ' ' mouse.lsl ':' typing2str(mouse.typing_lsl)];
 end
 if mouse.typing_koki>0
-    tit=[tit ' ' mouse.koki ':' typing2str(mouse.typing_koki)];
+    tit = [tit ' ' mouse.koki ':' typing2str(mouse.typing_koki)];
 end
 if mouse.typing_cre>0
-    tit=[tit ' ' mouse.cre ':' typing2str(mouse.typing_cre)];
+    tit = [tit ' ' mouse.cre ':' typing2str(mouse.typing_cre)];
 end
 
 show_single_condition_maps(record,fname,condnames,fileinfo,roi,ror,tit);
@@ -115,17 +119,16 @@ pos([3 4]) = [700 500];
 h_ed = get_fighandle('OI database*');
 if ~isempty(h_ed)
     pos_ed = get(h_ed,'Position');
-    pos(2)=pos_ed(2)-pos(4)-100;
+    pos(2) = pos_ed(2)-pos(4)-100;
 end
 set(h,'position',pos);
-
 colormap gray;
 
 subplot(4,2,2)
-htitle=title(tit);
+htitle = title(tit);
 set(htitle,'FontSize',8);
-pos=get(htitle,'Position');
-pos(1)=0; %-0.25*size(roi,2);
+pos = get(htitle,'Position');
+pos(1) = 0;
 set(htitle,'Position',pos);
 set(htitle,'HorizontalAlignment','left');
 axis off;
@@ -133,13 +136,11 @@ axis off;
 % plot responses
 if numel(response_all,2)~=length(response_all)
     subplot(2,2,1);
-    [x,y]=meshgrid( (1:size(response_all,2)),...
+    [x,y] = meshgrid( (1:size(response_all,2)),...
         linspace(-0.25,0.25,size(response_all,1)));
-    
     plot( x'+y',response_all','.');
-    % plot( x',response_all','.');
-    %  keyboard
-    ax=axis;ax([1 2])=[0.5 length(response)+0.5];axis(ax);
+    ax = axis;
+    ax([1 2]) = [0.5 length(response)+0.5];axis(ax);
     box off
     ylabel('% change');
     if ~isempty(condnames)
@@ -151,19 +152,19 @@ end
 subplot(2,2,3);
 switch stim_type
     case 'sf_contrast'
-        sf=record.stim_sf;
-        contrast=record.stim_contrast;
+        sf = record.stim_sf;
+        contrast = record.stim_contrast;
         if ~isempty(strfind(record.comment,'contrast_sf'))
-            contrast_sf=1;
-            x=repmat(contrast,length(sf),1);
-            x=x*100;
-            y=reshape(response,length(sf),length(contrast));
-            dy=reshape(response_sem,length(sf),length(contrast));
+            contrast_sf = 1;
+            x = repmat(contrast,length(sf),1);
+            x = x*100;
+            y = reshape(response,length(sf),length(contrast));
+            dy = reshape(response_sem,length(sf),length(contrast));
         else
-            contrast_sf=0;
-            x=repmat(sf,length(contrast),1);
-            y=reshape(response,length(sf),length(contrast))';
-            dy=reshape(response_sem,length(sf),length(contrast))';
+            contrast_sf = 0;
+            x = repmat(sf,length(contrast),1);
+            y = reshape(response,length(sf),length(contrast))';
+            dy = reshape(response_sem,length(sf),length(contrast))';
         end
         if ~isempty(dy)
             errorbar(x',y',dy','o');
