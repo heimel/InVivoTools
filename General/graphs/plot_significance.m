@@ -9,7 +9,7 @@ function plot_significance(x1,x2,y,p,height,w)
 %  HEIGHT height of vertical lines
 %  W extra horizontal width to be added to X1 and X2
 %
-% 2007-2019, Alexander Heimel
+% 2007-2020, Alexander Heimel
 %
 
 if nargin<6 || isempty(w)
@@ -31,20 +31,23 @@ if ~isnan(y)
     if p<0.001
         pc = '***';
     end
-    left = x1+w;
-    right = x2-w;
-    if left~=right
-        hl = line([left right],[y y]);
-        set(hl,'Color',[0 0 0]);
-    end
+    textx = (x1 + x2) / 2; 
     fontsize = get(gca,'FontSize');
-    hl = text((left+right)/2,y,pc,'FontSize',fontsize+5);
-    set(hl,'HorizontalAlignment','center')
-    if height>0
-        hl = line([left left],[y-height/2 y]);
-        set(hl,'Color',[0 0 0]);
-        hl = line([right right],[y-height/2 y]);
-        set(hl,'Color',[0 0 0]);
+    hl = text(textx,y,pc,'FontSize',fontsize+5,'horizontalalignment','center');
+    
+    if x1~=x2
+        left = x1+w;
+        right = x2-w;
+        if left~=right
+            hl = line([left right],[y y]);
+            set(hl,'Color',[0 0 0]);
+        end
+        if height>0
+            hl = line([left left],[y-height/2 y]);
+            set(hl,'Color',[0 0 0]);
+            hl = line([right right],[y-height/2 y]);
+            set(hl,'Color',[0 0 0]);
+        end
     end
 end
 

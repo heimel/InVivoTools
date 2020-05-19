@@ -3,7 +3,7 @@ function handle = show_record( record, h_fig, h_control_fig, name )
 %
 % HANDLE = SHOW_RECORD( RECORD,H_FIG,H_CONTROL_FIG,NAME)
 %
-% 2004-2014, Alexander Heimel
+% 2004-2020, Alexander Heimel
 
 if nargin<4 || isempty(name)
     name = 'Record';
@@ -14,6 +14,7 @@ if nargin<2
 end
 if nargin<3 || isempty(h_control_fig)
     bc = 0.8*[1 1 1];
+    h_control_fig = [];
 else
     bc = get(h_control_fig,'Color');
 end
@@ -21,26 +22,34 @@ end
 comment_lines = 3;
 
 if isempty(h_fig)
-    screensize=get(0,'ScreenSize');
+    screensize = get(0,'ScreenSize');
+    fields = fieldnames(record);
     
-    fields=fieldnames(record);
+    editheight = 20; % pxl
+    editwidth = 250; % pxl
+    labelleft = 5; % pxl
+    labelwidth = 100; % pxl
+    fontsize = 12; % pt
+    if ~isempty(h_control_fig)
+        udc = get(h_control_fig,'userdata');
+        if isfield(udc,'basefontsize') && ~isempty(udc.basefontsize)
+            fontsize = udc.basefontsize;
+        end
+        if isfield(udc,'buttonheight') && ~isempty(udc.buttonheight)
+            editheight = udc.buttonheight;
+        end
+    end
+    labelheight = editheight - 3; % pxl
     
-    labelleft=5;
-    labelwidth=100;
-    labelheight=17;
+    linesep = 1;
+    colsep = 3;
+    lineheight = editheight + linesep;
+    colwidth = labelleft + labelwidth + editwidth + 3*colsep;
     
-    editheight=labelheight+3;
-    editwidth=250;
-    
-    linesep=1;
-    colsep=3;
-    lineheight=editheight+linesep;
-    colwidth=labelleft+labelwidth+editwidth+3*colsep;
-    
-    height=(length(fields)+...
+    height = (length(fields)+...
         (comment_lines-1)*length(strmatch('comment',fields)))*lineheight;
     
-    top=height-editheight-linesep;
+    top = height-editheight-linesep;
     
     h_fig = figure('Name',name,...
         'WindowStyle','normal',...
@@ -58,7 +67,7 @@ if isempty(h_fig)
     end
     
     for i=1:length(fields)
-        left=labelleft;
+        left = labelleft;
         h_text(i) =...
             uicontrol('Parent',h_fig, ...
             'Units','pixels', ...
@@ -70,9 +79,10 @@ if isempty(h_fig)
             'Style','text', ...
             'Units','pixels',...
             'Fontname','Times',...
+            'FontSize',fontsize,...
             'Tag',fields{i});
         
-        left=left+labelwidth+colsep;
+        left = left+labelwidth+colsep;
         if ~strcmp(fields{i},'comment')
             h_edit(i)= ...
                 uicontrol('Parent',h_fig, ...
@@ -84,6 +94,7 @@ if isempty(h_fig)
                 'HorizontalAlignment','left',...
                 'Style','edit', ...
                 'Units','pixels',...
+                'FontSize',fontsize,...
                 'Callback','genercallback',...
                 'Tag',[ fields{i} ]);
             top=top-lineheight;
@@ -98,13 +109,16 @@ if isempty(h_fig)
                 'String','', ...
                 'HorizontalAlignment','left',...
                 'Style','edit', ...
-                'Units','pixels','max',comment_lines,'min', 0,...
+                'FontSize',fontsize,...
+                'Units','pixels',...
+                'max',comment_lines,...
+                'min', 0,...
                 'Callback','genercallback',...
                 'Tag',[ fields{i} ]);
             top=top-1*lineheight;
         end
-    end % for fields i
-    ud.h_edit=h_edit;
+    end % fields i
+    ud.h_edit = h_edit;
     set(h_fig,'Userdata',ud);
 end
 
@@ -113,7 +127,7 @@ fields=fieldnames(record);
 for i=1:length(fields)
     ud = get(h_fig,'Userdata');
     h_edit = ud.h_edit;
-    content = getfield(record,fields{i});
+    content = record.(fields{i});
     if islogical(content)
         content = double(content);
     end
@@ -131,17 +145,16 @@ for i=1:length(fields)
             % next line is to recover content when browsing or saving
             set(h_edit(i),'UserData',content);
             set(h_edit(i),'Enable','off');
-            content='CANNOT DISPLAY';
+            content = 'CANNOT DISPLAY';
     else
         set(h_edit(i),'Enable','on');
     end
     set(h_edit(i),'String',content);
 end
 
-ud.persistent=1;
-ud.h_edit=h_edit;
-ud.orgrecord=record;
-
+ud.persistent = 1;
+ud.h_edit = h_edit;
+ud.orgrecord = record;
 
 p = get(h_fig,'position');
 op = get(h_fig,'outerposition');
@@ -153,34 +166,18 @@ if isoctave
     windowhbordersize = 6;
 end    
 
-% switch computer
-%     case {'PCWIN','PCWIN64'}
-%         windowvbordersize=26;
-%         windowhbordersize=6;
-%     otherwise
-%         windowvbordersize=35;
-%         windowhbordersize=6;
-% end
-
 if isfield(ud,'db_form')
-    posdb=get(ud.db_form,'Position');
-    posfrm=get(h_fig,'Position');
-    %if posdb(2)-posfrm(4)>0 || isoctave % if not too high
-        set(h_fig,'Position',[posdb(1) posdb(2)-posfrm(4)-windowvbordersize posfrm(3) posfrm(4)])
-    %else
-    %    set(h_fig,'Position',[posdb(1)+posdb(3)+windowhbordersize posdb(2) posfrm(3) posfrm(4)])
-    %end
-    
-    % set color
+    posdb = get(ud.db_form,'Position');
+    posfrm = get(h_fig,'Position');
+    set(h_fig,'Position',[posdb(1) posdb(2)-posfrm(4)-windowvbordersize posfrm(3) posfrm(4)])
     set(h_fig,'Color',get(ud.db_form,'Color'));
-    
 end
 
 set(h_fig,'Userdata',ud);
 set(h_fig,'ResizeFcn',@figure_resize);
 
 if nargout==1
-    handle=h_fig;
+    handle = h_fig;
 end
 
 

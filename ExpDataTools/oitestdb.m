@@ -1,5 +1,5 @@
 function oitestdb
-%ECTEST_DB is a wrapper around EXPERIMENT_DB('ec')
+%OITEST_DB is a wrapper around EXPERIMENT_DB('oi')
 %
 % 2007, Alexander Heimel
 %

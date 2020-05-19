@@ -9,7 +9,7 @@ function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transfo
 %    NORMALITY_TEST can be
 %    'anderson-darling','ad','lilliefors','sw','shapiro-wilk'
 %
-% 2014-2019, Alexander Heimel
+% 2014-2020, Alexander Heimel
 
 ax = axis;
 if nargin<12 || isempty(height)
@@ -62,9 +62,7 @@ if  strcmp(test,'chi2')
         ' over all groups. chi2-statistic = ' num2str(chi2)]);
 end
 
-
-w=0.1;
-
+w = 0.1; % distance from center to start significance line
 
 for i=1:length(y)
     ind = ~isnan(y{i});

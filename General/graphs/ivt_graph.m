@@ -34,7 +34,7 @@ function h=ivt_graph(y,x,varargin)
 %     'ny',[]
 %     'bins',[]  % for (cumulative) histogram and rose
 %     'tail','both'   % for significance tests
-%     'legnd',''  % legend,example legnd,{wt,t1}
+%     'legnd','' % legend, example legnd,{''wt'';''t1''}
 %     'save_as',''
 %     'z',{}
 %     'showpairing',false
@@ -47,7 +47,7 @@ function h=ivt_graph(y,x,varargin)
 %        fit, linear
 %
 %
-% 2006-2015, Alexander Heimel
+% 2006-2020, Alexander Heimel
 %
 
 h=[];
@@ -522,7 +522,7 @@ switch style
         
         % plot points
         if showpoints
-
+            
             x_spaced = cell(length(y),1);
             for i=1:length(y)
                 [hp,x_spaced{i}] = plot_points(x(i),y{i},spaced);
@@ -624,7 +624,7 @@ switch style
                 %logmsg('Next routine throws away values. Not ideal!');
                 
                 for j=1:length(uniqx)
-                    if sum(x{i}==uniqx(j))> length(y{i})/length(uniqx)*0;%*0.5;%0.5
+                    if sum(x{i}==uniqx(j))> length(y{i})/length(uniqx)*0
                         uniqy(j) = nanmean(y{i}(x{i}==uniqx(j)));
                         switch errorbars
                             case 'sem'
@@ -634,7 +634,6 @@ switch style
                         end
                         pointsy{i}{j} = (y{i}(x{i}==uniqx(j)));   % for significance calculations
                     else
-                        
                         uniqy(j) = nan;
                         uniqystd(j) = nan;
                     end
@@ -681,24 +680,25 @@ switch style
         
         % plot significances
         % assume points of same x have to be compared across groups
-        if exist('pointsy','var')
+        if exist('pointsy','var') && length(x{1})==length(x{2}) && all(x{1}==x{2})
             for k=1:length(x{1}) % to have number of x-values
                 for i=1:length(pointsy)
                     for j=i+1:length(pointsy)
                         try
-                            [h.h_sig{i,j},h.p_sig{i,j},statistic,statistic_name,dof,test]=...
-                                compute_significance(pointsy{i}{k},...
-                                pointsy{j}{k},test,[],[],[],[],tail,transform,[],correction,normalitytest,wingtipheight);
-                            
-                            
-                            plot_significance(  x{i}(k),x{j}(k),...
-                                max([y{i}(k)+ystd{i}(k) y{j}(k)+ystd{j}(k)]),p,0,0);
-                        catch
+                            htemp = compute_significances(...
+                                {pointsy{i}{k},pointsy{j}{k}},...
+                                x{1}(k)*ones(1,length(pointsy)),test,signif_y,...
+                                [],[],tail,transform,[],correction,normalitytest,wingtipheight);
+                            h.h_sig{i,j} = htemp.h_sig{2};
+                            h.p_sig{i,j} = htemp.p_sig{2};
+                        catch me
+                            logmsg(['Problem computing significances: ' me.message]);
                             h.h_sig{i,j}=nan;
                             h.p_sig{i,j}=nan;
                             statistic = nan;
                             statistic_name = '';
                             dof = nan;
+                            
                         end
                         if h.h_sig{i,j}==1
                             logmsg(['Differences at x=' num2str(x{j}(k),2)...
