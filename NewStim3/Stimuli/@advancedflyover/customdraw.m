@@ -1,4 +1,4 @@
-function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI, capture_movie)
+function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI, capture_movie) %#ok<INUSL>
 %CUSTOMDRAW of ADVANCEDFLYOVER
 %
 % 201X, Sven van der Burg, Azadeh Tafreshiha
@@ -13,14 +13,11 @@ end
 NewStimGlobals % for pixels_per_cm and NewStimViewingDistance
 StimWindowGlobals % for StimWindowRefresh
 
-% screen_center_r2n_cm = [0 0 NewStimViewingDistance];
 screen_pxl = [StimWindowRect(3) StimWindowRect(4)];
-screen_cm = screen_pxl / pixels_per_cm;
 
 pixels_per_degree = tan(pi/(2 * 180)) * NewStimViewingDistance * pixels_per_cm * 2 ;
 params = getparameters(stim);
 
-n_frames = params.duration * StimWindowRefresh + 1; % should be in s and should be in stimulus definition (azadehloom)
 screen_center = screen_pxl / 2;
 pxlvelocity = params.velocity_degps * pixels_per_degree;
 velocity_pxlpf = pxlvelocity / StimWindowRefresh;
