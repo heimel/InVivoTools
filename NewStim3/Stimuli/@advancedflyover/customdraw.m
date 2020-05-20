@@ -1,4 +1,15 @@
 function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI, capture_movie)
+%CUSTOMDRAW of ADVANCEDFLYOVER
+%
+% 201X, Sven van der Burg, Azadeh Tafreshiha
+% 201X-2020, Alexander Heimel
+% 2020, Leonie Cazemier
+%
+
+if nargin<4 || isempty(capture_movie)
+    capture_movie = false;
+end
+
 NewStimGlobals % for pixels_per_cm and NewStimViewingDistance
 StimWindowGlobals % for StimWindowRefresh
 
@@ -105,7 +116,17 @@ for current_frame = 1:n_frames
     end
     stamp = Screen('Flip', StimWindow, stamp+0.5/StimWindowRefresh);
     
-end
+    if capture_movie
+        Screen('AddFrameToMovie', StimWindow);
+
+        % also save single frame
+        if current_frame == round(n_frames/2)
+            imageArray = Screen('GetImage', StimWindow);
+            imwrite(imageArray,fullfile(getdesktopfolder,['stimulus_frame' params.filename]),'png')
+        end
+    end
+    
+end % current_frame
 
 if strcmp(params.start_position, 'top_opto')
     StimSerial('rts',StimSerialStim,0);
@@ -115,8 +136,8 @@ if ~params.stay
     Screen(StimWindow,'FillRect',dp.clut_bg(1,:));
     stamp = Screen('Flip', StimWindow);
 end
-stimduration =toc;
-if abs(stimduration-params.duration)+0.01
+stimduration = toc;
+if abs(stimduration-params.duration)>0.01
     logmsg(['Stimulus took ' num2str(stimduration) ' s.']);
 end
 done = 1;
