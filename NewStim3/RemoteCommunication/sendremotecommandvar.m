@@ -38,13 +38,13 @@ strs = cat(ind,{'load(''toremote'',''-mat'');'},strs);
 if checkremotedir(pathstring) % directory exists
     pathn=fixpath(pathstring);
     fname = [pathn 'gotit'];
-    fnameerror = [pathn 'scripterror'];
+    fnameerror = [pathn 'scripterror.mat'];
     fout  = [pathn 'fromremote.mat'];
     fin  =  [pathn 'toremote.mat'];
     if exist(fname,'file')
         delete(fname);
     end
-    if exist(fout)==2,
+    if exist(fout)==2
         delete(fout);
     end
     if exist(fnameerror)==2
