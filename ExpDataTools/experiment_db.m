@@ -191,7 +191,7 @@ end
 if experimental_pc
     % check diskusage
     pth = eval([type 'datapath(db(1))']);
-    df=diskusage(pth);
+    df = diskusage(pth);
     if df.available < 11000000
         errormsg(['Less than 11 Gb available on ' pth '. Clean up disk!']);
     end
