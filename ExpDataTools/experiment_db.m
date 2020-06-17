@@ -1,4 +1,4 @@
-function fig=experiment_db( type, hostname )
+function fig = experiment_db( type, hostname )
 %EXPERIMENT_DB starts physiology database
 %
 %   FIG = EXPERIMENT_DB
