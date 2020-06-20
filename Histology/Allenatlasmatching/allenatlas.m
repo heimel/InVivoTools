@@ -1,13 +1,16 @@
 function [intensity,x_mm] = allenatlas(slice_name,separate_figures)
-%ALLENATLAS
+%ALLENATLAS loads and slices Allen Atlas map to compare slice
 %
-%  Loading and slicing Allen Atlas map
-%  http://help.brain-map.org/display/mousebrain/API#API-DownloadAtlas
-%    atlas has 25 um resolution
+%  [INTENSITY, X_MM] = ALLENATLAS( SLICE_NAME, SEPARATE_FIGURES )
 %
-%  Annotation http://api.brain-map.org/api/v2/structure_graph_download/1.json
+%  Allen Atlas nissl maps and annotation files need to be downloaded
+%    to folder specified in params.hist_allenmaplocation, set in
+%    processparams_local.m file
+%  the map file atlasVolume.raw and annotation file 1.json can be found at 
+%     http://help.brain-map.org/display/mousebrain/API#API-DownloadAtlas
+%     Annotation http://api.brain-map.org/api/v2/structure_graph_download/1.json
 %
-%  2016-2019, Alexander Heimel, based on Allen Institute
+%  2016-2020, Alexander Heimel, based on Allen Institute loading script
 
 if nargin<1
     slice_name = '';
@@ -37,7 +40,12 @@ if ~isfield(ud,'slice_name') || (~isempty(slice_name) && ~strcmp(ud.slice_name,s
     if ~exist(filename,'file')
         disp('Choose a slice image');
         savedir = pwd;
-        cd(params.hist_sliceslocation);
+        if exist(params.hist_sliceslocation,'dir')
+            cd(params.hist_sliceslocation);
+        else
+            logmsg(['Folder ' params.hist_sliceslocation ' des not exist.'])
+            logmsg(['Set params.hist_slicelocation in processparams_local.m file to change default search location.']);
+        end
         [filename,pathname] = uigetfile({'*.*','All Files (*.*)'},'Choose a slice image');
         cd(savedir);
         if filename==0
