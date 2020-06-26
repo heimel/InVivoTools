@@ -82,7 +82,9 @@ if rm<0
     b = 10*max(c);
 end
 
-explained_variance = 1 - std(rm* (c.^n)./ (b^n+c.^n) - data)^2/std(data)^2;
+% explained variance explained: https://en.wikipedia.org/wiki/Coefficient_of_determination
+fit = rm* (c.^n)./ (b^n+c.^n);
+explained_variance = 1 -  sum( (fit - data).^2)/length(data)/std(data)^2;
 
 % compute c50
 cn = linspace(0,1,1000);
