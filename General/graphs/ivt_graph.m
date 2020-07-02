@@ -680,7 +680,7 @@ switch style
         
         % plot significances
         % assume points of same x have to be compared across groups
-        if exist('pointsy','var') && length(x{1})==length(x{2}) && all(x{1}==x{2})
+        if exist('pointsy','var') && ( (length(x)==1) || (length(x{1})==length(x{2}) && all(x{1}==x{2})))
             for k=1:length(x{1}) % to have number of x-values
                 for i=1:length(pointsy)
                     for j=i+1:length(pointsy)

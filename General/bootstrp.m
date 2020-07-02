@@ -11,7 +11,7 @@ function y = bootstrp(n,f,x)
 % 2019, Alexander Heimel
 
 if ~isvector(x)
-    error('X should be vector');
+    logmsg('X should be vector');
     y = [];
 end
 
