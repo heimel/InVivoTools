@@ -1,4 +1,4 @@
-function runKilosort_invivo(EVENT,fileloc)
+function runKilosort_invivo(EVENT,fileloc,channels2analyze)
 
 %get all necessary paths
 invivoloc = what('inVivoTools');
@@ -14,7 +14,7 @@ createChannelMap_invivo
 chanMapFile = 'chanMap.mat';
 
 ops.trange = [0 Inf]; % time range to sort
-ops.NchanTOT    = length(EVENT.snips.times); % total number of channels in your recording
+ops.NchanTOT    = length(channels2analyze); % total number of channels in your recording
 
 %settings
 run(fullfile(pathToYourConfigFile, 'configKilosort_invivo.m'))

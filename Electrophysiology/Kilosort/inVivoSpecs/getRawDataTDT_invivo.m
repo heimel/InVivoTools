@@ -1,4 +1,4 @@
-function [vecTimestamps,matData,vecChannels] = getRawDataTDT(sMetaData,vecTimeRange)
+function [vecTimestamps,matData,vecChannels] = getRawDataTDT_invivo(sMetaData,vecTimeRange,channels2analyze)
 	%getRawDataTDT Extracts raw data from TDT data tank
 	%	[vecTimestamps,matData,vecChannels] = getRawDataTDT(sMetaData,vecTimeRange)
 	%
@@ -73,12 +73,18 @@ function [vecTimestamps,matData,vecChannels] = getRawDataTDT(sMetaData,vecTimeRa
 		vecChannels = 1:intNumChans;
 	end
 	intChannelNum = numel(vecChannels);
+    
+    %initialize writing data to file
+    strTargetFile = fullfile(sMetaData.Mytank, sMetaData.Myblock,'RawBinData.bin');
+    ptrFile = fopen(strTargetFile,'w');
+    fprintf('Opened binary file "%s"... \n',strTargetFile);
+
 	
 	%% pre-allocate data array
 	dblTotDur = vecTimeRange(2)-vecTimeRange(1);
 	dblMaxT = dblSampFreq*(dblTotDur+1); %add one second, just to be sure
 	intTotalBins = round(dblMaxT*1.1); %upper estimate of required number of frames
-	matData = zeros(intChannelNum,intTotalBins,'int16');
+	matData = zeros(length(channels2analyze),intTotalBins,'int16');
 	vecTimestamps = nan(1,intTotalBins);
 	dblApproxTotEvents = intTotalBins/intEventLength;
 	vecEventStartTracker = nan(1,round(1.1*dblApproxTotEvents));
@@ -140,33 +146,46 @@ function [vecTimestamps,matData,vecChannels] = getRawDataTDT(sMetaData,vecTimeRa
 			%select channels
 			matThisData(:,vecChannels(indAssignChans)) = matThisData(:,vecThisChanIdx(indRetrieveChans));
 			
-			%get timestamps
+			%get timestamps and check for NaNs / out of range stamps
 			intThisBinNum = size(matThisData,1);
 			vecAssignBins = (intTimeBin + (1:intThisBinNum));
 			intTimeBin = intTimeBin + intThisBinNum;
-			vecTimestamps(vecAssignBins) = vecEventTimestamps+dblStartSecs;
-		
+            vecNewTimestamps = vecEventTimestamps+dblStartSecs;
+            %check Nans
+            intFirstNan = find(isnan(vecNewTimestamps),1);
+            vecNewTimestamps(intFirstNan:end) = [];
+            matThisData(intFirstNan:end,:) = [];  
+            vecAssignBins(intFirstNan:end) = [];
+            %remove samples outside requested epoch
+            indRemoveSamples = vecNewTimestamps < vecTimeRange(1) | vecNewTimestamps > vecTimeRange(2);
+            vecNewTimestamps(indRemoveSamples) = [];
+            matThisData(indRemoveSamples,:) = [];
+            vecAssignBins(indRemoveSamples) = [];
+            %define timestamps
+            vecTimestamps(vecAssignBins) = vecNewTimestamps;
+
 			%check if matrix is empty
-			if any(matData(1,vecAssignBins) ~=0)
-				error([mfilename ':AssignmentError'],'Timestamp error! Time bins are already filled in output data structure');
-			end
+            %Edit Leonie: this does not work when writing directly to file! 
+% 			if any(matData(1,vecAssignBins) ~=0)
+% 				error([mfilename ':AssignmentError'],'Timestamp error! Time bins are already filled in output data structure');
+%             end
+                        
+            %remove channels you're not interested in (saving memory)
+            matThisData = matThisData(:,channels2analyze);
+            %correct voltage dir
+            matThisData = -matThisData';
 			
-			%assign to aggregate matrix
-			matData(:,vecAssignBins) = matThisData';
+			%append to file
+            intCount = fwrite(ptrFile, matThisData,'int16');
+
 		end
 	end
-	
-	%remove pre-allocated end
-	intFirstNan = find(isnan(vecTimestamps),1);
-	vecTimestamps(intFirstNan:end) = [];
-	matData(:,intFirstNan:end) = [];
-	
-	%remove samples outside requested epoch
-	indRemoveSamples = vecTimestamps < vecTimeRange(1) | vecTimestamps > vecTimeRange(2);
-	vecTimestamps(indRemoveSamples) = [];
-	matData(:,indRemoveSamples) = [];
-	
-	%% close libraries
+
+	    
+    fclose(ptrFile);
+    fprintf('Done! Output is %d \n',intCount);
+    
+    %% close libraries
 	ptrLib.CloseTank;
 	ptrLib.ReleaseServer;
 	close(ptrFig);
