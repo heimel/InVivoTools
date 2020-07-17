@@ -48,6 +48,7 @@ for t = 1:n_triggers
     measures.tf_fit_bandwidth{t} = NaN;
     measures.tf_fit_lowpass{t} = NaN;
     measures.tf_fit_dogpar{t} = NaN;
+    measures.fit_explained_variance{t} = NaN;
 
     response = response - baseline;
 
@@ -140,7 +141,7 @@ for t = 1:n_triggers
     end
     
     if measures.fit_explained_variance{t}<0
-        keyboard
+        logmsg('Negative explained variance?');
     end
 end
 
