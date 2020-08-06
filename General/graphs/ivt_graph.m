@@ -550,11 +550,11 @@ switch style
                 if exist('x_spaced','var')
                     plot(reshape([x_spaced{:}],numel(y{1}),length(y))',...
                         reshape([y{:}],numel(y{1}),length(y))',...
-                        linestyles,'linewidth',1)
+                        linestyles,'linewidth',linewidth)
                 else
                     plot(repmat(x,numel(y{1}),1)',...
                         reshape([y{:}],numel(y{1}),length(y))',...
-                        linestyles,'linewidth',1)
+                        linestyles,'linewidth',linewidth)
                 end
             end
         end
