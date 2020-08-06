@@ -133,7 +133,7 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
         frameTimes(1) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,1);
         for frameNum=2:length(MTI.df.frames)
             Screen(StimWindow,'WaitBlanking',MTI.pauseRefresh(frameNum-1));
-            StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,frameNum);
+            StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,frameNum,trigger);
             %rectnum = 1+mod(MTI.df.frames(frameNum),length(MTI.ds.offscreen));
             Screen('CopyWindow',MTI.ds.offscreen(MTI.df.frames(frameNum)),StimWindow,MTI.MovieParams.Movie_sourcerect(frameNum,:), MTI.df.rect,'srcCopyQuickly');
             frameTimes(frameNum) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,frameNum);
@@ -166,7 +166,7 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
         end
         
         if capture_movie; Screen('AddFrameToMovie', StimWindow); end
-        StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,1);
+        StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,1,trigger);
         
         for frameNum=2:length(MTI.df.frames)
             textures = MTI.MovieParams.Movie_textures{frameNum};
@@ -187,7 +187,7 @@ elseif strcmp(MTI.ds.displayType,'Movie') && strcmp(MTI.ds.displayProc,'standard
             end
             frameTimes(frameNum) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,frameNum);
             WaitSecs(1/10000);
-            StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,frameNum);
+            StimTriggerAct('Stim_beforeframe_trigger',MTI.stimid,frameNum,trigger);
         end
         if StimWindowUseCLUTMapping
             Screen('LoadNormalizedGammaTable',StimWindow,linspace(0,1,256)' * ones(1,3),1);
