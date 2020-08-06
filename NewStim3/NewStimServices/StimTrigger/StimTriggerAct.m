@@ -1,4 +1,4 @@
-function [thetimes,thecodes]=StimTriggerAct(theaction, code, code2)
+function [thetimes,thecodes]=StimTriggerAct(theaction, code, code2, code3)
 
 % STIMTRIGGERACTION - Activate a StimTrigger
 %
@@ -30,10 +30,13 @@ end
 if nargin<3
     code2 = []; %#ok<NASGU>
 end
+if nargin<4
+    code3 = [];
+end
 
 for i=1:length(StimTriggerList),
     try 
-        trgcmd = ['[mytimes,mycodes]=' StimTriggerList(i).TriggerType '_StimTriggerAct(StimTriggerList(i),theaction,code,code2);'];
+        trgcmd = ['[mytimes,mycodes]=' StimTriggerList(i).TriggerType '_StimTriggerAct(StimTriggerList(i),theaction,code,code2,code3);'];
         eval(trgcmd);
         thetimes = cat(1,thetimes,mytimes);
         thecodes = cat(1,thecodes,mycodes);
