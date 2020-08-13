@@ -20,7 +20,7 @@ if isempty(figureNum)
 	% check to see if already open
 	g = geteditor('RunExperiment');
 	if isempty(g)
-		g=figure;
+		g = figure;
 	else
 		return
 	end
@@ -53,11 +53,11 @@ SaveDir = 't00001';
 %	[thepath,thename]=fileparts(InVivoDataPath);
 %	mkdir(thepath, thename);
 %end;
-ss = -235+070;
-ds = -120+70;
-as = 0120+70;
-st = 0000+000;
-es = 0000;
+%ss = -235+070;
+%ds = -120+70;
+%as = 0120+70;
+%st = 0000+000;
+%es = 0000;
 
 
 figheight = 530;
@@ -65,6 +65,7 @@ figwidth = 430;
 figleft = 381;
 figtop = 217;
 
+set(gcf,'WindowStyle','normal');
 set(gcf,'Position',[figleft figtop figwidth figheight]);
 
 panel_top = 0.99;
