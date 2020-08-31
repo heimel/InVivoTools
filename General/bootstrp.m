@@ -8,7 +8,7 @@ function y = bootstrp(n,f,x)
 %  TEMPORARILY PROGRAMMED TO USE FOR MISSING BOOTSTRP IN OCTAVE_HOME
 %  CHECK FULL FUNCTIONALITY OF ORIGINAL MATLAB BOOTSTRP FUNCTION
 %
-% 2019, Alexander Heimel
+% 2019-2020, Alexander Heimel
 
 if ~isvector(x)
     logmsg('X should be vector');
@@ -17,5 +17,5 @@ end
 
 y = f(x(randi(length(x),length(x),n)));
 
-warning('using custommade bootstrp');
-
+warning('BOOTSTRP:CUSTOM','using custommade bootstrp');
+warning('OFF','BOOTSTRP:CUSTOM');
