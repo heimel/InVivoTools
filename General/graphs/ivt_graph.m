@@ -550,11 +550,11 @@ switch style
                 if exist('x_spaced','var')
                     plot(reshape([x_spaced{:}],numel(y{1}),length(y))',...
                         reshape([y{:}],numel(y{1}),length(y))',...
-                        linestyles,'linewidth',1)
+                        linestyles,'linewidth',linewidth)
                 else
                     plot(repmat(x,numel(y{1}),1)',...
                         reshape([y{:}],numel(y{1}),length(y))',...
-                        linestyles,'linewidth',1)
+                        linestyles,'linewidth',linewidth)
                 end
             end
         end
@@ -680,7 +680,7 @@ switch style
         
         % plot significances
         % assume points of same x have to be compared across groups
-        if exist('pointsy','var') && length(x{1})==length(x{2}) && all(x{1}==x{2})
+        if exist('pointsy','var') && ( (length(x)==1) || (length(x{1})==length(x{2}) && all(x{1}==x{2})))
             for k=1:length(x{1}) % to have number of x-values
                 for i=1:length(pointsy)
                     for j=i+1:length(pointsy)

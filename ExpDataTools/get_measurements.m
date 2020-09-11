@@ -205,11 +205,21 @@ for g=1:n_groups
             end
             
         otherwise
+            if min(n(:))<2
+                unit = value_per;
+            else
+                switch value_per
+                    case 'mouse'
+                        unit = 'mice';
+                    otherwise
+                        unit = [value_per 's'];
+                end
+            end
             logmsg([ 'measure = ' measuress.measure ', group=' groupss(g).name ...
                 ': mean = ' num2str(nanmean(double(results{g}(:))),3) ...
                 ', std = ' num2str(nanstd(double(results{g}(:))),3) ...
                 ', sem = ' num2str(sem(double(results{g}(:))),3) ...
-                ', N = ' num2str(min(n(:))) ' ' value_per 's']);
+                ', N = ' num2str(min(n(:))) ' ' unit]);
     end
 end % g (groups)
 
@@ -553,7 +563,11 @@ switch measure.measure
         if isempty(mouse.birthdate) || strcmpi(mouse.birthdate,'unknown')
             logmsg(['Birthdate unknown for ' recordfilter(mouse)]);
         end
-        results = age(mouse.birthdate,testrecord.date);
+        if isempty(criteria) || eval(criteria)
+            results = age(mouse.birthdate,testrecord.date);
+        else
+            results = NaN;
+        end
         dresults = NaN;
         return
     case 'expdate'  % day number since 1-1-0000

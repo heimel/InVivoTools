@@ -38,8 +38,10 @@ function RemoteScriptEditor(figNum,soefig)
 %
 %  See also:  SCRIPTEDITOR, STIMEDITOR
 
-if nargin==0, 	fig=figure;set(fig,'MenuBar','none','NumberTitle','off','Name','RemoteScriptEditor');
-    drawScriptEditor(fig);RemoteScriptEditor('Update',fig);
+if nargin==0
+    fig = figure('WindowStyle','Normal','MenuBar','none','NumberTitle','off','Name','RemoteScriptEditor');
+    drawScriptEditor(fig);
+    RemoteScriptEditor('Update',fig);
 elseif ~ischar(figNum)  % is the call described above
     fig = figNum; figure(fig); clf; set(fig,'MenuBar','none');
     drawScriptEditor(fig); RemoteScriptEditor('Update',fig);
@@ -64,7 +66,7 @@ else % it is a callback
             set(lbloc,'String',g,'value',[]);
             RemoteScriptEditor('EnableDisable',theFig);
         case 'UpdateRem'
-            save_str={'cd(pwd);try;save(''fromremote.mat'',''s'',''-v7'');catch;pause(0.1);save(''fromremote.mat'',''s'',''-v7'');end;' 
+            save_str={'cd(pwd);try;save(''fromremote.mat'',''s'',''-v7'');catch;pause(0.1);save(''fromremote.mat'',''s'',''-v7'');end;'
                 'try;delete(''gotit*'');end;'
                 'save(''gotit.mat'',''g'',''-v7'');'};
             str = cat(1,update_str,save_str);
@@ -72,7 +74,7 @@ else % it is a callback
             if b  % we know pathname is good
                 pathn = rempath;
                 fname = [pathn 'fromremote.mat'];
-                s = load(fname,'-mat'); 
+                s = load(fname,'-mat');
                 s = s.s;
                 handleupdate(s,lbrem);
                 RemoteScriptEditor('EnableDisable',theFig);
@@ -172,7 +174,7 @@ else % it is a callback
                     if b
                         pathn = rempath;
                         fname = [pathn 'fromremote.mat'];
-                        s = load(fname,'-mat'); 
+                        s = load(fname,'-mat');
                         s = s.s;
                         handleupdate(s,lbrem);
                         RemoteScriptEditor('EnableDisable',theFig);
@@ -180,16 +182,16 @@ else % it is a callback
                 end
             end
         case 'Tolocal'
-            remsavestr = {};
+            %remsavestr = {};
             strs = lb_getselected(lbrem);
             if ~isempty(strs)
-                ts=[];
+                ts = [];
                 for i=1:length(strs)
                     g = char(strs(i));
                     if g(end)=='*'
-                        g=g(1:end-1);
+                        g = g(1:end-1);
                     end
-                    ts =  [ts ' ' g] ;
+                    ts =  [ts ' ' g] ; %#ok<AGROW>
                 end
             end
             save_str= {['save fromremote.mat ' ts ' -mat']
@@ -219,7 +221,7 @@ else % it is a callback
                 'try;delete(''gotit*'');end;'
                 'save(''gotit.mat'',''g'',''-mat'');'};
             strs = lb_getselected(lbrem);
-            if length(strs)>0
+            if ~isempty(strs)
                 for i=1:length(strs)
                     g = char(strs(i));
                     if g(end)=='*'
@@ -235,7 +237,7 @@ else % it is a callback
             if b
                 pathn = rempath;
                 fname = [pathn 'fromremote.mat'];
-                s=load(fname,'-mat'); 
+                s=load(fname,'-mat');
                 s = s.s;
                 handleupdate(s,lbrem);
                 RemoteScriptEditor('EnableDisable',theFig);
@@ -246,7 +248,7 @@ else % it is a callback
                 'try;delete(''gotit*'');end;'
                 'save(''gotit.mat'',''g'',''-mat'');'};
             strs = lb_getselected(lbrem);
-            if length(strs)>0
+            if ~isempty(strs)
                 for i=1:length(strs)
                     g = char(strs(i));
                     if g(end)=='*'
@@ -270,10 +272,10 @@ else % it is a callback
         case 'Strip'
             loadstr = {};
             save_str= {'save(''fromremote.mat'',''s'',''-mat'');'
-                                'try;delete(''gotit*'');end;'
+                'try;delete(''gotit*'');end;'
                 'save(''gotit.mat'',''g'',''-mat'');'};
             strs = lb_getselected(lbrem);
-            if length(strs)>0
+            if ~isempty(strs)
                 for i=1:length(strs)
                     g = char(strs(i));
                     if g(end)=='*'
@@ -318,7 +320,7 @@ else % it is a callback
                     end
                     dupstr={[char(answ) '=' g ';']};
                     save_str= {'save(''fromremote.mat'',''s'',''-mat'');'
-                                        'try;delete(''gotit*'');end;'
+                        'try;delete(''gotit*'');end;'
                         'save(''gotit.mat'',''g'',''-mat'');'};
                     dupstr=cat(1,dupstr,update_str);
                     dupstr=cat(1,dupstr,save_str);
@@ -326,7 +328,7 @@ else % it is a callback
                     if b
                         pathn = rempath;
                         fname = [pathn 'fromremote.mat'];
-                        s = load(fname,'-mat'); 
+                        s = load(fname,'-mat');
                         s = s.s;
                         set(lbrem,'Value',[]);
                         handleupdate(s,lbrem);
@@ -376,7 +378,7 @@ else % it is a callback
                 set(scriptedstruct.toremoteload,'enable','off');
             end
             strs = lb_getselected(lbrem);
-            if length(strs)>0
+            if ~isempty(strs)
                 if length(strs)==1
                     set(scriptedstruct.edit,'enable','on');
                     set(scriptedstruct.duplicate,'enable','on');

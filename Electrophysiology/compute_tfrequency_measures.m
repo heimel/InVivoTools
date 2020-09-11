@@ -48,6 +48,7 @@ for t = 1:n_triggers
     measures.tf_fit_bandwidth{t} = NaN;
     measures.tf_fit_lowpass{t} = NaN;
     measures.tf_fit_dogpar{t} = NaN;
+    measures.fit_explained_variance{t} = NaN;
 
     response = response - baseline;
 
@@ -130,15 +131,17 @@ for t = 1:n_triggers
     measures.tf_fit_lowpass{t} = fit_lowpass;
     
     fit = dog(par,measures.range{t});    
+    % Explained variance explained: https://en.wikipedia.org/wiki/Coefficient_of_determination
     if par(1)==0
-        measures.fit_explained_variance{t} = 1 - std([fit 0]-[response 0])^2/std([response 0])^2;
-        
+        % measures.fit_explained_variance{t} = 1 - std([fit 0]-[response 0])^2/std([response 0])^2;
+        measures.fit_explained_variance{t} = 1 - sum( ([fit 0]-[response 0]).^2)/length([fit 0])/std([response 0])^2;
     else
-        measures.fit_explained_variance{t} = 1 - std(fit-response)^2/std(response)^2;
+        % measures.fit_explained_variance{t} = 1 - std(fit-response)^2/std(response)^2;
+        measures.fit_explained_variance{t} = 1 - sum( (fit-response).^2 )/length(fit)/std(response)^2;
     end
     
     if measures.fit_explained_variance{t}<0
-        keyboard
+        logmsg('Negative explained variance?');
     end
 end
 

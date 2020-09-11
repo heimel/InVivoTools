@@ -12,6 +12,7 @@ function [hp,x] = plot_points(x,r,spaced)
 %
 % 200X-2019, Alexander Heimel
 
+hp = [];
 rnonnan = r(~isnan(r));
 if length(r)==1
     spaced = 0; % to center

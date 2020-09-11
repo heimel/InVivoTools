@@ -1,6 +1,6 @@
 function NewStimConfiguration
 
-% NewStimCalibrate.m
+% NewStimConfiguration.m
 %
 %  A user-specific configuration file which contains calibration code
 %  for a specific machine and monitor.  Read each line of code and its comments
@@ -15,15 +15,18 @@ NewStimGlobals;
 
 remotecommglobals;
 %  Is this a remote (slave, or, in other words, a stimulus) machine?
-Remote_Comm_isremote = 0;
+Remote_Comm_isremote = 1;
 
 Remote_Comm_enable = 1;  % enable remote communication?
 
-Remote_Comm_eol = '\r';  % End of line, '\r' for MacOS9, '\n' for unix
+Remote_Comm_eol = '\n';  % End of line, '\r' for MacOS9, '\n' for unix
 Remote_Comm_method = 'filesystem';  % 'sockets' or 'filesystem'
 
 % settings for Remote_Comm_method = 'filesystem'
-Remote_Comm_dir = '/home/data/stims';   % the local directory in which to write
+%Remote_Comm_dir = '\\Daneel\Data\InVivo\Electrophys\Daneel\stims';   % the local directory in which to write
+                                           %   files for the remote computer
+%Remote_Comm_dir = '\\10.0.0.1\Data\Stims';   % the local directory in which to write
+Remote_Comm_dir = '\\Multivac\Data\Stims';   % the local directory in which to write
                                            %   files for the remote computer
 
 % settings for Remote_Comm_method = 'sockets'
@@ -41,10 +44,10 @@ Remote_Comm_port = 1205;
 Remote_Comm_remotearchitecture = 'unix'; % options are 'PC', 'Mac' (MacOS9), or 'unix' (Linux, MacOSX)
  % the computer type of the remote machine you are talking to (not of THIS computer, necessarily)
 
-Remote_Comm_localprefix = '/home/data'; % for example, 'Z:', 'z:', '/Users/Shared/myexperimentdir'
+Remote_Comm_localprefix = 'D:\Data\'; % for example, 'Z:', 'z:', '/Users/Shared/myexperimentdir'
  % the prefix to the shared directory on THIS computer
 
-Remote_Comm_remoteprefix = '/mnt/daneel/data';
+Remote_Comm_remoteprefix = '/mnt/daneel/Data/'; % '\\Multivac\Data\
  % the prefix to the same directory as viewed by the OTHER computer
 
  % Example, suppose your "master" computer is a PC running Windows, and you 
@@ -65,8 +68,8 @@ Remote_Comm_remoteprefix = '/mnt/daneel/data';
 
 StimWindowGlobals;
 StimWindowMonitor = 0;  % use the given monitor, 0 is first
-StimComputer = 0;       % is this a stimulus computer?
-StimDebug = false;      % do you want to show stimuli in 640x480 window 
+StimComputer = 1;       % is this a stimulus computer?
+StimDebug = true;      % do you want to show stimuli in 640x480 window 
 
 StimWindowUseCLUTMapping = 0; % most users will say 0
 NewStimPeriodicStimUseDrawTexture = 1; % most users will say 1
@@ -76,30 +79,32 @@ MonitorWindowMonitor = 0;  % use the given monitor, 0 is first
 MonitorComputer = 0;       % does this computer have a monitor window?
 
 
-if StimComputer&haspsychtbox==2,  % set up timing and monitor settings
+if StimComputer&&haspsychtbox==2,  % set up timing and monitor settings
 	%screen('Preference','SecondsMultiplier',1.000230644770116);
-	Screen('Preference','SecondsMultiplier',1.0);
-	Screen('Preference','Backgrounding',1); % we'll try this
-else,                          % set the current monitor dimensions for remote comm
+	screen('Preference','SecondsMultiplier',1.0);
+	screen('Preference','Backgrounding',1); % we'll try this
+
+else                          % set the current monitor dimensions for remote comm
 	StimWindowRefresh = 60;
 	StimWindowDepth = 8;
 	StimWindowRect = [ 0 0 1440 900 ];
+	StimWindowRect = [ 0 0 200 200 ];
 end;
 
  % pixels_per_cm of the monitor in use
-%pixels_per_cm = 17.49;  % from 2002-08-01 to 2003-01-27
-%pixels_per_cm = 18.0832; % from 2003-01-27 - 
-pixels_per_cm = 200/9.5; % other monitor 2008-05-14
+pixels_per_cm = 1440/51; % other monitor 2008-05-14
+                         % changed for new flat monitor - RR
+                         % 2012-08-29
 
-NewStimViewingDistance = 24; %cm, necessary for Alexander
+NewStimViewingDistance = 15; %cm, necessary for Alexander
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  Gamma correction settings
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 GammaCorrectionTableGlobals;
-GammaCorrectionEnable = 0;
-%LoadGammaCorrectionTable('Macintosh HD:Users:fitz_lab:FitzStim4:MonitorCalibrations:sony_rm430_121404LUT.txt');
-%LoadGammaCorrectionTable('Macintosh HD:Users:fitz_lab:FitzStim4:MonitorCalibrations:SONYCalib012207_LUT.txt');
+GammaCorrectionEnable = 1;
+LoadGammaCorrectionTable('gct_daneel.txt');
+%LoadGammaCorrectionTable('gct_HOSTNAME.txt');
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -117,16 +122,22 @@ GammaCorrectionEnable = 0;
 % StimSerial, for sending messages over serial port in Mac OS9.
 % Use portlist = serial('Ports') for a list of ports on your Mac.
 % use system('setserial -bg /dev/ttyS*') on linux 
+% Available pins are 'dtr' (pin 4 of DE-9 serial port, or pin 20 of a DB-25
+% port) and 'rts' (pin 7 of DE-9 port, or pin 4 of DB-25 port)
 
 StimSerialGlobals; % see help file for description
-StimSerialSerialPort = 0;          % do you want to enable this feature?
-StimSerialScriptIn = '.Bin';       % NewStim flips DTR on this port when trial starts
-StimSerialScriptOut = '.Bout';     % same
-StimSerialStimIn = '.keyU2X02in';  % NewStim flips DTR on this this port when individual stimuli start
-StimSerialStimOut = '.keyU2X02out';% same
+StimSerialSerialPort = 1;          % do you want to enable this feature?
+StimSerialScriptIn = 'COM1';       % NewStim flips ScriptOutPin on this port when trial starts
+StimSerialScriptInPin = 'dtr';       % flips this pin when trial starts
+StimSerialScriptOut = 'COM1';     % same
+StimSerialScriptOutPin = 'dtr';       %
+StimSerialStimIn = 'COM1';  % NewStim flips DTR on this this port when individual stimuli start
+StimSerialStimInPin = 'dtr';  % NewStim flips this pin when individual stimuli start
+StimSerialStimOut = 'COM1';% same
+StimSerialStimOutPin = 'dtr';% same
 
 % Display preferences
-NSUseInitialSerialTrigger = 0;
+NSUseInitialSerialTrigger = 1;
 NSUseStimSerialTrigger = 0;
 NSUsePCIDIO96Trigger = 1;
 NSUsePCIDIO96InputTrigger = 0;
@@ -143,3 +154,5 @@ StimTriggerClear
 %StimTriggerAdd('FitzTrig',fitzTrigParams);
 
 %StimTriggerAdd('VHTrig',[]); % add Van Hooser lab triggering
+StimTriggerAdd('DaneelTrig',struct('daq',22)); % add daneel triggering
+
