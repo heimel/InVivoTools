@@ -253,6 +253,7 @@ if usetril == -1
     if (isfield(EVENT.strons,'OpOn')==0 && length(EVENT.strons.tril)>1) || ...
             (isfield(EVENT.strons,'OpOn')==1 && (length(EVENT.strons.tril)-length(EVENT.strons.OpOn))>1)
         errormsg(['More than one trigger in ' recordfilter(record) '. Taking last. Set usetril=XX in comment to overrule']);
+        logmsg(['Triggers at ' mat2str(EVENT.strons.tril)]);
     end
 end
 
