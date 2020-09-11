@@ -563,7 +563,11 @@ switch measure.measure
         if isempty(mouse.birthdate) || strcmpi(mouse.birthdate,'unknown')
             logmsg(['Birthdate unknown for ' recordfilter(mouse)]);
         end
-        results = age(mouse.birthdate,testrecord.date);
+        if isempty(criteria) || eval(criteria)
+            results = age(mouse.birthdate,testrecord.date);
+        else
+            results = NaN;
+        end
         dresults = NaN;
         return
     case 'expdate'  % day number since 1-1-0000
