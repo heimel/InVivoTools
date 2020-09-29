@@ -31,20 +31,24 @@ function ScriptObjEditor(scriptName, soefig)
 %  stimuli.
 %
 
-if ~ischar(scriptName),error('Argument to ScriptObjEditor must be a name.');end;
+if ~ischar(scriptName)
+    error('Argument to ScriptObjEditor must be a name.');
+end
 %check to see if is command or scriptName
 commands = {'Update', 'New', 'NewOK', 'Close','SetMethod', 'Method', 'Trigger',...
     'Up', 'Down', 'Load', 'Unload', 'Strip', 'Add', 'Delete', ...
     'Replace', 'EditDisplayPrefs','EnableDisable','Tile'};
 iscmd = 0;
-for i=1:length(commands),
-    if strcmp(char(commands(i)),scriptName), iscmd=1;end;
-end;
+for i=1:length(commands)
+    if strcmp(char(commands(i)),scriptName)
+        iscmd = 1;
+    end
+end
 
-if iscmd==0,
-    if ~isscriptname(scriptName),
+if iscmd==0
+    if ~isscriptname(scriptName)
         error([scriptName ' is not name of a stimscript.']);
-    end;
+    end
     drawScriptObjEditor(scriptName);
     drawnow;
     theFig = gcf;
@@ -52,24 +56,26 @@ if iscmd==0,
 else % it is a callback command
     command = scriptName;
     theFig = gcbf;
-    if isempty(theFig)&&nargin~=2, theFig = gcf;
-    elseif nargin==2, theFig = soefig; end;
+    if isempty(theFig)&&nargin~=2
+        theFig = gcf;
+    elseif nargin==2
+        theFig = soefig;
+    end
     scriptstruct = get(theFig,'UserData');
-    script=[];
     lb = scriptstruct.lb;
-    if ~isscriptname(scriptstruct.scriptname),
+    if ~isscriptname(scriptstruct.scriptname)
         close(theFig);
         error([scriptstruct.scriptname ' no longer refers to '...
             'a stimscript.']);
     else
-        script=evalin('base',scriptstruct.scriptname);
+        script = evalin('base',scriptstruct.scriptname);
     end
     switch command
-        case 'Update',
+        case 'Update'
             %n = numStims(script);
             stims = get(script);
             g = {};
-            for i=1:length(stims),
+            for i=1:length(stims)
                 g(i) = {class(stims{i})}; %#ok<AGROW>
             end
             set(lb,'String',g,'value',[]);
@@ -89,28 +95,28 @@ else % it is a callback command
                 script);
             ScriptObjEditor SetMethod;
             ScriptObjEditor Update;
-        case 'Help',
+        case 'Help'
             g = help('ScriptObjEditor');
             textbox('ScriptObjEditor help',g);
             % display order stuff
-        case 'Method',
-            switch(get(scriptstruct.dispmeth,'value')),
-                case 1, % sequential
+        case 'Method'
+            switch(get(scriptstruct.dispmeth,'value'))
+                case 1 % sequential
                     set(scriptstruct.dispord,'Style','text',...
                         'BackgroundColor',[0.7 0.7 0.7]);
                     set(scriptstruct.replabel,'enable','on');
                     set(scriptstruct.repeat,'enable','on');
-                case 2, % random
+                case 2 % random
                     set(scriptstruct.dispord,'Style','text', ...
                         'BackgroundColor',[0.7 0.7 0.7]);
                     set(scriptstruct.replabel,'enable','on');
                     set(scriptstruct.repeat,'enable','on');
-                case 3, % specified
+                case 3 % specified
                     set(scriptstruct.dispord,'Style','edit', ...
                         'BackgroundColor',[1 1 1]);
                     set(scriptstruct.replabel,'enable','off');
                     set(scriptstruct.repeat,'enable','off');
-            end;
+            end
         case 'SetMethod'
             val = get(scriptstruct.dispmeth,'value');
             trigger_value = get(scriptstruct.trigger,'value');
@@ -118,15 +124,15 @@ else % it is a callback command
             trigger = strs{trigger_value};
             
             if val<3
-                repstr=get(scriptstruct.repeat,'String');
-                reps=0;
-                go=1;
+                repstr = get(scriptstruct.repeat,'String');
+                reps = 0;
+                go = 1;
                 try
                     eval(['reps=' repstr ';']);
                 catch
                     errordlg('Syntax error in repeats');
-                    go=0;
-                end;
+                    go = 0;
+                end
                 if go
                     try
                         script=setDisplayMethod(script,val-1,reps,trigger);
@@ -139,14 +145,14 @@ else % it is a callback command
                 end
             else % specified
                 dispstr = get(scriptstruct.dispord,'String');
-                go=1;
+                go = 1;
                 try
                     eval(['do=' dispstr ';']);
                 catch
                     errordlg('Syntax error in repeats');
-                    go=0;
-                end;
-                if go,
+                    go = 0;
+                end
+                if go
                     try
                         script=setDisplayMethod(script,val-1,do,trigger);
                         assignin('base',scriptstruct.scriptname,...
@@ -154,20 +160,20 @@ else % it is a callback command
                         ScriptObjEditor Update;
                     catch me
                         errormsg(me.message,true);
-                    end;
-                end;
-            end;
+                    end
+                end
+            end
         case 'Trigger'
             % val = get(scriptstruct.trigger,'value')
             % setting is handled by 'SetMethod' command
             
             % now the stimuli buttons
-        case 'New',
+        case 'New'
             z = gcbf;
             stimlist = NewStimList;
             [s,v]=listdlg('PromptString','Select a stimulus type',...
                 'SelectionMode','single','ListString',stimlist);
-            if v,
+            if v
                 ty=char(stimlist(s));
                 eval(['newstim = ' ty '(''graphical'');']);
                 if ~isempty(newstim) %#ok<NODEF>
@@ -176,25 +182,25 @@ else % it is a callback command
                         scriptstruct.scriptname,script);
                     figure(z);
                     ScriptObjEditor Update;
-                end;
-            end;
-        case 'Add',
+                end
+            end
+        case 'Add'
             z = gcbf;
             stimlist = listofvars('stimulus');
             [s,v]=listdlg('PromptString','Select a stimulus',...
                 'SelectionMode','single','ListString',stimlist);
-            if v,
+            if v
                 ty=char(stimlist(s));
                 newstim=evalin('base',ty);
-                if ~isempty(newstim),
+                if ~isempty(newstim)
                     script=append(script,newstim);
                     assignin('base', ...
                         scriptstruct.scriptname,script);
                     figure(z);
                     ScriptObjEditor Update;
-                end;
-            end;
-        case 'Replace', % should really be New based on
+                end
+            end
+        case 'Replace' % should really be New based on
             % should only happen when one stimulus is selected
             z = gcbf;
             val=int2str(get(lb,'value')); s=scriptstruct.scriptname;
@@ -206,54 +212,55 @@ else % it is a callback command
                 assignin('base',scriptstruct.scriptname,script);
                 figure(z);
                 ScriptObjEditor Update;
-            end;
-        case 'Load', % should only happen if selected stims
+            end
+        case 'Load' % should only happen if selected stims
             vals = get(lb,'value');
-            for i=1:length(vals),
+            for i=1:length(vals)
                 v=int2str(vals(i));
                 s=scriptstruct.scriptname;
                 evalin('base',['set(' s ',loadstim(get(' s ',' v ')),' v ');']);
-            end;
-        case 'unload', % should only happen if selected stims
+            end
+        case 'unload' % should only happen if selected stims
             vals = get(lb,'value');
-            for i=1:length(vals),
+            for i=1:length(vals)
                 v=int2str(vals(i));
                 s=scriptstruct.scriptname;
                 evalin('base',['set(' s ',unloadstim(get(' s ',' v ')),' v ');']);
-            end;
-        case 'Strip', % should only happen if selected stims
+            end
+        case 'Strip' % should only happen if selected stims
             vals = get(lb,'value');
-            for i=1:length(vals),
+            for i=1:length(vals)
                 v=int2str(vals(i));
                 s=scriptstruct.scriptname;
                 evalin('base',['set(' s ',strip(get(' s ',' v ')),' v ');']);
-            end;
-        case 'EditDisplayPrefs',
-            dpl = repmat(displaystruct({}),0,0);
+            end
+        case 'EditDisplayPrefs'
+            %dpl = repmat(displaystruct({}),0,0);
+            dpl = repmat(displayprefs({}),0,0);
             vals = get(lb,'value');
-            for i=1:length(vals),
+            for i=1:length(vals)
                 dpl(i)=getdisplayprefs(get(script,vals(i)));
-            end;
+            end
             dpln=editdisplayprefs(dpl);
-            if ~isempty(dpln),
-                for i=1:length(vals),
+            if ~isempty(dpln)
+                for i=1:length(vals)
                     stim = get(script,vals(i));
                     stim = setdisplayprefs(stim,dpln(i));
                     script=set(script,stim,vals(i));
-                end;
-            end;
+                end
+            end
             assignin('base',scriptstruct.scriptname,script);
             ScriptObjEditor Update;
-        case 'Delete',
+        case 'Delete'
             vals = get(lb,'value');
-            for i=1:length(vals),
+            for i=1:length(vals)
                 v=int2str(vals(i));
                 s=scriptstruct.scriptname;
                 evalin('base',[s '=remove(' s ',' v ');']);
                 vals = vals-1;
-            end;
+            end
             ScriptObjEditor Update;
-        case 'Close',
+        case 'Close'
             close(gcbf);
         case 'EnableDisable'
             strs = lb_getselected(lb);
@@ -264,12 +271,12 @@ else % it is a callback command
             if ~isempty(strs)
                 set(scriptstruct.editdp,'enable','on');
                 set(scriptstruct.delete,'enable','on');
-                if length(strs)==1,
+                if length(strs)==1
                     set(scriptstruct.replace,'enable','on');
                 else
                     set(scriptstruct.replace,'enable','off');
                 end
-                if haspsychtbox,
+                if haspsychtbox
                     set(scriptstruct.load,'enable','on');
                     set(scriptstruct.unload,'enable','on');
                     set(scriptstruct.strip,'enable','on');
@@ -296,79 +303,16 @@ else % it is a callback command
 end
 
 function b = isscriptname(sn)
-b=1;
+b = 1;
 try
     g = evalin('base',sn); %#ok<NASGU>
 catch
     b=0;
 end
 
-% function makeNewFig(figNum)
-%
-% h0 = figure('Color',[0.8 0.8 0.8], ...
-%     'PaperPosition',[18 180 576 432], ...
-%     'PaperUnits','points', ...
-%     'Position',[302 204 550 239], ...
-%     'Tag','Fig2', ...
-%     'MenuBar','none');
-% settoolbar(h0,'none');
-% h1 = uicontrol('Parent',h0, ...
-%     'Units','points', ...
-%     'BackgroundColor',[0.8 0.8 0.8], ...
-%     'ListboxTop',0, ...
-%     'Position',[71.2 9.6 63.2 24.8], ...
-%     'String','OK', ...
-%     'Tag','Pushbutton1','Callback','ScriptObjEditor NewOK');
-% h1 = uicontrol('Parent',h0, ...
-%     'Units','points', ...
-%     'BackgroundColor',[0.8 0.8 0.8], ...
-%     'FontSize',14, ...
-%     'FontWeight','bold', ...
-%     'HorizontalAlignment','left', ...
-%     'ListboxTop',0, ...
-%     'Position',[14.4 40 50.4 19.2], ...
-%     'String','Name:', ...
-%     'Style','text', ...
-%     'Tag','StaticText1');
-% namectl = uicontrol('Parent',h0, ...
-%     'Units','points', ...
-%     'BackgroundColor',[1 1 1], ...
-%     'ListboxTop',0, ...
-%     'Position',[68.8 37.6 197.6 24.8], ...
-%     'Style','edit', ...,
-%     'HorizontalAlignment','left',...
-%     'Tag','EditText1');
-% lb = uicontrol('Parent',h0, ...
-%     'Units','points', ...
-%     'BackgroundColor',[1 1 1], ...
-%     'Position',[19.2 80 244 77.6], ...
-%     'String',NewStimList, ...
-%     'Style','listbox', ...
-%     'Tag','Listbox1', ...
-%     'Value',1);
-% h1 = uicontrol('Parent',h0, ...
-%     'Units','points', ...
-%     'BackgroundColor',[0.8 0.8 0.8], ...
-%     'FontSize',14, ...
-%     'FontWeight','bold', ...
-%     'ListboxTop',0, ...
-%     'Position',[10.4 163.2 100.8 17.6], ...
-%     'String','Stimulus Type:', ...
-%     'Style','text', ...
-%     'Tag','StaticText2');
-% h1 = uicontrol('Parent',h0, ...
-%     'Units','points', ...
-%     'BackgroundColor',[0.8 0.8 0.8], ...
-%     'ListboxTop',0, ...
-%     'Position',[152.8 9.6 63.2 24.8], ...
-%     'String','Cancel', ...
-%     'Tag','Pushbutton1','Callback','close(gcbf);');
-% set(h0,'UserData',struct('lb',lb,'name',namectl,'parentFig',figNum));
-%
-
 function drawScriptObjEditor(scriptName)
 
-h0 = figure('Color',[0.8 0.8 0.8], ...
+h0 = figure('WindowStyle','Normal','Color',[0.8 0.8 0.8], ...
     'PaperUnits','points', ...
     'Position',[408   134   580   530], ...
     'Tag','Fig1', ...
