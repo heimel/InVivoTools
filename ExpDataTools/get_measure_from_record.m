@@ -3,7 +3,7 @@ function [val,val_sem]=get_measure_from_record(record,measure,criteria,extra_opt
 %
 %  [val,val_sem] = get_measure_from_record(record,measure,criteria,extra_options)
 %
-% 2007-2018, Alexander Heimel
+% 2007-2020, Alexander Heimel
 
 if nargin<3
     criteria = [];
@@ -99,7 +99,6 @@ end
 
 get = 1;
 if exist('anesthetic','var')
-%    if isempty(strfind(lower(record.anesthetic),lower(anesthetic)))
     if ~contains(lower(record.anesthetic),lower(anesthetic),'IgnoreCase',true)
         get = 0;
     end
@@ -337,7 +336,7 @@ for c=1:length(record.measures) % over all cells or ROIs
     else % no field with measure name
         switch measure
             case 'linked2neurite'
-                logmmsg(['linked2neurite should come from measures. Please analyze record ' recordfilter(record)]);
+                logmsg(['linked2neurite should come from measures. Please analyze record ' recordfilter(record)]);
                 if length(record.ROIs.celllist)<c
                     logmsg(['ROIs in record is shorter than measures for ' recordfilter(record)]);
                     tempval = NaN;
