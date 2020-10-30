@@ -4,7 +4,7 @@ function [wcinfo,filename] = wc_getmovieinfo( record)
 % [WCINFO,FILENAME] = WC_GETMOVIEINFO( RECORD )
 %    FILENAME is full mp4 filename including path and extension
 %
-% 2015-2019, Alexander Heimel
+% 2015-2020, Alexander Heimel
 
 par = wcprocessparams(record);
 
@@ -81,7 +81,9 @@ else
         wcinfo(i).path = parpath;
         wcinfo(i).mp4name = [ wcinfo(i).filename '.mp4'];
     end
-    logmsg(['Cannot create mp4 wrapper for ' fullfile(parpath,wcinfo(i).filename) '. Try on linux computer, or run sudo apt-get -y install gpac']);
+    if ~exist(fullfile(parpath,wcinfo(i).mp4name),'file')
+        logmsg(['Cannot create mp4 wrapper for ' fullfile(parpath,wcinfo(i).filename) '. Try on linux computer, or run sudo apt-get -y install gpac']);
+    end
 end
 
 for i=1:length(wcinfo)
