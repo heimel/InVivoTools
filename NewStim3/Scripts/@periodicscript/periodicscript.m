@@ -151,7 +151,8 @@ if finish,
                                                         theParams.fixedDur = PSparams.fixedDur(n12);
                                                         theParams.size = PSparams.size(n13);
                                                         if ~isempty(PSparams.ps_add)
-                                                            masking_stims=get(evalin('base',PSparams.ps_add));
+                                                            masking_script = evalin('base',PSparams.ps_add);
+                                                            masking_stims=get(masking_script);
                                                             for n14=1:length(masking_stims)
                                                                 theParams.ps_add = masking_stims{n14};
                                                                 stim = periodicstim(theParams); % should never fail
@@ -161,8 +162,19 @@ if finish,
                                                             stim = periodicstim(theParams); % should never fail
                                                             S = append(S,stim);
                                                         end
-                                                end; 
-                                                end; end; end; end; end; end; end; end; end; end; end; end;
+                                                    end;
+                                                end;
+                                            end;
+                                        end;
+                                    end;
+                                end;
+                            end;
+                        end;
+                    end;
+                end;
+            end;
+        end;
+    end;
     % generate all these stims
 else,
     S = [];
@@ -247,7 +259,7 @@ end;
 
 
 % make figure layout
-h0 = figure('Color',[0.8 0.8 0.8], ...
+h0 = figure('WindowStyle','normal','Color',[0.8 0.8 0.8], ...
     'PaperPosition',[18 180 576 432], ...
     'PaperUnits','points', ...
     'Position',[30 100 415 650], ...
@@ -891,7 +903,7 @@ cancel_ctl = uicontrol('Parent',h0, ...
 h1 = uicontrol('Parent',h0, ...
     'Units','pixels', ...
     'BackgroundColor',[0.7 0.7 0.7], ...
-    'Callback','textbox(''Periodicscript Help'',help(''periodicscript''));', ...      
+    'Callback','textbox(''Periodicscript Help'',help(''periodicscript''));', ...
     'FontWeight','bold', ...
     'ListboxTop',0, ...
     'Position',[297.6 38.4-30 71.2 27.2], ...

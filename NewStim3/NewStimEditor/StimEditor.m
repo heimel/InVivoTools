@@ -39,7 +39,7 @@ if nargin==0
     set(fig,'MenuBar','none','NumberTitle','off','Name','StimEditor');
     drawStimEditor(fig);
     StimEditor('Update',fig);
-elseif ~ischar(figNum),  % is the call described above
+elseif ~ischar(figNum) % is the call described above
     fig = figNum; 
     figure(fig); 
     clf; 
@@ -53,20 +53,20 @@ else % it is a callback
         theFig = gcf;
     elseif nargin==2
         theFig = soefig;
-    end;
+    end
     stimedstruct = get(theFig,'UserData');
     lb = stimedstruct.lb;
-    switch command,
-        case 'Update',
+    switch command
+        case 'Update'
             g = listofvars('stimulus');
             set(lb,'String',g,'value',[]);
             StimEditor('EnableDisable',theFig);
-        case 'Help',
+        case 'Help'
             g = help('StimEditor');
             textbox('StimEditor help',g);
-        case 'New',
+        case 'New'
             makeNewFig(gcbf);
-        case 'NewOK',
+        case 'NewOK'
             newstr = get(gcbf,'UserData');
             str = get(newstr.name,'String');
             ty = char(lb_getselected(newstr.lb));
@@ -78,131 +78,133 @@ else % it is a callback
             close(gcbf);
             figure(newstr.parentFig);
             StimEditor Update;
-        case 'OpenFile',
+        case 'OpenFile'
             [fname,pathn] = uigetfile('*','Open file...');
-            if fname(1)~=0,
+            if fname(1)~=0
                 evalin('base',['load ' pathn fname]);
-            end;
+            end
             StimEditor Update;
             z=geteditor('ScriptEditor');
-            if z,
+            if z
                 ScriptEditor('Update',z);
-            end;
-        case 'Save',
+            end
+        case 'Save'
             strs = lb_getselected(lb);
             if ~isempty(strs)
                 varnames = catCellStr(strs);
                 [fname,pathn]=uiputfile('*.mat','Save stims as...');
-                if fname(1)~=0,
+                if fname(1)~=0
                     evalin('base',['save ' pathn fname ' ' varnames]);
-                end;
-            end;
-        case 'SaveAll',
+                end
+            end
+        case 'SaveAll'
             strs = get(lb,'String');
             if ~isempty(strs)
                 varnames = catCellStr(strs);
                 [fname,pathn]=uiputfile('*.mat','Save stims as...');
-                if fname(1)~=0,
+                if fname(1)~=0
                     evalin('base',['save ' pathn fname ' ' varnames]);
-                end;
-            end;
-        case 'Load',
+                end
+            end
+        case 'Load'
             % should only happen if psychtoolbox available
             strs = lb_getselected(lb);
-            if ~isempty(strs),
-                for i=1:length(strs),
+            if ~isempty(strs)
+                for i=1:length(strs)
                     g = char(strs(i));
                     evalin('base',[g '=loadstim(' g ');']);
-                end;
-            end;
-        case 'Unload',
+                end
+            end
+        case 'Unload'
             % should only happen if psychtoolbox available
             strs = lb_getselected(lb);
-            if ~isempty(strs),
-                for i=1:length(strs),
+            if ~isempty(strs)
+                for i=1:length(strs)
                     g = char(strs(i));
                     evalin('base',[g '=unloadstim(' g ');']);
-                end;
-            end;
-        case 'Strip',
+                end
+            end
+        case 'Strip'
             % should only happen if psychtoolbox available
             strs = lb_getselected(lb);
-            if ~isempty(strs),
-                for i=1:length(strs),
+            if ~isempty(strs)
+                for i=1:length(strs)
                     g = char(strs(i));
                     evalin('base',[g '=strip(' g ');']);
-                end;
-            end;
-        case 'EditDisplayPrefs',
+                end
+            end
+        case 'EditDisplayPrefs'
             strs = lb_getselected(lb);
             dpl = repmat(displayprefs({}),0,0);
-            for i=1:length(strs),
+            for i=1:length(strs)
                 g = char(strs(i));
                 stim=evalin('base',g);
                 dpl(i)=getdisplayprefs(stim);
-            end;
+            end
             dpln = editdisplayprefs(dpl);
-            if ~isempty(dpln),
-                for i=1:length(strs),
+            if ~isempty(dpln)
+                for i=1:length(strs)
                     g = char(strs(i));
                     assignin('base','t__dp',dpln(i));
                     evalin('base',[g '=setdisplayprefs(' g ',t__dp);']);
                     evalin('base','clear t__dp');
-                end;
-            end;
-        case 'MakeScript',
+                end
+            end
+        case 'MakeScript'
             % should only occur when 1 stimulus is selected
             strs = lb_getselected(lb);
             namenotfound=1;
             prompt={'Name of new script:'}; def = {''};
             dlgTitle = 'New script name...';lineNo=1;
-            while (namenotfound),
+            while (namenotfound)
                 answ=inputdlg(prompt,dlgTitle,lineNo,def);
                 an = char(answ);
                 if isempty(answ)
                     namenotfound = 0; %cancelled
                     continue
                 end
-                if isempty(an),
+                if isempty(an)
                     an = ['scr_' strs{1}];
                 end
-                if ~isvarname(an), % syntax err
+                if ~isvarname(an) % syntax err
                     uiwait(errordlg('Syntax error in name'));
                 else % okay, make the script
                     script = stimscript(0);
-                    for i=1:length(strs),
+                    for i=1:length(strs)
                         g = char(strs(i));
                         stim = evalin('base',g);
                         script=append(script,stim);
-                    end;
+                    end
                     namenotfound = 0;
                     assignin('base',an,script);
-                end;
-            end;
+                end
+            end
             StimEditor Update;
             z = geteditor('ScriptEditor');
-            if ~isempty(z), ScriptEditor('Update',z); end;
-        case 'Replace',  % should really be renamed NewBasedOn
+            if ~isempty(z) 
+                ScriptEditor('Update',z); 
+            end
+        case 'Replace'  % should really be renamed NewBasedOn
             % should only occur when 1 stimulus is selected
             g = lb_getselected(lb);
             g = char(g);
-            namenotfound=1;
+            namenotfound = 1;
             prompt={'Name of new stimulus:'}; 
             def = { newstimname('',g) };
             dlgTitle = 'New stimulus name...';
             lineNo=1;
-            while (namenotfound),
-                answ=inputdlg(prompt,dlgTitle,lineNo,def);
+            while (namenotfound)
+                answ = inputdlg(prompt,dlgTitle,lineNo,def);
                 if isempty(answ)
                     namenotfound = 0; %cancelled
-                elseif ~isvarname(char(answ)), % syntax err
+                elseif ~isvarname(char(answ)) % syntax err
                     uiwait(errordlg('Syntax error in name'));
                 else % okay, make the stim
                     namenotfound = 0;
                     tempStim = evalin('base',g);
                     ty = class(tempStim);
                     eval(['nS=' ty '(''graphical'',tempStim);']);
-                    if ~isempty(nS),
+                    if ~isempty(nS)
                         assignin('base',char(answ),nS);
                     end
                 end
@@ -218,40 +220,40 @@ else % it is a callback
             if ~isempty(strs)
                 varnames = catCellStr(strs);
                 evalin('base',['clear ' varnames]);
-            end;
+            end
             set(lb,'value',[]);
             StimEditor Update;
-        case 'DeleteAll',
+        case 'DeleteAll'
             strs=get(lb,'String');
-            if ~isempty(strs),
+            if ~isempty(strs)
                 varnames=catCellStr(strs);
                 evalin('base',['clear ' varnames]);
-            end;
+            end
             set(lb,'value',[]);
             StimEditor Update;
-        case 'Close',
+        case 'Close'
             close(gcbf);
         case 'EnableDisable'
             strs = get(lb,'String');
-            if ~isempty(strs),
+            if ~isempty(strs)
                 set(stimedstruct.saveall,'enable','on');
                 set(stimedstruct.deleteall,'enable','on');
             else
                 set(stimedstruct.saveall,'enable','off');
                 set(stimedstruct.deleteall,'enable','off');
-            end;
+            end
             strs = lb_getselected(lb);
-            if ~isempty(strs),
+            if ~isempty(strs)
                 set(stimedstruct.save,'enable','on');
                 set(stimedstruct.delete,'enable','on');
                 set(stimedstruct.editdp,'enable','on');
                 set(stimedstruct.makescript,'enable','on');
-                if length(strs)==1,
+                if length(strs)==1
                     set(stimedstruct.replace,'enable','on');
                 else
                     set(stimedstruct.replace,'enable','off');
-                end;
-                if haspsychtbox,
+                end
+                if haspsychtbox
                     set(stimedstruct.show,'enable','on');
                     set(stimedstruct.load,'enable','on');
                     set(stimedstruct.unload,'enable','on');
@@ -272,18 +274,19 @@ else % it is a callback
                 set(stimedstruct.strip,'enable','off');
                 set(stimedstruct.show,'enable','off');
                 set(stimedstruct.unload,'enable','off');
-            end;
-            if ~haspsychtbox,
+            end
+            if ~haspsychtbox
                 set(stimedstruct.load,'enable','off');
                 set(stimedstruct.show,'enable','off');
                 set(stimedstruct.strip,'enable','off');
                 set(stimedstruct.unload,'enable','off');
-            end;
-    end;
-end;
+            end
+    end
+end
 
 function drawStimEditor(h0)
-set(h0,'Units','points', ...
+set(h0,'WindowStyle','Normal',...
+    'Units','points', ...
     'Color',[0.8 0.8 0.8], ...
     'MenuBar','none', ...
     'PaperPosition',[18 180 576 432], ...
@@ -455,6 +458,7 @@ n_lines = max(length(NewStimList),20);
 rowheight = 12;
 
 h0 = figure('Name','New stimulus',...
+    'WindowStyle','Normal',...
     'NumberTitle','off',...
     'Color',[0.8 0.8 0.8], ...
     'PaperPosition',[18 180 576 432], ...
@@ -463,14 +467,14 @@ h0 = figure('Name','New stimulus',...
     'Tag','Fig2', ...
     'MenuBar','none');
 settoolbar(h0,'none');
-h1 = uicontrol('Parent',h0, ...
+uicontrol('Parent',h0, ...
     'Units','points', ...
     'BackgroundColor',[0.8 0.8 0.8], ...
     'ListboxTop',0, ...
     'Position',[71.2 9.6 63.2 24.8], ...
     'String','OK', ...
     'Tag','Pushbutton1','Callback','StimEditor NewOK');
-h1 = uicontrol('Parent',h0, ...
+uicontrol('Parent',h0, ...
     'Units','points', ...
     'BackgroundColor',[0.8 0.8 0.8], ...
     'FontSize',14, ...
@@ -497,7 +501,7 @@ lb = uicontrol('Parent',h0, ...
     'Style','listbox', ...
     'Tag','Listbox1', ...
     'Value',1);
-h1 = uicontrol('Parent',h0, ...
+uicontrol('Parent',h0, ...
     'Units','points', ...
     'BackgroundColor',[0.8 0.8 0.8], ...
     'ListboxTop',0, ...
