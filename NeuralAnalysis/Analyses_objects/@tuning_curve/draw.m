@@ -25,12 +25,13 @@ if ~isempty(w)
             if strcmp(get(z(i),'type'),'axes')
                 disp('found the axes');
                 ud2 = get(z(i),'userdata');
-                delete(ud2{1}); delete(ud2{2});
+                delete(ud2{1}); 
+                delete(ud2{2});
             end
             delete(z(i));
         end
     end
-    ud = get(w.figure,'userdata');
+    %ud = get(w.figure,'userdata');
     figure(w.figure);
     rct3 = [];
     rct2 = [];
@@ -50,19 +51,21 @@ if ~isempty(w)
     r = axes('units',w.units,'position',rct,'tag','analysis_generic',...
         'uicontextmenu',contextmenu(tc));
     h = errorbar(c.curve(1,:),c.curve(2,:),c.curve(3,:),'r');
-    for jj=1:length(h)
-        set(h(jj),'linewidth',2);
+    for jj = 1:length(h)
+        set(h(jj),'linewidth',1);
     end
     hold on;
-    h = errorbar(c.curve(1,:),c.curve(2,:),c.curve(4,:));
+    h = errorbar(c.curve(1,:),c.curve(2,:),c.curve(4,:),'linewidth',2);
     for jj=1:length(h)
         set(h(jj),'linewidth',2);
     end
     if ~isempty(c.spont)
         ll = ones(size(c.curve(1,:)));
-        hold on;plot(c.curve(1,:),c.spont(1)*ll,'--');
-        plot(c.curve(1,:),c.spont(1)*ll+c.spont(2)*ll,'r--');
-        plot(c.curve(1,:),c.spont(1)*ll-c.spont(2)*ll,'r--');
+        hold on;
+        plot(c.curve(1,:),c.spont(1)*ll,'--','color',0*[1 1 1]);
+        % plot STD
+        plot(c.curve(1,:),c.spont(1)*ll+c.spont(2)*ll,'--','color',0.7*[1 1 1]);
+        plot(c.curve(1,:),c.spont(1)*ll-c.spont(2)*ll,'--','color',0.7*[1 1 1]);
     end
     title(I.title,'Interpreter','none');
     set(gca,'tag','analysis_generic','uicontextmenu',contextmenu(tc));
