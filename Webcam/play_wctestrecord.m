@@ -25,7 +25,7 @@ end
 %starttime = (wcinfo(1).stimstart-params.wc_playbackpretime) * params.wc_timemultiplier + params.wc_timeshift;
 starttime = wc_get_stimstart(record);
 
-logmsg('Running video in matlab');
+logmsg(['Running video in matlab: ' filename]);
 if ~exist(filename,'file')
     errormsg([filename ' does not exist. Perhaps need to configure mp4-wrapper?']);
     return
