@@ -65,14 +65,18 @@ else
     preamble = '';
 end
 filebase = fullfile( tank,blockname,[preamble '_' blockname]);
-tev_path = [filebase '.tev'];
 tsq_path = [filebase '.tsq'];
-
-
-if ~exist(tsq_path,'file')
+if ~exist(tsq_path,'file') && tank(end)~=filesep
+    [~,preamble] = fileparts(tank);
+    filebase = fullfile( tank,blockname,[preamble '_' blockname]);
+    tsq_path = [filebase '.tsq'];
+end
+    
+if ~exist(tsq_path,'file')   
     errormsg(['File ' tsq_path ' does not exist.']);
     return
 end
+tev_path = [filebase '.tev'];
 
 % open the files
 

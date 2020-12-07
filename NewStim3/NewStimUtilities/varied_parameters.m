@@ -1,7 +1,7 @@
 function [params,values] = varied_parameters( script )
 %VARIED_PARAMETERS returns which parameters have been varied in a script
 %
-% 2012-2019, Alexander Heimel
+% 2012-2020, Alexander Heimel
 %
 
 params = {};
@@ -31,3 +31,6 @@ for i = 1:length(possible_params)
         values{end+1} = vals;
     end
 end
+
+params{end+1} = 'stimnumber';
+values{end+1} = 1:length(ss); % 1 to number of stimuli

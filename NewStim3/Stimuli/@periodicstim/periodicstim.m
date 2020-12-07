@@ -227,7 +227,8 @@ end
 
 
 % make figure layout
-h0 = figure('Color',[0.8 0.8 0.8],'Position',[196 100 415 525]);
+h0 = figure('WindowStyle','Normal','Color',[0.8 0.8 0.8],...
+    'Position',[196 100 415 525]);
 settoolbar(h0,'none'); set(h0,'menubar','none');
 
 % window heading

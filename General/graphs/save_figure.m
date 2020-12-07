@@ -3,7 +3,7 @@ function filename=save_figure(filename,path,h)
 %
 %  SAVE_FIGURE(FILENAME,PATH,H)
 %
-% 200X-2015, Alexander Heimel
+% 200X-2020, Alexander Heimel
 
 if nargin<2
     path='';
@@ -36,10 +36,10 @@ if  isunix && ~ismac
     % imwrite(frame.cdata,[filename '.png']);
 else % windows or max (assume absence of ghostscript)
     saveas(h,[filename '.png'],'png');
-    saveas(h,[filename '.eps'],'epsc');
+    saveas(h,[filename '.pdf'],'pdf');
 end
 filename = fullfile(path,filename);
 cd(savewd);
 
 filename=[filename '.png'];
-logmsg(['Figure saved as ' filename ' (bitmap) and as eps (vector graphics)']);
+logmsg(['Figure saved as ' filename ' (bitmap) and as pdf/eps (vector graphics)']);

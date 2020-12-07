@@ -14,17 +14,23 @@ function [p,chi2,E] = chi2class(D)
 %       if D is a single column, it tests whether the distribution is
 %       equally distributed over all the classes
 %
-% -2014, Alexander Heimel (?)
+% 200X-2020, Alexander Heimel (?)
 
 if length(D) == numel(D) % i.e. single column
     D = D(:)'; % column vector
     D(2,:) = 100000 * ones(1,length(D));
 end
 
+%remove zero rows;
+ind = ~any(D,2);
+D(ind,:) = [];
 
+% remove zero columns;
+ind = ~any(D);
+D(:,ind) = [];
 
 [c,r] = size(D);
-rsum = sum(D')';
+rsum = sum(D,2); %sum(D')';
 csum = sum(D);
 T = sum(sum(D));
 df = (r-1)*(c-1);

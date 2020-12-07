@@ -1,4 +1,4 @@
-function [STATS,h] = manova(X,g,al)
+function [STATS,h] = manova_steve(X,g,al)
 
 % MANOVA - Multivariate Analysis of Variance
 %

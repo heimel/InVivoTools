@@ -13,7 +13,7 @@ function h=ivt_graph(y,x,varargin)
 %     'axishandle',[]
 %     'showpoints',{0,[1],2}
 %     'test',{['ttest'],'kruskal_wallis_test','none'}
-%     'spaced',{[0],1,2,3}    % spacing points in bar plot
+%     'spaced',{[0],1,2,3} % spacing points in bar plot, see help PLOT_POINTS
 %     'color',0.7*[1 1 1]
 %     'errorbars',''
 %     'style',{['bar'],'xy','box','hist','cumul','rose'}

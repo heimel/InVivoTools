@@ -27,6 +27,18 @@ if nargin<4 || isempty(plotoptions)
     plotoptions.show_freezestart = true;
 end
 
+if ~isfield(plotoptions,'show_circles') || isempty(plotoptions.show_circles)
+    plotoptions.show_circles = true;
+end
+if ~isfield(plotoptions,'markersize') || isempty(plotoptions.markersize)
+    plotoptions.markersize = 3;
+end
+if ~isfield(plotoptions,'startmarkersize') || isempty(plotoptions.startmarkersize)
+    plotoptions.startmarkersize = 6;
+end
+
+
+
 r = [];
 if isempty(record)
     return
@@ -90,12 +102,14 @@ if verbose && ~isoctave && isfield(record.measures,'stim_nose_centered_rotated_c
     
     hold on;
     
-    rectangle('Position',[-25 -25 2*25 2*25],'Curvature',[1 1],'edgecolor',0.7*[1 1 1],'linewidth',0.25)
-    text(20,-20,'25 cm','Fontsize',18);
+    if plotoptions.show_circles
+        rectangle('Position',[-25 -25 2*25 2*25],'Curvature',[1 1],'edgecolor',0.7*[1 1 1],'linewidth',0.25)
+        text(20,-20,'25 cm','Fontsize',18);
         
-    rectangle('Position',[-50 -50 2*50 2*50],'Curvature',[1 1],'edgecolor',0.7*[1 1 1],'linewidth',0.25)
-    text(37,-37,'50 cm','Fontsize',18);
-
+        rectangle('Position',[-50 -50 2*50 2*50],'Curvature',[1 1],'edgecolor',0.7*[1 1 1],'linewidth',0.25)
+        text(37,-37,'50 cm','Fontsize',18);
+    end
+    
     set(gca,'ydir','reverse')
     axis image
     set(gca,'xaxislocation','origin');
@@ -116,7 +130,9 @@ if verbose && ~isoctave && isfield(record.measures,'stim_nose_centered_rotated_c
         else
             plot(record.measures.stim_nose_centered_rotated_cm(ind,1),...
                 record.measures.stim_nose_centered_rotated_cm(ind,2),...
-                'o','color',0.8*[1 1 1],'markersize',3,'markerfacecolor',0.8*[1 1 1]);
+                'o','color',0.8*[1 1 1],...
+                'markersize',plotoptions.markersize,...
+                'markerfacecolor',0.8*[1 1 1]);
         end
     end
     
@@ -144,12 +160,26 @@ if verbose && ~isoctave && isfield(record.measures,'stim_nose_centered_rotated_c
     if  plotoptions.show_stimstart && ~isempty(ind)
         plot(record.measures.stim_nose_centered_rotated_cm(ind(1),1),...
             record.measures.stim_nose_centered_rotated_cm(ind(1),2),...
-            'o','color',[0 1 0],'markersize',3,'markerfacecolor',[0 1 0]);
+            'o','color',[1 1 1]*0.7,...
+            'markersize',plotoptions.startmarkersize,...
+            'markerfacecolor',[1 1 1]*0.7);
     end
     
     if  plotoptions.show_freeze
         plot(record.measures.stim_nose_centered_rotated_cm(ind_freeze,1),...
             record.measures.stim_nose_centered_rotated_cm(ind_freeze,2),...
-            'o','color',[ 1 0  0],'markersize',3,'markerfacecolor',[ 1 0 0]);
+            'o','color',[ 1 0  0],...
+            'markersize',plotoptions.markersize,...
+            'markerfacecolor',[ 1 0 0]);
     end
+    
+    
+    if  plotoptions.show_freezestart &&  ~isempty(ind_freeze)
+        plot(record.measures.stim_nose_centered_rotated_cm(ind_freeze(1),1),...
+            record.measures.stim_nose_centered_rotated_cm(ind_freeze(1),2),...
+            'o','color',[ 1 0  0],...
+            'markersize',plotoptions.startmarkersize,...
+            'markerfacecolor',[ 1 0.1 0.1]);
+    end
+    
 end
