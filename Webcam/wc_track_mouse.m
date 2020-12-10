@@ -195,7 +195,7 @@ hitnr = 0;
 smoothVidDif = movmean(vidDif,2*params.wc_freeze_smoother);
 deriv2 = diff(smoothVidDif);
 minimalMovement = min(smoothVidDif);
-nomotion = smoothVidDif(1:end-1) < (minimalMovement + params.wc_difThreshold) & abs(deriv2) < params.wc_deriv2thres;
+nomotion = (smoothVidDif(1:end-1) < (minimalMovement + params.wc_difThreshold)) & (abs(deriv2) < params.wc_deriv2thres);
 
 freezeTimes = [];
 freeze_duration = [];

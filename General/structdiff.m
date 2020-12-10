@@ -22,6 +22,12 @@ end
 flds = {};
 
 c = 1;
+
+if (isempty(a) && ~isempty(b)) || (~isempty(a) && isempty(b))
+    c = 0;
+    return
+end
+    
 fna = fieldnames(a);
 fnb = fieldnames(b);
 

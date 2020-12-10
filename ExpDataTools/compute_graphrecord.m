@@ -3,6 +3,9 @@ function [record,hgraph] = compute_graphrecord(record,db,hgraph)
 %
 %   [record,hgraph] = compute_graphrecord(record,db,hgraph)
 %
+%         DB is optional database with graphrecords to use if add2graph
+%            field is given
+%
 % 2015-2017, Alexander Heimel
 
 if nargin<3 

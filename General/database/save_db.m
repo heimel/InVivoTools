@@ -9,7 +9,7 @@ function [filename,lockfile]=save_db(db, filename , suggest,lockfile)
 %
 
 if nargin<4
-    lockfile = '';
+    lockfile = [];
 end
 if nargin<3
     suggest = '';
@@ -59,10 +59,6 @@ end
 db_table = struct2table(db);
 writetable(db_table,filename);
 
-function save_csv(db,filename)
-% deprecated
-saveStructArray(filename,db,1,';',1);
-
 function [filename,lockfile] = save_mat(db,filename,lockfile)
 debug = 1;
 
@@ -76,7 +72,7 @@ if res==1 % a lockfile exists
         end
     end
 else % no lockfile exists yet
-    [res,lockfile] = setlock(filename);
+    [~,lockfile] = setlock(filename);
 end
 
 h = waitbar(0,'Saving database. Please wait...');

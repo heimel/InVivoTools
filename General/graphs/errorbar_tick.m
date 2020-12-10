@@ -21,12 +21,15 @@ function errorbar_tick(h,w,xtype)
 %   http://www.mathworks.com/matlabcentral/newsreader/author/94805
 %   http://www.developpez.net/forums/u125006/dut/
 % It was further modified by Arnaud Laurent and Jerome Briot.
+%
+% 2020, Adapted by Alexander Heimel
 
 % Check numbers of arguments
 error(nargchk(1,3,nargin))
 
 % Check for the use of V6 flag ( even if it is depreciated ;) )
 flagtype = get(h,'type');
+
 
 % Check number of arguments and provide missing values
 if nargin==1
@@ -37,10 +40,21 @@ if nargin<3
    xtype = 'ratio';
 end
 
+
+
 % Calculate width of error bars
 if ~strcmpi(xtype,'units')
     dx = diff(get(gca,'XLim'));	% Retrieve x limits from current axis
     w = dx/w;                   % Errorbar width
+end
+
+
+try 
+    h.CapSize = w; % in point
+    return
+catch me
+    logmsg(me.message)
+    % continue with the old function
 end
 
 % Plot error bars

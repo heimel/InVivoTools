@@ -45,6 +45,9 @@ function h=ivt_graph(y,x,varargin)
 %        min_n, # , where # is the minimal number of y-values to include a
 %                           group in the graph
 %        fit, linear
+%        wingtipheight
+%        errorbar_tick    width of tick
+%        errorbar_sides   away, both, below, above, none, topline
 %
 %
 % 2006-2020, Alexander Heimel
@@ -1016,7 +1019,18 @@ return
 
 
 
-function h=plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick,colors)
+function h=plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick,colors,width,marker)
+if nargin<11 || isempty(marker)
+    marker = '.';
+end
+if nargin<10 || isempty(width)
+    switch sides
+        case 'topline'
+            width = 2;
+        otherwise
+            width = 0.5;
+    end
+end
 if nargin<9 || isempty(colors)
     colors = [];
 end
@@ -1087,28 +1101,38 @@ switch errorbars
             h = nan;
             return
         end
-        
         switch sides
             case 'away'
                 nonneg_dyeb=double(means>=0).*dyeb;
                 neg_dyeb=double(means<0).*dyeb;
                 h{1}=errorbar(x,means,0*dyeb,nonneg_dyeb,'k.');
+                h{1}.Marker = marker;
+                h{1}.LineWidth = width;
                 h{2}=errorbar(x,means,neg_dyeb,0*dyeb,'k.');
+                h{2}.Marker = marker;
+                h{2}.LineWidth = width;
             case 'both'
-                h=errorbar(x,means,dyeb,dyeb,'k.');
+                h = errorbar(x,means,dyeb,dyeb,'k.');
+                h.Marker = marker;
+                h.LineWidth = width;
             case 'below'
                 h=errorbar(x,means,dyeb,0*dyeb,'k.');
+                h.Marker = marker;
+                h.LineWidth = width;
             case 'above'
                 h=errorbar(x,means,0*dyeb,dyeb,'k.');
+                h.Marker = marker;
+                h.LineWidth = width;
             case 'none'
                 h=errorbar(x,means,0*dyeb,0*dyeb,'k.');
-                
+                h.Marker = marker;
+                h.LineWidth = width;
             case  'topline'
                 for i=1:length(x)
                     if means(i)<0
                         dyeb(i) = -dyeb(i);
                     end
-                    plot([x(i) x(i)],[means(i) means(i)+dyeb(i)],'-','linewidth',2,'color',colors{i});
+                    plot([x(i) x(i)],[means(i) means(i)+dyeb(i)],'-','linewidth',width,'color',colors{i});
                 end
         end
 end
