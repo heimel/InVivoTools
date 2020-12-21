@@ -59,6 +59,6 @@ end
 
 record = wc_compute_overheadstim_angles(  record, verbose);
 record = wc_add_freezing_ind( record, verbose);
-
+record = wc_add_freezing_approach( record, verbose);
 
 logmsg(['Interpreted tracking of ' recordfilter(record)]);

@@ -46,8 +46,8 @@ function h=ivt_graph(y,x,varargin)
 %                           group in the graph
 %        fit, linear
 %        wingtipheight
-%        errorbar_tick    width of tick
-%        errorbar_sides   away, both, below, above, none, topline
+%        errorbars_tick    width of tick
+%        errorbars_sides   away, both, below, above, none, topline
 %
 %
 % 2006-2020, Alexander Heimel
@@ -165,9 +165,9 @@ if isempty(linewidth)
 end
 
 if exist('errorbars_sides','var')
-    errorbars_sides=strtrim(errorbars_sides);
+    errorbars_sides = strtrim(errorbars_sides);
     if errorbars_sides(1)=='{'
-        errorbars_sides=split( errorbars_sides(2:end-1),';');
+        errorbars_sides = split( errorbars_sides(2:end-1),';');
     end
 end
 
@@ -258,14 +258,14 @@ end
 
 % reformat y into cell-structure
 if ~iscell(y)
-    if ndims(y)>2
+    if ndims(y)>2 %#ok<ISMAT>
         errormsg('Unable to handle arrays of more than 2 dimensions');
         return
     end
-    old_y=y;
-    y=cell(size(old_y,1),1);
-    for i=1:size(old_y,1)
-        y{i}=old_y(i,:);
+    old_y = y;
+    y = cell(size(old_y,1),1);
+    for i = 1:size(old_y,1)
+        y{i} = old_y(i,:);
     end
 end
 
@@ -669,11 +669,11 @@ switch style
         if ~isempty(ystd) && strcmp(errorbars,'none')~=1
             for i=1:length(y)
                 if iscell(errorbars_sides)
-                    ebsides=errorbars_sides{i};
+                    ebsides = errorbars_sides{i};
                 else
-                    ebsides=errorbars_sides;
+                    ebsides = errorbars_sides;
                 end
-                h.errorbar(i)=plot_errorbars({y{i}},x{i},{ystd{i}},[],y{i},...
+                h.errorbar(i) = plot_errorbars({y{i}},x{i},{ystd{i}},[],y{i},...
                     errorbars,ebsides,errorbars_tick,color);
                 if ishandle(h.errorbar(i)) || ~isnan(h.errorbar(i))
                     set(h.errorbar(i),'color',color{i},'clipping','off');
@@ -696,12 +696,8 @@ switch style
                             h.p_sig{i,j} = htemp.p_sig{2};
                         catch me
                             logmsg(['Problem computing significances: ' me.message]);
-                            h.h_sig{i,j}=nan;
-                            h.p_sig{i,j}=nan;
-                            statistic = nan;
-                            statistic_name = '';
-                            dof = nan;
-                            
+                            h.h_sig{i,j} = NaN;
+                            h.p_sig{i,j} = NaN;                            
                         end
                         if h.h_sig{i,j}==1
                             logmsg(['Differences at x=' num2str(x{j}(k),2)...
@@ -980,7 +976,7 @@ end
 
 if ~isempty(extra_code)
     %evaluate_extra_code(extra_code);
-    child=get(gca,'children'); %#ok<NASGU> % to be used in extra_code
+    child = get(gca,'children'); %#ok<NASGU> % to be used in extra_code
     try
         eval(extra_code); % do evaluation here to allow access to local variables
     catch me
@@ -1019,7 +1015,7 @@ return
 
 
 
-function h=plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick,colors,width,marker)
+function h = plot_errorbars(y,x,ystd,ny,means,errorbars,sides,tick,colors,width,marker)
 if nargin<11 || isempty(marker)
     marker = '.';
 end
@@ -1044,7 +1040,7 @@ if nargin<6 || isempty(errorbars)
     errorbars = 'std';
 end
 
-h={};
+h = {};
 switch errorbars
     case 'none'
     otherwise
@@ -1053,24 +1049,24 @@ switch errorbars
             case 'sem'
                 if length(flatten(y))~=length(y) %isempty(ystd)
                     for i=1:length(y)
-                        dy{i}=sem(y{i});
+                        dy{i} = sem(y{i});
                     end
                 elseif ~isempty(ystd)
                     for i=1:length(y)
-                        dy{i}=ystd{i}/sqrt(ny{i});
+                        dy{i} = ystd{i}/sqrt(ny{i});
                     end
                 else
                     for i=1:length(y)
-                        dy{i}=sem(y{i});
+                        dy{i} = sem(y{i});
                     end
                 end
             case 'std'
                 if isempty(ystd)
-                    for i=1:length(y)
-                        dy{i}=nanstd(y{i});
+                    for i = 1:length(y)
+                        dy{i} = nanstd(y{i});
                     end
                 else
-                    dy=ystd;
+                    dy = ystd;
                 end
             case 'bootstrapmean'
                 for i=1:length(y)
