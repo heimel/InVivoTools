@@ -9,10 +9,11 @@ if nargin<3 || isempty(verbose)
     verbose = true; %#ok<NASGU>
 end
 if nargin<2 || isempty(obj)
-    filename = 'Recording.mpg';
+    filename = fullfile(record.mouse,'Recording.mpg');
     obj = VideoReader(filename);
-end
+    framerate = obj.FrameRate;
 
+end
 
 measures = record.measures;
 
@@ -52,11 +53,12 @@ currAxes = axes;
 %h = [];
 stop_playing = false;
 skip_frames = 0;
-play = true;
+play = false;
 show_processed = true;
 show_circle = true;
 show_zoom = true;
-stepping = false;
+show_label = true;
+stepping = true;
 manual_tune = true;
 
 % for growing led reflection area
@@ -75,6 +77,7 @@ disp(' c: toggle show pupil circle');
 disp(' z: toggle zoom');
 disp(' g: goto time');
 disp(' b: mouse blinks');
+disp(' l: toggle label');
 disp(' +: increase pupil threshold (increase pupil area)');
 disp(' -: decrease pupil threshold (decrease pupil area)');
 disp(' ]: increase led threshold (decrease led area)');
@@ -83,23 +86,51 @@ disp(' [: decrease led threshold (increase led area)');
 frame = 0;
 tic;
 obj.CurrentTime = measures.starttime;
+
 frametimes(frame+1) = obj.CurrentTime;
 while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
     lasttoc = toc;
     show_processed = show_processed && analyse;
     
     if play || stepping
+        noframesleft = false;
+        for f = 1:skip_frames
+            readFrame(obj); % first find a frame where you see the pupil
+            frame = frame + 1;
+            frametimes(frame+1) = obj.CurrentTime;
+            if ~hasFrame(obj)
+                noframesleft = true;
+                break
+            end
+        end
+        if noframesleft
+            break
+        end
+        
+        
         if frame<=length(frametimes) && ~isnan(frametimes(frame+1)) &&  frametimes(frame+1) ~= obj.CurrentTime
-            disp('Frametime changed unexpectedly.');
-            keyboard
+            logmsg([num2str(frametimes(frame)) ': Glitch']);
+            obj.CurrentTime = frametimes(frame);
+            im = readFrame(obj);
+            if frametimes(frame+1) ~= obj.CurrentTime
+                close(fig);
+                errormsg('Frametime changed unexpectedly.');
+                return
+            end
         end
         
         im = readFrame(obj); % first find a frame where you see the pupil
         frame = frame + 1;
 
         if frame<length(frametimes) && ~isnan(frametimes(frame+1)) &&  frametimes(frame+1) ~= obj.CurrentTime
-            disp('Frametime changed unexpectedly.');
-            keyboard
+            logmsg([num2str(frametimes(frame)) ': Glitch']);
+            obj.CurrentTime = frametimes(frame);
+            im = readFrame(obj);
+            if frametimes(frame+1) ~= obj.CurrentTime
+                close(fig);
+                errormsg('Frametime changed unexpectedly.');
+                return
+            end
         end
         frametimes(frame+1) = obj.CurrentTime;
         im = rgb2gray(im);
@@ -145,19 +176,19 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
         % add correction mask
         im_without_led = im_without_led + im_corr;
         if isempty(led_component)
-            if play
-                disp(['No led components found at ' num2str(obj.CurrentTime)]);
-            end
+%             if play
+%                 disp(['No led components found at ' num2str(obj.CurrentTime)]);
+%             end
             led_found = false;
         elseif props(led_component).Area>150
-            if play
-                disp(['Central led component is too large at ' num2str(obj.CurrentTime)]);
-            end
+%             if play
+%                 disp(['Central led component is too large at ' num2str(obj.CurrentTime)]);
+%             end
             led_found = false;
         elseif props(led_component).Area<50
-            if play
-                disp(['Central led component is too small at ' num2str(obj.CurrentTime)]);
-            end
+%             if play
+%                 disp(['Central led component is too small at ' num2str(obj.CurrentTime)]);
+%             end
             led_found = false;
         else
             intensities = im_without_led(comps.PixelIdxList{led_component});
@@ -168,10 +199,10 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
             led_found = true;
         end
         
-        if play && ~led_found && manual_tune
-            play = false;
-            disp(msg);
-        end
+%         if play && ~led_found && manual_tune
+%             play = false;
+%             disp(msg);
+%         end
         
         % find pupil component
         im_proc = im_without_led<pupil_threshold ;
@@ -276,11 +307,13 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
         text(xl(2)-5,1,'Reset','VerticalAlignment','top','HorizontalAlignment','right','color',[ 1 1 1]);
     end
     
-    text(5,2,[num2str(obj.CurrentTime)...
-        ', Pupil > ' num2str(pupil_threshold) ...
-        ', LED > ' num2str(led_threshold) ...
-        ', Analyse = ' num2str(analyse)],...
-        'color',[1 1 1],'verticalalignment','top')
+    if show_label
+        text(5,2,[num2str(obj.CurrentTime)...
+            ', Pupil > ' num2str(pupil_threshold) ...
+            ', LED > ' num2str(led_threshold) ...
+            ', Analyse = ' num2str(analyse)],...
+            'color',[1 1 1],'verticalalignment','top')
+    end
     if ~isempty(fig.UserData)
         switch fig.UserData
             case 'q' % quit
@@ -291,8 +324,10 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
                 show_circle = ~show_circle;
             case 'f'
                 skip_frames = skip_frames + 1;
+                logmsg(['Skipping ' num2str(skip_frames) ' frames. s to slow down.']);
             case 's'
                 skip_frames = max(0,skip_frames - 1);
+                logmsg(['Skipping ' num2str(skip_frames) ' frames. f to speed up.']);
             case 'p' % play / proceed
                 play = ~play;
             case 't' % toggle show patches
@@ -328,6 +363,8 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
                 stepping = true;
                 pupil_threshold = pupil_thresholds(frame);
                 led_threshold = led_thresholds(frame);
+            case 'l'
+                show_label = ~show_label;
         end
         if analyse
             switch fig.UserData 
@@ -361,8 +398,8 @@ end
 if length(frametimes)==length(pupil_xs)+1
     frametimes(end) = []; % remove extra frametime
 end
-fig.WindowStyle = 'docked';
-disp('Done playing')
+close(fig);
+logmsg([ num2str(obj.CurrentTime) ': Stopped playing'])
 
 
 

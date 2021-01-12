@@ -68,6 +68,9 @@ switch type
         color = [1 0.6 0.4];
         play_data_enable = 1;
         track_data_enable = 1;
+    case 'hc'
+        color = [0.6 1 0.4];
+        play_data_enable = 1;
 end
 
 
@@ -252,9 +255,9 @@ if play_data_enable
         'Position',[left top ud.buttonwidth ud.buttonheight], ...
         'FontSize',ud.basefontsize,...
         'String','Play',...
-        'Tag','play_wctestrecord_callback');
-    left=left+ud.buttonwidth+colsep;
-    maxleft=max(maxleft,left);
+        'Tag','play_testrecord_callback');
+    left = left+ud.buttonwidth+colsep;
+    maxleft = max(maxleft,left);
 end
 
 if track_data_enable
