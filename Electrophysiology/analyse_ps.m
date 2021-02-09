@@ -225,5 +225,3 @@ switch lower(measures.variable)
         measures = compute_sfrequency_measures(measures);
 end
 
-
-
