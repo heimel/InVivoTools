@@ -4,6 +4,9 @@ function [db,filename,perm,lockfile]=open_db( filename, loadpath, filter)
 % [DB, FILENAME, PERM, LOCKFILE] = OPEN_DB( FILENAME, LOADPATH, FILTER)
 %        all arguments are optional
 %
+%  LOADPATH is only used if FILENAME is empty
+%
+%
 % 2007-2011, Alexander Heimel
 %
 
@@ -27,7 +30,7 @@ curpath = pwd; % save working directory
 				
 if ~isempty(filename)
   [loadpath,name,ext] = fileparts(filename);
-  if ~isempty(loadpath) % i.e not in the current folder
+  if ~isempty(loadpath) && loadpath(1)~='.' % i.e not in the current folder and not relative path
       cd(loadpath);
   end
 else

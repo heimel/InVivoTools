@@ -313,7 +313,18 @@ else
     end
 end
 
-measures = record.measures; %#ok<NASGU>
+% extra analyses, e.g. ec_analyse_xos, ec_analyse_adaptation
+if ~isempty(record.analysis)
+    try
+        record = feval(record.analysis,record);
+    catch me
+        errormsg(['Problem with analysis field in ' recordfilter(record) ...
+            ': ' me.message]);
+    end
+end
+
+
+measures = record.measures; 
 
 % save measures file
 if 0 && strncmp(record.stim_type,'background',10)==1

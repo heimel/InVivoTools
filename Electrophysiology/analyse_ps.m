@@ -224,4 +224,5 @@ switch lower(measures.variable)
     case 'sfrequency'
         measures = compute_sfrequency_measures(measures);
 end
-
+% New postanalyses tests with variable stimnumber are called at the bottom
+% of analyse_ectestrecord, and should be given in record.analysis field
