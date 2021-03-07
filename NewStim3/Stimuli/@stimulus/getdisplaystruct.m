@@ -1,3 +1,3 @@
-function [val] = getdisplaystruct(stimulus);
+function [val] = getdisplaystruct(stimulus)
 
 val = stimulus.displaystruct;

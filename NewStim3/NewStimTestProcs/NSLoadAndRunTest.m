@@ -2,6 +2,7 @@ function [MTI,MTI2]=NSLoadAndRunTest(stimclass,output)
 %NSLOADANDRUNTEST shows stimulus or script
 %
 % 200X, Steve Van Hooser
+% 200X-2021, Alexander Heimel
 
 if nargin<2
     output = usejava('jvm');
@@ -10,12 +11,8 @@ end
 NewStimGlobals;
 StimWindowGlobals;
 
-if NS_PTBv==3
-    currLut = Screen('ReadNormalizedGammaTable', StimWindowMonitor);
-    mypriority = MaxPriority(StimWindowMonitor,'WaitBlanking','SetClut','GetSecs'); % PD
-else
-    mypriority = 1;
-end;
+currLut = Screen('ReadNormalizedGammaTable', StimWindowMonitor);
+mypriority = MaxPriority(StimWindowMonitor,'WaitBlanking','SetClut','GetSecs'); % PD
 
 
 if isa(stimclass,'stimscript')
@@ -29,7 +26,9 @@ else
     if iscell(mystim)||isa(mystim,'stimulus')
         myscript = stimscript(0);
         if iscell(mystim)
-            for i=1:length(mystim), myscript = append(myscript,mystim{i}); end;
+            for i=1:length(mystim) 
+                myscript = append(myscript,mystim{i}); 
+            end
         else
             myscript = append(myscript,mystim);
         end
@@ -45,13 +44,13 @@ disp('Got past loading');
 MTI = DisplayTiming(myscript);
 disp('Got past DisplayTiming');
 MTI2 = DisplayStimScript(myscript,MTI,mypriority,1);
+disp('Got past DisplayStimScript');
 myscript = unloadStimScript(myscript);
 CloseStimScreen;
 success = 1;
 
-if NS_PTBv==3
-    Screen('LoadNormalizedGammaTable', StimWindowMonitor, currLut); 
-end
+Screen('LoadNormalizedGammaTable', StimWindowMonitor, currLut);
+disp('Resetted gammatable');
 
 if success && output
     StimWindowGlobals;

@@ -206,8 +206,25 @@ else
         measures.friedman_p = [];
     end
 end
-measures.variable = paramname;
 
+
+spikes=get_data(inp.spikes,[inp.st.mti{1}.startStopTimes(2),inp.st.mti{end}.startStopTimes(3)]);
+if processparams.ec_compute_spikerate_adaptation && ~isempty(spikes) && length(spikes)>2 
+    isi = spikes(2:end)-spikes(1:end-1);
+    isitimes=(spikes(2:end)+spikes(1:end-1))/2;
+    isitimes = isitimes - isitimes(1); % to avoid warning in polyfit
+    pfit = polyfit(isitimes,isi,1);
+    isi_start = pfit(1)*isitimes(1)+pfit(2);
+    isi_end = pfit(1)*isitimes(end)+pfit(2);
+    mean_rate = 1/mean(isi);
+    measures.rate_change_global = (1/isi_end - 1/isi_start)/(isitimes(end)-isitimes(1)) / mean_rate ;
+else
+    measures.rate_change_global = NaN;
+end
+
+
+
+measures.variable = paramname;
 switch lower(measures.variable)
     case 'contrast'
         measures = compute_contrast_measures(measures);

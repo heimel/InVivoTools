@@ -29,6 +29,7 @@ params.minimum_spontaneous_time = 0.5; % need at least this period for spontaneo
 %params.late_response_window = [0.5 inf]; % not implemented yet
 params.ec_temporary_timeshift = 0; % to induce a timeshift for analysis
 params.results_show_psth_count_all = false;
+params.ec_compute_spikerate_adaptation = false;
 
 params.always_use_matlab_tdt = false;
 

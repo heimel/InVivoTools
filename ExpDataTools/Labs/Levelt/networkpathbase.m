@@ -26,7 +26,7 @@ if isfield(params,'networkpathbase') && ...
   return
 end
 
-if usejava('jvm')
+if usejava('jvm') && ~exist('OCTAVE_VERSION', 'builtin')
     address = java.net.InetAddress.getLocalHost;
     IPaddress = char(address.getHostAddress);
     if ~strcmp(IPaddress(1:6),'192.87') && ~strcmp(IPaddress,'169.254.112.74') && ~strcmp(IPaddress(1:6),'146.50') % at the NIN or G2P

@@ -28,9 +28,9 @@
 %
 
 global StimWindow StimWindowMonitor StimWindowDepth StimWindowRefresh StimWindowRect StimComputer StimScreenBG StimWindowPreviousCLUT StimWindowUseCLUTMapping StimDebug 
-if isempty(StimDebug); %Alexander
-    StimDebug = false; %Alexander
-end %Alexander
+if isempty(StimDebug) 
+    StimDebug = false;
+end 
 
 global gNewStim % to replace other globals in the future
 gNewStim.StimWindow.window = StimWindow; 
