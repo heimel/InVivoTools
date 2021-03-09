@@ -21,8 +21,8 @@ if nargin<1
 end
 
 if ischar(fig) % filename
-    img=imread(fig);
-    fig = figure;
+    img = imread(fig);
+    fig = figure('WindowStyle','normal');
     image(img);
     axis image off;
 elseif isnumeric(fig) || ishandle(fig) % then figure handle
