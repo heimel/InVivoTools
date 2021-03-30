@@ -205,7 +205,9 @@ for z = 1:length(vars)  % looping over second parameter
 			spon{1}(stimlist(k)) = trigs{z}{s}(k);
 			% our monitor can't produce tF exactly, so we have to get frame time stamps
 			for nn=1:ps.nCycles
-				cyci_trigs{z}{s}{nn}(k) = mti{stimlist(k)}.frameTimes(1+(nn-1)*fpc);
+                % surprising correction needed to next line 2021-03-24 AH
+                %				cyci_trigs{z}{s}{nn}(k) = mti{stimlist(k)}.frameTimes(1+(nn-1)*fpc);
+				cyci_trigs{z}{s}{nn}(k) = mti{stimlist(k)}.frameTimes(1+round((nn-1)*fpc));
 				cycg_trigs{z}{s}((k-1)*ps.nCycles+nn) = cyci_trigs{z}{s}{nn}(k);
 			end
 		end
