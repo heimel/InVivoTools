@@ -1,4 +1,4 @@
-function [pks,locs] = findpeaks(X,varargin)
+function [pks,locs] = findpeaks_ivt(X,varargin)
 %FINDPEAKS Find local peaks in data
 %   PKS = FINDPEAKS(X) finds local peaks in the data vector X. A local peak
 %   is defined as a data sample which is either larger than the two
@@ -37,6 +37,7 @@ function [pks,locs] = findpeaks(X,varargin)
 
 %   Copyright 2007-2010 The MathWorks, Inc.
 %   $Revision: 1.1.6.11 $  $Date: 2010/02/17 19:00:08 $
+
 
 error(nargchk(1,11,nargin,'struct'));
 
