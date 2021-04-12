@@ -101,9 +101,7 @@ if ~isempty(w)
             rarect = grect2local(rarect,w.units,[m(mi) n(ohno-1) m(mi+1) n(ohno)],w.figure);
             r = axes('units',w.units,'position',rarect,'tag','analysis_generic');
             if ~isempty(ra.computations.rast{i})
-                %           if 1
-                A=[ra.computations.rast{i}(1,:); ra.computations.rast{i}(1,:)];
-                
+                A = [ra.computations.rast{i}(1,:); ra.computations.rast{i}(1,:)];
                 b = ra.computations.rast{i}(2,:);
                 trials = uniq(sort(b));
                 for ti = 1:length(trials)
