@@ -46,7 +46,8 @@ for i = 1:length(triggers)
     inp = inps(i);
     measures.triggers = triggers;
     
-    par = struct('res',processparams.ec_binwidth,'showrast',0,'interp',3,'drawspont',1,...
+    par = struct('res',processparams.ec_binwidth,'showrast',0,...
+        'interp',3,'drawspont',1,...
         'int_meth',0,'interval',[0 0]);
     
 %     if processparams.post_window(2)<Inf
@@ -114,7 +115,7 @@ for i = 1:length(triggers)
     measures.response_difference{i} = measures.response{i} - measures.response{1};
     
     %  compute peak time for preferred stimulus
-    rast=getoutput(out(i).rast);
+    rast = getoutput(out(i).rast);
     binsize = (rast.bins{1}(end)-rast.bins{1}(1))/(length(rast.bins{1})-1);
     maxbins = min(cellfun(@length,rast.counts));
     
