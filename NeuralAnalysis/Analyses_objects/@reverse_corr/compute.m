@@ -197,11 +197,21 @@ if centchanged && (p.crcpixel>0)
     stddev = sqrt(c(stddevinds)*c(stddevinds)'/length(stddevinds));
     [mm,peakind] = max(abs(cc)); %#ok<ASGLU> % location of peak
     onoff = cc(peakind)>0 ;    % onoff 1 = oncell, 0 = offcell, NaN = no signif STA
-    if abs(cc(peakind))<3*stddev
+    if abs(cc(peakind))<3*stddev % no clear peak, thus not computing transience
         onoff = NaN;
         transience = NaN;
     else
-        [mm,prepeakind] = max( (1-2*onoff)*cc(1:peakind-1));  %#ok<ASGLU>
+        [mm,prepeakind] = max( (1-2*onoff)*cc(1:peakind-1));  %#ok<ASGLU> find peak before peak
+        
+        % transience index is computed as the difference of the spike
+        % triggered average of the projected stimulus feature value
+        % to the mean feature value divided by the
+        % maximum difference in the opposite direction, preceding the
+        % maximum difference (Sommeijer et al. 2017. This follows the 
+        % biphasic index to measure how biphasic the response is (Piscopo
+        % et al. J Neurosci 2013) which shows a difference between tOFF and
+        % sOFF cells in mouse dLGN (Piscopo et al. J Neurosci 2013)
+
         transience = -cc(prepeakind)/cc(peakind);
     end
     
