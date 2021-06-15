@@ -57,16 +57,16 @@ if nvarargin>0
 end
 
 if isempty(mousedb) %#ok<NODEF>
-    mousedb=load_mousedb;
+    mousedb = load_mousedb;
 end
 if isempty(groupdb) %#ok<NODEF>
-    groupdb=load_groupdb;
+    groupdb = load_groupdb;
 end
 if isempty(measuredb) %#ok<NODEF>
-    measuredb=load_measuredb;
+    measuredb = load_measuredb;
 end
 if ischar(extra_options) %#ok<NODEF>
-    extra_options=split(extra_options,',');
+    extra_options = ivt_split(extra_options,',');
 end
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
@@ -360,7 +360,7 @@ end
 if isfield(testdb,'comment') &&  exist('comment','var')
     comment = strtrim(comment); %#ok<NODEF>
     if comment(1)=='{'
-        comment = strtrim(split( comment(2:end-1)));
+        comment = strtrim(ivt_split( comment(2:end-1)));
     else
         comment = {comment};
     end
@@ -371,7 +371,7 @@ end
 if isfield(testdb,'comment') &&  exist('nocomment','var')
     nocomment = strtrim(nocomment); %#ok<NODEF>
     if nocomment(1)=='{'
-        nocomment = split( nocomment(2:end-1));
+        nocomment = ivt_split( nocomment(2:end-1));
     else
         nocomment = {nocomment};
     end
@@ -383,7 +383,7 @@ end
 if isfield(testdb,'stim_parameters') &&  exist('stim_parameters','var')
     stim_parameters = strtrim(stim_parameters);  %#ok<NODEF>
     if stim_parameters(1)=='{'
-        stim_parameters = strtrim(split( stim_parameters(2:end-1)));
+        stim_parameters = strtrim(ivt_split( stim_parameters(2:end-1)));
     else
         stim_parameters = {stim_parameters};
     end

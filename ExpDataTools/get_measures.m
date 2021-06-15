@@ -8,18 +8,18 @@ function measuress = get_measures( measures, measuredb )
 %
 
 if nargin<2
-  measuredb=[];
+  measuredb = [];
 end
 if isempty(measuredb)
-  measuredb=load_measuredb;
+  measuredb = load_measuredb;
 end
 if ~iscell(measures)
-  measures=split(measures,',');
+  measures = ivt_split(measures,',');
 end
-n_measures=length(measures);
-ind=[];
-for m=1:n_measures
-  ind=[ind find_record(measuredb,['name~' measures{m}])];
+n_measures = length(measures);
+ind = [];
+for m = 1:n_measures
+  ind = [ind find_record(measuredb,['name~' measures{m}])];
 end
 if isempty(ind)
     % try to parese measures

@@ -145,7 +145,7 @@ end
 
 % parse extra options
 if ischar(extra_options)
-    extra_options=split(extra_options,',');
+    extra_options = ivt_split(extra_options,',');
 end
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
@@ -167,7 +167,7 @@ end
 if exist('errorbars_sides','var')
     errorbars_sides = strtrim(errorbars_sides);
     if errorbars_sides(1)=='{'
-        errorbars_sides = split( errorbars_sides(2:end-1),';');
+        errorbars_sides = ivt_split( errorbars_sides(2:end-1),';');
     end
 end
 
@@ -212,15 +212,15 @@ if exist('markersize','var')
 end
 
 if exist('markers','var')
-    markers=strtrim(markers);
+    markers = strtrim(markers);
     if markers(1)=='{'
-        markers=split( markers(2:end-1),';');
+        markers = ivt_split( markers(2:end-1),';');
     end
 end
 if exist('linestyles','var')
-    linestyles=strtrim(linestyles);
+    linestyles = strtrim(linestyles);
     if ~isempty(linestyles) && linestyles(1)=='{'
-        linestyles=split( linestyles(2:end-1),';');
+        linestyles = ivt_split( linestyles(2:end-1),';');
     end
 end
 

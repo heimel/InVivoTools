@@ -74,45 +74,15 @@ for p=1:length(probesets)
         return
     end
     
-    
     if zscr
         result{2}(4:end)=zscore(result{2}(4:end));
     end
     
     ind = strmatch(strain,result{1},'exact');
     if length(ind)==1
-            val(p) = result{2}(ind);
+        val(p) = result{2}(ind);
     end
 end
-
-
-%cmd=['grep -w ' strain ' ' tmptraitfile ' | cut -f2-' ];
-% if strain(end)=='*'
-%     strain = strain(1:end-1);
-%     cmd=['grep ' strain ' ' tmptraitfile ' | cut -f2-' ];
-% else
-%     cmd=['grep -w ' strain ' ' tmptraitfile ' | cut -f2-' ];
-% end
-% [status,result]=system(cmd);
-% if ~status
-%   % remove </pre> from end
-%   p=findstr(result,'</pre>');
-%   if ~isempty(p)
-%     result=result(1:p-1);
-%   end
-%   if result(end)==10
-%       result = result(1:end-1);
-%   end
-%   val=split(result,9); % split at tab
-%   val=split(result,10); % split at nl
-% %   for i=1:length(val)
-% %     val{i}=eval(val{i});
-% %   end
-%   val = cellfun(@str2double,val)';
-
-%  val=[val{:}];
-
-
 
 function strain = formatstrain(strain)
 strain=upper(strain); % for C57Bl/6J

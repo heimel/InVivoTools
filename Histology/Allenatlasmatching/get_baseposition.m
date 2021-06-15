@@ -1,15 +1,30 @@
 function ud = get_baseposition(ud)
 % best matched slice coordinates for Vangeneugden et al.
 %
-% 2018, Alexander Heimel
+% 2018-2021, Alexander Heimel
 %
 
-ud.phi = -98/180*pi; % angle in AP-LR plane (radii) sagittal =0 ; coronal = pi/2;
-ud.axis_ap = 315;
-ud.axis_lr = 112;
-ud.theta = 0; % angle to DV axis (radii) vertical = 0; horizontal = pi/2
+if ~isfield(ud,'phi')
+    ud.phi = -98/180*pi; % angle in AP-LR plane (radii) sagittal =0 ; coronal = pi/2;
+end
+if ~isfield(ud,'axis_ap')
+    ud.axis_ap = 315;
+end
+if ~isfield(ud,'axis_lr')
+    ud.axis_lr = 112;
+end
+if ~isfield(ud,'theta')
+    ud.theta = 0; % angle to DV axis (radii) vertical = 0; horizontal = pi/2
+end
+if ~isfield(ud,'xl')
+    ud.xl = [0.5 260.5];
+end
+if ~isfield(ud,'yl')
+    ud.yl = [0.4 310.5];
+end
+
 ud.slice_angle = 0; % in degrees
-ud.slice_scale = 1;
+ud.slice_scale = min([size(ud.VOL,2)/size(ud.slice,2) size(ud.VOL,1)/size(ud.slice,1)]);
 ud.slice_shift = [0 0];
 ud.slice_gamma = 1;
 ud.slice_prctile = 99.9;
@@ -88,18 +103,10 @@ switch ud.slice_name
         ud.slice_angle = -27; % in degrees
         ud.slice_scale = 0.77;
         ud.slice_gamma = 1.0;
-        
         ud.slice_threshold = 8;
         ud.slice_base  = 10;
         ud.slice_diis = [337 110 22];
     case 'ulyssee5'
-        %         ud.phi = 70/180*pi;
-        %         ud.axis_ap = 340;
-        %         ud.axis_lr = 109;
-        %         ud.slice_angle = -20; % in degrees
-        %         ud.slice_scale = 0.33;
-        %         ud.slice_shift = [7 -30];
-        
         ud.phi = 84/180*pi;
         ud.axis_ap = 344;
         ud.axis_lr = 105;
@@ -137,4 +144,12 @@ switch ud.slice_name
         ud.slice_diis = [240 126 20;223 89 7;230 93 7;251 96 7;249 106 6;244 118 6];
         ud.slice_base = 13;
         ud.slice_gamma = 1.3;
+    case '172005.1.16_s1_1'
+        ud.phi = -90/180*pi;
+        ud.axis_ap = 395;
+        ud.axis_lr = 107;
+        ud.slice_angle = -4; % in degrees
+        ud.slice_scale = 0.042;
+        ud.slice_shift = [75 8];
+        
 end

@@ -120,7 +120,7 @@ for s = 1:numSeries
     % check methods(r) for what else we can get out of r
     if ismethod(r,'getMetadata') % old loci version before 5.0
         metadata = r.getMetadata.char;
-        metadata = split(metadata,',');
+        metadata = ivt_split(metadata,',');
         series = metadata{1};
         p = find(series==' ',1);
         series = series(2:p-1);

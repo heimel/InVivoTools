@@ -26,7 +26,7 @@ if length(p) == 1
     end
 end
 
-epochs = split(record.epoch,',');
+epochs = ivt_split(record.epoch,',');
 
 data = [];
 for i=1:length(epochs)

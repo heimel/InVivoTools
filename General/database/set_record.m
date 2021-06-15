@@ -5,26 +5,26 @@ function record=set_record(record,settings)
 %
 %  2005, Alexander Heimel
 %
-  
-  if ~iscell(settings)
-    settings=split(settings,',');
-  end
 
-  for i=1:length(settings)
-    setting=settings{i};
-    indis=find(setting=='=');
+if ~iscell(settings)
+    settings = ivt_split(settings,',');
+end
+
+for i=1:length(settings)
+    setting = settings{i};
+    indis = find(setting=='=');
     if length(indis)~=1
-      logmsg(['Cannot handle setting ' setting ]);
-      return
+        logmsg(['Cannot handle setting ' setting ]);
+        return
     end
     fieldname = strtrim(setting(1:indis-1));
     field = record.(fieldname);
     content = strtrim(setting(indis+1:end));
     if isnumeric(field)
-      record.(fieldname) = str2num(content);
+        record.(fieldname) = str2num(content);
     else
-      record.(fieldname) = content;
+        record.(fieldname) = content;
     end
     
-  end
+end
 

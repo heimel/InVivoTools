@@ -92,7 +92,7 @@ if ischar(extra_options)
         extra_options = [extra_options 'limit,{' limit '}'];
     end
     
-    extra_options=split(extra_options,',',true);
+    extra_options = ivt_split(extra_options,',',true);
 end
 if mod(length(extra_options),2)==1
     errormsg('Extra_options has an odd number of arguments. It should contain key, parameter pairs.');
@@ -176,7 +176,7 @@ end
 
 % parse groups
 if ~iscell(groups)
-    groups=split(groups,',');
+    groups = ivt_split(groups,',');
 end
 % check for group operators
 groupoperators='-/+';
@@ -241,7 +241,7 @@ if collect_records
 end
 
 % parse criteria
-criteria = split(criteria,',',true);
+criteria = ivt_split(criteria,',',true);
 n_criteria = length(criteria);
 
 if ~isfield(groups,'criteria')
@@ -288,7 +288,7 @@ if isempty(grouplabels)
         grouplabels{g} = groups(g).label;
     end
 elseif ~iscell(grouplabels)
-    grouplabels = split(grouplabels,',');
+    grouplabels = ivt_split(grouplabels,',');
 end
 grouplabels = shorten_bxdnames(grouplabels);
 
@@ -363,9 +363,9 @@ end
 
 % parse measurelabels
 if isempty(measurelabels)
-    measurelabels=def_measurelabels;
+    measurelabels = def_measurelabels;
 elseif ~iscell(measurelabels)
-    measurelabels=split(measurelabels,',');
+    measurelabels = ivt_split(measurelabels,',');
 end
 
 % center measurelabels for use in captions
