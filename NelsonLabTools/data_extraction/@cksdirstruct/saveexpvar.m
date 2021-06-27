@@ -1,10 +1,12 @@
 function saveexpvar(cksds, vrbl, name, pres)
-
 %  SAVEEXPVAR (MYCKSDIRSTRUCT, VARIABLE, NAME [, PRES])
 %
 %  Saves an experiment variable VARIABLE to CKSDIRSTRUCT MYCKSDIRSTRUCT with
 %  the name NAME.  If PRES is 1, then if CELLVAR is of type MEASUREDDATA, then
 %  any associates of MEASUREDDATA are preserved.
+%
+% 200X, Steve Vanhooser
+% 200X-2021, Alexander Heimel
 
 if nargin==4
     preserved = pres;
@@ -48,10 +50,10 @@ if exist(fn,'file')
         end
         a = [a b];
         if ~isempty(b)
-            vbrl=disassociate(vrbl,1:numassociates(vrbl));
+            vbrl = disassociate(vrbl,1:numassociates(vrbl));
         end
         for i=1:length(a)
-            vrbl=associate(vrbl,a(i));
+            vrbl = associate(vrbl,a(i));
         end
     end
     eval([name '=vrbl;']);
@@ -62,9 +64,17 @@ if exist(fn,'file')
         dowait(rand); loops = loops + 1;
     end
     if loops==30
-        error(['Could not save ' name ' to file ' fn '.']);
+        logmsg(['Could not save ' name ' to file ' fn '.']);
+        btn = questdlg(['Could not save ' name ' to file ' fn '. Delete lock-file?'],'Locked','Yes','Cancel','Cancel');
+        switch btn
+            case 'Yes'
+                delete(fnlock);
+            case 'Cancel'
+                errormsg(['Could not save ' name ' to file ' fn '.'],true);
+        end
+        
     end
-    fid0=fopen(fnlock,'w');
+    fid0 = fopen(fnlock,'w');
     if fid0>0
         openedlock = 1;
     end
@@ -76,7 +86,7 @@ if exist(fn,'file')
         end
         error(['Could not save ' name ' to file ' fn '.']);
     end
-    if openedlock,
+    if openedlock
         fclose(fid0);
         delete(fnlock);
     end

@@ -165,8 +165,6 @@ for c=1:n_cells
                 n_intervals = size(measure.rf,1);
             end
             n_graphs = 4+n_intervals;
-%             printtext(subst_ctlchars(['rf_n_on: ' num2str(measure.rf_n_on) ]),y);
-%             y=printtext(subst_ctlchars(['halfmax: ' num2str(measure.halfmax_deg,2) '^o']),y,0.5);
             if isfield(measure,'rf_size')
                 y = printfield(measure,'rf_size',y,0.5);
             else
@@ -182,10 +180,8 @@ for c=1:n_cells
             y=printtext(subst_ctlchars(['peak   : ' num2str(fix(measure.time_peak*1000)) ' ms']),y,0.5);
             printtext(subst_ctlchars(['half life: ' num2str(measure.response_halflife*1000,'%2.f') ' ms' ]),y);
             y=printtext(subst_ctlchars(['roc auc: ' num2str(measure.roc_auc,2) ]),y,0.5);
-            
             printfield(measure,'rc_onoff',y,0);
             y = printfield(measure,'rc_transience',y,0.5);
-                        
             
             % rf graphs
             for i=1:n_intervals
@@ -205,7 +201,6 @@ for c=1:n_cells
             subplot('position',...
                 [ (1.5)/(n_graphs) reltitlepos-(row-0.3)*relsubheight 1/(n_graphs)*0.75 relsubheight*0.7]);
             plot_psth(measure,record);
-            
             
             % plot STA
             if isfield(measure,'rc_crc')
@@ -316,6 +311,8 @@ for c=1:n_cells
                     printfield(measure,'fit_explained_variance',y);
                 case {'position','location'}
                     y = printfield(measure,'rf_center',y);
+                case 'stimnumber'
+                    y = printfield(measure,'biphasic_index',y);
             end
             y = printfield(measure,'f1f0',y);
             
@@ -355,11 +352,6 @@ for c=1:n_cells
                     hold on;
                     
                     plot_rf( measure , 1)
-                    
-                    %                     resp_by_pos = reshape(measure.curve(2,:),measure.n_x,measure.n_y)';
-                    %                     resp_by_pos = resp_by_pos-min(resp_by_pos(:));
-                    %                     %figure('Name',['Cell ' num2str(resps(i).index) ' RF'],'NumberTitle','off');
-                    %                     imagesc(resp_by_pos);colormap gray;axis off
             end
             
             % psth
@@ -607,21 +599,21 @@ set(gca,'XTick',[]);
 set(gca,'YTick',[]);
 
 if max(rf)>2 % i.e. luminance and not df/f
-        clmp=repmat([0.5 0.5 0.5],64,1);
-        clmp(1:32,3)=linspace(1,0.5,32);
-        clmp(1:32,1)=linspace(0,0.5,32);
-        clmp(1:32,2)=linspace(0,0.5,32);
-        clmp(1,:) = [0 0 0];
-        clmp(33:64,1)=linspace(0.5,1,32);
-        clmp(33:64,2)=linspace(0.5,0.6,32);
-        clmp(33:64,3)=linspace(0.5,0.6,32);
-                clmp(64,:) = [1 0.7 0.7];
-
+    clmp=repmat([0.5 0.5 0.5],64,1);
+    clmp(1:32,3)=linspace(1,0.5,32);
+    clmp(1:32,1)=linspace(0,0.5,32);
+    clmp(1:32,2)=linspace(0,0.5,32);
+    clmp(1,:) = [0 0 0];
+    clmp(33:64,1)=linspace(0.5,1,32);
+    clmp(33:64,2)=linspace(0.5,0.6,32);
+    clmp(33:64,3)=linspace(0.5,0.6,32);
+    clmp(64,:) = [1 0.7 0.7];
+    
     colormap(clmp)
     if isfield(measure,'rc_feamean')
         set(gca,'CLim',[measure.rc_feamean-20 measure.rc_feamean+20]);
     end
-%    colormap hot
+    %    colormap hot
     %    set(gca,'CLim',[256/35 40 ])
 else % df/d
     set(gca,'ydir','reverse');
@@ -776,7 +768,7 @@ for i=1:length(curves) % over triggers
             end
             if isfield(measure,'tf_fit_dogpar') && iscell(measure.tf_fit_dogpar) && ~isempty(measure.tf_fit_dogpar{i}) && ~any(isnan(measure.tf_fit_dogpar{i}))
                 par = measure.tf_fit_dogpar{i};
-            else 
+            else
                 if isfield(measure,'rate_spont')
                     par = dog_fit(curve(1,:),curve(2,:)- measure.rate_spont{i},'zerobaseline');
                     par(1) = par(1) +  measure.rate_spont{i};
@@ -793,7 +785,7 @@ for i=1:length(curves) % over triggers
             set(gca,'xscale','log')
             set(gca,'xtick',[0.5 1 2 4 8 16]);
             box off
-
+            
         case 'size'
             if isfield(measure,'size_fit_optimal') && ~isnan(measure.size_fit_optimal{i})
                 plot([measure.size_fit_optimal{i} measure.size_fit_optimal{i}],ylim,'g-');
@@ -808,16 +800,12 @@ for i=1:length(curves) % over triggers
 end
 
 for i=1:length(curves) % over triggers, separate to have axis right
-    
-    ax=axis;
+    ax = axis;
     if isfield(measure,'rate_spont')
         plot([ax(1) ax(2)],[measure.rate_spont{i} measure.rate_spont{i}],[clr(i) '--']);
     end
 end
 yl = ylim;
-%if yl(2)>0
-%    ylim([0 yl(2)]);
-%end0
 switch measure.variable
     case 'contrast'
         xlim([-0.02 1]);
@@ -925,14 +913,12 @@ plot(x,(measure.wave-measure.std)/amplification,['--' clr]);
 xlabel(xlab);
 ylabel(ylab);
 
-
 function  plot_crc(measure,record)
 hold on
 xlim([-0.7 0.2])
 plot(xlim,[0 0],'k-');
 plot(measure.rc_lags,measure.rc_crc);
 box off
-
 
 function y = printfield(measure,field,y,x)
 if nargin<4

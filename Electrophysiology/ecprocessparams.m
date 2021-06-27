@@ -186,6 +186,8 @@ params.ec_rereference = 'remove_first_pc'; % currently only implemented for inta
 params.ec_show_spikedetection = true; % only implemented for importintan
 params.compute_fraction_overlapping_spikes = false;
 
+params.ec_biphasic_period = 1; % s, half-period to compute STA in analyse_biphasic_index
+
 if exist('processparams_local.m','file')
     oldparams = params;
     params = processparams_local( params );

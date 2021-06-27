@@ -146,13 +146,7 @@ for i=1:length(g) % for all cells
     if ~isempty(find_record(record,['comment=*' num2str(i) ':bad*']))
         cellmeasures.usable=0;
     end
-    
-%     if isempty(measures)
-%         cellmeasures.type='mu';
-%     else
-%         cellmeasures.type='su';
-%     end
-    
+        
     if isfield(cellmeasures,'rate_peak') && isfield(cellmeasures,'rate_spont')
         cellmeasures.ri= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
             cellmeasures.rate_peak;
@@ -288,7 +282,6 @@ if processparams.sort_compute_cluster_overlap &&  cluster_spikes
     end % channel c
 end % if cluster_spikes
 %end % reference r
-
 
 % insert measures into record.measures
 if (length(channels2analyze)==length(recorded_channels) && ...
