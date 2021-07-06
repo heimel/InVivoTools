@@ -20,7 +20,7 @@ for i=1:length(measures)
     
     n_triggers = length(m.rate);
     for t = 1:n_triggers
-        measures(i).xos_index{t} = 1 - max(m.response{t}([2 3]))/m.response{t}(4);
+        measures(i).xos_index{t} = 1 - m.response{t}(4)/max(m.response{t}([2 3]));
         measures(i).xos_linearity{t} = m.response{t}(4) / (m.response{t}(2) + m.response{t}(3));
         measures(i).xos_orientation_index{t} = abs(m.response{t}(2)-m.response{t}(3))/max(m.response{t}([2 3]));
     end % t
