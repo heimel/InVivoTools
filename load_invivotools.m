@@ -70,6 +70,7 @@ params.load_erg =1; % need for ERG stimulation and analysis
 params.load_electrophys = 1; % needed for electrophysiology recording and analysis
 params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_webcam = 1; % needed for InVivoTools analysis
+params.load_headcam = 1; % needed for InVivoTools freely moving head cam analysis
 params.load_studies = {}; % folders of Studies to load
 params.load_physiology = 1; % needed for EXG recordings
 params.load_histology = 1; % needed for matching histology to Allen Mouse Brain Atlas
@@ -113,6 +114,10 @@ end
 
 if params.load_webcam
     addpath(fullfile(path2invivotools,'Webcam'));
+end
+
+if params.load_headcam
+    addpath(fullfile(path2invivotools,'Headcam'));
 end
 
 % Twophoton package

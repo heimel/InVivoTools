@@ -1,9 +1,13 @@
-function fields=split( s, delimiter, only_outside_accolades )
-%SPLIT splits character-delimited line into cell array
+function fields = ivt_split( s, delimiter, only_outside_accolades )
+%IVT_SPLIT splits character-delimited line into cell array
 %
-% fields=split( s, delimiter, only_outside_accolades )
+% fields = ivt_split( s, delimiter, only_outside_accolades )
 %
-% 2005-2013, Alexander Heimel (from Steve Van Hooser)
+%  used to be called split, but in Matlab 2020b split was introduced
+%
+% DEPRECATED, use strsplit unless only_outside_accolades is necessary
+%
+% 2005-2021, Alexander Heimel (from Steve Van Hooser)
 %
 
 if nargin<3

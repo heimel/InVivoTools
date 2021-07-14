@@ -47,11 +47,11 @@ function df = displayprefs(parameters)
 %
 %
 
-if nargin == 0,
+if nargin == 0
     temp_dp_p = {'fps',1,'rect',[0 0 1 1],'frames',1};
     df = displayprefs(temp_dp_p);
     return;
-end;
+end
 
 params = struct( ...
     'fps',		0,		...
@@ -69,10 +69,10 @@ params.defaults = {};
 
 [good,errormsg] = verify(parameters);
 
-if good,
-    for i=1:2:length(parameters),
+if good
+    for i=1:2:length(parameters)
         eval(['params.' parameters{i} ' = parameters{i+1};']);
-    end;
+    end
 else
     error(['Could not create displayPrefs: ' errormsg]);
 end

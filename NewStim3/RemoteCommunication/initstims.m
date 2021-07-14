@@ -51,7 +51,10 @@ if Remote_Comm_isremote
     wp.dispprefs={'BGpretime',0,'BGposttime',0.05};
     wp.sFrequency = 1.5;% to check linearization
     warmupps = periodicstim(wp);
-    warmup = stimscript(0); warmup=append(warmup,warmupps);warmup=loadStimScript(warmup);
+    warmup = stimscript(0); 
+    warmup = append(warmup,warmupps);
+    warmup = append(warmup,stochasticgridstim);
+    warmup = loadStimScript(warmup);
     MTI=DisplayTiming(warmup);
     DisplayStimScript(warmup,MTI,0,0);
 else

@@ -61,8 +61,10 @@ function [MTI] = DisplayTiming(stimScript)
 %  DISPLAYTIMING applies gamma correction to all color look up tables in
 %  each stimulus's displaystruct object.
 %
+% 200X, Steve Van Hooser
+% 200X-2021, Alexander Heimel
 
-if ~isloaded(stimScript),
+if ~isloaded(stimScript)
     error('DisplayTiming error: stimScript not loaded.');
 end
 
@@ -72,11 +74,7 @@ StimWindowGlobals;
 NewStimGlobals;
 GammaCorrectionTableGlobals;
 
-if NS_PTBv>=3
-    currLut = Screen('ReadNormalizedGammaTable', StimWindow);
-else
-    currLut = zeros(256,3);
-end
+currLut = Screen('ReadNormalizedGammaTable', StimWindow);
 
 dispOrder = getDisplayOrder(stimScript);
 
@@ -89,40 +87,46 @@ for i=1:numStims(stimScript)
     thedss{i}.bg_gammauncorrected = thedss{i}.clut_bg(1,:);
     thedss{i}.bg_gammacorrected = thedss{i}.clut_bg(1,:);
     
-    if GammaCorrectionEnable,  % apply gamma correction
+    if GammaCorrectionEnable  % apply gamma correction
         % thedss{i}.clut_bg = ApplyGammaCorrection(thedss{i}.clut_bg);
         % Commented by Alexander: not applying gamma correction to clut_bg
         % table. Only the clut_bg value is used to set the background in the thedss{i}.clut
         thedss{i}.bg_gammacorrected = ApplyGammaCorrection(thedss{i}.clut_bg(1,:));
         
-        if iscell(thedss{i}.clut),
-            for j=1:length(thedss{i}.clut),thedss{i}.clut{j} = ApplyGammaCorrection(thedss{i}.clut{j}); end;
+        if iscell(thedss{i}.clut)
+            for j=1:length(thedss{i}.clut)
+                thedss{i}.clut{j} = ApplyGammaCorrection(thedss{i}.clut{j});
+            end
         else
             thedss{i}.clut = ApplyGammaCorrection(thedss{i}.clut);
-        end;
-    end;
-    if NS_PTBv>=3
-        thedss{i}.clut_bg = mergeluts(currLut,thedss{i}.clut_bg);
-        if iscell(thedss{i}.clut),
-            for j=1:length(thedss{i}.clut),thedss{i}.clut{j} = mergeluts(currLut,thedss{i}.clut{j}/255); end;
-        else
-            thedss{i}.clut = mergeluts(currLut,thedss{i}.clut/255);
-            
-            % on OS/X and some NVidia card the currlut may be larger than 256 rows
-            % but the rest of the software assumes 256 entries only.
-            thedss{i}.clut = thedss{i}.clut(1:256,:);
         end
+    end
+    thedss{i}.clut_bg = mergeluts(currLut,thedss{i}.clut_bg);
+    if iscell(thedss{i}.clut)
+        for j=1:length(thedss{i}.clut)
+            thedss{i}.clut{j} = mergeluts(currLut,thedss{i}.clut{j}/255); 
+        end
+    else
+        thedss{i}.clut = mergeluts(currLut,thedss{i}.clut/255);
+        
+        % on OS/X and some NVidia card the currlut may be larger than 256 rows
+        % but the rest of the software assumes 256 entries only.
+        thedss{i}.clut = thedss{i}.clut(1:256,:);
     end
 end
 
 for i=1:length(dispOrder)
     df = thedfs{dispOrder(i)};
     ds = thedss{dispOrder(i)};
-    if (strcmp(ds.displayType,'CLUTanim'))||(strcmp(ds.displayType,'Movie')),
-        if max(df.frames) > ds.frames, error(['Error: frames to display in ' ...
-                'displaypref greater than actual number of frames in displaystruct.']); end;
-        if min(df.frames) < 1, error(['Error: frames to display in ' ...
-                'displaypref out of bounds (less than first frame).']); end;
+    if (strcmp(ds.displayType,'CLUTanim'))||(strcmp(ds.displayType,'Movie'))
+        if max(df.frames) > ds.frames
+            error(['Error: frames to display in ' ...
+                'displaypref greater than actual number of frames in displaystruct.']); 
+        end
+        if min(df.frames) < 1
+            error(['Error: frames to display in ' ...
+                'displaypref out of bounds (less than first frame).']);
+        end
         % the following line is necessary because SetClut takes 1 refresh
         if strcmp(ds.displayType,'CLUTanim')
             sft=1;
@@ -130,19 +134,19 @@ for i=1:length(dispOrder)
             sft=0;
         end
         pauseRefresh = zeros(1,length(df.frames));
-        if df.roundFrames,
+        if df.roundFrames
             pauseRefresh(:) = round(StimWindowRefresh / df.fps)-sft;
         else
             pauseRefresh = diff(fix((1:(length(df.frames)+1)) * StimWindowRefresh / df.fps))-sft;
-        end;
+        end
         frameTimes = zeros(size(pauseRefresh));
     else
         if (strcmp(ds.displayType,'custom'))
             eval([ds.displayProc '(-1,[],ds,df);']); % get proc in memory
-        end;
+        end
         frameTimes = [];
         pauseRefresh = [];
-    end;
+    end
     startStopTimes = [ 0 0 0 0];
     if isfield(df,'BGpretime')
         preBGframes = fix(df.BGpretime * StimWindowRefresh);
@@ -154,9 +158,12 @@ for i=1:length(dispOrder)
     else
         postBGframes = [];
     end
-    MTI{i} = struct('preBGframes', preBGframes, 'postBGframes', postBGframes, ...
+    MTI{i} = struct('preBGframes', preBGframes,...
+        'postBGframes', postBGframes, ...
         'pauseRefresh', pauseRefresh, 'frameTimes', frameTimes, ...
-        'startStopTimes', startStopTimes, 'ds', ds, 'df', df,'stimid',dispOrder(i),'GammaCorrectionTable',GammaCorrectionTable);
+        'startStopTimes', startStopTimes, 'ds', ds, ...
+        'df', df,'stimid',dispOrder(i),...
+        'GammaCorrectionTable',GammaCorrectionTable);
     MTI{i}.MovieParams = MovieParams2MTI(ds, df);
     MTI{i}.ClipRgnParams = ClipRgnParams2MTI(ds,df);
 end

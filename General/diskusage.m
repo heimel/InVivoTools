@@ -35,7 +35,7 @@ if s~=0
     return
 end
 
-w = split(w,10); % split at returns
+w = ivt_split(w,10); % split at returns
 header = w{1};
 content = w{2};
 

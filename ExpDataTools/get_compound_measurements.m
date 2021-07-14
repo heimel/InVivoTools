@@ -52,7 +52,7 @@ if isempty(measuredb) %#ok<NODEF>
     measuredb=load_measuredb;
 end
 if ischar(extra_options) %#ok<NODEF>
-    extra_options=split(extra_options,',');
+    extra_options = ivt_split(extra_options,',');
 end
 
 if ischar(measures)
@@ -61,7 +61,7 @@ end
 
 % measures still contains multiple measures
 if ischar(measures) && ~isempty(find(measures==',',1))
-    measures = split(measures,',',true);
+    measures = ivt_split(measures,',',true);
     results = cell(1,length(measures));
     dresults = cell(1,length(measures));
     measurelabels = cell(1,length(measures));

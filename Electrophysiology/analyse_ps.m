@@ -46,14 +46,15 @@ for i = 1:length(triggers)
     inp = inps(i);
     measures.triggers = triggers;
     
-    par = struct('res',processparams.ec_binwidth,'showrast',0,'interp',3,'drawspont',1,...
+    par = struct('res',processparams.ec_binwidth,'showrast',0,...
+        'interp',3,'drawspont',1,...
         'int_meth',0,'interval',[0 0]);
     
-%     if processparams.post_window(2)<Inf
-%         logmsg('For Koen')
-%         par.interval = [0 processparams.post_window(2)];
-%         par.int_meth = 1;
-%     end
+     if processparams.post_window(2)<Inf
+          %logmsg('For Koen and Yi')
+          par.interval = [0 processparams.post_window(2)];
+          par.int_meth = 1;
+      end
     
     if verbose  % dont show for more than 5 cells
         where.figure = figure;
@@ -74,15 +75,7 @@ for i = 1:length(triggers)
     if isempty(curve)
         return
     end
-    
-%     if processparams.post_window(2)<Inf
-%         logmsg('For Koen')
-%         ch = get(where.figure,'children');
-%         set(ch(4),'xlim', [processparams.pre_window(1) processparams.post_window(2)]);
-%         set(ch(5),'xlim', [processparams.pre_window(1) processparams.post_window(2)]);
-%     end
-
-    
+        
     measures.curve{i} = curve;
     measures.rate_spont{i} = out(i).spont(1);
     [measures.rate_max{i}, ind_pref] = max(curve(2,:));
@@ -114,7 +107,7 @@ for i = 1:length(triggers)
     measures.response_difference{i} = measures.response{i} - measures.response{1};
     
     %  compute peak time for preferred stimulus
-    rast=getoutput(out(i).rast);
+    rast = getoutput(out(i).rast);
     binsize = (rast.bins{1}(end)-rast.bins{1}(1))/(length(rast.bins{1})-1);
     maxbins = min(cellfun(@length,rast.counts));
     
@@ -206,8 +199,25 @@ else
         measures.friedman_p = [];
     end
 end
-measures.variable = paramname;
 
+
+spikes=get_data(inp.spikes,[inp.st.mti{1}.startStopTimes(2),inp.st.mti{end}.startStopTimes(3)]);
+if processparams.ec_compute_spikerate_adaptation && ~isempty(spikes) && length(spikes)>2 
+    isi = spikes(2:end)-spikes(1:end-1);
+    isitimes=(spikes(2:end)+spikes(1:end-1))/2;
+    isitimes = isitimes - isitimes(1); % to avoid warning in polyfit
+    pfit = polyfit(isitimes,isi,1);
+    isi_start = pfit(1)*isitimes(1)+pfit(2);
+    isi_end = pfit(1)*isitimes(end)+pfit(2);
+    mean_rate = 1/mean(isi);
+    measures.rate_change_global = (1/isi_end - 1/isi_start)/(isitimes(end)-isitimes(1)) / mean_rate ;
+else
+    measures.rate_change_global = NaN;
+end
+
+
+
+measures.variable = paramname;
 switch lower(measures.variable)
     case 'contrast'
         measures = compute_contrast_measures(measures);
@@ -224,6 +234,5 @@ switch lower(measures.variable)
     case 'sfrequency'
         measures = compute_sfrequency_measures(measures);
 end
-
-
-
+% New postanalyses tests with variable stimnumber are called at the bottom
+% of analyse_ectestrecord, and should be given in record.analysis field

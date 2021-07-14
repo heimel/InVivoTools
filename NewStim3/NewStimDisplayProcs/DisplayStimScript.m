@@ -84,11 +84,8 @@ end
 
 if capture_movie
     disp('DISPLAYSTIMULUS: Creating movie. This will be slow!');
-    moviefilename = fullfile(['"' getdesktopfolder '"'],'stimulus_movie.mov') ;
     moviefilename = 'stimulus_movie.mov' ;
     try
-       % movieOptions =   ':CodecType=VideoCodec=x264enc speed-preset=1 noise-reduction=100000 ::: AudioCodec=faac ::: AudioSource=pulsesrc ::: Muxer=avimux';
-        movieOptions =   '';
         moviePtr = Screen('CreateMovie', StimWindow, moviefilename,[],[],StimWindowRefresh);
         disp(['DISPLAYSTIMULUS: Writing stimulus movie in ' fullfile(pwd,moviefilename)]);
     catch

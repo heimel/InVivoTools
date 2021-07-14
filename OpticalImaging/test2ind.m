@@ -14,7 +14,7 @@ if isempty(tests)
     return
 end
 if ~iscell(tests)
-    tests=split(tests,',');
+    tests = ivt_split(tests,',');
 end
 for i=1:length(tests)
     indslash=find(tests{i}=='/');

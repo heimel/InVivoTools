@@ -12,6 +12,7 @@ function [done,stamp,infoO] = customdraw(sgs, info, MTI, capture_movie)
 StimWindowGlobals;
 NewStimGlobals;
 
+
 usenewtexturemethod = 0;
 
 done = 0;
@@ -34,8 +35,12 @@ if isempty(info)
         end
     end
     infoO = struct('frameNum',1,'vbl',0,'rotationangle',rotationangle,'gridvalues',V,'colorvalues',colorvalues,'X',X,'Y',Y, 'gridrects',gridrects);
-    Screen('LoadNormalizedGammaTable',StimWindow,StimWindowPreviousCLUT);
-    Screen('FillRect',StimWindow,round(255*MTI.ds.clut(1,:,:)));
+   
+    Screen('LoadNormalizedGammaTable',StimWindow,MTI.ds.clut);
+    Screen('FillRect',StimWindow,SGSparams.BG);
+    %Screen('LoadNormalizedGammaTable',StimWindow,StimWindowPreviousCLUT);
+    %Screen('FillRect',StimWindow,round(255*MTI.ds.clut(1,:,:)));
+   
 else
     infoO = info;
 end

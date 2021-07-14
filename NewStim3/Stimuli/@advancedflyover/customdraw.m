@@ -2,7 +2,7 @@ function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI, capture_movie)
 %CUSTOMDRAW of ADVANCEDFLYOVER
 %
 % 201X, Sven van der Burg, Azadeh Tafreshiha
-% 201X-2020, Alexander Heimel
+% 201X-2021, Alexander Heimel
 % 2020, Leonie Cazemier
 %
 
@@ -33,11 +33,11 @@ if params.appear
     if strcmp(params.start_position, 'left')
         center_obj_pxl(1) = - extent_pxl(1)/2;
     elseif strncmpi(params.start_position,'top',3)
-            center_obj_pxl(2) = - extent_pxl(2)/2;
-            elseif strcmp(params.start_position, 'far')
-            center_obj_pxl(2) = - extent_pxl(2)/2;
-            center_obj_pxl(1) = (50*pixels_per_degree)+center_obj_pxl(1);
-        else
+        center_obj_pxl(2) = - extent_pxl(2)/2;
+    elseif strcmp(params.start_position, 'far')
+        center_obj_pxl(2) = - extent_pxl(2)/2;
+        center_obj_pxl(1) = (-65*pixels_per_degree)+center_obj_pxl(1);
+    else
         center_obj_pxl(1) = screen_pxl(1)+ extent_pxl(1)/2;
     end
 else
@@ -45,7 +45,7 @@ else
         center_obj_pxl(1) = stoppoint_pxl;
     elseif strncmpi(params.start_position,'top',3) || strcmp(params.start_position, 'far')
         center_obj_pxl(2) = stoppoint_pxl;
-        else
+    else
         center_obj_pxl(1) = screen_pxl(1) - stoppoint_pxl;
     end
 end
@@ -64,7 +64,7 @@ if strcmp(params.start_position, 'top_opto')
     StimSerialGlobals
     StimSerial('rts',StimSerialStim,1);
 end
-    
+
 for current_frame = 1:n_frames
     if params.appear
         if strcmp(params.start_position, 'left')
@@ -115,7 +115,7 @@ for current_frame = 1:n_frames
     
     if capture_movie
         Screen('AddFrameToMovie', StimWindow);
-
+        
         % also save single frame
         if current_frame == round(n_frames/2)
             imageArray = Screen('GetImage', StimWindow);

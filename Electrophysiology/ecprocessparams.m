@@ -29,6 +29,7 @@ params.minimum_spontaneous_time = 0.5; % need at least this period for spontaneo
 %params.late_response_window = [0.5 inf]; % not implemented yet
 params.ec_temporary_timeshift = 0; % to induce a timeshift for analysis
 params.results_show_psth_count_all = false;
+params.ec_compute_spikerate_adaptation = false;
 
 params.always_use_matlab_tdt = false;
 
@@ -184,6 +185,8 @@ params.ec_apply_notchfilter = true; % only implemented for importintan
 params.ec_rereference = 'remove_first_pc'; % currently only implemented for intan
 params.ec_show_spikedetection = true; % only implemented for importintan
 params.compute_fraction_overlapping_spikes = false;
+
+params.ec_biphasic_period = 1; % s, half-period to compute STA in analyse_biphasic_index
 
 if exist('processparams_local.m','file')
     oldparams = params;

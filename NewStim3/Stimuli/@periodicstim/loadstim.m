@@ -11,13 +11,13 @@ StimWindowGlobals;
 if NS_PTBv>=3  %&(NewStimPeriodicStimUseDrawTexture|isfield(PSstim.PSparams,'maskps')),
     outstim = loadstimPTB3(PSstim);
     return;
-end;
+end
 
 % otherwise we've got to use color table animation
 
 
 dfs = struct(getdisplayprefs(PSstim));
-if 1||dfs.fps<0,  % work around for no fps on server
+if 1||dfs.fps<0  % work around for no fps on server
     tRes = round( (1/PSparams.tFrequency) * StimWindowRefresh);
     % screen frames / cycle
     

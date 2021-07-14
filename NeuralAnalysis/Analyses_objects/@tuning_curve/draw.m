@@ -7,6 +7,8 @@ function draw(tc)
 %  Draws the output to the location in the TUNING_CURVE object TUNING_CURVEOBJ.
 %
 %  See also:  ANALYSIS_GENERIC/DRAW
+%
+% 200X, Steve Van Hooser
 
 c = getoutput(tc);
 if isempty(c.curve)

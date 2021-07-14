@@ -171,7 +171,7 @@ switch record.stim_type
 		y=reshape(y,length(sf),length(contrast))';
 		dy=reshape(dy,length(sf),length(contrast))';
 		
-		measure=split(measure,'_');
+		measure = ivt_split(measure,'_');
 		switch measure{1}
 			case 'sf'
 				val=sf;

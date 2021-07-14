@@ -24,6 +24,7 @@ disp('Annotation file: http://api.brain-map.org/api/v2/structure_graph_download/
 
 screensize = get(0,'ScreenSize');
 fig = figure(1234);
+set(fig,'WindowStyle','Normal');
 set(fig,'keypressfcn',@keypress);
 set(fig,'color',[0 0 0 ]);
 ud = get(fig,'userdata');
@@ -58,8 +59,10 @@ if ~isfield(ud,'slice_name') || (~isempty(slice_name) && ~strcmp(ud.slice_name,s
         end
     end
     [~,ud.slice_name] = fileparts(filename);
+    logmsg(['Loading ' ud.slice_name]);
     
     ud.slice = imread(filename);
+    ud.hist_show_channels = params.hist_show_channels;
 end
 
 if ~isfield(ud,'VOL') || ~isfield(ud,'ANO') || isempty(ud.VOL) || isempty(ud.ANO)
@@ -97,6 +100,14 @@ if ~isfield(ud,'VOL') || ~isfield(ud,'ANO') || isempty(ud.VOL) || isempty(ud.ANO
     levelim = levelim.*(ud.VOL>1);
     levelim(levelim==0) = NaN;
     ud.topim = -squeeze(min(levelim,[],2));
+    
+    
+    ud.phi = params.hist_phi;
+    ud.axis_ap = params.hist_axis_ap;
+    ud.axis_lr = params.hist_axis_lr;
+    ud.theta = params.hist_theta;
+    ud.xl = params.hist_xl;
+    ud.yl = params.hist_yl;
 end
 
 disp('Keys:');
@@ -134,6 +145,10 @@ al_ids = [402 1074 905 1114 233 601 649];
 % pl_ids = [425 750 269 869 902 377 393];
 % pm_ids = [533 805 41 501 565 257 469];
 vlat_ids = [al_ids vlat_ids];
+pag_ids = [795];
+
+v1_ids = pag_ids; % TEMPORARY
+
 ud = get(fig,'userdata');
 
 r(1) = -ud.axis_ap/cos(ud.phi);
@@ -189,8 +204,6 @@ for i=1:length(vlat_ids)
 end
 
 
-xl = [0.5 260.5];
-yl = [0.4 310.5];
 
 if ud.separate_figures
     figure
@@ -209,8 +222,8 @@ imagesc(im');
 axis image off
 set(gca,'xdir','reverse');
 colormap(gray);
-xlim(xl);
-ylim(yl);
+xlim(ud.xl);
+ylim(ud.yl);
 
 % get v1 border
 if 1
@@ -274,16 +287,23 @@ if any(ud.slice_shift~=0)
     imslice = imtranslate(imslice,ud.slice_shift);
 end
 
-if ndims(imslice)==3 % rgb
-    imslice = double(imslice(:,:,2)); % take green channel
-else
-    imslice = double(imslice);
+if ndims(imslice)==3 && ~isempty(ud.hist_show_channels)% rgb
+    imslice = double(imslice(:,:,ud.hist_show_channels)); % take green channel
 end
 
-imslice = imslice - min(imslice(:));
-imslice = imslice / prctile(imslice(:),ud.slice_prctile) * 64;
+if ndims(imslice)==3
+%     for c=1:3
+%     imslice(:,:,c) = imslice(:,:,c) - min(imslice(:));
+%     imslice = imslice / prctile(imslice(:),ud.slice_prctile) * 64;
+%     end
+else
+    imslice = double(imslice);
+    imslice = imslice - min(imslice(:));
+    imslice = imslice / prctile(imslice(:),ud.slice_prctile) * 64;
+end
 
 imslice = imslice.^ud.slice_gamma;
+
 image(imslice);
 ud.imslice = imslice;
 
@@ -291,8 +311,8 @@ colormap gray;
 axis image off
 set(gca,'xdir','reverse');
 plot_borders(b)
-xlim(xl);
-ylim(yl);
+xlim(ud.xl);
+ylim(ud.yl);
 hold on
 
 if ud.separate_figures
@@ -459,16 +479,16 @@ switch event.Key
     case 'rightarrow'
         ud.slice_shift(1) = ud.slice_shift(1)  - step;
     case 'pageup'
-        ud.slice_scale(1) = ud.slice_scale(1)  + 0.02 * step;
+        ud.slice_scale(1) = ud.slice_scale(1)  * (1 +  0.02 * step);
     case 'pagedown'
-        ud.slice_scale(1) = ud.slice_scale(1)  - 0.02 * step;
+        ud.slice_scale(1) = ud.slice_scale(1)  * (1 - 0.02 * step);
 end
 set(fig,'userdata',ud);
 showslice(fig);
 
 
 function show_topview(ud,r_lims)
-persistent Model %#ok<PSET>
+persistent Model 
 if isempty(Model)
     load('AllenBrainTopView.mat','-mat','Model');
 end

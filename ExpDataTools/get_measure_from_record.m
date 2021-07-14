@@ -49,7 +49,7 @@ if exist('limit','var')
             limit = limit(2:end-1);
         end
         limit(limit==';')=',';
-        limit = split(limit,',',true);
+        limit = ivt_split(limit,',',true);
     catch
         errormsg(['Something wrong with ' limit ]);
         return

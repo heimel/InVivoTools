@@ -19,8 +19,10 @@ switch record.datatype
         %results_lstestrecord( record );
     case 'wc'
         results_wctestrecord( record );
-    case 'pupil'
+    case 'pupil' % pupil camera headfixed
         results_pupiltestrecord( record );
+    case 'hc' % head camera freely moving
+        results_hctestrecord( record );
     otherwise
         errormsg(['Unknown datatype ' record.datatype ]);
         return

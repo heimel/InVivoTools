@@ -1,15 +1,15 @@
 function [results,dresults,measurelabel, rawdata] = get_measurements( groups, measure, varargin )
 %GET_MEASUREMENTS gets results for groups of mice for one or more measures
 %
-% [RESULTS,DRESULTS,MEASURELABELS] = GET_MEASUREMENTS( GROUPS, MEASURE,
-% VARARGIN )
+% [RESULTS,DRESULTS,MEASURELABELS,RAWDATA] = GET_MEASUREMENTS( GROUPS, MEASURE, VARARGIN )
 %
 %    RESULTS has structure like RESULTS{ group }(measure)
 %    RESULTS has structure like DRESULTS{ group }(measure) and contains
 %       SEM in the individual measurements
 %    MEASURELABEL is cell list of string
+%    RAWDATA contains raw data
 %
-% 2007-2019, Alexander Heimel
+% 2007-2020, Alexander Heimel
 %
 
 persistent expdb_cache
@@ -19,6 +19,7 @@ global pooled
 results={};
 dresults={};
 rawdata = {};
+testdb = [];
 
 pos_args={...
     'value_per','measurement',... % 'group','mouse','test','measurement', 'stack','neurite' %'reliable',1,...  % 1 to only use reliable records (record.reliable!0), 0 to use all
@@ -56,16 +57,16 @@ if nvarargin>0
 end
 
 if isempty(mousedb) %#ok<NODEF>
-    mousedb=load_mousedb;
+    mousedb = load_mousedb;
 end
 if isempty(groupdb) %#ok<NODEF>
-    groupdb=load_groupdb;
+    groupdb = load_groupdb;
 end
 if isempty(measuredb) %#ok<NODEF>
-    measuredb=load_measuredb;
+    measuredb = load_measuredb;
 end
 if ischar(extra_options) %#ok<NODEF>
-    extra_options=split(extra_options,',');
+    extra_options = ivt_split(extra_options,',');
 end
 for i=1:2:length(extra_options)
     assign(strtrim(extra_options{i}),extra_options{i+1});
@@ -104,69 +105,71 @@ for g=1:n_groups
 end % g
 
 linehead = '';
-switch measuress.datatype
-    case {'oi','ec','lfp','tp','ls','fret','fp','wc','pupil'}
-        reload = false;
-        if isempty(expdb_cache) || ...
-                ~isfield(expdb_cache,measuress.datatype) || ...
-                ~isfield( expdb_cache.(measuress.datatype),'type') || ...
-                ~strcmp(measuress.datatype, expdb_cache.(measuress.datatype).type)
-            reload = true;
-        else
-            if iscell(expdb_cache.(measuress.datatype).filename)
-                d = dir(expdb_cache.(measuress.datatype).filename{1});
-            else
-                d = dir(expdb_cache.(measuress.datatype).filename);
-            end
-            if isempty(d) % probably concatenated database
-                reload = false;
-            elseif ~strcmp(d.date, expdb_cache.(measuress.datatype).date) % i.e. changed
+if isempty(testdb)
+    switch measuress.datatype
+        case {'oi','ec','lfp','tp','ls','fret','fp','wc','pupil'}
+            reload = false;
+            if isempty(expdb_cache) || ...
+                    ~isfield(expdb_cache,measuress.datatype) || ...
+                    ~isfield( expdb_cache.(measuress.datatype),'type') || ...
+                    ~strcmp(measuress.datatype, expdb_cache.(measuress.datatype).type)
                 reload = true;
-            end
-        end
-        
-        if exist('dbname','var') && ischar(dbname) %#ok<NODEF> % alternative db specified
-            if ~exist(dbname,'file')
-                if exist(fullfile(expdatabasepath,dbname),'file')
-                    dbname = fullfile(expdatabasepath,dbname);
+            else
+                if iscell(expdb_cache.(measuress.datatype).filename)
+                    d = dir(expdb_cache.(measuress.datatype).filename{1});
+                else
+                    d = dir(expdb_cache.(measuress.datatype).filename);
+                end
+                if isempty(d) % probably concatenated database
+                    reload = false;
+                elseif ~strcmp(d.date, expdb_cache.(measuress.datatype).date) % i.e. changed
+                    reload = true;
                 end
             end
-            if ~exist(dbname,'file')
-                errormsg(['Database ' dbname ' does not exist.']);
-                expdb_cache.(measuress.datatype).db = [];
-                expdb_cache.(measuress.datatype).filename  = dbname;
-                return
+            
+            if exist('dbname','var') && ischar(dbname) %#ok<NODEF> % alternative db specified
+                if ~exist(dbname,'file')
+                    if exist(fullfile(expdatabasepath,dbname),'file')
+                        dbname = fullfile(expdatabasepath,dbname);
+                    end
+                end
+                if ~exist(dbname,'file')
+                    errormsg(['Database ' dbname ' does not exist.']);
+                    expdb_cache.(measuress.datatype).db = [];
+                    expdb_cache.(measuress.datatype).filename  = dbname;
+                    return
+                end
+                if ~reload && ~strcmp(expdb_cache.(measuress.datatype).filename,dbname)
+                    reload = true;
+                end
             end
-            if ~reload && ~strcmp(expdb_cache.(measuress.datatype).filename,dbname)
-                reload = true;
-            end
-        end
-        
-        if reload
-            %            expdb_cache.(measuress.datatype).type = expdatabases(measuress.datatype) ;
-            expdb_cache.(measuress.datatype).type = measuress.datatype ;
-            if exist('dbname','var') && ischar(dbname)
-                temp = load(dbname);
-                expdb_cache.(measuress.datatype).db = temp.db;
-                expdb_cache.(measuress.datatype).filename  = dbname;
-                clear('temp');
+            
+            if reload
+                %            expdb_cache.(measuress.datatype).type = expdatabases(measuress.datatype) ;
+                expdb_cache.(measuress.datatype).type = measuress.datatype ;
+                if exist('dbname','var') && ischar(dbname)
+                    temp = load(dbname);
+                    expdb_cache.(measuress.datatype).db = temp.db;
+                    expdb_cache.(measuress.datatype).filename  = dbname;
+                    clear('temp');
+                else
+                    [expdb_cache.(measuress.datatype).db,expdb_cache.(measuress.datatype).filename] = ...
+                        load_testdb(expdb_cache.(measuress.datatype).type);
+                end
+                if iscell(expdb_cache.(measuress.datatype).filename)
+                    d = dir(expdb_cache.(measuress.datatype).filename{1});
+                else
+                    d = dir(expdb_cache.(measuress.datatype).filename);
+                end
+                expdb_cache.(measuress.datatype).date = d.date;
             else
-                [expdb_cache.(measuress.datatype).db,expdb_cache.(measuress.datatype).filename] = ...
-                    load_testdb(expdb_cache.(measuress.datatype).type);
+                logmsg(['Using cache of ' expdb_cache.(measuress.datatype).filename '. Type ''clear functions'' to clear cache.']);
             end
-            if iscell(expdb_cache.(measuress.datatype).filename)
-                d = dir(expdb_cache.(measuress.datatype).filename{1});
-            else
-                d = dir(expdb_cache.(measuress.datatype).filename);
-            end
-            expdb_cache.(measuress.datatype).date = d.date;
-        else
-            logmsg(['Using cache of ' expdb_cache.(measuress.datatype).filename '. Type ''clear functions'' to clear cache.']);
-        end
-        
-        testdb = expdb_cache.(measuress.datatype).db;
-    otherwise
-        testdb=[];
+            
+            testdb = expdb_cache.(measuress.datatype).db;
+        otherwise
+            testdb=[];
+    end
 end
 
 % exclude groups for which we have too few points
@@ -357,7 +360,7 @@ end
 if isfield(testdb,'comment') &&  exist('comment','var')
     comment = strtrim(comment); %#ok<NODEF>
     if comment(1)=='{'
-        comment = strtrim(split( comment(2:end-1)));
+        comment = strtrim(ivt_split( comment(2:end-1)));
     else
         comment = {comment};
     end
@@ -368,7 +371,7 @@ end
 if isfield(testdb,'comment') &&  exist('nocomment','var')
     nocomment = strtrim(nocomment); %#ok<NODEF>
     if nocomment(1)=='{'
-        nocomment = split( nocomment(2:end-1));
+        nocomment = ivt_split( nocomment(2:end-1));
     else
         nocomment = {nocomment};
     end
@@ -380,7 +383,7 @@ end
 if isfield(testdb,'stim_parameters') &&  exist('stim_parameters','var')
     stim_parameters = strtrim(stim_parameters);  %#ok<NODEF>
     if stim_parameters(1)=='{'
-        stim_parameters = strtrim(split( stim_parameters(2:end-1)));
+        stim_parameters = strtrim(ivt_split( stim_parameters(2:end-1)));
     else
         stim_parameters = {stim_parameters};
     end

@@ -508,7 +508,7 @@ function [recorded_channels,area] = get_recorded_channels( record )
 recorded_channels = [];
 area = [];
 if isfield(record,'channel_info') && ~isempty(record.channel_info)
-    channel_info = split(record.channel_info);
+    channel_info = ivt_split(record.channel_info);
     if length(channel_info)==1
         recorded_channels = sort(str2num(channel_info{1})); %#ok<ST2NM>
     else

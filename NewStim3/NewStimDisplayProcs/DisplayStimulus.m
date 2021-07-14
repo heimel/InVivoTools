@@ -262,6 +262,11 @@ elseif strcmp(MTI.ds.displayType,'Sound')
     frameTimes(1) = StimTriggerAct('Stim_afterframe_trigger',MTI.stimid,1);
 end
 
+% hardcoded optogenetics trigger off
+%logmsg('Hard coded turning RTS off');
+StimSerialGlobals
+StimSerial('rts',StimSerialStim,0);
+
 if MTI.postBGframes>0
     if NS_PTBv<3
         Screen(StimWindow,'SetClut',MTI.ds.clut_bg);
@@ -294,11 +299,6 @@ if MTI.postBGframes>0
 else
     startStopTimes(3) = StimTriggerAct('Stim_OFFSET_trigger',MTI.stimid);
 end
-
-% hardcoded optogenetics trigger off
-%logmsg('Hard coded turning RTS off');
-StimSerialGlobals
-StimSerial('rts',StimSerialStim,0);
 
 startStopTimes(4) = StimTriggerAct('Stim_BGpost_trigger',MTI.stimid);
 

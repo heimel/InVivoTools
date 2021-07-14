@@ -367,24 +367,24 @@ measures.response_halflife=halfresponse*binwidth;
 
 % calculate spike rate adaptation during whole stimulation interval
 spikes=get_data(inp.spikes,[inp.st.mti{1}.startStopTimes(2),inp.st.mti{end}.startStopTimes(3)]);
-if ~isempty(spikes) && length(spikes)>2 && length(spikes)<100 % added conditions by Mehran
-    isi=spikes(2:end)-spikes(1:end-1);
+if processparams.ec_compute_spikerate_adaptation && ~isempty(spikes) && length(spikes)>2 
+    isi = spikes(2:end)-spikes(1:end-1);
     isitimes=(spikes(2:end)+spikes(1:end-1))/2;
     isitimes = isitimes - isitimes(1); % to avoid warning in polyfit
-    pfit=polyfit(isitimes,isi,1);
-    isi_start=pfit(1)*isitimes(1)+pfit(2);
-    isi_end=pfit(1)*isitimes(end)+pfit(2);
-    mean_rate=1/mean(isi);
+    pfit = polyfit(isitimes,isi,1);
+    isi_start = pfit(1)*isitimes(1)+pfit(2);
+    isi_end = pfit(1)*isitimes(end)+pfit(2);
+    mean_rate = 1/mean(isi);
     measures.rate_change_global = (1/isi_end - 1/isi_start)/(isitimes(end)-isitimes(1)) / mean_rate ;
 else
-    measures.rate_change_global=nan;
+    measures.rate_change_global = NaN;
 end
 
 if 0 % OFF-response analysis not finished
     % compute peristimulus histograms of OFF-responses to RF ON center
-    off_frametimes=inp.stimtime.mti{1}.frameTimes(f(rfy,rfx,:,1)<0);
-    spiketimes_afterframe=[];
-    for i=1:length(off_frametimes)
+    off_frametimes = inp.stimtime.mti{1}.frameTimes(f(rfy,rfx,:,1)<0);
+    spiketimes_afterframe = [];
+    for i = 1:length(off_frametimes)
         try
             spiketimes_afterthisframe=...
                 get_data(inp.spikes,[off_frametimes(i)+hist_start off_frametimes(i)+hist_end])...

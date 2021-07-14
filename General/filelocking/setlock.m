@@ -49,7 +49,7 @@ end
 
 
 if fid==-1 
-  error(['failed to open lockfile ' lockfilename ]);
+  errormsg(['failed to open lockfile ' lockfilename ]);
   return;
 end
 

@@ -32,6 +32,8 @@ function tc = tuning_curve(inputs, parameters, where, record)
 %                   :      in combination with int_meth below.
 %   int_meth  [1x1] :    0=>Analyze over [stim_start+start,stim_stop-stop]
 %                   :    1=>Analyze over [stim_start+start,stim_start+stop]
+%
+% 200X, Steve Van Hooser
 
 if nargin<4
     record = [];
@@ -39,9 +41,6 @@ end
 
 computations = struct('curve',[],'maxes',[],'mins',[],'spont',[]);
 internals = struct('rast',[],'spont',[]);
-
-% [good,er]=verifyinputs(inputs); 
-% if ~good,error(['INPUT: ' er]); end;
 
 nag = analysis_generic([],[],where); 
 delete(nag); 

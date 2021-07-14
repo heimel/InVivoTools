@@ -54,7 +54,7 @@ default_p = default; % private function
 finish = 1;
 
 if nargin==1
-    oldstim=[];
+    oldstim = [];
 else
     oldstim = OLDSTIM;
 end
@@ -124,8 +124,9 @@ end
 
 % create figure
 
-h0 = figure('Color',[0.8 0.8 0.8], 'Position',[140   307   488   602]);
-settoolbar(h0,'none'); set(h0,'menubar','none');
+h0 = figure('WindowStyle','Normal','Color',[0.8 0.8 0.8], 'Position',[140   307   488   602]);
+settoolbar(h0,'none'); 
+set(h0,'MenuBar','none');
 
 shift_y = -30;
 shift_y2 = -30;

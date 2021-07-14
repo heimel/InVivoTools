@@ -25,8 +25,8 @@ if td % timing data difference
     end
     n_bins = length(offsets)-1;
     in.edges = {};
-    in.counts = {}; % in.counts{number of stimuli}{number of cells}[number of bins,
-    for m=1:length(I.stimtime)
+    in.counts = {}; % in.counts{number of stimuli}{number of cells}(number of bins,number of frames)
+    for m = 1:length(I.stimtime) % loop over stims
         frameTimes = I.stimtime(m).mti{1}.frameTimes;
         n_frames = length(frameTimes);
         % tmpa = matrix with on each row all frametimes plus the start of the bins in the columns
@@ -35,38 +35,39 @@ if td % timing data difference
         tmpb = repmat(frameTimes,n_bins,1) + repmat(offsets(2:end)',1,n_frames);
         mn = min(min(tmpa));
         mx = max(max(tmpb));
-        for c=1:length(I.spikes) % loop over cells
+        for c = 1:length(I.spikes) % loop over cells? but only called for one cell 
             dat = get_data(I.spikes{c},[mn mx],2);
-            in.counts{m}{c} = zeros(size(offsets,2)-1,n_frames);
-            for o=1:n_bins
-                for dd=1:length(dat) % loop over spikes
+            in.counts{m}{c} = zeros(size(offsets,2)-1,n_frames); % will contain the number of spikes in each bin from each frame
+            for o = 1:n_bins
+                for dd = 1:length(dat) % loop over spikes
                     in.counts{m}{c}(o,:) = in.counts{m}{c}(o,:) + ((dat(dd)>=tmpa(o,:))&(dat(dd)<=tmpb(o,:)));
                 end
-            end
-        end
-    end
-    [x,y,rect]=getgrid(I.stimtime(1).stim);
+            end % bin o
+        end % cell c
+    end % stim m
+    [x,y,rect] = getgrid(I.stimtime(1).stim); % x,y are numbers of horzontal and vertical of patches
+
     fea = cell(length(I.spikes),length(offsets));
-    rc_avg = zeros(length(I.spikes),n_bins,y,x,3);
+    rc_avg = zeros(length(I.spikes),n_bins,y,x,3); 
     rc_std = zeros(length(I.spikes),n_bins,y,x,3);
     rc_raw = zeros(length(I.spikes),n_bins,y,x,3);
-    
     norms = zeros(length(I.spikes),n_bins);
-    for m=1:length(I.stimtime) % loop over stims
+    for m = 1:length(I.stimtime) % loop over stims
         [x,y,rect] = getgrid(I.stimtime(m).stim);
         v = getgridvalues(I.stimtime(m).stim);
         f = getstimfeatures(v,I.stimtime(m).stim,p,x,y,rect); % features
-        for c=1:length(I.spikes) % loop over cells
-            for o=1:n_bins
-                indx = [];
+        for c = 1:length(I.spikes) % loop over cells
+            for o = 1:n_bins
                 [B,dummy,inds] = unique(in.counts{m}{c}(o,:)); %#ok<ASGLU>
                 % i.e. in.counts{m}{c}(o,:) = B(inds)
+                % B contains a vectors of all counts
                 inds = inds(:)'; % necessary for change in unique behavior in MatlabR2014a
                 
-                for jj=1:length(B)
+                indx = [];
+                for jj = 1:length(B) % loop over all counts
                     if B(jj)~=0
-                        for kk=1:B(jj)
-                            indx=cat(2,indx,find(inds==jj));
+                        for kk = 1:B(jj) % loop over spikes in count B(jj)
+                            indx = cat(2,indx,find(inds==jj));
                         end
                     end
                 end
@@ -94,15 +95,20 @@ if td % timing data difference
     in.oldtimeres = p.timeres;
     in.oldfeature = p.feature;
     
-    r_c=struct('rc_avg',rc_avg,'rc_std',rc_std,'rc_raw',rc_raw,...
+    r_c = struct('rc_avg',rc_avg,'rc_std',rc_std,'rc_raw',rc_raw,...
         'bins',{in.counts},'norms',norms);
 else
     r_c = rc.computations.reverse_corr;
 end
 
-if p.crcpixel==-1
-    rr = max(r_c.rc_avg(1,:,:,:,end),[],5);  % take max color
-    rr = squeeze(max(abs(rr - p.feamean),[],2));
+if p.crcpixel==-1  
+    % max abs difference to p.feamean over bins for each pixel 
+    % p.feamean is the mean color 
+    % this code only works properly for gray!
+    rr = max(r_c.rc_avg(1,:,:,:,:),[],5);  % take max color
+    rr = squeeze(max(abs(rr - p.feamean),[],2)); % 
+
+    % compute index of pixel with maximum abs difference to p.feamean
     [dum,p.crcpixel] = max(rr(:)); %#ok<ASGLU>
     in.selectedbin = p.crcpixel;
 end
@@ -185,20 +191,27 @@ if centchanged && (p.crcpixel>0)
     end
     [overlap,stddevinds] = setxor(lags,calclags); %#ok<ASGLU>
     [ov,otherinds] = intersect(lags,calclags); %#ok<ASGLU>
-    %stddev = std(c(stddevinds));
-    cc = c(otherinds);
+
+    cc = c(otherinds); % average projected feature value before and after spike
     
-    % find peak
-    %    stddev = std(c(stddevinds));
     stddev = sqrt(c(stddevinds)*c(stddevinds)'/length(stddevinds));
-    
     [mm,peakind] = max(abs(cc)); %#ok<ASGLU> % location of peak
-    onoff = cc(peakind)>0 ;    % 1 = oncell, 0 = offcell, NaN = no signif STA
-    if abs(cc(peakind))<3*stddev
+    onoff = cc(peakind)>0 ;    % onoff 1 = oncell, 0 = offcell, NaN = no signif STA
+    if abs(cc(peakind))<3*stddev % no clear peak, thus not computing transience
         onoff = NaN;
         transience = NaN;
     else
-        [mm,prepeakind] = max( (1-2*onoff)*cc(1:peakind-1));  %#ok<ASGLU>
+        [mm,prepeakind] = max( (1-2*onoff)*cc(1:peakind-1));  %#ok<ASGLU> find peak before peak
+        
+        % transience index is computed as the difference of the spike
+        % triggered average of the projected stimulus feature value
+        % to the mean feature value divided by the
+        % maximum difference in the opposite direction, preceding the
+        % maximum difference (Sommeijer et al. 2017. This follows the 
+        % biphasic index to measure how biphasic the response is (Piscopo
+        % et al. J Neurosci 2013) which shows a difference between tOFF and
+        % sOFF cells in mouse dLGN (Piscopo et al. J Neurosci 2013)
+
         transience = -cc(prepeakind)/cc(peakind);
     end
     

@@ -1,4 +1,8 @@
 function [outstim] = loadstim(SGSstim)
+%STOCHASTICGRIDSTIM/LOADSTIM
+%
+% 200X, Steve van Hooser
+% 200X-2021, Alexander Heimel
 
 NewStimGlobals;
 StimWindowGlobals;
@@ -38,7 +42,7 @@ if isstruct(SGSparams.randState)
             rng_twister(SGSparams.randState.Seed);
         otherwise
             logmsg('Random number generator not uniformly implemented for Matlab and Octave');
-            rng(SGSparams.randState); 
+            rng(SGSparams.randState);
     end
 else
     logmsg('Reverse correlation for these stimuli is Matlab/Octave dependent.');
@@ -61,8 +65,7 @@ if ((XY<253) && (~dPs.forceMovie)) && ~use_customdraw % use one image and array 
         [y,is] = sort(I);
         clut{i} = ([ SGSparams.BG ; SGSparams.values(J(is),:); repmat(SGSparams.BG,255-XY,1);]);
     end
-    
-    
+        
     if NS_PTBv < 3
         if rotationangle~=0
             warning(['Rotating images not supported under OS 9 ' ...
@@ -79,7 +82,10 @@ if ((XY<253) && (~dPs.forceMovie)) && ~use_customdraw % use one image and array 
 else % use 'Movie' mode, one CLUT and many images
     displayType = 'Movie';
     displayProc = 'standard';
-    clut = ([ SGSparams.BG; SGSparams.values(1:l,:); repmat(SGSparams.BG,255-l,1);]);
+    %    clut = ([ SGSparams.BG; SGSparams.values(1:l,:); repmat(SGSparams.BG,255-l,1);]);
+    % Replaced by following line, Alexander 2021-03-07
+    clut = repmat(linspace(0,1,256)'*255,1,3);  
+
     if ~conserve_mem_custom
         offscreen = zeros(1,SGSparams.N);
     end
@@ -105,11 +111,11 @@ else % use 'Movie' mode, one CLUT and many images
                 image = imrotate(image, rotationangle,'nearest','crop');
             end
             if ~conserve_mem_custom||i==1
-		try
-	                rgb = ind2rgb(image,clut);
-		catch
-	                rgb = ind2rgb(image,clut/255);
-		end
+                try
+                    rgb = ind2rgb(image,clut);
+                catch
+                    rgb = ind2rgb(image,clut/255);
+                end
                 offscreen(i) = Screen('MakeTexture',StimWindow,rgb);
             end
         end

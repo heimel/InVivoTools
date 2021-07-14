@@ -146,13 +146,7 @@ for i=1:length(g) % for all cells
     if ~isempty(find_record(record,['comment=*' num2str(i) ':bad*']))
         cellmeasures.usable=0;
     end
-    
-%     if isempty(measures)
-%         cellmeasures.type='mu';
-%     else
-%         cellmeasures.type='su';
-%     end
-    
+        
     if isfield(cellmeasures,'rate_peak') && isfield(cellmeasures,'rate_spont')
         cellmeasures.ri= (cellmeasures.rate_peak-cellmeasures.rate_spont) /...
             cellmeasures.rate_peak;
@@ -289,7 +283,6 @@ if processparams.sort_compute_cluster_overlap &&  cluster_spikes
 end % if cluster_spikes
 %end % reference r
 
-
 % insert measures into record.measures
 if (length(channels2analyze)==length(recorded_channels) && ...
         all( sort(channels2analyze)==sort(recorded_channels))) || ...
@@ -313,7 +306,18 @@ else
     end
 end
 
-measures = record.measures; %#ok<NASGU>
+% extra analyses, e.g. ec_analyse_xos, ec_analyse_adaptation
+if ~isempty(record.analysis)
+    try
+        record = feval(record.analysis,record);
+    catch me
+        errormsg(['Problem with analysis field in ' recordfilter(record) ...
+            ': ' me.message]);
+    end
+end
+
+
+measures = record.measures; 
 
 % save measures file
 if 0 && strncmp(record.stim_type,'background',10)==1
@@ -343,7 +347,7 @@ function [recorded_channels,area] = get_recorded_channels( record )
 recorded_channels = [];
 area = [];
 if isfield(record,'channel_info') && ~isempty(record.channel_info)
-    channel_info = split(record.channel_info);
+    channel_info = ivt_split(record.channel_info);
     if length(channel_info)==1
         recorded_channels = sort(str2num(channel_info{1})); %#ok<ST2NM>
     else

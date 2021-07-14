@@ -88,7 +88,7 @@ if ~iscell(inputs.spikes)
 end
 							
 [good,er]=verifyinputs(inputs); 
-if ~good,
+if ~good
     msg = ['Input ' er];
     disp(['REVERSE_CORR: ' msg]);
     rc = [];

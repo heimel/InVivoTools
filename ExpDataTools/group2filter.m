@@ -23,7 +23,6 @@ if ischar(group)
   if isempty(ind)
     filt = '';
     error(['Could not find group ' group ]);
-    return
   end
   group = groupdb(ind);
   if collect_records
@@ -37,7 +36,7 @@ if ~isempty(filt)
   filt = ['(' filt ')'];
 end
 
-combine=split(group.combine);
+combine = ivt_split(group.combine);
 
 while ~isempty(combine)
   addfilt = group2filter(strtrim(combine{1}),groupdb,collect_records);
