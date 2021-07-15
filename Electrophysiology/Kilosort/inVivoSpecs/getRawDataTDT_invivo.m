@@ -78,7 +78,7 @@ function [vecTimestamps,matData,vecChannels] = getRawDataTDT_invivo(sMetaData,ve
     strTargetFile = fullfile(sMetaData.Mytank, sMetaData.Myblock,'RawBinData.bin');
     ptrFile = fopen(strTargetFile,'w');
     fprintf('Opened binary file "%s"... \n',strTargetFile);
-
+    written = 0;
 	
 	%% pre-allocate data array
 	dblTotDur = vecTimeRange(2)-vecTimeRange(1);
@@ -138,7 +138,7 @@ function [vecTimestamps,matData,vecChannels] = getRawDataTDT_invivo(sMetaData,ve
 			matThisData = matEvData(:,indThisEventBins);
             %built in conversion to be compatible with int16-storage
             %(adaptation for invivotools by Leonie)
-            matThisData = matThisData.*10^6;
+            matThisData = matThisData.*10^7;
 			vecThisChanIdx = vecChanIdx(indThisEventBins);
 			indRetrieveChans = ismember(vecThisChanIdx,vecChannels);
 			indAssignChans = ismember(vecChannels,vecThisChanIdx);
@@ -177,11 +177,17 @@ function [vecTimestamps,matData,vecChannels] = getRawDataTDT_invivo(sMetaData,ve
 			
 			%append to file
             intCount = fwrite(ptrFile, matThisData,'int16');
+            written = written + size(matThisData,2);
+            
+            if written ~= length(find(~isnan(vecTimestamps)))
+                pause;
+                break 
+            end
 
 		end
 	end
 
-	    
+	vecTimestamps(isnan(vecTimestamps))=[];  
     fclose(ptrFile);
     fprintf('Done! Output is %d \n',intCount);
     
