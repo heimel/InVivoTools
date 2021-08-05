@@ -14,3 +14,5 @@ iq = q3-q1;
 ind = (y>=q1-1.5*iq & y<=q3+1.5*iq );
 y = y(ind);
 
+logmsg(['removing ' num2str(setdiff( 1:length(y),find(ind)))]);
+
