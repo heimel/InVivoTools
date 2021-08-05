@@ -1,8 +1,8 @@
 %  create a channel map file
 
-Nchannels = length(EVENT.snips.times);
+Nchannels = length(channels2analyze);
 connected = true(Nchannels, 1);
-chanMap   = 1:Nchannels;
+chanMap   = channels2analyze;
 chanMap0ind = chanMap - 1;
 xcoords   = ones(Nchannels,1);
 ycoords   = [1:Nchannels]';

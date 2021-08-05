@@ -65,7 +65,8 @@ else
     end
     strTarget = fullfile(EVENT.Mytank, EVENT.Myblock);
     fs = dir(fullfile(strTarget, '*groups.csv'));
-    if isempty(fs) %no sorted/curated files in folder
+    fs2 = dir(fullfile(strTarget,'*group.tsv'));
+    if isempty(fs) && isempty(fs2) %no sorted/curated files in folder
         % make file that kilosort can use and sort it!
         [~] = make_kilosort_data(EVENT, strTarget);
         return

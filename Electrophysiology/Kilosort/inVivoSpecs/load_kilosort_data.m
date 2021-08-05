@@ -5,10 +5,24 @@ sampF = max([EVENT.strms.sampf]);
 nChan = EVENT.strms(1).channels;
 
 %load unit info
+
 loadf = fullfile(strTarget,'cluster_groups.csv');
-ops = detectImportOptions(loadf);
-unitspecs = readtable(loadf, ops);
-unitspecs = table2cell(unitspecs);
+loadf2 = fullfile(strTarget,'cluster_group.tsv');
+
+try
+    ops = detectImportOptions(loadf);
+    unitspecs = readtable(loadf, ops);
+    unitspecs = table2cell(unitspecs);
+catch
+   
+   [data,header,unitspecs] =tsvread(loadf2);
+    for i=2:size(unitspecs,1)
+        unitspecs{i,1} = str2num(unitspecs{i,1}); 
+    end
+    unitspecs(1,:) = [];
+end
+
+
 %load spike times
 sp = loadKSdir(strTarget);
 locSpikesOnly = false;
