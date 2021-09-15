@@ -164,7 +164,9 @@ if params.load_electrophys
         fullfile(path2invivotools,'Electrophysiology','Son'),...    %libraries for importing spike2 data
         fullfile(path2invivotools,'Electrophysiology','TDT'),... % for importing tdt data in linux
         fullfile(path2invivotools,'Electrophysiology','Axon'),... % for importing Axon abf files
-        genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5')));    % for MClust spike sorter
+        genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5')),...    % for MClust spike sorter
+        fullfile(path2invivotools,'Electrophysiology','Kilosort','inVivoSpecs') ...  % for exporting data to kilosort and importing kilosort spikes
+        );
 end
 
 % Physiology analyses
@@ -247,6 +249,8 @@ if isunix % bug workaround for Matlab R2012b and more recent
     % see e.g. http://www.mathworks.com/matlabcentral/answers/114915-why-does-matlab-cause-my-cpu-to-spike-even-when-matlab-is-idle-in-matlab-8-0-r2012b
     try 
         com.mathworks.mlwidgets.html.HtmlComponentFactory.setDefaultType('HTMLRENDERER')
+    catch me    
+        disp(['LOAD_INVIVOTOOLS: ' me.message])
     end
 end
 

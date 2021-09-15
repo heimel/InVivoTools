@@ -1,4 +1,7 @@
 function f = make_kilosort_data(EVENT, strTarget,channels2analyze)
+%MAKE_KILOSORT_DATA gets raw tdt continously sampled data and runs kilosort
+%
+
 
 if nargin<3 || isempty(channels2analyze)
     channels2analyze = 1:EVENT.snips.Snip.channels;
