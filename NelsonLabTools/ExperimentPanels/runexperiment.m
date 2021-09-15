@@ -8,7 +8,7 @@ function runexperiment(figureNum, record)
 %  figure is totally cleared by this routine.
 %
 % 2000-2003 Steve VanHooser
-% 2004-2014 Alexander Heimel
+% 2004-2021 Alexander Heimel
 %
 
 remotecommglobals
@@ -63,7 +63,9 @@ SaveDir = 't00001';
 figheight = 530;
 figwidth = 430;
 figleft = 381;
-figtop = 217;
+screensize = get(0,'ScreenSize');
+%figtop = 217;
+figtop = floor(screensize(4)/2 - figheight/2);
 
 set(gcf,'WindowStyle','normal');
 set(gcf,'Position',[figleft figtop figwidth figheight]);

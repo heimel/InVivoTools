@@ -14,7 +14,7 @@ function [handle, pos] = guicreate( arg, varargin )
 %  HANDLE contains object handle
 %  POS contains object position
 %
-% 2010, Alexander Heimel
+% 2010-2021, Alexander Heimel
 %
 
 string = []; %#ok<NASGU> % to overwrite function STRING
@@ -22,6 +22,7 @@ height = []; % to overwrite function HEIGHT
 width = [];
 style = [];
 units = [];
+handle = [];
 
 % possible varargins with default values
 pos_args={...
@@ -231,7 +232,7 @@ if strcmpi(style.Style,'popupmenu')
     position = position + [ 0 2 0 0]; %#ok<NASGU>
 end
 
-    cmd = 'handle=uicontrol(fig';
+cmd = 'handle=uicontrol(fig';
 flds = fieldnames(style);
 for i=1:length(flds)
     cmd = [cmd ',flds{' num2str(i) '},style.(flds{' num2str(i) '})' ]; %#ok<AGROW>
