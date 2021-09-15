@@ -17,7 +17,11 @@ function [handle, pos] = guicreate( arg, varargin )
 % 2010, Alexander Heimel
 %
 
-string = []; % to overwrite function STRING
+string = []; %#ok<NASGU> % to overwrite function STRING
+height = []; % to overwrite function HEIGHT 
+width = [];
+style = [];
+units = [];
 
 % possible varargins with default values
 pos_args={...
@@ -53,7 +57,7 @@ if isstruct(arg)
 	for i=1:length(f)
 		assign( lower(f{i}), arg.(f{i}));
 	end
-	if exist('style','var');
+	if exist('style','var') && ~isempty(style)
 		stylestr = style;
 		style = [];
 		style.Style = stylestr;
@@ -101,8 +105,8 @@ parenttype = get(parent,'type');
 parentpos = get(parent,'Position');
 
 % get defaults from figure
-if isempty(units) %#ok<NODEF>
-    units = get(fig,'Units');
+if isempty(units) 
+    units = get(fig,'Units'); %#ok<NASGU>
 end
 if isempty(backgroundcolor) && ~isfield(style,'BackgroundColor') %#ok<NODEF>
 	switch parenttype
@@ -224,23 +228,10 @@ if ~isempty(cdata)
 end
 
 if strcmpi(style.Style,'popupmenu')
-    position = position + [ 0 2 0 0];
+    position = position + [ 0 2 0 0]; %#ok<NASGU>
 end
 
-    
-
-
-%handle = uicontrol(fig,style,...
-%    'Parent',fig, ... % first arg has to be parent for octave
-%    'Units',units, ...
-%    'HorizontalAlignment',horizontalalignment, ...
-%    'Position',position - [ 0 height  0 0], ...
-%    'String',string, ... 
-%	'Parent',parent,...
-%    'TooltipString',tooltipstring,...
-%    'Tag',tag);
-
-cmd = 'handle=uicontrol(fig';
+    cmd = 'handle=uicontrol(fig';
 flds = fieldnames(style);
 for i=1:length(flds)
     cmd = [cmd ',flds{' num2str(i) '},style.(flds{' num2str(i) '})' ]; %#ok<AGROW>
@@ -258,11 +249,7 @@ cmd = [cmd  ...
 cmd = [cmd ');'];
 eval(cmd);
 
-
-
-
-
-if exist('autowidth','var')
+if exist('autowidth','var') && autowidth==1
     ext = get(handle,'extent');
     width = ext(3)*1.2; % add 20% 
     pos = get(handle,'position');
