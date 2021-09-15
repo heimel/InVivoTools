@@ -34,12 +34,6 @@ allclu = sort(unique(sp.clu));
 unitCounter = 0;
 checkchan = 1;
 
-%get corrfac if present
-files = dir(strTarget);
-if ~isempty(find(strcmpi({files.name},'corrfac.mat')));
-    load(fullfile(strTarget,'corrfac.mat'));  
-end
-
 for cl = 1:length(allclu)
     clus = allclu(cl);
     specInd = find([unitspecs{:,1}]==clus);
