@@ -49,7 +49,7 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
     cinterval = zeros(length(ind),2);  
     for j=ind(:)' % over stimuli
         ps = getparameters(get(I.st(i).stimscript,j));
-        if isfield(ps,I.paramname)
+        if isfield(ps,I.paramname) && ~strcmpi(I.paramname,'filename')
             curve_x(s) = ps.(I.paramname); %#ok<*AGROW>
             condnames{s} = [I.paramname '=' num2str(curve_x(s))];
         else % contigency plan
@@ -74,7 +74,7 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
         dp = struct(getdisplayprefs(get(I.st(1).stimscript,j)));
 
         
-        if length(I.st(1).mti{stimlist(1)}.frameTimes)>1
+        if length(I.st(1).mti{stimlist(1)}.frameTimes)>1 
             Cinterval(s,:) = ...
                 [0 I.st(1).mti{stimlist(1)}.frameTimes(end)-I.st(1).mti{stimlist(1)}.frameTimes(1)+df];
         else

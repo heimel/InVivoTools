@@ -4,7 +4,7 @@ function cells = importtdt(record, channels2analyze, allowchanges)
 % CELLS = IMPORTTDT( RECORD, CHANNELS2ANALYZE, ALLOWCHANGES=true )
 %
 % 2015-2017, Alexander Heimel
-%
+% 2020-2021: Kilosort implementation added by Leonie Cazemier
 
 if nargin<3 || isempty(allowchanges)
     allowchanges = true;
