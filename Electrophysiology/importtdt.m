@@ -72,7 +72,7 @@ else
         [~] = make_kilosort_data(EVENT, strTarget);
         return
     elseif isempty(fs) && isempty(fs2) && ~isempty(fsclu)
-        disp([ 'Spike sorted data is present but is not manually curated! '  ...
+        disp([ 'IMPORTTDT: Spike sorted data is present but is not manually curated! '  ...
             'The script will now load the uncurated data as MUA per channel.']);
         WaveTime_Fpikes = load_kilosort_data(strTarget, EVENT);
     else%load the sorted data
