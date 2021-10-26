@@ -66,11 +66,16 @@ else
     strTarget = fullfile(EVENT.Mytank, EVENT.Myblock);
     fs = dir(fullfile(strTarget, '*groups.csv'));
     fs2 = dir(fullfile(strTarget,'*group.tsv'));
-    if isempty(fs) && isempty(fs2) %no sorted/curated files in folder
+    fsclu = dir(fullfile(strTarget,'*clusters.npy'));
+    if isempty(fs) && isempty(fs2) && isempty(fsclu) %no sorted/curated files in folder
         % make file that kilosort can use and sort it!
         [~] = make_kilosort_data(EVENT, strTarget);
         return
-    else  %load the sorted data
+    elseif isempty(fs) && isempty(fs2) && ~isempty(fsclu)
+        disp([ 'Spike sorted data is present but is not manually curated! '  ...
+            'The script will now load the uncurated data as MUA per channel.']);
+        WaveTime_Fpikes = load_kilosort_data(strTarget, EVENT);
+    else%load the sorted data
         WaveTime_Fpikes = load_kilosort_data(strTarget, EVENT);
     end
 end
