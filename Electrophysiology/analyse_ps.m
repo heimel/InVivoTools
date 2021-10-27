@@ -100,12 +100,15 @@ for i = 1:length(triggers)
     measures.rate{i} = curve(2,:);
     measures.rate_normalized{i} = measures.rate{i} / measures.rate_max{1};
     measures.rate_max_normalized{i} = measures.rate_max{i} / measures.rate_max{1};
-    measures.rate_difference{i} = measures.rate{i} - measures.rate{1};
+    if length(measures.rate{i}) == length(measures.rate{1}) % if all stimuli were shown for all trigger types
+        measures.rate_difference{i} = measures.rate{i} - measures.rate{1};
+    end
     measures.response{i} = curve(2,:) - measures.rate_spont{i};
     measures.response_normalized{i} = measures.response{i} / measures.response_max{1};
     measures.response_max_normalized{i} = measures.response_max{i} / measures.response_max{1};
-    measures.response_difference{i} = measures.response{i} - measures.response{1};
-    
+    if length(measures.response{i}) == length(measures.response{1})
+        measures.response_difference{i} = measures.response{i} - measures.response{1};
+    end
     %  compute peak time for preferred stimulus
     rast = getoutput(out(i).rast);
     binsize = (rast.bins{1}(end)-rast.bins{1}(1))/(length(rast.bins{1})-1);

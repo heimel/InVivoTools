@@ -48,6 +48,11 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
     interval = zeros(length(ind),2); % assume length(I.st)==1
     cinterval = zeros(length(ind),2);  
     for j=ind(:)' % over stimuli
+        stimlist = find(o==j);
+        if isempty(stimlist)
+            logmsg(['Careful. Stimulus ' num2str(j) ' not shown for all conditions in ' recordfilter(record)]);
+            continue
+        end
         ps = getparameters(get(I.st(i).stimscript,j));
         if isfield(ps,I.paramname) && ~strcmpi(I.paramname,'filename')
             curve_x(s) = ps.(I.paramname); %#ok<*AGROW>
@@ -56,7 +61,6 @@ for i=1:length(I.st) % implementation of this loop seems defunct, AH
             curve_x(s) = j; % stim number
             condnames{s} = ['stimnumber = ' num2str(j)];
         end
-        stimlist = find(o==j);
         for k=1:length(stimlist)
             if ~isempty(I.st(i).mti{stimlist(k)}.frameTimes)
                 trigs{s}(k)=I.st(i).mti{stimlist(k)}.frameTimes(1);
