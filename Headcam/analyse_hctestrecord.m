@@ -39,6 +39,11 @@ filename = fullfile(record.mouse,'Recording.mpg');
 obj = VideoReader(filename);
 measures.framerate = obj.FrameRate;
 
+if measures.endtime>obj.Duration
+    logmsg(['Setting endtime to movie duration ' num2str(obj.Duration) ' s']);
+    measures.endtime = obj.Duration;
+end
+
 %
 %logmsg('TEMPORARY Getting start and end from A');
 %ii = record.epoch;
@@ -52,7 +57,7 @@ measures.framerate = obj.FrameRate;
 
 obj.CurrentTime = max(0,measures.starttime );
 measures.starttime = obj.CurrentTime; % might be slightly different, depending on encoding
-measures.number_frames = (measures.endtime-measures.starttime)*measures.framerate + 1; % one spare
+measures.number_frames = ceil((measures.endtime-measures.starttime)*measures.framerate + 1); % one spare
 
 record.measures = measures;
 

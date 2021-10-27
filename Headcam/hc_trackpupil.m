@@ -10,12 +10,51 @@ if nargin<3 || isempty(verbose)
 end
 if nargin<2 || isempty(obj)
     filename = fullfile(record.mouse,'Recording.mpg');
+    if ~exist(filename,'file')
+        logmsg(['Cannot find movie' filename ]);
+        return
+    end
     obj = VideoReader(filename);
     framerate = obj.FrameRate;
-
+    
 end
 
 measures = record.measures;
+if isempty(measures)
+    measures.starttime = [];
+    measures.endtime = [];
+    measures.framerate = [];
+    measures.number_frames = [];
+    measures.total_intensities = [];
+    measures.led_areas = [];
+    measures.led_dists = [];
+    measures.pupil_areas = [];
+    measures.pupil_dists = [];
+    measures.pupil_xs = [];
+    measures.pupil_ys = [];
+    measures.pupil_rs = [];
+    measures.frametimes = [];
+    measures.blinks = [];
+    measures.resets = [];
+    measures.par = [];
+    measures.reference_time = [];
+    measures.im_ref = [];
+    measures.rect_crop = [];
+    measures.im_ref_crop = [];
+    measures.led_center = [];
+    measures.eye_center = [];
+    measures.im_corr = [];
+    measures.pupil_thresholds = [];
+    measures.led_thresholds = [];
+    measures.pupil_xs_dev = [];
+    measures.pupil_ys_dev = [];
+    measures.pupil_deviations = [];
+    measures.pupil_areas_smooth = [];
+    measures.pupil_rs_smooth = [];
+    measures.pupil_noise = [];
+    measures.touching = [];
+end
+
 
 pupil_areas = measures.pupil_areas;
 pupil_xs = measures.pupil_xs;
@@ -89,6 +128,8 @@ obj.CurrentTime = measures.starttime;
 
 frametimes(frame+1) = obj.CurrentTime;
 while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
+    %disp(['CurrentTime = ' num2str(obj.CurrentTime)]);
+    
     lasttoc = toc;
     show_processed = show_processed && analyse;
     
@@ -121,7 +162,7 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
         
         im = readFrame(obj); % first find a frame where you see the pupil
         frame = frame + 1;
-
+        
         if frame<length(frametimes) && ~isnan(frametimes(frame+1)) &&  frametimes(frame+1) ~= obj.CurrentTime
             logmsg([num2str(frametimes(frame)) ': Glitch']);
             obj.CurrentTime = frametimes(frame);
@@ -143,7 +184,7 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
         
         stepping = false;
     end
-
+    
     if ~isnan(led_thresholds(frame))
         led_threshold = led_thresholds(frame) ;
     end
@@ -176,19 +217,19 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
         % add correction mask
         im_without_led = im_without_led + im_corr;
         if isempty(led_component)
-%             if play
-%                 disp(['No led components found at ' num2str(obj.CurrentTime)]);
-%             end
+            %             if play
+            %                 disp(['No led components found at ' num2str(obj.CurrentTime)]);
+            %             end
             led_found = false;
         elseif props(led_component).Area>150
-%             if play
-%                 disp(['Central led component is too large at ' num2str(obj.CurrentTime)]);
-%             end
+            %             if play
+            %                 disp(['Central led component is too large at ' num2str(obj.CurrentTime)]);
+            %             end
             led_found = false;
         elseif props(led_component).Area<50
-%             if play
-%                 disp(['Central led component is too small at ' num2str(obj.CurrentTime)]);
-%             end
+            %             if play
+            %                 disp(['Central led component is too small at ' num2str(obj.CurrentTime)]);
+            %             end
             led_found = false;
         else
             intensities = im_without_led(comps.PixelIdxList{led_component});
@@ -199,10 +240,10 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
             led_found = true;
         end
         
-%         if play && ~led_found && manual_tune
-%             play = false;
-%             disp(msg);
-%         end
+        %         if play && ~led_found && manual_tune
+        %             play = false;
+        %             disp(msg);
+        %         end
         
         % find pupil component
         im_proc = im_without_led<pupil_threshold ;
@@ -340,7 +381,7 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
                 disp(['Before step: frame = ' num2str(frame) ...
                     'frametimes(frame) = ' num2str(frametimes(frame)) ...
                     ', CurrentTime = ' num2str(obj.CurrentTime)]);
-
+                
                 
                 stepping = true;
                 frame = max(1,frame-2);
@@ -353,7 +394,7 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
                 disp(['After step: frame = ' num2str(frame) ...
                     'frametimes(frame) = ' num2str(frametimes(frame)) ...
                     ', CurrentTime = ' num2str(obj.CurrentTime)]);
-        
+                
             case 'g' % goto time
                 answer = inputdlg('Goto time: ','Go to time',1,{num2str(obj.CurrentTime)});
                 goto_time = str2double(answer) - 1/measures.framerate;
@@ -367,7 +408,7 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
                 show_label = ~show_label;
         end
         if analyse
-            switch fig.UserData 
+            switch fig.UserData
                 case {'+','='} % increase pupil threshold (increase pupil area)
                     pupil_threshold = min(255,pupil_threshold + 1);
                 case '-' % decrease pupil threshold (decrease pupil area)
@@ -386,7 +427,7 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
         end % analysis key pressed
         fig.UserData = [];
     end % key pressed
-
+    
     
     pupil_thresholds(frame) = pupil_threshold;
     led_thresholds(frame) = led_threshold;
@@ -425,7 +466,7 @@ record.measures = measures;
 end
 
 %%
-function [xo,yo,R] = circle_fit(x,y) 
+function [xo,yo,R] = circle_fit(x,y)
 % A function to find the best circle fit (radius and center location) to
 % given x,y pairs
 %
