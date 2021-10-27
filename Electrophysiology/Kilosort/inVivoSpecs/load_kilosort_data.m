@@ -140,9 +140,14 @@ else  %if data is not curated, take the units for each channel
         nWFsamps = length(wfWin);
         theseWF = zeros(nWFsToLoad, nWFsamps);
         for i=1:nWFsToLoad
+            try
             tempWF = ...
                 mmf.Data.x(mySpikeSite,spikesToExtract(i)+wfWin(1):spikesToExtract(i)+wfWin(end));
             WaveTime_Fpikes(ch).data(i,:) = double(tempWF);
+            catch
+                fprintf('LOAD_KILOSORT_DATA: missing waveform of spike %i of ch %i.  \n', i, ch); 
+                 WaveTime_Fpikes(ch).data(i,:) = NaN;
+            end
         end
     end 
 end
