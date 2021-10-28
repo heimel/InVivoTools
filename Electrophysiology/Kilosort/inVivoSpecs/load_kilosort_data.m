@@ -108,24 +108,15 @@ if ~isempty(unitspecs)
         end
     end
 else  %if data is not curated, take the units for each channel
-    
-    chSites = [];
-    for cl = 1:length(allclu)
-        %check which channel each cluster is located at
-        clus = allclu(cl);
-        chSpikeSites = spikeSites(sp.clu ==clus);
-        chSites(cl) = median(chSpikeSites);
-    end
-   for ch = 1:nChan
-        clusters = allclu(chSites==ch);
 
-        % get the spike times etc. only for desired clusters
-        mySpikeSites = spikeSites(ismember(sp.clu ,clusters));
-        mySpikeSite = median(mySpikeSites);
-        mySpikeTimes = spikeTimes(ismember(sp.clu,clusters)); %in seconds
-        mySpikeAmps = spikeAmps(ismember(sp.clu,clusters));
+   for ch = 1:nChan
+
+        % get the spike times etc. only for desired spikes (on this
+        % channel)
+        mySpikeTimes = spikeTimes(spikeSites == ch); %in seconds
+        mySpikeAmps = spikeAmps(spikeSites == ch);
         WaveTime_Fpikes(ch).time = mySpikeTimes;
-        WaveTime_Fpikes(ch).channel = mySpikeSite;
+        WaveTime_Fpikes(ch).channel = ch;
         WaveTime_Fpikes(ch).amplitude = mySpikeAmps;
         
         %also get waveforms
@@ -142,7 +133,7 @@ else  %if data is not curated, take the units for each channel
         for i=1:nWFsToLoad
             try
             tempWF = ...
-                mmf.Data.x(mySpikeSite,spikesToExtract(i)+wfWin(1):spikesToExtract(i)+wfWin(end));
+                mmf.Data.x(ch,spikesToExtract(i)+wfWin(1):spikesToExtract(i)+wfWin(end));
             WaveTime_Fpikes(ch).data(i,:) = double(tempWF);
             catch
                 fprintf('LOAD_KILOSORT_DATA: missing waveform of spike %i of ch %i.  \n', i, ch); 
