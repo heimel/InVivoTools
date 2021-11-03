@@ -122,7 +122,7 @@ x = eps*x.*rand(n,1);
 touching = true;
 steps = 0;
 
-while touching && steps<maxsteps
+while touching>0 && steps<maxsteps
     mx = repmat(x,1,n);
     dx = mx - mx';
     d = sqrt(dx.^2 + dy.^2);
