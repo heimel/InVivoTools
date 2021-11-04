@@ -950,8 +950,10 @@ end
 % set xticklabels
 if ~isempty(xticklabels)
     set(gca,'XTick',[]);
-    rotate_xticklabels = str2double(rotate_xticklabels);
-    ax=axis;
+    if ischar(rotate_xticklabels)
+        rotate_xticklabels = str2double(rotate_xticklabels);
+    end
+    ax = axis;
     if ~iscell(xticklabels)
         xtc = cell(size(xticklabels,1),1);
         for i = 1:size(xticklabels,1)
