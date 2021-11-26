@@ -21,8 +21,6 @@ save(fullfile(strTarget,'rawdataTimestamps.mat'), 'vecTimestamps')
 fprintf('Now running spike sorting on Kilosort.. \n')
 runKilosort_invivo(EVENT, strTarget,channels2analyze)
 
-%message
-f = msgbox([ 'Kilosort has sorted the spikes. They still need to be manually '...
-    'curated. Use python to curate the spikes and click the analysis button again to plot the results']);
+f=1; %succes!
 
 return
