@@ -86,6 +86,7 @@ if ~isempty(unitspecs)
         mySpikeSites = spikeSites(sp.clu ==clus);
         mySpikeSite = median(mySpikeSites);
         mySpikeTimes = spikeTimes(sp.clu==clus); %in seconds
+        mySpikeAmps = spikeAmps(sp.clu == clus);
         WaveTime_Fpikes(unitCounter).time = mySpikeTimes;
         WaveTime_Fpikes(unitCounter).channel = mySpikeSite;
         WaveTime_Fpikes(unitCounter).amplitude = mySpikeAmps;
