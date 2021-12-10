@@ -20,6 +20,11 @@ if isempty(wcinfo)
     return
 end
 
+if contains(record.comment,'no mouse')
+    logmsg(['No mouse in ' recordfilter(record)]);
+    return
+end
+
 stimsfile = getstimsfile(record);
 if isempty(stimsfile)
     logmsg(['No stimsfile for ' recordfilter(record)]);

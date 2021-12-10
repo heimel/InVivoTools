@@ -80,8 +80,6 @@ params.load_histology = 1; % needed for matching histology to Allen Mouse Brain 
 % is case-sensitive!
 params.lab='Levelt';
 
-params = processparams_local(params); % load local overrides
-
 if params.load_general % general
     % some generally useful tools not associated with any particular package
     path2general=fullfile(majorprefix,'General');
@@ -102,6 +100,8 @@ if params.load_general % general
         fullfile(path2general,'CircStat'), ... % circular statistics toolbox
         fullfile(path2general,'database','matlab_7'));
 end
+
+params = processparams_local(params); % load local overrides
 
 path2invivotools = majorprefix;
 

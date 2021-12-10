@@ -443,9 +443,13 @@ for c=1:length(record.measures) % over all cells or ROIs
             case 'neuritehash'
                 switch record.datatype
                     case 'tp'
-                        hash = factorial(11)+helphash(record.mouse) + helphash(record.stack) ;
-                        hash = hash + 41 * measures.linked2neurite;
-                        tempval = mod(hash^2,factorial(10)+1);
+                        if ~isempty(measures) && isfield(measures,'linked2neurite')
+                            hash = factorial(11)+helphash(record.mouse) + helphash(record.stack) ;
+                            hash = hash + 41 * measures.linked2neurite;
+                            tempval = mod(hash^2,factorial(10)+1);
+                        else
+                            tempval = NaN;
+                        end
                     otherwise
                         logmsg('Neurite hash is not implemented for data other than tp');
                 end
