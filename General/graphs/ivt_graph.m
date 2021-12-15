@@ -1,7 +1,7 @@
 function h=ivt_graph(y,x,varargin)
-%GRAPH produces scientific plots
+%IVT_GRAPH produces scientific plots
 %
-%  H = GRAPH(Y,X,VARARG)
+%  H = IVT_GRAPH(Y,X,VARARG)
 %
 %  Y,X is cell list of cell list of data vectors Y and X
 %    Y{measures}{group}[data]
@@ -50,7 +50,7 @@ function h=ivt_graph(y,x,varargin)
 %        errorbars_sides   away, both, below, above, none, topline
 %
 %
-% 2006-2020, Alexander Heimel
+% 2006-2021, Alexander Heimel
 %
 
 h=[];
@@ -165,7 +165,7 @@ if isempty(linewidth)
     end
 end
 
-if exist('errorbars_sides','var')
+if exist('errorbars_sides','var') && ~isempty(errorbars_sides)
     errorbars_sides = strtrim(errorbars_sides);
     if errorbars_sides(1)=='{'
         errorbars_sides = ivt_split( errorbars_sides(2:end-1),';');
