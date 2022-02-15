@@ -1,4 +1,4 @@
-function wc_kinetogram(records,clim,sessionboundarycolor)
+function wc_kinetogram(records,clim,sessionboundarycolor,colors)
 %WC_KINETOGRAM plots a figure of movement over records
 %
 % WC_KINETOGRAM( RECORDS, CLIM, SESSIONBOUNDARYCOLOR )
@@ -10,6 +10,9 @@ if nargin<2
 end
 if nargin<3 || isempty(sessionboundarycolor)
     sessionboundarycolor = [0 0 0];
+end
+if nargin<4 || isempty(colors)
+    colors = {[0.7 0.7 0.7],[0.1 0.1 0.8],[0 0.7 0]};
 end
 
 t = -1: 1/30:  2.8;
@@ -83,7 +86,6 @@ box off
 axis square
 set(gca,'Clim',[0 max(mousemove(:))]);
 hold on
-colors = {[0.7 0.7 0.7],[0.1 0.1 0.8],[0 0.7 0]};
 for i=1:size(freezestarts,1)
     
     rectangle('position',...

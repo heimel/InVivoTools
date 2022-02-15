@@ -97,10 +97,12 @@ switch type
             for i=1:length(db)
                 db(i).analysis = '';
             end
-            stat = checklock(filename);
-            if stat~=1
-                filename = save_db(db,filename,'');
-                rmlock(filename);
+            if ~iscell(filename)
+                stat = checklock(filename);
+                if stat~=1
+                    filename = save_db(db,filename,'');
+                    rmlock(filename);
+                end
             end
         end
 end
@@ -111,10 +113,12 @@ switch type
             for i=1:length(db)
                 db(i).channel_info = '';
             end
-            stat = checklock(filename);
-            if stat~=1
-                filename = save_db(db,filename,'');
-                rmlock(filename);
+            if ~iscell(filename)
+                stat = checklock(filename);
+                if stat~=1
+                    filename = save_db(db,filename,'');
+                    rmlock(filename);
+                end
             end
         end
 end
@@ -125,10 +129,12 @@ switch type
             for i=1:length(db)
                 db(i).eye = '';
             end
-            stat = checklock(filename);
-            if stat~=1
-                filename = save_db(db,filename,'');
-                rmlock(filename);
+            if ~iscell(filename)
+                stat = checklock(filename);
+                if stat~=1
+                    filename = save_db(db,filename,'');
+                    rmlock(filename);
+                end
             end
         end
 end
@@ -144,10 +150,12 @@ if isfield(db,'comment')
     end
     if multiline && ~iscell(filename)
         logmsg('Flattened multiline comments');
-        stat = checklock(filename);
-        if stat~=1
-            filename = save_db(db,filename,'');
-            rmlock(filename);
+        if ~iscell(filename)
+            stat = checklock(filename);
+            if stat~=1
+                filename = save_db(db,filename,'');
+                rmlock(filename);
+            end
         end
     end
 end

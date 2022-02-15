@@ -676,10 +676,14 @@ switch style
                 else
                     ebsides = errorbars_sides;
                 end
-                h.errorbar(i) = plot_errorbars({y{i}},x{i},{ystd{i}},[],y{i},...
+                h.errorbar{i} = plot_errorbars({y{i}},x{i},{ystd{i}},[],y{i},...
                     errorbars,ebsides,errorbars_tick,color);
-                if ishandle(h.errorbar(i)) || ~isnan(h.errorbar(i))
-                    set(h.errorbar(i),'color',color{i},'clipping','off');
+                if iscell(h.errorbar{i})
+                    for k = 1:length(h.errorbar{i})
+                        set(h.errorbar{i}{k},'color',color{i},'clipping','off');
+                    end
+                elseif ishandle(h.errorbar{i}) || ~isnan(h.errorbar{i})
+                    set(h.errorbar{i},'color',color{i},'clipping','off');
                 end
             end
         end
