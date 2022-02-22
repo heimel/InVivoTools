@@ -43,8 +43,12 @@ switch record.datatype
             'surface=' num2str(record.surface) ',' ...
             'depth=' num2str(record.depth) ',' ...
             'reliable!0'];
-        if ~isempty(record.location)
-            similar_record_crit = [similar_record_crit  ',location=' record.location ];
+        if ~isempty(record.location)  
+            if ischar(record.location)
+                similar_record_crit = [similar_record_crit  ',location=' record.location ];
+            else
+                logmsg('No taking location into account for matching.');
+            end
         end
         ind = setdiff(  find_record(db,similar_record_crit),curr_ind);
         

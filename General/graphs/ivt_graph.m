@@ -16,7 +16,7 @@ function h=ivt_graph(y,x,varargin)
 %     'spaced',{[0],1,2,3} % spacing points in bar plot, see help PLOT_POINTS
 %     'color',0.7*[1 1 1]
 %     'errorbars',''
-%     'style',{['bar'],'xy','box','hist','cumul','rose'}
+%     'style',{['bar'],'xy','box','level','hist','cumul','rose'}
 %     'signif_y',[]
 %     'prefax',[]
 %     'xticklabels',[]
@@ -48,9 +48,12 @@ function h=ivt_graph(y,x,varargin)
 %        wingtipheight
 %        errorbars_tick    width of tick
 %        errorbars_sides   away, both, below, above, none, topline
+%        points_shiftx     [0],  amount to shift points away from x position
+%        spacepoints_y2x   ratio of y-axis to x-axis for point spacing
+%        spacepoints_dmin  virtual marker size (in x-dimension units) for
+%                          points spacing
 %
-%
-% 2006-2021, Alexander Heimel
+% 2006-2022, Alexander Heimel
 %
 
 h=[];
@@ -67,7 +70,6 @@ signif_y = 0;
 xticklabels = [];
 extra_options = '';
 rotate_xticklabels = '';
-
 
 color=[]; % to overload matlab function OPTIM/COLOR
 fit=''; % to overload matlab function CURVEFIT/FIT
@@ -116,6 +118,10 @@ pos_args={...
     'outlierremoval',false,...
     'normalitytest','',...
     'wingtipheight',[],...
+    'points_shiftx',0,...
+    'spacepoints_y2x',[],...
+    'spacepoints_dmin',[],...
+    'jitter_y',[],...
     };
 
 assign(pos_args{:});
@@ -172,10 +178,27 @@ if exist('errorbars_sides','var') && ~isempty(errorbars_sides)
     end
 end
 
+if ~isempty('points_shiftx') && ischar(points_shiftx)
+    points_shiftx = str2double(points_shiftx);
+end
+
+
 if exist('errorbars_tick','var')
     errorbars_tick = str2double(errorbars_tick);
 else
     errorbars_tick = [];
+end
+
+if exist('spacepoints_y2x','var') && ~isempty(spacepoints_y2x)
+    spacepoints_y2x = str2double(spacepoints_y2x);
+else
+    spacepoints_y2x = [];
+end
+
+if exist('spacepoints_dmin','var') && ~isempty(spacepoints_dmin)
+    spacepoints_dmin = str2double(spacepoints_dmin);
+else
+    spacepoints_dmin = [];
 end
 
 if ~isempty(merge_x)
@@ -230,6 +253,12 @@ end
 if exist('wingtipheight','var')
     if ischar(wingtipheight)
         wingtipheight = str2double(wingtipheight);
+    end
+end
+
+if exist('jitter_y','var')
+    if ischar(jitter_y)
+        jitter_y = str2double(jitter_y);
     end
 end
 
@@ -441,7 +470,7 @@ switch style
         cm = reshape(cm',3,length(cm)/3)';
         colormap(cm);
         axis off
-    case {'bar','box'}
+    case {'bar','box','level'}
         if isempty(x)
             x=(1:length(y));
         end
@@ -450,12 +479,12 @@ switch style
         set(gcf,'PaperPositionMode','auto');
         if isempty(axishandle)
             if length(x)>5
-                p=get(gcf,'position');
-                p(3)=p(3)*(length(x)/6)^0.5;
+                p = get(gcf,'position');
+                p(3) = p(3)*(length(x)/6)^0.5;
                 set(gcf,'position',p);
             end
-            width=min(0.6,0.2*length(x));
-            left=0.5-width/2;
+            width = min(0.6,0.2*length(x));
+            left = 0.5-width/2;
             subplot('position',[left 0.20 width 0.7]);
         end
         hold on;
@@ -464,7 +493,7 @@ switch style
         end
         
         switch style
-            case 'bar'
+            case {'bar','level'}
                 % calculate means
                 means=zeros(1,length(y));
                 for i=1:length(y)
@@ -501,37 +530,49 @@ switch style
         if ~exist('errorbars_sides','var')
             errorbars_sides = 'away';
         end
-        h.errorbar = plot_errorbars(y,x,ystd,ny,means,...
+        h.errorbar = plot_errorbars(y,x-points_shiftx,ystd,ny,means,...
             errorbars,errorbars_sides,errorbars_tick,color); %#ok<*NODEF>
         
-        % plot bars
-        if ~exist('nobars','var')
-            for i=1:length(y)
-                h.bar{i}=bar(x(i), means(i) );
-                if iscell(color)
-                    set(h.bar{i},'facecolor',color{mod(i-1,end)+1});
-                else
-                    set(h.bar{i},'facecolor',color);
-                end
-                if ~isempty(linewidth)
-                    if linewidth>0
-                        set(h.bar{i},'linewidth',linewidth);
+        % plot bars or levels
+        switch style
+            case {'bar','box'}
+                for i=1:length(y)
+                    h.bar{i}=bar(x(i)-points_shiftx, means(i) );
+                    if iscell(color)
+                        set(h.bar{i},'facecolor',color{mod(i-1,end)+1});
                     else
-                        set(h.bar{i},'linestyle','none');
+                        set(h.bar{i},'facecolor',color);
+                    end
+                    if ~isempty(linewidth)
+                        if linewidth>0
+                            set(h.bar{i},'linewidth',linewidth);
+                        else
+                            set(h.bar{i},'linestyle','none');
+                        end
+                    end
+                    if ~isempty(barwidth)
+                        set(h.bar{i},'barwidth',barwidth)
                     end
                 end
-                if ~isempty(barwidth)
-                    set(h.bar{i},'barwidth',barwidth)
+            case 'level'
+                if isempty(barwidth)
+                    barwidth = 1;
                 end
-            end
+                for i = 1:length(y)
+                    h.bar{i} = plot(x(i)+[-0.5 0.5]*barwidth-points_shiftx, means(i)*[1 1],'k-' );
+                end
         end
-        
+       
         % plot points
         if showpoints
-            
             x_spaced = cell(length(y),1);
             for i=1:length(y)
-                [hp,x_spaced{i}] = plot_points(x(i),y{i},spaced);
+                if ~isempty(jitter_y)
+                    jy = (rand(size(y{i}))-0.5)*jitter_y;
+                else
+                    jy = 0;
+                end
+                [hp,x_spaced{i}] = plot_points(x(i)+points_shiftx,y{i}+jy,spaced,spacepoints_y2x,spacepoints_dmin);
                 switch markers
                     case 'none'
                         set(hp,'marker','none');
@@ -704,7 +745,7 @@ switch style
                         catch me
                             logmsg(['Problem computing significances: ' me.message]);
                             h.h_sig{i,j} = NaN;
-                            h.p_sig{i,j} = NaN;                            
+                            h.p_sig{i,j} = NaN;
                         end
                         if h.h_sig{i,j}==1
                             logmsg(['Differences at x=' num2str(x{j}(k),2)...
@@ -829,6 +870,12 @@ switch style
                         fity{i} = dog(par,fitx);
                         logmsg([' fit: dog par = ' num2str(par)  ]);
                     end
+                case 'von_mises'
+                    %[otcurve,pref,hwhh]=fit_otcurve(curve,pref_hint,tw_hint,peak_hint,spont_hint )
+                    for i = 1:length(ry)
+
+                    end
+                    logmsg('VON MISES IS NOT IMPLEMENTED YET');
                 otherwise
                     logmsg([' Fit type ' fit ' is not implemented.']);
                     fit = '';
@@ -1001,7 +1048,7 @@ if exist('legnd','var') && ~isempty(legnd)
     switch style
         case 'xy'
             handle = 'h.points,';
-        case {'bar','box'}
+        case {'bar','box','level'}
             handle = '[h.bar{:}],';
         case 'cumul'
             handle = 'h.cumul,';
