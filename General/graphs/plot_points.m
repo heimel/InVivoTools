@@ -107,7 +107,7 @@ dy = my - my'; % y distance matrix
 
 jx = rand(n,1)+0.5;  % jitter vector
 
-eps = 0.001 * range(y) / spacepoints_y2x;
+eps = 0.0001;% * range(y) / spacepoints_y2x;
 x = ones(n,1);
 x(2:2:end) = -1;
 x = eps*x.*rand(n,1);

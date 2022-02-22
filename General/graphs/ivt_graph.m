@@ -781,7 +781,8 @@ switch style
                 set(h.points(i),'color',color{i},'clipping','off');
                 set(h.points(i),'marker','none');
             end
-            fity = {};fity{length(ry)}=[];
+            fity = {};
+            fity{length(ry)} = [];
             ax = axis;
             fitx = linspace(ax(1)-5*(ax(2)-ax(1)),ax(1)+5*(ax(2)-ax(1)),1000);
             
@@ -790,8 +791,8 @@ switch style
                     % do nothing
                 case {'proportional','proportional_together'}
                     for i=1:length(ry)
-                        rc=nanmean(ry{i})/nanmean(rx{i});
-                        fity{i}=rc*fitx;
+                        rc = nanmean(ry{i})/nanmean(rx{i});
+                        fity{i} = rc*fitx;
                         logmsg([' Proportionality: rc = ' num2str(rc)  ]);
                         [rcoef,~,p,t,df] = nancorrcoef(rx{i},ry{i});
                         logmsg(['   correlation coeff = ' num2str(rcoef) ...
@@ -870,12 +871,11 @@ switch style
                         fity{i} = dog(par,fitx);
                         logmsg([' fit: dog par = ' num2str(par)  ]);
                     end
-                case 'von_mises'
-                    %[otcurve,pref,hwhh]=fit_otcurve(curve,pref_hint,tw_hint,peak_hint,spont_hint )
+                case 'direction_tuning'
                     for i = 1:length(ry)
-
+                        [par,fity{i}] = fit_direction_tuning(rx{i},ry{i},fitx,false);
+                        logmsg([' fit: direction_tuning par = ' num2str(par)  ]);
                     end
-                    logmsg('VON MISES IS NOT IMPLEMENTED YET');
                 otherwise
                     logmsg([' Fit type ' fit ' is not implemented.']);
                     fit = '';
