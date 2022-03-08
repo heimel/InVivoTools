@@ -1,0 +1,9 @@
+var v37%;
+var v38%;
+'v37%:=ViewFind("Data27");
+'FrontView(v37%);
+'WindowVisible(3);
+'Window(49.6094,0,99.375,106.651);
+v38%:=SetPower(1,512,1);
+ProcessAuto(1,0,0);
+YRange(1,0,1e-005);

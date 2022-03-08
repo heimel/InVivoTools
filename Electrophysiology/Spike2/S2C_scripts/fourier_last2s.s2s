@@ -1,0 +1,4 @@
+var v53%;
+v53%:=SetPower(1,512,1);
+ProcessAuto(1,1,0,2);
+YRange(1,0,1e-004);
