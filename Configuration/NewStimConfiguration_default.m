@@ -83,7 +83,7 @@ else
     % set the current monitor dimensions for remote comm
     StimWindowRefresh = 60;
     StimWindowDepth = 8;
-    StimWindowRect = [ 0 0 800 600 ];
+    StimWindowRect = [1920-800 1080-600 1920 1080];
 end
 
 % pixels_per_cm of the monitor in use

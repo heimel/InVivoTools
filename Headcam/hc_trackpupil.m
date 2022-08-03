@@ -9,14 +9,12 @@ if nargin<3 || isempty(verbose)
     verbose = true; %#ok<NASGU>
 end
 if nargin<2 || isempty(obj)
-    filename = fullfile(record.mouse,'Recording.mpg');
+    filename = hc_filename(record);
     if ~exist(filename,'file')
-        logmsg(['Cannot find movie' filename ]);
+        logmsg(['Cannot find movie ' filename '. Make sure it is in the current folder.']);
         return
     end
-    obj = VideoReader(filename);
-    framerate = obj.FrameRate;
-    
+    obj = VideoReader(filename);    
 end
 
 measures = record.measures;
@@ -53,6 +51,7 @@ if isempty(measures)
     measures.pupil_rs_smooth = [];
     measures.pupil_noise = [];
     measures.touching = [];
+    measures.ref_similarity = [];
 end
 
 
@@ -61,6 +60,7 @@ pupil_xs = measures.pupil_xs;
 pupil_ys = measures.pupil_ys;
 pupil_rs = measures.pupil_rs;
 frametimes = measures.frametimes;
+framerate = measures.framerate;
 blinks = measures.blinks;
 resets = measures.resets;
 reference_time = measures.reference_time;
@@ -73,9 +73,12 @@ eye_center = measures.eye_center;
 pupil_thresholds = measures.pupil_thresholds;
 led_thresholds = measures.led_thresholds;
 par = measures.par;
+ref_similarity = measures.ref_similarity;
 
 
-
+if isempty(framerate)
+    framerate = obj.FrameRate;
+end
 
 analyse = all(isnan(pupil_areas));
 
@@ -87,8 +90,12 @@ else
     disp(['Playing from ' num2str(measures.starttime) 's to ' num2str(measures.endtime) 's']);
 end
 
-fig = figure('WindowKeyPressFcn',@capture_keypress,'UserData','','WindowStyle','modal');
-currAxes = axes;
+fig = figure('Name','Pupil tracker','NumberTitle','off',...
+    'WindowKeyPressFcn',@capture_keypress,'UserData','','WindowStyle','modal');
+currAxes = axes('Position',[0.05 0.05 0.5 0.9]);
+help_panel = uipanel(fig,'Position',[0.7 0.05 0.25 0.9]);
+
+axis image
 %h = [];
 stop_playing = false;
 skip_frames = 0;
@@ -100,36 +107,55 @@ show_label = true;
 stepping = true;
 manual_tune = true;
 
+dbs = dbstack;
+if length(dbs)>1 && strcmp(dbs(2).name ,'play_hctestrecord')
+    manual_tune = false;
+end
+
 % for growing led reflection area
 se_led = strel('sphere',1);
 
 msg = 'Paused analysis. +/- to change pupil threshold. [/] to change led threshold. b for blink. p to continue.';
 
-disp('Keys: ')
-disp(' q: quit');
-disp(' p: pause or proceed');
-disp(' >: step one frame forward');
-disp(' <: step one frame backward');
-disp(' a: toggle analysis');
-disp(' t: toggle patches');
-disp(' c: toggle show pupil circle');
-disp(' z: toggle zoom');
-disp(' g: goto time');
-disp(' b: mouse blinks');
-disp(' l: toggle label');
-disp(' +: increase pupil threshold (increase pupil area)');
-disp(' -: decrease pupil threshold (decrease pupil area)');
-disp(' ]: increase led threshold (decrease led area)');
-disp(' [: decrease led threshold (increase led area)');
+key_bindings = { ...
+'q','quit';...
+'p', 'pause or proceed';...
+'>', 'step one frame forward';...
+'<', 'step one frame backward';...
+'a', 'toggle analysis';...
+'t', 'toggle patches';...
+'c', 'toggle show pupil circle';...
+'z', 'toggle zoom';...
+'g', 'goto time';...
+'b', 'mouse blinks';...
+'l', 'toggle label';...
+'+', 'increase pupil threshold (increase pupil area)';...
+'-', 'decrease pupil threshold (decrease pupil area)';...
+']', 'increase led threshold (decrease led area)';...
+'[', 'decrease led threshold (increase led area)'}; 
+
+show_key_bindings(key_bindings,help_panel);
+uicontrol(fig,'Style','Text','Units','points','Position',[10 10 50 10],'String','Pupil <');
+edit_pupil_threshold = uicontrol(fig,'Style','Edit','Units','points','Position',[60 10 30 10],'String','   ');
+uicontrol(fig,'Style','Text','Units','points','Position',[90 10 50 10],'String','LED >');
+edit_led_threshold = uicontrol(fig,'Style','Edit','Units','points','Position',[160 10 30 10],'String','   ');
+
+axes(currAxes);
 
 frame = 0;
 tic;
-obj.CurrentTime = measures.starttime;
+if ~isempty(measures.starttime)
+    obj.CurrentTime = measures.starttime;
+end
 
 frametimes(frame+1) = obj.CurrentTime;
-while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
-    %disp(['CurrentTime = ' num2str(obj.CurrentTime)]);
-    
+if ~isempty(measures.endtime)
+    endtime = measures.endtime;
+else
+    endtime = inf;
+end
+
+while hasFrame(obj) && ~stop_playing && obj.CurrentTime<endtime    
     lasttoc = toc;
     show_processed = show_processed && analyse;
     
@@ -177,7 +203,11 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
         im = rgb2gray(im);
         
         % crop
-        im_crop = im(rect_crop(2):rect_crop(2)+rect_crop(4),rect_crop(1):rect_crop(1)+rect_crop(3),:);
+        if ~isempty(rect_crop)
+            im_crop = im(rect_crop(2):rect_crop(2)+rect_crop(4),rect_crop(1):rect_crop(1)+rect_crop(3),:);
+        else
+            im_crop = im;
+        end
         
         % median filter
         im_crop = medfilt2(im_crop);
@@ -185,11 +215,19 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
         stepping = false;
     end
     
-    if ~isnan(led_thresholds(frame))
+    if length(led_thresholds)>=frame && ~isnan(led_thresholds(frame))
         led_threshold = led_thresholds(frame) ;
+    elseif frame>1 && length(led_thresholds)>frame-1 && ~isnan(led_thresholds(frame-1))
+        led_threshold = led_thresholds(frame-1);
+    elseif isempty(led_threshold)
+        led_threshold = par.default_led_threshold;
     end
-    if ~isnan(pupil_thresholds(frame))
+    if length(pupil_thresholds)>=frame && ~isnan(pupil_thresholds(frame))
         pupil_threshold = pupil_thresholds(frame);
+    elseif frame>1 && length(pupil_thresholds)>frame-1 && ~isnan(pupil_thresholds(frame-1))
+        pupil_threshold = pupil_thresholds(frame-1);
+    elseif isempty(pupil_threshold)
+        pupil_threshold = par.default_pupil_threshold;
     end
     
     im_proc = double(im_crop);
@@ -215,7 +253,9 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
         im_without_led = im_crop;
         
         % add correction mask
-        im_without_led = im_without_led + im_corr;
+        if ~isempty(im_corr)
+            im_without_led = im_without_led + im_corr;
+        end
         if isempty(led_component)
             %             if play
             %                 disp(['No led components found at ' num2str(obj.CurrentTime)]);
@@ -264,7 +304,7 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
         end
         
         if isempty(pupil_component)
-            if play
+            if play && ~isempty(pupil_xs)
                 disp(['No pupil components found at ' num2str(obj.CurrentTime)]);
             end
             pupil_found = false;
@@ -279,7 +319,24 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
             pupil_found = true;
         end
         
-        if play && ~pupil_found && manual_tune && ~blinks(frame) && ~resets(frame)
+        ref_similarity(frame) = corr2(im_crop,im_ref_crop); % to check blinking
+        
+        if ~pupil_found && ref_similarity(frame)<par.automatic_blinking_threshold
+            blinks(frame) = true;
+        end
+        
+        if play && ~pupil_found && manual_tune
+            disp(['Similarity to reference [0-1]: ' num2str(ref_similarity(frame),2)]);
+            
+            if length(blinks)>=frame && blinks(frame) 
+                continue
+            end
+            if length(resets)>=frame && resets(frame)
+                continue
+            end
+            
+            
+            
             play = false;
             disp(msg);
         end
@@ -319,20 +376,24 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
     end
     if show_zoom && show_processed
         image(im_composite,'Parent',currAxes)
+        axis image
     elseif show_zoom && ~show_processed
         image(im_crop,'Parent',currAxes)
+        axis image
     elseif ~show_zoom && show_processed
         imx = repmat(im,1,1,3);
         imx(rect_crop(2) + (1:size(im_composite,1)),rect_crop(1) + (1:size(im_composite,2)),:) = im_composite;
         image(imx,'Parent',currAxes)
+        axis image
     else
         image(im,'Parent',currAxes)
+        axis image
     end
     disableDefaultInteractivity(currAxes);
     currAxes.Visible = 'off';
-    if show_circle
+    if show_circle && ~isempty(pupil_ys)
         hold on
-        if show_zoom
+        if show_zoom 
             circle(pupil_ys(frame),pupil_xs(frame),pupil_rs(frame));
         else
             circle(pupil_ys(frame)+rect_crop(1),pupil_xs(frame)+rect_crop(2),pupil_rs(frame));
@@ -341,17 +402,18 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
     end
     
     xl = xlim;
-    if blinks(frame)
+    if ~isempty(blinks) && blinks(frame)
         text(xl(2)-5,1,'Blink','VerticalAlignment','top','HorizontalAlignment','right','color',[ 1 1 1]);
     end
-    if resets(frame)
+    if ~isempty(resets) && resets(frame)
         text(xl(2)-5,1,'Reset','VerticalAlignment','top','HorizontalAlignment','right','color',[ 1 1 1]);
     end
     
+    edit_pupil_threshold.String = num2str(pupil_threshold);
+    edit_led_threshold.String = num2str(led_threshold);
+
     if show_label
-        text(5,2,[num2str(obj.CurrentTime)...
-            ', Pupil > ' num2str(pupil_threshold) ...
-            ', LED > ' num2str(led_threshold) ...
+        text(5,2,[num2str(obj.CurrentTime,'%0.02f')...
             ', Analyse = ' num2str(analyse)],...
             'color',[1 1 1],'verticalalignment','top')
     end
@@ -375,12 +437,13 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
                 show_processed = ~show_processed;
             case 'a' % toggle analysis
                 analyse = ~analyse;
+                manual_tune = analyse;
             case {'>','.'} % step one frame forward
                 stepping = true;
             case {'<',','} % step one frame back
-                disp(['Before step: frame = ' num2str(frame) ...
-                    'frametimes(frame) = ' num2str(frametimes(frame)) ...
-                    ', CurrentTime = ' num2str(obj.CurrentTime)]);
+                %                 disp(['Before step: frame = ' num2str(frame) ...
+                %                     'frametimes(frame) = ' num2str(frametimes(frame)) ...
+                %                     ', CurrentTime = ' num2str(obj.CurrentTime)]);
                 
                 
                 stepping = true;
@@ -391,13 +454,13 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
                 pupil_threshold = pupil_thresholds(frame);
                 led_threshold = led_thresholds(frame);
                 
-                disp(['After step: frame = ' num2str(frame) ...
-                    'frametimes(frame) = ' num2str(frametimes(frame)) ...
-                    ', CurrentTime = ' num2str(obj.CurrentTime)]);
+                %                 disp(['After step: frame = ' num2str(frame) ...
+                %                     'frametimes(frame) = ' num2str(frametimes(frame)) ...
+                %                     ', CurrentTime = ' num2str(obj.CurrentTime)]);
                 
             case 'g' % goto time
                 answer = inputdlg('Goto time: ','Go to time',1,{num2str(obj.CurrentTime)});
-                goto_time = str2double(answer) - 1/measures.framerate;
+                goto_time = str2double(answer) - 1/framerate;
                 frame = find(frametimes>goto_time,1);
                 obj.CurrentTime = frametimes(frame);
                 readFrame(obj);
@@ -433,7 +496,7 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<measures.endtime
     led_thresholds(frame) = led_threshold;
     drawnow;
     newtoc = toc;
-    waittime = 1/measures.framerate - (newtoc-lasttoc);
+    waittime = 1/framerate - (newtoc-lasttoc);
     pause(waittime);
 end
 if length(frametimes)==length(pupil_xs)+1
@@ -461,6 +524,7 @@ measures.eye_center = eye_center;
 measures.pupil_thresholds = pupil_thresholds;
 measures.led_thresholds = led_thresholds;
 measures.par = par;
+measures.ref_similarity = ref_similarity;
 
 record.measures = measures;
 end
@@ -514,3 +578,22 @@ xp = r*cos(ang);
 yp = r*sin(ang);
 plot(x+xp,y+yp,'y--','LineWidth',1);
 end
+
+function show_key_bindings(key_bindings,help_panel)
+n_keys = size(key_bindings,1);
+
+for i=1:n_keys
+    txt = [key_bindings{i,1} ': ' key_bindings{i,2}];
+    uicontrol(help_panel,'Style','text','String',txt,...
+        'FontSize',8,...
+        'Units','points',...
+        'horizontalalignment','left',...
+        'Position',[0 i*10 200 10]);    
+    disp(txt);
+end
+struct(help_panel)
+
+end
+
+
+

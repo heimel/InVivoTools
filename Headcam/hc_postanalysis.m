@@ -17,8 +17,24 @@ end
 
 
 % remove blinks
-    ind = find(measures.blinks);
-    measures.pupil_areas(ind) = NaN;
+ind = find(measures.blinks);
+
+% remove around blinks
+if ~isfield(measures.par,'blink_blanking_time')
+    measures.par.blink_blanking_time = 0.4; %s
+end
+ext = measures.par.blink_blanking_time * measures.framerate;
+ext = -ext:ext;
+
+ind_extended = repmat(ind,1,length(ext)) + repmat(ext,length(ind),1);
+ind = unique(ind_extended);
+
+measures.pupil_areas(ind) = NaN;
+%measures.pupil_areas = 0;
+
+measures.pupil_rs(ind) = NaN;
+%measures.pupil_areas = 0;
+
 
 % remove artefacts
 measures.pupil_xs_dev = measures.pupil_xs - nanmedian(measures.pupil_xs);

@@ -52,16 +52,18 @@ if A
             if gNewStim.StimWindow.debug
                 Screen('Preference', 'SkipSyncTests', 1);
                 Screen('Preference',  'SuppressAllWarnings', 1);
+                [monitorSizeX_pxl,monitorSizeY_pxl] = Screen('WindowSize',StimWindowMonitor);
                 if isempty(StimWindowRect) %#ok<NODEF>
-                    StimWindow = Screen(StimWindowMonitor,'OpenWindow',128,[0 0 640 480]);
+                    StimWindow = Screen(StimWindowMonitor,'OpenWindow',128,[monitorSizeX_pxl-640 monitorSizeY_pxl-480 monitorSizeX_pxl monitorSizeY_pxl]);
                 else
                     StimWindow = Screen(StimWindowMonitor,'OpenWindow',128,StimWindowRect);
+                    %StimWindow = PsychImaging('OpenWindow',StimWindowMonitor,128,StimWindowRect);
                 end
             else
                 StimWindow = Screen(StimWindowMonitor,'OpenWindow',128);
             end
-        end;
-    end;
+        end
+    end
     StimWindowDepth = Screen(StimWindow,'PixelSize');
     StimWindowRect = Screen(StimWindow,'Rect'); %#ok<*NASGU>
     StimWindowRefresh = Screen(StimWindow,'FrameRate',[]);

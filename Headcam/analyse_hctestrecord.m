@@ -3,7 +3,7 @@ function record = analyse_hctestrecord( record, verbose)
 %
 % RECORD = ANALYSE_HCTESTRECORD( RECORD, VERBOSE)
 %
-% 2021, Alexander Heimel
+% 2021-2022, Alexander Heimel
 
 if nargin<2 || isempty(verbose)
     verbose = true;
@@ -32,10 +32,7 @@ else
 end
 logmsg(['End = ' num2str(measures.endtime) 's']);
 
-
-
-
-filename = fullfile(record.mouse,'Recording.mpg');
+filename = hc_filename(record);
 obj = VideoReader(filename);
 measures.framerate = obj.FrameRate;
 
@@ -43,17 +40,6 @@ if measures.endtime>obj.Duration
     logmsg(['Setting endtime to movie duration ' num2str(obj.Duration) ' s']);
     measures.endtime = obj.Duration;
 end
-
-%
-%logmsg('TEMPORARY Getting start and end from A');
-%ii = record.epoch;
-%load A
-%A_s = A/obj.FrameRate;
-%[~,filename] = fileparts( filename );
-%matfilename = [filename '_numx' num2str(ii,'%02d') '_analysis.mat'];
-%measures.starttime = A_s(ii,1);
-%measures.endtime = A_s(ii,2);
-%
 
 obj.CurrentTime = max(0,measures.starttime );
 measures.starttime = obj.CurrentTime; % might be slightly different, depending on encoding
@@ -124,12 +110,15 @@ if redraw
     measures.frametimes = NaN(measures.number_frames,1);
     measures.blinks = false(measures.number_frames,1);
     measures.resets = false(measures.number_frames,1);
-    
+    measures.ref_similarity = NaN(measures.number_frames,1);
     measures.par.min_pupil_size = 40;
     measures.par.default_pupil_threshold_prctile = 10;
     measures.par.default_pupil_threshold = 100;
     measures.par.default_led_threshold = 130;
     measures.par.artefact_deviation_threshold = 15; % pxl
+    measures.par.automatic_blinking_threshold = 0.6; % maximum similarity
+    measures.par.blink_blanking_time = 0.4; %s time to blank out before and after blink
+
     
     measures.reference_time = mean([measures.starttime measures.endtime]);
     obj.CurrentTime = measures.reference_time;

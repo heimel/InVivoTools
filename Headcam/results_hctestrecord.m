@@ -20,7 +20,7 @@ end
 
 % show start, mid, and end
 
-filename = fullfile(record.mouse,'Recording.mpg');
+filename = hc_filename(record);
 obj = VideoReader(filename);
 obj.CurrentTime = measures.starttime;
 im_start = readFrame(obj);
@@ -42,6 +42,7 @@ catch me
     logmsg(me.message);
     im_end = 0 * im_mid;
 end
+
 figure('Name',[record.mouse ' ' num2str(record.epoch) ' Overlay'],'NumberTitle','off');
 im_diff(:,:,1) = im_start;
 im_diff(:,:,2) = im_mid;
@@ -54,16 +55,20 @@ title([filename ' numx' num2str(record.epoch,'%02d')])
 disp('Check if the led reflection spot is white');
 
 
-
+%% Pupil radius
 if isfield(measures,'frametimes') && ~isempty(measures.frametimes) && ~all(isnan(measures.frametimes))
     figure('Name',[record.mouse ' ' num2str(record.epoch) ' Radius '],'NumberTitle','off');
     hold on
     plot( measures.frametimes,measures.pupil_rs,'.r');
 
-    
     ylabel('Pupil radius (pxl)');
     xlabel('Time (s)');
-    title([record.mouse ' numx ' num2str(record.epoch,'%02d')]);
+    if ~isempty(record.filename)
+        tit = subst_ctlchars(record.filename);
+    else
+        tit = [record.mouse ' - ' num2str(record.epoch,'%02d')];
+    end
+    title(tit);
     xlim([min(measures.frametimes),max(measures.frametimes)]);
 
     % show blinks
@@ -75,7 +80,7 @@ if isfield(measures,'frametimes') && ~isempty(measures.frametimes) && ~all(isnan
 
     plot( measures.frametimes,measures.pupil_rs_smooth,'-k','linewidth',2);
 
-    
+    % for approach paradigms
     manualtouching = regexp(record.comment,'touching=(\s*\d+)','tokens');
     if ~isempty(manualtouching)
         touching = str2double(manualtouching{1});
