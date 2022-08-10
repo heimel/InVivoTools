@@ -52,17 +52,17 @@ hold on
 axis off image
 text(5,1,'Red = start, Green = middle, Blue = end','VerticalAlignment','top','color',[1 1 1]);
 title([filename ' numx' num2str(record.epoch,'%02d')])
-disp('Check if the led reflection spot is white');
+disp('Check if the glint reflection spot is white');
 
 
-%% Pupil radius
+%% Pupil radius && x position
 if isfield(measures,'frametimes') && ~isempty(measures.frametimes) && ~all(isnan(measures.frametimes))
-    figure('Name',[record.mouse ' ' num2str(record.epoch) ' Radius '],'NumberTitle','off');
+    figure('Name',[record.mouse ' ' num2str(record.epoch) ' Results '],'NumberTitle','off');
+
+    subplot(2,1,1) % radius
     hold on
     plot( measures.frametimes,measures.pupil_rs,'.r');
-
-    ylabel('Pupil radius (pxl)');
-    xlabel('Time (s)');
+    ylabel('Radius (pxl)');
     if ~isempty(record.filename)
         tit = subst_ctlchars(record.filename);
     else
@@ -70,7 +70,7 @@ if isfield(measures,'frametimes') && ~isempty(measures.frametimes) && ~all(isnan
     end
     title(tit);
     xlim([min(measures.frametimes),max(measures.frametimes)]);
-
+    
     % show blinks
     yl = ylim;
     ind = find(measures.blinks);
@@ -87,6 +87,33 @@ if isfield(measures,'frametimes') && ~isempty(measures.frametimes) && ~all(isnan
        plot( touching *[1 1],yl,'color',[1 1 0]*0.8); 
     end
 
+    
+        subplot(2,1,2) % deviation
+    hold on
+    plot( measures.frametimes,measures.pupil_deviations,'.r');
+    ylabel('Deviation (pxl)');
+    xlabel('Time (s)');
+    xlim([min(measures.frametimes),max(measures.frametimes)]);
+
+    % show blinks
+    yl = ylim;
+    ind = find(measures.blinks);
+    for i=1:length(ind)
+       plot( measures.frametimes(ind(i)) *[1 1],yl,'color',[1 1 1]*0.8); 
+    end
+
+    plot( measures.frametimes,measures.pupil_deviations_smooth,'-k','linewidth',2);
+
+    % for approach paradigms
+    manualtouching = regexp(record.comment,'touching=(\s*\d+)','tokens');
+    if ~isempty(manualtouching)
+        touching = str2double(manualtouching{1});
+       plot( touching *[1 1],yl,'color',[1 1 0]*0.8); 
+    end
+
+
+    
+    
 end
 
 if ~isempty(measures) || isfield(measures,'pupil_noise')
