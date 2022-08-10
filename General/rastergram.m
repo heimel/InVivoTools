@@ -1,4 +1,4 @@
-function rastergram(spiketimes,trialstarts,interval)
+function n_spikes_shown = rastergram(spiketimes,trialstarts,interval)
 %RASTERGRAM makes a rastergram with spikes per trial
 %
 %  RASTERGRAM(SPIKETIMES, TRIALSTARTS, INTERVAL)
@@ -15,6 +15,7 @@ end
 
 
 n_trials = length(trialstarts);
+n_spikes_shown = 0;
 
 for r = 1:n_trials 
     start = trialstarts(r) + interval(1);
@@ -25,6 +26,9 @@ for r = 1:n_trials
     plot([spikes spikes]',...
         [(r-0.45)*ones(size(spikes)) (r+0.45)*ones(size(spikes))]','-k');
     hold on
+    
+    n_spikes_shown = n_spikes_shown + length(spikes);
 end
 set(gca,'ydir','reverse');
 ylim([1-0.5,n_trials+0.5]);
+

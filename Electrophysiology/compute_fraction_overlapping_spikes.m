@@ -10,13 +10,16 @@ datapath = experimentpath(record);
 if ~exist(fullfile(datapath,'_spikes.mat'),'file')
     return
 end
-load(fullfile(datapath,'_spikes.mat'));
+load(fullfile(datapath,'_spikes.mat'),'cells');
 if  ~isfield(cells,'channel')
     logmsg(['No channel field in spikes file. Need to reanalyse ' recordfilter(record)]);
     return
 end
-    
-    
+
+if length([cells.index]) ~= length(unique([cells.index]))
+    errormsg(['Spikesfile ' spikesfile ' contains results of multiple sortings in ' recordfilter(record)],false);
+end
+
 loaded_channels = uniq(sort([cells.channel]));
 
 [recorded_channels,area] = get_recorded_channels( record ); %#ok<ASGLU>

@@ -27,8 +27,10 @@ if isempty(stim) % copy movie stim file
 end
 
 spikesfile = fullfile(experimentpath(record),'_spikes.mat');
-s = load(spikesfile);
-cells = s.cells;
+load(spikesfile,'cells');
+if length([cells.index]) ~= length(unique([cells.index]))
+    errormsg(['Spikesfile ' spikesfile ' contains results of multiple sortings in ' recordfilter(record)],false);
+end
 
 for c=1:length(cells)
     figure('Name',['Rastergram cell ' num2str(cells(c).index)],'NumberTitle','off');

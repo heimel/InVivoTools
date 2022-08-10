@@ -100,6 +100,9 @@ else
 end
 
 spikesfile = fullfile(experimentpath(record), '_spikes.mat');
+if length([cells.index]) ~= length(unique([cells.index]))
+    errormsg(['Spikesfile ' spikesfile ' contains results of multiple sortings in ' recordfilter(record)],false);
+end
 
 isi = [];
 if exist(spikesfile,'file')
@@ -108,7 +111,11 @@ if exist(spikesfile,'file')
         isi = old.isi;
     end
     if isfield(old,'cells') && ~isempty(old.cells) && ~isempty(cells) && isfield(old.cells,'channel')
-        othercells = old.cells(~ismember([old.cells.channel],channels2analyze));
+        if ~isempty(channels2analyze)
+            othercells = old.cells(~ismember([old.cells.channel],channels2analyze));
+        else
+            othercells = [];
+        end
         if ~isempty(othercells)
             try
                 othercells = structconvert( othercells,cells);
@@ -123,15 +130,15 @@ if exist(spikesfile,'file')
 end
 
 if processparams.compute_isi
-    isi = get_spike_interval( cells, isi ); %#ok<NASGU>
+    isi = get_spike_interval( cells, isi ); 
 else
-    isi = []; %#ok<NASGU>
+    isi = []; 
 end
 
 if allowchanges
     if exist('allcells','var')
         orgcells = cells;
-        cells = allcells; %#ok<NASGU>
+        cells = allcells; 
         save(spikesfile,'cells','isi','-v7');
         cells = orgcells;
     else

@@ -36,7 +36,12 @@ switch data_type
             spikesfile = fullfile(experimentpath(record),'_spikes.mat');
             if exist(spikesfile,'file')
                 cells = [];
-                load(spikesfile);
+                load(spikesfile,'cells');
+            
+                if length([cells.index]) ~= length(unique([cells.index]))
+                    errormsg(['Spikesfile ' spikesfile ' contains results of multiple sortings in ' recordfilter(record)],false);
+                end
+                
                 if params.plot_spike_features
                     plot_spike_features(cells, record);
                 end
