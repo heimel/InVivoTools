@@ -1,7 +1,7 @@
 load_invivotools
 
-load_scanbox
+%load_scanbox
 
 % Call Psychtoolbox-3 specific startup function:
-if exist('PsychStartup'), PsychStartup; end;
+% if exist('PsychStartup'), PsychStartup; end;
 

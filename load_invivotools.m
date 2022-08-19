@@ -64,7 +64,7 @@ params.load_general = 1; % necessary for host function
 params.load_nelsonlabtools = 1; % needed for analysis, should be phased out
 params.load_newstim = 1; % needed for visual stimulation NewStim package
 params.load_neuralanalysis = 1; % needed for electrophysiology analysis
-params.load_twophoton = 1; % needed for twophoton analysis
+params.load_twophoton = 0; % needed for twophoton analysis
 params.load_intrinsicsignal = 1; % needed for optical imaging analysis
 params.load_erg =1; % need for ERG stimulation and analysis
 params.load_electrophys = 1; % needed for electrophysiology recording and analysis
@@ -144,6 +144,8 @@ if params.load_twophoton
         genpath([path2invivotools filesep 'Scanbox_Yeti']),...
         genpath([path2invivotools filesep 'NoRMCorre']),...
         genpath([path2invivotools filesep 'matlab-ParforProgress2']));
+    
+    load_scanbox;
     
     if exist('java','file') && usejava('jvm')
         javaaddpath(fullfile(twophoton_path,'Reid_cell_finder/java'));

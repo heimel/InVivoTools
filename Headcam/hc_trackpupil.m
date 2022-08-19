@@ -125,6 +125,7 @@ show_label = true;
 stepping = true;
 manual_tune = true;
 real_time_display = true;
+view = true;
 
 dbs = dbstack;
 if length(dbs)>1 && strcmp(dbs(2).name ,'play_hctestrecord')
@@ -133,7 +134,6 @@ end
 
 % for growing glint reflection area
 se_glint = strel('sphere',1);
-
 
 %% Main loop
 axes(currAxes);
@@ -159,6 +159,7 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<endtime
     lasttoc = toc;
     show_processed = show_processed && analyse;
     
+    %% Read and process image
     if play || stepping
         noframesleft = false;
         for f = 1:skip_frames
@@ -228,9 +229,9 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<endtime
     elseif isempty(pupil_threshold)
         pupil_threshold = par.default_pupil_threshold;
     end
-    
     im_proc = double(im_crop);
     
+    %% Analyse
     if analyse
         total_intensities(frame) = sum(im_crop(:));
         
@@ -311,21 +312,18 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<endtime
         end
         
         ref_similarity(frame) = corr2(im_crop,im_ref_crop); % to check blinking
-        
         if ~pupil_found && ref_similarity(frame)<par.automatic_blinking_threshold
             blinks(frame) = true;
         end
         
         if play && ~pupil_found && manual_tune
             display_message(['Similarity to reference [0-1]: ' num2str(ref_similarity(frame),2)]);
-            
             if length(blinks)>=frame && blinks(frame)
                 continue
             end
             if length(resets)>=frame && resets(frame)
                 continue
             end
-            
             play = false;
         end
         
@@ -346,66 +344,69 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<endtime
                     play = false;
                 end
             end
-            
         end
     end % analyse
     
-    colormap gray
-    if show_processed
-        im_composite = repmat(im_without_glint,1,1,3);
-        im_ind = ones(size(im_composite),'uint8');
-        im_ind(:,:,1) = 1-im_proc;
-        if ~isempty(pupil_component)
-            im_proc( pupil_comps.PixelIdxList{pupil_component}) = 0;
-            im_ind(:,:,2) = 1-im_proc;
+    %% Show image
+    if view
+        colormap gray
+        if show_processed
+            im_composite = repmat(im_without_glint,1,1,3);
+            im_ind = ones(size(im_composite),'uint8');
+            im_ind(:,:,1) = 1-im_proc;
+            if ~isempty(pupil_component)
+                im_proc( pupil_comps.PixelIdxList{pupil_component}) = 0;
+                im_ind(:,:,2) = 1-im_proc;
+            end
+            im_composite = im_composite.*im_ind;
         end
-        im_composite = im_composite.*im_ind;
-    end
-    
-    if show_zoom && show_processed
-        image(im_composite,'Parent',currAxes)
-        axis image
-    elseif show_zoom && ~show_processed
-        image(im_crop,'Parent',currAxes)
-        axis image
-    elseif ~show_zoom && show_processed
-        imx = repmat(im,1,1,3);
-        imx(rect_crop(2) + (1:size(im_composite,1)),rect_crop(1) + (1:size(im_composite,2)),:) = im_composite;
-        image(imx,'Parent',currAxes)
-        axis image
-    else
-        image(im,'Parent',currAxes)
-        axis image
-    end
-    
-    disableDefaultInteractivity(currAxes);
-    currAxes.Visible = 'off';
-    if show_circle && ~isempty(pupil_ys)
-        hold on
-        if show_zoom
-            circle(pupil_ys(frame),pupil_xs(frame),pupil_rs(frame));
+        if show_zoom && show_processed
+            image(im_composite,'Parent',currAxes)
+            axis image
+        elseif show_zoom && ~show_processed
+            image(im_crop,'Parent',currAxes)
+            axis image
+        elseif ~show_zoom && show_processed
+            imx = repmat(im,1,1,3);
+            imx(rect_crop(2) + (1:size(im_composite,1)),rect_crop(1) + (1:size(im_composite,2)),:) = im_composite;
+            image(imx,'Parent',currAxes)
+            axis image
         else
-            circle(pupil_ys(frame)+rect_crop(1),pupil_xs(frame)+rect_crop(2),pupil_rs(frame));
+            image(im,'Parent',currAxes)
+            axis image
         end
-        hold off
-    end
-    
-    xl = xlim;
-    if ~isempty(blinks) && blinks(frame)
-        text(xl(2)-5,1,'Blink','VerticalAlignment','top','HorizontalAlignment','right','color',[ 1 1 1]);
-    end
-    if ~isempty(resets) && resets(frame)
-        text(xl(2)-5,1,'Reset','VerticalAlignment','top','HorizontalAlignment','right','color',[ 1 1 1]);
-    end
-    
+        
+        disableDefaultInteractivity(currAxes);
+        currAxes.Visible = 'off';
+        if show_circle && ~isempty(pupil_ys)
+            hold on
+            if show_zoom
+                circle(pupil_ys(frame),pupil_xs(frame),pupil_rs(frame));
+            else
+                circle(pupil_ys(frame)+rect_crop(1),pupil_xs(frame)+rect_crop(2),pupil_rs(frame));
+            end
+            hold off
+        end
+        
+        xl = xlim;
+        if ~isempty(blinks) && blinks(frame)
+            text(xl(2)-5,1,'Blink','VerticalAlignment','top','HorizontalAlignment','right','color',[ 1 1 1]);
+        end
+        if ~isempty(resets) && resets(frame)
+            text(xl(2)-5,1,'Reset','VerticalAlignment','top','HorizontalAlignment','right','color',[ 1 1 1]);
+        end
+        
+        if show_label
+            text(5,2,[num2str(obj.CurrentTime,'%0.02f')...
+                ', Analyse = ' num2str(analyse)],...
+                'color',[1 1 1],'verticalalignment','top')
+        end
+        drawnow;
+    end % view
     edit_pupil_threshold.String = num2str(pupil_threshold);
     edit_glint_threshold.String = num2str(glint_threshold);
     
-    if show_label
-        text(5,2,[num2str(obj.CurrentTime,'%0.02f')...
-            ', Analyse = ' num2str(analyse)],...
-            'color',[1 1 1],'verticalalignment','top')
-    end
+    %% Perform user actions
     if ~isempty(fig.UserData)
         ind = find(contains(key_bindings(:,2),fig.UserData));
         if ~isempty(ind)
@@ -471,6 +472,9 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<endtime
                 
             case 'label'
                 show_label = ~show_label;
+            case 'view'
+                view = ~view;
+                display_message(['Viewing change to ' char(string(view))]);
         end
         if analyse
             switch action
@@ -501,7 +505,6 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<endtime
                     clear_from = str2double(answer) ;
                     answer = inputdlg('Clear until: ','Clear until',1,{num2str(clear_from+1)});
                     clear_until = str2double(answer) ;
-
                     firstframe = find(frametimes>clear_from-1/framerate,1,'first');
                     lastframe = find(frametimes<clear_until+1/framerate,1,'last');
                     if ~isempty(firstframe) && ~isempty(lastframe)
@@ -511,19 +514,15 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<endtime
                             'Confirm clearing', ...
                             'Yes', 'No', 'No');
                         if strcmp(answer,'Yes')
-                            
                             pupil_xs(firstframe:lastframe) = NaN;
                             pupil_ys(firstframe:lastframe) = NaN;
                             pupil_rs(firstframe:lastframe) = NaN;
-                            
                             pupil_areas(firstframe:lastframe) = NaN;
                             pupil_thresholds(firstframe:lastframe) = NaN;
                             glint_thresholds(firstframe:lastframe) = NaN;
                             blinks(firstframe:lastframe) = false;
                             resets(firstframe:lastframe) = false;
-                            
                             plot_radius(frametimes,pupil_rs,1);
-                            
                         end
                     else
                         display_message('Error in getting framenumbers');
@@ -533,13 +532,11 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<endtime
         fig.UserData = [];
     end % key pressed
     
-    
+    % Update data
     pupil_thresholds(frame) = pupil_threshold;
     glint_thresholds(frame) = glint_threshold;
     
-
-
-    drawnow;
+    
     newtoc = toc;
     
     
@@ -549,13 +546,13 @@ while hasFrame(obj) && ~stop_playing && obj.CurrentTime<endtime
     end
     
     
-end
+end % main loop
+
+%% Wrap up
 if length(frametimes)==length(pupil_xs)+1
     frametimes(end) = []; % remove extra frametime
 end
 close(fig);
-
-%% Wrap up
 logmsg([ num2str(obj.CurrentTime) ': Stopped playing'])
 
 measures.pupil_areas = pupil_areas;
