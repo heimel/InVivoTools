@@ -43,7 +43,12 @@ if A
         % ask for a certain pixel depth
         Screen(StimWindow,'PixelSize',8,1);
     else	% we may not ask for a pixel depth, it just is what it is
-        StimWindowPreviousCLUT = Screen('ReadNormalizedGammaTable',StimWindowMonitor);
+        try
+            StimWindowPreviousCLUT = Screen('ReadNormalizedGammaTable',StimWindowMonitor);
+        catch me
+            StimWindowPreviousCLUT = [];
+            logmsg('Could not read normalized gamma table.');
+        end
         if StimWindowUseCLUTMapping&&~isempty(which('PsychHelperCreateRemapCLUT'))
             PsychImaging('PrepareConfiguration');
             PsychImaging('AddTask', 'AllViews', 'EnableCLUTMapping');

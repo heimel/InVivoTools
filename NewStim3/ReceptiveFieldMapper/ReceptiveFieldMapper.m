@@ -35,29 +35,37 @@ function ReceptiveFieldMapper
 %
 %  Requires the NewStim package
 
-if ~haspsychtbox,error('ReceptiveFieldMapper requires PsychToolbox.'); end;
+if ~haspsychtbox
+    error('ReceptiveFieldMapper requires PsychToolbox.'); 
+end
 
-FlushEvents(['keyDown']);
+FlushEvents('keyDown');
 ReceptiveFieldGlobals;
 
-try, delete runit.m
-catch, end;
+try
+    delete runit.m
+catch
+end
 cd(pwd);
 	
 StimWindowGlobals;
 ShowStimScreen; Screen(StimWindow,'FillRect',0);
 
-if isempty(RFcurrentrect),RFcurrentrect=[0 0 100 100];
-else,RFcurrentrect=rectofinter(StimWindowRect,RFcurrentrect);end;
+if isempty(RFcurrentrect)
+    RFcurrentrect=[0 0 100 100];
+else
+    RFcurrentrect=rectofinter(StimWindowRect,RFcurrentrect);
+end
 
  %initialize parameters
-if isempty(RFparams),
+if isempty(RFparams)
 	PSparams=struct('rect',RFcurrentrect,...
         'imageType',0,'animType',0,'angle',0,'sFrequency',4,'sPhaseShift',0,...
 	'tFrequency',StimWindowRefresh,'barWidth',0.5000,'nCycles',1,'contrast',1,...
 	'background',0.5000,'backdrop',0.0000,'barColor',1,'nSmoothPixels',2,...
-        'fixedDur',0,'windowShape',0,'flickerType',0,'distance',57,'chromhigh',[255 255 255],'chromlow',[0 0 0]);
-	PSparams.dispprefs = {'BGpretime',-1,'BGposttime',-1},
+        'fixedDur',0,'windowShape',0,'flickerType',0,'distance',57,...
+        'chromhigh',[255 255 255],'chromlow',[0 0 0],'loops',0,'size',NaN);
+	PSparams.dispprefs = {'BGpretime',-1,'BGposttime',-1};
 	LBparams = struct('rect',RFcurrentrect,'shape',0,'points',[10 5],...
 	'distance',57,'units',1,'orientation',45,...
         'howlong',1/75,'backdrop',[0 0 0],'background',[0 0 0],...
@@ -68,20 +76,23 @@ if isempty(RFparams),
 	RFparams = struct('state',2,'mode',0,...
 	'drawrect',RFcurrentrect,'stim',1,'draw',1);
 	RFparams.stims = {periodicstim(PSparams), polygonstim(LBparams)};
-else,
+else
 	RFparams.mode = 0; RFparams.state = 2;
 	RFparams.stims{1}=repositionstim(RFparams.stims{1},...
 		{'rect',RFcurrentrect,'params',1}); % shouldn't fail
 	RFparams.stims{2}=repositionstim(RFparams.stims{2},...
 		{'rect',RFcurrentrect,'params',1}); % shouldn't fail
-end;
+end
 
 lastrect = RFcurrentrect;
 screencleared = 1;
-sscript = loadstimscript(append(stimscript(5),RFparams.stims{RFparams.stim}));
-MTI=DisplayTiming(sscript); Screen(StimWindow,'SetClut',MTI{1}.ds.clut{1});
+sscript = loadStimScript(append(stimscript(5),RFparams.stims{RFparams.stim}));
+MTI = DisplayTiming(sscript); 
+logmsg('Not setting CLUT');
+%Screen(StimWindow,'SetClut',MTI{1}.ds.clut{1});
 r = RFcurrentrect;
-c = getparameters(RFparams.stims{1}); c = c.contrast;
+c = getparameters(RFparams.stims{1}); 
+c = c.contrast;
 n=0; firsttime = 1;
 curmouse=[0 0];
 nt = 0; nmt = 0; nft = 0; aht = 0;
@@ -92,26 +103,26 @@ nt = 0; nmt = 0; nft = 0; aht = 0;
  
   HideCursor;
 
-  while(RFparams.state~=0),
+  while(RFparams.state~=0)
 	dir=0;big=2; adj=0; rl=0;
 	[b,nt] = checkkeyboard(nt,RFparams.state);
-	if b,
+	if b
 		c = GetChar;
-		switch(double(c)),
-			case 104, % h
+		switch(double(c))
+			case 104 % h
 				RFparams.draw = 1-RFparams.draw;
-			case 108, % l
+			case 108 % l
 				RFparams.mode = 1;
-			case 99, % c
+			case 99 % c
 				RFparams.mode = 2;
-			case 122, % z
+			case 122 % z
 				RFparams.mode = 3;
-			case 115, %s
+			case 115 %s
 				RFparams.mode = 4;
 			case 120, RFparams.state = 0; % x
-			case 111, RFparams.mode = 5, % o
+			case 111, RFparams.mode = 5; % o
 			case 119, RFparams.mode = 6; % w
-			case 97, RFparams.mode = 7; aht = getsecs; % auto-hide at 2Hz
+			case 97, RFparams.mode = 7; aht = GetSecs; % auto-hide at 2Hz
 			case 27, domenu; % Esc
 			case 109, RFparams.state = 3; FlushEvents('mouseUp'); % m - mouse
 			% arrow keys and whatnot, get keys from computer
@@ -135,16 +146,16 @@ nt = 0; nmt = 0; nft = 0; aht = 0;
 					s=RFparams.stim; rl=1;
 					RFparams.stims{s}=repositionstim(RFparams.stims{s},...
 						{'rect',RFcurrentrect,'params',1}); % shouldn't fail
-		end;
-		if adj,
-			switch RFparams.mode,
+        end
+		if adj
+			switch RFparams.mode
 				case 0, % don't do anything
 				case 1, movestim(dir,big);
 				case 2, stepcontrast(cos(dir),big);
 				case 3, resizestim(dir,big);
 				case 5, steporientation(cos(dir),big);
 				case 6, stepwidthheight(dir,big);
-			end;
+            end
 			if RFparams.stim==1,rl=1;end;
 			if (RFparams.mode~=1)|rl==1,
 				sscript=loadstimscript(set(sscript,RFparams.stims{RFparams.stim},1));
@@ -190,10 +201,12 @@ nt = 0; nmt = 0; nft = 0; aht = 0;
 			RFcurrentrect=RFcurrentrect+round([dx dy dx dy]);
 			MTI{1}.df.rect = RFcurrentrect;
 			%end;
-		end;
-	elseif ~adj&(getsecs-nft)>5,
-		cd(pwd); txt=checkscript('runit.m'); ntf=getsecs;
-		if ~isempty(txt),
+        end
+	elseif ~adj&&(GetSecs-nft)>5
+		cd(pwd); 
+        txt=checkscript('runit.m');
+        ntf = GetSecs;
+		if ~isempty(txt)
 			adj=1;
 			evalin('base',txt); % eval and update
 			cd(pwd); % try to flush writingx
@@ -204,48 +217,63 @@ nt = 0; nmt = 0; nft = 0; aht = 0;
 			sscript=loadstimscript(set(sscript,RFparams.stims{RFparams.stim},1));
 			MTI=DisplayTiming(sscript);
 			Screen(StimWindow,'SetClut',MTI{1}.ds.clut{1});
-			delete runit.m; nft=getsecs;
+			delete runit.m; 
+            nft=GetSecs;
 			HideCursor;
-		end;
-	end;
-	if adj==0,
-		if RFparams.mode==7,
-			if (getsecs-aht)>0.5, RFparams.draw = 1-RFparams.draw; aht = getsecs; end;
-		end;
-		if RFparams.draw|firsttime, blastMTI(MTI); firsttime=0;
-		else, Screen(StimWindow,'FillRect',0); end;
-	else,
-		if RFparams.draw, blastMTIlr(MTI,lastrect); %DisplayStimScript(sscript,MTI,0,lastrect);
-		else, Screen(StimWindow,'FillRect',0); end;	
+        end
+    end
+	if adj==0
+		if RFparams.mode==7
+			if (GetSecs-aht)>0.5
+                RFparams.draw = 1-RFparams.draw; 
+                aht = GetSecs; 
+            end
+        end
+		if RFparams.draw||firsttime
+            blastMTI(MTI);
+            firsttime=0;
+        else
+            Screen(StimWindow,'FillRect',0); 
+        end
+    else
+		if RFparams.draw
+            blastMTIlr(MTI,lastrect); %DisplayStimScript(sscript,MTI,0,lastrect);
+        else
+            Screen(StimWindow,'FillRect',0); 
+        end
 		lastrect = RFcurrentrect;
 	n=n+1;
-	end;
+    end
 	
-end;
-n;
-RFcurrentrect;r;
+  end
 sscript = unloadstimscript(sscript);
 ShowCursor;
 CloseStimScreen;
 
 function [b,nt]=checkkeyboard(no,state)
-switch state,
-	case 3,
-		%if(getsecs-no)>3, b=CharAvail; nt = getsecs;
-		%else, b = 0; nt = no; end;
-		b = 0; nt = no;
-	otherwise,
-		b = CharAvail; nt = getsecs;
-end;
+switch state
+	case 3
+		b = 0; 
+        nt = no;
+    otherwise
+		b = CharAvail; 
+        nt = GetSecs;
+end
 	
 function [b,nmt]=checkmouse(no,state)
-switch state,
-	case 3,
-		if(getsecs-no)>0.1, b=EventAvail('mouseUp'); nmt = getsecs;
-		else, b = 0; nmt = no; end;
-	otherwise,
-		b = EventAvail('mouseUp'); nmt = getsecs;
-end;
+switch state
+	case 3
+		if(GetSecs-no)>0.1
+            b=EventAvail('mouseUp'); 
+            nmt = GetSecs;
+        else
+            b = 0; 
+            nmt = no; 
+        end
+    otherwise
+		b = EventAvail('mouseUp'); 
+        nmt = GetSecs;
+end
 	
 function blastMTIlr(MTI,lastrect)
 StimWindowGlobals;ReceptiveFieldGlobals;
@@ -255,16 +283,22 @@ if MTI{1}.ds.makeClip,Screen(StimWindow,'SetDrawingRegion',RFcurrentrect,MTI{1}.
 Screen('CopyWindow',MTI{1}.ds.offscreen,StimWindow,...
 	MTI{1}.df.rect-[MTI{1}.df.rect(1) MTI{1}.df.rect(2) MTI{1}.df.rect(1) MTI{1}.df.rect(2)],...
 	MTI{1}.df.rect,'srcCopy');
-if MTI{1}.ds.makeClip,Screen(StimWindow,'SetDrawingRegion',StimWindowRect); end;
+if MTI{1}.ds.makeClip
+    Screen(StimWindow,'SetDrawingRegion',StimWindowRect); 
+end
 
 function blastMTI(MTI)
 StimWindowGlobals;ReceptiveFieldGlobals;
 Screen(StimWindow,'WaitBlanking');
-if MTI{1}.ds.makeClip,Screen(StimWindow,'SetDrawingRegion',RFcurrentrect,MTI{1}.ds.makeClip-1); end;
+if MTI{1}.ds.makeClip
+    Screen(StimWindow,'SetDrawingRegion',RFcurrentrect,MTI{1}.ds.makeClip-1); 
+end
 Screen('CopyWindow',MTI{1}.ds.offscreen,StimWindow,...
 	MTI{1}.df.rect-[MTI{1}.df.rect(1) MTI{1}.df.rect(2) MTI{1}.df.rect(1) MTI{1}.df.rect(2)],...
 	MTI{1}.df.rect,'srcCopy');
-if MTI{1}.ds.makeClip,Screen(StimWindow,'SetDrawingRegion',StimWindowRect); end;
+if MTI{1}.ds.makeClip
+    Screen(StimWindow,'SetDrawingRegion',StimWindowRect); 
+end
 
 function domenu
 StimWindowGlobals;

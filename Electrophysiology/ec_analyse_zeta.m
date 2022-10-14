@@ -3,6 +3,8 @@ function record = ec_analyse_zeta( record, verbose)
 %
 %  RECORD = EC_ANALYSE_ZETA( RECORD, VERBOSE )
 %
+%  zetatest from Jorrit Montijn needs to be in the path
+%
 % 2022, Alexander Heimel
 
 if nargin<2 || isempty(verbose)

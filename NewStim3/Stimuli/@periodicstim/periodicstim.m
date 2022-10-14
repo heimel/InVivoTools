@@ -68,42 +68,49 @@ function [pso] = periodicstim(PSparams,OLDSTIM)
 %
 %  See also:  STIMULUS, STOCHASTICGRIDSTIM, PERIODICSCRIPT
 %
-%  200X, Steve Van Hooser, adapted Alexander Heimel
+%  200X, Steve Van Hooser
+%  200X-2022, Alexander Heimel
 
 %warning('PERIODICSTIM:DEFAULT_PHASE','Default spatial phase is set to luminance balanced. Use spatial phase = pi/2 for black bar center');
 %warning('off','PERIODICSTIM:DEFAULT_PHASE');
 
 NewStimListAdd('periodicstim');
 
-if nargin==0,
+if nargin==0
     pso = periodicstim('default');
     return;
-end;
+end
 
 finish = 1;
 
 default_p = default; % private function
 
-if nargin==1, oldstim=[]; else oldstim = OLDSTIM; end;
+if nargin==1
+    oldstim=[]; 
+else 
+    oldstim = OLDSTIM;
+end
 
-if ischar(PSparams),
-    if strcmp(PSparams,'graphical'),
+if ischar(PSparams)
+    if strcmp(PSparams,'graphical')
         % load parameters graphically
         p = get_graphical_input(oldstim);
         if isempty(p)
             finish = 0;
         else
             PSparams = p;
-        end;
-    elseif strcmp(PSparams,'default'),
+        end
+    elseif strcmp(PSparams,'default')
         PSparams = default_p;
     else
         error('Unknown string input into periodicstim.');
-    end;
+    end
 else   % they are just parameters
     [good, err] = verifyperiodicstim(PSparams);
-    if ~good, error(['Could not create periodicstim: ' err]); end;
-end;
+    if ~good
+        logmsg(['Problem with creation parameters: ' err]); 
+    end
+end
 
 if finish
     StimWindowGlobals;
@@ -136,8 +143,11 @@ if finish
     width = oldRect(3) - oldRect(1); height = oldRect(4)-oldRect(2);
     dims = max(width,height);
     newrect = [oldRect(1) oldRect(2) oldRect(1)+dims oldRect(2)+dims];
-    if PSparams.windowShape>=2&&PSparams.windowShape<=8,
-        extra = 0; if PSparams.windowShape>=4, extra = 90; end;
+    if PSparams.windowShape>=2&&PSparams.windowShape<=8
+        extra = 0; 
+        if PSparams.windowShape>=4
+            extra = 90; 
+        end
         angle = mod(PSparams.angle+extra,360)/180*pi;
         trans = [cos(angle) -sin(angle); sin(angle) cos(angle)];
         ctr = [mean(oldRect([1 3])) mean(oldRect([2 4]))];
@@ -148,7 +158,7 @@ if finish
             max(cRect(:,2))-min(cRect(:,2))];
         ID = max(dimnew);
         newrect = ([-ID -ID ID ID]/2+repmat(ctr,1,2));
-    end;
+    end
     dp=[{'fps',fps,'rect',newrect,'frames',frames}, PSparams.dispprefs{:} ];
     s = stimulus(5);
     data = struct('PSparams', PSparams);
@@ -156,7 +166,7 @@ if finish
     pso.stimulus = setdisplayprefs(pso.stimulus,displayprefs(dp));
 else
     pso = [];
-end;
+end
 
 
 
@@ -164,7 +174,7 @@ end;
 
 function params = get_graphical_input(oldstim)
 
-if isempty(oldstim),
+if isempty(oldstim)
     default_p = default; % private function
     rect_str = mat2str(default_p.rect);
     image_val = default_p.imageType+1;
@@ -213,7 +223,7 @@ else
     sPhase_str = num2str(PSparams.sPhaseShift);
     fixed_str = num2str(PSparams.fixedDur);
     dp_str = wimpcell2str(PSparams.dispprefs);
-    if isfield(PSparams,'loops'),
+    if isfield(PSparams,'loops')
         loops_str = num2str(PSparams.loops);
     else
         loops_str = '0';

@@ -66,13 +66,13 @@ end
 
 % to avoid all nonsense warnings in matlab
 signif_y = 0;
-% dy = [];
 xticklabels = [];
 extra_options = '';
 rotate_xticklabels = '';
 
-color=[]; % to overload matlab function OPTIM/COLOR
-fit=''; % to overload matlab function CURVEFIT/FIT
+color = []; % to overload matlab function OPTIM/COLOR
+fit = ''; % to overload matlab function CURVEFIT/FIT
+fontname = ''; % to overload matlab function FONTNAME
 
 %defaults
 

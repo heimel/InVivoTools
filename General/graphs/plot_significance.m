@@ -19,7 +19,7 @@ if nargin<5 || isempty(height)
     height = 0;
 end
 
-if p>0.05 || isnan(p)
+if isempty(p) || p>0.05 || isnan(p)
     return
 end
 
