@@ -22,5 +22,6 @@
 - Move data to Surfarchive:  archive.surfsara.nl:/archive/nincsf  
   info on https://servicedesk.surf.nl/wiki/display/WIKI/Data+Archive%3A+Login+and+general+usage
   account on archive.surfsara.nl is same as on surfportal
-  This can be with putty but also from powershell if OpenSsh has been installed as an windows optional feature (Settings/App/Optional features).
+  This can be done with command.exe shell if OpenSsh has been installed as an windows optional feature (Settings/App/Optional features).
     scp -r W:\TarredForSurfArchive\PROJECTNAME aheimel@archive.surfsara.nl:\archive\nincsf
+  Powershell (instead of CMD) also works, but causes disconnects due to time-out (2023-01-20)

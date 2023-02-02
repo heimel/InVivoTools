@@ -130,7 +130,7 @@ while touching>0 && steps<maxsteps
     if ~t(1,end) % first and last are not touching
         x(2:end-1) = x(2:end-1) + 0.08*force(2:end-1).*jx(2:end-1)*spacepoints_dmin;
     else
-        x = x + 0.5*force.*jx*dmin;
+        x = x + 0.5*force.*jx*spacepoints_dmin;
     end
     steps = steps + 1;
 end

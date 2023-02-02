@@ -76,6 +76,13 @@ if length(x) > 5000
     warning('Shapiro-Wilk test might be inaccurate due to large sample size ( > 5000).');
 end
 
+if all(x==x(1))
+    H = false;
+    pValue = NaN;
+    W = NaN;
+    return
+end
+
 %
 % Ensure the significance level, ALPHA, is a 
 % scalar, and set default if necessary.
