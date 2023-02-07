@@ -1,7 +1,7 @@
 function results_testrecord( record) 
 %RESULTS_TESTRECORD wrapper around specific results testrecords
 %
-% 2015, Alexander Heimel
+% 2015-2023, Alexander Heimel
 
 
 switch record.datatype
@@ -23,6 +23,8 @@ switch record.datatype
         results_pupiltestrecord( record );
     case 'hc' % head camera freely moving
         results_hctestrecord( record );
+    case 'wheel'
+        results_wheelrecord( record );
     otherwise
         errormsg(['Unknown datatype ' record.datatype ]);
         return

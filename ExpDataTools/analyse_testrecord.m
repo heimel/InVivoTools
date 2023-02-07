@@ -3,7 +3,7 @@ function record = analyse_testrecord( record, verbose, allowchanges )
 %
 %  RECORD = ANALYSE_TESTRECORD( RECORD,VERBOSE=true, ALLOWCHANGES=true )
 %
-% 2015-2017, Alexander Heimel
+% 2015-2023, Alexander Heimel
 
 if nargin<2 || isempty(verbose)
     verbose = true;
@@ -31,6 +31,8 @@ switch record.datatype
         record = analyse_pupiltestrecord( record, verbose );
     case 'hc' % head camera freely moving
         record = analyse_hctestrecord( record, verbose );
+    case 'wheel' % running wheel record
+        record = analyse_wheelrecord( record, verbose );
     otherwise
         errormsg(['Unknown datatype ' record.datatype ]);
         return
