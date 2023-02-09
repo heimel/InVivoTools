@@ -3,18 +3,20 @@ function s = recordfilter( record,db)
 %
 %  S = RECORDFILTER( RECORD, DB )
 %
-% 2013, Alexander Heimel
+% 2013-2023, Alexander Heimel
 %
 
 if nargin<2
     db=[];
 end
 
-if isempty(db) % very leveltlab specific
+if isempty(db) % lab specific
     s = '';
     s = addfield( s, record, 'mouse');
+    s = addfield( s, record, 'subject');
     s = addfield( s, record, 'date');
     [s,tp] = addfield( s, record, 'epoch');
+    s = addfield( s, record, 'sessnr');
     if tp
         s = addfield( s, record, 'stack');
     else
@@ -57,6 +59,10 @@ end
 if ~isempty(str)
     str(end+1)=',';
 end
-
-str = [str field '=' record.(field)];
+if isnumeric(record.(field))
+    val = num2str(record.(field));
+else
+    val = record.(field);
+end
+str = [str field '=' val];
 
