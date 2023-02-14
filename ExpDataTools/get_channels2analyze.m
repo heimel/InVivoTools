@@ -5,6 +5,7 @@ function  channels = get_channels2analyze( record )
 %
 
 h_db = get_fighandle('Ec database*');
+h_db = [h_db get_fighandle('Neuropixels database*')];
 if length(h_db)>1
     warning('ANALYSE_ECTESTRECORD:MULTIPLE_DB','Multiple EC database control windows. Take first for determining channel');
     warning('off','ANALYSE_ECTESTRECORD:MULTIPLE_DB');

@@ -3,7 +3,6 @@ function results_testrecord( record)
 %
 % 2015-2023, Alexander Heimel
 
-
 switch record.datatype
     case {'oi','fp'}
         results_oitestrecord( record );
@@ -26,6 +25,10 @@ switch record.datatype
     case 'wheel'
         results_wheelrecord( record );
     otherwise
-        errormsg(['Unknown datatype ' record.datatype ]);
+        if isfield(record,'resultsfunction') && ~isempty(record.resultsfunction)
+            feval(record.resultsfunction,record);
+        else
+            errormsg(['Unknown datatype ' record.datatype ]);
+        end
         return
 end

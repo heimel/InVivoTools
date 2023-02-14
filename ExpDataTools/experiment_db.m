@@ -57,7 +57,7 @@ if isempty(db)
 end
 
 switch type
-    case 'ec'
+    case {'ec','neuropixels'}
         channels_enabled = 1;
     case 'tp'
         color = [0.4 0.5 1];
