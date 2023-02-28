@@ -4,6 +4,8 @@ function s = rmfields(s,f)
 % S = RMFIELDS(S, F)
 %       S is struct, and F is a cell list of fieldnames to remove from S
 %
+% See also RMFIELD
+%
 % 2014, Alexander Heimel
 %
 

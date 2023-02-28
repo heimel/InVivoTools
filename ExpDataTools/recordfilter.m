@@ -16,6 +16,7 @@ if isempty(db) % lab specific
     s = addfield( s, record, 'subject');
     s = addfield( s, record, 'date');
     [s,tp] = addfield( s, record, 'epoch');
+    s = addfield( s, record, 'sessionid');
     s = addfield( s, record, 'sessnr');
     if tp
         s = addfield( s, record, 'stack');
@@ -53,16 +54,16 @@ if ~isfield(record,field)
     return
 end
 pres = true;
-if isempty( record.(field))
+if isempty( record.(field)) 
     return
-end
-if ~isempty(str)
-    str(end+1)=',';
 end
 if isnumeric(record.(field))
     val = num2str(record.(field));
 else
     val = record.(field);
+end
+if ~isempty(str)
+    str(end+1)=',';
 end
 str = [str field '=' val];
 

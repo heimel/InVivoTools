@@ -35,7 +35,7 @@ switch record.datatype
         record = analyse_wheelrecord( record, verbose );
     otherwise
         if isfield(record,'analysisfunction') && ~isempty(record.analysisfunction)
-            record = feval(record.analysisfunction,record);
+            record = feval(record.analysisfunction,record,verbose);
         else
             errormsg(['Unknown datatype ' record.datatype ]);
         end
