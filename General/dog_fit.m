@@ -1,16 +1,24 @@
 function par = dog_fit(x,y,options,xo)
 %DOG_FIT fits difference of gaussians
 %
-%    PAR=DOG_FIT(X,Y,[OPTIONS])
+%    PAR = DOG_FIT(X,Y,[OPTIONS],[XO])
 %
 %    PAR = [ R0 RE SE RI SI ]
-%    OPTIONS can be 'zerobaseline', in which case for x->inf, y->0
+%    OPTIONS can be empty (default) or 'zerobaseline', in which case for x->inf, y->0
+%    XO is an optional PAR to start the fit
 %
 %    R0 is baseline response
 %    RE is maximum response of positive gaussian
 %    SE is standard deviation of positive gaussian
 %    RI is maximum response of negative gaussian
 %    SI is standard deviation of negative gaussian
+%
+%  The found parameters can be used as:
+%     r = dog(par,x)
+%
+%  See DOG and DOG_ERROR functions for implementation of the difference 
+%  of gaussians and the nudges used for fitting.
+%
 %
 % 200X-2019, Alexander Heimel
 
@@ -29,11 +37,11 @@ if nargin<4 || isempty(xo)
     xo = [r0 re se ri si];
 end
 
-search_options=optimset('fminsearch');
-	search_options.TolFun=1e-4;
-	search_options.TolX=1e-4;
-	search_options.MaxFunEvals=6*300;%'300*numberOfVariables';
-	search_options.Display='off';
+search_options = optimset('fminsearch');
+search_options.TolFun = 1e-4;
+search_options.TolX = 1e-4;
+search_options.MaxFunEvals = 6*300;
+search_options.Display = 'off';
 
 switch lower(options)
     case 'zerobaseline'       
