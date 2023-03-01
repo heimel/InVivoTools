@@ -4,8 +4,10 @@ function par = dog_fit(x,y,options,xo)
 %    PAR = DOG_FIT(X,Y,[OPTIONS],[XO])
 %
 %    PAR = [ R0 RE SE RI SI ]
-%    OPTIONS can be empty (default) or 'zerobaseline', in which case for x->inf, y->0
-%    XO is an optional PAR to start the fit
+%    OPTIONS can be empty (default) or 'zerobaseline', in which case it 
+%       fits with R0 set to 0, and thus for x->infinity, y->0
+%    XO is an optional PAR to start the fit. This can speed up the fitting
+%       or avoid wrong fits
 %
 %    R0 is baseline response
 %    RE is maximum response of positive gaussian
