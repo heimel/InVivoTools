@@ -1,13 +1,11 @@
-function newud=analyse_testrecord_callback( ud)
+function newud = analyse_testrecord_callback( ud)
 %ANALYSE_TESTRECORD_CALLBACK
 %
-%   NEWUD=ANALYSE_TESTRECORD_CALLBACK( UD)
+%   NEWUD = ANALYSE_TESTRECORD_CALLBACK( UD)
 %
-% 2007-2014, Alexander Heimel
+% 2007-2023, Alexander Heimel
 
-%warning('on','all');
-
-record=ud.db(ud.current_record);
+record = ud.db(ud.current_record);
 
 if get(ud.h.filter,'value') && length(ud.ind)>1 % i.e. filter on
     answer = questdlg('Analyse entire selection?','Analyse selection','Yes','No','No');
@@ -23,20 +21,19 @@ if isfield(record,'experimenter') && isempty(record.experimenter)
     logmsg('Experimenter field is required.'); 
 end
 
-
 check_duplicates(record,ud.db,ud.current_record);
 
-record = analyse_testrecord( record );
+record = analyse_testrecord( record,[],[],ud.db);
 
 % insert analysed record into database
-ud.changed=1;
-ud.db(ud.current_record)=record;
+ud.changed = 1;
+ud.db(ud.current_record) = record;
 set(ud.h.fig,'Userdata',ud);
 
 % compute odi 
 if isfield(record,'eye') && ( strcmp(record.eye,'ipsi') || strcmp(record.eye,'contra'))
     record = compute_odi_measures( record,ud.db);
-    ud.db(ud.current_record)=record;
+    ud.db(ud.current_record) = record;
     set(ud.h.fig,'Userdata',ud);
 end
         
@@ -49,7 +46,7 @@ end
 
 % get analysed record from recordform and rewrite in database
 if isfield(ud,'record_form')
-    ud.db(ud.current_record)=get_record(ud.record_form);
+    ud.db(ud.current_record) = get_record(ud.record_form);
 end
 set(ud.h.fig,'Userdata',ud);
 
@@ -61,8 +58,8 @@ end
 
 results_testrecord( record);
 
-ud.changed=1;
-newud=ud;
+ud.changed = 1;
+newud = ud;
 
 
 

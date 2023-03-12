@@ -1,7 +1,7 @@
 function measures = compute_angle_measures( measures )
 %COMPUTE_ANGLE_MEASURES compute some specific angle measures
 %
-%  RECORD = COMPUTE_ANGLE_MEASURES( RECORD )
+%  MEASURES = COMPUTE_ANGLE_MEASURES( MEASURES )
 %
 %
 % 2013 Alexander Heimel

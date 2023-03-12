@@ -1,7 +1,7 @@
-function record = analyse_testrecord( record, verbose, allowchanges )
+function record = analyse_testrecord( record, verbose, allowchanges, db )
 %ANALYSE_TESTRECORD wraps around specific testrecord analyses
 %
-%  RECORD = ANALYSE_TESTRECORD( RECORD,VERBOSE=true, ALLOWCHANGES=true )
+%  RECORD = ANALYSE_TESTRECORD( RECORD,VERBOSE=true, ALLOWCHANGES=true, DB = [] )
 %
 % 2015-2023, Alexander Heimel
 
@@ -12,6 +12,9 @@ if nargin<3 || isempty(allowchanges)
     allowchanges = true;
 else
     logmsg('ALLOWCHANGES is only implemented for ANALYSE_ECTESTRECORD.');
+end
+if nargin<4 || isempty(db)
+    db = [];
 end
 
 switch record.datatype
@@ -35,7 +38,7 @@ switch record.datatype
         record = analyse_wheelrecord( record, verbose );
     otherwise
         if isfield(record,'analysisfunction') && ~isempty(record.analysisfunction)
-            record = feval(record.analysisfunction,record,verbose);
+            record = feval(record.analysisfunction,record,db,verbose);
         else
             errormsg(['Unknown datatype ' record.datatype ]);
         end
