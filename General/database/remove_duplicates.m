@@ -1,7 +1,7 @@
-function db = remove_duplicates(db,flds,keep,keep_criterium)
+function db = remove_duplicates(db,flds,keep,keep_criterium,verbose)
 %REMOVE_DUPLICATES removes duplicates from db
 %
-% DB = REMOVE_DUPLICATES(DB,FLDS,KEEP,KEEP_CRITERIUM)
+% DB = REMOVE_DUPLICATES(DB,[FLDS],[KEEP='all'],[KEEP_CRITERIUM],[VERBOSE=false])
 %     FLDS is cell list of field names to use. Empty uses all
 %     KEEP is 'first','last' (default),'keep_criterium'
 %       for KEEP is 'all', no duplicates are removed only shown
@@ -9,7 +9,7 @@ function db = remove_duplicates(db,flds,keep,keep_criterium)
 %     'keep_criterium'. If none fits the keep criterium, it will keep the
 %     last
 %
-% 2013-2017, Alexander Heimel, Daan van Versendaal
+% 2013-2023, Alexander Heimel, Daan van Versendaal
 %
 
 if nargin<2 || isempty(flds)
@@ -17,6 +17,12 @@ if nargin<2 || isempty(flds)
 end
 if nargin<3 || isempty(keep)
     keep = 'all';
+end
+if nargin<4 || isempty(keep_criterium)
+    keep_criterium = '';
+end
+if nargin<5 || isempty(verbose)
+    verbose = false;
 end
 
 remove = false(length(db),1);
@@ -60,6 +66,9 @@ for i=1:length(db)
     end
 end
 db(remove) = [];
+if verbose
+    logmsg(['Removed '  num2str(sum(remove)) ' records. '  num2str(length(db)) ' records left over.']);
+end
 
 
 
