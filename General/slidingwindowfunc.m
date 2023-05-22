@@ -59,7 +59,7 @@ for i=start:stepsize:stop-windowsize
 	
 	if zeropad||~isempty(INDs)
 		Xn(end+1) = mean([i i+windowsize]);
-	end;
+    end
 	if ~isempty(INDs)
 		eval(['Yn(end+1)=' func ' (Y(INDs));']);
         y = Y(INDs)';

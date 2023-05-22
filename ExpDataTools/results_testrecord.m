@@ -24,6 +24,8 @@ switch record.datatype
         results_hctestrecord( record );
     case 'wheel'
         results_wheelrecord( record );
+    case 'nt'
+        results_nttestrecord( record );
     otherwise
         if isfield(record,'resultsfunction') && ~isempty(record.resultsfunction)
             feval(record.resultsfunction,record);
