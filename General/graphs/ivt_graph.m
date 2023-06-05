@@ -73,6 +73,7 @@ rotate_xticklabels = '';
 color = []; % to overload matlab function OPTIM/COLOR
 fit = ''; % to overload matlab function CURVEFIT/FIT
 fontname = ''; % to overload matlab function FONTNAME
+tail = ''; % to overload matlab function TAIL
 
 %defaults
 

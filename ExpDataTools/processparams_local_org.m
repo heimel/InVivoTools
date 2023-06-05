@@ -20,6 +20,10 @@ function params = processparams_local(params) %#ok<FNDEF>
 % 2014-2017, Alexander Heimel
 %
 
+if nargin<1
+    params = [];
+end
+
 % UNCOMMENT AND CHANGE AS NECESSARY
 
 % params.databasepath_localroot = 'C:\Users\heimel\Dropbox (NIN)\InVivo';

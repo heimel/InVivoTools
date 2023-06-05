@@ -238,7 +238,10 @@ if exist('PsychStartup','file')
 end
 
 % load External repositories
-addpath(fullfile(path2invivotools,'Externals','jsonlab'));
+% commented out on 2023-05-27. Repository should be downloaded separatedly
+% from github/fangq/jsonlab
+% addpath(fullfile(path2invivotools,'Externals','jsonlab')); 
+
 
 
 % load Study specific folders
