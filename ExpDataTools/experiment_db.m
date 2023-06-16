@@ -71,6 +71,9 @@ switch type
     case 'hc'
         color = [0.6 1 0.4];
         play_data_enable = 1;
+    case 'nt'
+        color = [0.6 1 0.4];
+        track_data_enable = 1;
 end
 
 
@@ -186,8 +189,8 @@ colsep = 3;
 %ud.buttonheight = 30;
 top = 10;
 
-ud=get(h_fig,'UserData');
-h=ud.h;
+ud = get(h_fig,'UserData');
+h = ud.h;
 
 % set customize sort to sort button
 set(h.sort,'Tag','sort_testrecords');
@@ -269,6 +272,12 @@ if play_data_enable
 end
 
 if track_data_enable
+    switch type
+        case 'nt'
+            fcn_name = 'nt_track_behavior_callback';
+        case 'wc'
+            fcn_name = 'track_wctestrecord_callback';
+    end
     h.track = ...
         uicontrol('Parent',h_fig, ...
         'Units','pixels', ...
@@ -277,7 +286,7 @@ if track_data_enable
         'ListboxTop',0, ...
         'FontSize',ud.basefontsize,...
         'Position',[left top ud.buttonwidth ud.buttonheight], ...
-        'String','Track','Tag','track_wctestrecord_callback');
+        'String','Track','Tag',fcn_name);
     left=left+ud.buttonwidth+colsep;
     maxleft=max(maxleft,left);
 end

@@ -86,8 +86,12 @@ ud.current_record = length(ud.db);
 
 screensize = get(0,'ScreenSize');
 
+% java functions to take windows taskbar into account
+jframe = javax.swing.JFrame;
+toolkit = java.awt.Toolkit.getDefaultToolkit();
+insets = toolkit.getScreenInsets(jframe.getGraphicsConfiguration());
 
-leftp = 0;
+leftp = insets.left; 
 topp = screensize(4)-ud.figheight-60;
 w = get(0,'children');
 for c = w(:)'
