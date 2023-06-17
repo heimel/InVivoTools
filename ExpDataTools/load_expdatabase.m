@@ -1,11 +1,12 @@
 function [db,filename]=load_expdatabase( whichdb,where,create,load_main,verbose)
-%LOAD_EXPDATABASE loads local or network copy of a database
+%load_expdatabase. Loads local or network copy of a database
 %
-%  [DB,FILENAME] = LOAD_EXPDATABASE(WHICHDB,WHERE,CREATE,LOAD_MAIN,VERBOSE)
+%  [DB,FILENAME] = load_expdatabase(WHICHDB,[WHERE='network'],[CREATE=false],[LOAD_MAIN=true],[VERBOSE=true])
+%       WHICHDB contains database name to load
 %       If CREATE is true, create new if it doesn't exist
 %       If LOAD_MAIN [True], fall back to loading main database
 %
-% 200X-2017, Alexander Heimel
+% 200X-2023, Alexander Heimel
 %
 
 db = [];
@@ -50,7 +51,11 @@ end
 
 whichexpdb = [whichexpdb '.mat'];
 
-filename = fullfile(expdatabasepath(where),capitalize(experiment),whichexpdb);
+if exist(whichexpdb,'file') && strcmp(who('-file',whichexpdb,'db'),'db')
+    filename = whichexpdb;
+else
+    filename = fullfile(expdatabasepath(where),capitalize(experiment),whichexpdb);
+end
 if exist(filename,'file')==0
     d = dir(filename);
     if ~isempty(d) % i.e. multiple files

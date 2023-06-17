@@ -1,15 +1,16 @@
 function fig = experiment_db( type, hostname )
-%EXPERIMENT_DB starts physiology database
+%experiment_db. Starts physiology database
 %
-%   FIG = EXPERIMENT_DB
-%   FIG = EXPERIMENT_DB( TYPE )
-%   FIG = EXPERIMENT_DB( TYPE, HOSTNAME )
-%   FIG = EXPERIMENT_DB( DB );
+%   FIG = experiment_db
+%   FIG = experiment_db( TYPE )
+%   FIG = experiment_db( TYPE, HOSTNAME )
+%   FIG = experiment_db( DB );
+%   FIG = experiment_db( FILENAME );
 %
-%     TYPE can be 'oi','ec','tp','wc'
+%     TYPE can be 'oi','ec','tp','wc',etc.
 %     FIG returns handle to the database control figure
 %
-% 2005-2020, Alexander Heimel
+% 2005-2023, Alexander Heimel
 %
 
 if nargout==1
@@ -54,6 +55,10 @@ end
 
 if isempty(db)
     return
+end
+
+if isfield(db,'datatype') && ~isempty(db(1).datatype)
+    type = db(1).datatype;
 end
 
 switch type

@@ -32,7 +32,11 @@ if nargin<4 || isempty(load_main)
     load_main = [];
 end
 
-whichdb = expdatabases( datatype, hostname);
+if exist(datatype,'file') && strcmp(who('-file',datatype,'db'),'db')
+    whichdb = datatype;
+else
+    whichdb = expdatabases( datatype, hostname);
+end
 
 [db,filename] = load_expdatabase(whichdb,'network',create,load_main,verbose);
 if isempty(db)
