@@ -6,7 +6,7 @@ function y=smoothen(x,sigma)
 %
 %  2004, Alexander Heimel
 
-if isnan(sigma)
+if isnan(sigma) || sigma==0
     y = x;
     return
 end
