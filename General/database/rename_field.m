@@ -1,56 +1,60 @@
-function [db, succeeded] = rename_field( db )
-%RENAME_FIELD removes a field from a structure (array) interactively
+function [db, succeeded] = rename_field( db, old_field, new_field )
+%rename_field removes a field from a structure (array). Can be interactive.
 %
-% [DB, SUCCEEDED] = RENAME_FIELD( DB )
+% [DB, SUCCEEDED] = rename_field( DB, [OLD_FIELD],[NEW_FIELD] )
+%    if OLD_FIELD and NEW_FIELD are not supplied, then user will be
+%    prompted for these.
 %
-% 2012, Alexander Heimel
+% 2012-2023, Alexander Heimel
 %
+
 succeeded = false;
 
-field = inputdlg('Name of field to rename:','Rename field');
-if isempty(field)
+if nargin>1 % no interaction
+    % to retain the field order, get field nummbers
+    flds = fields(db);
+    ind = find(strcmp(flds,old_field));
+    if isempty(ind)
+        disp(['rename_field: field ' old_field ' is not a field of given structure.'])
+        return
+    end
+    [db.(new_field)] = db.(old_field);
+    db = rmfield(db,old_field);
+    db = orderfields(db,[1:ind-1 length(flds) ind:(length(flds)-1)]);
+
+    succeeded = true;
     return
 end
-field = field{1};
-if isempty(field)
+
+old_field = inputdlg('Name of field to rename:','Rename field');
+if isempty(old_field)
     return
 end
-if ~isfield(db,field)
-    disp(['RENAME_FIELD: ' field ' is not an existing field.']);
+old_field = old_field{1};
+if isempty(old_field)
+    return
+end
+if ~isfield(db,old_field)
+    disp(['rename_field: ' old_field ' is not an existing field.']);
     return;
 end
 
-
-
-newfield = inputdlg('New field name:','Rename field');
-if isempty(newfield)
+new_field = inputdlg('New field name:','Rename field');
+if isempty(new_field)
     return
 end
-newfield = newfield{1};
-newfield = subst_specialchars( newfield );
-if isempty(newfield)
+new_field = new_field{1};
+new_field = subst_specialchars( new_field );
+if isempty(new_field)
     return
 end
-if newfield(1)<='9'
-    disp('RENAME_FIELD: First character of field should be a letter.');
+if new_field(1)<='9'
+    disp('rename_field: First character of field should be a letter.');
     return
 end
-
-if isfield(db,newfield)
-    disp(['RENAME_FIELD: Field name ' newfield ' already exists.']);
+if isfield(db,new_field)
+    disp(['rename_field: Field name ' new_field ' already exists.']);
     return
 end
 
-
-% to keep order, get field nummber
-flds = fieldnames(db);
-ind = strmatch(field,flds,'exact');
-
-[db.(newfield)] = db.(field);
-db = rmfield(db,field);
-
-db = orderfields(db,[1:ind-1 length(flds) ind:(length(flds)-1)]);
-
-
-
-succeeded = true;
+[db, succeeded] = rename_field( db, old_field, new_field );
