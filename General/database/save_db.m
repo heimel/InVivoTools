@@ -1,11 +1,11 @@
 function [filename,lockfile]=save_db(db, filename , suggest,lockfile)
-%SAVE_DB saves matlab struct array database
+% SAVE_DB saves matlab struct array database
 %
-% FILENAME = SAVE_DB( DB, [FILENAME], [SUGGEST], [LOCKFILE])
+% [FILENAME,LOCKFILE] = SAVE_DB( DB, [FILENAME], [SUGGEST], [LOCKFILE])
 %      if no FILENAME is given, then a dialog popups to select a name
 %      SUGGEST is what to suggest if no filename is given
 %
-% 2007-2019, Alexander Heimel
+% 2007-2023, Alexander Heimel
 %
 
 if nargin<4
@@ -83,6 +83,7 @@ end
 
 v = version;
 if v(1)<'5' && ~isoctave
+    delete(h);
     errormsg('Cannot save in Version 5 matlab format',true);
 end
 if v(1)=='5' && ~isoctave
@@ -96,7 +97,13 @@ if v(1)=='5' && ~isoctave
     end
 else
     if exist(filename,'file')
-        movefile(filename,[filename '_copy'],'f');
+        try
+            movefile(filename,[filename '_copy'],'f');
+        catch me
+            delete(h);
+            logmsg(me.message);
+            errormsg(['Cannot backup "' filename '" to "' filename '_copy." Check file permissions or see if file is open in another program or computer'],true);
+        end
     end
     try
         save(filename,'db','-v7');
