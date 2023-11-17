@@ -1,11 +1,17 @@
-function y = nansem(x)
-%NANSEM Standard error of the mean, ignoring NaNs.
-%   Y = NANSEM(X)
+function y = nansem(x,dim)
+%nansem. Standard error of the mean, ignoring NaNs.
+%   Y = nansem(X,dim)
 %
+% 200X-2023, Alexander Heimel
 
-if numel(x)==length(x)
-    x = x(~isnan(x));
-    y = sem(x);
-else
-    error('NANSEM:MORETHANONED','NANSEM only allows one-dimensional data');
+if nargin<2 || isempty(dim)
+    if size(x,1)==1
+        dim = ndims(x);
+    else
+        dim = 1;
+    end
+end
+
+n = sum(~isnan(x),dim);
+y = nanstd(x,[],dim)./sqrt(n);
 end
