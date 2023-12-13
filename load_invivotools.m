@@ -7,7 +7,7 @@ function load_invivotools
 %    check https://github.com/heimel/InVivoTools for most recent version
 %    and documentation. In Manual folder
 %
-% 2014-2017, Alexander Heimel
+% 2014-2023, Alexander Heimel
 %
 
 if exist ('OCTAVE_VERSION', 'builtin') 
@@ -66,7 +66,6 @@ params.load_newstim = 1; % needed for visual stimulation NewStim package
 params.load_neuralanalysis = 1; % needed for electrophysiology analysis
 params.load_twophoton = 0; % needed for twophoton analysis
 params.load_intrinsicsignal = 1; % needed for optical imaging analysis
-params.load_erg = 0; % need for ERG stimulation and analysis
 params.load_electrophys = 1; % needed for electrophysiology recording and analysis
 params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_webcam = 1; % needed for InVivoTools analysis
@@ -215,12 +214,6 @@ if params.load_intrinsicsignal
         fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','opticflow_dots'),...
         fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','rotating_dots'),...
         fullfile(majorprefix,'Configuration'));    % next contains camera framerates
-end
-
-% ERG software
-if params.load_erg
-    ergpath = fullfile(path2invivotools,'ERG');
-    addpath(ergpath,fullfile(ergpath,'usbActiveWire'));
 end
 
 % Histology and Allen Atlas matching

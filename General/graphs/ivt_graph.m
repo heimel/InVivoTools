@@ -180,12 +180,12 @@ if exist('errorbars_sides','var') && ~isempty(errorbars_sides)
     end
 end
 
-if ~isempty('points_shiftx') && ischar(points_shiftx)
+if ~isempty(points_shiftx) && ischar(points_shiftx)
     points_shiftx = str2double(points_shiftx);
 end
 
 
-if ~isempty('errorbars_tick') && ischar(errorbars_tick)
+if ~isempty(errorbars_tick) && ischar(errorbars_tick)
     errorbars_tick = str2double(errorbars_tick);
 end
 
