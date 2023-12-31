@@ -1,7 +1,7 @@
 function h = compute_significances( y,x, test, signif_y, ystd, ny, tail, transform, h, correction, normality_test, height)
 %COMPUTE_SIGNIFICANCES performs standard set of tests on data, and plots stars
 %
-% H = COMPUTE_SIGNIFICANCES(X,Y,TEST,SIGNIF_Y,YSTD,NY,TAIL,TRANSFORM,H,CORRECTION,NORMALITY_TEST,HEIGHT)
+% H = COMPUTE_SIGNIFICANCES(X,Y,TEST,SIGNIF_Y,YSTD,NY,TAIL,TRANSFORM,H,CORRECTION,NORMALITY_TEST='shapiro-wilk',HEIGHT)
 %
 %    H is result struct
 %
@@ -120,8 +120,6 @@ switch test
     case {'kruskal-wallis','kruskal_wallis','kruskal wallis','kruskalwallis'}
         nonparametric = 1;
 end
-
-
 
 if notnormal
     logmsg('Detected a not normal group. Do a transform or use Kruskal-Wallis, unless n is high (>30)');

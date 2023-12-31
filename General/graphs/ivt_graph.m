@@ -289,17 +289,17 @@ if length(prefax)==4
 end
 
 % reformat y into cell-structure
-if ~iscell(y)
-    if ndims(y)>2 %#ok<ISMAT>
-        errormsg('Unable to handle arrays of more than 2 dimensions');
-        return
-    end
-    old_y = y;
-    y = cell(size(old_y,1),1);
-    for i = 1:size(old_y,1)
-        y{i} = old_y(i,:);
-    end
-end
+% if ~iscell(y)
+%     if ndims(y)>2 %#ok<ISMAT>
+%         errormsg('Unable to handle arrays of more than 2 dimensions');
+%         return
+%     end
+%     old_y = y;
+%     y = cell(size(old_y,1),1);
+%     for i = 1:size(old_y,1)
+%         y{i} = old_y(i,:);
+%     end
+% end
 
 % flatten y,x,color
 if iscell(y{1})
@@ -401,7 +401,8 @@ switch style
             bins = 16;
         end
         if exist('rose_style','var') && strcmp(rose_style,'relative')
-            polar(0,2); hold on; % ugly, need it for friederike's graph
+            polar(0,2); 
+            hold on; % ugly, need it for friederike's graph
             for i=1:length(y)
                 [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins);
             end
@@ -434,8 +435,7 @@ switch style
         end
         for i=1:length(y)
             y{i} = y{i}(~isnan(y{i})); % remove NaNs
-            
-            [cf_mean,histbin_centers,h.cumul(i)]=plot_cumulative( y{i},bins,color{i},1,prefax,1);
+            [~,~,h.cumul(i)] = plot_cumulative( y{i},bins,color{i},1,prefax,1);
             set(h.cumul(i),'linewidth',linewidth);
         end
     case {'hist'}
@@ -444,9 +444,9 @@ switch style
         end
         for i=1:length(y)
             if ~isempty(bins)
-                [cf_mean,histbin_centers]=hist( y{i},bins);
+                [~,histbin_centers] = hist( y{i},bins);
             else
-                [cf_mean,histbin_centers]=hist( y{i});
+                [~,histbin_centers] = hist( y{i});
             end
             hist( y{i},histbin_centers);
             hh = findobj(gca,'Type','patch');
@@ -497,13 +497,13 @@ switch style
                 % calculate means
                 means=zeros(1,length(y));
                 for i=1:length(y)
-                    means(i)=nanmean(y{i});
+                    means(i) = mean(y{i},'omitnan');
                 end
             case 'box'
                 % calculate means
                 means=zeros(1,length(y));
                 for i=1:length(y)
-                    means(i)=nanmedian(y{i});
+                    means(i) = median(y{i},'omitnan');
                 end
                 if isempty(errorbars)
                     errorbars = 'bootstrapmedian';
@@ -513,10 +513,10 @@ switch style
         if exist('sort_y','var')
             switch sort_y
                 case 'asc'
-                    [means,ind]=sort(means);
+                    [means,ind] = sort(means);
                 case 'desc'
-                    [means,ind]=sort(-means);
-                    means=-means;
+                    [means,ind] = sort(-means);
+                    means = -means;
                 otherwise
                     logmsg(['sort_y by ' sort_y ' is not implemented yet']);
                     ind=(1:length(means));
@@ -537,7 +537,7 @@ switch style
         switch style
             case {'bar','box'}
                 for i=1:length(y)
-                    h.bar{i}=bar(x(i)-points_shiftx, means(i) );
+                    h.bar{i} = bar(x(i)-points_shiftx, means(i) );
                     if iscell(color)
                         set(h.bar{i},'facecolor',color{mod(i-1,end)+1});
                     else
@@ -636,12 +636,13 @@ switch style
         end
         if showpoints==0 % replace points by means
             for i=1:length(y)
-                x{i}=nanmean(x{i});
-                y{i}=nanmean(y{i});
+                x{i} = mean(x{i},'omitnan');
+                y{i} = mean(y{i},'omitnan');
             end
         end
         if showpoints==2 % replace y by means
             ystd = cell(length(y),1);
+            pointsy = cell(length(y),1);
             for i=1:length(y)
                 if length(x{i})~=length(y{i})
                     errormsg(['Unequal number of x and y values for set ' num2str(i)]);
@@ -651,14 +652,14 @@ switch style
                     return
                 end
                 
-                ind=find(~isnan(x{i})&~isnan(y{i}));
-                x{i}=x{i}(ind);
-                y{i}=y{i}(ind);
-                [x{i},ind]=sort(x{i});
-                y{i}=y{i}(ind);
-                uniqx=uniq(x{i});
-                uniqy=zeros(1,length(uniqx));
-                uniqystd=zeros(1,length(uniqx));
+                ind = find(~isnan(x{i})&~isnan(y{i}));
+                x{i} = x{i}(ind);
+                y{i} = y{i}(ind);
+                [x{i},ind] = sort(x{i});
+                y{i} = y{i}(ind);
+                uniqx = uniq(x{i});
+                uniqy = zeros(1,length(uniqx));
+                uniqystd = zeros(1,length(uniqx));
                 
                 if ~isempty(merge_x)
                     dx = diff(uniqx)/(uniqx(end)-uniqx(1));
@@ -672,12 +673,12 @@ switch style
                 
                 for j=1:length(uniqx)
                     if sum(x{i}==uniqx(j))> length(y{i})/length(uniqx)*0
-                        uniqy(j) = nanmean(y{i}(x{i}==uniqx(j)));
+                        uniqy(j) = mean(y{i}(x{i}==uniqx(j)),'omitnan');
                         switch errorbars
                             case 'sem'
                                 uniqystd(j) = nansem(y{i}(x{i}==uniqx(j)));
                             otherwise
-                                uniqystd(j) = nanstd(y{i}(x{i}==uniqx(j)));
+                                uniqystd(j) = std(y{i}(x{i}==uniqx(j)),'omitnan');
                         end
                         pointsy{i}{j} = (y{i}(x{i}==uniqx(j)));   % for significance calculations
                     else
@@ -730,7 +731,7 @@ switch style
         end
         
         % plot significances
-        % assume points of same x have to be compared across groups
+        % if showpoints ==2, then assume points of same x have to be compared across groups
         if exist('pointsy','var') && ( (length(x)==1) || (length(x{1})==length(x{2}) && all(x{1}==x{2})))
             for k=1:length(x{1}) % to have number of x-values
                 for i=1:length(pointsy)
@@ -754,8 +755,17 @@ switch style
                     end
                 end
             end
+        else
+            % statistics for x vs y
+            try
+                logmsg('Group 1 is x, Group 2 is y.')
+                compute_significances( [x,y],(max(x{:})+min(x{:}))/2*[1 1], ...
+                    test, [2 min(y{:})+1.1*(max(y{:})-min(y{:}))], [], [], tail, transform, [], correction, normalitytest, wingtipheight);
+            catch me
+                logmsg(['Problem computing significances: ' me.message]);
+            end
         end
-        
+
         % line fit (do before plotting points)
         if exist('fit','var') || exist('slidingwindow','var')
             if ~exist('fit','var')
@@ -1104,22 +1114,22 @@ switch errorbars
         switch errorbars
             case 'sem'
                 if length(flatten(y))~=length(y) %isempty(ystd)
-                    for i=1:length(y)
+                    for i = 1:length(y)
                         dy{i} = sem(y{i});
                     end
                 elseif ~isempty(ystd)
-                    for i=1:length(y)
+                    for i = 1:length(y)
                         dy{i} = ystd{i}/sqrt(ny{i});
                     end
                 else
-                    for i=1:length(y)
+                    for i = 1:length(y)
                         dy{i} = sem(y{i});
                     end
                 end
             case 'std'
                 if isempty(ystd)
                     for i = 1:length(y)
-                        dy{i} = nanstd(y{i});
+                        dy{i} = std(y{i},'omitnan');
                     end
                 else
                     dy = ystd;
