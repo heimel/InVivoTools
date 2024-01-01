@@ -68,9 +68,9 @@ for i=1:length(y)
     ind = ~isnan(y{i});
     
     logmsg(['Group ' num2str(i) ':  ' num2str(mean(y{i}(ind)),3) ...
-        ' +/- ' num2str(std(y{i}(ind)),2) ...
-        ' [' num2str(sem(y{i}(ind)),2) ']' ...
-        ' (mean +/- std [sem]), n = ' num2str(length(y{i}(ind))) ' + ' num2str(sum(isnan(y{i}))) ' NaNs']);
+        ' ± ' num2str(sem(y{i}(ind)),2) ...
+        ' [' num2str(std(y{i}(ind)),2) ']' ...
+        ' (mean ± s.e.m. [std.]), n = ' num2str(length(y{i}(ind))) ' + ' num2str(sum(isnan(y{i}))) ' NaNs']);
 end
 
 
@@ -132,8 +132,8 @@ if nonparametric || notnormal
             n = ceil(100000/length(y{i}(ind)));
             btsm = std(bootstrp(n,@median,y{i}(ind)));
             logmsg(['Group ' num2str(i) ':  ' num2str(median(y{i}(ind)),3) ...
-                ' +/- ' num2str(btsm,2)  ...
-                ' (median +/- bootstrap std (sem)), n = ' num2str(length(y{i}(ind))) ' + ' num2str(sum(isnan(y{i}))) ' NaNs']);
+                ' ± ' num2str(btsm,2)  ...
+                ' (median ± bootstrap std (sem)), n = ' num2str(length(y{i}(ind))) ' + ' num2str(sum(isnan(y{i}))) ' NaNs']);
         else
              logmsg(['Group ' num2str(i) ': 0 entries']);
         end
@@ -149,7 +149,7 @@ if length(y)>2 % multigroup comparison
     end
     
     [h.p_groupkruskalwallis,anovatab,kwstats] = kruskalwallis(v,group,'off'); %#ok<ASGLU>
-    logmsg(['Group Kruskal-Wallis: p = ' num2str(h.p_groupkruskalwallis,2) ', df = ' num2str(anovatab{4,3})]);
+    logmsg(['Group Kruskal-Wallis: p = ' num2str(h.p_groupkruskalwallis,2) ', df = ' num2str(anovatab{4,3}) ', chi-sq stat = ' num2str(anovatab{2,5})]);
     [h.p_groupanova,anovatab,stats] = anova1(v,group,'off'); %#ok<ASGLU>
     logmsg(['Group ANOVA: p = ' num2str(h.p_groupanova,2) ', s[' num2str(stats.df) '] = ' num2str(stats.s)]);
     try

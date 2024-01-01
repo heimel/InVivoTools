@@ -114,10 +114,8 @@ if length(r1)>1 && length(r2)>1
                        rethrow(me)
                end
             end            
-            if isfield(stats,'zval') % for too few numbers it is missing
-                statistic = stats.zval;
-                statistic_name = 'z';
-            end
+            statistic = stats.ranksum;
+            statistic_name = 'U';
             testperformed = 'ranksum (Mann-Whitney U test)';
         case {'kruskal-wallis','kruskal_wallis','kruskal wallis','kruskalwallis'}
             [p,statistic,dof] = kruskal_wallis_test(r1,r2);
