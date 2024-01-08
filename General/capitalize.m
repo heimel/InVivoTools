@@ -4,10 +4,17 @@ function s = capitalize( s )
 % S = CAPITALIZE( S )
 %   e.g. capitalize('aBcd eF') returns 'Abcd ef'
 %
-% 2010, Alexander Heimel
+% 2010-2023, Alexander Heimel
 %
 
 if ~isempty(s)
-    s = lower(s);
-    s(1) = upper(s(1));
+    if ischar(s)
+
+        s = lower(s);
+        s(1) = upper(s(1));
+    elseif isstring(s)
+        for i=1:length(s)
+            s{i} = capitalize(s{i});
+        end
+    end
 end
