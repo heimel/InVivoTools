@@ -759,8 +759,9 @@ switch style
             % statistics for x vs y
             try
                 logmsg('Group 1 is x, Group 2 is y.')
-                compute_significances( [x,y],(max(x{:})+min(x{:}))/2*[1 1], ...
+                hsig = compute_significances( [x,y],(max(x{:})+min(x{:}))/2*[1 1], ...
                     test, [2 min(y{:})+1.1*(max(y{:})-min(y{:}))], [], [], tail, transform, [], correction, normalitytest, wingtipheight);
+                h.p_sig = hsig.p_sig;
             catch me
                 logmsg(['Problem computing significances: ' me.message]);
             end
