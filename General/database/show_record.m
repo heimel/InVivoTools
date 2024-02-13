@@ -132,7 +132,7 @@ for i=1:length(fields)
         content = double(content);
     end
     if isnumeric(content)
-        if ~isempty(content)
+        if ~isempty(content) && ismatrix(content)
             content = mat2str(content,10);
         else
             content = '';
