@@ -7,7 +7,7 @@ function zetap = zetatest_on_psth(counts,n_events,verbose)
 %   N_EVENTS is the original number of stimuli/trials/events
 %   if VERBOSE is true a figure of the generated spikes and PSTH is shown
 %
-% 2022, Alexander Heimel
+% 2022-2024, Alexander Heimel
 
 if nargin<3 || isempty(verbose)
     verbose = false; %#ok<NASGU>
@@ -16,8 +16,8 @@ end
 scurr = rng;
 rng(21375); % to get reproducable results
 
-maxp = 0;
 n_samples = 10;
+zetaps = NaN(1,n_samples);
 for sample = 1:n_samples
     
     binwidth = 0.01; % should be irrelevant
@@ -39,14 +39,17 @@ for sample = 1:n_samples
     
     spiketimes = spiketimes + eventstarts(events);
     spiketimes = sort(spiketimes);
-    zetap = zetatest(spiketimes,eventstarts);
-    if zetap>maxp
-        maxp = zetap;
-    end
-end % sample
-zetap = maxp;
 
-if false
+    spiketimes = [spiketimes - n_events*duration; spiketimes; spiketimes + n_events*duration]; % add data before and after trials
+
+    % zetaps(sample) =  getZeta(spiketimes,eventstarts)
+    % zetaps(sample) = zetatest(spiketimes,eventstarts,[],[],[],[],[],[],true);
+    zetaps(sample) =   fastzeta(spiketimes,eventstarts,[],[],[],false); % works better for data with few trials
+ 
+end % sample
+zetap = median(zetaps);
+
+if verbose
     figure('Name','PSTH-based','NumberTitle','off'); %#ok<UNRCH>
     subplot(2,1,1);
     rastergram(spiketimes,eventstarts,duration);
