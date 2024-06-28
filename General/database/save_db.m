@@ -82,20 +82,20 @@ if debug
 end
 
 v = version;
-if v(1)<'5' && ~isoctave
-    delete(h);
-    errormsg('Cannot save in Version 5 matlab format',true);
-end
-if v(1)=='5' && ~isoctave
-    if exist(filename,'file')
-        movefile(filename,[filename '_copy']);
-    end
-    save(filename,'db','-mat')
-    if debug
-        logmsg('Saved in v5 format');
-        toc
-    end
-else
+% if v(1)<'5' && ~isoctave
+%     delete(h);
+%     errormsg('Cannot save in Version 5 matlab format',true);
+% end
+% if v(1)=='5' && ~isoctave
+%     if exist(filename,'file')
+%         movefile(filename,[filename '_copy']);
+%     end
+%     save(filename,'db','-mat')
+%     if debug
+%         logmsg('Saved in v5 format');
+%         toc
+%     end
+% else
     if exist(filename,'file')
         try
             movefile(filename,[filename '_copy'],'f');
@@ -130,7 +130,7 @@ else
             end
         end
     end
-end
+% end
 waitbar(1,h);
 delete(h);
 

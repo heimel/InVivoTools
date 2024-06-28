@@ -2,13 +2,25 @@
 %
 %  Script to tar prepared project folders for archiving
 %
-% 2022, Alexander Heimel
+%  For storage at Surf Data Archive the tar-files should be between 1GB and
+%  200GB in size and average file size should not fall below 1GB.
+%  Make sure that folders in Data_collection folder do not exceed 200 GB. 
+%  Distribute over multiple folders if necessary
+%
+%  For data archiving check out: https://github.com/heimel/InVivoTools/blob/master/DataArchiving/archiving_checklist.md 
+%  in particular run prepare_project_for_archiving to check presence of raw
+%  data.
+%
+%  More guidelines at https://servicedesk.surf.nl/wiki/display/WIKI/Data+Archive#DataArchive-Guidelines
+%
+% 2022-2024, Alexander Heimel
 
-projectId = 'Vangeneugden_2019_Curr_Biol_11.51_13.13_13.59_14.90'; 
+projectId = 'Van_Versendaal_Unpublished_chondroitinase_11.74'; 
 
 logmsg(['Tarring project ' projectId])
 
-prepRootFolder = '\\vs03\vs03-csf-1\ReadyForSurfArchive';
+%prepRootFolder = '\\vs03\vs03-csf-1\ReadyForSurfArchive';
+prepRootFolder = '\\vs01\CSF_Data\Heimel';
 
 if ~exist(prepRootFolder,'dir')
     logmsg([prepRootFolder ' does not exist.']);

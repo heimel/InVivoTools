@@ -38,6 +38,8 @@ switch record.datatype
         record = analyse_wheelrecord( record, verbose );
     case 'nt' % running wheel record
         record = analyse_nttestrecord( record, verbose );
+    case 'ax' % axograph record
+        record = analyse_axtestrecord( record, verbose );
     otherwise
         if isfield(record,'analysisfunction') && ~isempty(record.analysisfunction)
             record = feval(record.analysisfunction,record,db,verbose);

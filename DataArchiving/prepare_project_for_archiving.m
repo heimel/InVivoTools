@@ -4,11 +4,12 @@
 %
 % 2022, Alexander Heimel
 
-projectId = 'Camillo_2018_Sci_Rep_13.29_14.87'; 
+projectId = 'Van_Versendaal_Unpublished_chondroitinase_11.74'; 
 
 logmsg(['Preparing project ' projectId])
 
-prepRootFolder = '\\vs03\vs03-csf-1\PreparingForSurfArchive';
+%prepRootFolder = '\\vs03\vs03-csf-1\PreparingForSurfArchive';
+prepRootFolder = '\\vs01\CSF_Data\Heimel';
 
 if ~exist(prepRootFolder,'dir')
     logmsg([prepRootFolder ' does not exist.']);

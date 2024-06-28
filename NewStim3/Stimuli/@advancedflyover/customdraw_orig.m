@@ -15,8 +15,7 @@ StimWindowGlobals % for StimWindowRefresh
 % screen_center_r2n_cm = [0 0 NewStimViewingDistance];
 screen_pxl = [StimWindowRect(3) StimWindowRect(4)];
 
-pixels_per_degree = tan(pi/(2 * 180)) * NewStimViewingDistance * pixels_per_cm * 2 ;
-params = getparameters(stim);
+lparams = getparameters(stim);
 
 screen_center = screen_pxl / 2;
 pxlvelocity = params.velocity_degps * pixels_per_degree;
