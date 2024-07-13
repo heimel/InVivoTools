@@ -4,12 +4,13 @@
 %
 % 2022, Alexander Heimel
 
-projectId = 'Van_Versendaal_Unpublished_chondroitinase_11.74'; 
+projectId = 'Tafreshiha_2022_Thesis_DREADDS_172005'; 
+%prepRootFolder = '\\vs03\vs03-csf-1\PreparingForSurfArchive';
+%prepRootFolder = '\\vs01\CSF_Data\Heimel';
+prepRootFolder = '\\vs03\vs03-csf-1\Tafreshiha';
 
 logmsg(['Preparing project ' projectId])
 
-%prepRootFolder = '\\vs03\vs03-csf-1\PreparingForSurfArchive';
-prepRootFolder = '\\vs01\CSF_Data\Heimel';
 
 if ~exist(prepRootFolder,'dir')
     logmsg([prepRootFolder ' does not exist.']);

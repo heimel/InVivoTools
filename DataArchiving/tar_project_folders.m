@@ -15,12 +15,14 @@
 %
 % 2022-2024, Alexander Heimel
 
-projectId = 'Van_Versendaal_Unpublished_chondroitinase_11.74'; 
+projectId = 'Cazemier_2024_Elife_FG_in_SC'; 
+%prepRootFolder = '\\vs03\vs03-csf-1\PreparingForSurfArchive';
+%prepRootFolder = '\\vs01\CSF_Data\Heimel';
+prepRootFolder = '\\vs03\vs03-csf-3\Cazemier';
 
 logmsg(['Tarring project ' projectId])
+logmsg('Make sure Data_collections folder only contains folders and no files!')
 
-%prepRootFolder = '\\vs03\vs03-csf-1\ReadyForSurfArchive';
-prepRootFolder = '\\vs01\CSF_Data\Heimel';
 
 if ~exist(prepRootFolder,'dir')
     logmsg([prepRootFolder ' does not exist.']);

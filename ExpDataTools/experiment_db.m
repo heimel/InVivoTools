@@ -50,7 +50,7 @@ else
     else
         type = 'oi';
     end
-    filename = {['tempdb_' datestr(now,'yyyymmdd') '.mat']}; % making it a cell to avoid later loading
+    filename = {['tempdb_' char(datetime('now','format','yyyyMMdd')) '.mat']}; % making it a cell to avoid later loading
 end
 
 if isempty(db)
@@ -187,15 +187,20 @@ if nargout==1
     fig = h_fig;
 end
 
-maxleft = 0;
-left = 10;
-%ud.buttonwidth = 65;
-colsep = 3;
-%ud.buttonheight = 30;
-top = 10;
 
 ud = get(h_fig,'UserData');
 h = ud.h;
+
+maxleft = ud.maxleft;
+left = ud.leftmargin;
+colsep = ud.colsep;
+top = ud.colsep;
+
+%maxleft = 0;
+%left = 10;
+%colsep = 3;
+%top = 10;
+
 
 % set customize sort to sort button
 set(h.sort,'Tag','sort_testrecords');
@@ -292,7 +297,7 @@ if track_data_enable
         'FontSize',ud.basefontsize,...
         'Position',[left top ud.buttonwidth ud.buttonheight], ...
         'String','Track','Tag',fcn_name);
-    left=left+ud.buttonwidth+colsep;
+    left = left+ud.buttonwidth+colsep;
     maxleft=max(maxleft,left);
 end
 
