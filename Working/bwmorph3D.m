@@ -1,9 +1,0 @@
-function SI = bwmorph3D(S)
-S([1,size(S,1)],:,:)=0;
-S(:,[1,size(S,2)],:)=0;
-S(:,:,[1,size(S,3)])=0;
-M = find(S);
-J = logical(S(M).*S(M+1).*S(M-1).*S(M+size(S,2)).*S(M-size(S,2)).*S(M+size(S,1)*size(S,2)).*S(M-size(S,1)*size(S,2)));
-JJ=find(J);
-SI=S;
-SI(M(JJ))=1;

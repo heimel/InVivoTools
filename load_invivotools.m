@@ -61,18 +61,18 @@ disp([ upper(mfilename) ': To override InVivoTools settings: edit processparams_
 
 % defaults, put overrides in processparams_local.m file
 params.load_general = 1; % necessary for host function
-params.load_nelsonlabtools = 1; % needed for analysis, should be phased out
+params.load_nelsonlabtools = 0; % needed for analysis of Nelson Lab data
 params.load_newstim = 1; % needed for visual stimulation NewStim package
 params.load_neuralanalysis = 1; % needed for electrophysiology analysis
 params.load_twophoton = 0; % needed for twophoton analysis
-params.load_intrinsicsignal = 1; % needed for optical imaging analysis
+params.load_intrinsicsignal = 0; % needed for optical imaging analysis
 params.load_electrophys = 1; % needed for electrophysiology recording and analysis
 params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_webcam = 1; % needed for InVivoTools analysis
 params.load_headcam = 1; % needed for InVivoTools freely moving head cam analysis
-params.load_studies = {}; % folders of Studies to load
 params.load_physiology = 1; % needed for EXG recordings
 params.load_histology = 1; % needed for matching histology to Allen Mouse Brain Atlas
+params.load_dataarchiving = 1; % needed for preparing project for archiving
 
 % set default lab, can be overruled depending on host:
 % alternatives 'Fitzpatrick','Levelt','Lohmann'
@@ -106,9 +106,9 @@ path2invivotools = majorprefix;
 
 if params.load_expdatatools
     path2expdatatools = fullfile(path2invivotools,'ExpDataTools');
-    addpath(path2expdatatools, ...
-        fullfile(path2expdatatools,'MdbTools'),...   % files to use Leveltlab MS Access mouse database
-        fullfile(path2expdatatools,'Labs',params.lab));% add some lab specific tools
+    % path2expdatatools = [path2expdatatools ';' fullfile(path2expdatatools,'MdbTools')]; % files to use Leveltlab MS Access mouse database
+    path2expdatatools = [path2expdatatools ';' fullfile(path2expdatatools,'Labs',params.lab)]; % add some lab specific tools
+    addpath(path2expdatatools);
 end
 
 if params.load_webcam
@@ -161,13 +161,13 @@ end
 
 % Electrophysiology analyses
 if params.load_electrophys
-    addpath(fullfile(path2invivotools,'Electrophysiology'),...
-        fullfile(path2invivotools,'Electrophysiology','Son'),...    %libraries for importing spike2 data
-        fullfile(path2invivotools,'Electrophysiology','TDT'),... % for importing tdt data in linux
-        fullfile(path2invivotools,'Electrophysiology','Axon'),... % for importing Axon abf files
-        genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5')),...    % for MClust spike sorter
-        fullfile(path2invivotools,'Electrophysiology','Kilosort','inVivoSpecs') ...  % for exporting data to kilosort and importing kilosort spikes
-        );
+    ephys_path = fullfile(path2invivotools,'Electrophysiology');
+    % ephys_path = [ephys_path ';' fullfile(path2invivotools,'Electrophysiology','Son')]; % Spike2 files
+    ephys_path = [ephys_path ';' fullfile(path2invivotools,'Electrophysiology','TDT')]; % Tucker-Davis Technology files
+    % ephys_path = [ephys_path ';' fullfile(path2invivotools,'Electrophysiology','Axon')]; % Axon patch clamp spikes
+    % ephys_path = [ephys_path ';' genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5'))]; % MClust spike sorter
+    ephys_path = [ephys_path ';' fullfile(path2invivotools,'Electrophysiology','Kilosort','inVivoSpecs')]; % for exporting data to kilosort and importing kilosort spikes
+    addpath(ephys_path);
 end
 
 % Physiology analyses
@@ -199,7 +199,7 @@ end
 
 % Nelsonlab tools, must be after NewStim package
 if params.load_nelsonlabtools
-    tmppath=pwd;
+    tmppath = pwd;
     cd(fullfile(path2invivotools,'NelsonLabTools'));
     NelsonLabToolsInit; % initializing
     cd(tmppath);
@@ -222,38 +222,25 @@ if params.load_histology
     addpath(fullfile(path2invivotools,'Histology','Allenatlasmatching'));
 end
     
-% Temp folder for work in progress
-addpath(fullfile(path2invivotools,'Working'));
-
-% Call Psychtoolbox-3 specific startup function:
-if exist('PsychStartup','file')
-    PsychStartup;
+if params.load_dataarchiving
+    addpath(fullfile(path2invivotools,'DataArchiving'));
 end
 
-% load External repositories
-% commented out on 2023-05-27. Repository should be downloaded separatedly
-% from github/fangq/jsonlab
-% addpath(fullfile(path2invivotools,'Externals','jsonlab')); 
+% % Call Psychtoolbox-3 specific startup function:
+% if exist('PsychStartup','file')
+%     PsychStartup;
+% end
 
-
-
-% load Study specific folders
-studiespath = cellfun(@(x) fullfile(majorprefix,'Studies',x),params.load_studies,'UniformOutput',false);
-if ~isempty(studiespath)    
-    addpath(studiespath{:});
-end
-
-if isunix % bug workaround for Matlab R2012b and more recent
-    % see e.g. http://www.mathworks.com/matlabcentral/answers/114915-why-does-matlab-cause-my-cpu-to-spike-even-when-matlab-is-idle-in-matlab-8-0-r2012b
-    try 
-        com.mathworks.mlwidgets.html.HtmlComponentFactory.setDefaultType('HTMLRENDERER')
-    catch me    
-        disp(['LOAD_INVIVOTOOLS: ' me.message])
-    end
-end
+% if isunix % bug workaround for Matlab R2012b and more recent
+%     % see e.g. http://www.mathworks.com/matlabcentral/answers/114915-why-does-matlab-cause-my-cpu-to-spike-even-when-matlab-is-idle-in-matlab-8-0-r2012b
+%     try 
+%         com.mathworks.mlwidgets.html.HtmlComponentFactory.setDefaultType('HTMLRENDERER')
+%     catch me    
+%         disp(['LOAD_INVIVOTOOLS: ' me.message])
+%     end
+% end
 
 if isoctave
     warning('on','Octave:shadowed-function');
 end
 
-%clear 
