@@ -1,19 +1,20 @@
 # ARCHIVING_CHECKLIST
 
 ## Preparing steps
-- Study dossiers and approvals in Ethics
-- Databases in Data_collection \ Databases
-- Raw data in Data_collection
-- Published manuscript in Publications
-- Analysis scripts in Data_analysis
-- Stimulus and standard scripts in Methods_and_materials 
-- Info about materials in Methods_and_materials
+- Fill out README.md
+- Copy study dossiers and approvals in Ethics
+- Copy databases in Data_collection\Databases
+- Move raw data in folders in Data_collection 
+- Check that there are no loose files in Data_collection. Only folders are archived!
+- Copy published manuscript in Publications
+- Move analysis scripts in Data_analysis
+- Move Stimulus and standard scripts in Methods_and_materials 
+- Copy info about materials in Methods_and_materials
 - Check content of Heimel\Projects
 - Check content of Heimel\Archive\Projects
 - Run prepare_project_for_archiving to check presence of raw data
 
 ## Tarring
-- Move all files in Data_collection into folders
 - Remove empty folders
 - For storage at Surf Data Archive the tar-files should be between 1GB and 200GB in size. Make sure that folders in Data_collection folder do not exceed 200 GB and definitely not more than 1 Tb. Distribute over multiple folders if necessary
 - More guidelines at https://servicedesk.surf.nl/wiki/display/WIKI/Data+Archive#DataArchive-Guidelines
