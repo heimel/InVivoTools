@@ -34,7 +34,7 @@ all_bursttimes=[];
 for int=1:n_intervals
   spiketimes=get_data( cell, intervals( int, :) );
   n_spikes=n_spikes+length(spiketimes); % just for information
-  [bursttimes n_events params]=get_bursttimes( spiketimes, params );
+  [bursttimes,~,n_events,params]=get_bursttimes( spiketimes, params );
   all_bursttimes=[all_bursttimes bursttimes];
   n_all_events=n_all_events+n_events; 
 end

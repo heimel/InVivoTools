@@ -12,7 +12,7 @@
 - Copy info about materials in Methods_and_materials
 - Check content of Heimel\Projects
 - Check content of Heimel\Archive\Projects
-- Run prepare_project_for_archiving to check presence of raw data
+- For data acquired with InVivoTools, run prepare_project_for_archiving to check presence of raw data
 
 ## Tarring
 - Remove empty folders
@@ -26,23 +26,26 @@ https://servicedesk.surf.nl/wiki/display/WIKI/Data+Archive%3A+Effective+archive+
 On linux (e.g. Surf Cloud) 
 tar -cvf - FOLDER | split --bytes=100G -d -a 3 - FOLDER.tar.
 
-
 To unpack:
 cat Y* | tar -xvf -
 
+- Create filelist by:
+dir /b/s > filelist.txt
 
-- Delete original folders, except for 1. Publication folder with last version of the paper, 2. Ethics folder, 3. Presentations, 4. Experiment database 5. Project notes
+- Copy Literature folders into personal paper archive
+- Delete original folders
+- Delete tarcommands.bat
 
 ## Storing on Surf Archive
-- Move tarfiles to Surfarchive:  archive.surfsara.nl:/archive/nincsf  
+- Copy tarfiles to Surfarchive:  archive.surfsara.nl:/archive/nincsf  * on 2024-10-29 Chris vdT told me this will now be /archive/ninda/csf *
+  
+  scp -r W:\TarredForSurfArchive\PROJECTNAME aheimel@archive.surfsara.nl:\archive\nincsf#SEE COMMENT ABOVE ABOUT ninda/csf
+  
   info on https://servicedesk.surf.nl/wiki/display/WIKI/Data+Archive#DataArchive-Guidelines
   account on archive.surfsara.nl is same as on surfportal
   This can be done with command.exe shell if OpenSsh has been installed as an windows optional feature (Settings/App/Optional features).
-    scp -r W:\TarredForSurfArchive\PROJECTNAME aheimel@archive.surfsara.nl:\archive\nincsf
   Powershell (instead of CMD) also works, but causes disconnects due to time-out (2023-01-20)
-Files larger than 200Gb need to be split.
-This can be done using 'split -b 200G largefile.tar' (more ideal would be to split at creation)
 
-
-2024-07-07 ** Check out option to use dmftar (tool from Surf) via HPC linux computer connected to VS03 **
-
+## Clean up
+- Delete tar files except for Publications.tar, which contains pdfs and movies that could be useful for talks
+- Move folder to archived projects 
