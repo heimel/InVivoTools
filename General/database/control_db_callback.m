@@ -60,14 +60,14 @@ switch windowname
                     set(ud.h.next,'Enable','on');
                     set(ud.h.last,'Enable','on');
                 end
-                ud.current_record=current_record;
+                ud.current_record = current_record;
                 set(ud.h.current_record,'String',num2str(ud.current_record));
-                ud.record_form=show_record(ud.db(ud.current_record), ...
+                ud.record_form = show_record(ud.db(ud.current_record), ...
                     ud.record_form,h_fig);
                 
                 % set db form in userdata in record_form userdata
-                record_ud=get(ud.record_form,'UserData');
-                record_ud.db_form=h_fig;
+                record_ud = get(ud.record_form,'UserData');
+                record_ud.db_form = h_fig;
                 set(ud.record_form,'UserData',record_ud);
                 set(ud.record_form,'Tag','control_db_callback');
                 if ~ud.changed
@@ -294,7 +294,7 @@ switch windowname
                     return
                 end
                 [ud.filename,ud.lockfile]=save_db(ud.db,ud.filename,'',ud.lockfile);
-                ud.changed=0;
+                ud.changed = 0;
                 set(h_fig,'Userdata',ud);
                 control_db_callback(ud.h.current_record);
             case 'save as' % now export
@@ -317,6 +317,19 @@ switch windowname
                 if ~isnumeric(filename) %i.e. successful
                     rmlock(filename);
                 end
+    
+                % new behavior: 2025-02-09 
+                if isempty(ud.filename)
+                    [res,lockfile,button] = setlock(filename);
+                    if res==1
+                        ud.filename = filename;
+                        ud.lockfile = lockfile;
+                        ud.changed = 0;
+                        set(h_fig,'Userdata',ud);
+                        set_control_name(h_fig);
+                    end
+                end
+
             case 'help'
                 help_url = 'https://github.com/heimel/InVivoTools/wiki';
                 logmsg(['Opening ' help_url ' in default browser.']);

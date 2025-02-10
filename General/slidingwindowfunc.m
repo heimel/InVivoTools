@@ -23,13 +23,15 @@ function [Yn,Xn,Yerr] = slidingwindowfunc(X, Y, start, stepsize, stop, windowsiz
 %  If ZEROPAD is 1, then a 0 is coded if no points are found within a given window.
 %  If ZEROPAD is 0, and if no points are found within a given window, no Xn or Yn point
 %     is added for that window.
+%  If ZEROPAD is NaN, then a NaN is coded if no points are found within a given window.
 %
 %  Xn is the center location of each window and Yn is the result of the
 %  function in each window.
 %
 %  Also see MOVMEAN
 %
-% 200X, Steve Van Hooser (?), 2016-2023 Alexander Heimel
+% 200X, Steve Van Hooser (?)
+% 2016-2025 Alexander Heimel
 
 if nargin<9 || isempty(intervalfunc)
     intervalfunc = 'nanstderr';
@@ -53,7 +55,6 @@ if nargin<4 || isempty(stepsize)
     stepsize = (stop-start)/100;
 end
 
-
 Xn = [];
 Yn = [];
 Yerr = [];
@@ -64,7 +65,7 @@ intervalf = str2func(intervalfunc);
 for i=start:stepsize:stop-windowsize
     INDs = find(X>=i & X<i+windowsize);
 
-    if zeropad || ~isempty(INDs)
+    if zeropad==0 || isnan(zeropad) || ~isempty(INDs)
         Xn(end+1) = mean([i i+windowsize]);
     end
     if ~isempty(INDs)
@@ -74,11 +75,20 @@ for i=start:stepsize:stop-windowsize
             Yerr(end+1) = intervalf(Y(INDs)');
         end
     end
-    if zeropad && isempty(INDs)
+    if zeropad==1 && isempty(INDs)
         Yn(end+1) = 0;
         if nargout==3
             Yerr(end+1) = 0;
         end
     end
+
+    if isnan(zeropad) && isempty(INDs)
+        Yn(end+1) = NaN;
+        if nargout==3
+            Yerr(end+1) = NaN;
+        end
+    end
+
+
 end
 

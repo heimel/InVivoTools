@@ -61,7 +61,8 @@ if isempty(h_fig)
         'Position',[(screensize(3)-colwidth)/2 (screensize(4)-height)/2 colwidth height], ...
         'Tag','', ...
         'Units','pixels',...
-        'ToolBar','none');
+        'ToolBar','none',...
+        'AutoResizeChildren','off');
     set(h_fig,'MenuBar','none');
     set(h_fig,'NumberTitle','off');
     if ~isempty(h_control_fig)
@@ -82,7 +83,7 @@ if isempty(h_fig)
             'Units','pixels',...
             'Fontname','SansSerif',...
             'FontSize',fontsize,...
-            'Tag',fields{i}); %#ok<AGROW,NASGU>
+            'Tag',fields{i}); %#ok<AGROW>
         
         left = left+labelwidth+colsep;
         if ~strcmp(fields{i},'comment')
@@ -125,8 +126,8 @@ if isempty(h_fig)
 end
 
 % fill form
-fields=fieldnames(record);
-for i=1:length(fields)
+fields = fieldnames(record);
+for i = 1:length(fields)
     ud = get(h_fig,'Userdata');
     h_edit = ud.h_edit;
     content = record.(fields{i});

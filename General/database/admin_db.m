@@ -1,14 +1,13 @@
 function fig = admin_db( db )
-%ADMINL_DB control panel for database
+%ADMINL_DB control panel for database restructuring
 %
 %  H_FIG = ADMIN_DB( DB )
 %
 %    DB can be a structarray or a filename
 %
-%
 %  For normal database use, use CONTROL_DB instead
 %
-%  2012, Alexander Heimel
+%  2012-2025, Alexander Heimel
 %
 
 if nargin<1
@@ -28,25 +27,17 @@ end
 set(h_fig,'Name','Database administration');
 
 
+ud = get(h_fig,'UserData');
+h = ud.h;
 
+maxleft = ud.maxleft;
+left = ud.leftmargin;
+colsep = ud.colsep;
+top = ud.colsep;
+buttonwidth = ud.buttonwidth;
+buttonheight = ud.buttonheight;
 
-p = get(h_fig,'Position');
-p(3) = p(3)+80;
-set(h_fig,'Position',p);
-
-% extra buttons:
-
-left=10;
-buttonwidth=70;
-colsep=3;
-buttonheight=30;
-top=10;
-
-ud=get(h_fig,'UserData');
-h=ud.h;
 set(ud.record_form,'CloseRequestFcn','closereq');
-
-maxleft = 0;
 
 h.addtextfield = ...
     uicontrol('Parent',h_fig, ...
@@ -66,8 +57,8 @@ h.addtextfield = ...
     'ListboxTop',0, ...
     'Position',[left top buttonwidth+30 buttonheight], ...
     'String','Add text field' );
-left=left+buttonwidth+30+colsep;
-maxleft=max(maxleft,left);
+left = left+buttonwidth+30+colsep;
+maxleft = max(maxleft,left);
 
 h.addnumericfield = ...
     uicontrol('Parent',h_fig, ...
@@ -87,9 +78,8 @@ h.addnumericfield = ...
     'ListboxTop',0, ...
     'Position',[left top buttonwidth+40 buttonheight], ...
     'String','Add num. field' );
-left=left+buttonwidth+40+colsep;
-maxleft=max(maxleft,left);
-
+left = left+buttonwidth+40+colsep;
+maxleft = max(maxleft,left);
 
 h.removefield = ...
     uicontrol('Parent',h_fig, ...
@@ -109,8 +99,8 @@ h.removefield = ...
     'ListboxTop',0, ...
     'Position',[left top buttonwidth+40 buttonheight], ...
     'String','Remove field' );
-left=left+buttonwidth+40+colsep;
-maxleft=max(maxleft,left);
+left = left+buttonwidth+40+colsep;
+maxleft = max(maxleft,left);
 
 
 
@@ -152,17 +142,15 @@ h.renamefield = ...
     'ListboxTop',0, ...
     'Position',[left top buttonwidth+40 buttonheight], ...
     'String','Rename field' );
-left=left+buttonwidth+40+colsep;
-maxleft=max(maxleft,left);
+left = left+buttonwidth+40+colsep;
+maxleft = max(maxleft,left);
 
 % make figure wide enough
-pos=get(h_fig,'Position');
-pos(3)=max(maxleft,pos(3));
+pos = get(h_fig,'Position');
+pos(3) = max(maxleft,pos(3));
 set(h_fig,'Position',pos);
 
-
-
-ud.h=h;
+ud.h = h;
 set(h_fig,'UserData',ud);
 
 

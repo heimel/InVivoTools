@@ -1,4 +1,9 @@
-function y = movingavr(x, n);
+function y = movingavr(x, n)
+%movingavr. Computes moving average
+%
+% Deprecated. Use Matlab movmean instead.
+%
+
 if n==1
         y = x;
         return;

@@ -7,8 +7,6 @@ if isfield(record,'resultsfunction') && ~isempty(record.resultsfunction)
     feval(record.resultsfunction,record);
 else
     switch record.datatype
-        case 'fp'
-            results_oitestrecord( record );
         case 'lfp'
             if ~isempty(record.measures) && ~strcmp(record.analysis,'wspectrum') % Mehran temporarily
                 results_lfptestrecord( record );
@@ -20,7 +18,7 @@ else
             if exist(resultsfunction,'file')
                 feval(resultsfunction,record);
             else
-                errormsg(['Unknown datatype ' record.datatype ]);
+                errormsg(['Unknown datatype ' record.datatype '. Check if present in path.']);
             end
     end
     return

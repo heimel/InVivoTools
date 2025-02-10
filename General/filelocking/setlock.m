@@ -1,7 +1,7 @@
 function [res,lockfile,button]=setlock( filename )
 %SETLOCK sets a filelock by creating filename.lock text file
 %
-%  [RES,LOCKFILE] = SETLOCK( FILENAME )
+%  [RES,LOCKFILE,BUTTON] = SETLOCK( FILENAME )
 %    RES = 1 if succeeded, 0 if failed
 %    LOCKFILE is struct with lockfile contents
 %    SETLOCK fails if CHECKLOCK returns the presence of a lock
@@ -11,25 +11,25 @@ function [res,lockfile,button]=setlock( filename )
 % 2007-2013, Alexander Heimel
 %
 
-res=0;
-lockfile=[];
+res = 0;
+lockfile = [];
 button = '';
 
 [stat,oldlockfile]=checklock(filename);
 
 if stat==1
-  question=[filename ' is locked' ];
+  question = [filename ' is locked' ];
   try 
-    question=[question ' by user ' oldlockfile.user];
+    question = [question ' by user ' oldlockfile.user];
   end
   try 
-    question=[question ' on ' oldlockfile.host];
+    question = [question ' on ' oldlockfile.host];
   end
   try 
-    question=[question ' at ' oldlockfile.time];
+    question = [question ' at ' oldlockfile.time];
   end
   
- button=questdlg(question, 'File locked','Open read-only','Replace lock','Cancel','Open read-only');
+ button = questdlg(question, 'File locked','Open read-only','Replace lock','Cancel','Open read-only');
  switch button
    case { 'Open read-only','Cancel'}
      return
@@ -38,15 +38,14 @@ if stat==1
  end
 end
 
-lockfilename=getlockfilename( filename);
-fid=fopen(lockfilename,'w');
+lockfilename = getlockfilename( filename);
+fid = fopen(lockfilename,'w');
 if fid==-1
     try
         delete(lockfilename)
         fid=fopen(lockfilename,'w');
     end
 end
-
 
 if fid==-1 
   errormsg(['failed to open lockfile ' lockfilename ]);

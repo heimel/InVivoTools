@@ -1,5 +1,11 @@
 function set_control_name( h )
 %SET_CONTROL_NAME sets database control name
+%
+%  set_control_name( h )
+%
+%    h: figure handle of control_db figure
+%
+% 200X, Alexander Heimel
 
 ud = get(h,'Userdata');
 

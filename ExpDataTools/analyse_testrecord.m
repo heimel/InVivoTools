@@ -21,8 +21,6 @@ if isfield(record,'analysisfunction') && ~isempty(record.analysisfunction)
     record = feval(record.analysisfunction,record,db,verbose);
 else 
     switch record.datatype
-        case 'fp' % flavoprotein
-            record = analyse_oitestrecord( record );
         case 'ec' % unit electrophysiology
             record = analyse_ectestrecord( record, verbose, allowchanges );
         case 'fret' % microscopy
