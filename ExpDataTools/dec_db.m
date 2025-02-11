@@ -6,7 +6,7 @@ function fig=dec_db
 % 20012, Alexander Heimel
 %
 
-filename = fullfile( expdatabasepath, 'decdb.mat');
+filename = fullfile( expdatabasepath(), 'decdb.mat');
 
 h_fig=control_db(filename,[1 0 0]); 
 

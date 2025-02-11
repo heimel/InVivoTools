@@ -25,8 +25,8 @@ if nargin<1 || isempty(record)
 end
 
 % set default root
-params.wcdatapath_networkroot = [networkpathbase filesep 'Experiments']; % much faster than fullfile
-params.wcdatapath_localroot = [localpathbase filesep 'Experiments'];% much faster than fullfile
+params.wcdatapath_networkroot = [networkpathbase() filesep 'Experiments']; % much faster than fullfile
+% params.wcdatapath_localroot = [localpathbase() filesep 'Experiments'];% much faster than fullfile
 
 % check for local overrides
 params = processparams_local(params);
@@ -34,22 +34,22 @@ params = processparams_local(params);
 branch = fullfile(record.experiment,record.mouse,record.date,record.setup,record.epoch);
 
 % first try local root
-path=fullfile(params.wcdatapath_localroot,branch);
-
-if ~exist(path,'dir')
+% path=fullfile(params.wcdatapath_localroot,branch);
+% 
+% if ~exist(path,'dir')
+%     if verbose
+%         logmsg(['Check params.wcdatapath_localroot in processparams_local. Not existing folder ' path]);
+%     end
+path = fullfile(params.wcdatapath_networkroot,branch);
+if ~exist(path,'dir')  % fall back to local path
     if verbose
-        logmsg(['Check params.wcdatapath_localroot in processparams_local. Not existing folder ' path]);
+        logmsg(['Check params.wcdatapath_networkroot in processparams_local. Not existing folder ' path]);
     end
-    path = fullfile(params.wcdatapath_networkroot,branch);
-    if ~exist(path,'dir')  % fall back to local path
-        if verbose
-            logmsg(['Check params.wcdatapath_networkroot in processparams_local. Not existing folder ' path]);
-        end
-        path = fullfile(params.wcdatapath_localroot,branch);
-    end
-end
-
-if ~exist(path,'dir') 
+        %     % path = fullfile(params.wcdatapath_localroot,branch);
+        % end
+        % % end
+        %
+        % if ~exist(path,'dir')
     if create
         mkdir(path);
     else

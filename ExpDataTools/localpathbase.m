@@ -3,10 +3,14 @@ function base = localpathbase
 %
 % BASE = LOCALPATHBASE
 %
+% DEPRECATED. USE NETWORKPATHBASE INSTEAD
+%
 % 2012-2020, Alexander Heimel
 %
 
 persistent base_pers
+
+logmsg('DEPRECATED: USE NETWORKPATHBASE INSTEAD')
 
 if ~isempty(base_pers)
     base = base_pers;

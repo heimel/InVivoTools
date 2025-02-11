@@ -13,8 +13,7 @@ if isfield(record,'mouse') % i.e. called from mouse_db
     % get protocol
     % assume mousenumber like 04.05.1.01
     protocol_number = record.mouse(1:5);
-    experimental_group = str2double(record.mouse(7));
-    load(fullfile( expdatabasepath, 'decdb.mat'),'db');
+    load(fullfile( expdatabasepath(), 'decdb.mat'),'db');
     decdb = db;
     decrecord = decdb(find_record(decdb,['protocol=' protocol_number]));
 elseif isfield(record,'protocol') % i.e. called from dec_db
@@ -22,7 +21,7 @@ elseif isfield(record,'protocol') % i.e. called from dec_db
     decrecord = record;
     protocol_number = record.protocol;
     
-    load(fullfile(expdatabasepath,'mousedb.mat'),'db');
+    load(fullfile(expdatabasepath(),'mousedb.mat'),'db');
     mousedb = db;
     flds = fieldnames(mousedb);
     record = [];

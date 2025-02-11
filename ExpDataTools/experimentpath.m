@@ -134,7 +134,7 @@ switch vers
         
         switch vers
             case '2015t'
-                datapath = fullfile(localpathbase,...
+                datapath = fullfile(networkpathbase(),...
                     'Experiments',...
                     experiment,...
                     record.mouse,...
@@ -143,7 +143,7 @@ switch vers
                     test);
             otherwise
                 f = filesep; % faster than fullfile
-                lpb = localpathbase;
+                lpb = networkpathbase();
                 if isempty(strfind(lpb,'InVivo'))
                     lpb = [lpb f 'InVivo'];
                 end

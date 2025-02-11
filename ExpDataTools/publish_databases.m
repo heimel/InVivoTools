@@ -81,7 +81,7 @@ switch answer
             recordtype = flds{i};
             db = used_records.(recordtype);
             db = remove_duplicates(db,[],'first');
-            filename = fullfile(expdatabasepath,publishname,[ recordtype 'db_' publishname '.mat']);
+            filename = fullfile(expdatabasepath(),publishname,[ recordtype 'db_' publishname '.mat']);
             save(filename,'db','-v7');
         end
 end

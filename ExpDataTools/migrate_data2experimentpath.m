@@ -44,7 +44,7 @@ if ~iscell(experiments)
     experiments = {experiments};
 end
 if strcmpi(experiments{1},'all')
-    folders = dir(expdatabasepath);
+    folders = dir(expdatabasepath());
     folders = folders([folders.isdir]); % select folders only
     folders = folders(3:end); % don't take local and parent
     experiments = {};
@@ -59,7 +59,7 @@ if strcmpi(experiments{1},'all')
         end
     end
 elseif any(experiments{1}=='*')
-    folders = dir(fullfile(expdatabasepath,experiments{1}));
+    folders = dir(fullfile(expdatabasepath(),experiments{1}));
     folders = folders([folders.isdir]); % select folders only
     experiments = {};
     for i=1:length(folders)

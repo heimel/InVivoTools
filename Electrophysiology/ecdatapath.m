@@ -21,17 +21,20 @@ end
 
 
 % first check locally
-params.ecdatapath_localroot = fullfile(localpathbase,'Electrophys',capitalize(record.setup));
+% params.ecdatapath_localroot = fullfile(localpathbase,'Electrophys',capitalize(record.setup));
 
 % check for local overrides
 params = processparams_local(params);
 
-if ~exist(params.ecdatapath_localroot,'dir')
-    %logmsg(['Folder ' params.ecdatapath_localroot ' does not exist.']);
-    if exist(networkpathbase,'dir')
-        params.ecdatapath_localroot = fullfile(networkpathbase,'Electrophys',capitalize(record.setup));
-    end
-end
+% if ~exist(params.ecdatapath_localroot,'dir')
+%     %logmsg(['Folder ' params.ecdatapath_localroot ' does not exist.']);
+%     if exist(networkpathbase(),'dir')
+%         params.ecdatapath_localroot = fullfile(networkpathbase(),'Electrophys',capitalize(record.setup));
+%     end
+% end
+
+params.ecdatapath_localroot = fullfile(networkpathbase(),'Electrophys',capitalize(record.setup));
+
 
 datapath=fullfile(params.ecdatapath_localroot,record.date(1:4),record.date(6:7),record.date(9:10));
 switch record.setup

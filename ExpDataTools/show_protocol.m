@@ -10,7 +10,7 @@ newud=ud;
 record=ud.db(ud.current_record);
 
 
-decpath = fullfile(expdatabasepath,'..','..','DEC');
+decpath = fullfile(expdatabasepath(),'..','..','DEC');
 protocolpath = dir(fullfile(decpath,[record.protocol(1:5) '*'] ));
 
 if length(protocolpath)>1

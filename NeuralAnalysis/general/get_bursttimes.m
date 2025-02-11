@@ -1,7 +1,7 @@
-function [bursttimes, tonictimes, n_events, n_spikes_per_burst, params] = get_bursttimes( spiketimes, params )
+function [bursttimes, tonictimes, n_events, mean_spikes_per_burst, mean_burst_isi, params] = get_bursttimes( spiketimes, params )
 %GET_BURSTTIMES returns all times of bursts from an array of spiketimes
 % 
-%    [BURSTTIMES, TONICTIMES, N_EVENTS, N_SPIKES_PER_BURST, PARAMS] = 
+%    [BURSTTIMES, TONICTIMES, N_EVENTS, MEAN_SPIKES_PER_BURST, MEAN_BURST_ISI, PARAMS] = 
 %              GET_BURSTTIMES( SPIKETIMES, [PARAMS] )
 % 
 %    SPIKETIMES is a vector containing all spiketimes. PARAMS is a
@@ -16,8 +16,8 @@ function [bursttimes, tonictimes, n_events, n_spikes_per_burst, params] = get_bu
 %    N_EVENTS is the total number of events, both bursts (which
 %    are counted once, even if they include multiple spikes) and tonic
 %    spikes.
-%    N_SPIKES_PER_BURST is vector containing the number of spikes for
-%    all bursts.
+%    MEAN_SPIKES_PER_BURST is the mean number of spikes per burst
+%    MEAN_BURST_ISI is the mean ISI within all bursts
 %    PARAMS is a structure with the set of parameters used to
 %    define bursts.
 %
@@ -37,7 +37,8 @@ end
 bursttimes = [];
 tonictimes = [];
 n_events = 0;
-n_spikes_per_burst = [];
+mean_spikes_per_burst = NaN;
+mean_burst_isi = NaN;
 
 if length(spiketimes)<2 
   return;  % returns params, if one wants to know default parameters
@@ -46,6 +47,8 @@ end
 % select all ISIs < PARAMS.MAX_ISI
 isis = diff( spiketimes );
 ind_short_isis = find(isis<params.max_isi);
+
+mean_burst_isi = mean(isis(ind_short_isis)); % of course dependent on max_isi
 
 % n_events is total number of events where bursts and tonic spikes all
 % count for one. 
@@ -82,4 +85,4 @@ for i = 1:n_bursts
     n_spikes_per_burst(i) = 1 + ...
         length(find(ind_later_burst_spikes>ind_first & ind_later_burst_spikes<ind_next_burst));
 end % i
-
+mean_spikes_per_burst = mean(n_spikes_per_burst);

@@ -3,7 +3,7 @@
 %
 % 2019, Alexander Heimel
 
-databasepath = expdatabasepath;
+databasepath = expdatabasepath();
 
 % first test databases in topfolder
 d = dir(fullfile(databasepath,'*test*.mat'));

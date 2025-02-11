@@ -13,7 +13,7 @@ function available = dec_group_numbers( protocol, show )
 db = []; % to mask matlab db function
 protocol = strtrim(protocol);
 
-load(fullfile(expdatabasepath,'decdb'));
+load(fullfile(expdatabasepath(),'decdb'),'db');
 
 decrecord = db(find_record(db,['protocol=' protocol]));
 if isempty(decrecord)
@@ -26,7 +26,7 @@ else
 end
 
 
-load(fullfile(expdatabasepath,'mousedb'));
+load(fullfile(expdatabasepath,'mousedb'),'db');
 
 for i=1:length(groupnumbers)
     ind = find_record(db,['mouse=' protocol '.' num2str(i,'%2d') '.*']);

@@ -129,8 +129,8 @@ if isempty(testdb)
             
             if exist('dbname','var') && ischar(dbname) %#ok<NODEF> % alternative db specified
                 if ~exist(dbname,'file')
-                    if exist(fullfile(expdatabasepath,dbname),'file')
-                        dbname = fullfile(expdatabasepath,dbname);
+                    if exist(fullfile(expdatabasepath(),dbname),'file')
+                        dbname = fullfile(expdatabasepath(),dbname);
                     end
                 end
                 if ~exist(dbname,'file')
@@ -145,7 +145,6 @@ if isempty(testdb)
             end
             
             if reload
-                %            expdb_cache.(measuress.datatype).type = expdatabases(measuress.datatype) ;
                 expdb_cache.(measuress.datatype).type = measuress.datatype ;
                 if exist('dbname','var') && ischar(dbname)
                     temp = load(dbname);

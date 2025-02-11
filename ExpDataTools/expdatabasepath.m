@@ -1,7 +1,6 @@
 function dbpath=expdatabasepath( where)
 %EXPDATABASEPATH returns database folder
 %
-% 
 % 200X-2015, Alexander Heimel
 %
 
@@ -17,7 +16,7 @@ switch where
             dbpath=dbpath_network;
             return
         end
-        base=networkpathbase;
+        base=networkpathbase();
     case 'local'
         if ~isempty(dbpath_local)
             dbpath=dbpath_local;
