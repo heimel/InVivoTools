@@ -23,6 +23,9 @@ width = [];
 style = [];
 units = [];
 handle = [];
+fontname = ''; % to overload matlab function FONTNAME
+fontsize = ''; % to overload matlab function FONTSIZE
+
 
 % possible varargins with default values
 pos_args={...

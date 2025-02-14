@@ -81,71 +81,7 @@ switch type
         track_data_enable = 1;
 end
 
-
 experimental_pc = is_experimental_pc( hostname);
-
-% temporarily adding anesthetic field % 2013-03-18
-% switch type
-%     case {'tp','oi','ec'}
-%         if ~isfield(db,'anesthetic')
-%             for i=1:length(db)
-%                 db(i).anesthetic = '';
-%             end
-%             stat = checklock(filename);
-%             if stat~=1
-%                 filename = save_db(db,filename,'');
-%                 rmlock(filename);
-%             end
-%         end
-% end
-% temporarily adding analysis field % 2014?
-% switch type
-%     case {'ec'}
-%         if ~isfield(db,'analysis')
-%             for i=1:length(db)
-%                 db(i).analysis = '';
-%             end
-%             if ~iscell(filename)
-%                 stat = checklock(filename);
-%                 if stat~=1
-%                     filename = save_db(db,filename,'');
-%                     rmlock(filename);
-%                 end
-%             end
-%         end
-% end
-% temporarily adding channel info 2014-03-25
-% switch type
-%     case {'ec'}
-%         if ~isfield(db,'channel_info')
-%             for i=1:length(db)
-%                 db(i).channel_info = '';
-%             end
-%             if ~iscell(filename)
-%                 stat = checklock(filename);
-%                 if stat~=1
-%                     filename = save_db(db,filename,'');
-%                     rmlock(filename);
-%                 end
-%             end
-%         end
-% end
-% temporarily adding eye field % 2014?
-% switch type
-%     case {'tp'}
-%         if ~isfield(db,'eye')
-%             for i=1:length(db)
-%                 db(i).eye = '';
-%             end
-%             if ~iscell(filename)
-%                 stat = checklock(filename);
-%                 if stat~=1
-%                     filename = save_db(db,filename,'');
-%                     rmlock(filename);
-%                 end
-%             end
-%         end
-% end
 
 if isfield(db,'comment')
     % Temp removal for multiline comments

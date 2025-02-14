@@ -61,7 +61,7 @@ disp([ upper(mfilename) ': To override InVivoTools settings: edit processparams_
 
 % defaults, put overrides in processparams_local.m file
 params.load_general = 1; % necessary for host function
-params.load_nelsonlabtools = 0; % needed for analysis of Nelson Lab data
+params.load_nelsonlabtools = 1; % needed for analysis of Nelson Lab data
 params.load_newstim = 1; % needed for visual stimulation NewStim package
 params.load_neuralanalysis = 1; % needed for electrophysiology analysis
 params.load_twophoton = 0; % needed for twophoton analysis

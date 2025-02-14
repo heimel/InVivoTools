@@ -22,6 +22,7 @@ end
 
 % first check locally
 % params.ecdatapath_localroot = fullfile(localpathbase,'Electrophys',capitalize(record.setup));
+params = [];
 
 % check for local overrides
 params = processparams_local(params);
