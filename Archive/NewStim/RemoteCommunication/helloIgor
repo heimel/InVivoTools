@@ -1,4 +1,0 @@
-tell application "Igor" of machine "dormouse"
-	activate
-	Do Script "print 1"
-end tell

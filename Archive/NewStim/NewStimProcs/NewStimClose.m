@@ -1,2 +1,0 @@
-CloseStimScreen
-CloseStimSerial

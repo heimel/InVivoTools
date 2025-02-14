@@ -61,7 +61,7 @@ disp([ upper(mfilename) ': To override InVivoTools settings: edit processparams_
 
 % defaults, put overrides in processparams_local.m file
 params.load_general = 1; % necessary for host function
-params.load_nelsonlabtools = 1; % needed for analysis of Nelson Lab data
+params.load_nelsonlabtools = 0; % needed for analysis of Nelson Lab data
 params.load_newstim = 1; % needed for visual stimulation NewStim package
 params.load_neuralanalysis = 1; % needed for electrophysiology analysis
 params.load_twophoton = 0; % needed for twophoton analysis
@@ -93,6 +93,7 @@ if params.load_general % general
         fullfile(path2general,'Wavelet','sinefit'), ... % used for erp analysis, Timo
         fullfile(path2general,'uitools'), ...
         fullfile(path2general,'CircStat'), ... % circular statistics toolbox
+        fullfile(path2general,'matlab-ParforProgress2'), ... 
         fullfile(path2general,'database','matlab_7'));
 end
 
@@ -140,9 +141,8 @@ if params.load_twophoton
         fullfile(twophoton_path, 'Platforms', twophoton_microscope_type));
     
     addpath(twophoton_path, ...
-        genpath([path2invivotools filesep 'Scanbox_Yeti']),...
-        genpath([path2invivotools filesep 'NoRMCorre']),...
-        genpath([path2invivotools filesep 'matlab-ParforProgress2']));
+        genpath([path2invivotools filesep 'Scanbox_Yeti']),...   % Get Scanbox from Github
+        genpath([path2invivotools filesep 'NoRMCorre'])); % Get NoRMCorre from Github
     
     load_scanbox;
     
@@ -190,10 +190,11 @@ if params.load_newstim
     % NewStimConfig file in that folder should be out of version control
     % ideally should get different location, but called like this in
     % NewStim3/NewStimInit, also used for optical imaging
-    addpath(fullfile(majorprefix,'Configuration'),...
+    addpath(...
         fullfile(path2invivotools,'NewStim3'),...
-        fullfile(path2invivotools,'Calibration'),...    % some calibration files for the packages that depend on each computer
-        fullfile(path2invivotools,'Calibration','Monitors'));
+        fullfile(path2invivotools,'NewStim3','Configuration'),...
+        fullfile(path2invivotools,'NewStim3','Calibration'),...    % some calibration files for the packages that depend on each computer
+        fullfile(path2invivotools,'NewStim3','Calibration','Monitors'));
     NewStimInit;
 end
 
@@ -201,7 +202,7 @@ end
 if params.load_nelsonlabtools
     tmppath = pwd;
     cd(fullfile(path2invivotools,'NelsonLabTools'));
-    NelsonLabToolsInit; % initializing
+    NelsonLabToolsInit(); % initializing
     cd(tmppath);
 end
 

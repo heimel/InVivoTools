@@ -1,1 +1,0 @@
-function css%CSS shortcut for CloseStimScreenCloseStimScreen
