@@ -176,7 +176,7 @@ if ~isempty(pos)
             entries={db(:).(field)};
         end
     end
-    if isnumeric(content)
+    if isnumeric(content) || islogical(content)
         expn=str2double(expr);
         switch comp
             case '='

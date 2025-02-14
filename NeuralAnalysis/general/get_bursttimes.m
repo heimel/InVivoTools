@@ -1,7 +1,7 @@
-function [bursttimes, tonictimes, n_events, mean_spikes_per_burst, mean_burst_isi, params] = get_bursttimes( spiketimes, params )
+function [bursttimes, tonictimes, n_events, spikes_per_burst, mean_burst_isi, params] = get_bursttimes( spiketimes, params )
 %GET_BURSTTIMES returns all times of bursts from an array of spiketimes
 % 
-%    [BURSTTIMES, TONICTIMES, N_EVENTS, MEAN_SPIKES_PER_BURST, MEAN_BURST_ISI, PARAMS] = 
+%    [BURSTTIMES, TONICTIMES, N_EVENTS, SPIKES_PER_BURST, MEAN_BURST_ISI, PARAMS] = 
 %              GET_BURSTTIMES( SPIKETIMES, [PARAMS] )
 % 
 %    SPIKETIMES is a vector containing all spiketimes. PARAMS is a
@@ -37,7 +37,7 @@ end
 bursttimes = [];
 tonictimes = [];
 n_events = 0;
-mean_spikes_per_burst = NaN;
+spikes_per_burst = NaN;
 mean_burst_isi = NaN;
 
 if length(spiketimes)<2 
@@ -74,7 +74,7 @@ tonictimes = spiketimes( ind_tonic_spikes ) ;
 
 
 n_bursts = length(bursttimes);
-n_spikes_per_burst = NaN(1,n_bursts);
+spikes_per_burst = NaN(1,n_bursts);
 for i = 1:n_bursts
     ind_first = ind_first_burst_spikes(i);
     if i<n_bursts
@@ -82,7 +82,6 @@ for i = 1:n_bursts
     else
         ind_next_burst = length(spiketimes)+1;
     end
-    n_spikes_per_burst(i) = 1 + ...
+    spikes_per_burst(i) = 1 + ...
         length(find(ind_later_burst_spikes>ind_first & ind_later_burst_spikes<ind_next_burst));
 end % i
-mean_spikes_per_burst = mean(n_spikes_per_burst);

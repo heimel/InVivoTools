@@ -1,4 +1,7 @@
-function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI)
+function [done,stamp,stiminfo] = customdraw( stim, stiminfo, MTI, capture_movie)
+
+% capture_movie is not yet implemented
+
 NewStimGlobals % for pixels_per_cm and NewStimViewingDistance
 StimWindowGlobals % for StimWindowRefresh
 

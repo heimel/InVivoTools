@@ -73,7 +73,7 @@ MTI = cell(0);
 StimWindowGlobals;
 NewStimGlobals;
 GammaCorrectionTableGlobals;
-
+StimWindow
 currLut = Screen('ReadNormalizedGammaTable', StimWindow);
 
 dispOrder = getDisplayOrder(stimScript);

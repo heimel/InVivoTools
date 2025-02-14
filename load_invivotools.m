@@ -74,10 +74,6 @@ params.load_physiology = 1; % needed for EXG recordings
 params.load_histology = 1; % needed for matching histology to Allen Mouse Brain Atlas
 params.load_dataarchiving = 1; % needed for preparing project for archiving
 
-% set default lab, can be overruled depending on host:
-% alternatives 'Fitzpatrick','Levelt','Lohmann'
-% is case-sensitive!
-params.lab='Levelt';
 
 if params.load_general % general
     % some generally useful tools not associated with any particular package
@@ -106,8 +102,7 @@ path2invivotools = majorprefix;
 
 if params.load_expdatatools
     path2expdatatools = fullfile(path2invivotools,'ExpDataTools');
-    % path2expdatatools = [path2expdatatools ';' fullfile(path2expdatatools,'MdbTools')]; % files to use Leveltlab MS Access mouse database
-    path2expdatatools = [path2expdatatools ';' fullfile(path2expdatatools,'Labs',params.lab)]; % add some lab specific tools
+   % path2expdatatools = [path2expdatatools ';' fullfile(path2expdatatools,'Labs',params.lab)]; % add some lab specific tools
     addpath(path2expdatatools);
 end
 
@@ -122,6 +117,11 @@ end
 % Twophoton package
 if params.load_twophoton
     twophoton_path = fullfile(path2invivotools,'TwoPhoton');
+
+    % set default lab, can be overruled depending on host:
+    % alternatives 'Fitzpatrick','Levelt','Lohmann'
+    % is case-sensitive!
+    params.lab='Levelt';
 
     switch params.lab
         case 'Lohmann'
