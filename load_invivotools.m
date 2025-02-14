@@ -61,19 +61,17 @@ disp([ upper(mfilename) ': To override InVivoTools settings: edit processparams_
 
 % defaults, put overrides in processparams_local.m file
 params.load_general = 1; % necessary for host function
+params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_nelsonlabtools = 0; % needed for analysis of Nelson Lab data
-params.load_newstim = 1; % needed for visual stimulation NewStim package
-params.load_neuralanalysis = 1; % needed for electrophysiology analysis
+params.load_newstim = 0; % needed for visual stimulation NewStim package
 params.load_twophoton = 0; % needed for twophoton analysis
 params.load_intrinsicsignal = 0; % needed for optical imaging analysis
 params.load_electrophys = 1; % needed for electrophysiology recording and analysis
-params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_webcam = 1; % needed for InVivoTools analysis
-params.load_headcam = 1; % needed for InVivoTools freely moving head cam analysis
+params.load_headcam = 0; % needed for InVivoTools freely moving head cam analysis
 params.load_physiology = 1; % needed for EXG recordings
-params.load_histology = 1; % needed for matching histology to Allen Mouse Brain Atlas
+params.load_histology = 0; % needed for matching histology to Allen Mouse Brain Atlas
 params.load_dataarchiving = 1; % needed for preparing project for archiving
-
 
 if params.load_general % general
     % some generally useful tools not associated with any particular package
@@ -93,8 +91,7 @@ if params.load_general % general
         fullfile(path2general,'Wavelet','sinefit'), ... % used for erp analysis, Timo
         fullfile(path2general,'uitools'), ...
         fullfile(path2general,'CircStat'), ... % circular statistics toolbox
-        fullfile(path2general,'matlab-ParforProgress2'), ... 
-        fullfile(path2general,'database','matlab_7'));
+        fullfile(path2general,'matlab-ParforProgress2'));
 end
 
 params = processparams_local(params); % load local overrides
@@ -168,6 +165,13 @@ if params.load_electrophys
     % ephys_path = [ephys_path ';' genpath(fullfile(path2invivotools,'Electrophysiology','MClust-3.5'))]; % MClust spike sorter
     ephys_path = [ephys_path ';' fullfile(path2invivotools,'Electrophysiology','Kilosort','inVivoSpecs')]; % for exporting data to kilosort and importing kilosort spikes
     addpath(ephys_path);
+
+    tmppath=pwd;
+    cd(fullfile(path2invivotools,'Electrophysiology','NeuralAnalysis'));
+    NeuralAnalysisObjectInit;
+    cd(tmppath);
+
+
 end
 
 % Physiology analyses
@@ -176,13 +180,7 @@ if params.load_physiology
         fullfile(path2invivotools,'Physiology','video'));    % for video 
 end
 
-% NeuralAnalysis package
-if params.load_neuralanalysis
-    tmppath=pwd;
-    cd(fullfile(path2invivotools,'NeuralAnalysis'));
-    NeuralAnalysisObjectInit;
-    cd(tmppath);
-end
+
 
 % NewStim package to show and analyse visual stimuli
 if params.load_newstim
@@ -213,8 +211,7 @@ if params.load_intrinsicsignal
         fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3'),...
         fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','coherence_dots'),...
         fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','opticflow_dots'),...
-        fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','rotating_dots'),...
-        fullfile(majorprefix,'Configuration'));    % next contains camera framerates
+        fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','rotating_dots'));
 end
 
 % Histology and Allen Atlas matching
@@ -226,20 +223,6 @@ end
 if params.load_dataarchiving
     addpath(fullfile(path2invivotools,'DataArchiving'));
 end
-
-% % Call Psychtoolbox-3 specific startup function:
-% if exist('PsychStartup','file')
-%     PsychStartup;
-% end
-
-% if isunix % bug workaround for Matlab R2012b and more recent
-%     % see e.g. http://www.mathworks.com/matlabcentral/answers/114915-why-does-matlab-cause-my-cpu-to-spike-even-when-matlab-is-idle-in-matlab-8-0-r2012b
-%     try 
-%         com.mathworks.mlwidgets.html.HtmlComponentFactory.setDefaultType('HTMLRENDERER')
-%     catch me    
-%         disp(['LOAD_INVIVOTOOLS: ' me.message])
-%     end
-% end
 
 if isoctave
     warning('on','Octave:shadowed-function');
