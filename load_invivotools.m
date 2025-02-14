@@ -41,7 +41,7 @@ disp([ upper(mfilename) ': Manual available at https://github.com/heimel/InVivoT
 if isunix
     updatestr = 'To update InVivoTools: update_invivotools';
 else
-    updatestr = 'To update InVivoTools: open github and click on Sync.';
+    updatestr = 'To update InVivoTools: open github and click on Fetch origin or Sync.';
 end
 disp([ upper(mfilename) ': ' updatestr]);
 
