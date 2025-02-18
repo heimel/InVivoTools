@@ -65,11 +65,12 @@ if ~iscell(y)
 end
 
 % to avoid all nonsense warnings in matlab
+axishandle = [];
 signif_y = 0;
 xticklabels = [];
 extra_options = '';
 rotate_xticklabels = '';
-
+normalitytest = '';
 color = []; % to overload matlab function OPTIM/COLOR
 fit = ''; % to overload matlab function CURVEFIT/FIT
 fontname = ''; % to overload matlab function FONTNAME

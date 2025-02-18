@@ -1,3 +1,0 @@
-CloseStimScreen
-CloseStimSerial
-CloseStimPCIDIO96

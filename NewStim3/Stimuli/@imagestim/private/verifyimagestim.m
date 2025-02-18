@@ -1,1 +1,0 @@
-function [b,errmsg] = verifyimagestim(p)b = 0;errmsg = '';

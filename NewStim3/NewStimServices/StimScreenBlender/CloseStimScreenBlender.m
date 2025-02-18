@@ -1,5 +1,0 @@
-function CloseStimScreenBlender
-
-StimScreenBlenderGlobals;
-
-StimScreenBlenderGLSL = [];

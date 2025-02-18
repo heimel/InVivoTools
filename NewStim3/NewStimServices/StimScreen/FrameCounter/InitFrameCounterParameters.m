@@ -1,1 +1,0 @@
-function InitFrameCounterParameters(box, outline, numdivs)FrameCounterGlobals;FrameCounterRect = [ box; outline ]; FrameCounterDivs = numdivs;

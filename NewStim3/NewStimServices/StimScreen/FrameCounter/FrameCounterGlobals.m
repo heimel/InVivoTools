@@ -1,1 +1,0 @@
-%% FrameCounterGlobals%% This script declares all of the FrameCounter global variables%%% FrameCounterRect(2x4)         - The rectangle in which the frame counter is%                                 drawn; the second row is an outline rect% global FrameCounterRect FrameCounterDivs

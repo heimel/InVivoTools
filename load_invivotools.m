@@ -63,7 +63,7 @@ disp([ upper(mfilename) ': To override InVivoTools settings: edit processparams_
 params.load_general = 1; % necessary for host function
 params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_nelsonlabtools = 0; % needed for analysis of Nelson Lab data
-params.load_newstim = 0; % needed for visual stimulation NewStim package
+% params.load_newstim = 0; % needed for visual stimulation NewStim package
 params.load_twophoton = 0; % needed for twophoton analysis
 params.load_intrinsicsignal = 0; % needed for optical imaging analysis
 params.load_electrophys = 1; % needed for electrophysiology recording and analysis
@@ -181,20 +181,20 @@ if params.load_physiology
 end
 
 
-
-% NewStim package to show and analyse visual stimuli
-if params.load_newstim
-    % for NewStim3 this folder is configuration
-    % NewStimConfig file in that folder should be out of version control
-    % ideally should get different location, but called like this in
-    % NewStim3/NewStimInit, also used for optical imaging
-    addpath(...
-        fullfile(path2invivotools,'NewStim3'),...
-        fullfile(path2invivotools,'NewStim3','Configuration'),...
-        fullfile(path2invivotools,'NewStim3','Calibration'),...    % some calibration files for the packages that depend on each computer
-        fullfile(path2invivotools,'NewStim3','Calibration','Monitors'));
-    NewStimInit;
-end
+% 
+% % NewStim package to show and analyse visual stimuli
+% if params.load_newstim
+%     % for NewStim3 this folder is configuration
+%     % NewStimConfig file in that folder should be out of version control
+%     % ideally should get different location, but called like this in
+%     % NewStim3/NewStimInit, also used for optical imaging
+%     addpath(...
+%         fullfile(path2invivotools,'NewStim3'),...
+%         fullfile(path2invivotools,'NewStim3','Configuration'),...
+%         fullfile(path2invivotools,'NewStim3','Calibration'),...    % some calibration files for the packages that depend on each computer
+%         fullfile(path2invivotools,'NewStim3','Calibration','Monitors'));
+%     NewStimInit;
+% end
 
 % Nelsonlab tools, must be after NewStim package
 if params.load_nelsonlabtools
