@@ -40,7 +40,7 @@ n_events = 0;
 spikes_per_burst = NaN;
 mean_burst_isi = NaN;
 
-if length(spiketimes)<2 
+if length(spiketimes)<1
   return;  % returns params, if one wants to know default parameters
 end
 
@@ -48,7 +48,11 @@ end
 isis = diff( spiketimes );
 ind_short_isis = find(isis<params.max_isi);
 
-mean_burst_isi = mean(isis(ind_short_isis)); % of course dependent on max_isi
+if ~isfield(params,'compute_mean_burst_isi_as_inverse_freq') ||  ~params.compute_mean_burst_isi_as_inverse_freq
+    mean_burst_isi = mean(isis(ind_short_isis)); % Default way
+else
+    mean_burst_isi = 1/mean(1./isis(ind_short_isis)); % As computed by Nora
+end
 
 % n_events is total number of events where bursts and tonic spikes all
 % count for one. 
