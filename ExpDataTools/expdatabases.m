@@ -3,8 +3,12 @@ function testdb = expdatabases( type, hostname )
 %
 %  [TESTDB] = EXPDATABASES( TYPE, HOSTNAME )
 %
+%  DEPRECATED
+%
 % 2011-2012, Alexander Heimel
 %
+
+logmsg('DEPRECATED')
 
 if nargin<2 || isempty(hostname)
     hostname = host;
@@ -27,33 +31,3 @@ switch hostname
 end
 
 testdb = [prefix 'testdb_' hostname]; 
-% 
-% switch type
-%     case 'oi'
-%         switch hostname
-%             case {'daneel','andrew','jander'}
-%                 testdb=['testdb_' hostname];
-%             otherwise
-%                 testdb='testdb';
-%         end
-%     case {'ec','lfp'}
-%         switch hostname
-%             case {'nin380','nori001','daneel','antigua'}
-%                 testdb = ['ectestdb_' hostname ];
-%             otherwise
-%                 testdb = 'ectestdb';
-%         end
-%     case 'tp'
-%         switch hostname
-%             case 'wall-e'
-%                 testdb='tptestdb_olympus';
-%            case 'nin343' % next to tychoscope
-%                 testdb='tptestdb_lavision';
-%             otherwise
-%                 testdb='tptestdb_olympus';
-%         end
-%     case 'ls'
-%         testdb = 'lstestdb_friederike';
-%     otherwise  
-%         testdb = [type 'testdb_' hostname];
-% end

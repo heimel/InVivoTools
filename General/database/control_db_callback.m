@@ -8,20 +8,20 @@ function control_db_callback( cbo )
 %
 
 try
-    action=get(cbo,'Tag');
+    action = cbo.Tag;
 catch
     % window must have been closed already
     return
 end
 
-h_fig=get(cbo,'Parent');
-ud=get(h_fig,'UserData');
-windowname=get(h_fig,'Name');
+h_fig = cbo.Parent;
+ud = h_fig.UserData;
+windowname = h_fig.Name;
 
 switch windowname
     case 'Record'
-        h_dbfig=ud.db_form;
-        ud=get(h_dbfig,'UserData');
+        h_dbfig = ud.db_form;
+        ud = h_dbfig.UserData;
         ud.db(ud.current_record)=get_record(ud.record_form);
         ud.changed=1;
         set(h_dbfig,'Userdata',ud);
@@ -251,15 +251,15 @@ switch windowname
                     control_db_callback(ud.h.current_record);
                 end
             case 'import'
-                curpath=pwd; % save working directory
+                curpath = pwd; % save working directory
                 if ~isempty(ud.filename) && exist(fileparts(ud.filename),'dir')
                     cd(fileparts(ud.filename));
                 end
-                [filename,pathname]=uigetfile({'*.mat','MATLAB Files (*.mat)'},'Load database');
+                [filename,pathname] = uigetfile({'*.mat','MATLAB Files (*.mat)'},'Load database');
                 if isnumeric(filename) % i.e. unsuccessful
                     return
                 end
-                filename=fullfile(pathname,filename);
+                filename = fullfile(pathname,filename);
                 imported = load(filename);
                 if ~isempty(ud.db)
                     imported.db = structconvert(imported.db,ud.db);
@@ -279,9 +279,9 @@ switch windowname
                     end
                 end
                 cd(curpath); % change back to working directory
-                ud.changed=1;
-                ud.ind=(1:length(ud.db));
-                set(h_fig,'Userdata',ud);
+                ud.changed = 1;
+                ud.ind = (1:length(ud.db));
+                h_fig.Userdata = ud;
                 control_db_callback(ud.h.filter);
                 control_db_callback(ud.h.current_record);
             case 'save'

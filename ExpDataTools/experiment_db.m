@@ -7,10 +7,12 @@ function fig = experiment_db( type, hostname )
 %   FIG = experiment_db( DB );
 %   FIG = experiment_db( FILENAME );
 %
-%     TYPE can be 'oi','ec','tp','wc',etc.
+%     TYPE can be 'oi','ec','tp','wc','nt',etc.
+%         if no database is found, then an empty database for the 
+%         specific datatype is opened if it exists.
 %     FIG returns handle to the database control figure
 %
-% 2005-2023, Alexander Heimel
+% 2005-2025, Alexander Heimel
 %
 
 if nargout==1
@@ -54,7 +56,17 @@ else
 end
 
 if isempty(db)
-    return
+    emptydb_filename = [type 'testdb_empty.mat'];
+    if exist(emptydb_filename,'file')
+        load(emptydb_filename,'db');
+        if isempty(db)
+            return
+        end
+        logmsg(['Loaded empty database ' emptydb_filename]);
+        filename = {};
+    else
+        return
+    end
 end
 
 if isfield(db,'datatype') && ~isempty(db(1).datatype)
@@ -131,12 +143,6 @@ maxleft = ud.maxleft;
 left = ud.leftmargin;
 colsep = ud.colsep;
 top = ud.colsep;
-
-%maxleft = 0;
-%left = 10;
-%colsep = 3;
-%top = 10;
-
 
 % set customize sort to sort button
 set(h.sort,'Tag','sort_testrecords');

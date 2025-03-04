@@ -16,7 +16,11 @@ if nargin<3
 end
 if nargin<2 || isempty(filename)
     if isempty(suggest)
-        suggest='database.mat';
+        if isfield(db,'datatype') && ~isempty(db(1).datatype)
+            suggest = [db(1).datatype 'testdb.mat'];
+        else
+            suggest='database.mat';
+        end
     end
     filterspec = { ...
         '*.mat','MATLAB Files (*.mat)'; ...

@@ -36,7 +36,7 @@ if nargin<3 || isempty(create)
 end
 
 % remove .mat to be able to add experiment
-if ~isempty(strfind(whichdb,'.mat')) && strcmp(whichdb(end-3:end),'.mat')
+if length(whichdb)>4 && strcmp(whichdb(end-3:end),'.mat')
     whichdb = whichdb(1:end-4);
 end
 
