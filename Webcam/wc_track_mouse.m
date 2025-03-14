@@ -143,7 +143,7 @@ while vid.CurrentTime < timeRange(2) && hasFrame(vid)
     end
     
     [body(i,:),arse(i,:),nose(i,:),stim(i,:)] = ...
-        get_mouse_position( Frame,bg,params,figRaw,screenrect);
+        wc_get_mouse_position( Frame,bg,params,figRaw,screenrect);
     
 %     if frametimes(i)>stimstart
 %         keyboard

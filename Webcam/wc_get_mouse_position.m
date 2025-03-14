@@ -1,10 +1,10 @@
-function [mousepos,tailbase,snout,stimpos,mouseBoundary] = get_mouse_position(Frame,bg,par,hfig,screenrect )
-%GET_MOUSE_POSITION gets mouse centroid, tail, snout, stim in pixels
+function [mousepos,tailbase,snout,stimpos,mouseBoundary] = wc_get_mouse_position(frame,bg,params,hfig,area_rect )
+%WC_GET_MOUSE_POSITION gets mouse centroid, tail, snout, stim in pixels
 %
-%  [POS,TAILBASE,SNOUT,STIMPOS] = get_mouse_position( FRAME_BG_SUBSTRACTED, PAR, HFIG )
+%  [POS,TAILBASE,SNOUT,STIMPOS] = wc_get_mouse_position( FRAME,BG,[PARAMS],[HFIG] )
 %
 % 2017, Laila Blomer
-% 2019, adapted by Alexander Heimel
+% 2019-2025, Alexander Heimel
 
 persistent sedisk
 
@@ -15,39 +15,30 @@ if isempty(sedisk)
     end
 end
 
-if nargin<4 || isempty(screenrect)
+if nargin<5 || isempty(area_rect)
     % taking full frame as screen rectangle
-    screenrect = [0 0 size(Frame,2) size(Frame,1)];
+    area_rect = [0 0 size(frame,2) size(frame,1)];
 end
-
-if nargin<3
+if nargin<4
     hfig = [];
 end
-
-if nargin<2 || isempty(par)
-    par.wc_minAreaSize = 200; % pxl, Minimal area for region that is tracked as mouse
-    par.wc_minMouseSize = 50^2; % pxl, Minimal area a mouse could be
-    par.wc_minStimSize = 10; % pxl, Minimal area for region that might be stimulus
-    par.wc_tailWidth = 12; % pxl
-    par.wc_tailToMiddle = 70; % pxl
-    par.wc_minComponentSize = 10; % pxl, Consider smaller components as noise
-    par.wc_dilation = ones(5); % for image dilation
-    par.wc_blackThreshold = 0.3;
+if nargin<3 || isempty(params)
+    params.wc_minAreaSize = 200; % pxl, Minimal area for region that is tracked as mouse
+    params.wc_minMouseSize = 50^2; % pxl, Minimal area a mouse could be
+    params.wc_minStimSize = 10; % pxl, Minimal area for region that might be stimulus
+    params.wc_tailWidth = 12; % pxl
+    params.wc_tailToMiddle = 70; % pxl
+    params.wc_minComponentSize = 10; % pxl, Consider smaller components as noise
+    params.wc_dilation = ones(5); % for image dilation
+    params.wc_blackThreshold = 0.3;
 end
 
 bg = double(bg);
-frame_bg_subtracted = bg - double(Frame);
+frame_bg_subtracted = bg - double(frame);
 frame_bg_subtracted = abs(frame_bg_subtracted);
-frame_bg_subtracted = frame_bg_subtracted ./ (bg + 40);
+frame_bg_subtracted = frame_bg_subtracted ./ (bg + params.wc_bg_normalization);
 
-
-% frame_bg_subtracted = bg16 - int16(Frame);
-% frame_bg_subtracted = abs(frame_bg_subtracted);
-% frame_bg_subtracted = double(frame_bg_subtracted);
-% frame_bg_subtracted = frame_bg_subtracted ./ (double(bg16) + 40);
-
-
-blackThreshold = par.wc_blackThreshold;
+blackThreshold = params.wc_blackThreshold;
 
 mousepos = [NaN NaN];
 stimpos = [NaN NaN];
@@ -63,41 +54,41 @@ if ~isempty(hfig)
     colormap gray
 end
 
-while (length(pos)<2 || max([pos.Area])<par.wc_minAreaSize ...
-        || sum([pos.Area])<par.wc_minMouseSize || min([pos.Area]<par.wc_minStimSize) )...
+while (length(pos)<2 || max([pos.Area])<params.wc_minAreaSize ...
+        || sum([pos.Area])<params.wc_minMouseSize || min([pos.Area]<params.wc_minStimSize) )...
         && blackThreshold>0.01
     imbw = (frame_bg_subtracted > blackThreshold);
-    imbw = imclose(imbw,par.wc_dilation);
+    imbw = imclose(imbw,params.wc_dilation);
     cc = bwconncomp(imbw);
     pos = regionprops(cc,'Area');
     blackThreshold = 0.9*blackThreshold; % lower threshold
 end
 
 imbw = frame_bg_subtracted> blackThreshold;
-imbw = imclose(imbw,par.wc_dilation);
+imbw = imclose(imbw,params.wc_dilation);
 
 mouse = imbw;
 cc = bwconncomp(imbw);
 pos = regionprops(cc,'Centroid','Area');
-if isempty(pos) || not(any([pos.Area]>par.wc_minAreaSize))
+if isempty(pos) || not(any([pos.Area]>params.wc_minAreaSize))
     logmsg('Could not find any changed components');
     return
 end
 
 % get mouse center
-indmouse = find([pos.Area]>par.wc_minAreaSize);
+indmouse = find([pos.Area]>params.wc_minAreaSize);
 posCentroids = [pos(indmouse).Centroid];
 mousepos = [ posCentroids(1:2:end)*[pos(indmouse).Area]'/sum([pos(indmouse).Area]), ...
     posCentroids(2:2:end)*[pos(indmouse).Area]'/sum([pos(indmouse).Area])];
 
 % get stim center
-indstim = find([pos.Area]<par.wc_minAreaSize & [pos.Area]>par.wc_minStimSize);
+indstim = find([pos.Area]<params.wc_minAreaSize & [pos.Area]>params.wc_minStimSize);
 if ~isempty(indstim)
     if length(indstim)>1 % more than one fits the size criteria
         % then find the one closest to the horizontal midline of the screen
         posCentroids = [pos(indstim).Centroid];
         posCentroids = reshape(posCentroids,2,length(indstim))';
-        [~,indind] = min(abs(posCentroids(:,2)- (screenrect(2)+screenrect(4)/2)));
+        [~,indind] = min(abs(posCentroids(:,2)- (area_rect(2)+area_rect(4)/2)));
         indstim = indstim(indind);
     end
     stimpos = pos(indstim).Centroid ;
@@ -109,7 +100,6 @@ end
 % Get mouse boundaries
 % design new binary image with 1 shape, the mouse. Also make new
 % mouseBoundaries
-
 
 boundary = bwboundaries(mouse);
 [M, N] = size(mouse);
@@ -135,10 +125,8 @@ if length(indmouse)>1 % mouse is multiple components
         cc = bwconncomp(mouseBinary);
         d = d + 1;
     end
-    %    mouseBoundary = bwboundaries(mouseBinary);
     mouseBoundary = bwboundaries(mouseBinary);
 end
-
 
 A = cellfun('size', mouseBoundary, 1);
 [~, ind] = max(A);
@@ -162,7 +150,7 @@ if isnan(num) || (num == 0)
     tailNotFound = true;
 else
     [ytailtip,xtailtip] = ind2sub(size(D),indD);
-    if pdist([mousepos; [xtailtip, ytailtip]]) < par.wc_tailToMiddle
+    if pdist([mousepos; [xtailtip, ytailtip]]) < params.wc_tailToMiddle
         % tailtip too close to centroid
         tailNotFound = true;
     else
@@ -181,7 +169,6 @@ if ~isempty(hfig)
     hold off
 end
 
-
 % take snout at the point furthers away from the tail tip
 D = bwdistgeodesic(mouseBinary, xtailtip, ytailtip, 'quasi-euclidean');
 posSnout = D(:);
@@ -193,7 +180,6 @@ if ~isempty(hfig)
     plot(snout(1),snout(2),'gx');
     hold off
 end
-
 
 % Compute distance between found tail and every point of mouseBoundary
 % to get the coordinate with the minimum distance, which should be the tip
@@ -220,7 +206,7 @@ while ~beginFound && ~tailNotFound
     left = mod((left + row - 2), row) + 1;
     right = mod(right, row) + 1;
     dist = pdist([mouseBoundary(left,:); mouseBoundary(right,:)]);
-    if dist > par.wc_tailWidth
+    if dist > params.wc_tailWidth
         beginFound = true;
         ind = right;
     elseif (left == halfway) || (right == halfway)

@@ -1,5 +1,4 @@
 function [Yn,Xn,Yerr] = slidingwindowfunc(X, Y, start, stepsize, stop, windowsize,func,zeropad,intervalfunc)
-
 % SLIDINGWINDOWFUNC - Sliding window analysis for 1-dimensional data
 %
 %       [Yn,Xn,Yint] = SLIDINGWINDOWFUNC(X, Y, START, STEPSIZE, STOP, WINDOWSIZE,...
@@ -65,30 +64,29 @@ intervalf = str2func(intervalfunc);
 for i=start:stepsize:stop-windowsize
     INDs = find(X>=i & X<i+windowsize);
 
-    if zeropad==0 || isnan(zeropad) || ~isempty(INDs)
-        Xn(end+1) = mean([i i+windowsize]);
-    end
+    % if zeropad==0 || isnan(zeropad) || ~isempty(INDs)
+    %     Xn(end+1) = mean([i i+windowsize]);
+    % end
+
     if ~isempty(INDs)
+        Xn(end+1) = mean([i i+windowsize]);
         Yn(end+1) = f(Y(INDs));
         y = Y(INDs)';
-        if nargout==3 
+        if nargout==3
             Yerr(end+1) = intervalf(Y(INDs)');
         end
-    end
-    if zeropad==1 && isempty(INDs)
+    elseif zeropad==1
+        Xn(end+1) = mean([i i+windowsize]);
         Yn(end+1) = 0;
         if nargout==3
             Yerr(end+1) = 0;
         end
-    end
-
-    if isnan(zeropad) && isempty(INDs)
+    elseif isnan(zeropad) && isempty(INDs)
+        Xn(end+1) = mean([i i+windowsize]);
         Yn(end+1) = NaN;
         if nargout==3
             Yerr(end+1) = NaN;
         end
     end
-
-
 end
 

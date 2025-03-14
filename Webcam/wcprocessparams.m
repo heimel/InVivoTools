@@ -89,6 +89,7 @@ params.wc_tailWidth = 12; % pxl
 params.wc_tailToMiddle = 70; % pxl
 params.wc_minComponentSize = 6; % pxl, Consider smaller components as noise
 params.wc_dilation = ones(5); % for image dilation
+params.wc_bg_normalization = 40;
 
 switch record.mouse
     case '14.13.2.01'

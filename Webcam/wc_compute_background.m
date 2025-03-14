@@ -3,6 +3,8 @@ function bg16 = wc_compute_background(record,vid,timeRange)
 % 
 %  BG16 = WC_COMPUTE_BACKGROUND( RECORD, VID, TIMERANGE )
 %
+%  DEPRECATED: Use compute_movie_background instead
+%
 % 2019, Alexander Heimel
 
 

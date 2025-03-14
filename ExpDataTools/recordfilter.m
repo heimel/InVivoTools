@@ -18,6 +18,8 @@ if isempty(db) % lab specific
     [s,tp] = addfield( s, record, 'epoch');
     s = addfield( s, record, 'sessionid');
     s = addfield( s, record, 'sessnr');
+    s = addfield( s, record, 'condition');
+    s = addfield( s, record, 'stimulus');
     if tp
         s = addfield( s, record, 'stack');
     else
@@ -30,7 +32,7 @@ flds = fieldnames(record);
 s = [flds{1} '=' record.(flds{1})];
 
 ind = find_record(db,s);
-unique_record = (length(ind)==1);
+unique_record = (isscalar(ind));
 f = 2;
 while ~unique_record && f<=length(flds)
     if isstruct(record.(flds{f}))
@@ -44,7 +46,7 @@ while ~unique_record && f<=length(flds)
     end
     s = [s ',' flds{f} '="' val '"' ];
     ind = find_record(db,s);
-    unique_record = (length(ind)==1);
+    unique_record = (isscalar(ind));
     f = f + 1;
 end
 

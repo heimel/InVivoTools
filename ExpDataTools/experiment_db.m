@@ -400,9 +400,14 @@ set(h.analyse,'Tag','analyse_testrecord_callback');
 
 set(h.results,'Enable','on');
 set(h.results,'Tag','results_testrecord_callback');
-set(h.new,'Callback',...
-    ['ud=get(gcf,''userdata'');ud=new_' type 'testrecord(ud);' ...
-    'set(gcf,''userdata'',ud);control_db_callback(ud.h.current_record);']);
+
+new_record_functionname = ['new_' type ' testrecord'];
+if exist(new_record_functionname,'file')
+    set(h.new,'Callback',...
+        ['ud=get(gcf,''userdata'');ud=new_' type 'testrecord(ud);' ...
+        'set(gcf,''userdata'',ud);control_db_callback(ud.h.current_record);']);
+end
+
 
 avname = ['available_' type 'tests'];
 if exist(avname,'file')
