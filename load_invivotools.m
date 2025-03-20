@@ -65,7 +65,6 @@ params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_nelsonlabtools = 0; % needed for analysis of Nelson Lab data
 % params.load_newstim = 0; % needed for visual stimulation NewStim package
 params.load_twophoton = 0; % needed for twophoton analysis
-params.load_intrinsicsignal = 0; % needed for optical imaging analysis
 params.load_electrophys = 1; % needed for electrophysiology recording and analysis
 params.load_webcam = 1; % needed for InVivoTools analysis
 params.load_headcam = 0; % needed for InVivoTools freely moving head cam analysis
@@ -202,16 +201,6 @@ if params.load_nelsonlabtools
     cd(fullfile(path2invivotools,'NelsonLabTools'));
     NelsonLabToolsInit(); % initializing
     cd(tmppath);
-end
-
-% Intrinsic Signal Optical Imaging package
-if params.load_intrinsicsignal
-    addpath(fullfile(path2invivotools,'OpticalImaging'),...
-        fullfile(path2invivotools,'OpticalImaging','Arduino'),...
-        fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3'),...
-        fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','coherence_dots'),...
-        fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','opticflow_dots'),...
-        fullfile(path2invivotools,'OpticalImaging','IntrinsicSignalStimuli3','rotating_dots'));
 end
 
 % Histology and Allen Atlas matching
