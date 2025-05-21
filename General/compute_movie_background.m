@@ -21,7 +21,7 @@ if ischar(vid)
     vid = VideoReader(filename);
 end
 
-if nargin<3 || isempty(time_range)
+if nargin<2 || isempty(time_range)
     time_range = [0 vid.Duration];
 end    
 
@@ -29,9 +29,9 @@ logmsg('Computing background');
 
 f = 1;
 n_samples = 30;
-bgtimeRange(1) = max(0,time_range(1)-120); % add 2 minutes earlier
+bgtimeRange(1) = max(min(1,vid.Duration),time_range(1)-120); % add 2 minutes earlier, skip first second for autogain changes
 bgtimeRange(2) = min(vid.Duration,time_range(2)+120); % add 2 minutes later
-skip = diff(bgtimeRange)/n_samples;
+skip = diff(bgtimeRange)/(n_samples+1);
 Frame = readFrame(vid);
 bg = zeros([size(Frame) n_samples ],class(Frame));
 try
@@ -53,6 +53,16 @@ while vid.CurrentTime<= (bgtimeRange(2)-skip) && hasFrame(vid)
     end
     f = f+1;
 end
+
+% cluster to get different mouse positions
+bgflat = reshape(bg,[size(bg,1)*size(bg,2)*size(bg,3) size(bg,4)]);
+km = kmeans(double(bgflat),5,'Start','uniform');
+%km = kmeans(double(bgflat),5);
+[km,bgs] = kmeans(double(bgflat'),5);
+bgs = uint8(reshape(bgs,[size(bgs,1) size(bg,1) size(bg,2) size(bg,3)]));
+bgs = shiftdim(bgs,1);
+bg = bgs;
+
 bg = median(bg,4); % mode better?
 bg16 = int16(bg);
 

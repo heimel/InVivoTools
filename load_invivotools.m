@@ -36,14 +36,14 @@ if isoctave
     
  end
 
-disp([ upper(mfilename) ': Manual available at https://github.com/heimel/InVivoTools/wiki']);
+disp([ mfilename() ': Manual available at https://github.com/heimel/InVivoTools/wiki']);
 
 if isunix
     updatestr = 'To update InVivoTools: update_invivotools';
 else
     updatestr = 'To update InVivoTools: open github and click on Fetch origin or Sync.';
 end
-disp([ upper(mfilename) ': ' updatestr]);
+disp([ mfilename() ': ' updatestr]);
 
 majorprefix = fileparts(mfilename('fullpath'));
 addpath(fullfile(majorprefix));
@@ -51,13 +51,13 @@ addpath(fullfile(majorprefix));
 if ~exist('processparams_local.m','file')
     success = copyfile(fullfile(majorprefix,'ExpDataTools','processparams_local_org.m'),fullfile(majorprefix,'processparams_local.m'));
     if success
-        disp([ upper(mfilename) ': Created ' fullfile(majorprefix,'processparams_local.m')]);
+        disp([ mfilename() ': Created ' fullfile(majorprefix,'processparams_local.m')]);
     end
 elseif ~isempty(processparams_local([]))
-    disp([ upper(mfilename) ': Local parameter settings in processparams_local:']);
+    disp([ mfilename() ': Local parameter settings in processparams_local:']);
     disp(processparams_local([]));
 end
-disp([ upper(mfilename) ': To override InVivoTools settings: edit processparams_local']);
+disp([ mfilename() ': To override InVivoTools settings: edit processparams_local']);
 
 % defaults, put overrides in processparams_local.m file
 params.load_general = 1; % necessary for host function

@@ -7,6 +7,9 @@ function pp = posthoc_poweranalysis(control,y,dy,test,n_samplings)
 %      variation 
 %  N_SAMPLINGS=10000 is the number of times to computer the signifance 
 %
+%  Note that doing a post-hoc test on the observed effect size rather than
+%  the hypothesized effect size adds little information (e.g. Hoenig, 2001)
+%
 % 2021, Alexander Heimel
 
 if nargin<5 || isempty(n_samplings)
