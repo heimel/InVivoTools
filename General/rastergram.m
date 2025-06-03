@@ -1,13 +1,20 @@
-function [n_spikes_shown,rel_spiketimes] = rastergram(spiketimes,trialstarts,interval)
+function [n_spikes_shown,rel_spiketimes] = rastergram(spiketimes,trialstarts,interval,options)
 %RASTERGRAM makes a rastergram with spikes per trial
 %
-%  RASTERGRAM(SPIKETIMES, TRIALSTARTS, INTERVAL)
+%  RASTERGRAM(SPIKETIMES, TRIALSTARTS, INTERVAL, Color=[1 1 1])
 %
 %     INTERVAL can be double with max. time to show after trial start
 %           or 2-vector with start and end time relatieve to trial start,
 %           e.g. [-0.5 2]
 %
-% 2021-2024, Alexander Heimel
+% 2021-2025, Alexander Heimel
+
+arguments
+    spiketimes
+    trialstarts
+    interval
+    options.Color = [0 0 0]
+end
 
 if nargin<3 || isempty(interval)
     interval = median(diff(trialstarts));
@@ -39,7 +46,7 @@ for r = 1:n_trials
 
     % plot raster
     plot([spikes spikes]',...
-        [(r-0.45)*ones(size(spikes)) (r+0.45)*ones(size(spikes))]','-k');
+        [(r-0.45)*ones(size(spikes)) (r+0.45)*ones(size(spikes))]','-','Color',options.Color);
     hold on
     
     n_spikes_shown = n_spikes_shown + length(spikes);
