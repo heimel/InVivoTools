@@ -1,7 +1,7 @@
-function [n_spikes_shown,rel_spiketimes] = rastergram(spiketimes,trialstarts,interval,options)
+function [n_spikes_shown,rel_spiketimes,h] = rastergram(spiketimes,trialstarts,interval,options)
 %RASTERGRAM makes a rastergram with spikes per trial
 %
-%  RASTERGRAM(SPIKETIMES, TRIALSTARTS, INTERVAL, Color=[1 1 1])
+%  [N_SPIKES,REL_SPIKETIMES,H] = RASTERGRAM(SPIKETIMES, TRIALSTARTS, INTERVAL, Color=[1 1 1], LineWidth=1)
 %
 %     INTERVAL can be double with max. time to show after trial start
 %           or 2-vector with start and end time relatieve to trial start,
@@ -14,6 +14,7 @@ arguments
     trialstarts
     interval
     options.Color = [0 0 0]
+    options.LineWidth = 1
 end
 
 if nargin<3 || isempty(interval)
@@ -31,6 +32,11 @@ end
 n_trials = length(trialstarts);
 n_spikes_shown = 0;
 
+if n_trials == 0
+    logmsg('No trials')
+    return
+end
+
 ylim([1-0.5,n_trials+0.5]);
 hold on
 plot([0 0],ylim,'color',[0.8 0.8 1])
@@ -45,9 +51,13 @@ for r = 1:n_trials
     end
 
     % plot raster
-    plot([spikes spikes]',...
-        [(r-0.45)*ones(size(spikes)) (r+0.45)*ones(size(spikes))]','-','Color',options.Color);
+    ht = plot([spikes spikes]',...
+        [(r-0.45)*ones(size(spikes)) (r+0.45)*ones(size(spikes))]',...
+        '-','Color',options.Color,'LineWidth',options.LineWidth);
     hold on
+    if ~isempty(ht)
+        h = ht;
+    end
     
     n_spikes_shown = n_spikes_shown + length(spikes);
 end
