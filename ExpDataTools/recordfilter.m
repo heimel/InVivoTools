@@ -3,6 +3,8 @@ function s = recordfilter( record,db)
 %
 %  S = RECORDFILTER( RECORD, DB )
 %
+%    S is char string
+%
 % 2013-2023, Alexander Heimel
 %
 

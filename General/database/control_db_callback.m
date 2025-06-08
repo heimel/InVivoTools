@@ -4,7 +4,7 @@ function control_db_callback( cbo )
 %  CONTROL_DB_CALLBACK( CBO )
 %    handles callbacks for CONTROL_DB
 %
-% 2005-2014, Alexander Heimel
+% 2005-2025, Alexander Heimel
 %
 
 try
@@ -24,7 +24,7 @@ switch windowname
         ud = h_dbfig.UserData;
         ud.db(ud.current_record)=get_record(ud.record_form);
         ud.changed=1;
-        set(h_dbfig,'Userdata',ud);
+        set(h_dbfig,'UserData',ud);
         control_db_callback(ud.h.current_record);
     otherwise %  Database control
         switch action
@@ -34,15 +34,15 @@ switch windowname
                     current_record=0;
                 end
                 if current_record ~= round(current_record) || current_record<1
-                    current_record=1;
+                    current_record = 1;
                 end
                 if current_record > length(ud.db)
-                    current_record=length(ud.db);
+                    current_record = length(ud.db);
                     if isempty(ud.db)
                         delete(ud.record_form);
                         %close(ud.record_form);
-                        ud.record_form=[];
-                        set(h_fig,'Userdata',ud);
+                        ud.record_form = [];
+                        set(h_fig,'UserData',ud);
                         return
                     end
                 end
@@ -80,7 +80,7 @@ switch windowname
                         set(ud.h.save,'Enable','off');
                     end
                 end
-                set(h_fig,'Userdata',ud);
+                set(h_fig,'UserData',ud);
             case 'next'
                 i=findclosest( ud.ind,ud.current_record);
                 if ud.current_record<ud.ind(i)
@@ -105,12 +105,12 @@ switch windowname
                 if isfield(record,'measures') && isstruct(record.measures) % not copying measures
                     record.measures = [];
                 end
-                ud.db=insert_record(ud.db,record, ...
+                ud.db = insert_record(ud.db,record, ...
                     ud.current_record+1);
                 set(ud.h.current_record,'String',num2str(ud.current_record+1));
-                ud.ind=(1:length(ud.db));
-                ud.changed=1;
-                set(h_fig,'Userdata',ud);
+                ud.ind = (1:length(ud.db));
+                ud.changed = 1;
+                set(h_fig,'UserData',ud);
                 control_db_callback(ud.h.filter);
                 control_db_callback(ud.h.current_record);
                 
@@ -132,7 +132,7 @@ switch windowname
                 end
                 ud.changed=1;
                 ud.ind=(1:length(ud.db));
-                set(h_fig,'Userdata',ud);
+                set(h_fig,'UserData',ud);
                 control_db_callback(ud.h.filter);
                 control_db_callback(ud.h.current_record);
             case 'first'
@@ -157,7 +157,7 @@ switch windowname
                     ud.current_record+1);
                 ud.changed=1;
                 ud.ind=(1:length(ud.db));
-                set(h_fig,'Userdata',ud);
+                set(h_fig,'UserData',ud);
                 control_db_callback(ud.h.filter);
                 set(ud.h.current_record,'String',num2str(ud.current_record+1));
                 control_db_callback(ud.h.current_record);
@@ -245,45 +245,50 @@ switch windowname
                     set(ud.h.current_record,'String','1');
                     ud.changed=0;
                     ud.ind=(1:length(ud.db));
-                    set(h_fig,'Userdata',ud);
+                    set(h_fig,'UserData',ud);
                     set_control_name(h_fig);
                     control_db_callback(ud.h.filter);
                     control_db_callback(ud.h.current_record);
                 end
             case 'import'
-                curpath = pwd; % save working directory
-                if ~isempty(ud.filename) && exist(fileparts(ud.filename),'dir')
-                    cd(fileparts(ud.filename));
+                answer = questdlg('What do you want to import?',...
+                    'Import type','Single file','Full folder','Cancel','Single file');
+                switch answer
+                    case 'Single file'
+                        curpath = pwd; % save working directory
+                        if ~isempty(ud.filename) && exist(fileparts(ud.filename),'dir')
+                            cd(fileparts(ud.filename));
+                        end
+                        [filename,pathname] = uigetfile(...
+                            {'*.*','All files (*.*)';...
+                            '*.mat','MATLAB files (*.mat)'; ...
+                            '*.json','JSON files (*.json)'},'Import file');
+                        if isnumeric(filename) % i.e. unsuccessful
+                            return
+                        end
+                        filename = fullfile(pathname,filename);
+                        [ud.db,ud.changed] = import_file_into_db(filename,ud.db,ud.current_record);
+                        cd(curpath); % change back to working directory
+                        ud.ind = (1:length(ud.db));
+                        h_fig.UserData = ud;
+                        control_db_callback(ud.h.filter);
+                        control_db_callback(ud.h.current_record);
+                    case 'Full folder'
+                        curpath = pwd; % save working directory
+                        if ~isempty(ud.filename) && exist(fileparts(ud.filename),'dir')
+                            cd(fileparts(ud.filename));
+                        end
+                        pathname = uigetdir('','Import folder');
+                        if isnumeric(pathname) % i.e. unsuccessful
+                            return
+                        end
+                        [ud.db,ud.changed] = import_folder_into_db(pathname,ud.db,ud.current_record);
+                        cd(curpath); % change back to working directory
+                        ud.ind = (1:length(ud.db));
+                        h_fig.UserData = ud;
+                        control_db_callback(ud.h.filter);
+                        control_db_callback(ud.h.current_record);
                 end
-                [filename,pathname] = uigetfile({'*.mat','MATLAB Files (*.mat)'},'Load database');
-                if isnumeric(filename) % i.e. unsuccessful
-                    return
-                end
-                filename = fullfile(pathname,filename);
-                imported = load(filename);
-                if ~isempty(ud.db)
-                    imported.db = structconvert(imported.db,ud.db);
-                end
-                try
-                    if ud.h.current_record<length(ud.db)
-                        ud.db = [ud.db(1:ud.current_record) imported.db ud.db(ud.current_record+1:end)];
-                    else
-                        ud.db = [ud.db imported.db];
-                    end
-                catch me
-                    switch me.identifier
-                        case 'MATLAB:catenate:structFieldBad'
-                            errormsg('Unable to import database saved in different formats. Try loading and resaving the to-be-imported database before importing.');
-                        otherwise
-                            rethrow(me)
-                    end
-                end
-                cd(curpath); % change back to working directory
-                ud.changed = 1;
-                ud.ind = (1:length(ud.db));
-                h_fig.Userdata = ud;
-                control_db_callback(ud.h.filter);
-                control_db_callback(ud.h.current_record);
             case 'save'
                 if isempty(ud.filename)
                     control_db_callback(ud.h.save_as);
@@ -295,7 +300,7 @@ switch windowname
                 end
                 [ud.filename,ud.lockfile]=save_db(ud.db,ud.filename,'',ud.lockfile);
                 ud.changed = 0;
-                set(h_fig,'Userdata',ud);
+                set(h_fig,'UserData',ud);
                 control_db_callback(ud.h.current_record);
             case 'save as' % now export
                 if get(ud.h.filter,'value')
@@ -325,7 +330,7 @@ switch windowname
                         ud.filename = filename;
                         ud.lockfile = lockfile;
                         ud.changed = 0;
-                        set(h_fig,'Userdata',ud);
+                        set(h_fig,'UserData',ud);
                         set_control_name(h_fig);
                     end
                 end
@@ -357,7 +362,7 @@ switch windowname
                     try
                         delete(ud.record_form);
                         ud.record_form=[];
-                        set(h_fig,'Userdata',ud);
+                        set(h_fig,'UserData',ud);
                     end
                 end
                 if ~isempty(find(ud.perm=='w',1))
@@ -374,7 +379,7 @@ switch windowname
             otherwise
                 if ~isempty(action)
                     ud = feval(action,ud );
-                    set(h_fig,'Userdata',ud);
+                    set(h_fig,'UserData',ud);
                     control_db_callback(ud.h.current_record);
                 end
         end
