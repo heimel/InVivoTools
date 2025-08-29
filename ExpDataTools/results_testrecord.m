@@ -13,6 +13,9 @@ else
             end
         case 'wheel'
             results_wheelrecord( record );
+        case '' 
+            logmsg(['No datatype for ' recordfilter(record)])
+            % do nothing
         otherwise
             resultsfunction = ['results_' record.datatype 'testrecord'];
             if exist(resultsfunction,'file')

@@ -27,6 +27,8 @@ else
             record = analyse_tptestrecord( record, verbose );
         case 'wheel' % running wheel record
             record = analyse_wheelrecord( record, verbose );
+        case ''
+            logmsg(['No datatype for ' recordfilter(record)])
         otherwise
             analysisfunction = ['analyse_' record.datatype 'testrecord'];
             if exist(analysisfunction,'file')
