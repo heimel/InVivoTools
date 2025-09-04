@@ -4,10 +4,17 @@ function y=subst_ctlchars(x)
 % Y=SUBST_CTLCHARS(X)
 %  Y will have same length as X
 %
-% 2007, Alexander Heimel
+% 2007-2025, Alexander Heimel
 %
 % See also GENVARNAME
 %
 
 y=x;
-y(find(y=='_'))='-';
+if ischar(y)
+    y(find(y=='_'))='-';
+elseif isstring(y)
+    y = char(y);
+    y(find(y=='_'))='-';
+    y = string(y);
+end
+

@@ -1,9 +1,13 @@
-function h = errorband(x,y,b,color)
+function h = errorband(x,y,b,color,alpha)
 %errorband. Plots errorband around line
 %
-%    h = errorband(x,y,b,[color])
+%    h = errorband(x,y,b,[color],alpha=0.5)
 %
 % 2025, Alexander
+
+if nargin<5 || isempty(alpha)
+    alpha = 0.5;
+end
 
 if nargin<4 || isempty(color)
     co = colororder(gca());
@@ -17,7 +21,7 @@ b = b(:)';
 vx = [x flip(x)];
 vy = [y-b flip(y+b)]';
 held = ishold();
-h(1) = fill( vx,vy,color,'LineStyle','none','FaceAlpha',0.5);
+h(1) = fill( vx,vy,color,'LineStyle','none','FaceAlpha',alpha);
 hold on;
 h(2) = plot(x,y,'color',color);
 if ~held
