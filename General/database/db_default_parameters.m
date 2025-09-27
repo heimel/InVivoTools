@@ -13,9 +13,16 @@ params = struct;
 
 params.db_backgroundcolor = 0.8*[1 1 1];
 params.db_basefontsize = 9; % pt 
-params.db_figwidth = 510; % pxl
 params.db_buttonpadding = 4; % pxl
+params.db_buttonwidth = 4 * params.db_basefontsize*1.33 + 2*params.db_buttonpadding;
+
 params.db_colsep = 3; % pxl, also acting as rowsep
+params.db_leftmargin = 2 * params.db_colsep; % pxl
+
+
+%params.db_figwidth = 510; % pxl
+params.db_figwidth = 2*params.db_leftmargin + 7*params.db_buttonwidth + 6*params.db_colsep; % pxl, 7 buttons wide
+
 
 params.db_max_labelwidth = 100; % pxl, for record form
 params.db_max_editwidth = 250; % pxl, for record form

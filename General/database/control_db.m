@@ -57,16 +57,17 @@ end
 
 ud.basefontsize = params.db_basefontsize;
 
-buttonheight = params.db_basefontsize*1.33 + 2*params.db_buttonpadding;
-buttonwidth = 4 * params.db_basefontsize*1.33 + 2*params.db_buttonpadding;
+pt2pxl = 1.33;
+buttonheight = params.db_basefontsize*pt2pxl + 2*params.db_buttonpadding;
+buttonwidth = params.db_buttonwidth;
 figheight = 4 * buttonheight  + 5 * params.db_colsep;
-leftmargin = 2 * params.db_colsep;
 maxleft = 0;
-left = leftmargin;
+left = params.db_leftmargin;
 top = figheight - buttonheight - params.db_colsep;
+leftmargin = params.db_leftmargin;
 
 ud.colsep = params.db_colsep;
-ud.buttonwidth = buttonwidth;
+ud.buttonwidth = params.db_buttonwidth;
 ud.buttonheight = buttonheight;
 ud.maxleft = maxleft;
 ud.leftmargin = leftmargin;
@@ -99,21 +100,32 @@ if leftp > screensize(3)-params.db_figwidth
     topp = topp-200;
 end
 
+% Check Windows text size
+if ispc() && ~isMATLABReleaseOlderThan('R2025a')
+    NET.addAssembly('mscorlib');   % loads Microsoft core library (if causing crashes, do differently)
+    key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey('Software\Microsoft\Accessibility');
+    if ~isempty(key)
+        val = key.GetValue('TextScaleFactor');
+        key.Close();
+        if ~isempty(val) && val ~= 100
+            logmsg('Windows Text size scaling is different from 100%. This may cause lay-out issues. Set Text size to 100% to solve.');
+        end
+    end
+end
+
+pos = [leftp topp params.db_figwidth figheight];
 h.fig = ...
-    figure(...
+    uifigure(...
     'Name','Database control',... %  'Color',params.db_backgroundcolor,...
     'WindowStyle','normal',...
-    'Position',[leftp topp ... % top left
-    params.db_figwidth figheight], ...
-    'Tag','control_db_callback', ...
     'Units','pixels',...
     'ToolBar','none',...
+    'MenuBar','none',...
+    'NumberTitle','off',...
+    'Position',pos, ...
+    'Tag','control_db_callback', ...
     'color',color);
 
-set(h.fig,'MenuBar','none');
-set(h.fig,'NumberTitle','off');
-
-drawnow
 ud.type = 'generic'; % type of database
 
 h.first = uicontrol('Parent',h.fig, ...
@@ -331,11 +343,12 @@ h.save = ...
     'BackgroundColor',params.db_backgroundcolor,...
     'Callback','genercallback', ...
     'ListboxTop',0, ...
-    'Position',[left top buttonwidth buttonheight], ...
     'FontSize',ud.basefontsize,...
     'String','Save', ...
     'Tag','save',...
-    'Tooltipstring','Saving database in place');
+    'Tooltipstring','Saving database in place',...
+        'Position',[left top buttonwidth buttonheight] ...
+);
 left=left+buttonwidth+params.db_colsep;
 maxleft=max(maxleft,left);
 
@@ -403,6 +416,8 @@ set(h.fig,'UserData',ud);
 set(h.fig,'CloseRequestFcn','ud=get(gcf,''UserData'');control_db_callback(ud.h.close)');
 
 % make figure wide enough
+drawnow
+
 pos = get(h.fig,'Position');
 pos(3) = maxleft;
 set(h.fig,'Position',pos);
