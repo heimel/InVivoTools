@@ -15,5 +15,7 @@ session_path_function = [datatype '_session_path'];
 if exist(session_path_function,'file')
     pth = feval(session_path_function,record);
     system(['explorer.exe "' pth '"']);
+else
+    logmsg(['Unknown datatype in ' recordfilter(record)]);
 end
 
