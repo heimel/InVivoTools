@@ -15,7 +15,7 @@ if nargin<1
     if ~isempty(get(0,'children'))
         fig = gcf;
     else
-        [filename, pathname, filterindex] = uigetfile('*.*', 'Select an image file');
+        [filename, pathname] = uigetfile('*.*', 'Select an image file');
         fig = fullfile(pathname,filename);
     end
 end
@@ -117,8 +117,8 @@ try
             y{i} = 10.^y{i};
         end
         
-        disp(['x{' num2str(i) '} = ' mat2str(x{i})]);
-        disp(['y{' num2str(i) '} = ' mat2str(y{i})]);
+        disp(['x{' num2str(i) '} = ' mat2str(x{i}) ';']);
+        disp(['y{' num2str(i) '} = ' mat2str(y{i}) ';']);
     end
     
     if n==1
