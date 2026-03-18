@@ -34,7 +34,7 @@ db_ud.changed = 1;
 set(h_dbfig,'userdata',db_ud);
 control_db_callback(db_ud.h.filter);
 control_db_callback(db_ud.h.current_record);
-if verbose
-    logmsg(['Updated record nr ' num2str(ind) ' in open database']);
-end
+% if verbose
+%     logmsg(['Updated record nr ' num2str(ind) ' in open database']);
+% end
 success = true;
