@@ -1,4 +1,4 @@
-function [record,hgraph] = compute_graphrecord(record,db,hgraph)
+function [record,hgraph] = compute_graphrecord(record,db,hgraph,groupdb)
 %COMPUTE_GRAPHRECORD computes figure from graphrecord
 %
 %   [record,hgraph] = compute_graphrecord(record,db,hgraph)
@@ -6,7 +6,11 @@ function [record,hgraph] = compute_graphrecord(record,db,hgraph)
 %         DB is optional database with graphrecords to use if add2graph
 %            field is given
 %
-% 2015-2017, Alexander Heimel
+% 2015-2026, Alexander Heimel
+
+if nargin<4 || isempty(groupdb)
+    groupdb = [];
+end
 
 if nargin<3 
     hgraph = [];
@@ -32,7 +36,7 @@ if ~isempty(record.add2graph)
                 ind_add2 = ind_add2(1);
             end
             
-            [db(ind_add2),h] = compute_graphrecord(db(ind_add2),db,hgraph);
+            [db(ind_add2),h] = compute_graphrecord(db(ind_add2),db,hgraph,groupdb);
             if ~isempty(h)
                 hgraph = h.fig;
             end
@@ -49,7 +53,8 @@ end
     'extra_code',record.extra_code,'filename',record.filename,...
     'name',record.name,...
     'path',record.path,'value_per',record.value_per,'ylab',record.ylab,...
-    'add2graph_handle',hgraph,'limit',record.limit);
+    'add2graph_handle',hgraph,'limit',record.limit,...
+    'groupdb',groupdb);
 
 record.values.gy = gy;
 record.values.gx = gx;

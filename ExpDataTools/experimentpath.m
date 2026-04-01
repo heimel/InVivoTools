@@ -30,6 +30,15 @@ if nargin<4 || isempty(vers)
             case 'lif'
                 vers = '2015';
         end
+        switch record.mouse(1:min(end,8))
+            case '20.20.02'
+                vers = 'fyd';
+                record.project = 'Stxbp1_KO';
+                record.dataset = '20.20.02';
+                % record.subject = record.mouse;
+                record.subject = '';
+                record.sessionid = record.date;
+        end
     end
 end
 if nargin<3 || isempty(create)
@@ -48,6 +57,16 @@ if nargin<1 || isempty(record)
 end
 
 switch vers
+    case 'fyd'
+        switch record.datatype
+            case 'ec'
+                datapath = fullfile(networkpathbase(),...
+                    record.project,...
+                    'Data_collection',...
+                    record.dataset,...
+                    record.subject,...
+                    record.sessionid, 'mouse', record.test );
+        end
     case '2004'
         if isfield(record,'datatype')
             switch record.datatype
