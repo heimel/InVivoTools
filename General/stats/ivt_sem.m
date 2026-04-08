@@ -1,12 +1,10 @@
-function s = sem(x,dim)
-% sem. Returns STD / SQRT #X
+function s = ivt_sem(x,dim)
+% ivt_sem. Returns STD / SQRT #X
 %
-%  S = sem(X,DIM=1)
+%  S = ivt_sem(X,DIM=1)
 %
 % 200X-2026, Alexander Heimel
 %
-
-warning('SEM:SEM_DEPRECATED','Use of sem is deprecated. Use ivt_sem instead.')
 
 if isempty(x)
     s = [];

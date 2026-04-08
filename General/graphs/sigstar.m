@@ -196,10 +196,12 @@ function varargout=sigstar(groups,stats,nosort)
     %for all bars.
     yd=myRange(ylim)*0.01; %Ticks are 1% of the y axis range
     for ii=1:length(groups)
-        y=get(H(ii,1),'YData');
-        y(1)=y(1)-yd;
-        y(4)=y(4)-yd;   
-        set(H(ii,1),'YData',y)
+        try
+            y=get(H(ii,1),'YData');
+            y(1)=y(1)-yd;
+            y(4)=y(4)-yd;
+            set(H(ii,1),'YData',y)
+        end
     end
 
 
@@ -246,10 +248,11 @@ function H=makeSignificanceBar(x,y,p)
         stars='n.s';
     end
     
-    x=repmat(x,2,1);
-    y=repmat(y,4,1);
-    
-    H(1)=plot(x(:),y,'Color', [0.3 0.3 0.3],'LineWidth',2,'Tag','sigstar_bar');
+    if x(1)~=x(2)
+        x=repmat(x,2,1);
+        y=repmat(y,4,1);
+        H(1)=plot(x(:),y,'Color', [0.3 0.3 0.3],'LineWidth',2,'Tag','sigstar_bar');
+    end   
     
     %Increase offset between line and text if we will print "n.s."
     %instead of a star.

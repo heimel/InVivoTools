@@ -72,7 +72,7 @@ xticklabels = [];
 extra_options = '';
 rotate_xticklabels = '';
 normalitytest = '';
-correction = []; 
+correction = [];
 color = []; % to overload matlab function OPTIM/COLOR
 fit = ''; % to overload matlab function CURVEFIT/FIT
 fontname = ''; % to overload matlab function FONTNAME
@@ -103,7 +103,7 @@ pos_args={...
     'extra_code','',...
     'rotate_xticklabels','0',...
     'markers','closed_circle',... % {'none','open_triangle','closed_triangle','open_circle','closed_circle'}
-    'markersize',3,... 
+    'markersize',3,...
     'fontsize',10,...
     'fontname','arial',...
     'linestyles','',...
@@ -371,10 +371,10 @@ end
 switch style
     case 'surf'
         logmsg('Surf currently only works for 1 image');
-        
+
         n_x = size(z{1},2);
         n_y = size(z{1},1);
-        
+
         if n_x>length(x{1}) || n_y>length(y{1})
             logmsg(['Z has dimension ' mat2str(size(z{1})) ...
                 ', while x has length ' num2str(length(x{1})) ...
@@ -382,7 +382,7 @@ switch style
         end
         x{1} = x{1}(1:n_x);
         y{1} = y{1}(1:n_y);
-        
+
         if size(z{1},3)>1
             logmsg(['Averaging ' num2str(size(z{1},3) ) ' frames.']);
             z{1} = mean(z{1},3);
@@ -405,7 +405,7 @@ switch style
             bins = 16;
         end
         if exist('rose_style','var') && strcmp(rose_style,'relative')
-            polar(0,2); 
+            polar(0,2);
             hold on; % ugly, need it for friederike's graph
             for i=1:length(y)
                 [rose_theta(i,:),rose_r(i,:)] = rose( y{i}+pi/bins,bins);
@@ -478,7 +478,7 @@ switch style
         if isempty(x)
             x=(1:length(y));
         end
-        
+
         % figure positioning and size
         set(gcf,'PaperPositionMode','auto');
         if isempty(axishandle)
@@ -495,7 +495,7 @@ switch style
         if length(x)>5 % broad graph, show horizontal lines
             set(gca,'YGrid','on')
         end
-        
+
         switch style
             case {'bar','level'}
                 % calculate means
@@ -513,7 +513,7 @@ switch style
                     errorbars = 'bootstrapmedian';
                 end
         end
-        
+
         if exist('sort_y','var')
             switch sort_y
                 case 'asc'
@@ -529,14 +529,14 @@ switch style
             color = color(ind);
             xticklabels = xticklabels(ind);
         end
-        
+
         % plot errors
         if ~exist('errorbars_sides','var')
             errorbars_sides = 'away';
         end
         h.errorbar = plot_errorbars(y,x-points_shiftx,ystd,ny,means,...
             errorbars,errorbars_sides,errorbars_tick,color); %#ok<*NODEF>
-        
+
         % plot bars or levels
         switch style
             case {'bar','box'}
@@ -566,7 +566,7 @@ switch style
                     h.bar{i} = plot(x(i)+[-0.5 0.5]*barwidth-points_shiftx, means(i)*[1 1],'k-' );
                 end
         end
-       
+
         % plot points
         if showpoints
             x_spaced = cell(length(y),1);
@@ -586,13 +586,13 @@ switch style
                     case 'open_circle'
                         set(hp,'marker','o');
                 end
-                
+
                 if markersize>0
                     set(hp,'markersize',markersize);
                 end
             end
         end
-        
+
         if showpairing
             if ~all(cellfun(@numel,y)==numel(y{1}))
                 logmsg('Not all y have same number of elements. Not showing pairing')
@@ -609,16 +609,16 @@ switch style
                 end
             end
         end
-        
+
         % compute and plot significances
         h = compute_significances( y,x, test, signif_y, ystd, ny, tail,transform, h,correction,normalitytest,wingtipheight );
-        
+
         % tighten x-axis
         ax = axis;
         ax(1) = min(x)-0.5;
         ax(2) = max(x)+0.5;
         axis(ax);
-        
+
     case 'xy'
         if isempty(x)
             for i=1:length(y)
@@ -655,7 +655,7 @@ switch style
                     end
                     return
                 end
-                
+
                 ind = find(~isnan(x{i})&~isnan(y{i}));
                 x{i} = x{i}(ind);
                 y{i} = y{i}(ind);
@@ -664,7 +664,7 @@ switch style
                 uniqx = uniq(x{i});
                 uniqy = zeros(1,length(uniqx));
                 uniqystd = zeros(1,length(uniqx));
-                
+
                 if ~isempty(merge_x)
                     dx = diff(uniqx)/(uniqx(end)-uniqx(1));
                     ind = find(dx<merge_x);
@@ -672,9 +672,9 @@ switch style
                         x{i}(x{i}==uniqx(j)) = uniqx(j+1);
                     end
                 end
-                
+
                 %logmsg('Next routine throws away values. Not ideal!');
-                
+
                 for j=1:length(uniqx)
                     if sum(x{i}==uniqx(j))> length(y{i})/length(uniqx)*0
                         uniqy(j) = mean(y{i}(x{i}==uniqx(j)),'omitnan');
@@ -699,14 +699,14 @@ switch style
                 errorbars = 'std'; % to avoid trouble later when plotting
             end
         end
-        
+
         if exist('smoothing','var') && smoothing>0
             for i=1:length(y)
                 y{i}=smooth(y{i},smoothing);
                 y{i}=y{i}(:)';
             end
         end
-        
+
         % plot errors
         if ~exist('errorbars_sides','var')
             errorbars_sides='both';
@@ -733,44 +733,45 @@ switch style
                 end
             end
         end
-        
+
         % plot significances
         % if showpoints ==2, then assume points of same x have to be compared across groups
-        if exist('pointsy','var') && ( (length(x)==1) || (length(x{1})==length(x{2}) && all(x{1}==x{2})))
-            for k=1:length(x{1}) % to have number of x-values
-                for i=1:length(pointsy)
-                    for j=i+1:length(pointsy)
-                        try
-                            htemp = compute_significances(...
-                                {pointsy{i}{k},pointsy{j}{k}},...
-                                x{1}(k)*ones(1,length(pointsy)),test,signif_y,...
-                                [],[],tail,transform,[],correction,normalitytest,wingtipheight);
-                            h.h_sig{i,j} = htemp.h_sig{2};
-                            h.p_sig{i,j} = htemp.p_sig{2};
-                        catch me
-                            logmsg(['Problem computing significances: ' me.message]);
-                            h.h_sig{i,j} = NaN;
-                            h.p_sig{i,j} = NaN;
-                        end
-                        if h.h_sig{i,j}==1
-                            logmsg(['Differences at x=' num2str(x{j}(k),2)...
-                                ' are significant. p=' num2str(h.p_sig{i,j},2)  ]);
+        if ~strcmp(test,'none')
+            if exist('pointsy','var') && ( (length(x)==1) || (length(x{1})==length(x{2}) && all(x{1}==x{2})))
+                for k=1:length(x{1}) % to have number of x-values
+                    for i=1:length(pointsy)
+                        for j=i+1:length(pointsy)
+                            try
+                                htemp = compute_significances(...
+                                    {pointsy{i}{k},pointsy{j}{k}},...
+                                    x{1}(k)*ones(1,length(pointsy)),test,signif_y,...
+                                    [],[],tail,transform,[],correction,normalitytest,wingtipheight);
+                                h.h_sig{i,j} = htemp.h_sig{2};
+                                h.p_sig{i,j} = htemp.p_sig{2};
+                            catch me
+                                logmsg(['Problem computing significances: ' me.message]);
+                                h.h_sig{i,j} = NaN;
+                                h.p_sig{i,j} = NaN;
+                            end
+                            if h.h_sig{i,j}==1
+                                logmsg(['Differences at x=' num2str(x{j}(k),2)...
+                                    ' are significant. p=' num2str(h.p_sig{i,j},2)  ]);
+                            end
                         end
                     end
                 end
-            end
-        else
-            % statistics for x vs y
-            try
-                logmsg('Group 1 is x, Group 2 is y.')
-                hsig = compute_significances( [x,y],(max(x{:})+min(x{:}))/2*[1 1], ...
-                    test, [2 min(y{:})+1.1*(max(y{:})-min(y{:}))], [], [], tail, transform, [], correction, normalitytest, wingtipheight);
-                h.p_sig = hsig.p_sig;
-            catch me
-                logmsg(['Problem computing significances: ' me.message]);
+            else
+                % statistics for x vs y
+                try
+                    logmsg('Group 1 is x, Group 2 is y.')
+                    hsig = compute_significances( [x,y],(max(x{:})+min(x{:}))/2*[1 1], ...
+                        test, [2 min(y{:})+1.1*(max(y{:})-min(y{:}))], [], [], tail, transform, [], correction, normalitytest, wingtipheight);
+                    h.p_sig = hsig.p_sig;
+                catch me
+                    logmsg(['Problem computing significances: ' me.message]);
+                end
             end
         end
-
         % line fit (do before plotting points)
         if exist('fit','var') || exist('slidingwindow','var')
             if ~exist('fit','var')
@@ -800,7 +801,7 @@ switch style
             fity{length(ry)} = [];
             ax = axis;
             fitx = linspace(ax(1)-5*(ax(2)-ax(1)),ax(1)+5*(ax(2)-ax(1)),1000);
-            
+
             switch fit
                 case ''
                     % do nothing
@@ -862,14 +863,14 @@ switch style
                         rescale_to_1 = false;
                     end
                     for i=1:length(ry)
-                        
+
                         c = rx{i}(~isnan(rx{i}));
                         r = ry{i}(~isnan(rx{i}));
-                        
+
                         [nk_rm,nk_b,nk_n] = naka_rushton(c,r);
                         fity{i} = nk_rm* (fitx.^nk_n)./ ...
                             (nk_b^nk_n+fitx.^nk_n) ;
-                        
+
                     end
                     if rescale_to_1
                         fitx = fitx*100;
@@ -903,9 +904,9 @@ switch style
                     end
                 end
                 axis(ax);
-                
+
             end
-            
+
             if exist('slidingwindow','var')
                 slidingwindow = str2double( slidingwindow );
                 for i=1:length(ry)
@@ -914,7 +915,7 @@ switch style
                         min(rx{i})-slidingwindow,stepsize,...
                         max(rx{i})+slidingwindow,...
                         slidingwindow,'nanmean',0);
-                    
+
                     h.fit(i)=plot(fitx,fity,'-');
                     set(h.fit(i),'Color',color{i});
                 end
@@ -941,10 +942,10 @@ switch style
                     linestyle = linestyle{i};
                 end
                 set(h.points(i),'linestyle',linestyle);
-                
+
             end
             set(h.points(i),'linewidth',linewidth);
-            
+
             if exist('markers','var')
                 if ~iscell(markers)
                     marker = markers;
@@ -975,7 +976,7 @@ switch style
                 end
             end
         end
-        
+
     otherwise
         errormsg(['graph style ' style ' is not implemented']);
         return
@@ -1041,7 +1042,7 @@ if ~isempty(xticklabels)
             set(hl,'HorizontalAlignment','center');
             set(hl,'VerticalAlignment','top');
         end
-        
+
     end
 end
 
@@ -1072,7 +1073,7 @@ if exist('legnd','var') && ~isempty(legnd)
         case 'pie'
             handle = 'h.pie,' ;
     end
-    
+
     eval(['legend(' handle legnd(2:end-1) ')']);
     legend boxoff
 end
@@ -1162,7 +1163,7 @@ switch errorbars
                 return
         end
         dyeb=[dy{:}];
-        
+
         if any(size(x)~=size(means))
             logmsg('X and MEANS are of unequal sizes. Cannot draw errorbars.');
             h = nan;
