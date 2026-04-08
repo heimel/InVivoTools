@@ -25,8 +25,8 @@ function h=ivt_graph(y,x,varargin)
 %     'extra_code',''
 %     'rotate_xticklabels',[0] % is the rotation in degrees
 %     'markers', {'none','open_triangle','closed_triangle','open_circle',['closed_circle']}
-%     'markersize',[8]
-%     'fontsize',[14]
+%     'markersize',[3]
+%     'fontsize',[10]
 %     'fontname',['arial']
 %     'linestyles',''
 %     'linewidth',[3]
@@ -469,7 +469,8 @@ switch style
         subplot('position',[left 0.20 width 0.7]);
         hold on;
         my = cellfun(@mean,y);
-        h.stackedbar = bar([my;my],'stacked');xlim([.5 1.5]);
+        h.stackedbar = bar([my;my],'stacked');
+        xlim([.5 1.5]);
         cm=[color{:}];
         cm = reshape(cm',3,length(cm)/3)';
         colormap(cm);
@@ -489,7 +490,7 @@ switch style
             end
             width = min(0.6,0.2*length(x));
             left = 0.5-width/2;
-            subplot('position',[left 0.20 width 0.7]);
+            subplot('position',[left 0.20 width 0.7],'fontsize',fontsize);
         end
         hold on;
         if length(x)>5 % broad graph, show horizontal lines
@@ -582,7 +583,8 @@ switch style
                         set(hp,'marker','none');
                     case 'closed_circle'
                         set(hp,'marker','o');
-                        set(hp,'markerfacecolor',color{mod(i-1,end)+1});
+                        clr = color{mod(i-1,end)+1};
+                        set(hp,'markerfacecolor',clr);
                     case 'open_circle'
                         set(hp,'marker','o');
                 end
@@ -970,7 +972,7 @@ switch style
                         end
                     case 'closed_circle'
                         set(h.points(i),'marker','o');
-                        set(h.points(i),'markerfacecolor',color{i});
+                         set(h.points(i),'markerfacecolor',color{i});
                     otherwise
                         logmsg(['Unknown marker ' marker]);
                 end
@@ -1121,7 +1123,7 @@ switch errorbars
             case 'sem'
                 if length(flatten(y))~=length(y) %isempty(ystd)
                     for i = 1:length(y)
-                        dy{i} = sem(y{i});
+                        dy{i} = ivt_sem(y{i});
                     end
                 elseif ~isempty(ystd)
                     for i = 1:length(y)
@@ -1129,7 +1131,7 @@ switch errorbars
                     end
                 else
                     for i = 1:length(y)
-                        dy{i} = sem(y{i});
+                        dy{i} = ivt_sem(y{i});
                     end
                 end
             case 'std'

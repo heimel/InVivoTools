@@ -54,7 +54,7 @@ if ~isnan(y)
     textx = (x1 + x2) / 2; 
     fontsize = get(gca,'FontSize');
     if pc(1)=='*'
-        fontsize = fontsize + 5;
+        fontsize = ceil(fontsize * 1.5);
         hl = text(textx,y,pc,'FontSize',fontsize,'horizontalalignment','center','verticalalignment','middle');
     else
         hl = text(textx,y,pc,'FontSize',fontsize,'horizontalalignment','center','verticalalignment','bottom');
