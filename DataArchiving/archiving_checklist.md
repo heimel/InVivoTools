@@ -26,6 +26,8 @@ and info about filesize:
 https://servicedesk.surf.nl/wiki/display/WIKI/Data+Archive%3A+Effective+archive+file+management
 * Run tar\_project\_folders.m followed by tarcommands.bat to tar all folders
 
+On windows use 7zip to cut tar files into volumes.
+
 On linux (e.g. Surf Cloud)
 tar -cvf - FOLDER | split --bytes=100G -d -a 3 - FOLDER.tar.
 
