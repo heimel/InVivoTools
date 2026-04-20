@@ -7,7 +7,7 @@ function load_invivotools
 %    check https://github.com/heimel/InVivoTools for most recent version
 %    and documentation. In Manual folder
 %
-% 2014-2023, Alexander Heimel
+% 2014-2026, Alexander Heimel
 %
 
 if exist ('OCTAVE_VERSION', 'builtin') 
@@ -89,7 +89,8 @@ if params.load_general % general
         fullfile(path2general,'Wavelet','sinefit'), ... % used for erp analysis, Timo
         fullfile(path2general,'uitools'), ...
         fullfile(path2general,'CircStat'), ... % circular statistics toolbox
-        fullfile(path2general,'matlab-ParforProgress2'));
+        fullfile(path2general,'matlab-ParforProgress2'),...
+        fullfile(path2general,'yaml')); % tools to read and write yaml config files
 end
 
 params = processparams_local(params); % load local overrides

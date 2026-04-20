@@ -9,7 +9,7 @@ function [c,flds] = structdiff(a,b,verbose)
 %    FLDS contains all fieldnames which differ
 %
 % 200X, Steve VanHooser
-% 200X-2018, Alexander Heimel
+% 200X-2026, Alexander Heimel
 
 if nargin<3
     verbose = false;
@@ -49,7 +49,7 @@ for i=1:length(fna)
         end
         if ndims(a.(fna{i})) ~= ndims(b.(fnb{ii})) || ...
                 any(size(a.(fna{i})) ~= size(b.(fnb{ii}))) || ...
-                ~all(a.(fna{i})(:)==b.(fnb{ii})(:))
+                ~isequaln(a.(fna{i}),b.(fnb{ii})) % ~all(a.(fna{i})(:)==b.(fnb{ii})(:))
             flds{end+1} = fna{i};
             if verbose
                 disp(['Fields ''' fna{i} ''' differ.']);
