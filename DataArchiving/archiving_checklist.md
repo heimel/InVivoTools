@@ -1,10 +1,10 @@
-# ARCHIVING\_CHECKLIST
+# ARCHIVING_CHECKLIST
 
 ## Preparing steps
 
 
 
-* Move project into \\\\vs03\\vs03-csf-XXX\\PreparingForSurfArchive
+* Move project into \\vs03\vs03-csf-XXX\PreparingForSurfArchive
 * Fill out README.md
 * Copy study dossiers and approvals in Ethics
 * Copy databases in Data\_collection\\Databases
@@ -26,7 +26,7 @@ and info about filesize:
 https://servicedesk.surf.nl/wiki/display/WIKI/Data+Archive%3A+Effective+archive+file+management
 * Run tar\_project\_folders.m followed by tarcommands.bat to tar all folders
 
-On windows use 7zip to cut tar files into volumes.
+On windows use 7zip to cut tar files into volumes, (set volume size to 100G)
 
 On linux (e.g. Surf Cloud)
 tar -cvf - FOLDER | split --bytes=100G -d -a 3 - FOLDER.tar.
@@ -43,9 +43,9 @@ dir /b/s > filelist.txt
 
 ## Storing on Surf Archive
 
-* Copy tarfiles to Surfarchive:  archive.surfsara.nl:/archive/nincsf  \* on 2024-10-29 Chris vdT told me this will now be /archive/ninda/csf \*
+* Copy tarfiles to Surfarchive:  archive.surfsara.nl:/archive/ninda/csf  
 
-  scp -r W:\\TarredForSurfArchive\\PROJECTNAME aheimel@archive.surfsara.nl:\\archive\\nincsf#SEE COMMENT ABOVE ABOUT ninda/csf
+  scp -r W:\TarredForSurfArchive\PROJECTNAME aheimel@archive.surfsara.nl:\archive\ninda\csf #SEE COMMENT ABOVE ABOUT ninda/csf
 
   info on https://servicedesk.surf.nl/wiki/display/WIKI/Data+Archive#DataArchive-Guidelines
 account on archive.surfsara.nl is same as on surfportal

@@ -63,11 +63,10 @@ disp([ mfilename() ': To override InVivoTools settings: edit processparams_local
 params.load_general = 1; % necessary for host function
 params.load_expdatatools = 1; % needed for InVivoTools analysis
 params.load_nelsonlabtools = 0; % needed for analysis of Nelson Lab data
-% params.load_newstim = 0; % needed for visual stimulation NewStim package
 params.load_electrophys = 1; % needed for electrophysiology recording and analysis
-params.load_webcam = 1; % needed for InVivoTools analysis
+params.load_webcam = 0; % needed for InVivoTools analysis
 params.load_headcam = 0; % needed for InVivoTools freely moving head cam analysis
-params.load_physiology = 1; % needed for EXG recordings
+params.load_physiology = 0; % needed for EXG recordings
 params.load_histology = 0; % needed for matching histology to Allen Mouse Brain Atlas
 params.load_dataarchiving = 1; % needed for preparing project for archiving
 
@@ -125,8 +124,6 @@ if params.load_electrophys
     cd(fullfile(path2invivotools,'Electrophysiology','NeuralAnalysis'));
     NeuralAnalysisObjectInit;
     cd(tmppath);
-
-
 end
 
 % Physiology analyses
@@ -134,22 +131,6 @@ if params.load_physiology
     addpath(fullfile(path2invivotools,'Physiology'),...
         fullfile(path2invivotools,'Physiology','video'));    % for video 
 end
-
-
-% 
-% % NewStim package to show and analyse visual stimuli
-% if params.load_newstim
-%     % for NewStim3 this folder is configuration
-%     % NewStimConfig file in that folder should be out of version control
-%     % ideally should get different location, but called like this in
-%     % NewStim3/NewStimInit, also used for optical imaging
-%     addpath(...
-%         fullfile(path2invivotools,'NewStim3'),...
-%         fullfile(path2invivotools,'NewStim3','Configuration'),...
-%         fullfile(path2invivotools,'NewStim3','Calibration'),...    % some calibration files for the packages that depend on each computer
-%         fullfile(path2invivotools,'NewStim3','Calibration','Monitors'));
-%     NewStimInit;
-% end
 
 % Nelsonlab tools, must be after NewStim package
 if params.load_nelsonlabtools
