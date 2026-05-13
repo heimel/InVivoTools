@@ -36,7 +36,7 @@ function h=ivt_graph(y,x,varargin)
 %     'tail','both'   % for significance tests
 %     'legnd','' % legend, example legnd,{''wt'';''t1''}
 %     'save_as',''
-%     'z',{}
+%     'z',{}'  % for surface plot
 %     'showpairing',false
 %     'extra_options',''
 %
