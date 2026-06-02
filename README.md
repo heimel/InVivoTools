@@ -18,7 +18,7 @@ edit(fullfile(userpath,'startup.m'))
 
 ## Manual ##
 
-The manual can be found at: [docs/README.md]
+The manual can be found at: [docs/README.md](docs/README.md)
 
 For information on microscopic image analysis, see <https://sites.google.com/site/alexanderheimel/protocols/puncta-analysis-using-matlab>
 
