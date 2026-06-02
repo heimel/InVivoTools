@@ -44,6 +44,7 @@ stored data.
   - [Database administration](9.2-Database-functions.md#database-administration)
 - [Analysis functions](9.3-Analysis-functions.md)
 - [Results functions](9.4-Results-functions.md)
+- [Graph functions](9.5-Graph-functions.md)
 
 ## Related documentation
 
