@@ -71,7 +71,13 @@ if ~exist(tsq_path,'file') && tank(end)~=filesep
     filebase = fullfile( tank,blockname,[preamble '_' blockname]);
     tsq_path = [filebase '.tsq'];
 end
-    
+
+if ~exist(tsq_path,'file') % 2026-11-05
+    filebase = fullfile( tank,['mouse_'  blockname]);
+    tsq_path = [filebase '.tsq'];
+end
+
+
 if ~exist(tsq_path,'file')   
     errormsg(['File ' tsq_path ' does not exist.']);
     return

@@ -24,7 +24,7 @@ if isfield(record,'monitorpos') && isempty(record.monitorpos)
     errormsg(['Monitor position is missing in record. mouse=' record.mouse ',date=' record.date ',test=' record.test]);
 end
 
-datapath=experimentpath(record,false);
+datapath = experimentpath(record,false);
 if ~exist(datapath,'dir')
     errormsg(['Folder ' datapath ' does not exist.']);
     return
@@ -42,6 +42,14 @@ if isempty(channels2analyze)
 end
 
 cells = import_spikes( record, channels2analyze, verbose, allowchanges ); 
+
+processparams.override_by_spikes = true;
+if processparams.override_by_spikes 
+    logmsg('loading _spikes.mat ')
+    spikes = load(fullfile(experimentpath(record),'_spikes.mat'));
+    cells = spikes.cells;
+end
+
 
 if isempty(cells)
     return
@@ -82,7 +90,10 @@ if length(g)>50 % dont show more than 10 cells in the analysis
     verbose = 0;
 end
 
-for i=1:length(g) % for all cells
+% n_cells = length(g);% 2026-11-06
+n_cells = length(cells);% 2026-11-06
+for i = 1:n_cells % for all cells
+
     switch record.stim_type
         case {'sg','sg_adaptation'}
             inp.stimtime = stimtimestruct(ssts,1); % only works for one repetition
@@ -91,24 +102,31 @@ for i=1:length(g) % for all cells
     inp.st=ssts;
     inp.spikes={};
     inp.cellnames = {};
-    inp.spikes=d.(g{i});
-    n_spikes=0;
-    for k=1:length(ssts.mti)
+    % name = g{i};   % 2026-11-06
+    name = cells(i).name; % 2026-11-06
+    % inp.spikes = d.(name);  % 2026-11-06 
+    inp.spikes = cells(i).data; % 2026-11-06
+    acell = cells(i);
+    inp.spikes = cksmultipleunit(acell.intervals,acell.desc_long,...
+    		acell.desc_brief,acell.data,acell.detector_params);
+
+    n_spikes = 0;
+    for k = 1:length(ssts.mti)
         try
-            n_spikes=n_spikes+length(get_data(inp.spikes,...
+            n_spikes = n_spikes+length(get_data(inp.spikes,...
                 [ssts.mti{k}.startStopTimes(1),...
                 ssts.mti{k}.startStopTimes(end)],1));
         catch me
             logmsg(['An error is caught. I do not know why. Tell Alexander to check. ' me.message]);
-            n_spikes=n_spikes+length(get_data(inp.spikes,...
+            n_spikes = n_spikes+length(get_data(inp.spikes,...
                 [ssts.mti{k}.startStopTimes(1),...
                 ssts.mti{k}.startStopTimes(end-1)]));
         end
     end
-    inp.cellnames{1} = [g{i}];
-    inp.title=[g{i}]; % only used in period_curve
-    logmsg(['Cell ' num2str(i) ' of ' num2str( length(g) ) ...
-        ', ' g{i} ', ' num2str(n_spikes) ' spikes']);
+    inp.cellnames{1} = name;
+    inp.title=[name]; % only used in period_curve
+    logmsg(['Cell ' num2str(i) ' of ' num2str( n_cells ) ...
+        ', ' name ', ' num2str(n_spikes) ' spikes']);
     
     stim_type = record.stim_type;
     try
@@ -176,6 +194,7 @@ for i=1:length(g) % for all cells
             (cellmeasures.rate_late-cellmeasures.rate_spont) /...
             (cellmeasures.rate_early-cellmeasures.rate_spont));
     end
+    
     
     cellmeasures.index = cells(i).index;
     cellmeasures.type = cells(i).type;

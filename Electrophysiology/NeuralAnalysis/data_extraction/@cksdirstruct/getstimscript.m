@@ -11,16 +11,16 @@ saveScript=[];MTI=[];
 
 p = getpathname(cksds);
 
-if ~exist([p thedir]),
+if ~exist([p thedir])
     errordlg(['Folder ' p thedir ' does not exist.']);
 	return
-elseif ~exist([p fixpath(thedir) 'stims.mat']),
+elseif ~exist([p fixpath(thedir) 'stims.mat'])
     errordlg(['No stims.mat file with stimulus info in ' p thedir ]);
 	return
-else,
+else
 	g = load([p fixpath(thedir) 'stims.mat']);
 	saveScript = g.saveScript;
 	MTI = g.MTI2;
-end;
+end
 
 

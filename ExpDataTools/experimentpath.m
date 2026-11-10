@@ -65,7 +65,10 @@ switch vers
                     'Data_collection',...
                     record.dataset,...
                     record.subject,...
-                    record.sessionid, 'mouse', record.test );
+                    record.sessionid, 'mouse');
+                if include_test
+                   datapath = fullfile(datapath, record.test );
+                end
         end
     case '2004'
         if isfield(record,'datatype')
