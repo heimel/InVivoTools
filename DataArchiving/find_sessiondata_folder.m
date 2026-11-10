@@ -16,7 +16,7 @@ isoDate = session.isodate;
 location = {};
 location{1} = '\\vs01\MVP\Shared\InVivo';
 location{2} = '\\vs01\CSF_Data\Shared\InVivo';
-location{3} = '\\vs03\VS03-CSF-1\Heimel\InVivo';
+location{3} = '\\vs04\VS04-CSF-1\Heimel\InVivo';
 nLocations = 3;
 
 for i = 1:nLocations

@@ -5,9 +5,7 @@
 % 2022, Alexander Heimel
 
 projectId = 'Tafreshiha_2022_Thesis_DREADDS_172005'; 
-%prepRootFolder = '\\vs03\vs03-csf-1\PreparingForSurfArchive';
-%prepRootFolder = '\\vs01\CSF_Data\Heimel';
-prepRootFolder = '\\vs03\vs03-csf-1\Tafreshiha';
+prepRootFolder = '\\vs04\vs04-csf-1\Tafreshiha';
 
 logmsg(['Preparing project ' projectId])
 

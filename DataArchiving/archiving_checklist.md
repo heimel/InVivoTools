@@ -4,7 +4,7 @@
 
 
 
-* Move project into \\vs03\vs03-csf-XXX\PreparingForSurfArchive
+* Move project into \\vs04\vs04-csf-XXX\PreparingForSurfArchive
 * Fill out README.md
 * Copy study dossiers and approvals in Ethics
 * Copy databases in Data\_collection\\Databases

@@ -16,9 +16,7 @@
 % 2022-2024, Alexander Heimel
 
 projectId = 'Ahmadlou_Unpublished_Widefield_center_surround_13.14'; 
-%prepRootFolder = '\\vs03\vs03-csf-1\PreparingForSurfArchive';
-%prepRootFolder = '\\vs01\CSF_Data\Heimel';
-prepRootFolder = '\\vs03\vs03-csf-1\Ahmadlou';
+prepRootFolder = '\\vs04\vs04-csf-1\Ahmadlou';
 
 logmsg(['Tarring project ' projectId])
 logmsg('Make sure Data_collections folder only contains folders and no files!')
